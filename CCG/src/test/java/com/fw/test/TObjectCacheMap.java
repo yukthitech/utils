@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fw.ccg.util.ObjectCacheMap;
+import com.yukthi.ccg.util.ObjectCacheMap;
 
 public class TObjectCacheMap
 {
