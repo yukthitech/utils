@@ -1,0 +1,158 @@
+<configuration xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<template name="createTableTemplate"><![CDATA[
+		CREATE TABLE ${query.tableName}
+		(
+			<#list query.tableStructure.columns as column>
+				<@trim><#assign columnType>${column.typeName}</#assign>
+				
+				<#if columnType == "STRING">
+					<#assign dataType="VARCHAR(${column.length?c})">
+				<#elseif columnType == "INT">
+					<#assign dataType="INT">
+				<#elseif columnType == "LONG">
+					<#assign dataType="BIGINT">
+				<#elseif columnType == "FLOAT">
+					<#assign dataType="FLOAT">
+				<#elseif columnType == "DOUBLE">
+					<#assign dataType="DOUBLE">
+				<#elseif columnType == "DATE_TIME">
+					<#assign dataType="DATETIME">
+				<#elseif columnType == "CLOB">
+					<#assign dataType="LONGTEXT">
+				<#else>
+					<#assign dataType>${column.typeName}</#assign>
+				</#if>
+				
+				<#if column.idField>
+					<#assign constraint>PRIMARY KEY </#assign>
+				<#else>
+					<#assign constraint></#assign>
+				</#if>
+				
+				<#if !column.nullable>
+					<#assign constraint>${constraint} NOT NULL </#assign>
+				</#if>
+				
+				<#if column.autoIncrement>
+					<#assign constraint>${constraint} AUTO_INCREMENT </#assign>
+				<#elseif column.sequenceIncrement>
+					<#assign constraint>${constraint} AUTO_INCREMENT </#assign>
+				</#if>
+				
+				<#assign comma></#assign>
+				
+				<#if column_has_next>
+					<#assign comma>,</#assign>
+				<#elseif query.tableStructure.constraintsAvailable>
+					<#assign comma>,</#assign>
+				<#elseif !query.joinTable>
+					<#assign comma>,</#assign>
+				</#if>
+				
+				${column.name}		${dataType}			${constraint}</@trim>${comma}
+			</#list>
+			
+			<#if !query.joinTable>
+				<#assign comma></#assign>
+				<#if query.tableStructure.constraintsAvailable>
+					<#assign comma>,</#assign>
+				</#if>
+				UQ_ENTITY_ID		VARCHAR(100)			NOT NULL,
+				CONSTRAINT UQ_${query.tableName}_UQ_ENTITY_ID UNIQUE (UQ_ENTITY_ID)${comma}
+			</#if>
+
+			<#list query.tableStructure.uniqueConstraints as constraint>
+				<@trim><#assign comma></#assign>
+				
+				<#if constraint_has_next>
+					<#assign comma>,</#assign>
+				<#elseif query.tableStructure.foreignConstraintsAvailable>
+					<#assign comma>,</#assign>
+				</#if>
+				
+				CONSTRAINT ${constraint.name} UNIQUE (<#list constraint.columns as column>${column}<#if column_has_next>,</#if></#list>) ${comma}</@trim>
+			</#list>
+			
+			<#list query.tableStructure.foreignConstraints as constraint>
+				CONSTRAINT ${constraint.name} FOREIGN KEY (<#list constraint.columns as column>${column}<#if column_has_next>,</#if></#list>) 
+					REFERENCES  ${constraint.parentTable} (<#list constraint.parentColumns as column>${column}<#if column_has_next>,</#if></#list>) <#if constraint_has_next>,</#if>
+			</#list>
+		)
+	]]></template>	
+
+	<template name="createIndexTemplate"><![CDATA[
+		CREATE INDEX ${query.indexName} ON ${query.tableName}(<#list query.columns as column>${column}<#if column_has_next>,</#if></#list>)
+	]]></template>	
+
+	<template name="saveTemplate"><![CDATA[
+		INSERT INTO ${query.tableName}(<#list query.columns as column>${column.name}<#if column_has_next>,</#if></#list>)
+		VALUES (<#list query.columns as column><#if column.sequenceGenerated>NULL<#else>?</#if><#if column_has_next>,</#if></#list>)
+	]]></template>	
+
+	<template name="updateTemplate"><![CDATA[
+		UPDATE ${query.tableName}
+		SET <#list query.columns as column>${column.name} = ?<#if column_has_next>,</#if>
+		</#list>WHERE <#list query.conditions as condition>${condition.column} ${condition.operator} ?
+		<#if condition_has_next>AND </#if></#list>
+	]]></template>	
+
+	<template name="deleteTemplate"><![CDATA[
+		DELETE FROM ${query.tableName}
+		WHERE 1 = 1
+		<#list query.conditions as condition>AND ${condition.column} ${condition.operator} ?</#list>
+	]]></template>	
+
+	<template name="childrenExistenceTemplate"><![CDATA[
+		SELECT COUNT(*)
+		FROM ${query.childTableName}
+		WHERE (<#list query.childColumns as column>${column}<#if column_has_next>, </#if></#list>)
+			IN (SELECT <#list query.parentColumns as column>${column}<#if column_has_next>, </#if></#list>
+				FROM ${query.parentTableName}
+				WHERE 1 = 1
+				<#list query.parentConditions as condition>AND ${condition.column} ${condition.operator} ?</#list>
+			)
+		<#list query.childConditions as condition>AND ${condition.column} ${condition.operator} ?</#list>
+	]]></template>	
+
+	<template name="fetchChildrenIdsTemplate"><![CDATA[
+		SELECT ${query.childIdColumn}
+		FROM ${query.childTableName}
+		WHERE (<#list query.childColumns as column>${column}<#if column_has_next>, </#if></#list>)
+			IN (SELECT <#list query.parentColumns as column>${column}<#if column_has_next>, </#if></#list>
+				FROM ${query.parentTableName}
+				WHERE 1 = 1
+				<#list query.parentConditions as condition>AND ${condition.column} ${condition.operator} ?</#list>
+			)
+		<#list query.childConditions as condition>AND ${condition.column} ${condition.operator} ?</#list>
+	]]></template>	
+
+	<template name="finderTemplate"><![CDATA[
+		SELECT <#list query.resultFields as column><@trim>
+				<#if column.tableCode??>${column.tableCode}.</#if>${column.column} <#if column.code??>${column.code}</#if><#if column_has_next>,</#if>
+			</@trim></#list>
+
+		FROM <#list query.tables as table>${table.table} <#if table.tableCode??>${table.tableCode}</#if><#if table_has_next>,</#if></#list>
+		WHERE 1 = 1
+		<#list query.joinConditions as joinCondition>AND ${joinCondition.leftTableCode}.${joinCondition.leftColumn} = ${joinCondition.rightTableCode}.${joinCondition.rightColumn}
+		</#list>
+		<#list query.conditions as condition>AND <#if condition.tableCode??>${condition.tableCode}.</#if>${condition.column} ${condition.operator} ?
+		</#list>
+	]]></template>	
+
+	<template name="countTemplate"><![CDATA[
+		SELECT COUNT(*)
+		FROM <#list query.tables as table>${table.table} <#if table.tableCode??>${table.tableCode}</#if><#if table_has_next>,</#if></#list>
+		WHERE 1 = 1
+		<#list query.joinConditions as joinCondition>AND ${joinCondition.leftTableCode}.${joinCondition.leftColumn} = ${joinCondition.rightTableCode}.${joinCondition.rightColumn}
+		</#list>
+		<#list query.conditions as condition>AND <#if condition.tableCode??>${condition.tableCode}.</#if>${condition.column} ${condition.operator} ?
+		</#list>
+	]]></template>	
+
+	<template name="dropTableTemplate"><![CDATA[
+		DROP TABLE ${query.tableName}
+	]]></template>	
+
+</configuration>
+
+

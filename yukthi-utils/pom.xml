@@ -7,7 +7,7 @@
 	<version>1.0</version>
 	<packaging>jar</packaging>
 
-	<name>fw-utils</name>
+	<name>yukthi-utils</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
