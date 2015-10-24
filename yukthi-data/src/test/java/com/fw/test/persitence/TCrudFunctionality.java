@@ -5,9 +5,11 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.fw.test.persitence.entity.Address;
 import com.fw.test.persitence.entity.Employee;
+import com.fw.test.persitence.entity.Employee1;
 import com.fw.test.persitence.entity.IEmployeeRepository;
-import com.yukthi.persistence.UniqueConstraintViolationException;
+import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.repository.RepositoryFactory;
 
 /**
@@ -24,6 +26,7 @@ public class TCrudFunctionality extends TestSuiteBase
 		
 		//cleanup the emp table
 		factory.dropRepository(Employee.class);
+		factory.dropRepository(Employee1.class);
 	}
 	
 
@@ -79,10 +82,8 @@ public class TCrudFunctionality extends TestSuiteBase
 			
 			empRepository.update(empForUpdate);
 			Assert.fail("Employee got updated with duplicate mail");
-		}catch(UniqueConstraintViolationException ex)
+		}catch(Exception ex)
 		{
-			Assert.assertEquals("EmailId", ex.getConstraintName());
-			Assert.assertTrue(ex.getMessage().contains("kiran@kk.com"));
 		}
 		
 		//cleanup the emp table
@@ -154,6 +155,21 @@ public class TCrudFunctionality extends TestSuiteBase
 		//cleanup the emp table
 		factory.dropRepository(Employee.class);
 	}
+	
+	@Test(dataProvider = "repositoryFactories")
+	public void testComplexObjectSave(RepositoryFactory factory)
+	{
+		ICrudRepository<Employee1> empRepository = factory.getRepositoryForEntity(Employee1.class);
+		
+		Employee1 emp = new Employee1("12345", "kranthi@kk.com", "kranthi", "90232333", 28);
+		emp.setAddress(new Address("city", "state"));
+		empRepository.save(emp);
+		
+		Employee1 savedEmp = empRepository.findById(emp.getId());
+		Assert.assertNotNull(emp.getAddress());
+		Assert.assertEquals(savedEmp.getAddress().getCity(), "city");
+		Assert.assertEquals(savedEmp.getAddress().getState(), "state");
+	}	
 	
 	/*
 	@Test

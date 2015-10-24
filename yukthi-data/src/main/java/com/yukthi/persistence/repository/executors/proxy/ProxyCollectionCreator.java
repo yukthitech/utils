@@ -47,7 +47,8 @@ public class ProxyCollectionCreator
 	 * Creates a proxy for specified entity type
 	 * @param entityDetails
 	 * @param repository
-	 * @param entityType
+	 * @param condition
+	 * @param actualCollection
 	 */
 	public ProxyCollectionCreator(EntityDetails entityDetails, ICrudRepository<?> repository, SearchCondition condition, Collection<Object> actualCollection)
 	{

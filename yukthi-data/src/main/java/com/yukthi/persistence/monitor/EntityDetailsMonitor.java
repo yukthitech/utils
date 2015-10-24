@@ -53,7 +53,7 @@ public class EntityDetailsMonitor
 	
 	/**
 	 * Returns true, if tables for specified entity is created
-	 * @param entityType
+	 * @param entityTypes
 	 * @return
 	 */
 	public synchronized boolean isTablesCreated(Class<?>... entityTypes)

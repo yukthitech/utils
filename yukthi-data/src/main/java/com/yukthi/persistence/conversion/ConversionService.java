@@ -66,6 +66,14 @@ public class ConversionService
 		}
 		
 		Class<?> converterType = typeMapping.converterType();
+		
+		//if no converter is specified in annotation
+		if(IPersistenceConverter.class.equals(converterType))
+		{
+			//dont use any converter
+			return null;
+		}
+		
 		IPersistenceConverter converter = typeToConverter.get(converterType);
 		
 		if(converter != null)

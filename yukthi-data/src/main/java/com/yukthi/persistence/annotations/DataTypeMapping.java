@@ -25,5 +25,5 @@ public @interface DataTypeMapping
 	 * Converter type to be used for data conversion between java type and db-types
 	 * @return
 	 */
-	public Class<? extends IPersistenceConverter> converterType();
+	public Class<? extends IPersistenceConverter> converterType() default IPersistenceConverter.class;
 }
