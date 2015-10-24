@@ -1,4 +1,4 @@
-package com.fw.test;
+package com.yukthi.test;
 
 import java.util.Arrays;
 
