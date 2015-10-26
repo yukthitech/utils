@@ -33,7 +33,7 @@ import javax.validation.Payload;
 import com.yukthi.validators.MaxLenValidator;
 
 /**
- * String Max length constraint annotation. Ensure target field value length <= specified length
+ * String Max length constraint annotation. Ensure target field value length &lt;= specified length
  * @author akiran
  */
 @Constraint(validatedBy = MaxLenValidator.class)

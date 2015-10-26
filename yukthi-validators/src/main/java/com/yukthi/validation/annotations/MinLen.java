@@ -33,7 +33,7 @@ import javax.validation.Payload;
 import com.yukthi.validators.MinLenValidator;
 
 /**
- * String Min length constraint annotation. Ensure target field value length >= specified length
+ * String Min length constraint annotation. Ensure target field value length &gt;= specified length
  * @author akiran
  */
 @Constraint(validatedBy = MinLenValidator.class)

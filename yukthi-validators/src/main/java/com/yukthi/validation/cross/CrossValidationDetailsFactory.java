@@ -85,7 +85,7 @@ public class CrossValidationDetailsFactory
 	/**
 	 * Creates and returns cross validator of specified type.
 	 * 
-	 * @param validatorType
+	 * @param beanType
 	 * @return
 	 */
 	public BeanCrossValidationDetails getCrossValidatorDetails(Class<?> beanType)
