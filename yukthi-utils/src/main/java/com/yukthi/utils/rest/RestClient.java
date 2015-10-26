@@ -37,18 +37,22 @@ public class RestClient
 	
 			logger.debug("Got response-status as {}", status);
 			
-			//if status is OK
-			if(status >= 200 && status < 300)
+			HttpEntity entity = response.getEntity();
+			
+			try
 			{
-				HttpEntity entity = response.getEntity();
 				value = entity != null? EntityUtils.toString(entity): null;
-				
-				logger.debug("Got response body: {}", value);
-				
-				if(StringUtils.isBlank(value))
-				{
-					value = null;
-				}
+			}catch(Exception ex)
+			{
+				logger.warn("An error occurred while fetching response content", ex);
+				value = null;
+			}
+			
+			logger.debug("Got response status as {} and body as: {}", status, value);
+			
+			if(StringUtils.isBlank(value))
+			{
+				value = null;
 			}
 			
 			return new RestResult<String>(value, status);
@@ -160,7 +164,8 @@ public class RestClient
 			}catch(Exception ex)
 			{
 				logger.error("An error occurred while parsing json response", ex);
-				throw new RestInvocationException("An error occurred while parsing json response", ex);
+				//throw new RestInvocationException("An error occurred while parsing json response", ex);
+				resultValue = null;
 			}
 		}
 		
