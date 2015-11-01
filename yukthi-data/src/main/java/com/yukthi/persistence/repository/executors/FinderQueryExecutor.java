@@ -18,7 +18,6 @@ import com.yukthi.persistence.Record;
 import com.yukthi.persistence.RecordCountMistmatchException;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.FinderQuery;
-import com.yukthi.persistence.repository.InvalidRepositoryException;
 
 @QueryExecutorPattern(prefixes = {"find", "fetch"})
 public class FinderQueryExecutor extends AbstractSearchQuery
@@ -35,20 +34,29 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
 		methodDesc = String.format("finder method '%s' of repository - '%s'", method.getName(), repositoryType.getName());
 
+		/*
 		Class<?> paramTypes[] = method.getParameterTypes();
 
 		if(paramTypes.length == 0)
 		{
 			throw new InvalidRepositoryException("No-parameter finder method '" + method.getName() + "' in repository: " + repositoryType.getName());
 		}
+		*/
 		
 		fetchReturnDetails(method);
 		
+		/*
 		if(!fetchConditonsByAnnotations(method, true, conditionQueryBuilder, methodDesc, true) && 
 				!fetchConditionsByName(method, conditionQueryBuilder, methodDesc))
 		{
 			throw new InvalidRepositoryException("Failed to determine parameter conditions for finder method '" 
 							+ method.getName() + "' of repository - " + repositoryType.getName());
+		}
+		*/
+		
+		if( !fetchConditonsByAnnotations(method, true, conditionQueryBuilder, methodDesc, true) )
+		{
+			fetchConditionsByName(method, conditionQueryBuilder, methodDesc);
 		}
 	}
 

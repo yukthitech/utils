@@ -89,7 +89,7 @@ public class TValidators
 		//loop through violation constraints
 		for(ConstraintViolation<Object> violation : violations)
 		{
-			logger.debug("\tGot violation as - " + violation.getMessage());
+			logger.debug("\tGot violation as - " + violation);
 			
 			if(expectedMssg != null)
 			{

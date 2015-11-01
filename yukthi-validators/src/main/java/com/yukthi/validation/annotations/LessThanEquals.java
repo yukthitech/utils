@@ -33,7 +33,7 @@ import com.yukthi.validators.LessThanEqualsValidator;
 
 /**
  * Adds constraint on target field and ensures the target field value is less than
- * or equal to field specified by {@link #field()} 
+ * or equal to field specified by {@link #field()}. Can be used on Number or Date fields.
  * @author akiran
  */
 @Documented

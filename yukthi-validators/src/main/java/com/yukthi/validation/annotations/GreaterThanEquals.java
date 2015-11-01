@@ -31,6 +31,11 @@ import java.lang.annotation.Target;
 import com.yukthi.validation.cross.CrossConstraint;
 import com.yukthi.validators.GreaterThanEqualsValidator;
 
+/**
+ * Compares target field with the field specified by {@link #field()}. This validation annotation should be used on fields
+ * of same type. And can be used on Number fields or Date fields.
+ * @author akiran
+ */
 @Documented
 @CrossConstraint(validatedBy = GreaterThanEqualsValidator.class)
 @Target( { ElementType.METHOD, ElementType.FIELD })

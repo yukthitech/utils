@@ -4,6 +4,7 @@
 package com.yukthi.utils.rest;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -132,9 +133,22 @@ public class RestClient
 	 * @param expectedResponseType Expected response type, which will be used to convert json response
 	 * @return Response (json) converted object as part of {@link RestResult}
 	 */
-	public <T> RestResult<T> invokeJsonRequest(RestRequest<?> request, final Class<T> expectedResponseType)
+	public <T> RestResult<T> invokeJsonRequest(RestRequest<?> request, Class<T> expectedResponseType)
 	{
 		return invokeJsonRequest(request, TypeFactory.defaultInstance().uncheckedSimpleType(expectedResponseType));
+	}
+
+	/**
+	 * To be invoked when expected result is collection
+	 * @param request Request to be invoked
+	 * @param collectionType Expected return collection type
+	 * @param expectedResponseType Expected return collection element type
+	 * @return Rest response
+	 */
+	public <T, C extends Collection<T>> RestResult<C> invokeJsonRequest(RestRequest<?> request, Class<C> collectionType, Class<T> expectedResponseType)
+	{
+		JavaType collectionJavaType = TypeFactory.defaultInstance().constructCollectionType(collectionType, expectedResponseType);
+		return invokeJsonRequest(request, collectionJavaType);
 	}
 
 	/**

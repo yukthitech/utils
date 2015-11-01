@@ -19,15 +19,16 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Contains common utility methods
+ * 
  * @author akiran
  */
 public class CommonUtils
 {
 	private static Logger logger = LogManager.getLogger(CommonUtils.class);
-	
+
 	private static Map<Class<?>, Class<?>> wrapperToPrimitive = new HashMap<Class<?>, Class<?>>();
 	private static Map<Class<?>, Class<?>> primitiveToWrapper = new HashMap<Class<?>, Class<?>>();
-	
+
 	static
 	{
 		addMapping(Boolean.class, boolean.class);
@@ -45,11 +46,12 @@ public class CommonUtils
 		wrapperToPrimitive.put(wrapperType, primType);
 		primitiveToWrapper.put(primType, wrapperType);
 	}
-	
+
 	private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{([\\w\\.\\(\\)]+)\\}");
 
 	/**
 	 * Returns true if specified type is primitive wrapper type
+	 * 
 	 * @param type
 	 * @return
 	 */
@@ -57,9 +59,10 @@ public class CommonUtils
 	{
 		return wrapperToPrimitive.containsKey(type);
 	}
-	
+
 	/**
 	 * Gets wrapper type for specified primitive type
+	 * 
 	 * @param primitiveType
 	 * @return
 	 */
@@ -67,9 +70,10 @@ public class CommonUtils
 	{
 		return primitiveToWrapper.get(primitiveType);
 	}
-	
+
 	/**
 	 * Gets primitive type for specified wrapper type
+	 * 
 	 * @param wrapperType
 	 * @return
 	 */
@@ -77,28 +81,84 @@ public class CommonUtils
 	{
 		return wrapperToPrimitive.get(wrapperType);
 	}
-	
+
 	/**
-	 * Checks if object of type "from" can be assigned to type "to". This method considers auto-boxing also
+	 * Returns default value for specified types. For wrappers and primitives default value is returned.
+	 * For non-primitive types null is returned.
+	 * 
+	 * @param type Type for which default value needs to be returned
+	 * @return default value
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getDefaultValue(Class<T> type)
+	{
+		//if type is not specified 
+		if(type == null)
+		{
+			return null;
+		}
+
+		//if primitive or its wrapper is specified
+		if(type.equals(Boolean.TYPE) || type.equals(Boolean.class))
+		{
+			return (T)new Boolean(false);
+		}
+		else if(type.equals(Character.TYPE) || type.equals(Character.class))
+		{
+			return (T)new Character('\0');
+		}
+		else if(type.equals(Byte.TYPE) || type.equals(Byte.class))
+		{
+			return (T)new Byte((byte) 0);
+		}
+		else if(type.equals(Short.TYPE) || type.equals(Short.class))
+		{
+			return (T)new Short((short) 0);
+		}
+		else if(type.equals(Integer.TYPE) || type.equals(Integer.class))
+		{
+			return (T)new Integer(0);
+		}
+		else if(type.equals(Long.TYPE) || type.equals(Long.class))
+		{
+			return (T)new Long(0);
+		}
+		else if(type.equals(Float.TYPE) || type.equals(Float.class))
+		{
+			return (T)new Float(0);
+		}
+		else if(type.equals(Double.TYPE) || type.equals(Double.class))
+		{
+			return (T)new Double(0);
+		}
+		
+		//if non primitive or wrapper is supported return null
+		return null;
+	}
+
+	/**
+	 * Checks if object of type "from" can be assigned to type "to". This method
+	 * considers auto-boxing also
+	 * 
 	 * @param from
 	 * @param to
 	 * @return
 	 */
 	public static boolean isAssignable(Class<?> from, Class<?> to)
 	{
-		//if its directly assignable
+		// if its directly assignable
 		if(to.isAssignableFrom(from))
 		{
 			return true;
 		}
-		
-		//if from is wrapper
+
+		// if from is wrapper
 		if(wrapperToPrimitive.containsKey(from))
 		{
 			return wrapperToPrimitive.get(from).isAssignableFrom(to);
 		}
-		
-		//if from is primitive
+
+		// if from is primitive
 		if(primitiveToWrapper.containsKey(from))
 		{
 			return primitiveToWrapper.get(from).isAssignableFrom(to);
@@ -108,14 +168,15 @@ public class CommonUtils
 	}
 
 	/**
-	 * Replaces expressions in "expressionString" with the property values of "bean".
-	 * The expressions should be of format ${<property-name>}. Where property name can
-	 * be a simple property, nested property or indexed property as defined in apache's
-	 * BeanUtils.getProperty
+	 * Replaces expressions in "expressionString" with the property values of
+	 * "bean". The expressions should be of format ${<property-name>}. Where
+	 * property name can be a simple property, nested property or indexed
+	 * property as defined in apache's BeanUtils.getProperty
 	 * 
 	 * @param bean
 	 * @param expressionString
-	 * @param formatter Optional. Formatter to format property values.
+	 * @param formatter
+	 *            Optional. Formatter to format property values.
 	 * @return
 	 */
 	public static String replaceExpressions(Object bean, String expressionString, IFormatter formatter)
@@ -123,42 +184,43 @@ public class CommonUtils
 		Matcher matcher = EXPRESSION_PATTERN.matcher(expressionString);
 		StringBuffer result = new StringBuffer();
 		Object value = null;
-		
-		//loop through the expressions
+
+		// loop through the expressions
 		while(matcher.find())
 		{
 			try
 			{
 				value = PropertyUtils.getProperty(bean, matcher.group(1));
-			}catch(Exception ex)
+			} catch(Exception ex)
 			{
-				//in case of error log a warning and ignore
+				// in case of error log a warning and ignore
 				logger.warn("An error occurred while parsing expression: " + matcher.group(1), ex);
 				value = "";
 			}
-			
-			//if value is null, make it into empty string to avoid exceptions
+
+			// if value is null, make it into empty string to avoid exceptions
 			if(value == null)
 			{
 				value = "";
 			}
-			//if value is not null and formatter is specified
+			// if value is not null and formatter is specified
 			else if(formatter != null)
 			{
 				value = formatter.convert(value);
 			}
-			
-			//replace expression with property value
+
+			// replace expression with property value
 			matcher.appendReplacement(result, Matcher.quoteReplacement(value.toString()));
 		}
-		
+
 		matcher.appendTail(result);
-		
+
 		return result.toString();
 	}
 
 	/**
 	 * Finds index of "element" in specified "array". If not found returns -1.
+	 * 
 	 * @param array
 	 * @param element
 	 * @return
@@ -169,8 +231,8 @@ public class CommonUtils
 		{
 			return -1;
 		}
-		
-		for(int  i = 0; i < array.length; i++)
+
+		for(int i = 0; i < array.length; i++)
 		{
 			if(element == null)
 			{
@@ -184,12 +246,12 @@ public class CommonUtils
 				return i;
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	/**
-	 * Converts specified array of elements into Set and returns the same. 
+	 * Converts specified array of elements into Set and returns the same.
 	 * Duplicate values will get filtered by set.
 	 * 
 	 * @param elements
@@ -201,12 +263,13 @@ public class CommonUtils
 		{
 			return new HashSet<E>();
 		}
-		
+
 		return new HashSet<E>(Arrays.asList(elements));
 	}
-	
+
 	/**
 	 * Checks if the specified array is empty (null or zero length array)
+	 * 
 	 * @param array
 	 * @return
 	 */
@@ -216,48 +279,50 @@ public class CommonUtils
 		{
 			return true;
 		}
-		
+
 		if(array.length == 0)
 		{
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Creates a map out of the key value pairs provided
-	 * @param keyValues Key Value pairs
+	 * 
+	 * @param keyValues
+	 *            Key Value pairs
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static <K, V> Map<K, V> toMap(Object... keyValues)
 	{
-		//if array is empty, return empty map
+		// if array is empty, return empty map
 		if(isEmptyArray(keyValues))
 		{
 			return Collections.emptyMap();
 		}
-		
-		//if key values are not provided in pairs
+
+		// if key values are not provided in pairs
 		if(keyValues.length % 2 != 0)
 		{
 			throw new IllegalArgumentException("Key values are not provided in pairs");
 		}
-		
+
 		Map<K, V> keyToVal = new HashMap<K, V>();
-		
+
 		for(int i = 0; i < keyValues.length; i += 2)
 		{
-			((Map)keyToVal).put(keyValues[i], keyValues[i + 1]);
+			((Map) keyToVal).put(keyValues[i], keyValues[i + 1]);
 		}
-		
+
 		return keyToVal;
 	}
-	
+
 	/**
-	 * Fetches the specified field value of the bean. This field should be made accessible
-	 * before calling this method.
+	 * Fetches the specified field value of the bean. This field should be made
+	 * accessible before calling this method.
 	 * 
 	 * @param field
 	 * @param bean
@@ -268,12 +333,10 @@ public class CommonUtils
 		try
 		{
 			return field.get(bean);
-		}catch(Exception ex)
+		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while fetching field value - " + field.getName(), ex);
 		}
 	}
 
-	
-	
 }

@@ -290,4 +290,38 @@ public class TCommonUtils
 		
 		Assert.assertEquals(CommonUtils.toSet("v1", "v2", "v1").size(), 2);
 	}
+
+	/**
+	 * Test case for testing default value fetching
+	 */
+	@Test(groups = ITestGroups.UNIT_TESTS)
+	public void testGetDefaultValue()
+	{
+		Assert.assertEquals((Byte)(byte)0, CommonUtils.getDefaultValue(byte.class));
+		Assert.assertEquals(new Byte((byte)0), CommonUtils.getDefaultValue(Byte.class));
+
+		Assert.assertEquals((Boolean)false, CommonUtils.getDefaultValue(boolean.class));
+		Assert.assertEquals((Boolean)false, CommonUtils.getDefaultValue(Boolean.class));
+
+		Assert.assertEquals((Short)(short)0, CommonUtils.getDefaultValue(short.class));
+		Assert.assertEquals(new Short((short)0), CommonUtils.getDefaultValue(Short.class));
+
+		Assert.assertEquals((Object)'\0', CommonUtils.getDefaultValue(char.class));
+		Assert.assertEquals(new Character('\0'), CommonUtils.getDefaultValue(Character.class));
+
+		Assert.assertEquals((Object)0, CommonUtils.getDefaultValue(int.class));
+		Assert.assertEquals((Object)0, CommonUtils.getDefaultValue(Integer.class));
+
+		Assert.assertEquals((Object)0L, CommonUtils.getDefaultValue(long.class));
+		Assert.assertEquals((Object)0L, CommonUtils.getDefaultValue(Long.class));
+
+		Assert.assertEquals((Object)0f, CommonUtils.getDefaultValue(float.class));
+		Assert.assertEquals((Object)0f, CommonUtils.getDefaultValue(Float.class));
+
+		Assert.assertEquals((Object)0.0, CommonUtils.getDefaultValue(double.class));
+		Assert.assertEquals((Object)0.0, CommonUtils.getDefaultValue(Double.class));
+
+		Assert.assertNull(CommonUtils.getDefaultValue(null));
+		Assert.assertNull(CommonUtils.getDefaultValue(String.class));
+	}
 }

@@ -52,6 +52,7 @@ public class CrossValidationEnabler implements ConstraintValidator<EnableCrossVa
 	/* (non-Javadoc)
 	 * @see javax.validation.ConstraintValidator#isValid(java.lang.Object, javax.validation.ConstraintValidatorContext)
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean isValid(Object bean, ConstraintValidatorContext context)
 	{
@@ -96,7 +97,7 @@ public class CrossValidationEnabler implements ConstraintValidator<EnableCrossVa
 					message = mssgInterpolator.interpolate(validator.getErrorMessage(), new CrossMessageInterpolatorContext(bean, validator));
 					
 					//message = processMessageParameters(validator.getErrorMessage(), validator);
-					context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+					context.buildConstraintViolationWithTemplate(message).addNode(field.getName()).addConstraintViolation();
 					isValid = false;
 				}
 			}

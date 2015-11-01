@@ -20,33 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.yukthi.validation.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.yukthi.utils.exceptions;
 
-import com.yukthi.validation.cross.CrossConstraint;
-import com.yukthi.validators.LessThanValidator;
+import com.yukthi.utils.MessageFormatter;
 
 /**
- * Adds constraint so that target field value is less than value of specified field by {@link #field()}.
- * Can be used on Number of Date fields.
+ * To be thrown when unexpected null is encountered. Provides var args support for better formatting
  * @author akiran
  */
-@Documented
-@CrossConstraint(validatedBy = LessThanValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
-@Retention(RetentionPolicy.RUNTIME)
-public @interface LessThan
+public class InvalidStateException extends RuntimeException
 {
-	/**
-	 * Field with which current field should be compared
-	 * @return
-	 */
-	public String field();
-	
-	public String message() default "{com.yukthi.validation.LessThan}";
+	private static final long serialVersionUID = 1L;
+
+	public InvalidStateException(Throwable cause, String message, Object... args)
+	{
+		super(MessageFormatter.format(message, args), cause);
+	}
+
+	public InvalidStateException(String message, Object... args)
+	{
+		super(MessageFormatter.format(message, args));
+	}
 }
