@@ -37,6 +37,8 @@ public class GetRestRequest extends RestRequest<GetRestRequest>
 		}
 		
 		HttpGet httpget = new HttpGet(uriBuilder.build());
+		super.populateHeaders(httpget);
+		
 		return httpget;
 	}
 	
@@ -52,6 +54,12 @@ public class GetRestRequest extends RestRequest<GetRestRequest>
 		builder.append("\n\tRequest Type: GET");
 		builder.append("\n\t").append("Resolved URI: ").append(super.getResolvedUri());
 		builder.append("\n\t").append("Params: ").append(super.params);
+		
+		if(!headers.isEmpty())
+		{
+			builder.append("\n\t").append("Headers: ").append(super.headers);
+		}
+		
 
 		builder.append("\n]");
 		return builder.toString();

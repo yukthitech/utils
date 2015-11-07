@@ -56,7 +56,7 @@ public class RestClient
 				value = null;
 			}
 			
-			return new RestResult<String>(value, status);
+			return new RestResult<String>(value, status, response);
 		}
 
 	}
@@ -75,6 +75,11 @@ public class RestClient
 	 * Object mapper that will be used to parse json responses
 	 */
 	private ObjectMapper objectMapper = new ObjectMapper();
+	
+	/**
+	 * Listener that can listen to rest client events
+	 */
+	private IRestClientListener restClientListener;
 
 	/**
 	 * A base url of the API server (eg: http://localhost:8080/test), which will get prepended to each request being invoked
@@ -92,6 +97,22 @@ public class RestClient
 
 		this.baseUrl = baseUrl;
 		httpclient = HttpClientFactory.getInstance().newHttpClient();
+	}
+	
+	/**
+	 * @return the {@link #restClientListener restClientListener}
+	 */
+	public IRestClientListener getRestClientListener()
+	{
+		return restClientListener;
+	}
+
+	/**
+	 * @param restClientListener the {@link #restClientListener restClientListener} to set
+	 */
+	public void setRestClientListener(IRestClientListener restClientListener)
+	{
+		this.restClientListener = restClientListener;
 	}
 
 	/**
@@ -164,7 +185,7 @@ public class RestClient
 		request.setContentType("application/json");
 		
 		//invoked the request
-		RestResult<String> stringResult = invokeRequest(request);
+		RestResult<String> stringResult = makeRequest(request);
 		T resultValue = null;
 
 		//if response has body
@@ -184,7 +205,15 @@ public class RestClient
 		}
 		
 		//return final result
-		return new RestResult<T>(resultValue, stringResult.getStatusCode());
+		RestResult<T> result = new RestResult<T>(resultValue, stringResult.getStatusCode(), stringResult.getHttpResponse());
+		
+		if(restClientListener != null)
+		{
+			logger.debug("Calling rest client listener before sending JSON result to caller");
+			restClientListener.postrequest(request, result);
+		}
+			
+		return result;
 	}
 
 	/**
@@ -194,9 +223,36 @@ public class RestClient
 	 */
 	public RestResult<String> invokeRequest(RestRequest<?> request)
 	{
+		RestResult<String> result = makeRequest(request);
+		
+		if(restClientListener != null)
+		{
+			logger.debug("Calling rest client listener before sending result to caller");
+			restClientListener.postrequest(request, result);
+		}
+		
+		return result;
+	}
+	
+	private RestResult<String> makeRequest(RestRequest<?> request)
+	{
 		try
 		{
-			logger.trace("Invoking request [Base Url - {}]: {}", baseUrl, request);
+			if(restClientListener != null)
+			{
+				logger.debug("Calling rest client listener before sending request to server");
+				restClientListener.prerequest(request);
+			}
+			
+			//dont print request details of secured request
+			if(request.isSecured())
+			{
+				logger.trace("Invoking request [Base Url - {}]", baseUrl);
+			}
+			else
+			{
+				logger.trace("Invoking request [Base Url - {}]: {}", baseUrl, request);
+			}
 			
 			//build http client request
 			HttpRequestBase convertedRequest = request.toHttpRequestBase(baseUrl);
