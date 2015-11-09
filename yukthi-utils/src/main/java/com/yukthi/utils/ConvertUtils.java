@@ -50,11 +50,16 @@ public class ConvertUtils
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static Object convert(Object value, Class<?> targetType)
 	{
+		if(value == null)
+		{
+			return null;
+		}
+		
 		if(Enum.class.isAssignableFrom(targetType))
 		{
 			if(!(value instanceof String))
 			{
-				throw new ConversionException(String.format("An error occurred while converting {} to type -{}", value, targetType.getName()));
+				throw new ConversionException(String.format("An error occurred while converting %s to type - %s", value, targetType.getName()));
 			}
 			
 			return Enum.valueOf((Class)targetType, (String)value);
