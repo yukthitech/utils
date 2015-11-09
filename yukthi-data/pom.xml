@@ -93,6 +93,11 @@
 			<artifactId>yukthi-utils</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.yukthi</groupId>
+			<artifactId>yukthi-data-mapping</artifactId>
+			<version>1.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.jasypt</groupId>

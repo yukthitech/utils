@@ -1,4 +1,4 @@
-package com.yukthi.persistence;
+package com.yukthi.persistence.repository.annotations;
 
 public enum Operator
 {

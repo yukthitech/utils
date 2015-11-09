@@ -6,11 +6,11 @@ import com.fw.test.persitence.queries.EmpSearchQuery;
 import com.fw.test.persitence.queries.EmpSearchResult;
 import com.fw.test.persitence.queries.KeyValueBean;
 import com.yukthi.persistence.ICrudRepository;
-import com.yukthi.persistence.Operator;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
 import com.yukthi.persistence.repository.annotations.CountFunction;
 import com.yukthi.persistence.repository.annotations.Field;
+import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
 

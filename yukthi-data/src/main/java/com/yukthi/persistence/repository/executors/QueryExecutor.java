@@ -12,7 +12,6 @@ import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.IDataStore;
-import com.yukthi.persistence.Operator;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.listeners.EntityEventType;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
@@ -20,6 +19,7 @@ import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 public abstract class QueryExecutor
 {

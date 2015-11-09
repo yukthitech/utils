@@ -12,12 +12,12 @@ import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ForeignConstraintDetails;
 import com.yukthi.persistence.ForeignConstraintViolationException;
 import com.yukthi.persistence.IDataStore;
-import com.yukthi.persistence.Operator;
 import com.yukthi.persistence.UniqueConstraintDetails;
 import com.yukthi.persistence.UniqueConstraintViolationException;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.CountQuery;
 import com.yukthi.persistence.query.QueryCondition;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 {

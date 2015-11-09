@@ -1,6 +1,6 @@
 package com.yukthi.persistence.query;
 
-import com.yukthi.persistence.Operator;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 /**
  * Represents a condition in condition based query

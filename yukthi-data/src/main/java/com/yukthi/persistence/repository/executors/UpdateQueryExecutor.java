@@ -12,7 +12,6 @@ import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.ITransaction;
-import com.yukthi.persistence.Operator;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.listeners.EntityEventType;
 import com.yukthi.persistence.query.ColumnParam;
@@ -20,6 +19,7 @@ import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.UpdateQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.Field;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 @QueryExecutorPattern(prefixes = {"update"})
 public class UpdateQueryExecutor extends AbstractPersistQueryExecutor

@@ -1,6 +1,6 @@
 package com.yukthi.persistence.repository.search;
 
-import com.yukthi.persistence.Operator;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 /**
  * Dynamic condition for search query

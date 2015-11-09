@@ -1,7 +1,7 @@
 package com.fw.test.persitence.queries;
 
-import com.yukthi.persistence.Operator;
 import com.yukthi.persistence.repository.annotations.Condition;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 /**
  * Test query object to find employees

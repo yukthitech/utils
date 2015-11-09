@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.yukthi.persistence.Operator;
-
 /**
  * Marks the target parameter or field as condition
  * @author akiran

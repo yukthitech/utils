@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.yukthi.persistence.EntityDetails;
-import com.yukthi.persistence.Operator;
+import com.yukthi.persistence.repository.annotations.Operator;
 
 /**
  * Represents a generic select query that can be executed against multiple entities

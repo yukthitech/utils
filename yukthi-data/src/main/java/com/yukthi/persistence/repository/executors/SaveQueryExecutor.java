@@ -21,7 +21,6 @@ import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.ITransaction;
 import com.yukthi.persistence.JoinTableDetails;
 import com.yukthi.persistence.JoinTableEntity;
-import com.yukthi.persistence.Operator;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.listeners.EntityEventType;
@@ -31,6 +30,7 @@ import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.QueryResultField;
 import com.yukthi.persistence.query.SaveQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
+import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.utils.ObjectWrapper;
 
 @QueryExecutorPattern(prefixes = {"save"})
