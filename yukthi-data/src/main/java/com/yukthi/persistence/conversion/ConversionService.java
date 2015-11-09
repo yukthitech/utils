@@ -101,6 +101,12 @@ public class ConversionService
 	 */
 	public Object convertToJavaType(Object dbObject, FieldDetails fieldDetails)
 	{
+		//when db object is null, return null
+		if(dbObject == null)
+		{
+			return null;
+		}
+		
 		//fetch field specific converter
 		IPersistenceConverter converter = getConverter(fieldDetails);
 		
@@ -122,6 +128,12 @@ public class ConversionService
 	 */
 	public Object convertToDBType(Object javaObj, FieldDetails fieldDetails)
 	{
+		//when java object is null, return null
+		if(javaObj == null)
+		{
+			return null;
+		}
+		
 		//fieldDetails will be null, when conversion is needed for values in conditions
 		if(fieldDetails == null)
 		{
