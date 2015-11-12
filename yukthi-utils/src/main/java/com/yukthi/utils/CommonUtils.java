@@ -169,7 +169,7 @@ public class CommonUtils
 
 	/**
 	 * Replaces expressions in "expressionString" with the property values of
-	 * "bean". The expressions should be of format ${<property-name>}. Where
+	 * "bean". The expressions should be of format ${&lt;property-name&gt;}. Where
 	 * property name can be a simple property, nested property or indexed
 	 * property as defined in apache's BeanUtils.getProperty
 	 * 
@@ -257,6 +257,7 @@ public class CommonUtils
 	 * @param elements
 	 * @return
 	 */
+	@SafeVarargs
 	public static <E> Set<E> toSet(E... elements)
 	{
 		if(elements == null)
@@ -339,4 +340,46 @@ public class CommonUtils
 		}
 	}
 
+	/**
+	 * Converts list to map. By using "keyProp" to fetch key value and value property to fetch the value for map.
+	 * Value property is optional, if not specified, current object will be used as value.
+	 * 
+	 * @param list List to be converted
+	 * @param keyProp Key property which be used to fetch key
+	 * @param valueProp Optional. Property to fetch for resultant map. If not specified, current object will be used.
+	 * @return Resultant map
+	 */
+	@SuppressWarnings("unchecked")
+	public static <K,V> Map<K, V> buildMap(Iterable<?> list, String keyProp, String valueProp)
+	{
+		if(list == null)
+		{
+			return null;
+		}
+		
+		if(keyProp == null)
+		{
+			throw new NullPointerException("Key property can not be null");
+		}
+	
+		//convert to map
+		try
+		{
+			Map<K, V> map = new HashMap<>();
+			Object value = null;
+			
+			for(Object obj : list)
+			{
+				value = (valueProp != null) ? PropertyUtils.getProperty(obj, valueProp) : obj;
+				map.put((K)PropertyUtils.getProperty(obj, keyProp), (V)value);
+			}
+			
+			return map;
+		}catch(Exception ex)
+		{
+			throw new IllegalArgumentException("An error occurred while converting list to map", ex);
+		}
+	}
+	
+	
 }

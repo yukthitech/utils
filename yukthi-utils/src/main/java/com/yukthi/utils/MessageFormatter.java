@@ -31,8 +31,8 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Utility to format strings in log4j 2 way.
  * 
- * {} will match with the current index argument. If index is greater than provided values then <undefined> string will be used.
- * {<idx>} can be used to refer to argument at particular index. Helpful in building messages which uses same argument multiple times.
+ * {} will match with the current index argument. If index is greater than provided values then &lt;undefined&gt; string will be used.
+ * {&lt;idx&gt;} can be used to refer to argument at particular index. Helpful in building messages which uses same argument multiple times.
  * 
  * @author akiran
  */
@@ -51,8 +51,8 @@ public class MessageFormatter
 	/**
 	 * Replaces the args values in "message" using patterns mentioned below and same will be returned. 
 	 * 
-	 * {} will match with the current index argument. If index is greater than provided values then <undefined> string will be used.
-	 * {<idx>} can be used to refer to argument at particular index. Helpful in building messages which uses same argument multiple times.
+	 * {} will match with the current index argument. If index is greater than provided values then &lt;undefined&gt; string will be used.
+	 * {&lt;idx&gt;} can be used to refer to argument at particular index. Helpful in building messages which uses same argument multiple times.
 	 * 
 	 * @param message Message string with expressions
 	 * @param args Values for expression

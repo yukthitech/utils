@@ -74,7 +74,7 @@ public class TableStructure
 				continue;
 			}
 			
-			this.foreignConstraints.add(new ForeignConstraintStructure(entityDetails, constraint, fieldMapping));
+			this.foreignConstraints.add(new ForeignConstraintStructure(entityDetails, constraint, fieldMapping, constraint.isDeleteCascaded()));
 		}
 	}
 

@@ -21,6 +21,37 @@ public class EntityDetailsMonitor
 	private Map<Class<?>, List<IEntityCreateTableListener>> createTableListeners = new HashMap<>();
 
 	private Map<Class<?>, EntityDetails> entityWithTables = new HashMap<>();
+	
+	/**
+	 * Invoked by {@link EntityDetailsFactory} when an entity is loaded with already existing table. This
+	 * is important, to ensure table creation for enities which has dependency on existing tables are
+	 * unblocked.
+	 * @param entityDetails
+	 */
+	public synchronized void addEntityWithTable(EntityDetails entityDetails)
+	{
+		Class<?> entityType = entityDetails.getEntityType();
+		
+		logger.debug("Found entity with exiting table: {}", entityType.getName());
+		entityWithTables.put(entityType, entityDetails);
+		
+		List<IEntityCreateTableListener> listeners = createTableListeners.get(entityType);
+		
+		//if no listeners are registered for current entity
+		if(listeners == null)
+		{
+			return;
+		}
+		
+		//invoke the registered listeners
+		for(IEntityCreateTableListener listener : listeners)
+		{
+			listener.tableCreated(entityDetails);
+		}
+		
+		//clean the listeners as the event is notified
+		createTableListeners.remove(entityType);
+	}
 
 	/**
 	 * Event method expected to be invoked by {@link EntityDetailsFactory} after tables are created.

@@ -88,7 +88,7 @@ public class TestUtil
 
 	/**
 	 * Calls values() and valueOf() on specified enum type. And also calls read method of all properties. This will add code coverage for target enum
-	 * @param enumType
+	 * @param enumTypes
 	 * @throws NoSuchMethodException 
 	 * @throws SecurityException 
 	 * @throws InvocationTargetException 
@@ -450,7 +450,7 @@ public class TestUtil
 	/**
 	 * Executes setters and getters of beans specified and validates the properties
 	 * are set and fetched properly
-	 * @param beans
+	 * @param beanTypes
 	 * @throws IllegalAccessException 
 	 */
 	public static void testBeanTypes(Class<?>... beanTypes) throws IllegalAccessException

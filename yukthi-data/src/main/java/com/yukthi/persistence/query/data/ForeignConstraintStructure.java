@@ -12,17 +12,19 @@ public class ForeignConstraintStructure
 	private String columns[];
 	private String parentTable;
 	private String parentColumns[];
-	
-	public ForeignConstraintStructure(EntityDetails entityDetails, ForeignConstraintDetails constraint, Map<String, String> fieldMapping)
+	private boolean isDeleteCascaded;
+
+	public ForeignConstraintStructure(EntityDetails entityDetails, ForeignConstraintDetails constraint, Map<String, String> fieldMapping, boolean isDeleteCascaded)
 	{
 		Field ownerField = constraint.getOwnerField();
 		EntityDetails targetEntity = constraint.getTargetEntityDetails();
-		
+
 		this.name = constraint.getConstraintName();
 		this.parentTable = targetEntity.getTableName();
-		
+
 		this.columns = new String[] { entityDetails.getFieldDetailsByField(ownerField.getName()).getColumn() };
 		this.parentColumns = new String[] { targetEntity.getIdField().getColumn() };
+		this.isDeleteCascaded = isDeleteCascaded;
 	}
 
 	public String getName()
@@ -63,6 +65,23 @@ public class ForeignConstraintStructure
 	public void setParentColumns(String[] parentColumns)
 	{
 		this.parentColumns = parentColumns;
+	}
+
+	/**
+	 * @return the {@link #isDeleteCascaded isDeleteCascaded}
+	 */
+	public boolean isDeleteCascaded()
+	{
+		return isDeleteCascaded;
+	}
+
+	/**
+	 * @param isDeleteCascaded
+	 *            the {@link #isDeleteCascaded isDeleteCascaded} to set
+	 */
+	public void setDeleteCascaded(boolean isDeleteCascaded)
+	{
+		this.isDeleteCascaded = isDeleteCascaded;
 	}
 
 }

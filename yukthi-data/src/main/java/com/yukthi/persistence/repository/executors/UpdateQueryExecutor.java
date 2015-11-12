@@ -151,7 +151,23 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				continue;
 			}
 			
-			value = conversionService.convertToDBType(field.getValue(entity), field);
+			value = field.getValue(entity);
+			
+			//if current field is relation field
+			if(field.isRelationField())
+			{
+				//if current table does not own relation, ignore current field
+				if(!field.isTableOwned())
+				{
+					//TODO: Take care of cases where join table is involved
+					continue;
+				}
+				
+				//if current table owns the relation in same table, replace the enity valu with foreign entity id value
+				value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+			}
+			
+			value = conversionService.convertToDBType(value, field);
 			
 			query.addColumn(new ColumnParam(field.getColumn(), value, -1));
 		}
@@ -199,9 +215,29 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			//TODO: When unique fields are getting updated, make sure unique constraints are not violated
 				//during unique field update might be we have to mandate id is provided as condition
 			
+			FieldDetails field = null;
+			
 			for(ColumnParam column: updateQuery.getColumns())
 			{
-				value = conversionService.convertToDBType(params[column.getIndex()], entityDetails.getFieldDetailsByColumn(column.getName()));
+				field = entityDetails.getFieldDetailsByColumn(column.getName());
+				value = params[column.getIndex()];
+				
+				//if current field is relation field
+				if(field.isRelationField())
+				{
+					//if current table does not own relation, ignore current field
+					if(!field.isTableOwned())
+					{
+						//TODO: Take care of cases where join table is involved
+						continue;
+					}
+					
+					//if current table owns the relation in same table, replace the entity value with foreign entity id value
+					value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+				}
+
+				value = conversionService.convertToDBType(value, field);
+
 				column.setValue(value);
 			}
 			

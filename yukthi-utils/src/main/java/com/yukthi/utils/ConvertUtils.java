@@ -55,11 +55,16 @@ public class ConvertUtils
 			return null;
 		}
 		
+		if(targetType.isAssignableFrom(value.getClass()))
+		{
+			return value;
+		}
+		
 		if(Enum.class.isAssignableFrom(targetType))
 		{
 			if(!(value instanceof String))
 			{
-				throw new ConversionException(String.format("An error occurred while converting %s to type - %s", value, targetType.getName()));
+				throw new ConversionException(String.format("An error occurred while converting %s (Type: %s) to type - %s", value, value.getClass().getName(), targetType.getName()));
 			}
 			
 			return Enum.valueOf((Class)targetType, (String)value);

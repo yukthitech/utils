@@ -75,7 +75,7 @@
 			
 			<#list query.tableStructure.foreignConstraints as constraint>
 				CONSTRAINT ${constraint.name} FOREIGN KEY (<#list constraint.columns as column>${column}<#if column_has_next>,</#if></#list>) 
-					REFERENCES  ${constraint.parentTable} (<#list constraint.parentColumns as column>${column}<#if column_has_next>,</#if></#list>) <#if constraint_has_next>,</#if>
+					REFERENCES  ${constraint.parentTable} (<#list constraint.parentColumns as column>${column}<#if column_has_next>,</#if></#list>) <#if constraint.deleteCascaded>ON DELETE CASCADE</#if> <#if constraint_has_next>,</#if>
 			</#list>
 		)
 	]]></template>	

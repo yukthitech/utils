@@ -211,11 +211,13 @@ public class EntityDetailsFactory
 		
 		Class<?> cls = entityType;
 		Map<String, String> flattenColumnMap = null;
+		boolean tableExists = false;
 		
 		try
 		{
 			flattenColumnMap = flattenColumnNames(entityDetails.getTableName(), dataStore);
 			entityDetails.setTableCreated(true);
+			tableExists = true;
 		}catch(RuntimeException ex)
 		{
 			if(!createTables)
@@ -302,6 +304,11 @@ public class EntityDetailsFactory
 			throw new IllegalStateException("Entity table is not found or not created - " + entityType.getName());
 		}
 		*/
+		
+		if(tableExists)
+		{
+			entityDetailsMonitor.addEntityWithTable(entityDetails);
+		}
 		
 		logger.trace("Completed building of entity details {}", entityDetails);
 		logger.trace("*********************************************************");
