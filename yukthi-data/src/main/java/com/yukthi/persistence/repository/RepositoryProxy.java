@@ -35,6 +35,7 @@ class RepositoryProxy implements InvocationHandler
 		defaultedMethods.put("getEntityDetails", this::getEntityDetails);
 		defaultedMethods.put("newTransaction", this::newTransaction);
 		defaultedMethods.put("currentTransaction", this::currentTransaction);
+		defaultedMethods.put("newOrExistingTransaction", this::newOrExistingTransaction);
 		defaultedMethods.put("dropEntityTable", this::dropEntityTable);
 		defaultedMethods.put("getRepositoryType", this::getRepositoryType);
 
@@ -126,6 +127,17 @@ class RepositoryProxy implements InvocationHandler
 		}
 	}
 	
+	private Object newOrExistingTransaction(Object args[])
+	{
+		try
+		{
+			return dataStore.getTransactionManager().newOrExistingTransaction();
+		}catch(TransactionException e)
+		{
+			throw new IllegalStateException(e);
+		}
+	}
+
 	/**
 	 * Drops current entity table
 	 * @param args

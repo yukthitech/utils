@@ -58,13 +58,13 @@ public class RdbmsTransactionManager implements ITransactionManager<RdbmsTransac
 	}
 	
 	@Override
-	public RdbmsTransaction currentTransaction() throws TransactionException
+	public TransactionWrapper<RdbmsTransaction> currentTransaction() throws TransactionException
 	{
 		RdbmsTransaction transaction = threadToTransaction.get(Thread.currentThread());
 		
 		if(transaction != null)
 		{
-			return transaction;
+			return new TransactionWrapper<RdbmsTransaction>(transaction, true);
 		}
 		
 		throw new IllegalStateException("No transaction is started by current thread");
