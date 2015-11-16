@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthi.ccg.xml.XMLBeanParser;
 import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.IDataStore;
+import com.yukthi.persistence.IFinderRecordProcessor;
 import com.yukthi.persistence.ITransaction;
 import com.yukthi.persistence.ITransactionManager;
 import com.yukthi.persistence.PersistenceException;
@@ -811,7 +812,7 @@ public class RdbmsDataStore implements IDataStore
 	}
 
 	@Override
-	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails)
+	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails, IFinderRecordProcessor recordProcessor)
 	{
 		logger.trace("Started method: executeFinder");
 		logger.debug("Fetching records from table '{}' using query: {}", findQuery.getTableName(), findQuery);
@@ -848,6 +849,7 @@ public class RdbmsDataStore implements IDataStore
 			int colCount = metaData.getColumnCount();
 			String colNames[] = null;
 			Object cellValue = null;
+			long recordNo = 1;
 			
 			while(rs.next())
 			{
@@ -882,7 +884,16 @@ public class RdbmsDataStore implements IDataStore
 					rec.set(i, colNames[i], cellValue);
 				}
 				
+				if(recordProcessor != null)
+				{
+					if(!recordProcessor.process(recordNo, rec))
+					{
+						break;
+					}
+				}
+				
 				records.add(rec);
+				recordNo++;
 			}
 			
 			logger.debug("Found " + records.size() + " records found from table: " + findQuery.getTableName());

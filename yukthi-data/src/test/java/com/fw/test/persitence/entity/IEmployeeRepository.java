@@ -11,6 +11,7 @@ import com.yukthi.persistence.repository.annotations.ConditionBean;
 import com.yukthi.persistence.repository.annotations.CountFunction;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.persistence.repository.annotations.OrderBy;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
 
@@ -35,6 +36,10 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	
 	@SearchResult
 	public List<EmpSearchResult> findResultsByName(@Condition("name") String name);
+	
+	@SearchResult
+	@OrderBy("name")
+	public List<EmpSearchResult> findResultsByNameWithOrder(@Condition(value = "name", op = Operator.LIKE) String name);
 	
 	@SearchResult
 	public EmpSearchResult findResultByName(@Condition("name") String name);

@@ -17,8 +17,10 @@ import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.Field;
+import com.yukthi.persistence.repository.annotations.OrderBy;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
+import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 
 /**
  * Provides common base functionality for search query type executors - Finder and Search queries
@@ -27,6 +29,8 @@ import com.yukthi.persistence.repository.annotations.SearchResult;
 public abstract class AbstractSearchQuery extends QueryExecutor
 {
 	private static Logger logger = LogManager.getLogger(AbstractSearchQuery.class);
+	
+	private static RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
 	protected Class<?> returnType;
 	protected Class<?> collectionReturnType = null;
@@ -40,7 +44,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	 * Description of the method
 	 */
 	protected String methodDesc;
-
+	
 	/**
 	 * Fetches result field from return object type
 	 * @param returnType
@@ -176,7 +180,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		}
 		else if(method.getAnnotation(SearchResult.class) != null)
 		{
-			SearchResult searchResult = method.getAnnotation(SearchResult.class);
+			SearchResult searchResult = recursiveAnnotationFactory.findAnnotationRecursively(method, SearchResult.class); 
 			ResultMapping mappings[] = searchResult.mappings();
 
 			//if mappings are specified fetch field details from bean fields
@@ -206,6 +210,26 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		else
 		{
 			throw new UnsupportedOperationException("Failed to determine return details of finder method: " + method.getName());
+		}
+	}
+	
+	protected void fetchOrderDetails(Method method)
+	{
+		OrderBy orderBy = recursiveAnnotationFactory.findAnnotationRecursively(method, OrderBy.class);
+		
+		if(orderBy == null)
+		{
+			return;
+		}
+		
+		for(String field : orderBy.value())
+		{
+			if(!entityDetails.hasField(field))
+			{
+				throw new InvalidMappingException("Invalid field '" + field + "' specified in @OrderBy annotation of finder method - " + methodDesc);
+			}
+			
+			conditionQueryBuilder.addOrderByField(field, methodDesc);
 		}
 	}
 

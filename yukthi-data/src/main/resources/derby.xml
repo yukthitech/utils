@@ -139,13 +139,15 @@
 		SELECT <#list query.resultFields as column><@trim>
 				<#if column.tableCode??>${column.tableCode}.</#if>${column.column} <#if column.code??>${column.code}</#if><#if column_has_next>,</#if>
 			</@trim></#list>
-
 		FROM <#list query.tables as table>${table.table} <#if table.tableCode??>${table.tableCode}</#if><#if table_has_next>,</#if></#list>
 		WHERE 1 = 1
 		<#list query.joinConditions as joinCondition>AND ${joinCondition.leftTableCode}.${joinCondition.leftColumn} = ${joinCondition.rightTableCode}.${joinCondition.rightColumn}
 		</#list>
 		<#list query.conditions as condition>AND <#if condition.tableCode??>${condition.tableCode}.</#if>${condition.column} ${condition.operator} ?
 		</#list>
+		<#if query.orderByFields??> 
+			ORDER BY <#list query.orderByFields as orderField>${orderField.code}<#if orderField_has_next>, </#if></#list>
+		</#if>
 	]]></template>	
 
 	<template name="countTemplate"><![CDATA[

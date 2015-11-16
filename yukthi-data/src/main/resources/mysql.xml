@@ -137,6 +137,10 @@
 		</#list>
 		<#list query.conditions as condition>AND <#if condition.tableCode??>${condition.tableCode}.</#if>${condition.column} ${condition.operator} ?
 		</#list>
+		<#if query.orderByFields??> 
+			ORDER BY <#list query.orderByFields as orderField>${orderField.code}<#if orderField_has_next>, </#if></#list>
+		</#if>
+		<#if query.resultsLimitCount??>LIMIT ${query.resultsLimitCount}</#if>
 	]]></template>	
 
 	<template name="countTemplate"><![CDATA[

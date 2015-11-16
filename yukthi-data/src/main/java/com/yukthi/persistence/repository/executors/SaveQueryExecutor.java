@@ -372,7 +372,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid));
 		
 		//execute finder query 
-		List<Record> records = dataStore.executeFinder(findQuery, entityDetails);
+		List<Record> records = dataStore.executeFinder(findQuery, entityDetails, null);
 		
 		//if no records are found return null
 		if(records == null || records.isEmpty())

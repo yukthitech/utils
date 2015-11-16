@@ -58,6 +58,8 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 		{
 			fetchConditionsByName(method, conditionQueryBuilder, methodDesc);
 		}
+		
+		super.fetchOrderDetails(method);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -75,8 +77,11 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 			//set the result fields, conditions and tables details on finder query
 			conditionQueryBuilder.loadConditionalQuery(finderQuery, params);
 			
+			//add order-by fields
+			conditionQueryBuilder.loadOrderByFields(finderQuery);
+			
 			//execute the query and fetch records
-			List<Record> records = dataStore.executeFinder(finderQuery, entityDetails);
+			List<Record> records = dataStore.executeFinder(finderQuery, entityDetails, null);
 			
 			//if no results found
 			if(records == null || records.isEmpty())

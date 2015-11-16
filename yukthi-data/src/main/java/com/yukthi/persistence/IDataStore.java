@@ -51,7 +51,7 @@ public interface IDataStore
 	
 	public List<Object> fetchChildrenIds(FetchChildrenIdsQuery fetchChildrenIdsQuery);
 
-	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails);
+	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails, IFinderRecordProcessor recordProcessor);
 	
 	/**
 	 * Drops the underlying entity table

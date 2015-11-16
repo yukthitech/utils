@@ -18,6 +18,7 @@ import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.JoinTableDetails;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.conversion.ConversionService;
+import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.query.IConditionalQuery;
 import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.QueryJoinCondition;
@@ -223,6 +224,11 @@ public class ConditionQueryBuilder implements Cloneable
 	 * List of result fields of this query
 	 */
 	private List<ResultField> resultFields = new ArrayList<>();
+	
+	/**
+	 * Mapping from entity field name to result field
+	 */
+	private Map<String, ResultField> fieldToResultField = new HashMap<>();
 
 	/**
 	 * Mapping from property name to table
@@ -234,6 +240,8 @@ public class ConditionQueryBuilder implements Cloneable
 	 * Mapping from table-short-code to the table. Which will be needed while giving join info
 	 */
 	private Map<String, TableInfo> codeToTable = new HashMap<>();
+	
+	private List<ResultField> orderByFields = new ArrayList<>();
 	
 	/**
 	 * Counter for generating unique table codes
@@ -495,6 +503,7 @@ public class ConditionQueryBuilder implements Cloneable
 			
 			resultField.table = codeToTable.get(DEF_TABLE_CODE);
 			resultFields.add(resultField);
+			fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
 
 			if(resultProperty == null)
 			{
@@ -511,9 +520,10 @@ public class ConditionQueryBuilder implements Cloneable
 		resultField.fieldDetails = fieldDetailsHolder.getValue();
 
 		//TODO: If end field represents a collection, check if it can be supported, if not throw exception
-		//		Note - Reverse mapping property has to be created for such properies
+		//		Note - Reverse mapping property has to be created for such properties
 		
 		resultFields.add(resultField);
+		fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
 
 		//if this direct return field
 		if(resultProperty == null)
@@ -600,6 +610,30 @@ public class ConditionQueryBuilder implements Cloneable
 			addTables(query, condition.table.tableCode, includedTables);
 			query.addCondition(new QueryCondition(condition.table.tableCode, condition.fieldDetails.getColumn(), condition.operator, value));
 		}
+	}
+	
+	public void loadOrderByFields(FinderQuery finderQuery)
+	{
+		if(this.orderByFields.isEmpty())
+		{
+			return;
+		}
+		
+		List<QueryResultField> orderByCodes = new ArrayList<>();
+		
+		//loop through order by fields
+		for(ResultField field : orderByFields)
+		{
+			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code));
+		}
+		
+		//if enable codes are available
+		if(!orderByCodes.isEmpty())
+		{
+			//add order codes
+			finderQuery.setOrderByFields( orderByCodes.toArray(new QueryResultField[0]) );
+		}
+
 	}
 	
 	/**
@@ -718,6 +752,33 @@ public class ConditionQueryBuilder implements Cloneable
 				throw new IllegalArgumentException("An error occurred while parsing record - " + record, ex);
 			}
 		}
+	}
+	
+	public void addOrderByField(String field, String methodDesc)
+	{
+		if(!fieldToResultField.containsKey(field))
+		{
+			throw new InvalidMappingException("Field '" + field + "' specified in @OrderBy annotation is not part of result list of finder query - " + methodDesc);
+		}
+		
+		this.orderByFields.add(fieldToResultField.get(field));
+	}
+	
+	/**
+	 * Fetches short code for the specified result field.
+	 * @param field Field for which code needs to be fetched
+	 * @return Matching code, if not present null will be returned.
+	 */
+	public QueryResultField getResultFieldCode(String field)
+	{
+		ResultField resultField = fieldToResultField.get(field);
+		
+		if(resultField == null)
+		{
+			return null;
+		}
+		
+		return new QueryResultField(resultField.table.tableCode, resultField.fieldDetails.getColumn(), resultField.code);
 	}
 	
 	@Override

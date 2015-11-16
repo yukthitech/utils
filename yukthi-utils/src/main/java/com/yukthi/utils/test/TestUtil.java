@@ -95,6 +95,7 @@ public class TestUtil
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
+	@SuppressWarnings("unchecked")
 	public static void coverEnumTest(Class<? extends Enum<?>>... enumTypes) throws SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException
 	{
 		Method valueOfMet = null;

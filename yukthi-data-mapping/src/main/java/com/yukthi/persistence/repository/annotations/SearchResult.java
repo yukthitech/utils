@@ -17,7 +17,7 @@ public @interface SearchResult
 	/**
 	 * Specifies mapping from entity fields to result properties. If specified, @{@link Field} annotations
 	 * will not be searched in the return type of finder method.
-	 * @return
+	 * @return Mapping from entity field to result property
 	 */
 	public ResultMapping[] mappings() default {};
 }
