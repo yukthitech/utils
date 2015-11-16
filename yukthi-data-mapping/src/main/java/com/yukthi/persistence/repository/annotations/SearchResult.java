@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @author akiran
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 public @interface SearchResult
 {
 	/**

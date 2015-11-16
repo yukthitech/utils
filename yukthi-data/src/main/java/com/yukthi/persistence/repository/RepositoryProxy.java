@@ -4,7 +4,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,11 +19,16 @@ import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.JoinTableDetails;
 import com.yukthi.persistence.TransactionException;
 import com.yukthi.persistence.query.DropTableQuery;
+import com.yukthi.persistence.repository.annotations.NotExecutableMethod;
 import com.yukthi.persistence.repository.executors.QueryExecutor;
+import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
+import com.yukthi.utils.exceptions.UnsupportedOperationException;
 
 class RepositoryProxy implements InvocationHandler
 {
 	private static Logger logger = LogManager.getLogger(RepositoryProxy.class);
+
+	private static RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
 	private IDataStore dataStore;
 	private Map<String, QueryExecutor> methodToExecutor = new HashMap<>();
@@ -29,6 +36,8 @@ class RepositoryProxy implements InvocationHandler
 
 	private Map<String, Function<Object[], Object>> defaultedMethods = new HashMap<>();
 	private Class<? extends ICrudRepository<?>> repositoryType;
+	
+	private Set<Method> nonExecutableMethods = new HashSet<>();
 	
 	public RepositoryProxy(IDataStore dataStore, Class<? extends ICrudRepository<?>> repositoryType, EntityDetails entityDetails, ExecutorFactory executorFactory)
 	{
@@ -60,6 +69,12 @@ class RepositoryProxy implements InvocationHandler
 			{
 				throw new InvalidRepositoryException("Duplicate method '" + method.getName() + "' encouneted in repository: " + repositoryType.getName());
 			}
+			
+			if(recursiveAnnotationFactory.findAnnotationRecursively(method, NotExecutableMethod.class) != null)
+			{
+				nonExecutableMethods.add(method);
+				continue;
+			}
 
 			queryExecutor = executorFactory.getQueryExecutor(repositoryType, method, entityDetails);
 			
@@ -69,7 +84,6 @@ class RepositoryProxy implements InvocationHandler
 				continue;
 			}
 			
-			
 			throw new InvalidRepositoryException("Invalid CRUD method '" + methodName + "' is specified for entity - " + entityDetails.getEntityType().getName());
 		}
 		
@@ -78,6 +92,13 @@ class RepositoryProxy implements InvocationHandler
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 	{
+		//if current method is non-executable then throw exception
+		if(nonExecutableMethods.contains(method))
+		{
+			throw new UnsupportedOperationException("Repository method {}.{}() is marked with @{}. This method can not be executed directly.", 
+					repositoryType.getName(), method.getName(), NotExecutableMethod.class.getName());
+		}
+		
 		String methodName = method.getName();
 				
 		if(defaultedMethods.containsKey(methodName))

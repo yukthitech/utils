@@ -20,10 +20,11 @@ import com.yukthi.persistence.RecordCountMistmatchException;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
+import com.yukthi.persistence.repository.annotations.SearchFunction;
 import com.yukthi.persistence.repository.search.SearchCondition;
 import com.yukthi.persistence.repository.search.SearchQuery;
 
-@QueryExecutorPattern(prefixes = {"search"})
+@QueryExecutorPattern(prefixes = {"search"}, annotatedWith = SearchFunction.class)
 public class SearchQueryExecutor extends AbstractSearchQuery
 {
 	private static Logger logger = LogManager.getLogger(SearchQueryExecutor.class);
@@ -46,6 +47,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		}
 		
 		fetchReturnDetails(method);
+		super.fetchOrderDetails(method);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -77,6 +79,8 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			//add order-by fields
 			if(searchQuery.getOrderByFields() != null)
 			{
+				conditionQueryBuilder.clearOrderByFields();
+				
 				for(String field : searchQuery.getOrderByFields())
 				{
 					conditionQueryBuilder.addOrderByField(field, methodDesc);

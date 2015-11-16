@@ -292,7 +292,7 @@ public class ForeignConstraintDetails
 		// ensure target represents an entity type
 		if(targetEntityDetails == null)
 		{
-			throw new InvalidMappingException(String.format("Invalid entity relation-target type '%1' specified for field '%2.%3'", sourceFieldType.getName(), sourceEntityDetails.getEntityType().getName(), sourceField.getName()));
+			throw new InvalidMappingException(String.format("Invalid entity relation-target type '%1s' specified for field '%2s.%3s'", sourceFieldType.getName(), sourceEntityDetails.getEntityType().getName(), sourceField.getName()));
 		}
 
 		// set target entity details on result

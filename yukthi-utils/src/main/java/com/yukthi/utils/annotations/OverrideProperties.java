@@ -23,32 +23,22 @@
 
 package com.yukthi.utils.annotations;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
+ * Used when multiple overrides needs to be specified on single element
  * @author akiran
- *
  */
-public interface TestInterface
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface OverrideProperties
 {
-	@SearchResult(count = 10, 
-			mappings = {
-					@Mapping(field = "field1", property = "property1")
-			}, 
-			returnMapping = @Mapping(field = "retField1", property = "retProperty1")
-	)
-	public void directAnnotation();
-	
-	@LovQuery1
-	public void recursiveAnnotaion();
-	
-	@LovQuery2(count = 30)
-	public void simplePropOverride();
-
-	@LovQuery3(returnField = "retField4")
-	public void nestedPropPropOverride();
-
-	@LovQuery4(count = 50, mappingField = "field5", returnField = "retField5")
-	public void arrayPropOverride();
-	
-	@LovQuery5(field = "field6")
-	public void multiOverride();
+	/**
+	 * List of overrides to specify
+	 * @return List of overrides
+	 */
+	public OverrideProperty[] value();
 }

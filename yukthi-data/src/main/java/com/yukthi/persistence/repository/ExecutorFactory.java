@@ -18,6 +18,7 @@ import com.yukthi.persistence.repository.executors.QueryExecutorPattern;
 import com.yukthi.persistence.repository.executors.SaveQueryExecutor;
 import com.yukthi.persistence.repository.executors.SearchQueryExecutor;
 import com.yukthi.persistence.repository.executors.UpdateQueryExecutor;
+import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 
 /**
  * Factory to get query executor for specified repository method. A query executor for a repository method can be determined using
@@ -122,6 +123,8 @@ public class ExecutorFactory
 		}
 	}
 	
+	private static RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
+	
 	/**
 	 * Maintains list of supported executor details
 	 */
@@ -131,7 +134,7 @@ public class ExecutorFactory
 	 * List of annotation mappings to be used to match repository methods to 
 	 * executor
 	 */
-	private Map<Class<?>, ExecutorDetails> annotationToDetails = new HashMap<>();
+	private Map<Class<? extends Annotation>, ExecutorDetails> annotationToDetails = new HashMap<>();
 	
 	private PersistenceExecutionContext persistenceExecutionContext;
 	
@@ -178,7 +181,7 @@ public class ExecutorFactory
 		excludePrefixes = excludePrefixes.length == 0 ? null : excludePrefixes;
 
 		//check if executor can be matched using annotation
-		Class<?> annotationType = executorPattern.annotatedWith();
+		Class<? extends Annotation> annotationType = executorPattern.annotatedWith();
 		
 		if(prefixes == null && Annotation.class.equals(annotationType))
 		{
@@ -212,10 +215,28 @@ public class ExecutorFactory
 	 */
 	public QueryExecutor getQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
-		Annotation annotaions[] = method.getAnnotations();
+		//Annotation annotaions[] = method.getAnnotations();
 		ExecutorDetails details = null;
+		Annotation annotation = null;
 		
-		//based on annotations, check if match between repository method and exeutor can be done
+		//based on annotations, check if match between repository method and executor can be done
+		for(Class<? extends Annotation> annotaionType: annotationToDetails.keySet())
+		{
+			annotation = recursiveAnnotationFactory.findAnnotationRecursively(method, annotaionType);
+			
+			if(annotation == null)
+			{
+				continue;
+			}
+			
+			details = annotationToDetails.get(annotaionType);
+			
+			if(details != null)
+			{
+				return details.newQueryExecutor(persistenceExecutionContext, repositoryType, method, entityDetails);
+			}
+		}
+		/*
 		for(Annotation annotaion: annotaions)
 		{
 			details = annotationToDetails.get(annotaion.annotationType());
@@ -225,6 +246,7 @@ public class ExecutorFactory
 				return details.newQueryExecutor(persistenceExecutionContext, repositoryType, method, entityDetails);
 			}
 		}
+		*/
 		
 		//if match can not be done using annotation
 		String methodName = method.getName();

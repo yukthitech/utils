@@ -21,34 +21,25 @@
  * SOFTWARE.
  */
 
-package com.yukthi.utils.annotations;
+package com.yukthi.utils.exceptions;
+
+import com.yukthi.utils.MessageFormatter;
 
 /**
+ * To be thrown when unsupported operation is executed. Provides var args support for better formatting
  * @author akiran
- *
  */
-public interface TestInterface
+public class UnsupportedOperationException extends RuntimeException
 {
-	@SearchResult(count = 10, 
-			mappings = {
-					@Mapping(field = "field1", property = "property1")
-			}, 
-			returnMapping = @Mapping(field = "retField1", property = "retProperty1")
-	)
-	public void directAnnotation();
-	
-	@LovQuery1
-	public void recursiveAnnotaion();
-	
-	@LovQuery2(count = 30)
-	public void simplePropOverride();
+	private static final long serialVersionUID = 1L;
 
-	@LovQuery3(returnField = "retField4")
-	public void nestedPropPropOverride();
+	public UnsupportedOperationException(Throwable cause, String message, Object... args)
+	{
+		super(MessageFormatter.format(message, args), cause);
+	}
 
-	@LovQuery4(count = 50, mappingField = "field5", returnField = "retField5")
-	public void arrayPropOverride();
-	
-	@LovQuery5(field = "field6")
-	public void multiOverride();
+	public UnsupportedOperationException(String message, Object... args)
+	{
+		super(MessageFormatter.format(message, args));
+	}
 }

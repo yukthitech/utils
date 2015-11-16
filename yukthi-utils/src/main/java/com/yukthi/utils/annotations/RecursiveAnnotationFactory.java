@@ -178,6 +178,12 @@ public class RecursiveAnnotationFactory
 				throw new InvalidArgumentException(ex, "An error occurred while invoking method - {}.{}()", annotation.annotationType().getName(), method.getName());
 			}
 			
+			//if the value is overridden then use overridden value
+			if(overriddenProp.containsKey(methodName))
+			{
+				methodVal = overriddenProp.get(methodName);
+			}
+			
 			//if array indexes are present
 			if(arrIndexes != null)
 			{
@@ -294,19 +300,44 @@ public class RecursiveAnnotationFactory
 	{
 		Method methods[] = parentAnnotation.annotationType().getMethods();
 		OverrideProperty overrideProperty = null;
+		OverrideProperties overrideProperties = null;
 		Class<?> targetAnnotationType = targetAnnotation.annotationType(); 
 
 		String propertyTokens[] = null;
 		Object value = null;
 		AnnotationMethodHandler<Annotation> handler = null;
+		List<OverrideProperty> overridePropertyLst = new ArrayList<>();
+		String methodName = null;
 		
 		//loop through parent annotation methods and find which methods are overriding target annotation properties
 		for(Method method : methods)
 		{
+			overridePropertyLst.clear();
+			
 			overrideProperty = method.getAnnotation(OverrideProperty.class);
+			overrideProperties = method.getAnnotation(OverrideProperties.class);
 			
 			//if annotation is not present or 
-			if(overrideProperty == null || !targetAnnotationType.equals(overrideProperty.targetAnnotationType()) )
+			if(overrideProperty != null && targetAnnotationType.equals(overrideProperty.targetAnnotationType()) )
+			{
+				overridePropertyLst.add(overrideProperty);
+			}
+			
+			//if @OverrideProperties is specified
+			if(overrideProperties != null)
+			{
+				//extract matching overrides
+				for(OverrideProperty overProp : overrideProperties.value())
+				{
+					if(targetAnnotationType.equals(overProp.targetAnnotationType()) )
+					{
+						overridePropertyLst.add(overProp);
+					}
+				}
+			}
+
+			//if no overrides are specified
+			if(overridePropertyLst.isEmpty())
 			{
 				continue;
 			}
@@ -327,9 +358,14 @@ public class RecursiveAnnotationFactory
 				handler = newAnnotation(targetAnnotation);
 			}
 			
+			methodName = parentAnnotation.annotationType().getName() + "." + method.getName() + "()";
+			
 			//add overridden property value
-			propertyTokens = overrideProperty.property().split("\\.");
-			handler.setPropertyValue(null, parentAnnotation.annotationType().getName() + "." + method.getName() + "()", propertyTokens, 0, value, new StringBuilder());
+			for(OverrideProperty overProp : overridePropertyLst)
+			{
+				propertyTokens = overProp.property().split("\\.");
+				handler.setPropertyValue(null, methodName, propertyTokens, 0, value, new StringBuilder());
+			}
 		}
 		
 		return (handler != null) ? (A)handler.proxyAnnotation : targetAnnotation;

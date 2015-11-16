@@ -122,5 +122,21 @@ public class TRecursiveAnnotationFactory
 		Assert.assertEquals(searchResult.returnMapping().property(), "retProperty5");
 	}
 	
+	@Test
+	public void testMultiOverride() throws Exception
+	{
+		Method method = testClass.getMethod("multiOverride");
+		SearchResult searchResult = recursiveAnnotationFactory.findAnnotationRecursively(method, SearchResult.class);
+		
+		Assert.assertEquals(searchResult.count(), 60);
+		Assert.assertEquals(searchResult.mappings()[0].field(), "field6");
+		Assert.assertEquals(searchResult.mappings()[0].property(), "property6");
+		Assert.assertEquals(searchResult.returnMapping().field(), "field6");
+		Assert.assertEquals(searchResult.returnMapping().property(), "retProperty6");
+		
+		OrderBy orderBy = recursiveAnnotationFactory.findAnnotationRecursively(method, OrderBy.class);
+		Assert.assertEquals(orderBy.fields()[0], "field6");
+	}
+
 	//TODO: add test cases for multi dimension array, sub annotation override
 }

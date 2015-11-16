@@ -497,7 +497,7 @@ public class ConditionQueryBuilder implements Cloneable
 			//if the field mapping is wrong
 			if(resultField.fieldDetails == null)
 			{
-				throw new InvalidMappingException( String.format("Invalid field mapping '%1' found in result parameter '%2' of '%3'", 
+				throw new InvalidMappingException( String.format("Invalid field mapping '%1s' found in result parameter '%2s' of '%3s'", 
 							entityFieldExpression, entityFieldExpression, methodDesc) );
 			}
 			
@@ -753,6 +753,14 @@ public class ConditionQueryBuilder implements Cloneable
 			}
 		}
 	}
+
+	/**
+	 * Used by search query to clear order by fields before adding dynamic order by fields
+	 */
+	public void clearOrderByFields()
+	{
+		this.orderByFields.clear();
+	}
 	
 	public void addOrderByField(String field, String methodDesc)
 	{
@@ -786,7 +794,15 @@ public class ConditionQueryBuilder implements Cloneable
 	{
 		try
 		{
-			return (ConditionQueryBuilder)super.clone();
+			ConditionQueryBuilder newBuilder = (ConditionQueryBuilder)super.clone();
+			newBuilder.codeToTable = new HashMap<>(codeToTable);
+			newBuilder.conditions = new ArrayList<>(conditions);
+			newBuilder.fieldToResultField = new HashMap<>(fieldToResultField);
+			newBuilder.orderByFields = new ArrayList<>(orderByFields);
+			newBuilder.propToTable = new HashMap<>(propToTable);
+			newBuilder.resultFields = new ArrayList<>(resultFields);
+			
+			return newBuilder;
 		} catch(CloneNotSupportedException ex)
 		{
 			throw new IllegalStateException("An error occurred while cloning", ex);

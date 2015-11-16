@@ -167,6 +167,8 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			}
 		}
 		
+		SearchResult searchResult = recursiveAnnotationFactory.findAnnotationRecursively(method, SearchResult.class);
+		
 		//if return type matches with entity type, add all entity fields as result fields
 		if(entityDetails.getEntityType().equals(this.returnType) || ICrudRepository.class.equals(method.getDeclaringClass()))
 		{
@@ -178,9 +180,8 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			Field field = method.getAnnotation(Field.class);
 			conditionQueryBuilder.addResultField(null, this.returnType, field.value(), methodDesc);
 		}
-		else if(method.getAnnotation(SearchResult.class) != null)
+		else if(searchResult != null)
 		{
-			SearchResult searchResult = recursiveAnnotationFactory.findAnnotationRecursively(method, SearchResult.class); 
 			ResultMapping mappings[] = searchResult.mappings();
 
 			//if mappings are specified fetch field details from bean fields

@@ -23,32 +23,30 @@
 
 package com.yukthi.utils.annotations;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * @author akiran
  *
  */
-public interface TestInterface
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@SearchResult(count = 60, 
+	mappings = {
+		@Mapping(field = "field6", property = "property6")
+	}, 
+	returnMapping = @Mapping(field = "retField", property = "retProperty6")
+)
+@OrderBy(fields = {"field"})
+public @interface LovQuery5
 {
-	@SearchResult(count = 10, 
-			mappings = {
-					@Mapping(field = "field1", property = "property1")
-			}, 
-			returnMapping = @Mapping(field = "retField1", property = "retProperty1")
-	)
-	public void directAnnotation();
-	
-	@LovQuery1
-	public void recursiveAnnotaion();
-	
-	@LovQuery2(count = 30)
-	public void simplePropOverride();
-
-	@LovQuery3(returnField = "retField4")
-	public void nestedPropPropOverride();
-
-	@LovQuery4(count = 50, mappingField = "field5", returnField = "retField5")
-	public void arrayPropOverride();
-	
-	@LovQuery5(field = "field6")
-	public void multiOverride();
+	@OverrideProperties({
+		@OverrideProperty(targetAnnotationType = SearchResult.class, property = "returnMapping.field"),
+		@OverrideProperty(targetAnnotationType = SearchResult.class, property = "mappings[0].field"),
+		@OverrideProperty(targetAnnotationType = OrderBy.class, property = "fields[0]")
+	})
+	public String field();
 }
