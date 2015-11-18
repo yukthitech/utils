@@ -30,6 +30,7 @@ import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ObjectWrapper;
+import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
  * Builder that can be used to keep track of conditions/columns involved and their dependencies.
@@ -708,22 +709,28 @@ public class ConditionQueryBuilder implements Cloneable
 				continue;
 			}
 			
-			//as only table owned properties are maintained under returnColumnToField
-			//		this would be parent (target entity) that needs to be loaded
-			if(resultField.fieldDetails.isRelationField())
+			try
 			{
-				foreignConstraint = resultField.fieldDetails.getForeignConstraintDetails();
-				foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
-				
-				proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, 
-						repositoryFactory.getRepositoryForEntity((Class)foreignEntityDetails.getEntityType()), value);
-				value = proxyEntityCreator.getProxyEntity();
-			}
-			//if current field is a simple field (non relation field)
-			else
+				//as only table owned properties are maintained under returnColumnToField
+				//		this would be parent (target entity) that needs to be loaded
+				if(resultField.fieldDetails.isRelationField())
+				{
+					foreignConstraint = resultField.fieldDetails.getForeignConstraintDetails();
+					foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
+					
+					proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, 
+							repositoryFactory.getRepositoryForEntity((Class)foreignEntityDetails.getEntityType()), value);
+					value = proxyEntityCreator.getProxyEntity();
+				}
+				//if current field is a simple field (non relation field)
+				else
+				{
+					value = conversionService.convertToJavaType(value, resultField.fieldDetails);
+					value = ConvertUtils.convert(value, resultField.fieldType);
+				}
+			}catch(Exception ex)
 			{
-				value = conversionService.convertToJavaType(value, resultField.fieldDetails);
-				value = ConvertUtils.convert(value, resultField.fieldType);
+				throw new InvalidStateException(ex, "An error occurred while converting field {} value - {}", resultField.fieldDetails.getName(), value);
 			}
 		
 			//if value is null after conversion, ignore value
