@@ -702,6 +702,12 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			value = record.getObject(resultField.code);
 			
+			//ignore null values
+			if(value == null)
+			{
+				continue;
+			}
+			
 			//as only table owned properties are maintained under returnColumnToField
 			//		this would be parent (target entity) that needs to be loaded
 			if(resultField.fieldDetails.isRelationField())
@@ -720,6 +726,7 @@ public class ConditionQueryBuilder implements Cloneable
 				value = ConvertUtils.convert(value, resultField.fieldType);
 			}
 		
+			//if value is null after conversion, ignore value
 			if(value == null)
 			{
 				continue;
