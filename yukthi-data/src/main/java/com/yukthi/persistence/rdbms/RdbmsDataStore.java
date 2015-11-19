@@ -2,6 +2,7 @@ package com.yukthi.persistence.rdbms;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.Blob;
@@ -30,6 +31,7 @@ import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.IFinderRecordProcessor;
 import com.yukthi.persistence.ITransaction;
 import com.yukthi.persistence.ITransactionManager;
+import com.yukthi.persistence.LobData;
 import com.yukthi.persistence.PersistenceException;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.TransactionWrapper;
@@ -495,6 +497,8 @@ public class RdbmsDataStore implements IDataStore
 			pstmt = connection.prepareStatement(query);
 			int index = 1;
 			List<Object> params = new ArrayList<>();
+			Object value = null;
+			List<Closeable> closeables = new ArrayList<>();
 			
 			for(ColumnParam column: saveQuery.getColumns())
 			{
@@ -503,15 +507,40 @@ public class RdbmsDataStore implements IDataStore
 					continue;
 				}
 				
-				pstmt.setObject(index, column.getValue());
-				params.add(column.getValue());
+				value = column.getValue();
 				
+				if(value instanceof LobData)
+				{
+					LobData lobData = (LobData)value;
+					closeables.add(lobData);
+					
+					if(lobData.isTextStream())
+					{
+						pstmt.setCharacterStream(index, lobData.openReader() );
+					}
+					else
+					{
+						pstmt.setBinaryStream(index,  lobData.openStream() );
+					}
+				}
+				else
+				{
+					pstmt.setObject(index, value);
+				}
+				
+				params.add(value);
 				index++;
 			}
 			
 			logger.debug("Executing using params: {}", params);
 			
 			int count = pstmt.executeUpdate();
+			
+			//close any open closeables (like blob streams)
+			for(Closeable closeable : closeables)
+			{
+				closeable.close();
+			}
 			
 			//if the save was successful
 			if(count > 0)
