@@ -10,6 +10,9 @@ import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
 import com.yukthi.persistence.repository.annotations.CountFunction;
 import com.yukthi.persistence.repository.annotations.Field;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
+import com.yukthi.persistence.repository.annotations.MethodConditions;
+import com.yukthi.persistence.repository.annotations.NullCheck;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.OrderBy;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
@@ -24,6 +27,16 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	
 	public Employee findEmpByEmail(@Condition("emailId") String mail);
 	
+	public List<Employee> findEmpByName1(@Condition(value = "name", nullable = true) String name);
+	public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullable = true) String name);
+	
+	@MethodConditions(
+			nullChecks = {
+					@NullCheck(field = "name")
+			}
+	)
+	public List<Employee> findEmpWithNoName(@Condition("phoneNo") String phoneNo);
+	
 	@Field("age")
 	public int findAge(@Condition("name") String name, @Condition("phoneNo") String phoneNo);
 
@@ -31,6 +44,9 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	public String findEmailByEmployeeNo(String empNo);
 	
 	public List<Employee> findByPhoneNo(@Condition(value = "phoneNo", op = Operator.LIKE) String phone);
+	
+	public List<Employee> findByNameOrPhone(@Condition(value = "name", op = Operator.LIKE, joinWith = JoinOperator.OR) String name, 
+			@Condition(value = "phoneNo", op = Operator.LIKE, joinWith = JoinOperator.OR) String phone);
 
 	public List<Employee> find(@ConditionBean EmpSearchQuery query);
 	

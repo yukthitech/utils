@@ -59,6 +59,8 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 			fetchConditionsByName(method, conditionQueryBuilder, methodDesc);
 		}
 		
+		fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
+		
 		super.fetchOrderDetails(method);
 	}
 

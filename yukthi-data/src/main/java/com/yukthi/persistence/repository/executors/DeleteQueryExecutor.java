@@ -56,6 +56,8 @@ public class DeleteQueryExecutor extends AbstractPersistQueryExecutor
 			super.fetchConditionsByName(method, conditionQueryBuilder, methodDesc);
 		}
 		
+		super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
+		
 		returnType = method.getReturnType();
 		
 		if(!boolean.class.equals(returnType) && !void.class.equals(returnType) && !int.class.equals(returnType))

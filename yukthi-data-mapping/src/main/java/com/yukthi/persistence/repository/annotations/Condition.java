@@ -17,13 +17,25 @@ public @interface Condition
 	 * Name of the entity field on which this condition should be applied. If the target is
 	 * finder method param, this is mandatory. If this annotation is used on field, this is
 	 * optional.
-	 * @return
+	 * @return Entity field name expression
 	 */
 	public String value() default "";
 	
 	/**
 	 * Operator to be used in condition
-	 * @return
+	 * @return Condition operator to be used
 	 */
 	public Operator op() default Operator.EQ;
+	
+	/**
+	 * Join operator to be used for this condition
+	 * @return Join operator to be used for this condition
+	 */
+	public JoinOperator joinWith() default JoinOperator.AND;
+	
+	/**
+	 * Indicates this condition can hold null values
+	 * @return Whether this condition can hold null values
+	 */
+	public boolean nullable() default false;
 }

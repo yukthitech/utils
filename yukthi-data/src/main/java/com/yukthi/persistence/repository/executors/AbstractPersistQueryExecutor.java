@@ -17,6 +17,7 @@ import com.yukthi.persistence.UniqueConstraintViolationException;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.CountQuery;
 import com.yukthi.persistence.query.QueryCondition;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 
 public abstract class AbstractPersistQueryExecutor extends QueryExecutor
@@ -61,13 +62,13 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				value = fieldDetails.getValue(entity);
 				value = conversionService.convertToDBType(value, fieldDetails);
 				
-				existenceQuery.addCondition(new QueryCondition(null, fieldDetails.getColumn(), Operator.EQ, value));
+				existenceQuery.addCondition(new QueryCondition(null, fieldDetails.getColumn(), Operator.EQ, value, JoinOperator.AND));
 				fieldValues.put(field, value);
 			}
 			
 			if(excludeId)
 			{
-				existenceQuery.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.NE, entityDetails.getIdField().getValue(entity)));
+				existenceQuery.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.NE, entityDetails.getIdField().getValue(entity), JoinOperator.AND));
 			}
 			
 			if(dataStore.getCount(existenceQuery, entityDetails) > 0)
@@ -121,7 +122,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				continue;
 			}
 			
-			existenceQuery.addCondition(new QueryCondition(null, foreignEntityDetails.getIdField().getColumn(), Operator.EQ, value));
+			existenceQuery.addCondition(new QueryCondition(null, foreignEntityDetails.getIdField().getColumn(), Operator.EQ, value, JoinOperator.AND));
 			
 			if(dataStore.getCount(existenceQuery, foreignEntityDetails) <= 0)
 			{

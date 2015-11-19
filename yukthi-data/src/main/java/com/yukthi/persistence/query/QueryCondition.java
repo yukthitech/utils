@@ -1,5 +1,9 @@
 package com.yukthi.persistence.query;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 
 /**
@@ -28,12 +32,32 @@ public class QueryCondition implements Cloneable
 	 */
 	private Object value;
 	
-	public QueryCondition(String tableCode, String column, Operator operator, Object value)
+	/**
+	 * Joining operator
+	 */
+	private JoinOperator joinOperator = JoinOperator.AND;
+	
+	/**
+	 * Conditions grouped with current condition
+	 */
+	private List<QueryCondition> groupedConditions;
+	
+	/**
+	 * Instantiates a new query condition.
+	 *
+	 * @param tableCode the table code
+	 * @param column the column
+	 * @param operator the operator
+	 * @param value the value
+	 * @param joinOperator the join operator
+	 */
+	public QueryCondition(String tableCode, String column, Operator operator, Object value, JoinOperator joinOperator)
 	{
 		this.tableCode = tableCode;
 		this.column = column;
 		this.operator = operator;
 		this.value = value;
+		this.joinOperator = joinOperator;
 	}
 
 	/**
@@ -100,6 +124,59 @@ public class QueryCondition implements Cloneable
 		this.value = value;
 	}
 	
+	/**
+	 * Gets the joining operator.
+	 *
+	 * @return the joining operator
+	 */
+	public JoinOperator getJoinOperator()
+	{
+		return joinOperator;
+	}
+
+	/**
+	 * Sets the joining operator.
+	 *
+	 * @param joinOperator the new joining operator
+	 */
+	public void setJoinOperator(JoinOperator joinOperator)
+	{
+		this.joinOperator = joinOperator;
+	}
+
+	/**
+	 * Gets the conditions grouped with current condition.
+	 *
+	 * @return the conditions grouped with current condition
+	 */
+	public List<QueryCondition> getGroupedConditions()
+	{
+		return groupedConditions;
+	}
+
+	/**
+	 * Sets the conditions grouped with current condition.
+	 *
+	 * @param groupedConditions the new conditions grouped with current condition
+	 */
+	public void setGroupedConditions(List<QueryCondition> groupedConditions)
+	{
+		this.groupedConditions = groupedConditions;
+	}
+	
+	public void addGroupedCondition(QueryCondition condition)
+	{
+		if(groupedConditions == null)
+		{
+			this.groupedConditions = new ArrayList<>();
+		}
+		
+		this.groupedConditions.add(condition);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
 	@Override
 	public QueryCondition clone()
 	{
@@ -121,6 +198,7 @@ public class QueryCondition implements Cloneable
 	{
 		StringBuilder builder = new StringBuilder("[");
 
+		builder.append(joinOperator).append(" ");
 		builder.append(tableCode).append(".").append(column).append(" ");
 		builder.append(operator).append(" ").append(value);
 

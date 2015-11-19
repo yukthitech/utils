@@ -810,6 +810,26 @@ public class RdbmsDataStore implements IDataStore
 		}
 		
 	}
+	
+	private void addParamsRecursively(QueryCondition condition, PreparedStatement stmt, List<Object> params) throws SQLException
+	{
+		//for null based conditions templates should take care of nulls
+		if(condition.getValue() != null)
+		{
+			stmt.setObject(params.size() + 1, condition.getValue());
+			params.add(condition.getValue());
+		}
+		
+		if(condition.getGroupedConditions() == null)
+		{
+			return;
+		}
+		
+		for(QueryCondition grpCondition : condition.getGroupedConditions())
+		{
+			addParamsRecursively(grpCondition, stmt, params);
+		}
+	}
 
 	@Override
 	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails, IFinderRecordProcessor recordProcessor)
@@ -829,14 +849,10 @@ public class RdbmsDataStore implements IDataStore
 			
 			Connection connection = transaction.getTransaction().getConnection();
 			pstmt = connection.prepareStatement(query);
-			int index = 1;
 			
 			for(QueryCondition condition: findQuery.getConditions())
 			{
-				pstmt.setObject(index, condition.getValue());
-				params.add(condition.getValue());
-				
-				index++;
+				addParamsRecursively(condition, pstmt, params);
 			}
 			
 			logger.debug("Executing using params: {}", params);

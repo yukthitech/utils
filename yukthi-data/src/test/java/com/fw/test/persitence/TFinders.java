@@ -12,6 +12,7 @@ import com.fw.test.persitence.queries.EmpSearchResult;
 import com.fw.test.persitence.queries.KeyValueBean;
 import com.yukthi.persistence.RecordCountMistmatchException;
 import com.yukthi.persistence.repository.RepositoryFactory;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.SearchResult;
 import com.yukthi.persistence.repository.search.SearchCondition;
@@ -31,6 +32,8 @@ public class TFinders extends TestSuiteBase
 		repo.save(new Employee("1233", "user3@test.com", "user3", "1234563", 35));
 		repo.save(new Employee("1234", "user4@test.com", "user4", "1234564", 40));
 		repo.save(new Employee("1235", "user5@test.com", "user5", "12345644", 45));
+		
+		repo.save(new Employee("1236", "user6@test.com", null, "12345646", 46));
 	}
 
 	@Override
@@ -90,7 +93,7 @@ public class TFinders extends TestSuiteBase
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
 		
 		List<Employee> empLst = repo.findByPhoneNo("%64%");
-		Assert.assertEquals(empLst.size(), 2);
+		Assert.assertEquals(empLst.size(), 3);
 
 		Assert.assertEquals(CommonUtils.toSet(empLst.get(0).getAge(), empLst.get(1).getAge()) , CommonUtils.toSet(40, 45));
 		Assert.assertEquals(CommonUtils.toSet(empLst.get(0).getEmailId(), empLst.get(1).getEmailId()) , CommonUtils.toSet("user4@test.com", "user5@test.com"));
@@ -109,7 +112,7 @@ public class TFinders extends TestSuiteBase
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
 		
 		List<Employee> empLst = repo.find(new EmpSearchQuery(null, "%64%", 5, 100));
-		Assert.assertEquals(empLst.size(), 2);
+		Assert.assertEquals(empLst.size(), 3);
 
 		Assert.assertEquals(CommonUtils.toSet(empLst.get(0).getAge(), empLst.get(1).getAge()) , CommonUtils.toSet(40, 45));
 		Assert.assertEquals(CommonUtils.toSet(empLst.get(0).getEmailId(), empLst.get(1).getEmailId()) , CommonUtils.toSet("user4@test.com", "user5@test.com"));
@@ -124,7 +127,7 @@ public class TFinders extends TestSuiteBase
 		Assert.assertEquals(empLst.size(), 2);
 
 		empLst = repo.find(new EmpSearchQuery(null, null, 35, null));
-		Assert.assertEquals(empLst.size(), 3);
+		Assert.assertEquals(empLst.size(), 4);
 
 		empLst = repo.find(new EmpSearchQuery(null, null, 35, 40));
 		Assert.assertEquals(empLst.size(), 2);
@@ -171,9 +174,73 @@ public class TFinders extends TestSuiteBase
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
 		
 		List<KeyValueBean> results = repo.findKeyValues("1234564%");
-		Assert.assertEquals(results.size(), 2);
+		Assert.assertEquals(results.size(), 3);
 		Assert.assertEquals(CommonUtils.toSet(results.get(0).getKey(), results.get(1).getKey()) , CommonUtils.toSet("user4", "user5"));
 		Assert.assertEquals(CommonUtils.toSet(results.get(0).getValue(), results.get(1).getValue()) , CommonUtils.toSet("40", "45"));
+	}
+
+	/**
+	 * Tests finder with OR operator
+	 * @param factory
+	 */
+	@Test(dataProvider = "repositoryFactories")
+	public void testFinderWithOrcondition(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		List<Employee> results = repo.findByNameOrPhone("user1", "1234563");
+		
+		Assert.assertEquals(results.size(), 2);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()) , CommonUtils.toSet("1230", "1233"));
+	}
+
+	/**
+	 * Checks repository methods with null values for = and != operators
+	 * @param factory
+	 */
+	@Test(dataProvider = "repositoryFactories")
+	public void testFinderWithNull(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		//check with = operator with null value
+		List<Employee> results = repo.findEmpByName1(null);
+		
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(results.get(0).getEmployeeNo(), "1236");
+
+		//check = operator with not null value
+		results = repo.findEmpByName1("user4");
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(results.get(0).getEmployeeNo(), "1234");
+
+		//check != operator with null value
+		results = repo.findEmpByName2(null);
+		Assert.assertEquals(results.size(), 6);
+		
+		//check != operator with not null value 
+		results = repo.findEmpByName2("user4");
+		Assert.assertEquals(results.size(), 5);
+	}
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testFinderWithMethodConditions(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		//check when no other condition is involved
+		List<Employee> results = repo.findEmpWithNoName(null);
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(results.get(0).getEmployeeNo(), "1236");
+		
+		//check when other conditions are involve
+		results = repo.findEmpWithNoName("12345646");
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(results.get(0).getEmployeeNo(), "1236");
+		
+		//check when no results are present
+		results = repo.findEmpWithNoName("142");
+		Assert.assertEquals(results.size(), 0);
 	}
 
 	@Test(dataProvider = "repositoryFactories")
@@ -195,5 +262,43 @@ public class TFinders extends TestSuiteBase
 		
 		Assert.assertEquals(results.size(), 1);
 		Assert.assertEquals(results.get(0).getEmployeeNo() , "1231");
+	}
+
+	/**
+	 * Tests search query with null values
+	 * @param factory
+	 */
+	@Test(dataProvider = "repositoryFactories")
+	public void testSearchWithNull(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		List<Employee> results = repo.search(new SearchQuery(
+				new SearchCondition("name", Operator.EQ, null, true)
+		));
+		
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(results.get(0).getEmployeeNo(), "1236");
+	}
+
+	/**
+	 * Tests search query with group conditions
+	 * @param factory
+	 */
+	@Test(dataProvider = "repositoryFactories")
+	public void testSearchWithConditionGroups(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		SearchQuery query = new SearchQuery();
+		query.addCondition(
+				new SearchCondition("name", Operator.EQ, "user2")
+					.addCondition(new SearchCondition("age", Operator.EQ, 30))
+		).addCondition(new SearchCondition(JoinOperator.OR, "name", Operator.EQ, "user3"));
+		
+		List<Employee> results = repo.search(query);
+		
+		Assert.assertEquals(results.size(), 2);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()) , CommonUtils.toSet("1232", "1233"));
 	}
 }

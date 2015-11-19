@@ -16,6 +16,8 @@ import freemarker.template.Template;
 
 public class RdbmsConfiguration implements Validateable
 {
+	public static final String COMMON_CODE = "#commonCode";
+	
 	public static final String CHECK_SEQUENCE_QUERY = "checkSequenceTemplate";
 	public static final String CREATE_SEQUENCE_QUERY = "createSequenceTemplate";
 	public static final String CREATE_QUERY = "createTableTemplate";
@@ -72,6 +74,18 @@ public class RdbmsConfiguration implements Validateable
 			if(isEmptyQuery(query))
 			{
 				throw new ValidateException("'" + query + "' template can not be null or empty");
+			}
+		}
+		
+		String commonCode = queryMap.remove(COMMON_CODE);
+		
+		if(commonCode != null)
+		{
+			String names[] = queryMap.keySet().toArray(new String[0]);
+			
+			for(String name : names)
+			{
+				queryMap.put(name, commonCode + "\n" + queryMap.get(name));
 			}
 		}
 	}

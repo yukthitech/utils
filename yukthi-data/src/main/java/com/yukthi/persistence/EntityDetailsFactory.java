@@ -152,7 +152,7 @@ public class EntityDetailsFactory
 	{
 		if(fields == null || fields.length == 0)
 		{
-			throw new InvalidConfigurationException("No/empty list of fields specified for indexing");
+			throw new InvalidPersistenceConfigurationException("No/empty list of fields specified for indexing");
 		}
 		
 		if(name == null || name.trim().length() == 0)

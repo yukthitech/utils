@@ -49,10 +49,13 @@ public class SearchQuery
 	 *
 	 * @param condition
 	 *            condition to be added
+	 *            
+	 * @return returns curent query to add more conditions
 	 */
-	public void addCondition(SearchCondition condition)
+	public SearchQuery addCondition(SearchCondition condition)
 	{
 		conditions.add(condition);
+		return this;
 	}
 	
 	/**

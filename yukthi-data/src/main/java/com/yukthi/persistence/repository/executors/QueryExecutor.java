@@ -19,6 +19,9 @@ import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
+import com.yukthi.persistence.repository.annotations.MethodConditions;
+import com.yukthi.persistence.repository.annotations.NullCheck;
 import com.yukthi.persistence.repository.annotations.Operator;
 
 public abstract class QueryExecutor
@@ -130,7 +133,7 @@ public abstract class QueryExecutor
 							name, queryobjType.getName(), methodName, repositoryType.getName()));
 			}
 			
-			conditionQueryBuilder.addCondition(condition.op(), index, field.getName(), name, methodDesc);
+			conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), name, condition.joinWith(), methodDesc, condition.nullable());
 			found = true;
 		}
 		
@@ -204,7 +207,7 @@ public abstract class QueryExecutor
 				throw new InvalidRepositoryException(String.format("Nested expression '%1s' when plain properties are expected in %2s", fieldName, methodDesc));
 			}
 			
-			conditionQueryBuilder.addCondition(condition.op(), i, null, fieldName.trim(), methodDesc);
+			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable());
 			found = true;
 		}
 
@@ -237,11 +240,43 @@ public abstract class QueryExecutor
 		{
 			field = StringUtil.toStartLower(field);
 			
-			conditionQueryBuilder.addCondition(Operator.EQ, index, null, field, methodDesc);
+			conditionQueryBuilder.addCondition(null, Operator.EQ, index, null, field, JoinOperator.AND, methodDesc, false);
 			index++;
 		}
 		
 		return true;
 	}
 	
+	/**
+	 * Checks and adds conditions defined at method level
+	 * @param method
+	 * @param conditionQueryBuilder
+	 * @param methodDesc
+	 */
+	protected void fetchMethodLevelConditions(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc)
+	{
+		//obtain method level conditions
+		MethodConditions methodConditions = method.getAnnotation(MethodConditions.class);
+		
+		if(methodConditions == null)
+		{
+			return;
+		}
+		
+		NullCheck nullChecks[] = methodConditions.nullChecks();
+		
+		//check and add null based conditions
+		if(nullChecks != null)
+		{
+			Operator operator = null;
+			
+			for(NullCheck check : nullChecks)
+			{
+				operator = check.checkForNotNull() ? Operator.NE : Operator.EQ;
+				
+				//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
+				conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true);
+			}
+		}
+	}
 }

@@ -30,6 +30,7 @@ import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.QueryResultField;
 import com.yukthi.persistence.query.SaveQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.utils.ObjectWrapper;
 
@@ -369,7 +370,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		FinderQuery findQuery = new FinderQuery(entityDetails);
 		findQuery.addResultField(new QueryResultField(null, idFieldDetails.getColumn(), null));
 		
-		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid));
+		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid, JoinOperator.AND));
 		
 		//execute finder query 
 		List<Record> records = dataStore.executeFinder(findQuery, entityDetails, null);

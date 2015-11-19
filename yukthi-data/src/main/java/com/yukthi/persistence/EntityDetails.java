@@ -248,12 +248,12 @@ public class EntityDetails
 		{
 			if(oldIndex.getName().equals(indexDetails.getName()))
 			{
-				throw new InvalidConfigurationException("Duplicate index name encountered - " + indexDetails.getName());
+				throw new InvalidPersistenceConfigurationException("Duplicate index name encountered - " + indexDetails.getName());
 			}
 
 			if(Arrays.equals(oldIndex.getFields(), indexDetails.getFields()))
 			{
-				throw new InvalidConfigurationException("Multiple indexes are defined on same fields: " + Arrays.asList(indexDetails.getFields()));
+				throw new InvalidPersistenceConfigurationException("Multiple indexes are defined on same fields: " + Arrays.asList(indexDetails.getFields()));
 			}
 		}
 

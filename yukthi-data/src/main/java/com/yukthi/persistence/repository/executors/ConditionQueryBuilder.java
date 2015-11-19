@@ -26,6 +26,7 @@ import com.yukthi.persistence.query.QueryResultField;
 import com.yukthi.persistence.query.QueryTable;
 import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthi.utils.ConvertUtils;
@@ -33,8 +34,8 @@ import com.yukthi.utils.ObjectWrapper;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
- * Builder that can be used to keep track of conditions/columns involved and their dependencies.
- * And finally build the required query.
+ * Builder that can be used to keep track of conditions/columns involved and
+ * their dependencies. And finally build the required query.
  * 
  * @author akiran
  */
@@ -42,9 +43,10 @@ public class ConditionQueryBuilder implements Cloneable
 {
 	private static final String DEF_TABLE_CODE = "T0";
 	private static final String DEF_TABLE_ID_COL = "T0_ID";
-	
+
 	/**
 	 * Table information required by the query
+	 * 
 	 * @author akiran
 	 */
 	private static class TableInfo
@@ -53,27 +55,28 @@ public class ConditionQueryBuilder implements Cloneable
 		 * Short code for table
 		 */
 		private String tableCode;
-		
+
 		/**
 		 * Table name
 		 */
 		private String tableName;
-		
+
 		/**
 		 * Entity details representing this table
 		 */
 		private EntityDetails entityDetails;
-		
+
 		/**
-		 * Table code to which this table has to join (in order to get joined with main table)
+		 * Table code to which this table has to join (in order to get joined
+		 * with main table)
 		 */
 		private String joinTableCode;
-		
+
 		/**
 		 * Column to be used in current table for join
 		 */
 		private String joinTableColumn;
-		
+
 		/**
 		 * Column to be used in target table for join
 		 */
@@ -89,72 +92,106 @@ public class ConditionQueryBuilder implements Cloneable
 			this.column = targetColumn;
 		}
 	}
-	
+
 	/**
 	 * Condition details to be used in the query
+	 * 
 	 * @author akiran
 	 */
-	private static class Condition
+	static class Condition
 	{
 		/**
 		 * Condition operator
 		 */
 		private Operator operator;
-		
+
 		/**
 		 * Index of the parameter defining this condition
 		 */
 		private int index;
-		
+
 		/**
 		 * Embedded property name to be used when condition object in use
 		 */
 		private String embeddedProperty;
-		
+
 		/**
 		 * Entity field expression
 		 */
 		@SuppressWarnings("unused")
 		private String fieldExpression;
-		
+
 		/**
 		 * Table on which this condition needs to be applied
 		 */
 		private TableInfo table;
-		
+
 		/**
 		 * Field details (with column name) that can be used for condition
 		 */
 		private FieldDetails fieldDetails;
 
-		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression)
+		/**
+		 * Condition join operator
+		 */
+		private JoinOperator joinOperator;
+
+		/**
+		 * Conditions grouped with current condition
+		 */
+		private List<Condition> groupedConditions;
+		
+		private boolean nullable;
+		
+		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable)
 		{
 			this.operator = operator;
 			this.index = index;
 			this.embeddedProperty = embeddedProperty;
 			this.fieldExpression = fieldExpression;
+			this.joinOperator = joinOperator;
+			this.nullable = nullable;
 		}
-		
-		
+
 		/**
-		 * Converts the condition into bean expression that can be used to fetch condition value from method parameters
+		 * Converts the condition into bean expression that can be used to fetch
+		 * condition value from method parameters
+		 * 
 		 * @return
 		 */
 		public String getConditionExpression()
 		{
 			StringBuilder builder = new StringBuilder("parameters[").append(index).append("]");
-			
+
 			if(embeddedProperty != null)
 			{
 				builder.append(".").append(embeddedProperty);
 			}
-			
+
 			return builder.toString();
 		}
+
+		/**
+		 * Adds value to {@link #groupedConditions groupedConditions}
+		 *
+		 * @param condition
+		 *            condition to be added
+		 */
+		public void addCondition(Condition condition)
+		{
+			if(groupedConditions == null)
+			{
+				groupedConditions = new ArrayList<Condition>();
+			}
+
+			groupedConditions.add(condition);
+		}
+
 	}
-	
+
 	/**
 	 * Result field details that is part current query
+	 * 
 	 * @author akiran
 	 */
 	private static class ResultField
@@ -163,22 +200,22 @@ public class ConditionQueryBuilder implements Cloneable
 		 * Result property to which resultant value should be populated
 		 */
 		private String property;
-		
+
 		/**
 		 * Short code for result field
 		 */
 		private String code;
-		
+
 		/**
 		 * Table from which value can be fetched
 		 */
 		private TableInfo table;
-		
+
 		/**
 		 * Field details (with column) from which value can be fetched
 		 */
 		private FieldDetails fieldDetails;
-		
+
 		/**
 		 * Type of result field
 		 */
@@ -191,9 +228,10 @@ public class ConditionQueryBuilder implements Cloneable
 			this.fieldType = fieldType;
 		}
 	}
-	
+
 	/**
 	 * Bean context that can be used to parse/process expressions
+	 * 
 	 * @author akiran
 	 */
 	public static class ParameterContext
@@ -204,7 +242,7 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			this.parameters = parameters;
 		}
-		
+
 		public Object[] getParameters()
 		{
 			return parameters;
@@ -215,17 +253,17 @@ public class ConditionQueryBuilder implements Cloneable
 	 * Entity details on which this query is going to be executed
 	 */
 	private EntityDetails entityDetails;
-	
+
 	/**
 	 * List of conditions of this query
 	 */
 	private List<Condition> conditions = new ArrayList<>();
-	
+
 	/**
 	 * List of result fields of this query
 	 */
 	private List<ResultField> resultFields = new ArrayList<>();
-	
+
 	/**
 	 * Mapping from entity field name to result field
 	 */
@@ -235,56 +273,61 @@ public class ConditionQueryBuilder implements Cloneable
 	 * Mapping from property name to table
 	 */
 	private Map<String, TableInfo> propToTable = new HashMap<>();
-	
-	
+
 	/**
-	 * Mapping from table-short-code to the table. Which will be needed while giving join info
+	 * Mapping from table-short-code to the table. Which will be needed while
+	 * giving join info
 	 */
 	private Map<String, TableInfo> codeToTable = new HashMap<>();
-	
+
 	private List<ResultField> orderByFields = new ArrayList<>();
-	
+
 	/**
 	 * Counter for generating unique table codes
 	 */
 	private int nextTableId = 1;
-	
+
 	/**
 	 * Counter for generating unique field codes
 	 */
 	private int nextFieldId = 1;
-	
+
 	/**
-	 * Indicates whether the expected result is single field and is direct return type (not a bean and sub property)
+	 * Indicates whether the expected result is single field and is direct
+	 * return type (not a bean and sub property)
 	 */
 	private boolean isSingleFieldReturn;
-	
+
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
 		this.entityDetails = entityDetails;
 		codeToTable.put(DEF_TABLE_CODE, new TableInfo(DEF_TABLE_CODE, entityDetails.getTableName(), entityDetails, null, null, null));
 	}
-	
+
 	/**
 	 * Generates new unique table code
+	 * 
 	 * @return
 	 */
 	private String nextTableCode()
 	{
 		return "T" + (nextTableId++);
 	}
-	
+
 	/**
 	 * Generates new unique field code
+	 * 
 	 * @return
 	 */
 	private String nextFieldCode()
 	{
 		return "R" + (nextFieldId++);
 	}
-	
+
 	/**
-	 * Creates new table info with specified details and adds it to {@link #codeToTable} and {@link #propToTable} maps.
+	 * Creates new table info with specified details and adds it to
+	 * {@link #codeToTable} and {@link #propToTable} maps.
+	 * 
 	 * @param tableCode
 	 * @param entityDetails
 	 * @param joinTableCode
@@ -296,22 +339,21 @@ public class ConditionQueryBuilder implements Cloneable
 	private TableInfo newTableInfo(EntityDetails entityDetails, String tableName, String joinTableCode, String joinTableColumn, String targetColumn, String property)
 	{
 		TableInfo newTableInfo = new TableInfo(nextTableCode(), tableName, entityDetails, joinTableCode, joinTableColumn, targetColumn);
-		
-		//add new table info to maps
-		
-		//property will be null for join tables
+
+		// add new table info to maps
+
+		// property will be null for join tables
 		if(property != null)
 		{
 			propToTable.put(property, newTableInfo);
 		}
-		
+
 		codeToTable.put(newTableInfo.tableCode, newTableInfo);
-		
+
 		return newTableInfo;
 	}
 
-	private TableInfo getTableInfo(EntityDetails entityDetails, String entityFieldPath[], String paramType, 
-			String conditionExpr, String methodDesc, ObjectWrapper<FieldDetails> fieldDetailsWrapper)
+	private TableInfo getTableInfo(EntityDetails entityDetails, String entityFieldPath[], String paramType, String conditionExpr, String methodDesc, ObjectWrapper<FieldDetails> fieldDetailsWrapper)
 	{
 		EntityDetails currentEntityDetails = this.entityDetails, targetEntityDetails = null;
 		String currentProp = null;
@@ -320,188 +362,205 @@ public class ConditionQueryBuilder implements Cloneable
 		int maxIndex = entityFieldPath.length - 1;
 		ForeignConstraintDetails foreignConstraint = null, targetConstraint = null;
 		JoinTableDetails joinTableDetails = null;
-		
-		//loop through field parts and find the required table joins
+
+		// loop through field parts and find the required table joins
 		for(int i = 0; i < entityFieldPath.length; i++)
 		{
 			currentProp = (currentProp != null) ? currentProp + "." + entityFieldPath[i] : entityFieldPath[i];
 			fieldDetails = currentEntityDetails.getFieldDetailsByField(entityFieldPath[i]);
-			
-			//if invalid field details encountered
+
+			// if invalid field details encountered
 			if(fieldDetails == null)
 			{
-				throw new InvalidMappingException( String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s", 
-						currentProp, paramType, conditionExpr, methodDesc) );
+				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
 			}
-			
-			//if end of field expression is reached
+
+			// if end of field expression is reached
 			if(i == maxIndex)
 			{
-				//if end field is found to be entity instead of simple property
+				// if end field is found to be entity instead of simple property
 				if(fieldDetails.isRelationField())
 				{
-					throw new InvalidMappingException( String.format("Non-simple field mapping '%1s' found as %2s parameter '%3s' of %4s", 
-							currentProp, paramType, conditionExpr, methodDesc) );
+					throw new InvalidMappingException(String.format("Non-simple field mapping '%1s' found as %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
 				}
-				
+
 				fieldDetailsWrapper.setValue(fieldDetails);
 
 				return currentTableInfo;
 			}
 
 			newTableInfo = propToTable.get(currentProp);
-			
-			//if table is already found for current property
+
+			// if table is already found for current property
 			if(newTableInfo != null)
 			{
 				currentTableInfo = newTableInfo;
 				currentEntityDetails = newTableInfo.entityDetails;
 				continue;
 			}
-			
+
 			if(!fieldDetails.isRelationField())
 			{
-				throw new InvalidMappingException( String.format("Non-relational field mapping '%1s' found in %2 parameter '%3s' of %4s", 
-						currentProp, paramType, conditionExpr, methodDesc) );
+				throw new InvalidMappingException(String.format("Non-relational field mapping '%1s' found in %2 parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
 			}
-			
+
 			foreignConstraint = fieldDetails.getForeignConstraintDetails();
 			targetEntityDetails = foreignConstraint.getTargetEntityDetails();
-			
-			//if this is mapped relation
+
+			// if this is mapped relation
 			if(foreignConstraint.isMappedRelation())
 			{
 				targetFieldDetails = targetEntityDetails.getFieldDetailsByField(foreignConstraint.getMappedBy());
 				targetConstraint = targetFieldDetails.getForeignConstraintDetails();
 				joinTableDetails = targetConstraint.getJoinTableDetails();
-				
-				//if there is no join table in between
+
+				// if there is no join table in between
 				if(joinTableDetails == null)
 				{
-					//add target table info
-					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
-								currentEntityDetails.getIdField().getColumn(), targetFieldDetails.getColumn(), currentProp);
+					// add target table info
+					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), targetFieldDetails.getColumn(), currentProp);
 				}
-				//if table was joined via join talbe
+				// if table was joined via join talbe
 				else
 				{
-					//add join table info
-					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, 
-							currentEntityDetails.getIdField().getColumn(), joinTableDetails.getInverseJoinColumn(), null);
-					
-					//add target table info
-					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
-							joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
+					// add join table info
+					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), joinTableDetails.getInverseJoinColumn(), null);
+
+					// add target table info
+					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
 				}
 			}
-			//if the relation is via join table
+			// if the relation is via join table
 			else if(foreignConstraint.getJoinTableDetails() != null)
 			{
 				joinTableDetails = foreignConstraint.getJoinTableDetails();
 
-				//add join table info
-				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, 
-						currentEntityDetails.getIdField().getColumn(), joinTableDetails.getJoinColumn(), null);
-				
-				//add target table info
-				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
-						joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
+				// add join table info
+				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), joinTableDetails.getJoinColumn(), null);
+
+				// add target table info
+				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
 			}
-			//if the relation is simple relation
+			// if the relation is simple relation
 			else
 			{
-				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
-						fieldDetails.getColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
+				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, fieldDetails.getColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
 			}
-			
+
 			currentTableInfo = newTableInfo;
 			currentEntityDetails = targetEntityDetails;
 		}
-		
-		//only to satisfy compiler
+
+		// only to satisfy compiler
 		return null;
 	}
-	
+
 	/**
-	 * Adds the condition with specified details to this builder. This method evaluates the required table joins if this condition
-	 * needs to be included in the final query
+	 * Adds the condition with specified details to this builder. This method
+	 * evaluates the required table joins if this condition needs to be included
+	 * in the final query
+	 * 
+	 * @param groupHead
+	 *            Group head condition to which new condition needs to be added
 	 * @param operator
-	 * @param index
+	 * @param index Parameter index at which value for this condition can be found
 	 * @param embeddedProperty
 	 * @param entityFieldExpression
 	 * @param methodDesc
+	 * @param nullable Indicates whether condition can hold null values
+	 * @return Returns newly added condition which in turn can be used to add
+	 *         group conditions
 	 */
-	public void addCondition(Operator operator, int index, String embeddedProperty, String entityFieldExpression, String methodDesc)
+	public Condition addCondition(Condition groupHead, Operator operator, int index, String embeddedProperty, 
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable)
 	{
-		//split the entity field expression
+		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
 
-//		nyn8 nti8uiijyujuiu
-		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression);
-		
-		//if this mapping is for direct property mapping
+		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullable);
+
+		// if this mapping is for direct property mapping
 		if(entityFieldParts.length == 1)
 		{
 			condition.fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
-			
-			//if the field mapping is wrong
+
+			// if the field mapping is wrong
 			if(condition.fieldDetails == null)
 			{
-				throw new InvalidMappingException( String.format("Invalid field mapping '%1s' found in condition parameter '%2s' of %3s", 
-							entityFieldExpression, condition.getConditionExpression(), methodDesc) );
+				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in condition parameter '%2s' of %3s", entityFieldExpression, condition.getConditionExpression(), methodDesc));
+			}
+
+			condition.table = codeToTable.get(DEF_TABLE_CODE);
+			
+			if(groupHead != null)
+			{
+				groupHead.addCondition(condition);
+			}
+			else
+			{
+				conditions.add(condition);
 			}
 			
-			condition.table = codeToTable.get(DEF_TABLE_CODE);
-			conditions.add(condition);
-			return;
+			return condition;
 		}
-		
-		//if the mapping is for nested entity field (with foreign key relationships)
+
+		// if the mapping is for nested entity field (with foreign key
+		// relationships)
 		ObjectWrapper<FieldDetails> fieldDetailsHolder = new ObjectWrapper<>();
 		TableInfo tableInfo = getTableInfo(entityDetails, entityFieldParts, "condition", condition.getConditionExpression(), methodDesc, fieldDetailsHolder);
 		condition.table = tableInfo;
 		condition.fieldDetails = fieldDetailsHolder.getValue();
 
-		conditions.add(condition);
+		if(groupHead != null)
+		{
+			groupHead.addCondition(condition);
+		}
+		else
+		{
+			conditions.add(condition);
+		}
+		
+		return condition;
 	}
 
 	/**
 	 * Adds a result field of the query to this builder
+	 * 
 	 * @param resultProperty
 	 * @param entityFieldExpression
 	 * @param methodDesc
 	 */
 	public void addResultField(String resultProperty, Class<?> resultPropertyType, String entityFieldExpression, String methodDesc)
 	{
-		//if a field is already added as direct return value
+		// if a field is already added as direct return value
 		if(isSingleFieldReturn)
 		{
 			throw new InvalidMappingException("Encountered second return field addition after setting direct return field");
 		}
-		
-		//if subproperty field is already added and later if direct return is getting added
+
+		// if subproperty field is already added and later if direct return is
+		// getting added
 		if(!this.resultFields.isEmpty() && resultProperty == null)
 		{
 			throw new InvalidMappingException("Encountered addition direct-return field (with null property) after adding a subproperty return field");
 		}
-		
-		//split the entity field expression
+
+		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
 
 		ResultField resultField = new ResultField(resultProperty, nextFieldCode(), resultPropertyType);
-		
-		//if this mapping is for direct property mapping
+
+		// if this mapping is for direct property mapping
 		if(entityFieldParts.length == 1)
 		{
 			resultField.fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
-			
-			//if the field mapping is wrong
+
+			// if the field mapping is wrong
 			if(resultField.fieldDetails == null)
 			{
-				throw new InvalidMappingException( String.format("Invalid field mapping '%1s' found in result parameter '%2s' of '%3s'", 
-							entityFieldExpression, entityFieldExpression, methodDesc) );
+				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in result parameter '%2s' of '%3s'", entityFieldExpression, entityFieldExpression, methodDesc));
 			}
-			
+
 			resultField.table = codeToTable.get(DEF_TABLE_CODE);
 			resultFields.add(resultField);
 			fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
@@ -510,31 +569,35 @@ public class ConditionQueryBuilder implements Cloneable
 			{
 				isSingleFieldReturn = true;
 			}
-			
+
 			return;
 		}
-		
-		//if the mapping is for nested entity field (with foreign key relationships)
+
+		// if the mapping is for nested entity field (with foreign key
+		// relationships)
 		ObjectWrapper<FieldDetails> fieldDetailsHolder = new ObjectWrapper<>();
 		TableInfo tableInfo = getTableInfo(entityDetails, entityFieldParts, "condition", entityFieldExpression, methodDesc, fieldDetailsHolder);
 		resultField.table = tableInfo;
 		resultField.fieldDetails = fieldDetailsHolder.getValue();
 
-		//TODO: If end field represents a collection, check if it can be supported, if not throw exception
-		//		Note - Reverse mapping property has to be created for such properties
-		
+		// TODO: If end field represents a collection, check if it can be
+		// supported, if not throw exception
+		// Note - Reverse mapping property has to be created for such properties
+
 		resultFields.add(resultField);
 		fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
 
-		//if this direct return field
+		// if this direct return field
 		if(resultProperty == null)
 		{
 			isSingleFieldReturn = true;
 		}
 	}
-	
+
 	/**
-	 * Adds specified table and its dependency tables to the specified conditional query
+	 * Adds specified table and its dependency tables to the specified
+	 * conditional query
+	 * 
 	 * @param query
 	 * @param tableCode
 	 * @param includedTables
@@ -543,32 +606,33 @@ public class ConditionQueryBuilder implements Cloneable
 	{
 		String currentCode = tableCode;
 		TableInfo tableInfo = null;
-		
+
 		while(currentCode != null)
 		{
-			//if current table is already added to the query
+			// if current table is already added to the query
 			if(includedTables.contains(currentCode))
 			{
 				return;
 			}
-			
+
 			tableInfo = codeToTable.get(currentCode);
-			
+
 			query.addTable(new QueryTable(tableInfo.tableName, currentCode));
 			includedTables.add(currentCode);
-			
+
 			if(tableInfo.joinTableCode != null)
 			{
 				query.addJoinCondition(new QueryJoinCondition(tableInfo.tableCode, tableInfo.column, tableInfo.joinTableCode, tableInfo.joinTableColumn));
 			}
-			
+
 			currentCode = tableInfo.joinTableCode;
 		}
 	}
-	
+
 	/**
-	 * Loads the conditions, tables and fields to the specified conditional query using specified
-	 * params
+	 * Loads the conditions, tables and fields to the specified conditional
+	 * query using specified params
+	 * 
 	 * @param query
 	 * @param params
 	 */
@@ -576,100 +640,146 @@ public class ConditionQueryBuilder implements Cloneable
 	{
 		ParameterContext context = new ParameterContext(params);
 		Set<String> includedTables = new HashSet<>();
-		Object value = null;
-		
-		//load the result fields to specified query
+
+		// load the result fields to specified query
 		for(ResultField field : this.resultFields)
 		{
-			//add tables and fields to specifies query
+			// add tables and fields to specifies query
 			addTables(query, field.table.tableCode, includedTables);
 			query.addResultField(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code));
 		}
-		
-		query.addResultField(new QueryResultField(DEF_TABLE_CODE, 
-				codeToTable.get(DEF_TABLE_CODE).entityDetails.getIdField().getColumn(), DEF_TABLE_ID_COL));
 
-		//load the conditions to the query
+		query.addResultField(new QueryResultField(DEF_TABLE_CODE, codeToTable.get(DEF_TABLE_CODE).entityDetails.getIdField().getColumn(), DEF_TABLE_ID_COL));
+
+		QueryCondition queryCondition = null;
+		
+		// load the conditions to the query
 		for(Condition condition : this.conditions)
 		{
-			//fetch the value for current condition
-			try
-			{
-				value = PropertyUtils.getProperty(context, condition.getConditionExpression());
-			}catch(Exception ex)
-			{
-				throw new IllegalStateException("An error occurred while fetching condition value for expression -" + condition.getConditionExpression(), ex);
-			}
+			queryCondition = buildConditionForQuery(context, includedTables, query, condition);
 			
-			//if value is not provided, ignore current condition
-			if(value == null)
+			if(queryCondition != null)
 			{
-				continue;
+				query.addCondition(queryCondition);
 			}
-			
-			//add tables and conditions to specifies query
-			addTables(query, condition.table.tableCode, includedTables);
-			query.addCondition(new QueryCondition(condition.table.tableCode, condition.fieldDetails.getColumn(), condition.operator, value));
 		}
 	}
 	
+	/**
+	 * Builds conditions recursively that needs to be added to query
+	 * @param context Parameter context
+	 * @param includedTables Tables included
+	 * @param query Query for which conditions are being built
+	 * @param condition Condition to be converted
+	 * @return Newly built query condition. If value is null, returns null.
+	 */
+	private QueryCondition buildConditionForQuery(ParameterContext context, Set<String> includedTables, IConditionalQuery query, Condition condition)
+	{
+		Object value = null;
+				
+		// fetch the value for current condition
+		try
+		{
+			//for method level conditions like null-checks set null as value
+			if(condition.index >= 0)
+			{
+				value = PropertyUtils.getProperty(context, condition.getConditionExpression());
+			}
+		} catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while fetching condition value for expression -" + condition.getConditionExpression(), ex);
+		}
+		
+		QueryCondition groupHead = null;
+
+		// if value is not provided, ignore current condition
+		if(value != null || (condition.operator.isNullable() && condition.nullable))
+		{
+			// add tables and conditions to specifies query
+			addTables(query, condition.table.tableCode, includedTables);
+			
+			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getColumn(), condition.operator, value, condition.joinOperator);
+		}
+
+		//if no group conditions are present on this query
+		if(condition.groupedConditions == null)
+		{
+			return groupHead;
+		}
+		
+		//if group conditions are present add them recursively to current condition
+		QueryCondition grpCondition = null;
+		
+		for(Condition grpInternalCondition : condition.groupedConditions)
+		{
+			grpCondition = buildConditionForQuery(context, includedTables, query, grpInternalCondition);
+			
+			if(grpCondition == null)
+			{
+				continue;
+			}
+				
+			//if initial condition value is null, use first non null condition as group head
+			if(groupHead == null)
+			{
+				groupHead = grpCondition;
+			}
+			else
+			{
+				groupHead.addGroupedCondition(grpCondition);
+			}
+		}
+		
+		return groupHead;
+	}
+
 	public void loadOrderByFields(FinderQuery finderQuery)
 	{
 		if(this.orderByFields.isEmpty())
 		{
 			return;
 		}
-		
+
 		List<QueryResultField> orderByCodes = new ArrayList<>();
-		
-		//loop through order by fields
+
+		// loop through order by fields
 		for(ResultField field : orderByFields)
 		{
 			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code));
 		}
-		
-		//if enable codes are available
+
+		// if enable codes are available
 		if(!orderByCodes.isEmpty())
 		{
-			//add order codes
-			finderQuery.setOrderByFields( orderByCodes.toArray(new QueryResultField[0]) );
+			// add order codes
+			finderQuery.setOrderByFields(orderByCodes.toArray(new QueryResultField[0]));
 		}
 
 	}
-	
+
 	/**
 	 * Creates a collection of specified type
+	 * 
 	 * @param type
 	 * @return
 	 */
 	/*
-	@SuppressWarnings("unchecked")
-	private Collection<Object> createCollectionOfType(Class<?> type)
-	{
-		//if array list can be assigned to target field
-		if(type.isAssignableFrom(ArrayList.class))
-		{
-			return new ArrayList<>();
-		}
-		
-		//if hashset can be assigned to target field
-		if(type.isAssignableFrom(HashSet.class))
-		{
-			return new HashSet<>();
-		}
-		
-		try
-		{
-			return (Collection<Object>) type.newInstance();
-		}catch(Exception ex)
-		{
-			throw new IllegalStateException("Unable to create collection of type - " + type.getName(), ex);
-		}
-	}
-	*/
-	
+	 * @SuppressWarnings("unchecked") private Collection<Object>
+	 * createCollectionOfType(Class<?> type) { //if array list can be assigned
+	 * to target field if(type.isAssignableFrom(ArrayList.class)) { return new
+	 * ArrayList<>(); }
+	 * 
+	 * //if hashset can be assigned to target field
+	 * if(type.isAssignableFrom(HashSet.class)) { return new HashSet<>(); }
+	 * 
+	 * try { return (Collection<Object>) type.newInstance(); }catch(Exception
+	 * ex) { throw new IllegalStateException(
+	 * "Unable to create collection of type - " + type.getName(), ex); } }
+	 */
+
 	/**
 	 * Parses and converts specified record into specified result type
+	 * 
 	 * @param record
 	 * @param resultType
 	 * @param conversionService
@@ -677,8 +787,8 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @return
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private <T> T parseResult(Record record, Class<T> resultType, ConversionService conversionService, PersistenceExecutionContext persistenceExecutionContext) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException
@@ -687,81 +797,81 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			ResultField resField = this.resultFields.get(0);
 			Object res = conversionService.convertToJavaType(record.getObject(resField.code), resField.fieldDetails);
-			
-			return (T)ConvertUtils.convert(res, resField.fieldType);
+
+			return (T) ConvertUtils.convert(res, resField.fieldType);
 		}
-		
+
 		T result = resultType.newInstance();
 		Object value = null;
 		ProxyEntityCreator proxyEntityCreator = null;
 		ForeignConstraintDetails foreignConstraint = null;
 		EntityDetails foreignEntityDetails = null;
-		
+
 		RepositoryFactory repositoryFactory = persistenceExecutionContext.getRepositoryFactory();
-		
+
 		for(ResultField resultField : this.resultFields)
 		{
 			value = record.getObject(resultField.code);
-			
-			//ignore null values
+
+			// ignore null values
 			if(value == null)
 			{
 				continue;
 			}
-			
+
 			try
 			{
-				//as only table owned properties are maintained under returnColumnToField
-				//		this would be parent (target entity) that needs to be loaded
+				// as only table owned properties are maintained under
+				// returnColumnToField
+				// this would be parent (target entity) that needs to be loaded
 				if(resultField.fieldDetails.isRelationField())
 				{
 					foreignConstraint = resultField.fieldDetails.getForeignConstraintDetails();
 					foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
-					
-					proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, 
-							repositoryFactory.getRepositoryForEntity((Class)foreignEntityDetails.getEntityType()), value);
+
+					proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
 					value = proxyEntityCreator.getProxyEntity();
 				}
-				//if current field is a simple field (non relation field)
+				// if current field is a simple field (non relation field)
 				else
 				{
 					value = conversionService.convertToJavaType(value, resultField.fieldDetails);
 					value = ConvertUtils.convert(value, resultField.fieldType);
 				}
-			}catch(Exception ex)
+			} catch(Exception ex)
 			{
 				throw new InvalidStateException(ex, "An error occurred while converting field {} value - {}", resultField.fieldDetails.getName(), value);
 			}
-		
-			//if value is null after conversion, ignore value
+
+			// if value is null after conversion, ignore value
 			if(value == null)
 			{
 				continue;
 			}
-			
+
 			PropertyUtils.setProperty(result, resultField.property, value);
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Converts specified records into specified return type beans
+	 * 
 	 * @param records
 	 * @param returnType
 	 * @param resultCollection
 	 * @param conversionService
 	 * @param persistenceExecutionContext
 	 */
-	public <T> void parseResults(List<Record> records, Class<T> returnType, Collection<T> resultCollection, 
-			ConversionService conversionService, PersistenceExecutionContext persistenceExecutionContext)
+	public <T> void parseResults(List<Record> records, Class<T> returnType, Collection<T> resultCollection, ConversionService conversionService, PersistenceExecutionContext persistenceExecutionContext)
 	{
 		for(Record record : records)
 		{
 			try
 			{
 				resultCollection.add(parseResult(record, returnType, conversionService, persistenceExecutionContext));
-			}catch(Exception ex)
+			} catch(Exception ex)
 			{
 				throw new IllegalArgumentException("An error occurred while parsing record - " + record, ex);
 			}
@@ -769,53 +879,56 @@ public class ConditionQueryBuilder implements Cloneable
 	}
 
 	/**
-	 * Used by search query to clear order by fields before adding dynamic order by fields
+	 * Used by search query to clear order by fields before adding dynamic order
+	 * by fields
 	 */
 	public void clearOrderByFields()
 	{
 		this.orderByFields.clear();
 	}
-	
+
 	public void addOrderByField(String field, String methodDesc)
 	{
 		if(!fieldToResultField.containsKey(field))
 		{
 			throw new InvalidMappingException("Field '" + field + "' specified in @OrderBy annotation is not part of result list of finder query - " + methodDesc);
 		}
-		
+
 		this.orderByFields.add(fieldToResultField.get(field));
 	}
-	
+
 	/**
 	 * Fetches short code for the specified result field.
-	 * @param field Field for which code needs to be fetched
+	 * 
+	 * @param field
+	 *            Field for which code needs to be fetched
 	 * @return Matching code, if not present null will be returned.
 	 */
 	public QueryResultField getResultFieldCode(String field)
 	{
 		ResultField resultField = fieldToResultField.get(field);
-		
+
 		if(resultField == null)
 		{
 			return null;
 		}
-		
+
 		return new QueryResultField(resultField.table.tableCode, resultField.fieldDetails.getColumn(), resultField.code);
 	}
-	
+
 	@Override
 	public ConditionQueryBuilder clone()
 	{
 		try
 		{
-			ConditionQueryBuilder newBuilder = (ConditionQueryBuilder)super.clone();
+			ConditionQueryBuilder newBuilder = (ConditionQueryBuilder) super.clone();
 			newBuilder.codeToTable = new HashMap<>(codeToTable);
 			newBuilder.conditions = new ArrayList<>(conditions);
 			newBuilder.fieldToResultField = new HashMap<>(fieldToResultField);
 			newBuilder.orderByFields = new ArrayList<>(orderByFields);
 			newBuilder.propToTable = new HashMap<>(propToTable);
 			newBuilder.resultFields = new ArrayList<>(resultFields);
-			
+
 			return newBuilder;
 		} catch(CloneNotSupportedException ex)
 		{

@@ -19,6 +19,7 @@ import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.UpdateQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.Field;
+import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 
 @QueryExecutorPattern(prefixes = {"update"})
@@ -64,6 +65,8 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			{
 				throw new InvalidRepositoryException("For non-entity update method '" + method.getName() + "' no conditions are specified, in repository: " + repositoryType.getName());
 			}
+			
+			super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
 			
 			if(!fetchColumnsByAnnotations(method))
 			{
@@ -172,7 +175,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			query.addColumn(new ColumnParam(field.getColumn(), value, -1));
 		}
 		
-		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.EQ, entityDetails.getIdField().getValue(entity)));
+		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.EQ, entityDetails.getIdField().getValue(entity), JoinOperator.AND));
 		
 		super.notifyEntityEvent(null, entity, EntityEventType.PRE_UPDATE);
 		

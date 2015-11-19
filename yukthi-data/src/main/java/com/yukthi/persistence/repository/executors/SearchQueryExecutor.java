@@ -49,6 +49,34 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		fetchReturnDetails(method);
 		super.fetchOrderDetails(method);
 	}
+	
+	/**
+	 * Adds search condition recursively to specified builder
+	 * @param condition
+	 * @param conditionQueryBuilder
+	 * @param conditionParams
+	 * @param groupHead
+	 */
+	private void addConditionsRecursively(SearchCondition condition, ConditionQueryBuilder conditionQueryBuilder, List<Object> conditionParams, ConditionQueryBuilder.Condition groupHead)
+	{
+		ConditionQueryBuilder.Condition builderCondition = null;
+		builderCondition = conditionQueryBuilder.addCondition(groupHead, condition.getOperator(), conditionParams.size(), null, 
+				condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable());
+		
+		conditionParams.add(condition.getValue());
+		
+		//if no group conditions are present ignore
+		if(condition.getGroupedConditions() == null)
+		{
+			return;
+		}
+		
+		//add group conditions recursively
+		for(SearchCondition grpCondition : condition.getGroupedConditions())
+		{
+			addConditionsRecursively(grpCondition, conditionQueryBuilder, conditionParams, builderCondition);
+		}
+	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
@@ -72,9 +100,10 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			//add conditions to query builder so that they will be validated
 			for(SearchCondition condition : searchQuery.getConditions())
 			{
-				conditionQueryBuilder.addCondition(condition.getOperator(), conditionParams.size(), null, condition.getField(), methodDesc);
-				conditionParams.add(condition.getValue());
+				addConditionsRecursively(condition, conditionQueryBuilder, conditionParams, null);
 			}
+			
+			logger.debug("Executing search query with params - {}", conditionParams);
 			
 			//add order-by fields
 			if(searchQuery.getOrderByFields() != null)
