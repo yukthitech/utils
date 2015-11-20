@@ -10,7 +10,7 @@ public enum DataType
 	INT(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class), 
 	LONG(long.class, Long.class), 
 	FLOAT(float.class, Float.class), 
-	DOBULE(double.class, Double.class),
+	DOUBLE(double.class, Double.class),
 	BOOLEAN(boolean.class, Boolean.class),
 	DATE, 
 	BLOB, 
