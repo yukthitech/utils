@@ -593,12 +593,33 @@ public class RdbmsDataStore implements IDataStore
 			pstmt = connection.prepareStatement(query);
 			int index = 1;
 			List<Object> params = new ArrayList<>();
+			Object value = null;
+			List<Closeable> closeables = new ArrayList<>();
 			
 			for(ColumnParam column: updateQuery.getColumns())
 			{
-				pstmt.setObject(index, column.getValue());
-				params.add(column.getValue());
+				value = column.getValue();
 				
+				if(value instanceof LobData)
+				{
+					LobData lobData = (LobData)value;
+					closeables.add(lobData);
+					
+					if(lobData.isTextStream())
+					{
+						pstmt.setCharacterStream(index, lobData.openReader() );
+					}
+					else
+					{
+						pstmt.setBinaryStream(index,  lobData.openStream() );
+					}
+				}
+				else
+				{
+					pstmt.setObject(index, value);
+				}
+
+				params.add(value);
 				index++;
 			}
 			
@@ -614,6 +635,12 @@ public class RdbmsDataStore implements IDataStore
 			
 			int count = pstmt.executeUpdate();
 			
+			//close any open closeables (like blob streams)
+			for(Closeable closeable : closeables)
+			{
+				closeable.close();
+			}
+
 			logger.debug("Updated " + count + " records in table: " + updateQuery.getTableName());
 			
 			transaction.commit();

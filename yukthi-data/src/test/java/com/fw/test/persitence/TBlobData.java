@@ -130,7 +130,7 @@ public class TBlobData extends TestSuiteBase
 		//create temp file with some content
 		StringBuilder content = new StringBuilder();
 		
-		for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 10000; i++)
 		{
 			content.append("Some temp content line - " + i).append("\n");
 		}
@@ -150,6 +150,39 @@ public class TBlobData extends TestSuiteBase
 		
 		FileClobEntity entityFromDb = repo.findByName("TestFile1");
 		File entityFile = entityFromDb.getFile();
+		
+		logger.debug("File obtained from db - {}", tempFile.getPath());
+		
+		//ensure actual file and db files are different
+		Assert.assertNotEquals(tempFile.getName(), entityFile.getName());
+		
+		//ensure content from entity is good
+		Assert.assertEquals(FileUtils.readFileToString(entityFile), content.toString());
+		Assert.assertEquals(entity.getName(), "TestFile1");
+		
+		///////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////
+		///Test for update
+		//create temp file with some content
+		content.setLength(0);
+		
+		for(int i = 0; i < 10000; i++)
+		{
+			content.append("Some temp content line - " + i).append("\n");
+		}
+
+		tempFile = File.createTempFile("test", ".dat");
+		FileUtils.writeStringToFile(tempFile, content.toString());
+		logger.debug("Create temp file for update - {}", tempFile.getPath());
+
+		//perform update operation
+		entity = new FileClobEntity(entity.getId(), "TestFile1", tempFile);
+		
+		res = repo.update(entity);
+		Assert.assertEquals(res, true);
+		
+		entityFromDb = repo.findByName("TestFile1");
+		entityFile = entityFromDb.getFile();
 		
 		logger.debug("File obtained from db - {}", tempFile.getPath());
 		
