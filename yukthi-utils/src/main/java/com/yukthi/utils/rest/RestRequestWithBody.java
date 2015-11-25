@@ -46,7 +46,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	/**
 	 * Object mapper that will be used to convert objects to json
 	 */
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper = RestClient.OBJECT_MAPPER;
 
 	/**
 	 * HTTP method represented by this request
@@ -66,6 +66,32 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	{
 		super(uri);
 		this.method = method;
+	}
+	
+	/**
+	 * Gets the object mapper that will be used to convert objects to json. By default, the returned object mapper
+	 * is a common used by all rest clients and requests (so pay attention when returned mapper is modified).
+	 *
+	 * @return the object mapper that will be used to convert objects to json
+	 */
+	public ObjectMapper getObjectMapper()
+	{
+		return objectMapper;
+	}
+
+	/**
+	 * Sets the object mapper that will be used to convert objects to json.
+	 *
+	 * @param objectMapper the new object mapper that will be used to convert objects to json
+	 */
+	public void setObjectMapper(ObjectMapper objectMapper)
+	{
+		if(objectMapper == null)
+		{
+			throw new NullPointerException("Object mapper can not be null.");
+		}
+		
+		this.objectMapper = objectMapper;
 	}
 
 	/**

@@ -61,6 +61,8 @@ public class RestClient
 
 	}
 	
+	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	
 	/**
 	 * Base url of the API server
 	 */
@@ -74,7 +76,7 @@ public class RestClient
 	/**
 	 * Object mapper that will be used to parse json responses
 	 */
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper = OBJECT_MAPPER;
 	
 	/**
 	 * Listener that can listen to rest client events
@@ -116,7 +118,8 @@ public class RestClient
 	}
 
 	/**
-	 * Gets value of objectMapper 
+	 * Gets value of objectMapper. By default, the returned object mapper
+	 * is a common used by all rest clients and requests (so pay attention when returned mapper is modified).
 	 * @return the objectMapper
 	 */
 	public ObjectMapper getObjectMapper()
