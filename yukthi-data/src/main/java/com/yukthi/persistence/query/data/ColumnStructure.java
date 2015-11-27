@@ -87,6 +87,12 @@ public class ColumnStructure
 				this.type = fieldDetails.getDbDataType();
 			}
 		}
+		
+		//for version fields, ensure it is not nullable
+		if(fieldDetails.isVersionField())
+		{
+			this.nullable = false;
+		}
 	}
 
 	public String getName()

@@ -1,15 +1,23 @@
 package com.yukthi.persistence;
 
 import java.lang.reflect.Field;
+import java.util.Set;
 
 import javax.persistence.GenerationType;
 
 import com.yukthi.persistence.annotations.DataType;
+import com.yukthi.utils.CommonUtils;
+import com.yukthi.utils.exceptions.InvalidStateException;
 
 public class FieldDetails
 {
 	public static final int FLAG_ID = 1;
 	public static final int FLAG_AUTO_FETCH = 4;
+	
+	private static final Set<Class<?>> SUPPORTED_VERSION_FIELD_TYPES = CommonUtils.toSet(
+			int.class, Integer.class,
+			long.class, Long.class
+	);
 	
 	private Field field;
 	private String column;
@@ -19,6 +27,11 @@ public class FieldDetails
 	private String sequenceName;
 	
 	private String overriddenColumnName;
+	
+	/**
+	 * Version field used for optimistic updates
+	 */
+	private boolean versionField;
 	
 	/**
 	 * Foreign constraint on this field, if specified
@@ -33,7 +46,7 @@ public class FieldDetails
 		this.overriddenColumnName = details.overriddenColumnName;
 	}
 	
-	public FieldDetails(Field field, String column, DataType dbDataType)
+	public FieldDetails(Field field, String column, DataType dbDataType, boolean isVersionField)
 	{
 		if(field == null)
 		{
@@ -47,6 +60,12 @@ public class FieldDetails
 			throw new NullPointerException("Column can not be null or empty");
 		}
 		*/
+
+		if(isVersionField && !SUPPORTED_VERSION_FIELD_TYPES.contains(field.getType()))
+		{
+			throw new InvalidStateException("Field '{}' with unsupported data type '{}' is marked as version field.", field.getName(), field.getType().getName());
+		}
+		
 		
 		this.field = field;
 		this.column = column;
@@ -56,11 +75,13 @@ public class FieldDetails
 		{
 			field.setAccessible(true);
 		}
+		
+		this.versionField = isVersionField;
 	}
 
 	public FieldDetails(Field field, String column, DataType dbDataType, boolean idField, GenerationType generationType, boolean autoFetch, String sequenceName)
 	{
-		this(field, column, dbDataType);
+		this(field, column, dbDataType, false);
 		
 		if(generationType == GenerationType.SEQUENCE && (sequenceName == null || sequenceName.trim().length() == 0))
 		{
@@ -156,6 +177,15 @@ public class FieldDetails
 		return new FieldDetails(this);
 	}
 	
+	/**
+	 * Checks if is version field used for optimistic updates.
+	 *
+	 * @return the version field used for optimistic updates
+	 */
+	public boolean isVersionField()
+	{
+		return versionField;
+	}
 	
 
 	/**

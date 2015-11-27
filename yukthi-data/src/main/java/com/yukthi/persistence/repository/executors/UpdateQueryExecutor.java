@@ -16,13 +16,16 @@ import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.listeners.EntityEventType;
 import com.yukthi.persistence.query.ColumnParam;
 import com.yukthi.persistence.query.QueryCondition;
+import com.yukthi.persistence.query.UpdateColumnParam;
 import com.yukthi.persistence.query.UpdateQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.persistence.repository.annotations.UpdateFunction;
+import com.yukthi.persistence.repository.annotations.UpdateOperator;
 
-@QueryExecutorPattern(prefixes = {"update"})
+@QueryExecutorPattern(prefixes = {"update"}, annotatedWith = UpdateFunction.class)
 public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 {
 	private static Logger logger = LogManager.getLogger(UpdateQueryExecutor.class);
@@ -112,12 +115,25 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			
 			if(fieldDetails == null)
 			{
-				throw new InvalidRepositoryException("Invalid @Field with name '" + field.value() + "' is specified for update method '" 
+				throw new InvalidRepositoryException("@Field with invalid name '" + field.value() + "' is specified for update method '" 
 						+ method.getName() + "' of repository: " + repositoryType.getName());
 			}
 			
-			updateQuery.addColumn(new ColumnParam(fieldDetails.getColumn(), null, i));
+			//if version field is specified explicitly for update
+			if(fieldDetails.isVersionField())
+			{
+				throw new InvalidRepositoryException("Version field '{}' is configured for explicit update in repository method {}.{}", 
+						field.value(), repositoryType.getName(), method.getName());
+			}
+			
+			updateQuery.addColumn(new UpdateColumnParam(fieldDetails.getColumn(), null, i, field.updateOp()));
 			found = true;
+		}
+		
+		//add implicit version update instructions
+		if(entityDetails.hasVersionField())
+		{
+			updateQuery.addColumn(new UpdateColumnParam(entityDetails.getVersionField().getColumn(), null, 1, UpdateOperator.ADD));
 		}
 
 		return found;
@@ -154,6 +170,13 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				continue;
 			}
 			
+			//if version field, add instruction to increment it
+			if(field.isVersionField())
+			{
+				query.addColumn(new UpdateColumnParam(field.getColumn(), 1, -1, UpdateOperator.ADD));
+				continue;
+			}
+			
 			value = field.getValue(entity);
 			
 			//if current field is relation field
@@ -172,10 +195,16 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			
 			value = conversionService.convertToDBType(value, field);
 			
-			query.addColumn(new ColumnParam(field.getColumn(), value, -1));
+			query.addColumn(new UpdateColumnParam(field.getColumn(), value, -1, UpdateOperator.NONE));
 		}
 		
 		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.EQ, entityDetails.getIdField().getValue(entity), JoinOperator.AND));
+
+		//if version field is defined on the entity add it to the condition
+		if(entityDetails.hasVersionField())
+		{
+			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getColumn(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND));
+		}
 		
 		super.notifyEntityEvent(null, entity, EntityEventType.PRE_UPDATE);
 		

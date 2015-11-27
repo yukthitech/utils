@@ -175,10 +175,10 @@ public class JoinTableDetails
 			//create entity details
 			EntityDetails entityDetails = new EntityDetails(tableName, entityType);
 			
-			FieldDetails joinFieldDetails = new FieldDetails(joinColumnField, joinColumn, joinColumnType);
+			FieldDetails joinFieldDetails = new FieldDetails(joinColumnField, joinColumn, joinColumnType, false);
 			joinFieldDetails.setOverriddenColumnName(joinColumn);
 			
-			FieldDetails invJoinFieldDetails = new FieldDetails(invJoinColField, inverseJoinColumn, inverseJoinColumnType);
+			FieldDetails invJoinFieldDetails = new FieldDetails(invJoinColField, inverseJoinColumn, inverseJoinColumnType, false);
 			invJoinFieldDetails.setOverriddenColumnName(inverseJoinColumn);
 			
 			entityDetails.addFieldDetails(joinFieldDetails);

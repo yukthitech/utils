@@ -30,6 +30,11 @@ public class EntityDetails
 	private FieldDetails idField;
 	
 	/**
+	 * Field used to maintain entity version for optimistic updates
+	 */
+	private FieldDetails versionField;
+	
+	/**
 	 * Indicates whether table is created
 	 */
 	private boolean isTableCreated = false;
@@ -116,6 +121,16 @@ public class EntityDetails
 
 			this.idField = fieldDetails;
 		}
+		
+		if(fieldDetails.isVersionField())
+		{
+			if(this.versionField != null)
+			{
+				throw new InvalidMappingException("Multiple version fields are defined for entity: " + entityType.getName());
+			}
+
+			this.versionField = fieldDetails;
+		}
 	}
 
 	public FieldDetails getFieldDetailsByField(String field)
@@ -182,6 +197,21 @@ public class EntityDetails
 	public boolean hasIdField()
 	{
 		return (idField != null);
+	}
+	
+	/**
+	 * Gets the field used to maintain entity version for optimistic updates.
+	 *
+	 * @return the field used to maintain entity version for optimistic updates
+	 */
+	public FieldDetails getVersionField()
+	{
+		return versionField;
+	}
+	
+	public boolean hasVersionField()
+	{
+		return (versionField != null);
 	}
 
 	/**

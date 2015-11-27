@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -417,10 +418,11 @@ public class EntityDetailsFactory
 		FieldDetails fieldDetails = null;
 		Id idField = field.getAnnotation(Id.class);
 		GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+		Version version = field.getAnnotation(Version.class);
 
 		if(idField == null)
 		{
-			fieldDetails = new FieldDetails(field, columnName, dataType);
+			fieldDetails = new FieldDetails(field, columnName, dataType, (version != null));
 			
 			logger.trace("Adding field details {} to entity {}", fieldDetails, entityDetails);
 		}

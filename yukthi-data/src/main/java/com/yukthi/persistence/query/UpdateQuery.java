@@ -7,7 +7,7 @@ import com.yukthi.persistence.EntityDetails;
 
 public class UpdateQuery extends AbstractConditionalQuery
 {
-	private List<ColumnParam> columns;
+	private List<UpdateColumnParam> columns;
 
 	public UpdateQuery(EntityDetails entityDetails)
 	{
@@ -19,17 +19,17 @@ public class UpdateQuery extends AbstractConditionalQuery
 	 *
 	 * @param column column to be added
 	 */
-	public void addColumn(ColumnParam column)
+	public void addColumn(UpdateColumnParam column)
 	{
 		if(columns == null)
 		{
-			columns = new ArrayList<ColumnParam>();
+			columns = new ArrayList<>();
 		}
 
 		columns.add(column);
 	}
 
-	public List<ColumnParam> getColumns()
+	public List<UpdateColumnParam> getColumns()
 	{
 		return columns;
 	}

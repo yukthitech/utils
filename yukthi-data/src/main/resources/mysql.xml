@@ -140,7 +140,7 @@
 
 	<template name="updateTemplate"><![CDATA[
 		UPDATE ${query.tableName}
-		SET <#list query.columns as column>${column.name} = ?<#if column_has_next>,</#if>
+		SET <#list query.columns as column>${column.name} = <#if column.updateOperator.none != true>${column.name} ${column.updateOperator.op}</#if> ?<#if column_has_next>,</#if>
 		</#list>WHERE 1 = 1
 		<#list query.conditions as condition>${addCondition(condition, condition_index, false)}
 		</#list>
