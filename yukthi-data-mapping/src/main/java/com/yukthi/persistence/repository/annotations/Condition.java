@@ -38,4 +38,10 @@ public @interface Condition
 	 * @return Whether this condition can hold null values
 	 */
 	public boolean nullable() default false;
+	
+	/**
+	 * During condition evaluation case will be ignored
+	 * @return
+	 */
+	public boolean ignoreCase() default false;
 }

@@ -27,7 +27,7 @@ public interface IConditionalQuery
 	/**
 	 * Adds table name to this query 
 	 */
-	public void addTable(QueryTable table);
+	//public void addTable(QueryTable table);
 	
 	
 }

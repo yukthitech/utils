@@ -325,6 +325,7 @@ public class EntityDetailsFactory
 		DataType dbType = null;
 		DataTypeMapping dataTypeMapping = null;
 		String mappedColumn = null;
+		boolean nullable = false;
 		
 		for(Field field: fields)
 		{
@@ -376,8 +377,10 @@ public class EntityDetailsFactory
 				columnName = mappedColumn;
 			}
 			
+			nullable = (column == null || column.nullable());
+			
 			//build the field details
-			buildFieldDetails(field, columnName, dbType, entityDetails);
+			buildFieldDetails(field, columnName, dbType, entityDetails, nullable);
 			/*
 			idField = field.getAnnotation(IdField.class);
 
@@ -413,7 +416,7 @@ public class EntityDetailsFactory
 		}
 	}
 	
-	private FieldDetails buildFieldDetails(Field field, String columnName, DataType dataType, EntityDetails entityDetails)
+	private FieldDetails buildFieldDetails(Field field, String columnName, DataType dataType, EntityDetails entityDetails, boolean nullable)
 	{
 		FieldDetails fieldDetails = null;
 		Id idField = field.getAnnotation(Id.class);
@@ -422,7 +425,7 @@ public class EntityDetailsFactory
 
 		if(idField == null)
 		{
-			fieldDetails = new FieldDetails(field, columnName, dataType, (version != null));
+			fieldDetails = new FieldDetails(field, columnName, dataType, (version != null), nullable);
 			
 			logger.trace("Adding field details {} to entity {}", fieldDetails, entityDetails);
 		}
@@ -447,7 +450,7 @@ public class EntityDetailsFactory
 				sequenceName = "SEQ_" + entityDetails.getEntityType().getSimpleName().toUpperCase() + "_" + field.getName().toUpperCase();
 			}
 			
-			fieldDetails = new FieldDetails(field, columnName, dataType, true, generationType, autoFetch, sequenceName);
+			fieldDetails = new FieldDetails(field, columnName, dataType, true, generationType, autoFetch, sequenceName, false);
 			
 			logger.trace("Adding ID field details {} to entity {}", fieldDetails, entityDetails);
 		}
@@ -494,6 +497,8 @@ public class EntityDetailsFactory
 		Set<Class<?>> requiredParentEntitiesSet = new HashSet<>();
 		List<JoinTableDetails> joinTableList = new ArrayList<>();
 		
+		Class<?> targetEntity = entityDetails.getEntityType();
+		
 		//fetch required parent tables based on foreign key constraint on this entity
 		if(foreignConstraintsLst != null)
 		{
@@ -505,7 +510,11 @@ public class EntityDetailsFactory
 					continue;
 				}
 				
-				requiredParentEntitiesSet.add(constraint.getTargetEntityDetails().getEntityType());
+				//if current table is self joined, avoid recursive wait
+				if(!targetEntity.equals(constraint.getTargetEntityDetails().getEntityType()))
+				{
+					requiredParentEntitiesSet.add(constraint.getTargetEntityDetails().getEntityType());
+				}
 				
 				//track required join tables
 				if(constraint.getJoinTableDetails() != null)
@@ -523,6 +532,13 @@ public class EntityDetailsFactory
 			@Override
 			public void tableCreated(EntityDetails parentEntityDetails)
 			{
+				//if table is already created, ignore this call.
+					// multiple invocations can happen when multiple dependencies are involved
+				if(entityDetails.isTableCreated())
+				{
+					return;
+				}
+				
 				//wait till all required entity tables are created
 				if(!entityDetailsMonitor.isTablesCreated(requiredParentEntities))
 				{

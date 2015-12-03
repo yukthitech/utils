@@ -26,7 +26,11 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	public long findIdByEmail(@Condition("emailId") String mail);
 	
 	public Employee findEmpByEmail(@Condition("emailId") String mail);
+
+	public Employee findEmpByEmailIgnoreCase(@Condition(value = "emailId", ignoreCase = true) String mail);
 	
+	public Employee findByEmailPattern(@Condition(value = "emailId", ignoreCase = true, op = Operator.LIKE) String mail);
+
 	public List<Employee> findEmpByName1(@Condition(value = "name", nullable = true) String name);
 	public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullable = true) String name);
 	

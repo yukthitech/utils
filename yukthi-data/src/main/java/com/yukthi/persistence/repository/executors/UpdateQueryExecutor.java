@@ -198,12 +198,12 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			query.addColumn(new UpdateColumnParam(field.getColumn(), value, -1, UpdateOperator.NONE));
 		}
 		
-		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.EQ, entityDetails.getIdField().getValue(entity), JoinOperator.AND));
+		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.EQ, entityDetails.getIdField().getValue(entity), JoinOperator.AND, false));
 
 		//if version field is defined on the entity add it to the condition
 		if(entityDetails.hasVersionField())
 		{
-			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getColumn(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND));
+			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getColumn(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND, false));
 		}
 		
 		super.notifyEntityEvent(null, entity, EntityEventType.PRE_UPDATE);

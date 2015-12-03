@@ -9,23 +9,43 @@ import com.yukthi.persistence.annotations.DataType;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
+/**
+ * The Class FieldDetails.
+ */
 public class FieldDetails
 {
+	
+	/** The Constant FLAG_ID. */
 	public static final int FLAG_ID = 1;
+	
+	/** The Constant FLAG_AUTO_FETCH. */
 	public static final int FLAG_AUTO_FETCH = 4;
 	
+	/** The Constant SUPPORTED_VERSION_FIELD_TYPES. */
 	private static final Set<Class<?>> SUPPORTED_VERSION_FIELD_TYPES = CommonUtils.toSet(
 			int.class, Integer.class,
 			long.class, Long.class
 	);
 	
+	/** The field. */
 	private Field field;
+	
+	/** The column. */
 	private String column;
+	
+	/** The db data type. */
 	private DataType dbDataType;
+	
+	/** The flags. */
 	private int flags;
+	
+	/** The generation type. */
 	private GenerationType generationType;
+	
+	/** The sequence name. */
 	private String sequenceName;
 	
+	/** The overridden column name. */
 	private String overriddenColumnName;
 	
 	/**
@@ -34,10 +54,20 @@ public class FieldDetails
 	private boolean versionField;
 	
 	/**
+	 * Indicates if this field is nullable or not
+	 */
+	private boolean nullable;
+	
+	/**
 	 * Foreign constraint on this field, if specified
 	 */
 	private ForeignConstraintDetails foreignConstraintDetails;
 	
+	/**
+	 * Instantiates a new field details.
+	 *
+	 * @param details the details
+	 */
 	private FieldDetails(FieldDetails details)
 	{
 		this.field = details.field;
@@ -46,7 +76,16 @@ public class FieldDetails
 		this.overriddenColumnName = details.overriddenColumnName;
 	}
 	
-	public FieldDetails(Field field, String column, DataType dbDataType, boolean isVersionField)
+	/**
+	 * Instantiates a new field details.
+	 *
+	 * @param field the field
+	 * @param column the column
+	 * @param dbDataType the db data type
+	 * @param isVersionField the is version field
+	 * @param nullable the nullable
+	 */
+	public FieldDetails(Field field, String column, DataType dbDataType, boolean isVersionField, boolean nullable)
 	{
 		if(field == null)
 		{
@@ -70,6 +109,7 @@ public class FieldDetails
 		this.field = field;
 		this.column = column;
 		this.dbDataType = dbDataType;
+		this.nullable = nullable;
 
 		if(!field.isAccessible())
 		{
@@ -79,9 +119,21 @@ public class FieldDetails
 		this.versionField = isVersionField;
 	}
 
-	public FieldDetails(Field field, String column, DataType dbDataType, boolean idField, GenerationType generationType, boolean autoFetch, String sequenceName)
+	/**
+	 * Instantiates a new field details.
+	 *
+	 * @param field the field
+	 * @param column the column
+	 * @param dbDataType the db data type
+	 * @param idField the id field
+	 * @param generationType the generation type
+	 * @param autoFetch the auto fetch
+	 * @param sequenceName the sequence name
+	 * @param nullable the nullable
+	 */
+	public FieldDetails(Field field, String column, DataType dbDataType, boolean idField, GenerationType generationType, boolean autoFetch, String sequenceName, boolean nullable)
 	{
-		this(field, column, dbDataType, false);
+		this(field, column, dbDataType, false, nullable);
 		
 		if(generationType == GenerationType.SEQUENCE && (sequenceName == null || sequenceName.trim().length() == 0))
 		{
@@ -95,51 +147,102 @@ public class FieldDetails
 		this.sequenceName = sequenceName;
 	}
 	
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
 	public String getName()
 	{
 		return field.getName();
 	}
 	
+	/**
+	 * Gets the field.
+	 *
+	 * @return the field
+	 */
 	public Field getField()
 	{
 		return field;
 	}
 	
+	/**
+	 * Sets the column.
+	 *
+	 * @param column the new column
+	 */
 	void setColumn(String column)
 	{
 		this.column = column;
 	}
 
+	/**
+	 * Gets the column.
+	 *
+	 * @return the column
+	 */
 	public String getColumn()
 	{
 		return column;
 	}
 	
+	/**
+	 * Gets the db data type.
+	 *
+	 * @return the db data type
+	 */
 	public DataType getDbDataType()
 	{
 		return dbDataType;
 	}
 
+	/**
+	 * Checks if is id field.
+	 *
+	 * @return true, if is id field
+	 */
 	public boolean isIdField()
 	{
 		return ((flags & FLAG_ID) == FLAG_ID);
 	}
 	
+	/**
+	 * Checks if is auto fetch.
+	 *
+	 * @return true, if is auto fetch
+	 */
 	public boolean isAutoFetch()
 	{
 		return ((flags & FLAG_AUTO_FETCH) == FLAG_AUTO_FETCH);
 	}
 
+	/**
+	 * Gets the generation type.
+	 *
+	 * @return the generation type
+	 */
 	public GenerationType getGenerationType()
 	{
 		return generationType;
 	}
 	
+	/**
+	 * Gets the sequence name.
+	 *
+	 * @return the sequence name
+	 */
 	public String getSequenceName()
 	{
 		return sequenceName;
 	}
 	
+	/**
+	 * Gets the value.
+	 *
+	 * @param bean the bean
+	 * @return the value
+	 */
 	public Object getValue(Object bean)
 	{
 		try
@@ -151,6 +254,12 @@ public class FieldDetails
 		}
 	}
 
+	/**
+	 * Sets the value.
+	 *
+	 * @param bean the bean
+	 * @param value the value
+	 */
 	public void setValue(Object bean, Object value)
 	{
 		try
@@ -162,16 +271,31 @@ public class FieldDetails
 		}
 	}
 	
+	/**
+	 * Gets the overridden column name.
+	 *
+	 * @return the overridden column name
+	 */
 	public String getOverriddenColumnName()
 	{
 		return overriddenColumnName;
 	}
 
+	/**
+	 * Sets the overridden column name.
+	 *
+	 * @param overriddenColumnName the new overridden column name
+	 */
 	public void setOverriddenColumnName(String overriddenColumnName)
 	{
 		this.overriddenColumnName = overriddenColumnName;
 	}
 	
+	/**
+	 * Clone for audit.
+	 *
+	 * @return the field details
+	 */
 	public FieldDetails cloneForAudit()
 	{
 		return new FieldDetails(this);
@@ -245,6 +369,16 @@ public class FieldDetails
 		
 		//return true, if this is not mapped relation and join table is not specified
 		return (!foreignConstraintDetails.isMappedRelation() && (foreignConstraintDetails.getJoinTableDetails() == null));
+	}
+	
+	/**
+	 * Checks if is indicates if this field is nullable or not.
+	 *
+	 * @return the indicates if this field is nullable or not
+	 */
+	public boolean isNullable()
+	{
+		return nullable;
 	}
 	
 	/* (non-Javadoc)

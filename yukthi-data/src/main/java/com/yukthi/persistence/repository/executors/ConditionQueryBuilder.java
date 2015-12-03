@@ -23,7 +23,6 @@ import com.yukthi.persistence.query.IConditionalQuery;
 import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.QueryJoinCondition;
 import com.yukthi.persistence.query.QueryResultField;
-import com.yukthi.persistence.query.QueryTable;
 import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
@@ -81,8 +80,13 @@ public class ConditionQueryBuilder implements Cloneable
 		 * Column to be used in target table for join
 		 */
 		private String column;
+		
+		/**
+		 * Indicates if this relation is nullable
+		 */
+		private boolean nullable;
 
-		public TableInfo(String tableCode, String tableName, EntityDetails entityDetails, String joinTableCode, String sourceColumn, String targetColumn)
+		public TableInfo(String tableCode, String tableName, EntityDetails entityDetails, String joinTableCode, String sourceColumn, String targetColumn, boolean nullable)
 		{
 			this.tableCode = tableCode;
 			this.tableName = tableName;
@@ -90,6 +94,7 @@ public class ConditionQueryBuilder implements Cloneable
 			this.joinTableCode = joinTableCode;
 			this.joinTableColumn = sourceColumn;
 			this.column = targetColumn;
+			this.nullable = nullable;
 		}
 	}
 
@@ -135,6 +140,11 @@ public class ConditionQueryBuilder implements Cloneable
 		 * Condition join operator
 		 */
 		private JoinOperator joinOperator;
+		
+		/**
+		 * Indicates the condition should be case insensitive
+		 */
+		private boolean ignoreCase;
 
 		/**
 		 * Conditions grouped with current condition
@@ -143,7 +153,7 @@ public class ConditionQueryBuilder implements Cloneable
 		
 		private boolean nullable;
 		
-		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable)
+		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable, boolean ignoreCase)
 		{
 			this.operator = operator;
 			this.index = index;
@@ -151,6 +161,7 @@ public class ConditionQueryBuilder implements Cloneable
 			this.fieldExpression = fieldExpression;
 			this.joinOperator = joinOperator;
 			this.nullable = nullable;
+			this.ignoreCase = ignoreCase;
 		}
 
 		/**
@@ -301,7 +312,7 @@ public class ConditionQueryBuilder implements Cloneable
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
 		this.entityDetails = entityDetails;
-		codeToTable.put(DEF_TABLE_CODE, new TableInfo(DEF_TABLE_CODE, entityDetails.getTableName(), entityDetails, null, null, null));
+		codeToTable.put(DEF_TABLE_CODE, new TableInfo(DEF_TABLE_CODE, entityDetails.getTableName(), entityDetails, null, null, null, false));
 	}
 
 	/**
@@ -334,11 +345,12 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param joinTableColumn
 	 * @param targetColumn
 	 * @param property
+	 * @param nullable Indicates if this relation is optional
 	 * @return
 	 */
-	private TableInfo newTableInfo(EntityDetails entityDetails, String tableName, String joinTableCode, String joinTableColumn, String targetColumn, String property)
+	private TableInfo newTableInfo(EntityDetails entityDetails, String tableName, String joinTableCode, String joinTableColumn, String targetColumn, String property, boolean nullable)
 	{
-		TableInfo newTableInfo = new TableInfo(nextTableCode(), tableName, entityDetails, joinTableCode, joinTableColumn, targetColumn);
+		TableInfo newTableInfo = new TableInfo(nextTableCode(), tableName, entityDetails, joinTableCode, joinTableColumn, targetColumn, nullable);
 
 		// add new table info to maps
 
@@ -418,16 +430,19 @@ public class ConditionQueryBuilder implements Cloneable
 				if(joinTableDetails == null)
 				{
 					// add target table info
-					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), targetFieldDetails.getColumn(), currentProp);
+					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
+							currentEntityDetails.getIdField().getColumn(), targetFieldDetails.getColumn(), currentProp, fieldDetails.isNullable());
 				}
 				// if table was joined via join talbe
 				else
 				{
 					// add join table info
-					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), joinTableDetails.getInverseJoinColumn(), null);
+					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), 
+							joinTableDetails.getInverseJoinColumn(), null, fieldDetails.isNullable());
 
 					// add target table info
-					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
+					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
+							joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp, fieldDetails.isNullable());
 				}
 			}
 			// if the relation is via join table
@@ -436,15 +451,18 @@ public class ConditionQueryBuilder implements Cloneable
 				joinTableDetails = foreignConstraint.getJoinTableDetails();
 
 				// add join table info
-				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), joinTableDetails.getJoinColumn(), null);
+				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), 
+						joinTableDetails.getJoinColumn(), null, fieldDetails.isNullable());
 
 				// add target table info
-				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
+				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
+						joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp, fieldDetails.isNullable());
 			}
 			// if the relation is simple relation
 			else
 			{
-				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, fieldDetails.getColumn(), targetEntityDetails.getIdField().getColumn(), currentProp);
+				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
+						fieldDetails.getColumn(), targetEntityDetails.getIdField().getColumn(), currentProp, fieldDetails.isNullable());
 			}
 
 			currentTableInfo = newTableInfo;
@@ -472,12 +490,12 @@ public class ConditionQueryBuilder implements Cloneable
 	 *         group conditions
 	 */
 	public Condition addCondition(Condition groupHead, Operator operator, int index, String embeddedProperty, 
-			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable)
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase)
 	{
 		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
 
-		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullable);
+		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullable, ignoreCase);
 
 		// if this mapping is for direct property mapping
 		if(entityFieldParts.length == 1)
@@ -607,25 +625,33 @@ public class ConditionQueryBuilder implements Cloneable
 		String currentCode = tableCode;
 		TableInfo tableInfo = null;
 
+		//As the join tables has to come first, the conditions is maintained in reverse order
+		List<QueryJoinCondition> reverseOrder = new ArrayList<>(10);
+		
 		while(currentCode != null)
 		{
 			// if current table is already added to the query
 			if(includedTables.contains(currentCode))
 			{
-				return;
+				break;
 			}
 
 			tableInfo = codeToTable.get(currentCode);
 
-			query.addTable(new QueryTable(tableInfo.tableName, currentCode));
+			//query.addTable(new QueryTable(tableInfo.tableName, currentCode));
 			includedTables.add(currentCode);
 
 			if(tableInfo.joinTableCode != null)
 			{
-				query.addJoinCondition(new QueryJoinCondition(tableInfo.tableCode, tableInfo.column, tableInfo.joinTableCode, tableInfo.joinTableColumn));
+				reverseOrder.add(0, new QueryJoinCondition(tableInfo.tableCode, tableInfo.column, tableInfo.joinTableCode, tableInfo.joinTableColumn, tableInfo.tableName, tableInfo.nullable));
 			}
 
 			currentCode = tableInfo.joinTableCode;
+		}
+		
+		for(QueryJoinCondition condition : reverseOrder)
+		{
+			query.addJoinCondition(condition);
 		}
 	}
 
@@ -698,7 +724,7 @@ public class ConditionQueryBuilder implements Cloneable
 			// add tables and conditions to specifies query
 			addTables(query, condition.table.tableCode, includedTables);
 			
-			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getColumn(), condition.operator, value, condition.joinOperator);
+			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getColumn(), condition.operator, value, condition.joinOperator, condition.ignoreCase);
 		}
 
 		//if no group conditions are present on this query

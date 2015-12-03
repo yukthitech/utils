@@ -1,7 +1,6 @@
 package com.yukthi.persistence.query;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -32,7 +31,7 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 	/**
 	 * Holds tables that need to be used in query
 	 */
-	private List<QueryTable> tables;
+	//private List<QueryTable> tables;
 	
 	public AbstractConditionalQuery(EntityDetails entityDetails)
 	{
@@ -116,7 +115,7 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 	 * @see
 	 * com.fw.persistence.query.IConditionalQuery#addTable(java.lang.String,
 	 * java.lang.String)
-	 */
+	 * /
 	@Override
 	public void addTable(QueryTable table)
 	{
@@ -137,6 +136,7 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 		
 		return tables;
 	}
+	*/
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -152,10 +152,12 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 			builder.append("\n\tFields: ").append(this.resultFields);
 		}
 		
+		/*
 		if(CollectionUtils.isNotEmpty(this.tables))
 		{
 			builder.append("\n\tTables: ").append(this.tables);
 		}
+		*/
 		
 		if(CollectionUtils.isNotEmpty(this.joinConditions))
 		{

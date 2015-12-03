@@ -8,6 +8,7 @@ import com.yukthi.persistence.repository.annotations.Operator;
 
 /**
  * Represents a condition in condition based query
+ * 
  * @author akiran
  */
 public class QueryCondition implements Cloneable
@@ -16,48 +17,59 @@ public class QueryCondition implements Cloneable
 	 * Table (code) to be used for this condition
 	 */
 	private String tableCode;
-	
+
 	/**
 	 * Column to be used for this condition
 	 */
 	private String column;
-	
+
 	/**
 	 * Condition operator
 	 */
 	private Operator operator = Operator.EQ;
-	
+
 	/**
 	 * Value for the condition
 	 */
 	private Object value;
-	
+
 	/**
 	 * Joining operator
 	 */
 	private JoinOperator joinOperator = JoinOperator.AND;
-	
+
 	/**
 	 * Conditions grouped with current condition
 	 */
 	private List<QueryCondition> groupedConditions;
-	
+
+	/**
+	 * Indicates whether the condition should be case insensitive
+	 */
+	private boolean ignoreCase = false;
+
 	/**
 	 * Instantiates a new query condition.
 	 *
-	 * @param tableCode the table code
-	 * @param column the column
-	 * @param operator the operator
-	 * @param value the value
-	 * @param joinOperator the join operator
+	 * @param tableCode
+	 *            the table code
+	 * @param column
+	 *            the column
+	 * @param operator
+	 *            the operator
+	 * @param value
+	 *            the value
+	 * @param joinOperator
+	 *            the join operator
 	 */
-	public QueryCondition(String tableCode, String column, Operator operator, Object value, JoinOperator joinOperator)
+	public QueryCondition(String tableCode, String column, Operator operator, Object value, JoinOperator joinOperator, boolean ignoreCase)
 	{
 		this.tableCode = tableCode;
 		this.column = column;
 		this.operator = operator;
 		this.value = value;
 		this.joinOperator = joinOperator;
+		this.ignoreCase = ignoreCase;
 	}
 
 	/**
@@ -69,7 +81,8 @@ public class QueryCondition implements Cloneable
 	}
 
 	/**
-	 * @param tableCode the {@link #tableCode tableCode} to set
+	 * @param tableCode
+	 *            the {@link #tableCode tableCode} to set
 	 */
 	public void setTableCode(String tableCode)
 	{
@@ -85,7 +98,8 @@ public class QueryCondition implements Cloneable
 	}
 
 	/**
-	 * @param column the {@link #column column} to set
+	 * @param column
+	 *            the {@link #column column} to set
 	 */
 	public void setColumn(String column)
 	{
@@ -101,7 +115,8 @@ public class QueryCondition implements Cloneable
 	}
 
 	/**
-	 * @param operator the {@link #operator operator} to set
+	 * @param operator
+	 *            the {@link #operator operator} to set
 	 */
 	public void setOperator(Operator operator)
 	{
@@ -113,17 +128,23 @@ public class QueryCondition implements Cloneable
 	 */
 	public Object getValue()
 	{
+		if(ignoreCase && (value instanceof String))
+		{
+			value = ((String)value).toLowerCase();
+		}
+		
 		return value;
 	}
 
 	/**
-	 * @param value the {@link #value value} to set
+	 * @param value
+	 *            the {@link #value value} to set
 	 */
 	public void setValue(Object value)
 	{
 		this.value = value;
 	}
-	
+
 	/**
 	 * Gets the joining operator.
 	 *
@@ -137,7 +158,8 @@ public class QueryCondition implements Cloneable
 	/**
 	 * Sets the joining operator.
 	 *
-	 * @param joinOperator the new joining operator
+	 * @param joinOperator
+	 *            the new joining operator
 	 */
 	public void setJoinOperator(JoinOperator joinOperator)
 	{
@@ -157,24 +179,52 @@ public class QueryCondition implements Cloneable
 	/**
 	 * Sets the conditions grouped with current condition.
 	 *
-	 * @param groupedConditions the new conditions grouped with current condition
+	 * @param groupedConditions
+	 *            the new conditions grouped with current condition
 	 */
 	public void setGroupedConditions(List<QueryCondition> groupedConditions)
 	{
 		this.groupedConditions = groupedConditions;
 	}
-	
+
+	/**
+	 * Adds the grouped condition.
+	 *
+	 * @param condition the condition
+	 */
 	public void addGroupedCondition(QueryCondition condition)
 	{
 		if(groupedConditions == null)
 		{
 			this.groupedConditions = new ArrayList<>();
 		}
-		
+
 		this.groupedConditions.add(condition);
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Checks if is indicates whether the condition should be case insensitive.
+	 *
+	 * @return the indicates whether the condition should be case insensitive
+	 */
+	public boolean isIgnoreCase()
+	{
+		return ignoreCase;
+	}
+
+	/**
+	 * Sets the indicates whether the condition should be case insensitive.
+	 *
+	 * @param ignoreCase the new indicates whether the condition should be case insensitive
+	 */
+	public void setIgnoreCase(boolean ignoreCase)
+	{
+		this.ignoreCase = ignoreCase;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
@@ -182,15 +232,16 @@ public class QueryCondition implements Cloneable
 	{
 		try
 		{
-			return (QueryCondition)super.clone();
+			return (QueryCondition) super.clone();
 		} catch(CloneNotSupportedException ex)
 		{
 			throw new IllegalStateException("An error occurred while cloding query condition", ex);
 		}
 	}
 
-	
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

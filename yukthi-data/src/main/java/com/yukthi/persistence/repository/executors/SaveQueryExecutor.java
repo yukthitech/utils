@@ -370,7 +370,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		FinderQuery findQuery = new FinderQuery(entityDetails);
 		findQuery.addResultField(new QueryResultField(null, idFieldDetails.getColumn(), null));
 		
-		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid, JoinOperator.AND));
+		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid, JoinOperator.AND, false));
 		
 		//execute finder query 
 		List<Record> records = dataStore.executeFinder(findQuery, entityDetails, null);

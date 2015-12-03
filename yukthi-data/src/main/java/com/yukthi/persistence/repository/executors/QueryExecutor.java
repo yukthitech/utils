@@ -96,6 +96,7 @@ public abstract class QueryExecutor
 		FieldDetails fieldDetails = null;
 		String name = null;
 		boolean found = false;
+		boolean ignoreCase = false;
 		
 		//loop through query object type fields 
 		for(Field field : fields)
@@ -133,7 +134,9 @@ public abstract class QueryExecutor
 							name, queryobjType.getName(), methodName, repositoryType.getName()));
 			}
 			
-			conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), name, condition.joinWith(), methodDesc, condition.nullable());
+			ignoreCase = (String.class.equals(field.getType()) && condition.ignoreCase());
+			
+			conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), name, condition.joinWith(), methodDesc, condition.nullable(), ignoreCase);
 			found = true;
 		}
 		
@@ -157,6 +160,7 @@ public abstract class QueryExecutor
 		Condition condition = null;
 		boolean found = false;
 		String fieldName = null;
+		boolean ignoreCase = false;
 		
 		//fetch conditions for each argument
 		for(int i = 0; i < paramTypes.length; i++)
@@ -207,7 +211,9 @@ public abstract class QueryExecutor
 				throw new InvalidRepositoryException(String.format("Nested expression '%1s' when plain properties are expected in %2s", fieldName, methodDesc));
 			}
 			
-			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable());
+			ignoreCase = (String.class.equals(paramTypes[i]) && condition.ignoreCase());
+			
+			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase);
 			found = true;
 		}
 
@@ -240,7 +246,7 @@ public abstract class QueryExecutor
 		{
 			field = StringUtil.toStartLower(field);
 			
-			conditionQueryBuilder.addCondition(null, Operator.EQ, index, null, field, JoinOperator.AND, methodDesc, false);
+			conditionQueryBuilder.addCondition(null, Operator.EQ, index, null, field, JoinOperator.AND, methodDesc, false, false);
 			index++;
 		}
 		
@@ -275,7 +281,7 @@ public abstract class QueryExecutor
 				operator = check.checkForNotNull() ? Operator.NE : Operator.EQ;
 				
 				//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
-				conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true);
+				conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true, false);
 			}
 		}
 	}

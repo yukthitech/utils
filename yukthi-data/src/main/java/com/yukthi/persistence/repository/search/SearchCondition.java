@@ -42,6 +42,11 @@ public class SearchCondition
 	 * Indicates whether this condition can hold null value
 	 */
 	private boolean nullable;
+	
+	/**
+	 * Indicates the condition should be case insensitive
+	 */
+	private boolean ignoreCase;
 
 	/**
 	 * Instantiates a new search condition.
@@ -240,6 +245,28 @@ public class SearchCondition
 	public void setNullable(boolean nullable)
 	{
 		this.nullable = nullable;
+	}
+	
+	
+
+	/**
+	 * Checks if is indicates the condition should be case insensitive.
+	 *
+	 * @return the indicates the condition should be case insensitive
+	 */
+	public boolean isIgnoreCase()
+	{
+		return ignoreCase;
+	}
+
+	/**
+	 * Sets the indicates the condition should be case insensitive.
+	 *
+	 * @param ignoreCase the new indicates the condition should be case insensitive
+	 */
+	public void setIgnoreCase(boolean ignoreCase)
+	{
+		this.ignoreCase = ignoreCase;
 	}
 
 	/*

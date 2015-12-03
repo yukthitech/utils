@@ -8,99 +8,177 @@ package com.yukthi.persistence.query;
 public class QueryJoinCondition
 {
 	/**
-	 * Left side table to be used for join condition
+	 * joining table code
 	 */
-	private String leftTableCode;
+	private String joiningTableCode;
 
 	/**
 	 * Left side table column to be used for join condition
 	 */
-	private String leftColumn;
+	private String joiningColumn;
 
 	/**
 	 * Right side table code for join condition
 	 */
-	private String rightTableCode;
+	private String parentTableCode;
 
 	/**
 	 * Right side table column for join condition
 	 */
-	private String rightColumn;
-
-	public QueryJoinCondition(String leftTableCode, String leftColumn, String rightTableCode, String rightColumn)
-	{
-		this.leftTableCode = leftTableCode;
-		this.leftColumn = leftColumn;
-		this.rightTableCode = rightTableCode;
-		this.rightColumn = rightColumn;
-	}
+	private String parentColumn;
 
 	/**
-	 * @return the {@link #leftTableCode leftTableCode}
+	 * New table name being joined
 	 */
-	public String getLeftTableCode()
-	{
-		return leftTableCode;
-	}
+	private String joiningTableName;
 
 	/**
+	 * If the relation is nullable. If nullable, left join will be used
+	 */
+	private boolean nullable;
+
+	/**
+	 * Instantiates a new query join condition.
+	 *
 	 * @param leftTableCode
-	 *            the {@link #leftTableCode leftTableCode} to set
-	 */
-	public void setLeftTableCode(String leftTableCode)
-	{
-		this.leftTableCode = leftTableCode;
-	}
-
-	/**
-	 * @return the {@link #leftColumn leftColumn}
-	 */
-	public String getLeftColumn()
-	{
-		return leftColumn;
-	}
-
-	/**
+	 *            the left table code
 	 * @param leftColumn
-	 *            the {@link #leftColumn leftColumn} to set
-	 */
-	public void setLeftColumn(String leftColumn)
-	{
-		this.leftColumn = leftColumn;
-	}
-
-	/**
-	 * @return the {@link #rightTableCode rightTableCode}
-	 */
-	public String getRightTableCode()
-	{
-		return rightTableCode;
-	}
-
-	/**
+	 *            the left column
 	 * @param rightTableCode
-	 *            the {@link #rightTableCode rightTableCode} to set
-	 */
-	public void setRightTableCode(String rightTableCode)
-	{
-		this.rightTableCode = rightTableCode;
-	}
-
-	/**
-	 * @return the {@link #rightColumn rightColumn}
-	 */
-	public String getRightColumn()
-	{
-		return rightColumn;
-	}
-
-	/**
+	 *            the right table code
 	 * @param rightColumn
-	 *            the {@link #rightColumn rightColumn} to set
+	 *            the right column
+	 * @param nullable
+	 *            the nullable
 	 */
-	public void setRightColumn(String rightColumn)
+	public QueryJoinCondition(String leftTableCode, String leftColumn, String rightTableCode, String rightColumn, String rightJoinTableName, boolean nullable)
 	{
-		this.rightColumn = rightColumn;
+		this.joiningTableCode = leftTableCode;
+		this.joiningColumn = leftColumn;
+		this.parentTableCode = rightTableCode;
+		this.parentColumn = rightColumn;
+		this.joiningTableName = rightJoinTableName;
+		this.nullable = nullable;
+	}
+
+	/**
+	 * Gets the joining table code.
+	 *
+	 * @return the joining table code
+	 */
+	public String getJoiningTableCode()
+	{
+		return joiningTableCode;
+	}
+
+	/**
+	 * Sets the joining table code.
+	 *
+	 * @param joiningTableCode the new joining table code
+	 */
+	public void setJoiningTableCode(String joiningTableCode)
+	{
+		this.joiningTableCode = joiningTableCode;
+	}
+
+	/**
+	 * Gets the left side table column to be used for join condition.
+	 *
+	 * @return the left side table column to be used for join condition
+	 */
+	public String getJoiningColumn()
+	{
+		return joiningColumn;
+	}
+
+	/**
+	 * Sets the left side table column to be used for join condition.
+	 *
+	 * @param joiningColumn the new left side table column to be used for join condition
+	 */
+	public void setJoiningColumn(String joiningColumn)
+	{
+		this.joiningColumn = joiningColumn;
+	}
+
+	/**
+	 * Gets the right side table code for join condition.
+	 *
+	 * @return the right side table code for join condition
+	 */
+	public String getParentTableCode()
+	{
+		return parentTableCode;
+	}
+
+	/**
+	 * Sets the right side table code for join condition.
+	 *
+	 * @param parentTableCode the new right side table code for join condition
+	 */
+	public void setParentTableCode(String parentTableCode)
+	{
+		this.parentTableCode = parentTableCode;
+	}
+
+	/**
+	 * Gets the right side table column for join condition.
+	 *
+	 * @return the right side table column for join condition
+	 */
+	public String getParentColumn()
+	{
+		return parentColumn;
+	}
+
+	/**
+	 * Sets the right side table column for join condition.
+	 *
+	 * @param parentColumn the new right side table column for join condition
+	 */
+	public void setParentColumn(String parentColumn)
+	{
+		this.parentColumn = parentColumn;
+	}
+
+	/**
+	 * Gets the new table name being joined.
+	 *
+	 * @return the new table name being joined
+	 */
+	public String getJoiningTableName()
+	{
+		return joiningTableName;
+	}
+
+	/**
+	 * Sets the new table name being joined.
+	 *
+	 * @param joiningTableName the new new table name being joined
+	 */
+	public void setJoiningTableName(String joiningTableName)
+	{
+		this.joiningTableName = joiningTableName;
+	}
+
+	/**
+	 * Checks if is if the relation is nullable. If nullable, left join will be used.
+	 *
+	 * @return the if the relation is nullable
+	 */
+	public boolean isNullable()
+	{
+		return nullable;
+	}
+
+	/**
+	 * Sets the if the relation is nullable. If nullable, left join will be used.
+	 *
+	 * @param nullable the new if the relation is nullable
+	 */
+	public void setNullable(boolean nullable)
+	{
+		this.nullable = nullable;
 	}
 
 	/*
@@ -113,8 +191,13 @@ public class QueryJoinCondition
 	{
 		StringBuilder builder = new StringBuilder("[");
 
-		builder.append(leftTableCode).append(".").append(leftColumn);
-		builder.append(" = ").append(rightTableCode).append(rightColumn);
+		builder.append(joiningTableCode).append(".").append(joiningColumn);
+		builder.append(" = ").append(parentTableCode).append(parentColumn);
+
+		if(nullable)
+		{
+			builder.append(" (+)");
+		}
 
 		return builder.toString();
 	}

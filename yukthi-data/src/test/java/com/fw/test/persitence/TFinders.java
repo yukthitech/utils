@@ -25,6 +25,7 @@ public class TFinders extends TestSuiteBase
 	@Override
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
 	{
+		cleanFactoryAfterClass(factory);
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
 		repo.save(new Employee("1230", "user0@test.com", "user1", "1234560", 20));
 		repo.save(new Employee("1231", "user1@test.com", "user2", "1234561", 25));
@@ -43,6 +44,21 @@ public class TFinders extends TestSuiteBase
 		factory.dropRepository(Employee.class);
 	}
 	
+	@Test(dataProvider = "repositoryFactories")
+	public void testWithIgnoreCase(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+
+		//ensure case is not ignored by default
+		Employee e = repo.findEmpByEmailIgnoreCase("USER0@tEst.com");
+		Assert.assertNotNull(e);
+		Assert.assertEquals(e.getEmployeeNo(), "1230");
+
+		e = repo.findByEmailPattern("USeR0%");
+		Assert.assertNotNull(e);
+		Assert.assertEquals(e.getEmployeeNo(), "1230");
+	}
+
 	/**
 	 * Tests finder based on finder method name
 	 */

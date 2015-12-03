@@ -60,8 +60,10 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 	private void addConditionsRecursively(SearchCondition condition, ConditionQueryBuilder conditionQueryBuilder, List<Object> conditionParams, ConditionQueryBuilder.Condition groupHead)
 	{
 		ConditionQueryBuilder.Condition builderCondition = null;
+		boolean ignoreCase = ((condition.getValue() instanceof String) && condition.isIgnoreCase());
+		
 		builderCondition = conditionQueryBuilder.addCondition(groupHead, condition.getOperator(), conditionParams.size(), null, 
-				condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable());
+				condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable(), ignoreCase);
 		
 		conditionParams.add(condition.getValue());
 		

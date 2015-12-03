@@ -23,7 +23,11 @@
 			</#if>
 		
 			<#if condition.value??>
-				<#assign res> ${res} ${tableCode}${condition.column} ${condition.operator} ?</#assign>
+				<#if condition.ignoreCase>
+					<#assign res> ${res} LOWER(${tableCode}${condition.column}) ${condition.operator} ?</#assign>
+				<#else>
+					<#assign res> ${res} ${tableCode}${condition.column} ${condition.operator} ?</#assign>
+				</#if>
 			<#else>
 				<#if condition.operator.operator == '='>
 					<#assign res> ${res} ${tableCode}${condition.column} IS NULL</#assign>
@@ -181,10 +185,15 @@
 		SELECT <#list query.resultFields as column><@trim>
 				<#if column.tableCode??>${column.tableCode}.</#if>${column.column} <#if column.code??>${column.code}</#if><#if column_has_next>,</#if>
 			</@trim></#list>
-		FROM <#list query.tables as table>${table.table} <#if table.tableCode??>${table.tableCode}</#if><#if table_has_next>,</#if></#list>
-		WHERE 1 = 1
-		<#list query.joinConditions as joinCondition>AND ${joinCondition.leftTableCode}.${joinCondition.leftColumn} = ${joinCondition.rightTableCode}.${joinCondition.rightColumn}
+		FROM ${query.tableName} T0
+		<#list query.joinConditions as joinCondition>
+			<#if joinCondition.nullable>
+				LEFT JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
+			<#else>
+				JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
+			</#if>
 		</#list>
+		WHERE 1 = 1
 		<#list query.conditions as condition>${addCondition(condition, condition_index, true)}
 		</#list>
 		<#if query.orderByFields??> 
@@ -194,10 +203,15 @@
 
 	<template name="countTemplate"><![CDATA[
 		SELECT COUNT(*)
-		FROM <#list query.tables as table>${table.table} <#if table.tableCode??>${table.tableCode}</#if><#if table_has_next>,</#if></#list>
-		WHERE 1 = 1
-		<#list query.joinConditions as joinCondition>AND ${joinCondition.leftTableCode}.${joinCondition.leftColumn} = ${joinCondition.rightTableCode}.${joinCondition.rightColumn}
+		FROM ${query.tableName} T0
+		<#list query.joinConditions as joinCondition>
+			<#if joinCondition.nullable>
+				LEFT JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
+			<#else>
+				JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
+			</#if>
 		</#list>
+		WHERE 1 = 1
 		<#list query.conditions as condition>${addCondition(condition, condition_index, true)}
 		</#list>
 	]]></template>	
