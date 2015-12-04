@@ -189,8 +189,11 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 					continue;
 				}
 				
-				//if current table owns the relation in same table, replace the enity valu with foreign entity id value
-				value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+				if(value != null)
+				{
+					//if current table owns the relation in same table, replace the entity valu with foreign entity id value
+					value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+				}
 			}
 			
 			value = conversionService.convertToDBType(value, field);
@@ -264,8 +267,11 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 						continue;
 					}
 					
-					//if current table owns the relation in same table, replace the entity value with foreign entity id value
-					value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+					if(value != null)
+					{
+						//if current table owns the relation in same table, replace the entity value with foreign entity id value
+						value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+					}
 				}
 
 				value = conversionService.convertToDBType(value, field);
