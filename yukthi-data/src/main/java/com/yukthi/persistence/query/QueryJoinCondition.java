@@ -192,7 +192,7 @@ public class QueryJoinCondition
 		StringBuilder builder = new StringBuilder("[");
 
 		builder.append(joiningTableCode).append(".").append(joiningColumn);
-		builder.append(" = ").append(parentTableCode).append(parentColumn);
+		builder.append(" = ").append(parentTableCode).append(".").append(parentColumn);
 
 		if(nullable)
 		{

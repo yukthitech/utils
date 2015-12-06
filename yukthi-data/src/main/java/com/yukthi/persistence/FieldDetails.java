@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.GenerationType;
 
 import com.yukthi.persistence.annotations.DataType;
+import com.yukthi.persistence.annotations.NotUpdateable;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
@@ -59,6 +60,11 @@ public class FieldDetails
 	private boolean nullable;
 	
 	/**
+	 * field is updateable or not
+	 */
+	private boolean updateable = true;
+	
+	/**
 	 * Foreign constraint on this field, if specified
 	 */
 	private ForeignConstraintDetails foreignConstraintDetails;
@@ -110,6 +116,7 @@ public class FieldDetails
 		this.column = column;
 		this.dbDataType = dbDataType;
 		this.nullable = nullable;
+		this.updateable = (field.getAnnotation(NotUpdateable.class) == null);
 
 		if(!field.isAccessible())
 		{
@@ -379,6 +386,16 @@ public class FieldDetails
 	public boolean isNullable()
 	{
 		return nullable;
+	}
+	
+	/**
+	 * Checks if is field is updateable or not.
+	 *
+	 * @return the field is updateable or not
+	 */
+	public boolean isUpdateable()
+	{
+		return updateable;
 	}
 	
 	/* (non-Javadoc)

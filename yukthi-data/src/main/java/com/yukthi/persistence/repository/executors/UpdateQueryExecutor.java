@@ -177,6 +177,12 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				continue;
 			}
 			
+			//if field is not updateable skip the field
+			if(!field.isUpdateable())
+			{
+				continue;
+			}
+			
 			value = field.getValue(entity);
 			
 			//if current field is relation field
