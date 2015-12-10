@@ -27,6 +27,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import com.yukthi.utils.exceptions.InvalidArgumentException;
+import com.yukthi.utils.exceptions.InvalidStateException;
+
 /**
  * Reflection related utils
  * @author akiran
@@ -81,6 +84,169 @@ public class ReflectionUtils
 		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while fetching field value - " + field, ex);
+		}
+	}
+	
+	/**
+	 * Fetches type of the nested field type
+	 * @param cls Class in which nested field type needs to be fetched
+	 * @param fieldName Nested field name whose type needs to be fetched
+	 * @return Nested field type
+	 */
+	public static Class<?> getNestedFieldType(Class<?> cls, String fieldName)
+	{
+		String nestedPropPath[] = fieldName.split("\\.");
+		int maxIdx = nestedPropPath.length - 1;
+		Field field = null;
+		Class<?> prevCls = cls;
+		
+		//loop through property path
+		for(int i = 0; i <= maxIdx; i++)
+		{
+			try
+			{
+				//get intermediate property descriptor
+				try
+				{
+					field = prevCls.getDeclaredField(nestedPropPath[i]);
+				}catch(Exception ex)
+				{
+					field = null;
+				}
+				
+				//if the property is not found or found as read only, return false
+				if(field == null)
+				{
+					return null;
+				}
+				
+				//if end of path is reached, set the final value and break the loop
+				if(i == maxIdx)
+				{
+					return field.getType();
+				}
+
+				prevCls = field.getType();
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException(ex, "An error occurred while fetching nested field type - {}", fieldName);
+			}
+		}
+
+		return null;
+	}
+
+	public static Object getNestedFieldValue(Object bean, String fieldName)
+	{
+		if(bean == null)
+		{
+			return null;
+		}
+		
+		String nestedPropPath[] = fieldName.split("\\.");
+		int maxIdx = nestedPropPath.length - 1;
+		Field field = null;
+		Object prevObject = bean;
+		
+		//loop through property path
+		for(int i = 0; i <= maxIdx; i++)
+		{
+			try
+			{
+				//get intermediate property descriptor
+				try
+				{
+					field = prevObject.getClass().getDeclaredField(nestedPropPath[i]);
+				}catch(Exception ex)
+				{
+					field = null;
+				}
+				
+				//if the property is not found or found as read only, return false
+				if(field == null)
+				{
+					return null;
+				}
+				
+				field.setAccessible(true);
+				
+				//if end of path is reached, set the final value and break the loop
+				if(i == maxIdx)
+				{
+					return field.get(prevObject);
+				}
+
+				prevObject = field.get(prevObject);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException(ex, "An error occurred while fetching nested field value - {} on type - {}", fieldName, bean.getClass().getName());
+			}
+		}
+
+		return null;
+	}
+
+	public static void setNestedFieldValue(Object bean, String fieldName, Object value)
+	{
+		if(bean == null)
+		{
+			return;
+		}
+		
+		String nestedPropPath[] = fieldName.split("\\.");
+		int maxIdx = nestedPropPath.length - 1;
+		Field field = null;
+		Object prevObject = bean, newObject = null;
+		
+		//loop through property path
+		for(int i = 0; i <= maxIdx; i++)
+		{
+			try
+			{
+				//get intermediate property descriptor
+				try
+				{
+					field = prevObject.getClass().getDeclaredField(nestedPropPath[i]);
+				}catch(Exception ex)
+				{
+					field = null;
+				}
+				
+				//if the property is not found or found as read only, return false
+				if(field == null)
+				{
+					throw new InvalidArgumentException("Invalid nested field '{}' specified for bean type - {}", fieldName, bean.getClass().getName());
+				}
+				
+				field.setAccessible(true);
+				
+				//if end of path is reached, set the final value and break the loop
+				if(i == maxIdx)
+				{
+					field.set(prevObject, value);
+					return;
+				}
+
+				newObject = field.get(prevObject);
+				
+				//create intermediate beans as needed
+				if(newObject == null)
+				{
+					try
+					{
+						newObject = field.getType().newInstance();
+						field.set(prevObject, newObject);
+					}catch(Exception ex)
+					{
+						throw new InvalidStateException("Failed to created instance of type - {}", field.getType().getName());
+					}
+				}
+				
+				prevObject = newObject;
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException(ex, "An error occurred while fetching nested field value - {} on type - {}", fieldName, bean.getClass().getName());
+			}
 		}
 	}
 }
