@@ -33,7 +33,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthi.utils.CommonUtils;
-import com.yukthi.utils.ReflectionUtils;
 import com.yukthi.utils.annotations.PropertyMapping;
 import com.yukthi.utils.annotations.PropertyMappings;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
@@ -65,44 +64,37 @@ public class PropertyMapper
 	 */
 	private static void addMapping(BeanInfo beanInfo, Field field, PropertyMapping mapping)
 	{
-		Class<?> externalFieldType = ReflectionUtils.getNestedFieldType(mapping.type(), mapping.from());
+		NestedProperty externalProperty = null, localProperty = null;
 		
-		//if invalid source field is specified
-		if(externalFieldType == null)
+		try
 		{
-			throw new InvalidConfigurationException("Invalid property mapping '{}' specified on field - {}.{}", 
-					mapping.from(), field.getDeclaringClass().getName(), field.getName());
-		}
-		
-		Class<?> targetType = field.getType();
-		String localProperty = field.getName();
-		
-		//if local sub property is specified
-		if(mapping.subproperty().length() > 0)
-		{
-			//get sub property type
-			targetType = ReflectionUtils.getNestedFieldType(field.getType(), mapping.subproperty());
+			externalProperty = NestedProperty.getNestedProperty(mapping.type(), mapping.from());
 			
-			//if invalid sub property is specified
-			if(targetType == null)
+			String localPropertyName = field.getName();
+			
+			//if local sub property is specified
+			if(mapping.subproperty().length() > 0)
 			{
-				throw new InvalidConfigurationException("Invalid property mapping '{}' specified on field - {}.{}", 
-						mapping.subproperty(), field.getDeclaringClass().getName(), field.getName());
+				localPropertyName = localPropertyName + "." + mapping.subproperty();
 			}
 			
-			//Final mapping local property would be current field name + sub property name
-			localProperty = field.getName() + "." + mapping.subproperty();
+			localProperty = NestedProperty.getNestedProperty(field.getDeclaringClass(), localPropertyName);
+		}catch(Exception ex)
+		{
+			throw new InvalidConfigurationException(ex, "Invalid property mapping specified on field - {}.{}. "
+					+ "An error occurred while processing mapping properties.", 
+					field.getDeclaringClass().getName(), field.getName());
 		}
 		
 		//ensure target and source are of same types
-		if(!CommonUtils.isAssignable(externalFieldType, targetType))
+		if(!CommonUtils.isAssignable(externalProperty.getType(), localProperty.getType()))
 		{
 			throw new InvalidConfigurationException("Invalid property mapping specified on field - {}.{}. "
 					+ "Source property type and target property type are not matching", 
 					field.getDeclaringClass().getName(), field.getName());
 		}
 		
-		beanInfo.addCustomMapping(mapping.type(), new MappingInfo(mapping.from(), localProperty));
+		beanInfo.addCustomMapping(mapping.type(), new MappingInfo(externalProperty, localProperty));
 	}
 	
 	/**
@@ -285,14 +277,14 @@ public class PropertyMapper
 		{
 			for(MappingInfo mapping : mappings)
 			{
-				value = ReflectionUtils.getNestedFieldValue(source, mapping.getLocalProperty());
+				value = mapping.getLocalProperty().getValue(source);
 				
 				if(value == null)
 				{
 					continue;
 				}
 				
-				ReflectionUtils.setNestedFieldValue(destination, mapping.getExternalProperty(), value);
+				mapping.getExternalProperty().setValue(destination, value);
 			}
 		}
 	
@@ -303,14 +295,14 @@ public class PropertyMapper
 		{
 			for(MappingInfo mapping : mappings)
 			{
-				value = ReflectionUtils.getNestedFieldValue(source, mapping.getExternalProperty());
+				value = mapping.getExternalProperty().getValue(source);
 				
 				if(value == null)
 				{
 					continue;
 				}
 				
-				ReflectionUtils.setNestedFieldValue(destination, mapping.getLocalProperty(), value);
+				mapping.getLocalProperty().setValue(destination, value);
 			}
 		}
 	}

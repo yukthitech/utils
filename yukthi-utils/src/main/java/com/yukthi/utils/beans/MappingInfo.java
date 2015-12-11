@@ -32,20 +32,14 @@ class MappingInfo
 	/**
 	 * Other bean property from which mapping needs to be done
 	 */
-	private String externalProperty;
+	private NestedProperty externalProperty;
 	
 	/**
 	 * Current bean's property
 	 */
-	private String localProperty;
+	private NestedProperty localProperty;
 
-	/**
-	 * Instantiates a new mapping info.
-	 *
-	 * @param externalProperty the external property
-	 * @param localProperty the local property
-	 */
-	public MappingInfo(String externalProperty, String localProperty)
+	public MappingInfo(NestedProperty externalProperty, NestedProperty localProperty)
 	{
 		this.externalProperty = externalProperty;
 		this.localProperty = localProperty;
@@ -56,19 +50,9 @@ class MappingInfo
 	 *
 	 * @return the other bean property from which mapping needs to be done
 	 */
-	public String getExternalProperty()
+	public NestedProperty getExternalProperty()
 	{
 		return externalProperty;
-	}
-
-	/**
-	 * Sets the other bean property from which mapping needs to be done.
-	 *
-	 * @param externalProperty the new other bean property from which mapping needs to be done
-	 */
-	public void setExternalProperty(String externalProperty)
-	{
-		this.externalProperty = externalProperty;
 	}
 
 	/**
@@ -76,18 +60,8 @@ class MappingInfo
 	 *
 	 * @return the current bean's property
 	 */
-	public String getLocalProperty()
+	public NestedProperty getLocalProperty()
 	{
 		return localProperty;
-	}
-
-	/**
-	 * Sets the current bean's property.
-	 *
-	 * @param localProperty the new current bean's property
-	 */
-	public void setLocalProperty(String localProperty)
-	{
-		this.localProperty = localProperty;
 	}
 }
