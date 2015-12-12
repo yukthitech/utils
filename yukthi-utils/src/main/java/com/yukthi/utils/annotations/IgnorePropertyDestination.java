@@ -21,59 +21,19 @@
  * SOFTWARE.
  */
 
-package com.yukthi.utils.beans;
+package com.yukthi.utils.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Information about a property
+ * Indicates to ignore the target field property during property copy
  * @author akiran
  */
-class PropertyInfo
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+public @interface IgnorePropertyDestination
 {
-	/**
-	 * Actual property
-	 */
-	private NestedProperty property;
-	
-	/**
-	 * as a destination this property should be ignored
-	 */
-	private boolean ignoreDestination;
-
-	/**
-	 * Instantiates a new property info.
-	 *
-	 * @param property the property
-	 * @param ignoreDestination the ignore destination
-	 */
-	public PropertyInfo(NestedProperty property, boolean ignoreDestination)
-	{
-		this.property = property;
-		this.ignoreDestination = ignoreDestination;
-	}
-	
-	public String getName()
-	{
-		return property.getName();
-	}
-
-	/**
-	 * Gets the actual property.
-	 *
-	 * @return the actual property
-	 */
-	public NestedProperty getProperty()
-	{
-		return property;
-	}
-
-	/**
-	 * Checks if is as a destination this property should be ignored.
-	 *
-	 * @return the as a destination this property should be ignored
-	 */
-	public boolean isIgnoreDestination()
-	{
-		return ignoreDestination;
-	}
-	
 }

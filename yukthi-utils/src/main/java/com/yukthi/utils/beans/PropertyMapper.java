@@ -33,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthi.utils.CommonUtils;
+import com.yukthi.utils.annotations.IgnorePropertyDestination;
 import com.yukthi.utils.annotations.PropertyMapping;
 import com.yukthi.utils.annotations.PropertyMappings;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
@@ -142,13 +143,24 @@ public class PropertyMapper
 		
 		beanInfo = new BeanInfo(beanType);
 		Field fields[] = beanType.getDeclaredFields();
-		PropertyInfo propInfo = null;
+		NestedProperty nestedProp = null;
+		IgnorePropertyDestination ignorePropertyDestination = null;
 		
 		//loop through property descriptors and add to bean property map
 		for(Field field : fields)
 		{
-			propInfo = new PropertyInfo(field);
-			beanInfo.addProperty(propInfo);
+			try
+			{
+				nestedProp = NestedProperty.getNestedProperty(beanType, field.getName());
+			}catch(Exception ex)
+			{
+				logger.info("Ignoring {}.{} property, as property fetch resulted in error - {}", beanType.getName(), field.getName(), ex);
+				continue;
+			}
+			
+			ignorePropertyDestination = field.getAnnotation(IgnorePropertyDestination.class);
+			
+			beanInfo.addProperty(new PropertyInfo(nestedProp, ignorePropertyDestination != null));
 
 			getMappingsFromField(beanInfo, field);
 		}
@@ -174,6 +186,30 @@ public class PropertyMapper
 	}
 	
 	/**
+	 * Gets the class of specified object. In case of CGLIB proxies, actual class name will be returned.
+	 * @param bean
+	 * @return
+	 */
+	private static Class<?> getClass(Object bean)
+	{
+		String className = bean.getClass().getName();
+		int idx = className.indexOf("$$EnhancerByCGLIB$$");
+		
+		if(idx < 0)
+		{
+			return bean.getClass();
+		}
+		
+		try
+		{
+			return Class.forName(className.substring(0, idx));
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while fetching actual class name from proxy class name - {}", bean.getClass().getName());
+		}
+	}
+	
+	/**
 	 * Copies properties from "source" to "destination". This will be shallow copy. This copy also maps property camel case
 	 * naming. For example, relationId would be mapped to relation.id
 	 * @param destination Destination to which properties needs to be copied
@@ -193,32 +229,28 @@ public class PropertyMapper
 		}
 		
 		//load source and destination property maps
-		BeanInfo sourceBeanInfo = getBeanInfo(source.getClass());
-		BeanInfo destinationBeanInfo = getBeanInfo(destination.getClass());
+		BeanInfo sourceBeanInfo = getBeanInfo(getClass(source));
+		BeanInfo destinationBeanInfo = getBeanInfo(getClass(destination));
 		Object value = null, destValue = null;
 		
-		PropertyInfo sourceProperty = null, destProperty = null;;
+		PropertyInfo destPropInfo = null;
+		NestedProperty sourceProperty = null, destProperty = null;;
 		
 		//loop through source property and copy all simple (directly matching) properties
 		for(String srcProp : sourceBeanInfo.getPropertyNames())
 		{
-			sourceProperty = sourceBeanInfo.getProperty(srcProp);
-			destProperty = destinationBeanInfo.getProperty(srcProp);
+			destPropInfo = destinationBeanInfo.getProperty(srcProp);
 			
-			//if property is not found on destination ignore for now
-			if(destProperty == null)
+			//if property is not found on destination ignore
+			if(destPropInfo == null || destPropInfo.isIgnoreDestination())
 			{
 				continue;
 			}
-
-			try
-			{
-				value = sourceProperty.getValue(source);
-			}catch(Exception ex)
-			{
-				throw new InvalidStateException(ex, "An error occurred while fetching property '{}' from source type '{}'", 
-						srcProp, source.getClass().getName());
-			}
+			
+			destProperty = destPropInfo.getProperty();
+			sourceProperty = sourceBeanInfo.getProperty(srcProp).getProperty();
+			
+			value = sourceProperty.getValue(source);
 			
 			//if source value is not present
 			if(value == null)
@@ -260,14 +292,7 @@ public class PropertyMapper
 			}
 			
 			//copy property from source to destination
-			try
-			{
-				destProperty.setValue(destination, value);
-			}catch(Exception ex)
-			{
-				throw new InvalidStateException(ex, "An error occurred while setting property '{}' on destination type '{}'", 
-						srcProp, destination.getClass().getName());
-			}
+			destProperty.setValue(destination, value);
 		}
 		
 		List<MappingInfo> mappings = sourceBeanInfo.getMappings(destination.getClass()); 
