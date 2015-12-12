@@ -169,10 +169,23 @@ public class RestClient
 	 * @param expectedResponseType Expected return collection element type
 	 * @return Rest response
 	 */
-	public <T, C extends Collection<?>> RestResult<C> invokeJsonRequest(RestRequest<?> request, Class<C> collectionType, Class<T> expectedResponseType)
+	public <T, C extends Collection<?>> RestResult<C> invokeJsonRequestForList(RestRequest<?> request, Class<C> collectionType, Class<T> expectedResponseType)
 	{
 		JavaType collectionJavaType = TypeFactory.defaultInstance().constructCollectionType(collectionType, expectedResponseType);
 		return invokeJsonRequest(request, collectionJavaType);
+	}
+
+	/**
+	 * To be invoked when expected result is having wrapper with single type argument
+	 * @param request Request to be invoked
+	 * @param wrapperType Expected return wrapper type
+	 * @param expectedResponseType Expected return collection element type
+	 * @return Rest response
+	 */
+	public <T, W> RestResult<W> invokeJsonRequest(RestRequest<?> request, Class<W> wrapperType, Class<T> expectedResponseType)
+	{
+		JavaType wrapperJavaType = TypeFactory.defaultInstance().constructParametrizedType(wrapperType, wrapperType, expectedResponseType);
+		return invokeJsonRequest(request, wrapperJavaType);
 	}
 
 	/**
