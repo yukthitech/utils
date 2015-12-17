@@ -413,7 +413,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 			if(!fieldDetails.isRelationField())
 			{
-				throw new InvalidMappingException(String.format("Non-relational field mapping '%1s' found in %2 parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
+				throw new InvalidMappingException(String.format("Non-relational field mapping '%1s' found in %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
 			}
 
 			foreignConstraint = fieldDetails.getForeignConstraintDetails();
