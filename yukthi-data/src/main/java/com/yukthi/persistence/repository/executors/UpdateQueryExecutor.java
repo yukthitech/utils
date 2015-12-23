@@ -133,7 +133,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		//add implicit version update instructions
 		if(entityDetails.hasVersionField())
 		{
-			updateQuery.addColumn(new UpdateColumnParam(entityDetails.getVersionField().getColumn(), null, 1, UpdateOperator.ADD));
+			updateQuery.addColumn(new UpdateColumnParam(entityDetails.getVersionField().getColumn(), 1, -1, UpdateOperator.ADD));
 		}
 
 		return found;
@@ -261,6 +261,13 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			for(ColumnParam column: updateQuery.getColumns())
 			{
 				field = entityDetails.getFieldDetailsByColumn(column.getName());
+				
+				//index would be less than internal fields like version
+				if(column.getIndex() < 0)
+				{
+					continue; 
+				}
+				
 				value = params[column.getIndex()];
 				
 				//if current field is relation field
