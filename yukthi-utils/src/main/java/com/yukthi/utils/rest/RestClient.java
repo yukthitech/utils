@@ -197,9 +197,6 @@ public class RestClient
 	 */
 	public <T> RestResult<T> invokeJsonRequest(RestRequest<?> request, final JavaType expectedResponseType)
 	{
-		//set the content type on request
-		request.setContentType("application/json");
-		
 		//invoked the request
 		RestResult<String> stringResult = makeRequest(request);
 		T resultValue = null;

@@ -6,9 +6,7 @@ package com.yukthi.utils.rest;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
@@ -20,7 +18,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +30,40 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> extends RestRequest<T>
 {
+	private static final String JSON_CONTENT_TYPE = "application/json";
+	
+	private static final class RequestPart
+	{
+		private String name;
+		private Object value;
+		private String contentType;
+		
+		public RequestPart(String name, Object value, String contentType)
+		{
+			this.name = name;
+			this.value = value;
+			
+			this.contentType = contentType;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString()
+		{
+			StringBuilder builder = new StringBuilder(super.toString());
+			builder.append("[");
+
+			builder.append("Name: ").append(name);
+			builder.append(",").append("Value: ").append(value);
+
+			builder.append("]");
+			return builder.toString();
+		}
+
+	}
+	
 	/**
 	 * Request body
 	 */
@@ -41,7 +72,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	/**
 	 * Map to hold file fields.
 	 */
-	private Map<String, FileInfo> fileAttachments = new HashMap<>();
+	private List<RequestPart> multiparts = new ArrayList<>();
 
 	/**
 	 * Object mapper that will be used to convert objects to json
@@ -54,10 +85,9 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	private String method;
 
 	/**
-	 * Name of the request body field used, when multipart request is built
-	 * (when request has file attachments)
+	 * indicates if this is multipart request
 	 */
-	private String requestFieldName = "request";
+	private boolean multipartRequest;
 
 	/**
 	 * @param uri
@@ -95,23 +125,28 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	}
 
 	/**
-	 * Gets the name of the request body field used, when multipart request is built (when request has file attachments).
+	 * Checks if is indicates if this is multipart request.
 	 *
-	 * @return the name of the request body field used, when multipart request is built (when request has file attachments)
+	 * @return the indicates if this is multipart request
 	 */
-	public String getRequestFieldName()
+	public boolean isMultipartRequest()
 	{
-		return requestFieldName;
+		return multipartRequest;
 	}
 
 	/**
-	 * Sets the name of the request body field used, when multipart request is built (when request has file attachments).
+	 * Sets the indicates if this is multipart request.
 	 *
-	 * @param requestFieldName the new name of the request body field used, when multipart request is built (when request has file attachments)
+	 * @param multipartRequest the new indicates if this is multipart request
 	 */
-	public void setRequestFieldName(String requestFieldName)
+	public void setMultipartRequest(boolean multipartRequest)
 	{
-		this.requestFieldName = requestFieldName;
+		if(requestBody != null || !super.getParams().isEmpty())
+		{
+			throw new IllegalStateException("Body/params is already set on this request");
+		}
+		
+		this.multipartRequest = multipartRequest;
 	}
 
 	/**
@@ -124,9 +159,14 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	@SuppressWarnings("unchecked")
 	public T setBody(String body)
 	{
-		if(!super.params.isEmpty() || !this.fileAttachments.isEmpty())
+		if(!super.params.isEmpty())
 		{
 			throw new IllegalStateException("Both params and body can not be set on a single request. Param(s) were already set");
+		}
+		
+		if(multipartRequest)
+		{
+			throw new IllegalStateException("Body can not be set on multi part request");
 		}
 
 		this.requestBody = body;
@@ -140,11 +180,15 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 * @param object
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public T setJsonBody(Object object)
 	{
 		try
 		{
-			return setBody(objectMapper.writeValueAsString(object));
+			setBody(objectMapper.writeValueAsString(object));
+			super.setContentType(JSON_CONTENT_TYPE);
+			
+			return (T)this;
 		} catch(JsonProcessingException ex)
 		{
 			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
@@ -164,6 +208,11 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		{
 			throw new IllegalStateException("Both params and body can not be set on a single request. Request body was already set");
 		}
+		
+		if(multipartRequest)
+		{
+			throw new IllegalStateException("Params can not be added for multi part request");
+		}
 
 		return super.addParam(name, value);
 	}
@@ -179,12 +228,38 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 */
 	public void addAttachment(String field, File file, String contentType)
 	{
-		if(requestBody != null)
+		if(!multipartRequest)
 		{
-			throw new IllegalStateException("Both params and body can not be set on a single request. Request body was already set");
+			throw new IllegalStateException("Attachments can be added only to multi part request");
 		}
 
-		this.fileAttachments.put(field, new FileInfo(file, contentType));
+		this.multiparts.add(new RequestPart(field, new FileInfo(file, contentType), null));
+	}
+	
+	/**
+	 * Adds the specified object as json part to this multipart request
+	 * @param partName Name of the request part
+	 * @param object Object to be added
+	 * @return current request instance
+	 */
+	@SuppressWarnings("unchecked")
+	public T addJsonPart(String partName, Object object)
+	{
+		if(!multipartRequest)
+		{
+			throw new IllegalStateException("Parts can be added only to multi part request");
+		}
+		
+		try
+		{
+			String jsonObject = objectMapper.writeValueAsString(object);
+			this.multiparts.add(new RequestPart(partName, jsonObject, JSON_CONTENT_TYPE));
+		} catch(JsonProcessingException ex)
+		{
+			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
+		}
+		
+		return (T)this;
 	}
 
 	/*
@@ -201,32 +276,40 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		super.populateHeaders(postRequest);
 
 		// if file params are attached
-		if(!this.fileAttachments.isEmpty())
+		if(!this.multiparts.isEmpty())
 		{
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			
 			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 
 			FileInfo fileInfo = null;
 
 			// add files to request body
-			for(String name : this.fileAttachments.keySet())
+			for(RequestPart part : this.multiparts)
 			{
-				fileInfo = fileAttachments.get(name);
-
-				if(fileInfo.getContentType() != null)
+				if(part.value instanceof FileInfo)
 				{
-					builder.addPart(name, new FileBody(fileInfo.getFile(), ContentType.create(fileInfo.getContentType())));
+					fileInfo = (FileInfo)part.value;
+					
+					if(fileInfo.getContentType() != null)
+					{
+						builder.addPart(part.name, new FileBody(fileInfo.getFile(), ContentType.create(fileInfo.getContentType())));
+					}
+					else
+					{
+						builder.addPart(part.name, new FileBody(fileInfo.getFile()));
+					}
 				}
 				else
 				{
-					builder.addPart(name, new FileBody(fileInfo.getFile()));
+					//stringBody = new StringBody( part.value.toString(), ContentType.create(part.contentType) );
+					//builder.addTextBody(part.name, part.value.toString(), ContentType.create(part.contentType));
+					//builder.addPart(part.name, stringBody);
+					builder.addBinaryBody(part.name, part.value.toString().getBytes(), ContentType.create(part.contentType), part.name);
 				}
 			}
-
-			if(requestBody != null)
-			{
-				builder.addPart(requestFieldName, new StringBody( requestBody, ContentType.create(super.getContentType()) ) );
-			}
+			
+			postRequest.setEntity(builder.build());
 		}
 		// if params are present set the request body in the http FORM format
 		else if(!super.params.isEmpty())
@@ -278,14 +361,23 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 
 		builder.append("\n\tRequest Type: ").append(method);
 		builder.append("\n\t").append("Resolved URI: ").append(super.getResolvedUri());
+		builder.append("\n\t").append("Multipart: ").append(multipartRequest);
 		builder.append("\n\t").append("Params: ").append(super.params);
 
-		if(!headers.isEmpty())
+		if(headers != null && !headers.isEmpty())
 		{
 			builder.append("\n\t").append("Headers: ").append(super.headers);
 		}
 
-		builder.append("\n\t").append("Body: ").append(requestBody);
+		if(requestBody != null)
+		{
+			builder.append("\n\t").append("Body: ").append(requestBody);
+		}
+		
+		if(multiparts != null && !multiparts.isEmpty())
+		{
+			builder.append("\n\t").append("Multi parts: ").append(multiparts);
+		}
 
 		builder.append("\n]");
 		return builder.toString();
