@@ -12,13 +12,6 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-/**
- *
- * @author jk
- * getted from http://jxls.cvs.sourceforge.net/jxls/jxls/src/java/org/jxls/util/Util.java?revision=1.8&view=markup
- * by Leonid Vysochyn 
- * and modified (adding styles copying)
- */
 public class ExcelUtil
 {
 
