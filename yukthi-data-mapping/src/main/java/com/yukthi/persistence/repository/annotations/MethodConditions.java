@@ -40,5 +40,11 @@ public @interface MethodConditions
 	 * Specifies null based condition checks
 	 * @return null based conditions
 	 */
-	public NullCheck[] nullChecks();
+	public NullCheck[] nullChecks() default {};
+	
+	/**
+	 * Default conditions on the method
+	 * @return default conditions on the method
+	 */
+	public DefaultCondition[] conditions() default {};
 }

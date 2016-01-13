@@ -9,6 +9,7 @@ import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
 import com.yukthi.persistence.repository.annotations.CountFunction;
+import com.yukthi.persistence.repository.annotations.DefaultCondition;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.MethodConditions;
@@ -40,6 +41,13 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 			}
 	)
 	public List<Employee> findEmpWithNoName(@Condition("phoneNo") String phoneNo);
+	
+	@MethodConditions(
+		conditions = {
+			@DefaultCondition(field = "age", op = Operator.GE, value = "40")
+		}
+	)
+	public List<Employee> findOldEmployees(@Condition("phoneNo") String phoneNo);
 	
 	@Field("age")
 	public int findAge(@Condition("name") String name, @Condition("phoneNo") String phoneNo);

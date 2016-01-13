@@ -153,6 +153,8 @@ public class ConditionQueryBuilder implements Cloneable
 		
 		private boolean nullable;
 		
+		private Object defaultValue;
+		
 		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable, boolean ignoreCase)
 		{
 			this.operator = operator;
@@ -490,13 +492,13 @@ public class ConditionQueryBuilder implements Cloneable
 	 *         group conditions
 	 */
 	public Condition addCondition(Condition groupHead, Operator operator, int index, String embeddedProperty, 
-			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase)
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, String defaultValue)
 	{
 		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
 
 		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullable, ignoreCase);
-
+		
 		// if this mapping is for direct property mapping
 		if(entityFieldParts.length == 1)
 		{
@@ -518,6 +520,18 @@ public class ConditionQueryBuilder implements Cloneable
 			{
 				conditions.add(condition);
 			}
+
+			//for method level conditions parse and consider default value
+			if(index < 0 && defaultValue != null)
+			{
+				try
+				{
+					condition.defaultValue = ConvertUtils.convert(defaultValue, condition.fieldDetails.getField().getType());
+				}catch(Exception ex)
+				{
+					throw new InvalidMappingException(String.format("Invalid default value specified for field %s for repository method %s", entityFieldExpression, methodDesc), ex);					
+				}
+			}
 			
 			return condition;
 		}
@@ -538,6 +552,18 @@ public class ConditionQueryBuilder implements Cloneable
 			conditions.add(condition);
 		}
 		
+		//for method level conditions parse consider default value
+		if(index < 0 && defaultValue != null)
+		{
+			try
+			{
+				condition.defaultValue = ConvertUtils.convert(defaultValue, condition.fieldDetails.getField().getType());
+			}catch(Exception ex)
+			{
+				throw new InvalidMappingException(String.format("Invalid default value specified for field %s for repository method %s", entityFieldExpression, methodDesc), ex);					
+			}
+		}
+
 		return condition;
 	}
 
@@ -706,10 +732,15 @@ public class ConditionQueryBuilder implements Cloneable
 		// fetch the value for current condition
 		try
 		{
-			//for method level conditions like null-checks set null as value
+			//for non-method level conditions fetch the value
 			if(condition.index >= 0)
 			{
 				value = PropertyUtils.getProperty(context, condition.getConditionExpression());
+			}
+			//for method level conditions like null-checks and others use default value from condition
+			else
+			{
+				value = condition.defaultValue;
 			}
 		} catch(Exception ex)
 		{

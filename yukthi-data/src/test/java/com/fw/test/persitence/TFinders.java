@@ -317,4 +317,24 @@ public class TFinders extends TestSuiteBase
 		Assert.assertEquals(results.size(), 2);
 		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()) , CommonUtils.toSet("1232", "1233"));
 	}
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testSearchWithDefaultConditions(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		//find old employees without normal condition (only with default condition)
+		List<Employee> results = repo.findOldEmployees(null);
+		
+		Assert.assertEquals(results.size(), 3);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo(), results.get(2).getEmployeeNo()) , 
+				CommonUtils.toSet("1234", "1235", "1236"));
+		
+		//find old employees with normal condition (default condition with normal conditions)
+		results = repo.findOldEmployees("12345646");
+		
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(results.get(0).getEmployeeNo() , "1236");
+		
+	}
 }

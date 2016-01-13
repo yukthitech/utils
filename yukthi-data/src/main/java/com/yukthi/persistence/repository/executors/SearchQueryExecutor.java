@@ -63,7 +63,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		boolean ignoreCase = ((condition.getValue() instanceof String) && condition.isIgnoreCase());
 		
 		builderCondition = conditionQueryBuilder.addCondition(groupHead, condition.getOperator(), conditionParams.size(), null, 
-				condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable(), ignoreCase);
+				condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable(), ignoreCase, null);
 		
 		conditionParams.add(condition.getValue());
 		

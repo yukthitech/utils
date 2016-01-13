@@ -19,6 +19,7 @@ import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
+import com.yukthi.persistence.repository.annotations.DefaultCondition;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.MethodConditions;
 import com.yukthi.persistence.repository.annotations.NullCheck;
@@ -136,7 +137,7 @@ public abstract class QueryExecutor
 			
 			ignoreCase = (String.class.equals(field.getType()) && condition.ignoreCase());
 			
-			conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), name, condition.joinWith(), methodDesc, condition.nullable(), ignoreCase);
+			conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), name, condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
 			found = true;
 		}
 		
@@ -213,7 +214,7 @@ public abstract class QueryExecutor
 			
 			ignoreCase = (String.class.equals(paramTypes[i]) && condition.ignoreCase());
 			
-			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase);
+			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
 			found = true;
 		}
 
@@ -246,7 +247,7 @@ public abstract class QueryExecutor
 		{
 			field = StringUtil.toStartLower(field);
 			
-			conditionQueryBuilder.addCondition(null, Operator.EQ, index, null, field, JoinOperator.AND, methodDesc, false, false);
+			conditionQueryBuilder.addCondition(null, Operator.EQ, index, null, field, JoinOperator.AND, methodDesc, false, false, null);
 			index++;
 		}
 		
@@ -281,7 +282,19 @@ public abstract class QueryExecutor
 				operator = check.checkForNotNull() ? Operator.NE : Operator.EQ;
 				
 				//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
-				conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true, false);
+				conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true, false, null);
+			}
+		}
+		
+		DefaultCondition defConditions[] = methodConditions.conditions();
+		
+		//check and add default conditions
+		if(defConditions != null)
+		{
+			for(DefaultCondition condition : defConditions)
+			{
+				//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
+				conditionQueryBuilder.addCondition(null, condition.op(), -1, null, condition.field(), condition.joinOperator(), methodDesc, true, false, condition.value());
 			}
 		}
 	}
