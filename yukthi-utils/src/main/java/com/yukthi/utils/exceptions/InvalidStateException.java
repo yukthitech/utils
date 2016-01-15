@@ -23,23 +23,21 @@
 
 package com.yukthi.utils.exceptions;
 
-import com.yukthi.utils.MessageFormatter;
-
 /**
  * To be thrown when unexpected null is encountered. Provides var args support for better formatting
  * @author akiran
  */
-public class InvalidStateException extends RuntimeException
+public class InvalidStateException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;
 
-	public InvalidStateException(Throwable cause, String message, Object... args)
-	{
-		super(MessageFormatter.format(message, args), cause);
-	}
-
 	public InvalidStateException(String message, Object... args)
 	{
-		super(MessageFormatter.format(message, args));
+		super(message, args);
+	}
+
+	public InvalidStateException(Throwable cause, String message, Object... args)
+	{
+		super(cause, message, args);
 	}
 }

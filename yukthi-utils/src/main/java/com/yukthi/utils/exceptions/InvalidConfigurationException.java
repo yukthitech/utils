@@ -23,23 +23,21 @@
 
 package com.yukthi.utils.exceptions;
 
-import com.yukthi.utils.MessageFormatter;
-
 /**
  * To be thrown when configuration is not as per expectation. Provides var args support for better formatting
  * @author akiran
  */
-public class InvalidConfigurationException extends RuntimeException
+public class InvalidConfigurationException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;
 
-	public InvalidConfigurationException(Throwable cause, String message, Object... args)
-	{
-		super(MessageFormatter.format(message, args), cause);
-	}
-
 	public InvalidConfigurationException(String message, Object... args)
 	{
-		super(MessageFormatter.format(message, args));
+		super(message, args);
+	}
+
+	public InvalidConfigurationException(Throwable cause, String message, Object... args)
+	{
+		super(cause, message, args);
 	}
 }

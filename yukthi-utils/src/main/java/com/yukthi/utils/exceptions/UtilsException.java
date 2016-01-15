@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2015 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
+ * Copyright (c) 2016 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,43 @@
 
 package com.yukthi.utils.exceptions;
 
+import java.util.regex.Matcher;
+
+import com.yukthi.utils.MessageFormatter;
+
 /**
- * To be thrown when unsupported operation is executed. Provides var args support for better formatting
+ * Base exception for utils runtime exception
  * @author akiran
  */
-public class UnsupportedOperationException extends UtilsException
+public class UtilsException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
-	public UnsupportedOperationException(String message, Object... args)
+	public UtilsException(Throwable cause, String message, Object... args)
 	{
-		super(message, args);
+		super(buildMessage(message, args), cause);
 	}
 
-	public UnsupportedOperationException(Throwable cause, String message, Object... args)
+	public UtilsException(String message, Object... args)
 	{
-		super(cause, message, args);
+		super(buildMessage(message, args));
+	}
+	
+	private static String buildMessage(String message, Object... args)
+	{
+		String strArgs[] = null;
+		
+		if(args != null)
+		{
+			strArgs = new String[args.length];
+			
+			for(int i = 0; i < args.length; i++)
+			{
+				strArgs[i] = "" + args[i];
+				strArgs[i] = Matcher.quoteReplacement(strArgs[i]);
+			}
+		}
+		
+		return MessageFormatter.format(message, (Object[])strArgs);
 	}
 }

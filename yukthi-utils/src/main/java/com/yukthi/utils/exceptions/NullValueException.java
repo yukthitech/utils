@@ -23,23 +23,21 @@
 
 package com.yukthi.utils.exceptions;
 
-import com.yukthi.utils.MessageFormatter;
-
 /**
  * To be thrown when current state is not expected. Provides var args support for better formatting
  * @author akiran
  */
-public class NullValueException extends RuntimeException
+public class NullValueException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;
 
-	public NullValueException(Throwable cause, String message, Object... args)
-	{
-		super(MessageFormatter.format(message, args), cause);
-	}
-
 	public NullValueException(String message, Object... args)
 	{
-		super(MessageFormatter.format(message, args));
+		super(message, args);
+	}
+
+	public NullValueException(Throwable cause, String message, Object... args)
+	{
+		super(cause, message, args);
 	}
 }
