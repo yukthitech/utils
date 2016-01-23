@@ -34,6 +34,11 @@ public class Order
 	public Order()
 	{}
 	
+	public Order(long id)
+	{
+		this.id = id;
+	}
+	
 	public Order(String title, int orderNo, Customer customer, List<OrderItem> items)
 	{
 		this.title = title;

@@ -18,6 +18,13 @@ import com.yukthi.utils.ObjectWrapper;
 
 public interface IDataStore
 {
+	/**
+	 * This method is called during init of repository factory. This entity details factory is expected
+	 * to be used by datastore to fetch entity details and constraint details on need basis.
+	 * @param entityDetailsFactory
+	 */
+	public void setEntityDetailsFactory(EntityDetailsFactory entityDetailsFactory);
+	
 	public ConversionService getConversionService();
 	
 	public ITransactionManager<? extends ITransaction> getTransactionManager();

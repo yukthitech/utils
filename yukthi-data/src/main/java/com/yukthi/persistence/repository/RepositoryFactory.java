@@ -42,6 +42,7 @@ public class RepositoryFactory
 	public void setDataStore(IDataStore dataStore)
 	{
 		this.dataStore = dataStore;
+		dataStore.setEntityDetailsFactory(entityDetailsFactory);
 	}
 	
 	public boolean isCreateTables()

@@ -17,7 +17,7 @@ import com.yukthi.persistence.annotations.UniqueConstraint;
 })
 public class Employee
 {
-	public static final String ERROR_MESSAGE_DUPLICATE_EMAIL = "Specified email-id already exists: ${emailId}";
+	public static final String ERROR_MESSAGE_DUPLICATE_EMAIL = "Specified email-id already exists";
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

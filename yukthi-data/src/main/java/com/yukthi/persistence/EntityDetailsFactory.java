@@ -37,6 +37,7 @@ import com.yukthi.persistence.monitor.EntityDetailsMonitor;
 import com.yukthi.persistence.monitor.IEntityCreateTableListener;
 import com.yukthi.persistence.query.CreateIndexQuery;
 import com.yukthi.persistence.query.CreateTableQuery;
+import com.yukthi.utils.exceptions.InvalidStateException;
 
 public class EntityDetailsFactory
 {
@@ -46,6 +47,8 @@ public class EntityDetailsFactory
 	private Map<Class<?>, EntityDetails> typeToDetails = new HashMap<>();
 
 	private EntityDetailsMonitor entityDetailsMonitor = new EntityDetailsMonitor();
+	
+	private Map<String, Object> nameToConstraints = new HashMap<>();
 	
 	/**
 	 * Removes non aplha numeric characters (including underscore) from column names and sets it as key and the actual column
@@ -105,7 +108,8 @@ public class EntityDetailsFactory
 		
 		checkFieldValidity(entityDetails, fields, UniqueConstraint.class.getSimpleName(), uniqueConstraint.name(), entityDetails.getEntityType().getName());
 		
-		UniqueConstraintDetails constraint = new UniqueConstraintDetails(uniqueConstraint.name(), fields, uniqueConstraint.message(), uniqueConstraint.validate());
+		UniqueConstraintDetails constraint = new UniqueConstraintDetails(entityDetails, uniqueConstraint.name(), fields, 
+				uniqueConstraint.message(), uniqueConstraint.validate());
 		entityDetails.addUniqueKeyConstraint(constraint);
 		
 		logger.trace("Added unique-constraint {} to entity: {}", uniqueConstraint, entityDetails);
@@ -185,6 +189,34 @@ public class EntityDetailsFactory
 	{
 		//check in cache
 		return typeToDetails.get(entityType);
+	}
+	
+	private void loadConstraintDetails(EntityDetails entityDetails)
+	{
+		Collection<UniqueConstraintDetails> uniqueConstraints = entityDetails.getUniqueConstraints();
+		Collection<ForeignConstraintDetails> foreignConstraints = entityDetails.getForeignConstraints();
+		
+		//load unique constraints on to map 
+		for(UniqueConstraintDetails constraint : uniqueConstraints)
+		{
+			if(nameToConstraints.containsKey(constraint.getConstraintName()))
+			{
+				throw new InvalidStateException("Multiple constraint(s) found with same name - {}", constraint.getConstraintName());
+			}
+			
+			nameToConstraints.put(constraint.getConstraintName(), constraint);
+		}
+		
+		//load foreign key constraints
+		for(ForeignConstraintDetails constraint : foreignConstraints)
+		{
+			if(nameToConstraints.containsKey(constraint.getConstraintName()))
+			{
+				throw new InvalidStateException("Multiple constraint(s) found with same name - {}", constraint.getConstraintName());
+			}
+			
+			nameToConstraints.put(constraint.getConstraintName(), constraint);
+		}
 	}
 	
 	public synchronized EntityDetails getEntityDetails(Class<?> entityType, IDataStore dataStore, boolean createTables)
@@ -313,6 +345,8 @@ public class EntityDetailsFactory
 		
 		logger.trace("Completed building of entity details {}", entityDetails);
 		logger.trace("*********************************************************");
+		
+		loadConstraintDetails(entityDetails);
 		return entityDetails;
 	}
 	
@@ -366,6 +400,7 @@ public class EntityDetailsFactory
 					if(!ForeignConstraintDetails.isTableOwnedRelation(field))
 					{
 						logger.trace("Ignoring column mapping for field {} as it is not owned by table", field.getName());
+						buildFieldDetails(field, columnName, dbType, entityDetails, nullable);
 						continue;
 					}
 
@@ -626,6 +661,54 @@ public class EntityDetailsFactory
 	{
 		typeToDetails.remove(entityType);
 		entityDetailsMonitor.entityRemoved(entityType);
+		
+		Set<String> constraintNames = new HashSet<>(this.nameToConstraints.keySet());
+		Object constraint = null;
+		UniqueConstraintDetails uniqueConstraint = null;
+		ForeignConstraintDetails foreingConstraint = null;
+		
+		for(String name : constraintNames)
+		{
+			constraint = nameToConstraints.get(name);
+			
+			if(constraint instanceof UniqueConstraintDetails)
+			{
+				uniqueConstraint = (UniqueConstraintDetails)constraint;
+				
+				if(uniqueConstraint.getEntityDetails().getEntityType().equals(entityType))
+				{
+					nameToConstraints.remove(name);
+				}
+			}
+			else
+			{
+				foreingConstraint = (ForeignConstraintDetails)constraint;
+				
+				if(foreingConstraint.getOwnerEntityDetails().getEntityType().equals(entityType))
+				{
+					nameToConstraints.remove(name);
+				}
+			}
+		}
+		
 	}
 	
+	/**
+	 * Obtains constraint names from all entities
+	 * @return
+	 */
+	public Set<String> getConstraintNames()
+	{
+		return this.nameToConstraints.keySet();
+	}
+	
+	/**
+	 * Obtains constraint object with specified name
+	 * @param name
+	 * @return
+	 */
+	public Object getConstraint(String name)
+	{
+		return nameToConstraints.get(name);
+	}
 }

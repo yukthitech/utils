@@ -184,7 +184,7 @@ public class JoinTableDetails
 			entityDetails.addFieldDetails(joinFieldDetails);
 			entityDetails.addFieldDetails(invJoinFieldDetails);
 			
-			entityDetails.addUniqueKeyConstraint(new UniqueConstraintDetails("JOIN_INV_JOIN", 
+			entityDetails.addUniqueKeyConstraint(new UniqueConstraintDetails(entityDetails, "JOIN_INV_JOIN", 
 					new String[]{"joinColumn", "inverseJoinColumn"}, "Specified relation already exist", true));
 		
 			entityDetails.addForeignConstraintDetails(new ForeignConstraintDetails(ownerEntityDetails, joinColumnField, entityDetails));

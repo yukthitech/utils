@@ -7,9 +7,14 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.yukthi.persistence.annotations.ForeignConstraintMessage;
+
 @Table(name = "ORDER_ITEM")
 public class OrderItem
 {
+	public static final String FK_INVALID_ORDER_MSG = "No order exist with specified id";
+	public static final String FK_ORDER_DEL_MSG = "No order exist with specified id";
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
@@ -20,6 +25,7 @@ public class OrderItem
 	@Column
 	private int quantity;
 	
+	@ForeignConstraintMessage(message = FK_INVALID_ORDER_MSG, deleteMessage = FK_ORDER_DEL_MSG)
 	@ManyToOne
 	@Column(name = "ORDER_ID")
 	private Order order;

@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.yukthi.persistence.annotations.DataType;
 import com.yukthi.persistence.annotations.DeleteWithParent;
+import com.yukthi.persistence.annotations.ForeignConstraintMessage;
 
 public class ForeignConstraintDetails
 {
@@ -65,11 +66,30 @@ public class ForeignConstraintDetails
 	 */
 	private EntityDetails ownerEntityDetails;
 	
-	public ForeignConstraintDetails(String mappedBy, RelationType relationType, Field ownerField)
+	/**
+	 * Message to be used when constraint fails
+	 */
+	private String message;
+	
+	/**
+	 * Message to be used when parent entity is being deleted without deleting 
+	 * child items 
+	 */
+	private String deleteMessage;
+	
+	private ForeignConstraintDetails(String mappedBy, RelationType relationType, Field ownerField)
 	{
 		this.mappedBy = mappedBy;
 		this.relationType = relationType;
 		this.ownerField = ownerField;
+		
+		ForeignConstraintMessage constraintMessage = ownerField.getAnnotation(ForeignConstraintMessage.class);
+		
+		if(constraintMessage != null)
+		{
+			this.message = constraintMessage.message();
+			this.deleteMessage = constraintMessage.deleteMessage();
+		}
 	}
 	
 	/**
@@ -87,9 +107,34 @@ public class ForeignConstraintDetails
 		this.targetEntityDetails = targetEntityDetails;
 		this.ownerField = ownerField;
 		this.ownerEntityDetails = ownerEntityDetails;
+
+		ForeignConstraintMessage constraintMessage = ownerField.getAnnotation(ForeignConstraintMessage.class);
+		
+		if(constraintMessage != null)
+		{
+			this.message = constraintMessage.message();
+			this.deleteMessage = constraintMessage.deleteMessage();
+		}
 	}
 
-
+	/**
+	 * Fetches the constraint message to be used when constraint fails
+	 * @return the {@link #message message}
+	 */
+	public String getMessage()
+	{
+		return message;
+	}
+	
+	/**
+	 * Message to be used when parent entity is being deleted without deleting 
+	 * child items 
+	 * @return the {@link #deleteMessage deleteMessage}
+	 */
+	public String getDeleteMessage()
+	{
+		return deleteMessage;
+	}
 
 	/**
 	 * Gets the preferred name of this constraint

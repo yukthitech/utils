@@ -7,12 +7,15 @@ import java.util.List;
 
 public class UniqueConstraintDetails
 {
+	public static final String UNIQUE_CONSTRAINT_PREFIX = "UQ_";
+	
+	private EntityDetails entityDetails;
 	private String name;
 	private List<String> fields = new ArrayList<>();
 	private String message;
 	private boolean validate;
 
-	public UniqueConstraintDetails(String name, String fields[], String message, boolean validate)
+	public UniqueConstraintDetails(EntityDetails entityDetails, String name, String fields[], String message, boolean validate)
 	{
 		if(name == null || name.trim().length() == 0)
 		{
@@ -24,6 +27,7 @@ public class UniqueConstraintDetails
 			throw new NullPointerException("Fields can not be null or empty");
 		}
 
+		this.entityDetails = entityDetails;
 		this.name = name;
 		this.message = (message == null || message.trim().length() == 0) ? null : message.trim();
 		this.validate = validate;
@@ -31,9 +35,22 @@ public class UniqueConstraintDetails
 		this.fields.addAll(Arrays.asList(fields));
 	}
 	
+	/**
+	 * @return the {@link #entityDetails entityDetails}
+	 */
+	public EntityDetails getEntityDetails()
+	{
+		return entityDetails;
+	}
+	
 	public String getName()
 	{
 		return name;
+	}
+	
+	public String getConstraintName()
+	{
+		return  UNIQUE_CONSTRAINT_PREFIX + entityDetails.getEntityType().getSimpleName().toUpperCase() + "_" + name.toUpperCase();
 	}
 	
 	public String getFieldsString()

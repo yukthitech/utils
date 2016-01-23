@@ -76,7 +76,8 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				message = formatMessage(uniqueConstraint.getMessage(), fieldValues);
 				message = (message != null) ? message : "Unique constraint violated: " + uniqueConstraint.getName();
 				
-				throw new UniqueConstraintViolationException(uniqueConstraint.getName(), message);
+				throw new UniqueConstraintViolationException(entityDetails.getEntityType(), uniqueConstraint.getFields().toArray(new String[0]), 
+						uniqueConstraint.getName(), message);
 			}
 		}
 	}
@@ -129,7 +130,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				message = "Foreign constraint violated: " + foreignConstraint.getConstraintName();
 				
 				logger.error(message);
-				throw new ForeignConstraintViolationException(foreignConstraint.getConstraintName(), message);
+				throw new ForeignConstraintViolationException(entityDetails.getEntityType(), foreignConstraint.getConstraintName(), message);
 			}
 		}
 	}

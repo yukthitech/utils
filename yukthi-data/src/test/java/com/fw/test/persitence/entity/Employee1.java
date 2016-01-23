@@ -30,7 +30,7 @@ public class Employee1
 	@Column(name = "EMP_NO")
 	private String employeeNo;
 	
-	@UniqueConstraint(name = "EmailId", message = ERROR_MESSAGE_DUPLICATE_EMAIL)
+	@UniqueConstraint(name = "EmailId1", message = ERROR_MESSAGE_DUPLICATE_EMAIL)
 	private String emailId;
 	
 	@Indexed

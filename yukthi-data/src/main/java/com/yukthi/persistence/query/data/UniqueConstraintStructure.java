@@ -7,13 +7,12 @@ import com.yukthi.persistence.UniqueConstraintDetails;
 
 public class UniqueConstraintStructure
 {
-	public static final String UNIQUE_CONSTRAINT_PREFIX = "UQ_";
 	private String name;
 	private String columns[];
 	
 	public UniqueConstraintStructure(EntityDetails entityDetails, UniqueConstraintDetails constraint, Map<String, String> fieldMapping)
 	{
-		this.name = UNIQUE_CONSTRAINT_PREFIX + entityDetails.getEntityType().getSimpleName().toUpperCase() + "_" + constraint.getName().toUpperCase();
+		this.name = constraint.getConstraintName();
 		
 		//FieldDetails fieldDetails = null;
 		columns = new String[constraint.getFields().size()];

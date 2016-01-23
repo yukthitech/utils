@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthi.ccg.xml.XMLBeanParser;
 import com.yukthi.persistence.EntityDetails;
+import com.yukthi.persistence.EntityDetailsFactory;
 import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.IFinderRecordProcessor;
 import com.yukthi.persistence.ITransaction;
@@ -64,6 +65,8 @@ public class RdbmsDataStore implements IDataStore
 	private ConversionService conversionService = new ConversionService();
 	private RdbmsTransactionManager transactionManager = new RdbmsTransactionManager();
 	
+	private EntityDetailsFactory entityDetailsFactory;
+	
 	private String templatesName;
 	
 	public RdbmsDataStore(String templatesName)
@@ -85,6 +88,11 @@ public class RdbmsDataStore implements IDataStore
 		//add blob and clob converters as default converters
 		conversionService.addConverter(new BlobConverter());
 		conversionService.addConverter(new ClobConverter());
+	}
+	
+	public void setEntityDetailsFactory(EntityDetailsFactory entityDetailsFactory)
+	{
+		this.entityDetailsFactory = entityDetailsFactory;
 	}
 	
 	public void setConversionService(ConversionService conversionService)
@@ -566,9 +574,10 @@ public class RdbmsDataStore implements IDataStore
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while saving entity to table '{}' using query: {}", saveQuery.getTableName(), saveQuery, ex);
-			
-			throw new PersistenceException("An error occurred while saving entity to table '" 
-						+ saveQuery.getTableName() + "' using query: " + saveQuery, ex);
+
+			SqlExceptionHandler.handleException("An error occurred while saving entity to table '" 
+					+ saveQuery.getTableName() + "'", ex, entityDetailsFactory, false);
+			return -1;
 		}finally
 		{
 			closeResources(keysRs, pstmt);
@@ -649,8 +658,10 @@ public class RdbmsDataStore implements IDataStore
 		{
 			logger.error("An error occurred while updating entity(s) to table '" 
 					+ updateQuery.getTableName() + "' using query: " + updateQuery, ex);
-			throw new PersistenceException("An error occurred while updating entity(s) to table '" 
-						+ updateQuery.getTableName() + "' using query: " + updateQuery, ex);
+
+			SqlExceptionHandler.handleException("An error occurred while updating entity(s) to table '" 
+					+ updateQuery.getTableName() + "'", ex, entityDetailsFactory, false);
+			return -1;
 		}finally
 		{
 			closeResources(null, pstmt);
@@ -696,7 +707,11 @@ public class RdbmsDataStore implements IDataStore
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while deleting rows from table '" + deleteQuery.getTableName() + "' using query: " + deleteQuery, ex);
-			throw new PersistenceException("An error occurred while deleting rows from table '" + deleteQuery.getTableName() + "' using query: " + deleteQuery, ex);
+
+			SqlExceptionHandler.handleException("An error occurred while deleting rows from table '" 
+					+ deleteQuery.getTableName() + "'", ex, entityDetailsFactory, true);
+
+			return -1;
 		}finally
 		{
 			closeResources(null, pstmt);
@@ -724,99 +739,6 @@ public class RdbmsDataStore implements IDataStore
 		logger.debug("Executing using params: {}", paramValues);
 		
 		return pstmt;
-	}
-	
-	protected int executeUpdate(String queryName, String tableName, Object... params)
-	{
-		PreparedStatement pstmt = null;
-		
-		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
-		{
-			pstmt = buildPreparedStatement(transaction.getTransaction(), queryName, params);
-			
-			int count = pstmt.executeUpdate();
-			
-			transaction.commit();
-			return count;
-		}catch(Exception ex)
-		{
-			logger.error("An error occurred while fetching rows from table - " + tableName, ex);
-			
-			throw new PersistenceException("An error occurred while fetching rows from table - " + tableName, ex);
-		}finally
-		{
-			closeResources(null, pstmt);
-		}
-	}
-
-	protected List<Record> fetchRecords(String queryName, String tableName, Object... params)
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
-		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
-		{
-			pstmt = buildPreparedStatement(transaction.getTransaction(), queryName, params);
-			
-			rs = pstmt.executeQuery();
-			
-			List<Record> records = new ArrayList<>();
-			ResultSetMetaData metaData = rs.getMetaData();
-			Record  rec = null;
-			int colCount = metaData.getColumnCount();
-			String colNames[] = null;
-			Object cellValue = null;
-			
-			while(rs.next())
-			{
-				//if records are available fetch columns names, so that same name objects
-				//are shared across the records
-				if(colNames == null)
-				{
-					colNames = new String[colCount];
-					
-					for(int i = 0 ; i < colCount ; i++)
-					{
-						colNames[i] = metaData.getColumnLabel(i + 1);
-					}
-				}
-				
-				rec = new Record(colCount);
-				
-				//fetch column values for each record
-				for(int i = 0 ; i < colCount ; i++)
-				{
-					cellValue = rs.getObject(i + 1);
-					
-					if(cellValue instanceof Clob)
-					{
-						cellValue = convertClob((Clob)cellValue);
-					}
-					else if(cellValue instanceof Blob)
-					{
-						cellValue = convertBlob((Blob)cellValue);
-					}
-					
-					rec.set(i, colNames[i], cellValue);
-				}
-				
-				records.add(rec);
-			}
-			
-			logger.debug("Found " + records.size() + " records found from table: " + tableName);
-			
-			transaction.commit();
-			return records;
-		}catch(Exception ex)
-		{
-			logger.error("An error occurred while fetching rows from table - " + tableName, ex);
-			
-			throw new PersistenceException("An error occurred while fetching rows from table - " + tableName, ex);
-		}finally
-		{
-			closeResources(rs, pstmt);
-		}
-		
 	}
 	
 	private char[] convertClob(Clob clob)
