@@ -25,6 +25,12 @@ public interface IDataStore
 	 */
 	public void setEntityDetailsFactory(EntityDetailsFactory entityDetailsFactory);
 	
+	/**
+	 * Sets the specified native query factory for this data store
+	 * @param factory
+	 */
+	public void setNativeQueryFactory(NativeQueryFactory factory);
+	
 	public ConversionService getConversionService();
 	
 	public ITransactionManager<? extends ITransaction> getTransactionManager();
@@ -59,6 +65,22 @@ public interface IDataStore
 	public List<Object> fetchChildrenIds(FetchChildrenIdsQuery fetchChildrenIdsQuery);
 
 	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails, IFinderRecordProcessor recordProcessor);
+	
+	/**
+	 * Used to execute native search query indicated by "queryName"
+	 * @param queryName Name of the query to execute
+	 * @param context Context to be used to inject query params
+	 * @return List of fetched records
+	 */
+	public List<Record> executeNativeFinder(String queryName, Object context);
+	
+	/**
+	 * Used to execute native DML queries
+	 * @param queryName DML query name to execute
+	 * @param context Context to be used to inject query params
+	 * @return Number of records affected
+	 */
+	public int executeNativeDml(String queryName, Object context);
 	
 	/**
 	 * Drops the underlying entity table

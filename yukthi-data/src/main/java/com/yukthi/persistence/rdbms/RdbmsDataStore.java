@@ -33,6 +33,7 @@ import com.yukthi.persistence.IFinderRecordProcessor;
 import com.yukthi.persistence.ITransaction;
 import com.yukthi.persistence.ITransactionManager;
 import com.yukthi.persistence.LobData;
+import com.yukthi.persistence.NativeQueryFactory;
 import com.yukthi.persistence.PersistenceException;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.TransactionWrapper;
@@ -67,6 +68,8 @@ public class RdbmsDataStore implements IDataStore
 	
 	private EntityDetailsFactory entityDetailsFactory;
 	
+	private NativeQueryFactory nativeQueryFactory;
+	
 	private String templatesName;
 	
 	public RdbmsDataStore(String templatesName)
@@ -88,6 +91,15 @@ public class RdbmsDataStore implements IDataStore
 		//add blob and clob converters as default converters
 		conversionService.addConverter(new BlobConverter());
 		conversionService.addConverter(new ClobConverter());
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.yukthi.persistence.IDataStore#setNativeQueryFactory(com.yukthi.persistence.NativeQueryFactory)
+	 */
+	@Override
+	public void setNativeQueryFactory(NativeQueryFactory factory)
+	{
+		this.nativeQueryFactory = factory;
 	}
 	
 	public void setEntityDetailsFactory(EntityDetailsFactory entityDetailsFactory)
@@ -904,6 +916,168 @@ public class RdbmsDataStore implements IDataStore
 		}finally
 		{
 			closeResources(rs, pstmt);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.yukthi.persistence.IDataStore#executeNativeFinder(java.lang.String, java.lang.Object)
+	 */
+	public List<Record> executeNativeFinder(String queryName, Object context)
+	{
+		logger.trace("Started method: executeNativeFinder with query - {}", queryName);
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
+		{
+			List<Object> params = new ArrayList<>();
+			String query = nativeQueryFactory.buildQuery(queryName, params, context);
+			
+			logger.debug("Built native find query as: \n\t{}", query);
+			logger.debug("Executing using params: {}", params);
+			
+			Connection connection = transaction.getTransaction().getConnection();
+			pstmt = connection.prepareStatement(query);
+
+			int paramCount = params.size();
+			
+			for(int i = 0; i < paramCount; i++)
+			{
+				pstmt.setObject(i + 1, params.get(0));
+			}
+			
+			rs = pstmt.executeQuery();
+			
+			List<Record> records = new ArrayList<>();
+			ResultSetMetaData metaData = rs.getMetaData();
+			Record  rec = null;
+			int colCount = metaData.getColumnCount();
+			String colNames[] = null;
+			Object cellValue = null;
+			
+			while(rs.next())
+			{
+				//if records are available fetch columns names, so that same name objects
+				//are shared across the records
+				if(colNames == null)
+				{
+					colNames = new String[colCount];
+					
+					for(int i = 0 ; i < colCount ; i++)
+					{
+						colNames[i] = metaData.getColumnLabel(i + 1);
+					}
+				}
+				
+				rec = new Record(colCount);
+				
+				//fetch column values for each record
+				for(int i = 0 ; i < colCount ; i++)
+				{
+					cellValue = rs.getObject(i + 1);
+					
+					if(cellValue instanceof Clob)
+					{
+						cellValue = convertClob((Clob)cellValue);
+					}
+					else if(cellValue instanceof Blob)
+					{
+						cellValue = convertBlob((Blob)cellValue);
+					}
+					
+					rec.set(i, colNames[i], cellValue);
+				}
+				
+				records.add(rec);
+			}
+			
+			logger.debug("Found " + records.size() + " records found from table");
+			
+			transaction.commit();
+			return records;
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while executing native finder query - " + queryName, ex); 
+			
+			throw new PersistenceException("An error occurred while executing native finder query - " + queryName, ex);
+		}finally
+		{
+			closeResources(rs, pstmt);
+		}
+	}
+
+	@Override
+	public int executeNativeDml(String queryName, Object context)
+	{
+		logger.trace("Started method: executeNativeDml - " + queryName);
+		
+		PreparedStatement pstmt = null;
+		
+		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
+		{
+			List<Object> params = new ArrayList<>();
+			String query = nativeQueryFactory.buildQuery(queryName, params, context);
+			
+			logger.debug("Built update query as: \n\t{}", query);
+			logger.debug("Executing using params: {}", params);
+			
+			Connection connection = transaction.getTransaction().getConnection();
+			pstmt = connection.prepareStatement(query);
+			int index = 1;
+			Object value = null;
+			List<Closeable> closeables = new ArrayList<>();
+			int paramCount = params.size();
+			
+			for(int i = 0; i < paramCount; i++)
+			{
+				value = params.get(0);
+				
+				if(value instanceof LobData)
+				{
+					LobData lobData = (LobData)value;
+					closeables.add(lobData);
+					
+					if(lobData.isTextStream())
+					{
+						pstmt.setCharacterStream(index, lobData.openReader() );
+					}
+					else
+					{
+						pstmt.setBinaryStream(index,  lobData.openStream() );
+					}
+				}
+				else
+				{
+					pstmt.setObject(index, value);
+				}
+
+				params.add(value);
+				index++;
+			}
+			
+			
+			int count = pstmt.executeUpdate();
+			
+			//close any open closeables (like blob streams)
+			for(Closeable closeable : closeables)
+			{
+				closeable.close();
+			}
+
+			logger.debug("Affected {} records by query - {}", count, queryName);
+			
+			transaction.commit();
+			return count;
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while executing native DML - " + queryName, ex); 
+
+			SqlExceptionHandler.handleException("An error occurred while executing native DML - " + queryName, ex, entityDetailsFactory, false);
+			return -1;
+		}finally
+		{
+			closeResources(null, pstmt);
 		}
 	}
 
