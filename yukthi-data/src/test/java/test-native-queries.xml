@@ -1,0 +1,29 @@
+<native-queries>
+	<query name="readQuery"><![CDATA[
+		SELECT ID, EMP_NO EMPLOYEE_NO, PHONE_NO, AGE, EMAIL_ID, ENAME NAME
+		FROM EMPLOYEE
+		WHERE 1 = 1
+		<#if name??>AND ENAME LIKE '%${name}%'</#if>
+		<#if minAge??>AND AGE >= ?{minAge}</#if>
+		<#if maxAge??>AND AGE <= ?{maxAge}</#if>
+		ORDER BY EMP_NO
+	]]></query>
+	
+	<query name="insertQuery"><![CDATA[
+		INSERT INTO EMPLOYEE(EMP_NO, EMAIL_ID, ENAME, PHONE_NO, AGE, UQ_ENTITY_ID)
+		VALUES(?{employeeNo}, ?{emailId}, ?{name}, ?{phoneNo}, ?{age}, ?{time})
+	]]></query>
+
+	<query name="updateQuery"><![CDATA[
+		UPDATE EMPLOYEE
+		SET EMAIL_ID = ?{emailId}
+		WHERE ID = ${id}
+	]]></query>
+
+	<query name="deleteQuery"><![CDATA[
+		DELETE FROM EMPLOYEE
+		WHERE 1 = 1
+		<#if name??>AND ENAME LIKE '%${name}%'</#if>
+	]]></query>
+	
+</native-queries>

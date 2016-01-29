@@ -1,6 +1,7 @@
 package com.fw.test.persitence.entity;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fw.test.persitence.queries.EmpSearchQuery;
 import com.fw.test.persitence.queries.EmpSearchResult;
@@ -13,6 +14,8 @@ import com.yukthi.persistence.repository.annotations.DefaultCondition;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.MethodConditions;
+import com.yukthi.persistence.repository.annotations.NativeQuery;
+import com.yukthi.persistence.repository.annotations.NativeQueryType;
 import com.yukthi.persistence.repository.annotations.NullCheck;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.OrderBy;
@@ -90,4 +93,19 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	public long getCountByMailId(@Condition("emailId") String mail);
 
 	public void deleteAll();
+	
+	@NativeQuery(name = "insertQuery", type = NativeQueryType.INSERT)
+	public boolean addEmployee(Employee employee);
+	
+	@NativeQuery(name = "updateQuery", type = NativeQueryType.UPDATE)
+	public int updateEmployee(Map<String, Object> employeeDet);
+	
+	@NativeQuery(name = "deleteQuery", type = NativeQueryType.DELETE)
+	public int deleteEmployee(Map<String, Object> employeeDet);
+	
+	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
+	public Employee readEmployee1(EmpSearchQuery query);
+
+	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
+	public List<Employee> readEmployee2(EmpSearchQuery query);
 }

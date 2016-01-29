@@ -13,6 +13,7 @@ import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.repository.executors.CountQueryExecutor;
 import com.yukthi.persistence.repository.executors.DeleteQueryExecutor;
 import com.yukthi.persistence.repository.executors.FinderQueryExecutor;
+import com.yukthi.persistence.repository.executors.NativeQueryExecutor;
 import com.yukthi.persistence.repository.executors.QueryExecutor;
 import com.yukthi.persistence.repository.executors.QueryExecutorPattern;
 import com.yukthi.persistence.repository.executors.SaveQueryExecutor;
@@ -156,6 +157,8 @@ public class ExecutorFactory
 		registerExecutor(SaveQueryExecutor.class);
 		registerExecutor(DeleteQueryExecutor.class);
 		registerExecutor(UpdateQueryExecutor.class);
+		
+		registerExecutor(NativeQueryExecutor.class);
 	}
 
 	/**

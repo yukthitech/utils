@@ -944,7 +944,7 @@ public class RdbmsDataStore implements IDataStore
 			
 			for(int i = 0; i < paramCount; i++)
 			{
-				pstmt.setObject(i + 1, params.get(0));
+				pstmt.setObject(i + 1, params.get(i));
 			}
 			
 			rs = pstmt.executeQuery();
@@ -1031,7 +1031,7 @@ public class RdbmsDataStore implements IDataStore
 			
 			for(int i = 0; i < paramCount; i++)
 			{
-				value = params.get(0);
+				value = params.get(i);
 				
 				if(value instanceof LobData)
 				{

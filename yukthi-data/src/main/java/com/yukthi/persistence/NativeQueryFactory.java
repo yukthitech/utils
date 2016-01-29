@@ -23,12 +23,18 @@
 
 package com.yukthi.persistence;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import com.yukthi.persistence.freemarker.ParamCollectorDirective;
+import org.apache.commons.beanutils.PropertyUtils;
+
+import com.yukthi.ccg.xml.XMLBeanParser;
 import com.yukthi.persistence.freemarker.TrimDirective;
 import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
@@ -45,6 +51,11 @@ import freemarker.template.Template;
 public class NativeQueryFactory
 {
 	/**
+	 * Pattern for query parameters in queries
+	 */
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("\\?\\{([\\w\\.]+)\\}");
+	
+	/**
 	 * Map to maintain raw queries with expressions
 	 */
 	private Map<String, String> queryMap = new HashMap<>();
@@ -59,16 +70,52 @@ public class NativeQueryFactory
 	 */
 	private Configuration configuration = new Configuration();
 	
-	/**
-	 * Directive to collect parameter values that needs to be passed during query execution
-	 */
-	private ParamCollectorDirective paramCollectorDirective = new ParamCollectorDirective();
-	
-	
 	public NativeQueryFactory()
 	{
 		configuration.setSharedVariable("trim", new TrimDirective());
-		configuration.setSharedVariable("param", paramCollectorDirective);
+	}
+	
+	/**
+	 * Loads queries from specified input stream
+	 * @param is Input stream to be loaded
+	 */
+	public void addResourceStream(InputStream is)
+	{
+		XMLBeanParser.parse(is, this);
+	}
+	
+	/**
+	 * Loads queries from specified resource file. Specified resource path should be accessible in classpath.
+	 * @param resource Resource to be loaded
+	 */
+	public void addResource(String resource)
+	{
+		try
+		{
+			InputStream is = NativeQueryFactory.class.getResourceAsStream(resource);
+			addResourceStream(is);
+			is.close();
+		}catch(Exception ex)
+		{
+			throw new InvalidArgumentException(ex, "An error occurred while loading resource file - {}", resource);
+		}
+	}
+	
+	/**
+	 * Loads queries from specified file
+	 * @param file File to be loaded
+	 */
+	public void addFile(String file)
+	{
+		try
+		{
+			InputStream is = new FileInputStream(file);
+			addResourceStream(is);
+			is.close();
+		}catch(Exception ex)
+		{
+			throw new InvalidArgumentException(ex, "An error occurred while loading file - {}", file);
+		}
 	}
 
 	/**
@@ -118,20 +165,29 @@ public class NativeQueryFactory
 		
 		try
 		{
-			//reset param directive
-			paramCollectorDirective.reset(context);
-			
 			//process the template into query
 			StringWriter writer = new StringWriter();
 			template.process(context, writer);
 			
-			if(paramValues != null)
+			writer.flush();
+
+			//build the final query (replacing the param expressions)
+			String query = writer.toString();
+			StringBuffer finalQuery = new StringBuffer();
+			Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
+			String property = null;
+			
+			while(matcher.find())
 			{
-				paramValues.addAll(paramCollectorDirective.getParamValues());
+				property = matcher.group(1);
+				matcher.appendReplacement(finalQuery, "?");
+				
+				paramValues.add(PropertyUtils.getProperty(context, property));
 			}
 			
-			writer.flush();
-			return writer.toString();
+			matcher.appendTail(finalQuery);
+			
+			return finalQuery.toString();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An exception occurred while building query: " + name);

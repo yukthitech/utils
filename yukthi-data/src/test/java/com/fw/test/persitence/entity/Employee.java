@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.yukthi.persistence.annotations.Index;
 import com.yukthi.persistence.annotations.Indexed;
@@ -37,6 +38,9 @@ public class Employee
 	private String phoneNo;
 	
 	private int age;
+	
+	@Transient
+	private String time = "" + System.currentTimeMillis();
 	
 	public Employee()
 	{}
@@ -116,5 +120,11 @@ public class Employee
 		this.age = age;
 	}
 	
-	
+	/**
+	 * @return the {@link #time time}
+	 */
+	public String getTime()
+	{
+		return time;
+	}
 }

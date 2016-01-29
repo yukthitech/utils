@@ -83,7 +83,7 @@ public class ReflectionUtils
 			fieldObj.set(bean, value);
 		} catch(Exception ex)
 		{
-			throw new IllegalStateException("An error occurred while fetching field value - " + field, ex);
+			throw new IllegalStateException("An error occurred while seting field value - " + field, ex);
 		}
 	}
 	
