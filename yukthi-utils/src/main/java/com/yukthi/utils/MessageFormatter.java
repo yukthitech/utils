@@ -93,7 +93,7 @@ public class MessageFormatter
 				argIndex = loopIndex;
 			}
 			
-			//if the index is withing provided arguments length
+			//if the index is within provided arguments length
 			if(argIndex < args.length)
 			{
 				arg = args[argIndex];

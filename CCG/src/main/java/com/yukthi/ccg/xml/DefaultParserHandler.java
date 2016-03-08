@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import org.apache.commons.beanutils.PropertyUtils;
+
 import com.yukthi.ccg.core.CCGException;
 import com.yukthi.ccg.core.UnsupportedDataTypeException;
 import com.yukthi.ccg.core.ValidateException;
@@ -103,6 +105,8 @@ import com.yukthi.ccg.util.ValueProvider;
 public class DefaultParserHandler implements ParserHandler
 {
 	public static final String RNODE_INCLUDE_XML_RES = "includeXmlRes";
+	public static final String RNODE_CUSTOM_NODE_HANDLER = "customNodeHandler";
+	
 	public static final String ATTR_PATH = "path";
 
 	public static final String ATTR_BEAN_TYPE = "beanType";
@@ -146,6 +150,8 @@ public class DefaultParserHandler implements ParserHandler
 	private String escapePrefix = "$$";
 	private String escapeReplace = "$";
 	private boolean expressionEnabled = true;
+	
+	private ICustomNodeHandler customNodeHandler;
 
 	/**
 	 * If the root is null, then reserve attribute beanType is mandatory in root node. 
@@ -519,6 +525,18 @@ public class DefaultParserHandler implements ParserHandler
 			escapeReplace = att.get(ATTR_ESCAPE_REPLACE, "$");
 			return null;
 		}
+		
+		if(RNODE_CUSTOM_NODE_HANDLER.equals(node.getName()))
+		{
+			Object nodeHandler = createBean(node, classLoader);
+			this.customNodeHandler = (ICustomNodeHandler)nodeHandler;
+			return null;
+		}
+		
+		if(customNodeHandler != null)
+		{
+			return customNodeHandler.createCustomNodeBean(node, att);
+		}
 
 		return null;
 	}
@@ -577,7 +595,12 @@ public class DefaultParserHandler implements ParserHandler
 	 * @see com.yukthi.ccg.xml.ParserHandler#processReserveNodeEnd(java.lang.String, java.lang.Object, java.lang.Object, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	public void processReserveNodeEnd(BeanNode node, XMLAttributeMap att)
-	{}
+	{
+		if(customNodeHandler != null)
+		{
+			customNodeHandler.handleCustomNodeEnd(node, att);
+		}
+	}
 
 	/**
 	 * This method is expected to be used by child classes to change date format as
@@ -916,7 +939,8 @@ public class DefaultParserHandler implements ParserHandler
 
 				try
 				{
-					return CCGUtility.invokeGetProperty(rootBean, name, null, false);
+					//return CCGUtility.invokeGetProperty(rootBean, name, null, false);
+					return "" + PropertyUtils.getProperty(rootBean, name);
 				}catch(Exception ex)
 				{
 					throw new IllegalStateException("An error occurred while invoking property " + name + " on bean " + rootBean.getClass().getName(), ex);
@@ -925,5 +949,13 @@ public class DefaultParserHandler implements ParserHandler
 		};
 
 		return StringUtil.getPatternString(text, valueProvider, expressionPattern, escapePrefix, escapeReplace);
+	}
+	
+	/**
+	 * @param customNodeHandler the {@link #customNodeHandler customNodeHandler} to set
+	 */
+	public void setCustomNodeHandler(ICustomNodeHandler customNodeHandler)
+	{
+		this.customNodeHandler = customNodeHandler;
 	}
 }
