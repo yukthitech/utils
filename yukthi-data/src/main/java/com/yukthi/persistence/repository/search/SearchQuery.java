@@ -2,6 +2,9 @@ package com.yukthi.persistence.repository.search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * Search query object for search methods with dynamic conditions
@@ -21,9 +24,24 @@ public class SearchQuery
 	private List<String> orderByFields = new ArrayList<>();
 	
 	/**
-	 * Count to which results should be limited. Used in results paging
+	 * Row number after which results should be fetched. Used in paging.
 	 */
-	private int resultsLimitCount = -1;
+	private int resultsOffset = -1;
+	
+	/**
+	 * Maximum number of rows to return. Used in paging.
+	 */
+	private int resultsLimit = -1;
+	
+	/**
+	 * Additional fields to include along with standard return fields.
+	 */
+	private Set<String> additionalEntityFields;
+	
+	/**
+	 * Search result fields to be excluded.
+	 */
+	private Set<String> excludeFields;
 	
 	/**
 	 * Instantiates a new search query.
@@ -99,23 +117,83 @@ public class SearchQuery
 	}
 
 	/**
-	 * Gets the count to which results should be limited. Used in results paging.
+	 * Gets the row number after which results should be fetched. Used in paging.
 	 *
-	 * @return the count to which results should be limited
+	 * @return the row number after which results should be fetched
 	 */
-	public int getResultsLimitCount()
+	public int getResultsOffset()
 	{
-		return resultsLimitCount;
+		return resultsOffset;
 	}
 
 	/**
-	 * Sets the count to which results should be limited. Used in results paging.
+	 * Sets the row number after which results should be fetched. Used in paging.
 	 *
-	 * @param resultsLimitCount the new count to which results should be limited
+	 * @param resultsOffset the new row number after which results should be fetched
 	 */
-	public void setResultsLimitCount(int resultsLimitCount)
+	public void setResultsOffset(int resultsOffset)
 	{
-		this.resultsLimitCount = resultsLimitCount;
+		this.resultsOffset = resultsOffset;
+	}
+
+	/**
+	 * Gets the maximum number of rows to return. Used in paging.
+	 *
+	 * @return the maximum number of rows to return
+	 */
+	public int getResultsLimit()
+	{
+		return resultsLimit;
+	}
+
+	/**
+	 * Sets the maximum number of rows to return. Used in paging.
+	 *
+	 * @param resultsLimit the new maximum number of rows to return
+	 */
+	public void setResultsLimit(int resultsLimit)
+	{
+		this.resultsLimit = resultsLimit;
+	}
+	
+	/**
+	 * Gets the additional fields to include along with standard return fields.
+	 *
+	 * @return the additional fields to include along with standard return fields
+	 */
+	public Set<String> getAdditionalEntityFields()
+	{
+		return additionalEntityFields;
+	}
+
+	/**
+	 * Sets the additional fields to include along with standard return fields.
+	 *
+	 * @param additionalEntityFields the new additional fields to include along with standard return fields
+	 */
+	public void setAdditionalEntityFields(Set<String> additionalEntityFields)
+	{
+		this.additionalEntityFields = additionalEntityFields;
+	}
+
+	/**
+	 * Gets the search result fields to be excluded.
+	 *
+	 * @return the search result fields to be excluded
+	 */
+	public Set<String> getExcludeFields()
+	{
+		return excludeFields;
+	}
+
+	/**
+	 * Sets the search result fields to be excluded.
+	 *
+	 * @param excludeFields the new search result fields to be excluded
+	 */
+	public void setExcludeFields(Set<String> excludeFields)
+	{
+		this.excludeFields = excludeFields;
 	}
 
 	/* (non-Javadoc)
@@ -129,7 +207,20 @@ public class SearchQuery
 
 		builder.append("Conditions: ").append(conditions);
 		builder.append(", ").append("Order-by Fields: ").append(orderByFields);
-		builder.append(", ").append("Results limit count: ").append(resultsLimitCount);
+		builder.append(", ").append("Results Offset: ").append(resultsOffset);
+		builder.append(", ").append("Results Limit: ").append(resultsLimit);
+		
+		if(CollectionUtils.isNotEmpty(additionalEntityFields))
+		{
+			builder.append(", ").append("Additional Fields: ").append(additionalEntityFields);
+		}
+		
+		if(CollectionUtils.isNotEmpty(excludeFields))
+		{
+			builder.append(", ").append("Excluded Fields: ").append(excludeFields);
+		}
+		
+		
 
 		builder.append("]");
 		return builder.toString();

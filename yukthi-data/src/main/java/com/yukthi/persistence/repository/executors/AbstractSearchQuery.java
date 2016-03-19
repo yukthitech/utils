@@ -210,7 +210,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		}
 		else
 		{
-			throw new UnsupportedOperationException("Failed to determine return details of finder method: " + method.getName());
+			throw new UnsupportedOperationException("Failed to determine return details of finder method: " + methodDesc);
 		}
 	}
 	

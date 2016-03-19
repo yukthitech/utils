@@ -3,6 +3,7 @@ package com.fw.test.persitence.entity;
 import java.util.List;
 import java.util.Map;
 
+import com.fw.test.persitence.queries.DynamicEmpSearchResult;
 import com.fw.test.persitence.queries.EmpSearchQuery;
 import com.fw.test.persitence.queries.EmpSearchResult;
 import com.fw.test.persitence.queries.KeyValueBean;
@@ -20,7 +21,9 @@ import com.yukthi.persistence.repository.annotations.NullCheck;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.OrderBy;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
+import com.yukthi.persistence.repository.annotations.SearchFunction;
 import com.yukthi.persistence.repository.annotations.SearchResult;
+import com.yukthi.persistence.repository.search.SearchQuery;
 
 public interface IEmployeeRepository extends ICrudRepository<Employee>
 {
@@ -108,4 +111,8 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 
 	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
 	public List<Employee> readEmployee2(EmpSearchQuery query);
+
+	@SearchFunction
+	@SearchResult
+	public List<DynamicEmpSearchResult> searchByName(SearchQuery searchQuery);
 }

@@ -106,6 +106,12 @@ public interface IDataStore
 	 * @return
 	 */
 	public boolean isExplicitUniqueCheckRequired();
+	
+	/**
+	 * Returns true, if paging is supported by this data store.
+	 * @return true if paging is supported
+	 */
+	public boolean isPagingSupported();
 }
 
 

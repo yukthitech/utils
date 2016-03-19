@@ -1,4 +1,4 @@
-<configuration xmlns:ccg="/fw/ccg/XMLBeanParser">
+<configuration xmlns:ccg="/fw/ccg/XMLBeanParser" pagingSupported="true">
 	<template name="#commonCode"><![CDATA[
 		
 		<#function addCondition condition conditionIndex includeTableCode>
@@ -199,6 +199,9 @@
 		<#if query.orderByFields??> 
 			ORDER BY <#list query.orderByFields as orderField>${orderField.code}<#if orderField_has_next>, </#if></#list>
 		</#if>
+		<#if query.resultsOffset??>
+			LIMIT ${query.resultsOffsetString}, ${query.resultsLimitString}
+		</#if> 
 	]]></template>	
 
 	<template name="countTemplate"><![CDATA[

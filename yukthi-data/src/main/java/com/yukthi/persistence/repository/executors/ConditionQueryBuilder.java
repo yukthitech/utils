@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,8 @@ import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.executors.proxy.ProxyEntityCreator;
+import com.yukthi.persistence.repository.search.DynamicResultField;
+import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ObjectWrapper;
 import com.yukthi.utils.exceptions.InvalidStateException;
@@ -566,6 +569,26 @@ public class ConditionQueryBuilder implements Cloneable
 
 		return condition;
 	}
+	
+	/**
+	 * Removes result fields matching with specified property name.
+	 * @param propertyName Property name to be removed.
+	 */
+	public void removeResultField(String propertyName)
+	{
+		Iterator<ResultField> fieldIt = this.resultFields.iterator();
+		ResultField field = null;
+		
+		while(fieldIt.hasNext())
+		{
+			field = fieldIt.next();
+			
+			if(field.property.equals(propertyName))
+			{
+				fieldIt.remove();
+			}
+		}
+	}
 
 	/**
 	 * Adds a result field of the query to this builder
@@ -582,8 +605,10 @@ public class ConditionQueryBuilder implements Cloneable
 			throw new InvalidMappingException("Encountered second return field addition after setting direct return field");
 		}
 
-		// if subproperty field is already added and later if direct return is
-		// getting added
+		/*
+		 * resultProperty would be null only when direct field return is expected.
+		 * In case if result fields are already added and later direct result is being added as expectation throw error.
+		 */
 		if(!this.resultFields.isEmpty() && resultProperty == null)
 		{
 			throw new InvalidMappingException("Encountered addition direct-return field (with null property) after adding a subproperty return field");
@@ -640,7 +665,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 	/**
 	 * Adds specified table and its dependency tables to the specified
-	 * conditional query
+	 * conditional query.
 	 * 
 	 * @param query
 	 * @param tableCode
@@ -888,6 +913,13 @@ public class ConditionQueryBuilder implements Cloneable
 
 					proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
 					value = proxyEntityCreator.getProxyEntity();
+				}
+				//if this is additional property field
+				else if(resultField.property.startsWith("#"))
+				{
+					value = conversionService.convertToJavaType(value, resultField.fieldDetails);
+					((IDynamicSearchResult)result).addField(new DynamicResultField(resultField.property.substring(1), value));
+					continue;
 				}
 				// if current field is a simple field (non relation field)
 				else

@@ -1,4 +1,4 @@
-<configuration xmlns:ccg="/fw/ccg/XMLBeanParser">
+<configuration xmlns:ccg="/fw/ccg/XMLBeanParser" pagingSupported="false">
 	
 	<template name="#commonCode"><![CDATA[
 		

@@ -49,6 +49,11 @@ public class RdbmsConfiguration implements Validateable
 	
 	private ParamCollectorDirective paramCollectorDirective = new ParamCollectorDirective();
 	
+	/**
+	 * Indicates whether the target DB supports paging or not
+	 */
+	private boolean pagingSupported = true;
+	
 	public RdbmsConfiguration()
 	{
 		configuration.setSharedVariable("trim", new TrimDirective());
@@ -64,6 +69,26 @@ public class RdbmsConfiguration implements Validateable
 	{
 		String query = queryMap.get(name);
 		return (query == null || query.trim().length() == 0);
+	}
+	
+	/**
+	 * Checks if is indicates whether the target DB supports paging or not.
+	 *
+	 * @return the indicates whether the target DB supports paging or not
+	 */
+	public boolean isPagingSupported()
+	{
+		return pagingSupported;
+	}
+
+	/**
+	 * Sets the indicates whether the target DB supports paging or not.
+	 *
+	 * @param pagingSupported the new indicates whether the target DB supports paging or not
+	 */
+	public void setPagingSupported(boolean pagingSupported)
+	{
+		this.pagingSupported = pagingSupported;
 	}
 
 	@Override

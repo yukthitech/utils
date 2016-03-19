@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2015 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
+ * Copyright (c) 2016 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,17 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence;
+package com.yukthi.persistence.repository.search;
 
 /**
- * Can be used to process records as and when records are being fetched from DB. This instance can 
- * be passed {@link IDataStore#executeFinder(com.yukthi.persistence.query.FinderQuery, EntityDetails, IFinderRecordProcessor)}
+ * Used to indicate search method return type can hold dynamic return values (which are not part of standard fields).
  * @author akiran
  */
-public interface IFinderRecordProcessor
+public interface IDynamicSearchResult
 {
 	/**
-	 * Represents action to be taken on the record
-	 * @author akiran
+	 * Adds dynamic field with value.
+	 * @param field Field with value
 	 */
-	public enum Action
-	{
-		/**
-		 * Ignore current record and proceed to next one.
-		 */
-		IGNORE, 
-		
-		/**
-		 * Process the record and proceed to next one.
-		 */
-		PROCESS, 
-		
-		/**
-		 * Ignore current record and stop processing following records.
-		 */
-		STOP;
-	}
-	
-	/**
-	 * Called for every record being processed.
-	 * @param recordNo Current record number
-	 * @param record Record fetched
-	 * @return Action to be taken on current and future records.
-	 */
-	public Action process(long recordNo, Record record);
+	public void addField(DynamicResultField field);
 }

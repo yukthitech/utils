@@ -30,6 +30,7 @@ import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.EntityDetailsFactory;
 import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.IFinderRecordProcessor;
+import com.yukthi.persistence.IFinderRecordProcessor.Action;
 import com.yukthi.persistence.ITransaction;
 import com.yukthi.persistence.ITransactionManager;
 import com.yukthi.persistence.LobData;
@@ -62,7 +63,7 @@ public class RdbmsDataStore implements IDataStore
 	
 	private static Logger logger = LogManager.getLogger(RdbmsDataStore.class);
 	
-	private RdbmsConfiguration templates;
+	private RdbmsConfiguration rdbmsConfig;
 	private ConversionService conversionService = new ConversionService();
 	private RdbmsTransactionManager transactionManager = new RdbmsTransactionManager();
 	
@@ -74,14 +75,14 @@ public class RdbmsDataStore implements IDataStore
 	
 	public RdbmsDataStore(String templatesName)
 	{
-		templates = new RdbmsConfiguration();
+		rdbmsConfig = new RdbmsConfiguration();
 		this.templatesName = templatesName;
 		
 		try
 		{
 			logger.debug("Using RDBMS template type: " + templatesName);
 			
-			XMLBeanParser.parse(RdbmsDataStore.class.getResourceAsStream("/" + templatesName + ".xml"), templates);
+			XMLBeanParser.parse(RdbmsDataStore.class.getResourceAsStream("/" + templatesName + ".xml"), rdbmsConfig);
 		}catch(RuntimeException ex)
 		{
 			logger.error("An error occurred while loading template: " + templatesName, ex);
@@ -91,6 +92,15 @@ public class RdbmsDataStore implements IDataStore
 		//add blob and clob converters as default converters
 		conversionService.addConverter(new BlobConverter());
 		conversionService.addConverter(new ClobConverter());
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.yukthi.persistence.IDataStore#isPagingSupported()
+	 */
+	@Override
+	public boolean isPagingSupported()
+	{
+		return rdbmsConfig.isPagingSupported();
 	}
 	
 	/* (non-Javadoc)
@@ -189,7 +199,7 @@ public class RdbmsDataStore implements IDataStore
 	{
 		logger.trace("Started method: checkAndCreateSequence");
 		
-		if(!templates.hasQuery(RdbmsConfiguration.CREATE_SEQUENCE_QUERY) || !templates.hasQuery(RdbmsConfiguration.CHECK_SEQUENCE_QUERY))
+		if(!rdbmsConfig.hasQuery(RdbmsConfiguration.CREATE_SEQUENCE_QUERY) || !rdbmsConfig.hasQuery(RdbmsConfiguration.CHECK_SEQUENCE_QUERY))
 		{
 			throw new UnsupportedOperationException("Create sequence is not supported by this data-store: " + templatesName);
 		}
@@ -203,7 +213,7 @@ public class RdbmsDataStore implements IDataStore
 
 			statement = connection.createStatement();
 			
-			String query = templates.buildQuery(RdbmsConfiguration.CHECK_SEQUENCE_QUERY, "name", name);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CHECK_SEQUENCE_QUERY, "name", name);
 			logger.debug("Built check sequence query as:\n\t {}", query);
 			
 			rs = statement.executeQuery(query);
@@ -217,7 +227,7 @@ public class RdbmsDataStore implements IDataStore
 			
 			logger.debug("Found sequence '" + name + "' does not exits. Creating new sequence");
 			
-			query = templates.buildQuery(RdbmsConfiguration.CREATE_SEQUENCE_QUERY, "name", name);
+			query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_SEQUENCE_QUERY, "name", name);
 			logger.debug("Built create sequence query as:\n\t {}", query);			
 			
 			statement.execute(query);
@@ -246,7 +256,7 @@ public class RdbmsDataStore implements IDataStore
 
 			statement = connection.createStatement();
 			
-			String query = templates.buildQuery(RdbmsConfiguration.CREATE_QUERY, "query", createQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_QUERY, "query", createQuery);
 			
 			logger.debug("Built create-table query as: \n\t{}", query);
 			
@@ -275,7 +285,7 @@ public class RdbmsDataStore implements IDataStore
 
 			statement = connection.createStatement();
 			
-			String query = templates.buildQuery(RdbmsConfiguration.CREATE_INDEX, "query", creatIndexQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_INDEX, "query", creatIndexQuery);
 			
 			logger.debug("Built create-index query as: \n\t{}", query);
 			
@@ -312,7 +322,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.COUNT_QUERY, "query", countQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.COUNT_QUERY, "query", countQuery);
 			
 			logger.debug("Built existence query as: \n\t{}", query);
 			
@@ -371,7 +381,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.CHILDREN_EXISTENCE_QUERY, "query", childrenExistenceQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CHILDREN_EXISTENCE_QUERY, "query", childrenExistenceQuery);
 			
 			logger.debug("Built children-existence query as: \n\t{}", query);
 			
@@ -440,7 +450,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.FETCH_CHILDREN_IDS_QUERY, "query", fetchChildrenIdsQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.FETCH_CHILDREN_IDS_QUERY, "query", fetchChildrenIdsQuery);
 			
 			logger.debug("Built children-fetch query as: \n\t{}", query);
 			
@@ -509,7 +519,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.SAVE_QUERY, "query", saveQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.SAVE_QUERY, "query", saveQuery);
 			
 			logger.debug("Built save query as: \n\t{}", query);
 			
@@ -606,7 +616,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.UPDATE_QUERY, "query", updateQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.UPDATE_QUERY, "query", updateQuery);
 			
 			logger.debug("Built update query as: \n\t{}", query);
 			
@@ -691,7 +701,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.DELETE_QUERY, "query", deleteQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.DELETE_QUERY, "query", deleteQuery);
 			
 			logger.debug("Built delete query as: \n\t{}", query);
 			
@@ -734,7 +744,7 @@ public class RdbmsDataStore implements IDataStore
 	{
 		List<Object> paramValues = new ArrayList<>();
 		
-		String query = templates.buildQuery(queryName, paramValues, params);
+		String query = rdbmsConfig.buildQuery(queryName, paramValues, params);
 		
 		logger.debug("Built query as: \n\t{}", query);
 		
@@ -832,7 +842,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = templates.buildQuery(RdbmsConfiguration.FINDER_QUERY, "query", findQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.FINDER_QUERY, "query", findQuery);
 			
 			logger.debug("Built find query as: \n\t{}", query);
 			List<Object> params = new ArrayList<>();
@@ -855,10 +865,13 @@ public class RdbmsDataStore implements IDataStore
 			int colCount = metaData.getColumnCount();
 			String colNames[] = null;
 			Object cellValue = null;
-			long recordNo = 1;
+			long recordNo = -1;
+			IFinderRecordProcessor.Action action = null;
 			
 			while(rs.next())
 			{
+				recordNo++;
+				
 				//if records are avialable fetch columns names, so taht same name objects
 				//are shared across the reocrds
 				if(colNames == null)
@@ -892,14 +905,23 @@ public class RdbmsDataStore implements IDataStore
 				
 				if(recordProcessor != null)
 				{
-					if(!recordProcessor.process(recordNo, rec))
+					//check the action to be performed
+					action = recordProcessor.process(recordNo, rec);
+					
+					if(action == Action.STOP)
 					{
+						//stop further processing
 						break;
+					}
+					
+					if(action == Action.IGNORE)
+					{
+						//ignore current record and go to next record
+						continue;
 					}
 				}
 				
 				records.add(rec);
-				recordNo++;
 			}
 			
 			logger.debug("Found " + records.size() + " records found from table: " + findQuery.getTableName());
@@ -1109,7 +1131,7 @@ public class RdbmsDataStore implements IDataStore
 			
 			
 			//execute drop query
-			String query = templates.buildQuery(RdbmsConfiguration.DROP_QUERY, "query", dropQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.DROP_QUERY, "query", dropQuery);
 			
 			logger.debug("Built drop query as: \n\t{}", query);
 			

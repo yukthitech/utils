@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +22,7 @@ import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.SearchFunction;
+import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.persistence.repository.search.SearchCondition;
 import com.yukthi.persistence.repository.search.SearchQuery;
 
@@ -90,11 +92,34 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		
 		try
 		{
-			FinderQuery finderQuery = new FinderQuery(entityDetails);
+			final FinderQuery finderQuery = new FinderQuery(entityDetails);
 			SearchQuery searchQuery = (SearchQuery)params[0];
 			
 			//create a clone so that every time dynamic conditions can be added freshly
 			ConditionQueryBuilder conditionQueryBuilder = this.conditionQueryBuilder.clone();
+			
+			//remove result fields, which are excluded explicitly
+			if(CollectionUtils.isNotEmpty(searchQuery.getExcludeFields()))
+			{
+				for(String excludedProperty : searchQuery.getExcludeFields())
+				{
+					conditionQueryBuilder.removeResultField(excludedProperty);
+				}
+			}
+			
+			//if return type dynamic field data
+			if(IDynamicSearchResult.class.isAssignableFrom(returnType))
+			{
+				//if search query has additional field details to fetch
+				if(CollectionUtils.isNotEmpty(searchQuery.getAdditionalEntityFields()))
+				{
+					//add dynamic fields to condition builder
+					for(String additionalProp : searchQuery.getAdditionalEntityFields())
+					{
+						conditionQueryBuilder.addResultField("#" + additionalProp, Object.class, additionalProp, "<Addidional Property> - " + additionalProp);
+					}
+				}
+			}
 			
 			//set the result fields, conditions and tables details on finder query
 			List<Object> conditionParams = new ArrayList<>();
@@ -125,24 +150,43 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			IFinderRecordProcessor recordCountLimiter = null;
 
 			//if results needs to be limited
-			if(searchQuery.getResultsLimitCount() > 0)
+			if(searchQuery.getResultsLimit() > 0 || searchQuery.getResultsOffset() > 0)
 			{
-				finderQuery.setResultsLimitCount(searchQuery.getResultsLimitCount());
+				int start = searchQuery.getResultsOffset();
+				int countLimit = searchQuery.getResultsLimit();
 				
-				//As some of the DB's like DB does not support limit, explicit processor 
+				start = (start <= 0) ? 0 : start;
+				countLimit = (countLimit <= 0) ? Integer.MAX_VALUE : countLimit;
+				
+				
+				finderQuery.setResultsOffset(start);
+				finderQuery.setResultsLimit(countLimit);
+				
+				//As some of the DB's like Derby does not support limit, explicit processor 
 				//	is added to stop records fetching after the limit
-				long recordLimit = searchQuery.getResultsLimitCount();
-				
-				recordCountLimiter = new IFinderRecordProcessor()
+				if(!dataStore.isPagingSupported())
 				{
-					@Override
-					public boolean process(long recordNo, Record record)
+					recordCountLimiter = new IFinderRecordProcessor()
 					{
-						return (recordNo <= recordLimit);
-					}
-				};
+						int recStart = finderQuery.getResultsOffset();
+						int count = 0;
+						int recLimit = finderQuery.getResultsLimit();
+						
+						@Override
+						public Action process(long recordNo, Record record)
+						{
+							if(recordNo < recStart)
+							{
+								return Action.IGNORE;
+							}
+							
+							count++;
+							
+							return (count <= recLimit) ? Action.PROCESS : Action.STOP;
+						}
+					};
+				}
 			}
-			
 			
 			//execute the query and fetch records
 			List<Record> records = dataStore.executeFinder(finderQuery, entityDetails, recordCountLimiter);
