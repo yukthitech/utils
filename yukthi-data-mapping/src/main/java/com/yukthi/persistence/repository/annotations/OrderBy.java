@@ -19,4 +19,11 @@ public @interface OrderBy
 	 * @return Fields to use for results ordering
 	 */
 	public String[] value();
+	
+	/**
+	 * If specified, the output will be ordered according to specified fields. If this 
+	 * attribute is specified, value() will not be ignored.
+	 * @return  Fields to use for results ordering
+	 */
+	public OrderByField[] fields() default {};
 }

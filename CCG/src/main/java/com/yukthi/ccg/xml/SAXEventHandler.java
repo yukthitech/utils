@@ -496,7 +496,9 @@ class SAXEventHandler extends DefaultHandler
 			if(parentBean instanceof DynamicDataAcceptor)
 			{
 				if(dynType == null)
-					throw new XMLLoadException("Cannot find neither direct nor dynamic type for node: " + name, newNode);
+				{
+					dynType = String.class;
+				}
 
 				DynamicDataAcceptor acceptor = (DynamicDataAcceptor) parentBean;
 

@@ -204,7 +204,7 @@
 		<#list query.conditions as condition>${addCondition(condition, condition_index, true)}
 		</#list>
 		<#if query.orderByFields??> 
-			ORDER BY <#list query.orderByFields as orderField>${orderField.code}<#if orderField_has_next>, </#if></#list>
+			ORDER BY <#list query.orderByFields as orderField>${orderField.code} ${orderField.orderByType}<#if orderField_has_next>, </#if></#list>
 		</#if>
 	]]></template>	
 

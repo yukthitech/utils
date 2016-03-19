@@ -28,6 +28,7 @@ import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthi.persistence.repository.search.DynamicResultField;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
@@ -236,6 +237,8 @@ public class ConditionQueryBuilder implements Cloneable
 		 * Type of result field
 		 */
 		private Class<?> fieldType;
+		
+		private OrderByType orderType;
 
 		public ResultField(String property, String code, Class<?> fieldType)
 		{
@@ -827,7 +830,7 @@ public class ConditionQueryBuilder implements Cloneable
 		// loop through order by fields
 		for(ResultField field : orderByFields)
 		{
-			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code));
+			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code, field.orderType));
 		}
 
 		// if enable codes are available
@@ -976,14 +979,22 @@ public class ConditionQueryBuilder implements Cloneable
 		this.orderByFields.clear();
 	}
 
-	public void addOrderByField(String field, String methodDesc)
+	public void addOrderByField(String field, OrderByType orderByType, String methodDesc)
 	{
-		if(!fieldToResultField.containsKey(field))
+		ResultField resultField = fieldToResultField.get(field);
+		
+		if(resultField == null)
 		{
 			throw new InvalidMappingException("Field '" + field + "' specified in @OrderBy annotation is not part of result list of finder query - " + methodDesc);
 		}
-
-		this.orderByFields.add(fieldToResultField.get(field));
+		
+		if(orderByType == null)
+		{
+			orderByType = OrderByType.ASC;
+		}
+			
+		resultField.orderType = orderByType;
+		this.orderByFields.add(resultField);
 	}
 
 	/**

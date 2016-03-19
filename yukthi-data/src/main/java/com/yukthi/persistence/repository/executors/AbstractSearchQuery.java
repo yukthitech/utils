@@ -18,6 +18,8 @@ import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.OrderBy;
+import com.yukthi.persistence.repository.annotations.OrderByField;
+import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
@@ -223,14 +225,29 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			return;
 		}
 		
-		for(String field : orderBy.value())
+		if(orderBy.fields().length > 0)
 		{
-			if(!entityDetails.hasField(field))
+			for(OrderByField field : orderBy.fields())
 			{
-				throw new InvalidMappingException("Invalid field '" + field + "' specified in @OrderBy annotation of finder method - " + methodDesc);
+				if(!entityDetails.hasField(field.name()))
+				{
+					throw new InvalidMappingException("Invalid field '" + field.name() + "' specified in @OrderBy annotation of finder method - " + methodDesc);
+				}
+				
+				conditionQueryBuilder.addOrderByField(field.name(), field.type(), methodDesc);
 			}
-			
-			conditionQueryBuilder.addOrderByField(field, methodDesc);
+		}
+		else
+		{
+			for(String field : orderBy.value())
+			{
+				if(!entityDetails.hasField(field))
+				{
+					throw new InvalidMappingException("Invalid field '" + field + "' specified in @OrderBy annotation of finder method - " + methodDesc);
+				}
+				
+				conditionQueryBuilder.addOrderByField(field, OrderByType.ASC, methodDesc);
+			}
 		}
 	}
 

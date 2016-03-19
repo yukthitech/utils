@@ -16,6 +16,7 @@ import com.yukthi.ccg.util.CCGUtility;
 import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.IFinderRecordProcessor;
+import com.yukthi.persistence.OrderByField;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.RecordCountMistmatchException;
 import com.yukthi.persistence.conversion.ConversionService;
@@ -137,9 +138,9 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			{
 				conditionQueryBuilder.clearOrderByFields();
 				
-				for(String field : searchQuery.getOrderByFields())
+				for(OrderByField field : searchQuery.getOrderByFields())
 				{
-					conditionQueryBuilder.addOrderByField(field, methodDesc);
+					conditionQueryBuilder.addOrderByField(field.getName(), field.getOrderByType(), methodDesc);
 				}
 			}
 

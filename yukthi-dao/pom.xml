@@ -4,7 +4,7 @@
 
 	<groupId>com.yukthi</groupId>
 	<artifactId>yukthi-dao</artifactId>
-	<version>1.0</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>yukthi-dao</name>
@@ -30,12 +30,12 @@
 		<dependency>
 			<groupId>com.yukthi</groupId>
 			<artifactId>ccg</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.yukthi</groupId>
 			<artifactId>yukthi-utils</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

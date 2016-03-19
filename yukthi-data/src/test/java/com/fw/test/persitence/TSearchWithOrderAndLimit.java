@@ -12,8 +12,10 @@ import com.fw.test.persitence.entity.Employee;
 import com.fw.test.persitence.entity.IEmployeeRepository;
 import com.fw.test.persitence.queries.DynamicEmpSearchResult;
 import com.fw.test.persitence.queries.EmpSearchResult;
+import com.yukthi.persistence.OrderByField;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.search.SearchCondition;
 import com.yukthi.persistence.repository.search.SearchQuery;
 
@@ -70,18 +72,28 @@ public class TSearchWithOrderAndLimit extends TestSuiteBase
 		SearchQuery searchQuery = new SearchQuery(
 		);
 		
-		searchQuery.setOrderByFields(Arrays.asList("name"));
+		searchQuery.setOrderByFields(Arrays.asList(
+			new OrderByField("name", OrderByType.ASC)
+		));
 		
 		List<Employee> results = repo.search(searchQuery);
 		
 		List<String> names = new ArrayList<>();
 		
-		for(Employee res : results)
-		{
-			names.add(res.getName());
-		}
+		results.forEach(e -> names.add(e.getName()));
 		
 		Assert.assertEquals(names, Arrays.asList("abc", "def", "ghi", "xyz", "zie"));
+		
+		//test descending order
+		searchQuery.setOrderByFields(Arrays.asList(
+			new OrderByField("name", OrderByType.DESC)
+		));
+		
+		results = repo.search(searchQuery);
+		names.clear();
+		results.forEach(e -> names.add(e.getName()));
+		
+		Assert.assertEquals(names, Arrays.asList( "zie", "xyz", "ghi", "def", "abc"));
 	}
 
 	/**
@@ -96,7 +108,9 @@ public class TSearchWithOrderAndLimit extends TestSuiteBase
 		SearchQuery searchQuery = new SearchQuery(
 		);
 		
-		searchQuery.setOrderByFields(Arrays.asList("name"));
+		searchQuery.setOrderByFields(Arrays.asList(
+			new OrderByField("name", OrderByType.ASC)
+		));
 		searchQuery.setResultsLimit(3);
 		
 		List<Employee> results = repo.search(searchQuery);
@@ -123,7 +137,9 @@ public class TSearchWithOrderAndLimit extends TestSuiteBase
 		SearchQuery searchQuery = new SearchQuery(
 		);
 		
-		searchQuery.setOrderByFields(Arrays.asList("name"));
+		searchQuery.setOrderByFields(Arrays.asList(
+			new OrderByField("name", OrderByType.ASC)
+		));
 		searchQuery.setResultsOffset(2);
 		searchQuery.setResultsLimit(2);
 		
@@ -164,7 +180,10 @@ public class TSearchWithOrderAndLimit extends TestSuiteBase
 		SearchQuery searchQuery = new SearchQuery(
 		);
 		
-		searchQuery.setOrderByFields(Arrays.asList("name"));
+		searchQuery.setOrderByFields(Arrays.asList(
+			new OrderByField("name", OrderByType.ASC)
+		));
+		
 		searchQuery.setResultsOffset(2);
 		
 		List<Employee> results = repo.search(searchQuery);
@@ -189,7 +208,9 @@ public class TSearchWithOrderAndLimit extends TestSuiteBase
 			new SearchCondition("age", Operator.GE, 35)
 		);
 		
-		searchQuery.setOrderByFields(Arrays.asList("name"));
+		searchQuery.setOrderByFields(Arrays.asList(
+			new OrderByField("name", OrderByType.ASC)
+		));
 		
 		List<DynamicEmpSearchResult> results = repo.searchByName(searchQuery);
 		

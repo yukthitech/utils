@@ -1,5 +1,7 @@
 package com.yukthi.persistence.query;
 
+import com.yukthi.persistence.repository.annotations.OrderByType;
+
 /**
  * Result field of the query
  * @author akiran
@@ -20,6 +22,8 @@ public class QueryResultField
 	 * Short code for the column field
 	 */
 	private String code;
+	
+	private OrderByType orderByType;
 
 	public QueryResultField(String tableCode, String column, String code)
 	{
@@ -28,6 +32,13 @@ public class QueryResultField
 		this.code = code;
 	}
 
+	public QueryResultField(String tableCode, String column, String code, OrderByType orderByType)
+	{
+		this.tableCode = tableCode;
+		this.column = column;
+		this.code = code;
+		this.orderByType = orderByType;
+	}
 	/**
 	 * @return the {@link #tableCode tableCode}
 	 */
@@ -74,6 +85,14 @@ public class QueryResultField
 	public void setCode(String code)
 	{
 		this.code = code;
+	}
+	
+	/**
+	 * @return the {@link #orderByType orderByType}
+	 */
+	public OrderByType getOrderByType()
+	{
+		return orderByType;
 	}
 	
 	/* (non-Javadoc)

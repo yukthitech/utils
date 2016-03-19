@@ -520,9 +520,10 @@ public class DefaultParserHandler implements ParserHandler
 				return null;
 			}
 
-			expressionPattern = Pattern.compile(att.get(ATTR_PATTERN, "\\$+\\{([.[^\\}]]+)\\}"));
-			escapePrefix = att.get(ATTR_ESCAPE_PREFIX, "$$");
-			escapeReplace = att.get(ATTR_ESCAPE_REPLACE, "$");
+			setExpressionPattern(
+					att.get(ATTR_PATTERN, "\\$+\\{([.[^\\}]]+)\\}"), 
+					att.get(ATTR_ESCAPE_PREFIX, "$$"), 
+					att.get(ATTR_ESCAPE_REPLACE, "$"));
 			return null;
 		}
 		
@@ -957,5 +958,12 @@ public class DefaultParserHandler implements ParserHandler
 	public void setCustomNodeHandler(ICustomNodeHandler customNodeHandler)
 	{
 		this.customNodeHandler = customNodeHandler;
+	}
+	
+	public void setExpressionPattern(String expressionPattern, String escapePrefix, String escapeReplace)
+	{
+		this.expressionPattern = Pattern.compile(expressionPattern);
+		this.escapePrefix = escapePrefix;
+		this.escapeReplace = escapeReplace;
 	}
 }

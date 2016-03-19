@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.yukthi.persistence.OrderByField;
+
 /**
  * Search query object for search methods with dynamic conditions
  * 
@@ -21,7 +23,7 @@ public class SearchQuery
 	/**
 	 * List of fields by which search results should be ordered
 	 */
-	private List<String> orderByFields = new ArrayList<>();
+	private List<OrderByField> orderByFields = new ArrayList<>();
 	
 	/**
 	 * Row number after which results should be fetched. Used in paging.
@@ -101,7 +103,7 @@ public class SearchQuery
 	 *
 	 * @return the list of fields by which search results should be ordered
 	 */
-	public List<String> getOrderByFields()
+	public List<OrderByField> getOrderByFields()
 	{
 		return orderByFields;
 	}
@@ -111,7 +113,7 @@ public class SearchQuery
 	 *
 	 * @param orderByFields the new list of fields by which search results should be ordered
 	 */
-	public void setOrderByFields(List<String> orderByFields)
+	public void setOrderByFields(List<OrderByField> orderByFields)
 	{
 		this.orderByFields = orderByFields;
 	}
