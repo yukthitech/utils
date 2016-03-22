@@ -2,12 +2,15 @@ package com.yukthi.persistence.repository.executors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthi.persistence.EntityDetails;
+import com.yukthi.persistence.ExtendedTableDetails;
+import com.yukthi.persistence.ExtendedTableEntity;
 import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.IDataStore;
@@ -24,6 +27,7 @@ import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.UpdateFunction;
 import com.yukthi.persistence.repository.annotations.UpdateOperator;
+import com.yukthi.utils.exceptions.InvalidStateException;
 
 @QueryExecutorPattern(prefixes = {"update"}, annotatedWith = UpdateFunction.class)
 public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
@@ -126,17 +130,62 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 						field.value(), repositoryType.getName(), method.getName());
 			}
 			
-			updateQuery.addColumn(new UpdateColumnParam(fieldDetails.getColumn(), null, i, field.updateOp()));
+			updateQuery.addColumn(new UpdateColumnParam(fieldDetails.getDbColumnName(), null, i, field.updateOp()));
 			found = true;
 		}
 		
 		//add implicit version update instructions
 		if(entityDetails.hasVersionField())
 		{
-			updateQuery.addColumn(new UpdateColumnParam(entityDetails.getVersionField().getColumn(), 1, -1, UpdateOperator.ADD));
+			updateQuery.addColumn(new UpdateColumnParam(entityDetails.getVersionField().getDbColumnName(), 1, -1, UpdateOperator.ADD));
 		}
 
 		return found;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void updateExtensionFields(IDataStore dataStore, ConversionService conversionService, Object entity)
+	{
+		ExtendedTableDetails extendedTableDetails = entityDetails.getExtendedTableDetails();
+		
+		if(extendedTableDetails == null)
+		{
+			return;
+		}
+		
+		java.lang.reflect.Field extDataHolder = extendedTableDetails.getEntityField();
+		
+		Map<String, Object> extendedValues = null;
+		
+		try
+		{
+			extDataHolder.setAccessible(true);
+			extendedValues = (Map)extDataHolder.get(entity);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while fetching extended values");
+		}
+		
+		if(extendedValues == null || extendedValues.isEmpty())
+		{
+			return;
+		}
+		
+		Object id = entityDetails.getIdField().getValue(entity);
+		
+		UpdateQuery updateQuery = new UpdateQuery(extendedTableDetails.toEntityDetails(entityDetails));
+		
+		for(String field : extendedValues.keySet())
+		{
+			updateQuery.addColumn(new UpdateColumnParam(field.toLowerCase(), extendedValues.get(field), -1, UpdateOperator.NONE));
+		}
+		
+		updateQuery.addCondition(new QueryCondition(null, ExtendedTableEntity.COLUMN_ENTITY_ID, Operator.EQ, id, null, false));
+		
+		if( dataStore.update(updateQuery, extendedTableDetails.toEntityDetails(entityDetails)) <= 0)
+		{
+			throw new InvalidStateException("An error occurred while updating extension fields");
+		}
 	}
 	
 	private Object updateFullEntity(IDataStore dataStore, ConversionService conversionService, Object entity)
@@ -173,7 +222,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			//if version field, add instruction to increment it
 			if(field.isVersionField())
 			{
-				query.addColumn(new UpdateColumnParam(field.getColumn(), 1, -1, UpdateOperator.ADD));
+				query.addColumn(new UpdateColumnParam(field.getDbColumnName(), 1, -1, UpdateOperator.ADD));
 				continue;
 			}
 			
@@ -204,33 +253,48 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			
 			value = conversionService.convertToDBType(value, field);
 			
-			query.addColumn(new UpdateColumnParam(field.getColumn(), value, -1, UpdateOperator.NONE));
+			query.addColumn(new UpdateColumnParam(field.getDbColumnName(), value, -1, UpdateOperator.NONE));
 		}
 		
-		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.EQ, entityDetails.getIdField().getValue(entity), JoinOperator.AND, false));
+		query.addCondition(new QueryCondition(null, entityDetails.getIdField().getDbColumnName(), Operator.EQ, entityDetails.getIdField().getValue(entity), JoinOperator.AND, false));
 
 		//if version field is defined on the entity add it to the condition
 		if(entityDetails.hasVersionField())
 		{
-			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getColumn(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND, false));
+			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getDbColumnName(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND, false));
 		}
 		
-		super.notifyEntityEvent(null, entity, EntityEventType.PRE_UPDATE);
-		
-		int res = dataStore.update(query, entityDetails);
-		
-		if(res > 0)
+		try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
 		{
-			super.notifyEntityEvent(null, entity, EntityEventType.POST_UPDATE);
-		}
-		
-		if(boolean.class.equals(returnType))
+			super.notifyEntityEvent(null, entity, EntityEventType.PRE_UPDATE);
+			
+			int res = dataStore.update(query, entityDetails);
+			
+			updateExtensionFields(dataStore, conversionService, entity);
+			
+			if(res > 0)
+			{
+				super.notifyEntityEvent(null, entity, EntityEventType.POST_UPDATE);
+			}
+			
+			transaction.commit();
+
+			if(boolean.class.equals(returnType))
+			{
+				return (res > 0);
+			}
+			
+			return (int.class.equals(returnType)) ? res : null;
+		}catch(Exception ex)
 		{
-			return (res > 0);
+			//rethrow the catched exception
+			if(ex instanceof RuntimeException)
+			{
+				throw (RuntimeException)ex;
+			}
+			
+			throw new IllegalStateException(ex);
 		}
-		
-		return (int.class.equals(returnType)) ? res : null;
-		
 	}
 
 	
@@ -256,6 +320,8 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			//TODO: When unique fields are getting updated, make sure unique constraints are not violated
 				//during unique field update might be we have to mandate id is provided as condition
 			
+			
+			//TODO: Extension field update using annotaionts
 			FieldDetails field = null;
 			
 			for(ColumnParam column: updateQuery.getColumns())

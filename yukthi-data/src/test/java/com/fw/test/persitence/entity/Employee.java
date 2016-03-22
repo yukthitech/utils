@@ -5,11 +5,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.yukthi.persistence.annotations.Index;
 import com.yukthi.persistence.annotations.Indexed;
 import com.yukthi.persistence.annotations.Indexes;
+import com.yukthi.persistence.annotations.Transient;
 import com.yukthi.persistence.annotations.UniqueConstraint;
 
 @Table(name = "EMPLOYEE")

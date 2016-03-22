@@ -22,8 +22,8 @@ public class ForeignConstraintStructure
 		this.name = constraint.getConstraintName();
 		this.parentTable = targetEntity.getTableName();
 
-		this.columns = new String[] { entityDetails.getFieldDetailsByField(ownerField.getName()).getColumn() };
-		this.parentColumns = new String[] { targetEntity.getIdField().getColumn() };
+		this.columns = new String[] { entityDetails.getFieldDetailsByField(ownerField.getName()).getDbColumnName() };
+		this.parentColumns = new String[] { targetEntity.getIdField().getDbColumnName() };
 		this.isDeleteCascaded = isDeleteCascaded;
 	}
 

@@ -6,6 +6,7 @@ import java.util.Set;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.ChildrenExistenceQuery;
 import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.CreateExtendedTableQuery;
 import com.yukthi.persistence.query.CreateIndexQuery;
 import com.yukthi.persistence.query.CreateTableQuery;
 import com.yukthi.persistence.query.DeleteQuery;
@@ -40,6 +41,8 @@ public interface IDataStore
 	public void checkAndCreateSequence(String name);
 	
 	public void createTable(CreateTableQuery query);
+	
+	public void createExtendedTable(CreateExtendedTableQuery query);
 	
 	public void createIndex(CreateIndexQuery query);
 	

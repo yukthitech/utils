@@ -173,9 +173,10 @@ public class SearchQuery
 	 *
 	 * @param additionalEntityFields the new additional fields to include along with standard return fields
 	 */
-	public void setAdditionalEntityFields(Set<String> additionalEntityFields)
+	public SearchQuery setAdditionalEntityFields(Set<String> additionalEntityFields)
 	{
 		this.additionalEntityFields = additionalEntityFields;
+		return this;
 	}
 
 	/**
@@ -193,9 +194,10 @@ public class SearchQuery
 	 *
 	 * @param excludeFields the new search result fields to be excluded
 	 */
-	public void setExcludeFields(Set<String> excludeFields)
+	public SearchQuery setExcludeFields(Set<String> excludeFields)
 	{
 		this.excludeFields = excludeFields;
+		return this;
 	}
 
 	/* (non-Javadoc)

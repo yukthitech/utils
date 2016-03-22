@@ -2,13 +2,11 @@ package com.yukthi.persistence.query.data;
 
 import java.lang.reflect.Field;
 
-import javax.persistence.Column;
 import javax.persistence.GenerationType;
 
 import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.PersistenceException;
 import com.yukthi.persistence.annotations.DataType;
-import com.yukthi.persistence.annotations.DataTypeMapping;
 
 public class ColumnStructure
 {
@@ -23,41 +21,19 @@ public class ColumnStructure
 	public ColumnStructure(Class<?> entityType, FieldDetails fieldDetails)
 	{
 		Field field = fieldDetails.getField();
-		Column column = field.getAnnotation(Column.class);
-		DataTypeMapping dataTypeMapping = field.getAnnotation(DataTypeMapping.class);
 		
-		String overriddenColumn = fieldDetails.getOverriddenColumnName();
 		this.autoIncrement = (fieldDetails.isIdField() && fieldDetails.getGenerationType() == GenerationType.IDENTITY);
 		this.sequenceIncrement = (fieldDetails.isIdField() && fieldDetails.getGenerationType() == GenerationType.SEQUENCE);
 		this.idField = fieldDetails.isIdField();
+		this.name = fieldDetails.getDbColumnName();
 		
-		if(overriddenColumn != null && overriddenColumn.trim().length() > 0)
-		{
-			this.name = overriddenColumn;
-		}
-		else if(column == null || column.name().trim().length() == 0)
-		{
-			name = field.getName();
-			
-			name = name.replace("_", "");
-			name = name.replaceAll("([A-Z])", "_$1");
-			name = name.toUpperCase();
-		}
-		else
-		{
-			name = column.name().trim();
-		}
+		this.length = fieldDetails.getLength();
+		this.type = fieldDetails.getDbDataType();
+		this.nullable = fieldDetails.isNullable();
 		
-		if(column != null)
+		if(this.type == DataType.UNKNOWN)
 		{
-			this.length = column.length();
-			this.type = (dataTypeMapping != null) ? dataTypeMapping.type() : null;
-			this.nullable = column.nullable();
-			
-			if(this.type == DataType.UNKNOWN)
-			{
-				this.type = null;
-			}
+			this.type = null;
 		}
 		
 		if(this.type == null || this.type == DataType.UNKNOWN)

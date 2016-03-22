@@ -3,6 +3,7 @@ package com.yukthi.persistence;
 import java.lang.reflect.Field;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.GenerationType;
 
 import com.yukthi.persistence.annotations.DataType;
@@ -15,7 +16,6 @@ import com.yukthi.utils.exceptions.InvalidStateException;
  */
 public class FieldDetails
 {
-	
 	/** The Constant FLAG_ID. */
 	public static final int FLAG_ID = 1;
 	
@@ -28,11 +28,13 @@ public class FieldDetails
 			long.class, Long.class
 	);
 	
+	/**
+	 * Name of the field.
+	 */
+	private String name;
+	
 	/** The field. */
 	private Field field;
-	
-	/** The column. */
-	private String column;
 	
 	/** The db data type. */
 	private DataType dbDataType;
@@ -46,8 +48,10 @@ public class FieldDetails
 	/** The sequence name. */
 	private String sequenceName;
 	
-	/** The overridden column name. */
-	private String overriddenColumnName;
+	/**
+	 * Name of the db column
+	 */
+	private String dbColumnName;
 	
 	/**
 	 * Version field used for optimistic updates
@@ -70,6 +74,11 @@ public class FieldDetails
 	private ForeignConstraintDetails foreignConstraintDetails;
 	
 	/**
+	 * Length of the field. Applicable only for string fields.
+	 */
+	private int length = 255;
+	
+	/**
 	 * Instantiates a new field details.
 	 *
 	 * @param details the details
@@ -77,9 +86,9 @@ public class FieldDetails
 	private FieldDetails(FieldDetails details)
 	{
 		this.field = details.field;
-		this.column = details.column;
+		this.dbColumnName = details.dbColumnName;
 		this.dbDataType = details.dbDataType;
-		this.overriddenColumnName = details.overriddenColumnName;
+		this.dbColumnName = details.dbColumnName;
 	}
 	
 	/**
@@ -91,7 +100,7 @@ public class FieldDetails
 	 * @param isVersionField the is version field
 	 * @param nullable the nullable
 	 */
-	public FieldDetails(Field field, String column, DataType dbDataType, boolean isVersionField, boolean nullable)
+	public FieldDetails(Field field, DataType dbDataType, boolean isVersionField, boolean nullable)
 	{
 		if(field == null)
 		{
@@ -111,9 +120,7 @@ public class FieldDetails
 			throw new InvalidStateException("Field '{}' with unsupported data type '{}' is marked as version field.", field.getName(), field.getType().getName());
 		}
 		
-		
 		this.field = field;
-		this.column = column;
 		this.dbDataType = dbDataType;
 		this.nullable = nullable;
 		this.updateable = (field.getAnnotation(NotUpdateable.class) == null);
@@ -124,6 +131,7 @@ public class FieldDetails
 		}
 		
 		this.versionField = isVersionField;
+		populateInternalDetails();
 	}
 
 	/**
@@ -138,9 +146,9 @@ public class FieldDetails
 	 * @param sequenceName the sequence name
 	 * @param nullable the nullable
 	 */
-	public FieldDetails(Field field, String column, DataType dbDataType, boolean idField, GenerationType generationType, boolean autoFetch, String sequenceName, boolean nullable)
+	public FieldDetails(Field field, DataType dbDataType, boolean idField, GenerationType generationType, boolean autoFetch, String sequenceName, boolean nullable)
 	{
-		this(field, column, dbDataType, false, nullable);
+		this(field, dbDataType, false, nullable);
 		
 		if(generationType == GenerationType.SEQUENCE && (sequenceName == null || sequenceName.trim().length() == 0))
 		{
@@ -152,6 +160,42 @@ public class FieldDetails
 		
 		this.generationType = generationType;
 		this.sequenceName = sequenceName;
+		
+		populateInternalDetails();
+	}
+	
+	/**
+	 * Populate internal details.
+	 */
+	private void populateInternalDetails()
+	{
+		this.name = field.getName();
+		
+		Column column = field.getAnnotation(Column.class);
+		this.length = (column != null) ? column.length() : 255;
+
+		if(column == null || column.name().trim().length() == 0)
+		{
+			dbColumnName = this.name;
+			
+			dbColumnName = dbColumnName.replace("_", "");
+			dbColumnName = dbColumnName.replaceAll("([A-Z])", "_$1");
+			dbColumnName = dbColumnName.toUpperCase();
+		}
+		else
+		{
+			dbColumnName = column.name().trim();
+		}
+	}
+	
+	/**
+	 * Sets the name of the field.
+	 *
+	 * @param name the new name of the field
+	 */
+	void setName(String name)
+	{
+		this.name = name;
 	}
 	
 	/**
@@ -161,9 +205,29 @@ public class FieldDetails
 	 */
 	public String getName()
 	{
-		return field.getName();
+		return name;
 	}
 	
+	/**
+	 * Gets the length of the field. Applicable only for string fields.
+	 *
+	 * @return the length of the field
+	 */
+	public int getLength()
+	{
+		return length;
+	}
+
+	/**
+	 * Sets the length of the field. Applicable only for string fields.
+	 *
+	 * @param length the new length of the field
+	 */
+	void setLength(int length)
+	{
+		this.length = length;
+	}
+
 	/**
 	 * Gets the field.
 	 *
@@ -172,26 +236,6 @@ public class FieldDetails
 	public Field getField()
 	{
 		return field;
-	}
-	
-	/**
-	 * Sets the column.
-	 *
-	 * @param column the new column
-	 */
-	void setColumn(String column)
-	{
-		this.column = column;
-	}
-
-	/**
-	 * Gets the column.
-	 *
-	 * @return the column
-	 */
-	public String getColumn()
-	{
-		return column;
 	}
 	
 	/**
@@ -277,27 +321,27 @@ public class FieldDetails
 			throw new IllegalStateException("Failed to setting value from field: " + field.getName(), ex);
 		}
 	}
-	
+
 	/**
-	 * Gets the overridden column name.
+	 * Gets the name of the db column.
 	 *
-	 * @return the overridden column name
+	 * @return the name of the db column
 	 */
-	public String getOverriddenColumnName()
+	public String getDbColumnName()
 	{
-		return overriddenColumnName;
+		return dbColumnName;
 	}
 
 	/**
-	 * Sets the overridden column name.
+	 * Sets the name of the db column.
 	 *
-	 * @param overriddenColumnName the new overridden column name
+	 * @param dbColumnName the new name of the db column
 	 */
-	public void setOverriddenColumnName(String overriddenColumnName)
+	void setDbColumnName(String dbColumnName)
 	{
-		this.overriddenColumnName = overriddenColumnName;
+		this.dbColumnName = dbColumnName;
 	}
-	
+
 	/**
 	 * Clone for audit.
 	 *
@@ -437,7 +481,7 @@ public class FieldDetails
 		builder.append("[");
 
 		builder.append("Field: ").append(field);
-		builder.append(",").append("Column: ").append(column);
+		builder.append(",").append("Column: ").append(dbColumnName);
 		builder.append(",").append("ID Field: ").append(isIdField());
 
 		builder.append("]");

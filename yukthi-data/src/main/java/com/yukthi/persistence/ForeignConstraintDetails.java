@@ -142,7 +142,7 @@ public class ForeignConstraintDetails
 	 */
 	public String getConstraintName()
 	{
-		String ownerCol = ownerEntityDetails.getFieldDetailsByField(ownerField.getName()).getColumn().toUpperCase();
+		String ownerCol = ownerEntityDetails.getFieldDetailsByField(ownerField.getName()).getDbColumnName().toUpperCase();
 		return FOREIGN_CONSTRAINT_PREFIX + ownerEntityDetails.getTableName().toUpperCase() + "_" + ownerCol;
 	}
 

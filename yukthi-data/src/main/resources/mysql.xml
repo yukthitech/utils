@@ -98,14 +98,14 @@
 					<#assign comma>,</#assign>
 				<#elseif query.tableStructure.constraintsAvailable>
 					<#assign comma>,</#assign>
-				<#elseif !query.joinTable>
+				<#elseif !query.uniqueKeyDisabled>
 					<#assign comma>,</#assign>
 				</#if>
 				
 				${column.name}		${dataType}			${constraint}</@trim>${comma}
 			</#list>
 			
-			<#if !query.joinTable>
+			<#if !query.uniqueKeyDisabled>
 				<#assign comma></#assign>
 				<#if query.tableStructure.constraintsAvailable>
 					<#assign comma>,</#assign>
@@ -131,6 +131,30 @@
 					REFERENCES  ${constraint.parentTable} (<#list constraint.parentColumns as column>${column}<#if column_has_next>,</#if></#list>) <#if constraint.deleteCascaded>ON DELETE CASCADE</#if> <#if constraint_has_next>,</#if>
 			</#list>
 		)
+	]]></template>	
+
+	<template name="createExtendedTableTemplate"><![CDATA[
+		<#assign charset>${query.extendedTableDetails.charset.charsetName}</#assign>
+		
+		<#if charset == "UTF8">
+			<#assign charset>utf8</#assign>
+		<#elseif charset == "UTF16">
+			<#assign charset>utf16</#assign>
+		<#else>
+			<#assign charset>latin1</#assign>
+		</#if>
+
+		CREATE TABLE ${query.extendedTableDetails.tableName}
+		(
+			ENTITY_ID	BIGINT	NOT NULL,
+
+			<#list 1..query.extendedTableDetails.fieldCount as i>
+				${query.extendedTableDetails.fieldPrefix}${i}	VARCHAR(${query.extendedTableDetails.fieldSize}),
+			</#list>
+			
+			CONSTRAINT UQ_${query.extendedTableDetails.tableName}_ENTITY_ID UNIQUE (ENTITY_ID),
+			CONSTRAINT FK_${query.extendedTableDetails.tableName}_ENTITY FOREIGN KEY (ENTITY_ID) REFERENCES ${query.entityDetails.tableName}(ID) ON DELETE CASCADE
+		) CHARACTER SET = '${charset}'
 	]]></template>	
 
 	<template name="createIndexTemplate"><![CDATA[

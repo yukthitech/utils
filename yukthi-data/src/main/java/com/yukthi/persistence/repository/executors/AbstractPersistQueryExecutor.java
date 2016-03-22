@@ -62,13 +62,13 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				value = fieldDetails.getValue(entity);
 				value = conversionService.convertToDBType(value, fieldDetails);
 				
-				existenceQuery.addCondition(new QueryCondition(null, fieldDetails.getColumn(), Operator.EQ, value, JoinOperator.AND, false));
+				existenceQuery.addCondition(new QueryCondition(null, fieldDetails.getDbColumnName(), Operator.EQ, value, JoinOperator.AND, false));
 				fieldValues.put(field, value);
 			}
 			
 			if(excludeId)
 			{
-				existenceQuery.addCondition(new QueryCondition(null, entityDetails.getIdField().getColumn(), Operator.NE, entityDetails.getIdField().getValue(entity), JoinOperator.AND, false));
+				existenceQuery.addCondition(new QueryCondition(null, entityDetails.getIdField().getDbColumnName(), Operator.NE, entityDetails.getIdField().getValue(entity), JoinOperator.AND, false));
 			}
 			
 			if(dataStore.getCount(existenceQuery, entityDetails) > 0)
@@ -123,7 +123,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				continue;
 			}
 			
-			existenceQuery.addCondition(new QueryCondition(null, foreignEntityDetails.getIdField().getColumn(), Operator.EQ, value, JoinOperator.AND, false));
+			existenceQuery.addCondition(new QueryCondition(null, foreignEntityDetails.getIdField().getDbColumnName(), Operator.EQ, value, JoinOperator.AND, false));
 			
 			if(dataStore.getCount(existenceQuery, foreignEntityDetails) <= 0)
 			{

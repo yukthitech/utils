@@ -20,7 +20,8 @@ public class RdbmsConfiguration implements Validateable
 	
 	public static final String CHECK_SEQUENCE_QUERY = "checkSequenceTemplate";
 	public static final String CREATE_SEQUENCE_QUERY = "createSequenceTemplate";
-	public static final String CREATE_QUERY = "createTableTemplate";
+	public static final String CREATE_TABLE = "createTableTemplate";
+	public static final String CREATE_EXTENDED_TABLE = "createExtendedTableTemplate";
 	public static final String CREATE_INDEX = "createIndexTemplate";
 	public static final String SAVE_QUERY = "saveTemplate";
 	public static final String UPDATE_QUERY = "updateTemplate";
@@ -33,7 +34,7 @@ public class RdbmsConfiguration implements Validateable
 	public static final String DROP_QUERY = "dropTableTemplate";
 
 	public static final String MANDATORY_QUERIES[] = {
-		CREATE_QUERY, CREATE_INDEX,
+		CREATE_TABLE, CREATE_INDEX, CREATE_EXTENDED_TABLE,
 		
 		SAVE_QUERY, UPDATE_QUERY, DELETE_QUERY, FINDER_QUERY, COUNT_QUERY, 
 		

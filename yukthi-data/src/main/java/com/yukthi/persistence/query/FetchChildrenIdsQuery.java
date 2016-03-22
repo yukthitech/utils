@@ -26,7 +26,7 @@ public class FetchChildrenIdsQuery extends Query implements IChildQuery
 	
 	public String getChildIdColumn()
 	{
-		return childEntityDetails.getIdField().getColumn();
+		return childEntityDetails.getIdField().getDbColumnName();
 	}
 
 	public String getChildTableName()

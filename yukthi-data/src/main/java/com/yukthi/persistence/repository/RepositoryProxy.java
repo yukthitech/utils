@@ -185,6 +185,13 @@ class RepositoryProxy implements InvocationHandler
 			}
 		}
 		
+		//drop extended table if any
+		if(entityDetails.getExtendedTableDetails() != null)
+		{
+			EntityDetails dummEntityDetails = new EntityDetails(entityDetails.getExtendedTableDetails().getTableName(), Object.class);
+			dataStore.dropTable(new DropTableQuery(dummEntityDetails));
+		}
+		
 		//drop main table
 		dataStore.dropTable(new DropTableQuery(entityDetails));
 		return null;

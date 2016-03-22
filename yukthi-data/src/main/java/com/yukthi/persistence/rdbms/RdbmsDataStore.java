@@ -43,6 +43,7 @@ import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.ChildrenExistenceQuery;
 import com.yukthi.persistence.query.ColumnParam;
 import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.CreateExtendedTableQuery;
 import com.yukthi.persistence.query.CreateIndexQuery;
 import com.yukthi.persistence.query.CreateTableQuery;
 import com.yukthi.persistence.query.DeleteQuery;
@@ -256,7 +257,7 @@ public class RdbmsDataStore implements IDataStore
 
 			statement = connection.createStatement();
 			
-			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_QUERY, "query", createQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_TABLE, "query", createQuery);
 			
 			logger.debug("Built create-table query as: \n\t{}", query);
 			
@@ -266,6 +267,35 @@ public class RdbmsDataStore implements IDataStore
 		{
 			logger.error("An error occurred while executing create-table-query", ex);
 			throw new PersistenceException("An error occurred while executing create-table-query", ex);
+		}finally
+		{
+			closeResources(null, statement);
+		}
+	}
+
+	@Override
+	public void createExtendedTable(CreateExtendedTableQuery createExtendedTableQuery)
+	{
+		logger.trace("Started method: createExtendedTable");
+		
+		Statement statement = null;
+		
+		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
+		{
+			Connection connection = transaction.getTransaction().getConnection();
+
+			statement = connection.createStatement();
+			
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_EXTENDED_TABLE, "query", createExtendedTableQuery);
+			
+			logger.debug("Built create-extended-table query as: \n\t{}", query);
+			
+			statement.execute(query);
+			transaction.commit();
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while executing create-extended-table-query", ex);
+			throw new PersistenceException("An error occurred while executing create-extended-table-query", ex);
 		}finally
 		{
 			closeResources(null, statement);

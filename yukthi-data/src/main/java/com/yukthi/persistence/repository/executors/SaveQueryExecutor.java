@@ -1,5 +1,6 @@
 package com.yukthi.persistence.repository.executors;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthi.persistence.EntityDetails;
+import com.yukthi.persistence.ExtendedTableDetails;
+import com.yukthi.persistence.ExtendedTableEntity;
 import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ForeignConstraintDetails;
 import com.yukthi.persistence.ICrudRepository;
@@ -33,6 +36,7 @@ import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.utils.ObjectWrapper;
+import com.yukthi.utils.exceptions.InvalidStateException;
 
 @QueryExecutorPattern(prefixes = {"save"})
 public class SaveQueryExecutor extends AbstractPersistQueryExecutor
@@ -114,7 +118,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				
 				if(field.getGenerationType() == GenerationType.SEQUENCE)
 				{
-					query.addColumn(new ColumnParam(field.getColumn(), null, -1, field.getSequenceName()));
+					query.addColumn(new ColumnParam(field.getDbColumnName(), null, -1, field.getSequenceName()));
 					continue;
 				}
 			}
@@ -172,7 +176,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 			//convert to db data type
 			value = conversionService.convertToDBType(value, field);
 			
-			query.addColumn(new ColumnParam(field.getColumn(), value, -1));
+			query.addColumn(new ColumnParam(field.getDbColumnName(), value, -1));
 			
 			//if field is id field and value was set manually
 			if(field.isIdField())
@@ -207,6 +211,8 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 					entityDetails.getIdField().setValue(entity, idWrapper.getValue());
 				}
 				
+				saveExtensionFields((Long)idWrapper.getValue(), entity, entityDetails, conversionService, dataStore);
+				
 				//save child entities, if any
 				for(FieldDetails field : childFields.keySet())
 				{
@@ -238,6 +244,52 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 			}
 			
 			throw new IllegalStateException(ex);
+		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void saveExtensionFields(long id, Object entity, EntityDetails entityDetails, ConversionService conversionService, IDataStore dataStore)
+	{
+		ExtendedTableDetails extendedTableDetails = entityDetails.getExtendedTableDetails();
+		
+		if(extendedTableDetails == null)
+		{
+			return;
+		}
+		
+		Field extFieldsHolder = entityDetails.getExtendedTableDetails().getEntityField();
+		Map<String, Object> extendedFields = null;
+		
+		try
+		{
+			extFieldsHolder.setAccessible(true);
+			extendedFields = (Map) extFieldsHolder.get(entity);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while fetching extension field values");
+		}
+		
+		if(extendedFields == null || extendedFields.isEmpty())
+		{
+			return;
+		}
+		
+		
+		SaveQuery query = new SaveQuery(extendedTableDetails.toEntityDetails(entityDetails));
+		query.addColumn(new ColumnParam(ExtendedTableEntity.COLUMN_ENTITY_ID, id, -1));
+		
+		for(String field : extendedFields.keySet())
+		{
+			query.addColumn(new ColumnParam(field.toUpperCase(), extendedFields.get(field), -1));
+		}
+
+		//save the entity
+		int res = dataStore.save(query, entityDetails, new ObjectWrapper<>());
+
+		//if insert failed
+		if(res <= 0)
+		{
+			throw new IllegalStateException("Failed to save extended fields");
 		}
 	}
 	
@@ -368,7 +420,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		
 		//build finder query
 		FinderQuery findQuery = new FinderQuery(entityDetails);
-		findQuery.addResultField(new QueryResultField(null, idFieldDetails.getColumn(), null));
+		findQuery.addResultField(new QueryResultField(null, idFieldDetails.getDbColumnName(), null));
 		
 		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid, JoinOperator.AND, false));
 		

@@ -10,8 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class EntityDetails
 {
+	private static Logger logger = LogManager.getLogger(EntityDetails.class);
+	
 	private String tableName;
 	private Class<?> entityType;
 
@@ -33,6 +38,11 @@ public class EntityDetails
 	 * Field used to maintain entity version for optimistic updates
 	 */
 	private FieldDetails versionField;
+	
+	/**
+	 * Extended table details for this entity.
+	 */
+	private ExtendedTableDetails extendedTableDetails;
 	
 	/**
 	 * Indicates whether table is created
@@ -77,7 +87,7 @@ public class EntityDetails
 				throw new IllegalArgumentException("No field-mapping found for field: " + name);
 			}
 
-			fieldDetails.setColumn(column);
+			fieldDetails.setDbColumnName(column);
 			columnToDetails.put(column, fieldDetails);
 		}
 	}
@@ -94,22 +104,23 @@ public class EntityDetails
 
 	void addFieldDetails(FieldDetails fieldDetails)
 	{
-		if(fieldToDetails.containsKey(fieldDetails.getField()))
+		if(fieldToDetails.containsKey(fieldDetails.getName()))
 		{
-			throw new InvalidMappingException("Field '" + fieldDetails.getField() + "' is mapped multiple times");
+			logger.warn("Field '" + fieldDetails.getName() + "' is mapped multiple times");
+			//throw new InvalidMappingException("Field '" + fieldDetails.getField() + "' is mapped multiple times");
 		}
 
-		if(columnToDetails.containsKey(fieldDetails.getColumn()))
+		if(columnToDetails.containsKey(fieldDetails.getDbColumnName()))
 		{
-			throw new InvalidMappingException("Column '" + fieldDetails.getColumn() + "' is mapped by multiple field: [" + fieldDetails.getField() + ", " + columnToDetails.get(fieldDetails.getColumn()).getField() + "]");
+			throw new InvalidMappingException("Column '" + fieldDetails.getDbColumnName() + "' is mapped by multiple field: [" + fieldDetails.getName() + ", " + columnToDetails.get(fieldDetails.getDbColumnName()).getName() + "]");
 		}
 
-		fieldToDetails.put(fieldDetails.getField().getName(), fieldDetails);
+		fieldToDetails.put(fieldDetails.getName(), fieldDetails);
 		
 		//if column name is present, this might be case with non-owned relation fields
-		if(fieldDetails.getColumn() != null)
+		if(fieldDetails.getDbColumnName() != null)
 		{
-			columnToDetails.put(fieldDetails.getColumn(), fieldDetails);
+			columnToDetails.put(fieldDetails.getDbColumnName(), fieldDetails);
 		}
 
 		if(fieldDetails.isIdField())
@@ -315,6 +326,26 @@ public class EntityDetails
 	{
 		this.isTableCreated = isTableCreated;
 	}
+	
+	/**
+	 * Gets the extended table details for this entity.
+	 *
+	 * @return the extended table details for this entity
+	 */
+	public ExtendedTableDetails getExtendedTableDetails()
+	{
+		return extendedTableDetails;
+	}
+
+	/**
+	 * Sets the extended table details for this entity.
+	 *
+	 * @param extendedTableDetails the new extended table details for this entity
+	 */
+	public void setExtendedTableDetails(ExtendedTableDetails extendedTableDetails)
+	{
+		this.extendedTableDetails = extendedTableDetails;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -330,20 +361,5 @@ public class EntityDetails
 
 		builder.append("]");
 		return builder.toString();
-	}
-
-	public EntityDetails cloneForAudit(String tableName)
-	{
-		EntityDetails newEntityDetails = new EntityDetails(tableName, entityType);
-
-		for(FieldDetails fieldDetails: this.fieldToDetails.values())
-		{
-			fieldDetails = fieldDetails.cloneForAudit();
-			
-			newEntityDetails.fieldToDetails.put(fieldDetails.getField().getName(), fieldDetails);
-			newEntityDetails.columnToDetails.put(fieldDetails.getColumn(), fieldDetails);
-		}
-
-		return newEntityDetails;
 	}
 }

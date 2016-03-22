@@ -2,6 +2,8 @@ package com.yukthi.persistence;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,7 +19,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,16 +28,21 @@ import com.yukthi.persistence.annotations.AccessType;
 import com.yukthi.persistence.annotations.AutoFetchType;
 import com.yukthi.persistence.annotations.DataType;
 import com.yukthi.persistence.annotations.DataTypeMapping;
+import com.yukthi.persistence.annotations.Extendable;
+import com.yukthi.persistence.annotations.ExtendedFields;
 import com.yukthi.persistence.annotations.FieldAccess;
 import com.yukthi.persistence.annotations.Index;
 import com.yukthi.persistence.annotations.Indexed;
 import com.yukthi.persistence.annotations.Indexes;
+import com.yukthi.persistence.annotations.Transient;
 import com.yukthi.persistence.annotations.UniqueConstraint;
 import com.yukthi.persistence.annotations.UniqueConstraints;
 import com.yukthi.persistence.monitor.EntityDetailsMonitor;
 import com.yukthi.persistence.monitor.IEntityCreateTableListener;
 import com.yukthi.persistence.query.CreateIndexQuery;
 import com.yukthi.persistence.query.CreateTableQuery;
+import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
+import com.yukthi.utils.exceptions.InvalidConfigurationException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 public class EntityDetailsFactory
@@ -49,6 +55,8 @@ public class EntityDetailsFactory
 	private EntityDetailsMonitor entityDetailsMonitor = new EntityDetailsMonitor();
 	
 	private Map<String, Object> nameToConstraints = new HashMap<>();
+	
+	private RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
 	/**
 	 * Removes non aplha numeric characters (including underscore) from column names and sets it as key and the actual column
@@ -318,6 +326,8 @@ public class EntityDetailsFactory
 		//fetch constraints at field level
 			//Note: this is done at end to ensure all field details are loaded first. Which is required during cross recursion
 		fetchFieldConstraints(entityDetails, dataStore, createTables);
+
+		fetchExtendedTableDetails(entityType, entityDetails);
 		
 		if(flattenColumnMap == null)
 		{
@@ -365,7 +375,7 @@ public class EntityDetailsFactory
 		{
 			if(
 				Modifier.isStatic(field.getModifiers())
-				|| field.getAnnotation(Transient.class) != null	
+				|| recursiveAnnotationFactory.findAnnotationRecursively(field, Transient.class) != null	
 			  )
 			{
 				continue;
@@ -460,7 +470,7 @@ public class EntityDetailsFactory
 
 		if(idField == null)
 		{
-			fieldDetails = new FieldDetails(field, columnName, dataType, (version != null), nullable);
+			fieldDetails = new FieldDetails(field, dataType, (version != null), nullable);
 			
 			logger.trace("Adding field details {} to entity {}", fieldDetails, entityDetails);
 		}
@@ -485,7 +495,7 @@ public class EntityDetailsFactory
 				sequenceName = "SEQ_" + entityDetails.getEntityType().getSimpleName().toUpperCase() + "_" + field.getName().toUpperCase();
 			}
 			
-			fieldDetails = new FieldDetails(field, columnName, dataType, true, generationType, autoFetch, sequenceName, false);
+			fieldDetails = new FieldDetails(field, dataType, true, generationType, autoFetch, sequenceName, false);
 			
 			logger.trace("Adding ID field details {} to entity {}", fieldDetails, entityDetails);
 		}
@@ -518,6 +528,66 @@ public class EntityDetailsFactory
 			
 			//fetch foreign constraint details, if any
 			buildForeignConstraint(entityDetails, fieldDetails, dataStore, createTables);
+		}
+	}
+	
+	/**
+	 * Fetches extension field details for specific entity details.
+	 * @param entityType
+	 * @param entityDetails
+	 */
+	private void fetchExtendedTableDetails(Class<?> entityType, EntityDetails entityDetails)
+	{
+		Extendable extendable = recursiveAnnotationFactory.findAnnotationRecursively(entityType, Extendable.class);
+		
+		if(extendable == null)
+		{
+			return;
+		}
+		
+		String tableName = extendable.tableName();
+		
+		if(tableName.trim().length() == 0)
+		{
+			tableName = "EXT_" + entityDetails.getTableName();
+		}
+		
+		ExtendedTableDetails extendedTableDetails = new ExtendedTableDetails(tableName, extendable);
+		entityDetails.setExtendedTableDetails(extendedTableDetails);
+		
+		ParameterizedType parameterizedType = null;
+		Type mapParamTypes[] = null;
+		
+		//find entity field which will hold extended fields
+		for(Field field : entityType.getDeclaredFields())
+		{
+			if(field.getAnnotation(ExtendedFields.class) == null)
+			{
+				continue;
+			}
+			
+			if(!Map.class.isAssignableFrom(field.getType()))
+			{
+				throw new InvalidConfigurationException("In entity '{}' extended field holder field '{}' is of non-map type", entityType.getName(), field.getName());
+			}
+
+			extendedTableDetails.setEntityField(field);
+			
+			parameterizedType = (ParameterizedType)field.getGenericType();
+			mapParamTypes = parameterizedType.getActualTypeArguments();
+			
+			if(mapParamTypes.length != 2 || !String.class.equals(mapParamTypes[0]))
+			{
+				throw new InvalidConfigurationException("In entity '{}' extended field holder field '{}' is defined as map with non-string type key", entityType.getName(), field.getName());
+			}
+			
+			break;
+		}
+		
+		//if no field is found to hold extended field information, throw error
+		if(extendedTableDetails.getEntityField() == null)
+		{
+			throw new InvalidConfigurationException("Entity '{}' is defined as extendable but no field is defined to hold extended field information", entityType.getName());
 		}
 	}
 	
@@ -595,6 +665,8 @@ public class EntityDetailsFactory
 					createEntityTable(joinTable.toEntityDetails(), dataStore, true);
 				}
 				
+				createExtendedTable(entityDetails, dataStore);
+				
 				//inform the monitor current entity table is created, so that dependency tables waiting
 					//	 for this table can be created
 				entityDetailsMonitor.tablesCreatedForEntity(entityDetails);
@@ -622,10 +694,10 @@ public class EntityDetailsFactory
 	 * @param entityDetails
 	 * @param dataStore
 	 */
-	private void createEntityTable(EntityDetails entityDetails, IDataStore dataStore, boolean isJoinTable)
+	private void createEntityTable(EntityDetails entityDetails, IDataStore dataStore, boolean isUniqueKeyDisable)
 	{
 		//create the main table for the entity type
-		CreateTableQuery createTableQuery = new CreateTableQuery(entityDetails, isJoinTable);
+		CreateTableQuery createTableQuery = new CreateTableQuery(entityDetails, isUniqueKeyDisable);
 		dataStore.createTable(createTableQuery);
 
 		//reset the column mapping, to take new column names (if any) into consideration
@@ -644,12 +716,24 @@ public class EntityDetailsFactory
 			
 			for(String field: fields)
 			{
-				columns[idx] = entityDetails.getFieldDetailsByField(field).getColumn();
+				columns[idx] = entityDetails.getFieldDetailsByField(field).getDbColumnName();
 				idx++;
 			}
 			
 			dataStore.createIndex(new CreateIndexQuery(entityDetails, index.getName(), columns));
 		}
+	}
+	
+	private void createExtendedTable(EntityDetails entityDetails, IDataStore dataStore)
+	{
+		ExtendedTableDetails extendedTableDetails = entityDetails.getExtendedTableDetails();
+		
+		if(extendedTableDetails == null)
+		{
+			return;
+		}
+		
+		dataStore.createTable( new CreateTableQuery(extendedTableDetails.toEntityDetails(entityDetails), true) );
 	}
 	
 	/**

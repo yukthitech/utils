@@ -10,7 +10,7 @@ public class CreateTableQuery extends Query
 	/**
 	 * Indicates if this is join table or not
 	 */
-	private boolean isJoinTable;
+	private boolean isUniqueKeyDisabled;
 
 	public CreateTableQuery(EntityDetails entityDetails)
 	{
@@ -19,10 +19,10 @@ public class CreateTableQuery extends Query
 		this.tableStructure = new TableStructure(entityDetails);
 	}
 
-	public CreateTableQuery(EntityDetails entityDetails, boolean joinTable)
+	public CreateTableQuery(EntityDetails entityDetails, boolean isUniqueKeyDisable)
 	{
 		this(entityDetails);
-		this.isJoinTable = joinTable;
+		this.isUniqueKeyDisabled = isUniqueKeyDisable;
 	}
 
 	public TableStructure getTableStructure()
@@ -36,20 +36,20 @@ public class CreateTableQuery extends Query
 	}
 
 	/**
-	 * @return the {@link #isJoinTable isJoinTable}
+	 * @return the {@link #isUniqueKeyDisabled isJoinTable}
 	 */
-	public boolean isJoinTable()
+	public boolean isUniqueKeyDisabled()
 	{
-		return isJoinTable;
+		return isUniqueKeyDisabled;
 	}
 
 	/**
-	 * @param isJoinTable
-	 *            the {@link #isJoinTable isJoinTable} to set
+	 * @param isUniqueKeyDisabled
+	 *            the {@link #isUniqueKeyDisabled isJoinTable} to set
 	 */
-	public void setJoinTable(boolean isJoinTable)
+	public void setUniqueKeyDisabled(boolean isUniqueKeyDisabled)
 	{
-		this.isJoinTable = isJoinTable;
+		this.isUniqueKeyDisabled = isUniqueKeyDisabled;
 	}
 
 	/*

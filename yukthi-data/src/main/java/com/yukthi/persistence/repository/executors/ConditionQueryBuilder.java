@@ -13,6 +13,8 @@ import java.util.Set;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import com.yukthi.persistence.EntityDetails;
+import com.yukthi.persistence.ExtendedTableDetails;
+import com.yukthi.persistence.ExtendedTableEntity;
 import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ForeignConstraintDetails;
 import com.yukthi.persistence.InvalidMappingException;
@@ -44,8 +46,8 @@ import com.yukthi.utils.exceptions.InvalidStateException;
  */
 public class ConditionQueryBuilder implements Cloneable
 {
-	private static final String DEF_TABLE_CODE = "T0";
-	private static final String DEF_TABLE_ID_COL = "T0_ID";
+	public static final String DEF_TABLE_CODE = "T0";
+	public static final String DEF_TABLE_ID_COL = "T0_ID";
 
 	/**
 	 * Table information required by the query
@@ -392,7 +394,42 @@ public class ConditionQueryBuilder implements Cloneable
 			// if invalid field details encountered
 			if(fieldDetails == null)
 			{
-				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
+				ExtendedTableDetails extendedTableDetails = currentEntityDetails.getExtendedTableDetails();
+
+				//if current field represent extended field
+				if(extendedTableDetails != null && extendedTableDetails.getEntityField().getName().equals(entityFieldPath[i]))
+				{
+					//if extended field is used in middle
+					if(i != (maxIndex - 1))
+					{
+						throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s. "
+							+ "Extension field is used in middle/end of expression.", currentProp, paramType, conditionExpr, methodDesc));
+					}
+					
+					EntityDetails extendedEntityDetails = extendedTableDetails.toEntityDetails(currentEntityDetails);
+					
+					//ensure valid extension field is specified
+					if(extendedEntityDetails.getFieldDetailsByField(entityFieldPath[i + 1]) == null)
+					{
+						throw new InvalidMappingException(String.format("Invalid field mapping '%s.%s' found in %s parameter '%s' of %s. "
+								+ "Invalid extension field name specified - %s.", currentProp, entityFieldPath[i], paramType, conditionExpr, methodDesc, entityFieldPath[i]));
+					}
+					
+					newTableInfo = propToTable.get(currentProp);
+					
+					if(newTableInfo == null)
+					{
+						newTableInfo = newTableInfo(extendedEntityDetails, extendedEntityDetails.getTableName(), currentTableInfo.tableCode, 
+								currentEntityDetails.getIdField().getDbColumnName(), ExtendedTableEntity.COLUMN_ENTITY_ID, currentProp, true);
+					}
+					
+					fieldDetailsWrapper.setValue(extendedEntityDetails.getFieldDetailsByField(entityFieldPath[i + 1]));
+					return newTableInfo;
+				}
+				else
+				{
+					throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
+				}
 			}
 
 			// if end of field expression is reached
@@ -439,18 +476,18 @@ public class ConditionQueryBuilder implements Cloneable
 				{
 					// add target table info
 					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
-							currentEntityDetails.getIdField().getColumn(), targetFieldDetails.getColumn(), currentProp, fieldDetails.isNullable());
+							currentEntityDetails.getIdField().getDbColumnName(), targetFieldDetails.getDbColumnName(), currentProp, fieldDetails.isNullable());
 				}
 				// if table was joined via join talbe
 				else
 				{
 					// add join table info
-					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), 
+					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
 							joinTableDetails.getInverseJoinColumn(), null, fieldDetails.isNullable());
 
 					// add target table info
 					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
-							joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp, fieldDetails.isNullable());
+							joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, fieldDetails.isNullable());
 				}
 			}
 			// if the relation is via join table
@@ -459,18 +496,18 @@ public class ConditionQueryBuilder implements Cloneable
 				joinTableDetails = foreignConstraint.getJoinTableDetails();
 
 				// add join table info
-				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getColumn(), 
+				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
 						joinTableDetails.getJoinColumn(), null, fieldDetails.isNullable());
 
 				// add target table info
 				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
-						joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getColumn(), currentProp, fieldDetails.isNullable());
+						joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, fieldDetails.isNullable());
 			}
 			// if the relation is simple relation
 			else
 			{
 				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
-						fieldDetails.getColumn(), targetEntityDetails.getIdField().getColumn(), currentProp, fieldDetails.isNullable());
+						fieldDetails.getDbColumnName(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, fieldDetails.isNullable());
 			}
 
 			currentTableInfo = newTableInfo;
@@ -726,10 +763,10 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			// add tables and fields to specifies query
 			addTables(query, field.table.tableCode, includedTables);
-			query.addResultField(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code));
+			query.addResultField(new QueryResultField(field.table.tableCode, field.fieldDetails.getDbColumnName(), field.code));
 		}
 
-		query.addResultField(new QueryResultField(DEF_TABLE_CODE, codeToTable.get(DEF_TABLE_CODE).entityDetails.getIdField().getColumn(), DEF_TABLE_ID_COL));
+		query.addResultField(new QueryResultField(DEF_TABLE_CODE, codeToTable.get(DEF_TABLE_CODE).entityDetails.getIdField().getDbColumnName(), DEF_TABLE_ID_COL));
 
 		QueryCondition queryCondition = null;
 		
@@ -783,7 +820,7 @@ public class ConditionQueryBuilder implements Cloneable
 			// add tables and conditions to specifies query
 			addTables(query, condition.table.tableCode, includedTables);
 			
-			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getColumn(), condition.operator, value, condition.joinOperator, condition.ignoreCase);
+			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getDbColumnName(), condition.operator, value, condition.joinOperator, condition.ignoreCase);
 		}
 
 		//if no group conditions are present on this query
@@ -830,7 +867,7 @@ public class ConditionQueryBuilder implements Cloneable
 		// loop through order by fields
 		for(ResultField field : orderByFields)
 		{
-			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getColumn(), field.code, field.orderType));
+			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getDbColumnName(), field.code, field.orderType));
 		}
 
 		// if enable codes are available
@@ -1013,7 +1050,7 @@ public class ConditionQueryBuilder implements Cloneable
 			return null;
 		}
 
-		return new QueryResultField(resultField.table.tableCode, resultField.fieldDetails.getColumn(), resultField.code);
+		return new QueryResultField(resultField.table.tableCode, resultField.fieldDetails.getDbColumnName(), resultField.code);
 	}
 
 	@Override

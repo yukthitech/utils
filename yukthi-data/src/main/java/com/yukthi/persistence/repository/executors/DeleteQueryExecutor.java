@@ -85,7 +85,7 @@ public class DeleteQueryExecutor extends AbstractPersistQueryExecutor
 		FieldDetails ownerFieldDetails = childConstraint.getOwnerEntityDetails().getFieldDetailsByField(ownerField.getName());
 		EntityDetails childTargetEntity = childConstraint.getTargetEntityDetails();
 		
-		childQuery.addMapping( ownerFieldDetails.getColumn(), childTargetEntity.getIdField().getColumn());
+		childQuery.addMapping( ownerFieldDetails.getDbColumnName(), childTargetEntity.getIdField().getDbColumnName());
 	}
 	
 	/**
