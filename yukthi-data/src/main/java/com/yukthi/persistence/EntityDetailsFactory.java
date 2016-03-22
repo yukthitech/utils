@@ -375,7 +375,8 @@ public class EntityDetailsFactory
 		{
 			if(
 				Modifier.isStatic(field.getModifiers())
-				|| recursiveAnnotationFactory.findAnnotationRecursively(field, Transient.class) != null	
+				|| recursiveAnnotationFactory.findAnnotationRecursively(field, Transient.class) != null
+				|| field.getAnnotation(javax.persistence.Transient.class) != null
 			  )
 			{
 				continue;

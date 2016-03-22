@@ -95,7 +95,6 @@ public class FieldDetails
 	 * Instantiates a new field details.
 	 *
 	 * @param field the field
-	 * @param column the column
 	 * @param dbDataType the db data type
 	 * @param isVersionField the is version field
 	 * @param nullable the nullable
@@ -138,7 +137,6 @@ public class FieldDetails
 	 * Instantiates a new field details.
 	 *
 	 * @param field the field
-	 * @param column the column
 	 * @param dbDataType the db data type
 	 * @param idField the id field
 	 * @param generationType the generation type
