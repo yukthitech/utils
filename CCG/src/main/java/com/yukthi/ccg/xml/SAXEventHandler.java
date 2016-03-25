@@ -226,10 +226,12 @@ class SAXEventHandler extends DefaultHandler
 			DynamicDataAcceptor acceptor = (DynamicDataAcceptor) parentBean;
 			try
 			{
+				Object nodeValue = activeNode.isTextNode() ? processText(activeNode.getText()) : activeNode.getActualBean();
+				
 				if(activeNode.isIDBased())
-					acceptor.add(activeNode.getName(), activeNode.getID(), activeNode.getActualBean());
+					acceptor.add(activeNode.getName(), activeNode.getID(), nodeValue);
 				else
-					acceptor.add(activeNode.getName(), activeNode.getActualBean());
+					acceptor.add(activeNode.getName(), nodeValue);
 			} catch(Exception ex)
 			{
 				throw new XMLLoadException("Failed to set dynamic property for bean \"" + beanDesc + "\" for node: " + name, ex, activeNode);
