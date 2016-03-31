@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -112,12 +113,12 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		logger.trace("Started method: fetchReturnDetails");
 		
 		this.returnType = method.getReturnType();
-
+		
 		if(void.class.equals(this.returnType))
 		{
 			throw new InvalidRepositoryException("Found void finder method '" + method.getName() + "' in repository: " + repositoryType.getName());
 		}
-
+		
 		//TODO: Support map types
 		if(Collection.class.isAssignableFrom(returnType))
 		{
@@ -150,7 +151,9 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 				throw new InvalidRepositoryException("Unsupported collection return type (with mutliple type params) found on finder '" 
 							+ method.getName() + "' of repository: " + repositoryType.getName());
 			}
-			
+
+			this.returnType = TypeUtils.getRawType(typeArgs[0], repositoryType);
+			/*
 			//if type variables are used in return type
 			if(!(typeArgs[0] instanceof Class))
 			{
@@ -167,6 +170,11 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			{
 				this.returnType = (Class<?>)typeArgs[0];
 			}
+			*/
+		}
+		else
+		{
+			this.returnType = TypeUtils.getRawType(method.getGenericReturnType(), repositoryType);
 		}
 		
 		SearchResult searchResult = recursiveAnnotationFactory.findAnnotationRecursively(method, SearchResult.class);

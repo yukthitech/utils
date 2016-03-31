@@ -1,12 +1,14 @@
 package com.yukthi.persistence.repository;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Table;
+
+import org.apache.commons.lang3.reflect.TypeUtils;
 
 import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.EntityDetailsFactory;
@@ -108,11 +110,30 @@ public class RepositoryFactory
 	@SuppressWarnings({"rawtypes"})
 	private EntityDetails fetchEntityDetails(Class<?> repositoryType)
 	{
+		if(!ICrudRepository.class.isAssignableFrom(repositoryType))
+		{
+			throw new IllegalStateException("Specified type does not extend ICrudRepository: " + repositoryType.getName());
+		}
+		
+		Map<TypeVariable<?>, Type> typeMap = TypeUtils.getTypeArguments(repositoryType, ICrudRepository.class);
+		
+		Class<?> entityType = (Class<?>)typeMap.get(ICrudRepository.class.getTypeParameters()[0]);
+
+		Table table = entityType.getAnnotation(Table.class);
+		
+		if(table == null)
+		{
+			throw new InvalidMappingException("No @Table annotation found on entity type: " + entityType.getName());
+		}
+		
+		return entityDetailsFactory.getEntityDetails((Class)entityType, dataStore, createTables);
+
+		/*
 		Type crudRepoType = fetchRepositoryType(repositoryType);
 		
 		if(crudRepoType == null)
 		{
-			throw new IllegalStateException("Specified repository type does not extend ICrudRepository: " + repositoryType.getName());
+			
 		}
 		
 		Type crudRepoParams[] = ((ParameterizedType)crudRepoType).getActualTypeArguments();
@@ -126,6 +147,7 @@ public class RepositoryFactory
 		}
 		
 		return entityDetailsFactory.getEntityDetails((Class)entityType, dataStore, createTables);
+		*/
 	}
 	
 	@SuppressWarnings("unchecked")
