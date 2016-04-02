@@ -20,6 +20,7 @@ import com.yukthi.persistence.JoinTableDetails;
 import com.yukthi.persistence.TransactionException;
 import com.yukthi.persistence.query.DropTableQuery;
 import com.yukthi.persistence.repository.annotations.NotExecutableMethod;
+import com.yukthi.persistence.repository.executors.QueryExecutionContext;
 import com.yukthi.persistence.repository.executors.QueryExecutor;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 import com.yukthi.utils.exceptions.UnsupportedOperationException;
@@ -39,6 +40,8 @@ class RepositoryProxy implements InvocationHandler
 	
 	private Set<Method> nonExecutableMethods = new HashSet<>();
 	
+	private QueryExecutionContext queryExecutionContext = new QueryExecutionContext();
+	
 	public RepositoryProxy(IDataStore dataStore, Class<? extends ICrudRepository<?>> repositoryType, EntityDetails entityDetails, ExecutorFactory executorFactory)
 	{
 		defaultedMethods.put("getEntityDetails", this::getEntityDetails);
@@ -47,6 +50,7 @@ class RepositoryProxy implements InvocationHandler
 		defaultedMethods.put("newOrExistingTransaction", this::newOrExistingTransaction);
 		defaultedMethods.put("dropEntityTable", this::dropEntityTable);
 		defaultedMethods.put("getRepositoryType", this::getRepositoryType);
+		defaultedMethods.put("setExecutionContext", this::setExecutionContext);
 
 		this.dataStore = dataStore;
 		this.entityDetails = entityDetails;
@@ -113,7 +117,7 @@ class RepositoryProxy implements InvocationHandler
 		try
 		{
 			QueryExecutor queryExecutor = methodToExecutor.get(method.getName());
-			return queryExecutor.execute(dataStore, dataStore.getConversionService(), args);
+			return queryExecutor.execute(queryExecutionContext, dataStore, dataStore.getConversionService(), args);
 		}catch(RuntimeException ex)
 		{
 			logger.error("An error occurred while executing method: " + method.getName(), ex);
@@ -207,4 +211,9 @@ class RepositoryProxy implements InvocationHandler
 		return repositoryType;
 	}
 	
+	private Object setExecutionContext(Object args[])
+	{
+		queryExecutionContext.setRepositoryExecutionContext(args[0]);
+		return null;
+	}
 }

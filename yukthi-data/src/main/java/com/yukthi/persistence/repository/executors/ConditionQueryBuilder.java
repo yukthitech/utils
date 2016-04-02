@@ -3,6 +3,7 @@ package com.yukthi.persistence.repository.executors;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthi.persistence.repository.search.DynamicResultField;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
+import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ObjectWrapper;
 import com.yukthi.utils.exceptions.InvalidStateException;
@@ -159,7 +161,7 @@ public class ConditionQueryBuilder implements Cloneable
 		
 		private boolean nullable;
 		
-		private Object defaultValue;
+		private String defaultValue;
 		
 		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable, boolean ignoreCase)
 		{
@@ -258,10 +260,12 @@ public class ConditionQueryBuilder implements Cloneable
 	public static class ParameterContext
 	{
 		private Object parameters[];
+		private Object repositoryExecutionContext;
 
-		public ParameterContext(Object[] parameters)
+		public ParameterContext(Object[] parameters, Object repositoryExecutionContext)
 		{
 			this.parameters = parameters;
+			this.repositoryExecutionContext = repositoryExecutionContext;
 		}
 
 		public Object[] getParameters()
@@ -535,7 +539,8 @@ public class ConditionQueryBuilder implements Cloneable
 	 *         group conditions
 	 */
 	public Condition addCondition(Condition groupHead, Operator operator, int index, String embeddedProperty, 
-			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, String defaultValue)
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, 
+			String defaultValue)
 	{
 		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
@@ -569,7 +574,9 @@ public class ConditionQueryBuilder implements Cloneable
 			{
 				try
 				{
-					condition.defaultValue = ConvertUtils.convert(defaultValue, condition.fieldDetails.getField().getType());
+					//set default value as a string on condition. This string will be evaluated 
+					//   to a value during query execution. And will evaluate expressions in string, if any at that time.
+					condition.defaultValue = defaultValue;
 				}catch(Exception ex)
 				{
 					throw new InvalidMappingException(String.format("Invalid default value specified for field %s for repository method %s", entityFieldExpression, methodDesc), ex);					
@@ -600,7 +607,9 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			try
 			{
-				condition.defaultValue = ConvertUtils.convert(defaultValue, condition.fieldDetails.getField().getType());
+				//set default value as a string on condition. This string will be evaluated 
+				//   to a value during query execution. And will evaluate expressions in string, if any at that time.
+				condition.defaultValue = defaultValue;
 			}catch(Exception ex)
 			{
 				throw new InvalidMappingException(String.format("Invalid default value specified for field %s for repository method %s", entityFieldExpression, methodDesc), ex);					
@@ -753,9 +762,9 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param query
 	 * @param params
 	 */
-	public void loadConditionalQuery(IConditionalQuery query, Object params[])
+	public void loadConditionalQuery(Object repoExecutionContext, IConditionalQuery query, Object params[])
 	{
-		ParameterContext context = new ParameterContext(params);
+		ParameterContext context = new ParameterContext(params, repoExecutionContext);
 		Set<String> includedTables = new HashSet<>();
 
 		// load the result fields to specified query
@@ -805,7 +814,18 @@ public class ConditionQueryBuilder implements Cloneable
 			//for method level conditions like null-checks and others use default value from condition
 			else
 			{
-				value = condition.defaultValue;
+				String strValue = condition.defaultValue;
+				
+				//if no repo context is specified assume empty object
+				Object repoContext = (context.repositoryExecutionContext != null) ? context.repositoryExecutionContext : Collections.emptyMap(); 
+				
+				//if value is present check for expressions and replace them
+				if(strValue != null)
+				{
+					strValue = CommonUtils.replaceExpressions(repoContext, condition.defaultValue, null);
+				}
+				
+				value = ConvertUtils.convert(strValue, condition.fieldDetails.getField().getType());
 			}
 		} catch(Exception ex)
 		{

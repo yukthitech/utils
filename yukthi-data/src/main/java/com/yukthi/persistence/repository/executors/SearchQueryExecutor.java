@@ -83,9 +83,12 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see com.yukthi.persistence.repository.executors.QueryExecutor#execute(com.yukthi.persistence.repository.executors.QueryExecutionContext, com.yukthi.persistence.IDataStore, com.yukthi.persistence.conversion.ConversionService, java.lang.Object[])
+	 */
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
-	public Object execute(IDataStore dataStore, ConversionService conversionService, Object... params)
+	public Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
 		logger.trace("Started method: execute");
 		
@@ -145,7 +148,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			}
 
 			//load condition values
-			conditionQueryBuilder.loadConditionalQuery(finderQuery, conditionParams.toArray());
+			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), finderQuery, conditionParams.toArray());
 			conditionQueryBuilder.loadOrderByFields(finderQuery);
 			
 			IFinderRecordProcessor recordCountLimiter = null;

@@ -142,27 +142,34 @@ public class PropertyMapper
 		}
 		
 		beanInfo = new BeanInfo(beanType);
-		Field fields[] = beanType.getDeclaredFields();
+		Field fields[] = null;
 		NestedProperty nestedProp = null;
 		IgnorePropertyDestination ignorePropertyDestination = null;
 		
-		//loop through property descriptors and add to bean property map
-		for(Field field : fields)
+		while(!beanType.getName().startsWith("java"))
 		{
-			try
+			fields = beanType.getDeclaredFields();
+			
+			//loop through property descriptors and add to bean property map
+			for(Field field : fields)
 			{
-				nestedProp = NestedProperty.getNestedProperty(beanType, field.getName());
-			}catch(Exception ex)
-			{
-				logger.info("Ignoring {}.{} property, as property fetch resulted in error - {}", beanType.getName(), field.getName(), ex);
-				continue;
+				try
+				{
+					nestedProp = NestedProperty.getNestedProperty(beanType, field.getName());
+				}catch(Exception ex)
+				{
+					logger.info("Ignoring {}.{} property, as property fetch resulted in error - {}", beanType.getName(), field.getName(), ex);
+					continue;
+				}
+				
+				ignorePropertyDestination = field.getAnnotation(IgnorePropertyDestination.class);
+				
+				beanInfo.addProperty(new PropertyInfo(nestedProp, ignorePropertyDestination != null));
+	
+				getMappingsFromField(beanInfo, field);
 			}
 			
-			ignorePropertyDestination = field.getAnnotation(IgnorePropertyDestination.class);
-			
-			beanInfo.addProperty(new PropertyInfo(nestedProp, ignorePropertyDestination != null));
-
-			getMappingsFromField(beanInfo, field);
+			beanType = beanType.getSuperclass();
 		}
 		
 		//cache and return property map

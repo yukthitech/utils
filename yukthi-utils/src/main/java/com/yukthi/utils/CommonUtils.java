@@ -47,7 +47,8 @@ public class CommonUtils
 		primitiveToWrapper.put(primType, wrapperType);
 	}
 
-	private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{([\\w\\.\\(\\)]+)\\}");
+	private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{([\\w\\.\\(\\)\\=]+)\\}");
+	private static final Pattern DEF_VALUE_PATTERN = Pattern.compile("([\\w\\.\\(\\)]+)=([\\w\\.\\(\\)]*)");
 
 	/**
 	 * Returns true if specified type is primitive wrapper type
@@ -182,26 +183,43 @@ public class CommonUtils
 	public static String replaceExpressions(Object bean, String expressionString, IFormatter formatter)
 	{
 		Matcher matcher = EXPRESSION_PATTERN.matcher(expressionString);
+		Matcher defValMatcher = null;
 		StringBuffer result = new StringBuffer();
 		Object value = null;
+		String groupVal = null, key = null, defValue = null;
 
 		// loop through the expressions
 		while(matcher.find())
 		{
+			groupVal = matcher.group(1);
+			
+			defValMatcher = DEF_VALUE_PATTERN.matcher(groupVal);
+			
+			if(defValMatcher.matches())
+			{
+				key = defValMatcher.group(1);
+				defValue = defValMatcher.group(2);
+			}
+			else
+			{
+				key = groupVal;
+				defValue = "";
+			}
+			
 			try
 			{
-				value = PropertyUtils.getProperty(bean, matcher.group(1));
+				value = PropertyUtils.getProperty(bean, key);
 			} catch(Exception ex)
 			{
 				// in case of error log a warning and ignore
-				logger.warn("An error occurred while parsing expression: " + matcher.group(1), ex);
-				value = "";
+				logger.warn("An error occurred while parsing expression: " + key, ex);
+				value = null;
 			}
 
 			// if value is null, make it into empty string to avoid exceptions
 			if(value == null)
 			{
-				value = "";
+				value = defValue;
 			}
 			// if value is not null and formatter is specified
 			else if(formatter != null)

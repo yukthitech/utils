@@ -7,6 +7,13 @@ import com.yukthi.persistence.repository.search.SearchQuery;
 
 public interface ICrudRepository<E>
 {
+	/**
+	 * Sets the execution context for this repository. This object will be used to fetch context parameters.
+	 * This context can return values based on thread, which would be useful for webapplications.
+	 * @param context Context to be set
+	 */
+	public void setExecutionContext(Object context);
+	
 	public EntityDetails getEntityDetails();
 
 	/**

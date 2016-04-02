@@ -117,6 +117,15 @@ public class TCommonUtils
 		Assert.assertEquals("Property1=val1 Property2= nested= other=", CommonUtils.replaceExpressions(new TestBean("val1", -10, null), exprStr, null));
 	}
 	
+	@Test(groups = ITestGroups.UNIT_TESTS)
+	public void testReplaceExpressionsWithDefValue()
+	{
+		String exprStr = "Property1=${property1=defVal} Prop2=${property1=}";
+		
+		Assert.assertEquals("Property1=val1 Prop2=val1", CommonUtils.replaceExpressions(new TestBean("val1", 10, null), exprStr, null));
+		Assert.assertEquals("Property1=defVal Prop2=", CommonUtils.replaceExpressions(new TestBean(null, 10, null), exprStr, null));
+		
+	}
 	/**
 	 * Tests replace expressions with a bean
 	 */

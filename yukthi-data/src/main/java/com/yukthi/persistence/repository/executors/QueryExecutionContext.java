@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2015 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
+ * Copyright (c) 2016 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,30 +21,26 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.yukthi.persistence.repository.executors;
 
 /**
- * Conditions that can be specified at method level
+ * Encapsulation of parameters and other context sent during query executor execution.
  * @author akiran
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-public @interface MethodConditions
+public class QueryExecutionContext
 {
 	/**
-	 * Specifies null based condition checks
-	 * @return null based conditions
+	 * Repository execution context.
 	 */
-	public NullCheck[] nullChecks() default {};
+	private Object repositoryExecutionContext;
 	
-	/**
-	 * Default conditions on the method
-	 * @return default conditions on the method
-	 */
-	public DefaultCondition[] conditions() default {};
+	public void setRepositoryExecutionContext(Object repositoryExecutionContext)
+	{
+		this.repositoryExecutionContext = repositoryExecutionContext;
+	}
+	
+	public Object getRepositoryExecutionContext()
+	{
+		return repositoryExecutionContext;
+	}
 }

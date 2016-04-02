@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,10 +60,14 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		}
 		
 		boolean isCoreInterface = ICrudRepository.class.equals(method.getDeclaringClass());
+		Class<?> firstParamType = TypeUtils.getRawType(method.getGenericParameterTypes()[0], repositoryType);
 		
-		if( ( paramTypes.length == 1 && entityDetails.getEntityType().equals(paramTypes[0]) ) || isCoreInterface)
+		if( ( paramTypes.length >= 1 && entityDetails.getEntityType().equals(firstParamType) ) || isCoreInterface)
 		{
 			entityUpdate = true;
+			
+			super.fetchConditonsByAnnotations(method, false, conditionQueryBuilder, methodDesc, false);
+			super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
 		}
 		else
 		{
@@ -188,9 +193,11 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		}
 	}
 	
-	private Object updateFullEntity(IDataStore dataStore, ConversionService conversionService, Object entity)
+	private Object updateFullEntity(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
 		logger.trace("Started method: updateFullEntity");
+		
+		Object entity = params[0];
 		
 		if(entity == null)
 		{
@@ -264,6 +271,8 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getDbColumnName(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND, false));
 		}
 		
+		conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), query, params);
+		
 		try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
 		{
 			super.notifyEntityEvent(null, entity, EntityEventType.PRE_UPDATE);
@@ -298,14 +307,17 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 	}
 
 	
+	/* (non-Javadoc)
+	 * @see com.yukthi.persistence.repository.executors.QueryExecutor#execute(com.yukthi.persistence.repository.executors.QueryExecutionContext, com.yukthi.persistence.IDataStore, com.yukthi.persistence.conversion.ConversionService, java.lang.Object[])
+	 */
 	@Override
-	public Object execute(IDataStore dataStore, ConversionService conversionService, Object... params)
+	public Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
 		logger.trace("Started method: execute");
 		
 		if(entityUpdate)
 		{
-			return updateFullEntity(dataStore, conversionService, params[0]);
+			return updateFullEntity(context, dataStore, conversionService, params);
 		}
 		
 		queryLock.lock();
@@ -315,7 +327,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			Object value = null;
 			
 			updateQuery.clearConditions();
-			conditionQueryBuilder.loadConditionalQuery(updateQuery, params);
+			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), updateQuery, params);
 			
 			//TODO: When unique fields are getting updated, make sure unique constraints are not violated
 				//during unique field update might be we have to mandate id is provided as condition

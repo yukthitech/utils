@@ -330,11 +330,18 @@ public class TFinders extends TestSuiteBase
 		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo(), results.get(2).getEmployeeNo()) , 
 				CommonUtils.toSet("1234", "1235", "1236"));
 		
+		//test with dynamic expressions
+		repo.setExecutionContext(CommonUtils.toMap("oldAge", 46));
+		results = repo.findOldEmployees(null);
+		
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo()) , 
+				CommonUtils.toSet("1236"));
+
 		//find old employees with normal condition (default condition with normal conditions)
 		results = repo.findOldEmployees("12345646");
 		
 		Assert.assertEquals(results.size(), 1);
 		Assert.assertEquals(results.get(0).getEmployeeNo() , "1236");
-		
 	}
 }

@@ -50,7 +50,7 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	
 	@MethodConditions(
 		conditions = {
-			@DefaultCondition(field = "age", op = Operator.GE, value = "40")
+			@DefaultCondition(field = "age", op = Operator.GE, value = "${oldAge=40}")
 		}
 	)
 	public List<Employee> findOldEmployees(@Condition("phoneNo") String phoneNo);

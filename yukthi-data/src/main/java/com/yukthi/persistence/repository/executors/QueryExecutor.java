@@ -3,6 +3,7 @@ package com.yukthi.persistence.repository.executors;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,7 @@ import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.MethodConditions;
 import com.yukthi.persistence.repository.annotations.NullCheck;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 
 public abstract class QueryExecutor
 {
@@ -33,6 +35,8 @@ public abstract class QueryExecutor
 	protected Class<?> repositoryType;
 	
 	protected PersistenceExecutionContext persistenceExecutionContext;
+	
+	protected RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
 	public void setPersistenceExecutionContext(PersistenceExecutionContext persistenceExecutionContext)
 	{
@@ -66,7 +70,7 @@ public abstract class QueryExecutor
 		return factory.getEntityListenerManager().isListenerPresent(entityDetails.getEntityType(), eventType);
 	}
 	
-	public abstract Object execute(IDataStore dataStore, ConversionService conversionService, Object... params);
+	public abstract Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params);
 	
 	@SuppressWarnings("unchecked")
 	protected <A extends Annotation> A getAnnotation(Annotation annotations[], Class<A> type)
@@ -263,38 +267,44 @@ public abstract class QueryExecutor
 	protected void fetchMethodLevelConditions(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc)
 	{
 		//obtain method level conditions
-		MethodConditions methodConditions = method.getAnnotation(MethodConditions.class);
+		List<MethodConditions> methodConditionslst = recursiveAnnotationFactory.findAllAnnotationsRecursively(method, MethodConditions.class); 
 		
-		if(methodConditions == null)
+		if(methodConditionslst == null)
 		{
 			return;
 		}
 		
-		NullCheck nullChecks[] = methodConditions.nullChecks();
+		NullCheck nullChecks[] = null;
+		DefaultCondition defConditions[] = null;
 		
-		//check and add null based conditions
-		if(nullChecks != null)
+		for(MethodConditions methodConditions : methodConditionslst)
 		{
-			Operator operator = null;
+			nullChecks = methodConditions.nullChecks();
 			
-			for(NullCheck check : nullChecks)
+			//check and add null based conditions
+			if(nullChecks != null)
 			{
-				operator = check.checkForNotNull() ? Operator.NE : Operator.EQ;
+				Operator operator = null;
 				
-				//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
-				conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true, false, null);
+				for(NullCheck check : nullChecks)
+				{
+					operator = check.checkForNotNull() ? Operator.NE : Operator.EQ;
+					
+					//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
+					conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true, false, null);
+				}
 			}
-		}
-		
-		DefaultCondition defConditions[] = methodConditions.conditions();
-		
-		//check and add default conditions
-		if(defConditions != null)
-		{
-			for(DefaultCondition condition : defConditions)
+			
+			defConditions = methodConditions.conditions();
+			
+			//check and add default conditions
+			if(defConditions != null)
 			{
-				//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
-				conditionQueryBuilder.addCondition(null, condition.op(), -1, null, condition.field(), condition.joinOperator(), methodDesc, true, false, condition.value());
+				for(DefaultCondition condition : defConditions)
+				{
+					//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
+					conditionQueryBuilder.addCondition(null, condition.op(), -1, null, condition.field(), condition.joinOperator(), methodDesc, true, false, condition.value());
+				}
 			}
 		}
 	}

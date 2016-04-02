@@ -460,4 +460,62 @@ public class RecursiveAnnotationFactory
 		
 		return targetAnnotation;
 	}
+
+	/**
+	 * Searches and returns all annotations of type "targetAnnotationType" defined on "annotatedElement" recursively.
+	 * @param annotatedElement Element annotation search needs to be done
+	 * @param targetAnnotationType Annotation type to be searched
+	 * @return Found matching annotaions, if not null
+	 */
+	public <A extends Annotation> List<A> findAllAnnotationsRecursively(AnnotatedElement annotatedElement, Class<A> targetAnnotationType)
+	{
+		List<A> matchingAnnot = new ArrayList<>();
+		
+		//check if annotation is defined directly.
+		A targetAnnotation = annotatedElement.getAnnotation(targetAnnotationType);
+		
+		//if direct annotation is found, return the same
+		if(targetAnnotation != null)
+		{
+			logger.debug("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
+			matchingAnnot.add(targetAnnotation);
+		}
+		
+		/*
+		 * find target annotation on annotations defined on annotate-element.
+		 */
+		
+		//queue to maintain annotations order level wise
+		//next level annotation are appended, and annotation are popped from start for processing
+		LinkedList<Annotation> annotationQueue = new LinkedList<>();
+		
+		//find other annotations and add them to queue for further recursive processing
+		Annotation annotations[] = annotatedElement.getAnnotations();
+
+		//add annotations found to queue
+		if(annotations != null)
+		{
+			annotationQueue.addAll(Arrays.asList(annotations));
+		}
+		
+		//loop through queue and recursively try to find 
+		while(!annotationQueue.isEmpty())
+		{
+			//try to find target annotation on current annotation
+			targetAnnotation = findRecursiveAnnotation(annotationQueue.removeFirst(), annotationQueue, targetAnnotationType);
+			
+			//if target annotation found
+			if(targetAnnotation != null)
+			{
+				matchingAnnot.add(targetAnnotation);
+			}
+		}
+		
+		if(matchingAnnot.isEmpty())
+		{
+			return null;
+		}
+		
+		return matchingAnnot;
+	}
 }

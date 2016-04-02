@@ -224,7 +224,7 @@ public class NativeQueryExecutor extends QueryExecutor
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object execute(IDataStore dataStore, ConversionService conversionService, Object... params)
+	public Object execute(QueryExecutionContext exeContext, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
 		logger.trace("Started method: execute");
 		

@@ -67,10 +67,10 @@ public class CountQueryExecutor extends QueryExecutor
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.fw.persistence.repository.executors.QueryExecutor#execute(com.fw.persistence.IDataStore, com.fw.persistence.conversion.ConversionService, java.lang.Object[])
+	 * @see com.yukthi.persistence.repository.executors.QueryExecutor#execute(com.yukthi.persistence.repository.executors.QueryExecutionContext, com.yukthi.persistence.IDataStore, com.yukthi.persistence.conversion.ConversionService, java.lang.Object[])
 	 */
 	@Override
-	public Object execute(IDataStore dataStore, ConversionService conversionService, Object... params)
+	public Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
 		logger.trace("Started method: execute");
 		
@@ -81,7 +81,7 @@ public class CountQueryExecutor extends QueryExecutor
 			CountQuery query = new CountQuery(entityDetails);
 			
 			//set condition values on query
-			conditionQueryBuilder.loadConditionalQuery(query, params);
+			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), query, params);
 			
 			//execute the query and fetch result count
 			long count = dataStore.getCount(query, entityDetails);

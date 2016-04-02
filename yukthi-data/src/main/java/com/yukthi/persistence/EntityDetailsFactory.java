@@ -707,6 +707,7 @@ public class EntityDetailsFactory
 		//create required table indexes
 		String columns[] = null, fields[] = null;
 		int idx = 0;
+		String indexName = null;
 		
 		//check and create required indexes
 		for(IndexDetails index: entityDetails.getIndexDetailsList())
@@ -721,7 +722,9 @@ public class EntityDetailsFactory
 				idx++;
 			}
 			
-			dataStore.createIndex(new CreateIndexQuery(entityDetails, index.getName(), columns));
+		
+			indexName = entityDetails.getTableName() + "_" + index.getName();
+			dataStore.createIndex(new CreateIndexQuery(entityDetails,  indexName.toUpperCase(), columns));
 		}
 	}
 	
