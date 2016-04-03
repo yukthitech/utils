@@ -1,8 +1,10 @@
 package com.yukthi.persistence;
 
 import java.util.List;
+import java.util.Set;
 
 import com.yukthi.persistence.repository.annotations.CountFunction;
+import com.yukthi.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthi.persistence.repository.search.SearchQuery;
 
 public interface ICrudRepository<E>
@@ -54,6 +56,14 @@ public interface ICrudRepository<E>
 	public boolean deleteById(Object key);
 	
 	public E findById(Object key);
+	
+	/**
+	 * Fetches the entity with specified id, with specified custom fields.
+	 * @param key Id of the entity to fetch
+	 * @param customFieldNames Custom fields to fetch with entities
+	 * @return Entity with custom field values.
+	 */
+	public E findFullById(Object key, @ExtendedFieldNames Set<String> customFieldNames);
 	
 	/**
 	 * Fetches the count of number of entities in this repository 

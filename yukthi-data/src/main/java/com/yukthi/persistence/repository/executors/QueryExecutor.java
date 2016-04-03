@@ -240,7 +240,7 @@ public abstract class QueryExecutor
 		name = name.substring(idx + 2);
 		String fieldNames[] = name.split("And");
 		
-		if(method.getParameterTypes().length != fieldNames.length)
+		if(method.getParameterTypes().length < fieldNames.length)
 		{
 			throw new InvalidRepositoryException("Unable to find sufficient fields names from " + methodDesc);
 		}

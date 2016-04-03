@@ -2,6 +2,7 @@ package com.yukthi.persistence.repository.executors;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
+import com.yukthi.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.OrderBy;
 import com.yukthi.persistence.repository.annotations.OrderByField;
@@ -24,6 +26,7 @@ import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
+import com.yukthi.utils.exceptions.InvalidConfigurationException;
 
 /**
  * Provides common base functionality for search query type executors - Finder and Search queries
@@ -153,24 +156,6 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			}
 
 			this.returnType = TypeUtils.getRawType(typeArgs[0], repositoryType);
-			/*
-			//if type variables are used in return type
-			if(!(typeArgs[0] instanceof Class))
-			{
-				//if this is not from ICrudRepository
-				if(!ICrudRepository.class.equals(method.getDeclaringClass()))
-				{
-					throw new InvalidRepositoryException("Type variable are not supported which is found on finder '" 
-							+ method.getName() + "' of repository: " + repositoryType.getName());
-				}
-				
-				this.returnType = entityDetails.getEntityType();
-			}
-			else
-			{
-				this.returnType = (Class<?>)typeArgs[0];
-			}
-			*/
 		}
 		else
 		{
@@ -257,6 +242,51 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 				conditionQueryBuilder.addOrderByField(field, OrderByType.ASC, methodDesc);
 			}
 		}
+	}
+	
+	/**
+	 * Fetches param index which provides custom fields to fetch.
+	 * @param method Method from which param needs to be fetched.
+	 * @return index at which param names might have specified.
+	 */
+	protected int getExtendedFieldParam(Method method)
+	{
+		//if extended table is not present return
+		if(entityDetails.getExtendedTableDetails() == null)
+		{
+			return -1;
+		}
+		
+		Parameter params[] = method.getParameters();
+		
+		if(params == null || params.length == 0)
+		{
+			return -1;
+		}
+		
+		ParameterizedType parameterizedType = null;
+		
+		for(int i = 0; i < params.length; i++)
+		{
+			if(params[i].getAnnotation(ExtendedFieldNames.class) != null)
+			{
+				if(!Collection.class.isAssignableFrom(params[i].getType()))
+				{
+					throw new InvalidConfigurationException("Non collection param at index {} is declared as extended-field-names - {}", i, methodDesc);
+				}
+				
+				parameterizedType = (ParameterizedType) params[i].getParameterizedType();
+				
+				if(!String.class.equals(parameterizedType.getActualTypeArguments()[0]))
+				{
+					throw new InvalidConfigurationException("Non String collection param at index {} is declared as extended-field-names - {}", i, methodDesc);
+				}
+				
+				return i;
+			}
+		}
+		
+		return -1;
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.fw.test.persitence.entity;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -27,7 +26,7 @@ public class Project
 	 * Map to hold extension fields
 	 */
 	@ExtendedFields
-	private Map<String, Object> extensions = new HashMap<>();
+	private Map<String, Object> extensions;
 	
 	public Project()
 	{}

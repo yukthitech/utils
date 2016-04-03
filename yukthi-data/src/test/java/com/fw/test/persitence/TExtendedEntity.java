@@ -20,14 +20,27 @@ import com.yukthi.utils.CommonUtils;
  */
 public class TExtendedEntity extends TestSuiteBase
 {
+	private Long projIdWithFields;
+	private Long projIdWithoutFields;
+	
 	@Override
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
 	{
 		IProjectRepository repo = factory.getRepository(IProjectRepository.class);
 
 		repo.save(new Project("test1", CommonUtils.toMap("field1", 10, "field3", 100)));
-		repo.save(new Project("test2", CommonUtils.toMap("field1", 20, "field3", 200, "field2", 2000)));
 		repo.save(new Project("test3", CommonUtils.toMap("field1", 30, "field3", 300)));
+		
+		Project proj = new Project("test2", CommonUtils.toMap("field1", 20, "field3", 200, "field2", 2000));
+		repo.save(proj);
+		
+		projIdWithFields = proj.getId();
+		
+		//create project without fields
+		proj = new Project("test4", null);
+		repo.save(proj);
+		
+		projIdWithoutFields = proj.getId();
 	}
 
 	@Override
@@ -35,6 +48,25 @@ public class TExtendedEntity extends TestSuiteBase
 	{
 		//cleanup the emp table
 		factory.dropRepository(Project.class);
+	}
+	
+	@Test(dataProvider = "repositoryFactories")
+	public void testAsEntityFields(RepositoryFactory factory)
+	{
+		IProjectRepository repo = factory.getRepository(IProjectRepository.class);
+		
+		Project proj = repo.findFullById(projIdWithFields, CommonUtils.toSet("field1"));
+		Assert.assertEquals(proj.getName(), "test2");
+		Assert.assertEquals(proj.getExtensions(), CommonUtils.toMap("field1", "20"));
+		
+		proj = repo.findFullById(projIdWithFields, CommonUtils.toSet("field1", "field2", "field3"));
+		Assert.assertEquals(proj.getName(), "test2");
+		Assert.assertEquals(proj.getExtensions(), CommonUtils.toMap("field1", "20", "field2", "2000", "field3", "200"));
+		
+		//check for project whter there are no fields
+		proj = repo.findFullById(projIdWithoutFields, CommonUtils.toSet("field1", "field2", "field3"));
+		Assert.assertEquals(proj.getName(), "test4");
+		Assert.assertNull(proj.getExtensions());
 	}
 
 	@Test(dataProvider = "repositoryFactories")

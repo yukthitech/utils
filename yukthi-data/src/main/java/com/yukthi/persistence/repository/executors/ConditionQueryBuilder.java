@@ -974,6 +974,21 @@ public class ConditionQueryBuilder implements Cloneable
 					proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
 					value = proxyEntityCreator.getProxyEntity();
 				}
+				//if this is extension field
+				else if(resultField.property.startsWith("@"))
+				{
+					value = value.toString();
+					Map<String, Object> customFldMap = (Map)entityDetails.getExtendedTableDetails().getEntityField().get(result);
+					
+					if(customFldMap == null)
+					{
+						customFldMap = new HashMap<>();
+						entityDetails.getExtendedTableDetails().getEntityField().set(result, customFldMap);
+					}
+					
+					customFldMap.put(resultField.property.substring(1), value);
+					continue;
+				}
 				//if this is additional property field
 				else if(resultField.property.startsWith("#"))
 				{

@@ -26,6 +26,8 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 	
 	private ReentrantLock queryLock = new ReentrantLock();
 	
+	private int customFieldsIndex = -1;
+	
 	public FinderQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
 		super.repositoryType = repositoryType;
@@ -34,25 +36,7 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
 		methodDesc = String.format("finder method '%s' of repository - '%s'", method.getName(), repositoryType.getName());
 
-		/*
-		Class<?> paramTypes[] = method.getParameterTypes();
-
-		if(paramTypes.length == 0)
-		{
-			throw new InvalidRepositoryException("No-parameter finder method '" + method.getName() + "' in repository: " + repositoryType.getName());
-		}
-		*/
-		
 		fetchReturnDetails(method);
-		
-		/*
-		if(!fetchConditonsByAnnotations(method, true, conditionQueryBuilder, methodDesc, true) && 
-				!fetchConditionsByName(method, conditionQueryBuilder, methodDesc))
-		{
-			throw new InvalidRepositoryException("Failed to determine parameter conditions for finder method '" 
-							+ method.getName() + "' of repository - " + repositoryType.getName());
-		}
-		*/
 		
 		if( !fetchConditonsByAnnotations(method, true, conditionQueryBuilder, methodDesc, true) )
 		{
@@ -62,7 +46,10 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 		fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
 		
 		super.fetchOrderDetails(method);
+		
+		customFieldsIndex = super.getExtendedFieldParam(method);
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see com.yukthi.persistence.repository.executors.QueryExecutor#execute(com.yukthi.persistence.repository.executors.QueryExecutionContext, com.yukthi.persistence.IDataStore, com.yukthi.persistence.conversion.ConversionService, java.lang.Object[])
@@ -77,6 +64,25 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 		
 		try
 		{
+			ConditionQueryBuilder conditionQueryBuilder = this.conditionQueryBuilder;
+			
+			if(this.customFieldsIndex >= 0)
+			{
+				Collection<String> customFieldNames = (Collection<String>) params[customFieldsIndex];
+				
+				if(customFieldNames != null && !customFieldNames.isEmpty())
+				{
+					conditionQueryBuilder = this.conditionQueryBuilder.clone();
+					String prefix = entityDetails.getExtendedTableDetails().getEntityField().getName();
+					
+					for(String custFld : customFieldNames)
+					{
+						conditionQueryBuilder.addResultField("@" + custFld, String.class, prefix + "." + custFld, super.methodDesc);
+					}
+				}
+			}
+			
+			
 			FinderQuery finderQuery = new FinderQuery(entityDetails);
 
 			//set the result fields, conditions and tables details on finder query
