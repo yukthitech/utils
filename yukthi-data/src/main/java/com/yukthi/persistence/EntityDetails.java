@@ -13,6 +13,8 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthi.utils.exceptions.InvalidConfigurationException;
+
 public class EntityDetails
 {
 	private static Logger logger = LogManager.getLogger(EntityDetails.class);
@@ -112,7 +114,10 @@ public class EntityDetails
 
 		if(columnToDetails.containsKey(fieldDetails.getDbColumnName()))
 		{
-			throw new InvalidMappingException("Column '" + fieldDetails.getDbColumnName() + "' is mapped by multiple field: [" + fieldDetails.getName() + ", " + columnToDetails.get(fieldDetails.getDbColumnName()).getName() + "]");
+			throw new InvalidConfigurationException("Column '{}' is mapped by multiple fields - [{}, {}] in entity - {}", 
+					fieldDetails.getDbColumnName(), fieldDetails.getName(), 
+					columnToDetails.get(fieldDetails.getDbColumnName()).getName(), 
+					entityType.getName() );
 		}
 
 		fieldToDetails.put(fieldDetails.getName(), fieldDetails);
