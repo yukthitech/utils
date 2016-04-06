@@ -137,6 +137,13 @@ public class TRecursiveAnnotationFactory
 		OrderBy orderBy = recursiveAnnotationFactory.findAnnotationRecursively(method, OrderBy.class);
 		Assert.assertEquals(orderBy.fields()[0], "field6");
 	}
+	
+	@Test
+	public void testSuppression() throws Exception
+	{
+		Assert.assertNull(recursiveAnnotationFactory.findAllAnnotationsRecursively(testClass.getMethod("suppressMethod1"), SearchResult.class));
+		Assert.assertNotNull(recursiveAnnotationFactory.findAllAnnotationsRecursively(testClass.getMethod("suppressMethod2"), SearchResult.class));
+	}
 
 	//TODO: add test cases for multi dimension array, sub annotation override
 }

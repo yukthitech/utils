@@ -460,6 +460,32 @@ public class RecursiveAnnotationFactory
 		
 		return targetAnnotation;
 	}
+	
+	/**
+	 * Checks if the specified annotation is suppressed on specified annotated element.
+	 * @param annotatedElement Element to be checked
+	 * @param targetAnnotationType Annotation which needs to be checked
+	 * @return true if suppressed
+	 */
+	private boolean isRecursionSuppressed(AnnotatedElement annotatedElement, Class<?> targetAnnotationType)
+	{
+		SuppressRecursiveSearch suppressRecursiveSearch = annotatedElement.getAnnotation(SuppressRecursiveSearch.class);
+		
+		if(suppressRecursiveSearch == null)
+		{
+			return false;
+		}
+		
+		for(Class<?> type : suppressRecursiveSearch.value())
+		{
+			if(type.equals(targetAnnotationType))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	/**
 	 * Searches and returns all annotations of type "targetAnnotationType" defined on "annotatedElement" recursively.
@@ -479,6 +505,12 @@ public class RecursiveAnnotationFactory
 		{
 			logger.debug("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
 			matchingAnnot.add(targetAnnotation);
+		}
+
+		//if annotation recursion is suppressed return direct finding alone
+		if(isRecursionSuppressed(annotatedElement, targetAnnotationType))
+		{
+			return matchingAnnot.isEmpty() ? null : matchingAnnot;
 		}
 		
 		/*
