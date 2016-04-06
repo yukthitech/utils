@@ -708,6 +708,7 @@ public class EntityDetailsFactory
 		String columns[] = null, fields[] = null;
 		int idx = 0;
 		String indexName = null;
+		FieldDetails fieldDetails = null;
 		
 		//check and create required indexes
 		for(IndexDetails index: entityDetails.getIndexDetailsList())
@@ -718,7 +719,15 @@ public class EntityDetailsFactory
 			
 			for(String field: fields)
 			{
-				columns[idx] = entityDetails.getFieldDetailsByField(field).getDbColumnName();
+				fieldDetails = entityDetails.getFieldDetailsByField(field);
+				
+				if(fieldDetails == null)
+				{
+					throw new InvalidConfigurationException("Invalid field name '{}' specified in index '{}' of entity - {} ", 
+							field, index.getName(), entityDetails.getEntityType().getName());
+				}
+				
+				columns[idx] = fieldDetails.getDbColumnName();
 				idx++;
 			}
 			
