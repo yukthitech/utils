@@ -1,8 +1,8 @@
 package com.yukthi.persistence.repository.executors;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +21,7 @@ import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
 import com.yukthi.persistence.repository.annotations.DefaultCondition;
+import com.yukthi.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.MethodConditions;
 import com.yukthi.persistence.repository.annotations.NullCheck;
@@ -71,27 +72,6 @@ public abstract class QueryExecutor
 	}
 	
 	public abstract Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params);
-	
-	@SuppressWarnings("unchecked")
-	protected <A extends Annotation> A getAnnotation(Annotation annotations[], Class<A> type)
-	{
-		logger.trace("Started method: getAnnotation");
-		
-		if(annotations == null || annotations.length == 0)
-		{
-			return null;
-		}
-		
-		for(Annotation a: annotations)
-		{
-			if(a.annotationType().equals(type))
-			{
-				return (A)a;
-			}
-		}
-		
-		return null;
-	}
 	
 	private boolean fetchConditionsFromObject(String methodName, Class<?> queryobjType,  
 			int index, ConditionQueryBuilder conditionQueryBuilder, String methodDesc, boolean allowNested)
@@ -152,15 +132,9 @@ public abstract class QueryExecutor
 			boolean expectAllConditions, ConditionQueryBuilder conditionQueryBuilder, String methodDesc, boolean allowNested)
 	{
 		logger.trace("Started method: fetchConditonsByAnnotations");
-		
-		Class<?> paramTypes[] = method.getParameterTypes();
-		Annotation paramAnnotations[][] = method.getParameterAnnotations();
-		
-		if(paramAnnotations == null || paramAnnotations.length == 0)
-		{
-			return false;
-		}
 
+		Parameter parameters[] = method.getParameters();
+		
 		ConditionBean conditionBean = null;
 		Condition condition = null;
 		boolean found = false;
@@ -168,24 +142,29 @@ public abstract class QueryExecutor
 		boolean ignoreCase = false;
 		
 		//fetch conditions for each argument
-		for(int i = 0; i < paramTypes.length; i++)
+		for(int i = 0; i < parameters.length; i++)
 		{
-			condition = getAnnotation(paramAnnotations[i], Condition.class);
+			condition = parameters[i].getAnnotation(Condition.class); 
 			
 			//if condition is not found on attr
 			if(condition == null)
 			{
 				//check for query object annotation
-				conditionBean = getAnnotation(paramAnnotations[i], ConditionBean.class);
+				conditionBean = parameters[i].getAnnotation(ConditionBean.class); 
 				
 				//if query object is found find nested conditions
 				if(conditionBean != null)
 				{
-					if( fetchConditionsFromObject(method.getName(), paramTypes[i], i, conditionQueryBuilder, methodDesc, allowNested) )
+					if( fetchConditionsFromObject(method.getName(), parameters[i].getType(), i, conditionQueryBuilder, methodDesc, allowNested) )
 					{
 						found = true;
 					}
 					
+					continue;
+				}
+				
+				if(parameters[i].getAnnotation(ExtendedFieldNames.class) != null)
+				{
 					continue;
 				}
 				
@@ -216,7 +195,7 @@ public abstract class QueryExecutor
 				throw new InvalidRepositoryException(String.format("Nested expression '%1s' when plain properties are expected in %2s", fieldName, methodDesc));
 			}
 			
-			ignoreCase = (String.class.equals(paramTypes[i]) && condition.ignoreCase());
+			ignoreCase = (String.class.equals(parameters[i].getType()) && condition.ignoreCase());
 			
 			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
 			found = true;

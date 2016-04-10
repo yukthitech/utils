@@ -25,6 +25,7 @@ import com.yukthi.persistence.repository.annotations.OrderByField;
 import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
+import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 import com.yukthi.utils.exceptions.InvalidConfigurationException;
 
@@ -253,6 +254,12 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	{
 		//if extended table is not present return
 		if(entityDetails.getExtendedTableDetails() == null)
+		{
+			return -1;
+		}
+		
+		//if return type is not entity type and not dynamic search result, ignore extension field names, if any
+		if(!returnType.equals(entityDetails.getEntityType()) && !IDynamicSearchResult.class.isAssignableFrom(returnType))
 		{
 			return -1;
 		}

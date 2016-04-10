@@ -1,7 +1,7 @@
 package com.yukthi.persistence.repository.executors;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -98,22 +98,16 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 	{
 		logger.trace("Started method: fetchColumnsByAnnotations");
 		
-		Class<?> paramTypes[] = method.getParameterTypes();
-		Annotation paramAnnotations[][] = method.getParameterAnnotations();
+		Parameter paramters[] = method.getParameters();
 		
-		if(paramAnnotations == null)
-		{
-			return false;
-		}
-
 		Field field = null;
 		boolean found = false;
 		FieldDetails fieldDetails = null;
 		
 		//fetch conditions for each argument
-		for(int i = 0; i < paramTypes.length; i++)
+		for(int i = 0; i < paramters.length; i++)
 		{
-			field = getAnnotation(paramAnnotations[i], Field.class);
+			field = paramters[i].getAnnotation(Field.class);
 			
 			if(field == null)
 			{

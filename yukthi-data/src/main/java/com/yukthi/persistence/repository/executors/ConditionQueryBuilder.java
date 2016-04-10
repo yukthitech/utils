@@ -900,26 +900,6 @@ public class ConditionQueryBuilder implements Cloneable
 	}
 
 	/**
-	 * Creates a collection of specified type
-	 * 
-	 * @param type
-	 * @return
-	 */
-	/*
-	 * @SuppressWarnings("unchecked") private Collection<Object>
-	 * createCollectionOfType(Class<?> type) { //if array list can be assigned
-	 * to target field if(type.isAssignableFrom(ArrayList.class)) { return new
-	 * ArrayList<>(); }
-	 * 
-	 * //if hashset can be assigned to target field
-	 * if(type.isAssignableFrom(HashSet.class)) { return new HashSet<>(); }
-	 * 
-	 * try { return (Collection<Object>) type.newInstance(); }catch(Exception
-	 * ex) { throw new IllegalStateException(
-	 * "Unable to create collection of type - " + type.getName(), ex); } }
-	 */
-
-	/**
 	 * Parses and converts specified record into specified result type
 	 * 
 	 * @param record
@@ -978,16 +958,25 @@ public class ConditionQueryBuilder implements Cloneable
 				else if(resultField.property.startsWith("@"))
 				{
 					value = value.toString();
-					Map<String, Object> customFldMap = (Map)entityDetails.getExtendedTableDetails().getEntityField().get(result);
 					
-					if(customFldMap == null)
+					if(resultType.equals(entityDetails.getEntityType()))
 					{
-						customFldMap = new HashMap<>();
-						entityDetails.getExtendedTableDetails().getEntityField().set(result, customFldMap);
+						Map<String, Object> customFldMap = (Map)entityDetails.getExtendedTableDetails().getEntityField().get(result);
+						
+						if(customFldMap == null)
+						{
+							customFldMap = new HashMap<>();
+							entityDetails.getExtendedTableDetails().getEntityField().set(result, customFldMap);
+						}
+						
+						customFldMap.put(resultField.property.substring(1), value);
+						continue;
 					}
-					
-					customFldMap.put(resultField.property.substring(1), value);
-					continue;
+					else
+					{
+						((IDynamicSearchResult)result).addField(new DynamicResultField(resultField.property.substring(1), value));
+						continue;
+					}
 				}
 				//if this is additional property field
 				else if(resultField.property.startsWith("#"))

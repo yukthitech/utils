@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -204,7 +203,13 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 					return returnType.isPrimitive() ? CCGUtility.getDefaultPrimitiveValue(returnType) : null;
 				}
 				
-				return Collections.emptyList();
+				try
+				{
+					return (Collection)collectionReturnType.newInstance();
+				}catch(Exception ex)
+				{
+					throw new IllegalStateException("An error occurred while creating return collection: " + collectionReturnType.getName(), ex);
+				}
 			}
 
 			//if single element is expected as result

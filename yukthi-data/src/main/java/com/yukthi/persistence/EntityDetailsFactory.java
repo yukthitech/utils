@@ -558,31 +558,43 @@ public class EntityDetailsFactory
 		
 		ParameterizedType parameterizedType = null;
 		Type mapParamTypes[] = null;
+		Class<?> cls = entityType;
 		
-		//find entity field which will hold extended fields
-		for(Field field : entityType.getDeclaredFields())
+		//find extension field data holder recursively over the inheritance hierarchy
+		OUTER: while(true)
 		{
-			if(field.getAnnotation(ExtendedFields.class) == null)
+			if(cls.getName().startsWith("java"))
 			{
-				continue;
+				break;
 			}
 			
-			if(!Map.class.isAssignableFrom(field.getType()))
+			//find entity field which will hold extended fields
+			for(Field field : cls.getDeclaredFields())
 			{
-				throw new InvalidConfigurationException("In entity '{}' extended field holder field '{}' is of non-map type", entityType.getName(), field.getName());
+				if(field.getAnnotation(ExtendedFields.class) == null)
+				{
+					continue;
+				}
+				
+				if(!Map.class.isAssignableFrom(field.getType()))
+				{
+					throw new InvalidConfigurationException("In entity '{}' extended field holder field '{}' is of non-map type", entityType.getName(), field.getName());
+				}
+	
+				extendedTableDetails.setEntityField(field);
+				
+				parameterizedType = (ParameterizedType)field.getGenericType();
+				mapParamTypes = parameterizedType.getActualTypeArguments();
+				
+				if(mapParamTypes.length != 2 || !String.class.equals(mapParamTypes[0]))
+				{
+					throw new InvalidConfigurationException("In entity '{}' extended field holder field '{}' is defined as map with non-string type key", entityType.getName(), field.getName());
+				}
+				
+				break OUTER;
 			}
-
-			extendedTableDetails.setEntityField(field);
 			
-			parameterizedType = (ParameterizedType)field.getGenericType();
-			mapParamTypes = parameterizedType.getActualTypeArguments();
-			
-			if(mapParamTypes.length != 2 || !String.class.equals(mapParamTypes[0]))
-			{
-				throw new InvalidConfigurationException("In entity '{}' extended field holder field '{}' is defined as map with non-string type key", entityType.getName(), field.getName());
-			}
-			
-			break;
+			cls = cls.getSuperclass();
 		}
 		
 		//if no field is found to hold extended field information, throw error
