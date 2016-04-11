@@ -130,7 +130,7 @@
 				CONSTRAINT ${constraint.name} FOREIGN KEY (<#list constraint.columns as column>${column}<#if column_has_next>,</#if></#list>) 
 					REFERENCES  ${constraint.parentTable} (<#list constraint.parentColumns as column>${column}<#if column_has_next>,</#if></#list>) <#if constraint.deleteCascaded>ON DELETE CASCADE</#if> <#if constraint_has_next>,</#if>
 			</#list>
-		)
+		)<#if query.charset??> CHARACTER SET = '${query.charset}'</#if>
 	]]></template>	
 
 	<template name="createExtendedTableTemplate"><![CDATA[

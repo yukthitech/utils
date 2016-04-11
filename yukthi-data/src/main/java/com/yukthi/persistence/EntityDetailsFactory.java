@@ -758,7 +758,10 @@ public class EntityDetailsFactory
 			return;
 		}
 		
-		dataStore.createTable( new CreateTableQuery(extendedTableDetails.toEntityDetails(entityDetails), true) );
+		CreateTableQuery createTableQuery = new CreateTableQuery(extendedTableDetails.toEntityDetails(entityDetails), true);
+		createTableQuery.setCharset(extendedTableDetails.getCharset());
+		
+		dataStore.createTable(createTableQuery);
 	}
 	
 	/**
