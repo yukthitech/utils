@@ -1,5 +1,6 @@
 package com.yukthi.utils.expr;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -90,5 +91,23 @@ public class ExpressionRegistry
 	public IFunction getFunction(String name)
 	{
 		return functionMap.get(name);
+	}
+	
+	/**
+	 * Fetchs all operators.
+	 * @return All operators.
+	 */
+	public Collection<IOperator> getAllOperators()
+	{
+		return operatorMap.values();
+	}
+	
+	/**
+	 * Fetches all available functions.
+	 * @return All functions.
+	 */
+	public Collection<IFunction> getAllFunctions()
+	{
+		return functionMap.values();
 	}
 }
