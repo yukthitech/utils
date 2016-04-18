@@ -1,6 +1,7 @@
 package com.yukthi.persistence.repository.search;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -178,6 +179,20 @@ public class SearchQuery
 		this.additionalEntityFields = additionalEntityFields;
 		return this;
 	}
+	
+	/**
+	 * Adds specified additional entity field to the search query result fields.
+	 * @param field Field to be added.
+	 */
+	public void addAdditionEntityField(String field)
+	{
+		if(this.additionalEntityFields == null)
+		{
+			this.additionalEntityFields = new HashSet<>();
+		}
+		
+		this.additionalEntityFields.add(field);
+	}
 
 	/**
 	 * Gets the search result fields to be excluded.
@@ -198,6 +213,20 @@ public class SearchQuery
 	{
 		this.excludeFields = excludeFields;
 		return this;
+	}
+	
+	/**
+	 * Adds specified exceluded field to the search query.
+	 * @param field Field to be excluded.
+	 */
+	public void addExcludedField(String field)
+	{
+		if(this.excludeFields == null)
+		{
+			this.excludeFields = new HashSet<>();
+		}
+		
+		this.excludeFields.add(field);
 	}
 
 	/* (non-Javadoc)

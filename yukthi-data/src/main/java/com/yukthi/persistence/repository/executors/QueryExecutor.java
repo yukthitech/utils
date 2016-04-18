@@ -190,9 +190,9 @@ public abstract class QueryExecutor
 						+ method.getName() + "' of repository: " + repositoryType.getName());
 			}
 			
-			if(!allowNested && fieldName.contains("."))
+			if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 			{
-				throw new InvalidRepositoryException(String.format("Nested expression '%1s' when plain properties are expected in %2s", fieldName, methodDesc));
+				throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
 			}
 			
 			ignoreCase = (String.class.equals(parameters[i].getType()) && condition.ignoreCase());

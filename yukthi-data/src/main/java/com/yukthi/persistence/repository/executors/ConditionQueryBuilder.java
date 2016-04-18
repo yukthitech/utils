@@ -38,6 +38,7 @@ import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ObjectWrapper;
+import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
@@ -162,6 +163,8 @@ public class ConditionQueryBuilder implements Cloneable
 		private boolean nullable;
 		
 		private String defaultValue;
+		
+		private boolean joiningField;
 		
 		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable, boolean ignoreCase)
 		{
@@ -521,6 +524,36 @@ public class ConditionQueryBuilder implements Cloneable
 		// only to satisfy compiler
 		return null;
 	}
+	
+	public boolean isJoiningField(String entityFieldExpression)
+	{
+		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
+		
+		if(entityFieldParts.length != 2)
+		{
+			return false;
+		}
+		
+		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
+		
+		if(fieldDetails == null)
+		{
+			return false;
+		}
+		
+		if(!fieldDetails.isRelationField())
+		{
+			return false;
+		}
+		
+		if(!fieldDetails.isTableOwned())
+		{
+			return false;
+		}
+		
+		EntityDetails targetEntityDetails = fieldDetails.getForeignConstraintDetails().getTargetEntityDetails();
+		return targetEntityDetails.getIdField().getName().equals(entityFieldParts[1]);
+	}
 
 	/**
 	 * Adds the condition with specified details to this builder. This method
@@ -546,9 +579,10 @@ public class ConditionQueryBuilder implements Cloneable
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
 
 		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullable, ignoreCase);
+		condition.joiningField = isJoiningField(entityFieldExpression);
 		
 		// if this mapping is for direct property mapping
-		if(entityFieldParts.length == 1)
+		if(entityFieldParts.length == 1 || condition.joiningField)
 		{
 			condition.fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
 
@@ -974,7 +1008,8 @@ public class ConditionQueryBuilder implements Cloneable
 					}
 					else
 					{
-						((IDynamicSearchResult)result).addField(new DynamicResultField(resultField.property.substring(1), value));
+						String entityExtField = entityDetails.getExtendedTableDetails().getEntityField().getName();
+						((IDynamicSearchResult)result).addField(new DynamicResultField(entityExtField + "." + resultField.property.substring(1), value));
 						continue;
 					}
 				}
