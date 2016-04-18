@@ -38,7 +38,6 @@ import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ObjectWrapper;
-import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
