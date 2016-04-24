@@ -78,4 +78,11 @@ public interface ICrudRepository<E>
 	 * @return
 	 */
 	public List<E> search(SearchQuery searchQuery);
+	
+	/**
+	 * Fetches number of matching records for the specified search query.
+	 * @param searchQuery Search query to match
+	 * @return Number of matching records.
+	 */
+	public long searchCount(SearchQuery searchQuery);
 }

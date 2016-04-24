@@ -271,6 +271,11 @@ public class TFinders extends TestSuiteBase
 		Assert.assertEquals(results.size(), 2);
 		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()) , CommonUtils.toSet("1231", "1232"));
 		
+		//ensure search count is executed properly
+		Assert.assertEquals(repo.searchCount(new SearchQuery(
+				new SearchCondition("name", Operator.EQ, "user2")
+		)), 2);
+		
 		results = repo.search(new SearchQuery(
 				new SearchCondition("name", Operator.EQ, "user2"),
 				new SearchCondition("phoneNo", Operator.EQ, "1234561")
@@ -278,6 +283,12 @@ public class TFinders extends TestSuiteBase
 		
 		Assert.assertEquals(results.size(), 1);
 		Assert.assertEquals(results.get(0).getEmployeeNo() , "1231");
+
+		//ensure search count is executed properly
+		Assert.assertEquals(repo.searchCount(new SearchQuery(
+				new SearchCondition("name", Operator.EQ, "user2"),
+				new SearchCondition("phoneNo", Operator.EQ, "1234561")
+		)), 1);
 	}
 
 	/**

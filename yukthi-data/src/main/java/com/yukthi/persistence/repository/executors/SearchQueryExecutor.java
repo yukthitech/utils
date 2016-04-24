@@ -19,12 +19,14 @@ import com.yukthi.persistence.OrderByField;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.RecordCountMistmatchException;
 import com.yukthi.persistence.conversion.ConversionService;
+import com.yukthi.persistence.query.CountQuery;
 import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.SearchFunction;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.persistence.repository.search.SearchCondition;
 import com.yukthi.persistence.repository.search.SearchQuery;
+import com.yukthi.utils.ConvertUtils;
 
 @QueryExecutorPattern(prefixes = {"search"}, annotatedWith = SearchFunction.class)
 public class SearchQueryExecutor extends AbstractSearchQuery
@@ -32,6 +34,8 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 	private static Logger logger = LogManager.getLogger(SearchQueryExecutor.class);
 	
 	private ReentrantLock queryLock = new ReentrantLock();
+	
+	private Class<?> countReturnType;
 	
 	public SearchQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
@@ -48,7 +52,18 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			throw new InvalidRepositoryException("Invalid parameters specified for search method. Search method should have single parameter and it should of type - " + SearchQuery.class.getName());
 		}
 		
-		fetchReturnDetails(method);
+		countReturnType = method.getReturnType();
+		
+		if(Long.class.equals(countReturnType) || long.class.equals(countReturnType) || Integer.class.equals(countReturnType) || int.class.equals(countReturnType))
+		{
+			//nothing do here for now
+		}
+		else
+		{
+			countReturnType = null;
+			fetchReturnDetails(method);
+		}
+		
 		super.fetchOrderDetails(method);
 	}
 	
@@ -81,6 +96,30 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			addConditionsRecursively(grpCondition, conditionQueryBuilder, conditionParams, builderCondition);
 		}
 	}
+	
+	private Long findCount(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
+	{
+		CountQuery countQuery = new CountQuery(entityDetails);
+		SearchQuery searchQuery = (SearchQuery)params[0];
+		
+		//create a clone so that every time dynamic conditions can be added freshly
+		ConditionQueryBuilder conditionQueryBuilder = this.conditionQueryBuilder.clone();
+		
+		List<Object> conditionParams = new ArrayList<>();
+
+		//add conditions to query builder so that they will be validated
+		for(SearchCondition condition : searchQuery.getConditions())
+		{
+			addConditionsRecursively(condition, conditionQueryBuilder, conditionParams, null);
+		}
+		
+		//load condition values
+		conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), countQuery, conditionParams.toArray());
+
+		logger.debug("Executing search query with params - {}", conditionParams);
+
+		return dataStore.getCount(countQuery, entityDetails);
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthi.persistence.repository.executors.QueryExecutor#execute(com.yukthi.persistence.repository.executors.QueryExecutionContext, com.yukthi.persistence.IDataStore, com.yukthi.persistence.conversion.ConversionService, java.lang.Object[])
@@ -95,6 +134,12 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		
 		try
 		{
+			if(countReturnType != null)
+			{
+				Long count = findCount(context, dataStore, conversionService, params);
+				return ConvertUtils.convert(count, countReturnType);
+			}
+
 			final FinderQuery finderQuery = new FinderQuery(entityDetails);
 			SearchQuery searchQuery = (SearchQuery)params[0];
 			
