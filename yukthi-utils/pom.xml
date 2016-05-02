@@ -15,7 +15,6 @@
 
 		<httpclient.version>4.4</httpclient.version>
 
-		<testng.version>6.3.1</testng.version>
 		<mockito.version>1.9.5</mockito.version>
 	</properties>
 
@@ -68,7 +67,7 @@
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>${testng.version}</version>
+			<version>6.9.10</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

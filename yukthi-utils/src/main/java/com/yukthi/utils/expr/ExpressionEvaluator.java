@@ -31,6 +31,29 @@ public class ExpressionEvaluator
 		List<Token> rpnFormat = toRpnExpression(tokenLst);
 
 		Object rpnTokens[] = rpnFormat.toArray();
+		
+		if(rpnTokens.length == 1)
+		{
+			Token token = (Token)rpnTokens[0];
+			
+			if(token.tokenType == TokenType.LITERAL)
+			{
+				return new Expression(new Literal(token.string));	
+			}
+			
+			if(token.tokenType == TokenType.NUMBER)
+			{
+				return new Expression(new Literal(Double.parseDouble(token.string)));	
+			}
+
+			if(token.tokenType == TokenType.STRING)
+			{
+				return new Expression(new Variable(token.string));	
+			}
+			
+			throw new ParseException("Invalid single-token encountered while parsing expression - {}", expressionStr);
+		}
+		
 		List<Object> operands = new ArrayList<>();
 		int index = 0;
 		IExpressionPart finalExpression = null;
@@ -69,7 +92,7 @@ public class ExpressionEvaluator
 		
 		if(finalExpression == null)
 		{
-			throw new ParseException("Failed to parse expression string into expression");
+			throw new ParseException("Failed to parse expression string into expression - {}", expressionStr);
 		}
 		
 		return new Expression(finalExpression);

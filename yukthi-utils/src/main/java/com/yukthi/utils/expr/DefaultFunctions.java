@@ -141,4 +141,10 @@ public class DefaultFunctions
 		
 		return avg / (values.length + 1);
 	}
+	
+	@FunctionInfo(name = "RANDOM", syntax = "RANDOM()", description = "Returns a random value.")
+	public static Number randomNumber()
+	{
+		return Math.random();
+	}
 }

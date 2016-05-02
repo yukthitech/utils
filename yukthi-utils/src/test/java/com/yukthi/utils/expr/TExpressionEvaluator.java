@@ -40,6 +40,8 @@ public class TExpressionEvaluator
 	@Test
 	public void testParseIntoTokens()
 	{
+		validateParse("3", "3");
+		validateParse("var", "var");
 		validateParse("3 *  4", "3", "*", "4");
 		validateParse(" a.b + (3 + 3.4) * pop", "a.b", "+", "(", "3", "+", "3.4", ")", "*", "pop");
 		validateParse(" a.b + IF(b > 3, 'aff', 'dd\"f')", "a.b", "+", "IF", "(", "b", ">", "3", ",", "aff",  ",", "dd\"f", ")");
@@ -158,7 +160,12 @@ public class TExpressionEvaluator
 				return null;
 			}
 		};
-
+		
+		//test simple expressions
+		Assert.assertEquals(expressionEvaluator.parse("3.0").evaluate(variableValueProvider, registry), (Double)3.0);
+		Assert.assertEquals(expressionEvaluator.parse("a").evaluate(variableValueProvider, registry), 20);
+		Assert.assertNotNull(expressionEvaluator.parse("RANDOM()").evaluate(variableValueProvider, registry));
+		
 		//test arithmetic operators
 		Assert.assertEquals(expressionEvaluator.parse("3 * 4").evaluate(variableValueProvider, registry), (Double)12.0);
 		Assert.assertEquals(expressionEvaluator.parse("(a * 2) + i").evaluate(variableValueProvider, registry), (Double)50.0);

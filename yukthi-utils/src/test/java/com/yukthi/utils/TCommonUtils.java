@@ -9,13 +9,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.Assert;
-
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.yukthi.utils.CommonUtils;
-import com.yukthi.utils.IFormatter;
 import com.yukthi.utils.test.ITestGroups;
 
 /**

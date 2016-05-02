@@ -3,12 +3,10 @@
  */
 package com.yukthi.utils;
 
-import junit.framework.Assert;
-
 import org.apache.commons.beanutils.ConversionException;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.yukthi.utils.DataConverter;
 import com.yukthi.utils.test.ITestGroups;
 
 /**
