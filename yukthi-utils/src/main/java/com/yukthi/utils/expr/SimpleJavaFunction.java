@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
@@ -186,6 +187,12 @@ public class SimpleJavaFunction implements IFunction
 				
 				methodArgs.add(array);
 				break;
+			}
+			
+			//when parameter type is not matching, try conversion
+			if(!funcParamTypes[i].isAssignableFrom(parameters[i].getClass()))
+			{
+				parameters[i] = ConvertUtils.convert(parameters[i], funcParamTypes[i]);
 			}
 			
 			methodArgs.add(parameters[i]);
