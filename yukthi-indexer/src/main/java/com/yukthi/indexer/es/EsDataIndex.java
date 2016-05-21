@@ -2,7 +2,6 @@ package com.yukthi.indexer.es;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -19,12 +18,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthi.indexer.IDataIndex;
+import com.yukthi.indexer.IndexSearchResult;
 import com.yukthi.indexer.IndexType;
 import com.yukthi.indexer.search.SearchSettings;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.MessageFormatter;
 import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
+import com.yukthi.utils.rest.DeleteRestRequest;
 import com.yukthi.utils.rest.GetRestRequest;
 import com.yukthi.utils.rest.PostRestRequest;
 import com.yukthi.utils.rest.RestClient;
@@ -61,6 +62,8 @@ public class EsDataIndex implements IDataIndex
 	private Map<Class<?>, TypeQueryDetails> queryTypes = new HashMap<>();
 	
 	private RestClient restClient;
+	
+	private boolean dataModified = false;
 	
 	public EsDataIndex(String indexName, Client client, RestClient restClient)
 	{
@@ -223,6 +226,8 @@ public class EsDataIndex implements IDataIndex
 		        .setSource(objectMapper.writeValueAsString(indexObj))
 		        .execute()
 		        .actionGet();
+			
+			dataModified = true;
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while indexing data - {}", data);
@@ -256,11 +261,45 @@ public class EsDataIndex implements IDataIndex
 		this.queryTypes.put(queryType, typeQueryDetails);
 		return typeQueryDetails;
 	}
-
-	public <T> List<T> search(Object queryObj, SearchSettings searchSettings)
+	
+	private Object toSource(EsSearchResult.Hit hit)
 	{
 		try
 		{
+			String sourceTypeName = (String)hit.getSource().get(OBJECT_TYPE_FIELD);
+			String sourceJson = (String)hit.getSource().get(OBJECT_FIELD);
+			
+			Class<?> sourceType = Class.forName(sourceTypeName);
+			return objectMapper.readValue(sourceJson, sourceType);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "Failed to convert hit into source object");
+		}
+	}
+	
+	/**
+	 * Commits the changes which are not committed by calling refresh on es.
+	 */
+	private void commitChanges()
+	{
+		PostRestRequest request = new PostRestRequest("/" + indexName + "/_refresh");
+		RestResult<String> result =  restClient.invokeRequest(request);
+
+		dataModified = false;
+		logger.debug("Got refresh/commit response as - {}", result.getValue());
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> IndexSearchResult<T> search(Object queryObj, SearchSettings searchSettings)
+	{
+		try
+		{
+			if(dataModified)
+			{
+				logger.debug("As data is modified, performing refresh to ensure newly added data is committed and available for search");
+				commitChanges();
+			}
+			
 			TypeQueryDetails queryDetails = getQueryDetails(queryObj.getClass());
 			TypeIndexDetails indexDetails = indexedTypes.get(queryDetails.getIndexType());
 			
@@ -269,23 +308,50 @@ public class EsDataIndex implements IDataIndex
 			
 			logger.debug("Executing search query - \n{}\n", queryJson);
 			
-			PostRestRequest searchRequest = new PostRestRequest("/" + indexName + "/" + indexDetails.getType().getName());
+			PostRestRequest searchRequest = new PostRestRequest("/" + indexName + "/" + indexDetails.getType().getName() + "/_search");
 			searchRequest.setBody(queryJson);
 			
-			RestResult<EsSearchResult> result = restClient.invokeJsonRequest(searchRequest, EsSearchResult.class);
+			RestResult<EsSearchResult> restResult = restClient.invokeJsonRequest(searchRequest, EsSearchResult.class);
 			
-			if(result.getValue() == null)
+			if(restResult.getValue() == null)
 			{
-				throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", result.getStatusCode());
+				throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", restResult.getStatusCode());
 			}
 			
+			EsSearchResult searchResult = restResult.getValue();
 			
+			IndexSearchResult<T> finalResult = new IndexSearchResult<>();
 			
+			if(searchResult.finalHits() == null)
+			{
+				return finalResult;
+			}
+			
+			for(EsSearchResult.Hit hit : searchResult.finalHits())
+			{
+				finalResult.addResult((T)toSource(hit), hit.getScore());
+			}
+			
+			return finalResult;
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while executing search operation with query - {}", queryObj);
 		}
+	}
+
+	@Override
+	public void clean()
+	{
+		logger.debug("Deleting index - {}", indexName);
 		
-		return null;
+		DeleteRestRequest deleteRestRequest = new DeleteRestRequest("/" + indexName);
+		RestResult<String> result = restClient.invokeRequest(deleteRestRequest);
+		
+		int status = result.getStatusCode();
+		
+		if(status >=200 && status <= 300)
+		{
+			logger.debug("Index {} deleted successfully", indexName);
+		}
 	}
 }

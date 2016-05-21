@@ -3,10 +3,13 @@ package com.yukthi.indexer.es;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class EsSearchResult
 {
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Hit
 	{
 		private String id;
@@ -47,16 +50,67 @@ class EsSearchResult
 		}
 
 	}
+	
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class HitsWrapper
+	{
+		private int total;
+		
+		private double maxScore;
+		
+		private List<Hit> hits;
 
-	private List<Hit> hits;
+		public List<Hit> getHits()
+		{
+			return hits;
+		}
 
-	public List<Hit> getHits()
+		public void setHits(List<Hit> hits)
+		{
+			this.hits = hits;
+		}
+
+		public int getTotal()
+		{
+			return total;
+		}
+
+		public void setTotal(int total)
+		{
+			this.total = total;
+		}
+
+		@JsonProperty("max_score")
+		public double getMaxScore()
+		{
+			return maxScore;
+		}
+
+		public void setMaxScore(double maxScore)
+		{
+			this.maxScore = maxScore;
+		}
+	}
+
+	private HitsWrapper hits;
+
+	public HitsWrapper getHits()
 	{
 		return hits;
 	}
 
-	public void setHits(List<Hit> hits)
+	public void setHits(HitsWrapper hits)
 	{
 		this.hits = hits;
+	}
+	
+	public List<Hit> finalHits()
+	{
+		if(hits == null)
+		{
+			return null;
+		}
+		
+		return hits.hits;
 	}
 }

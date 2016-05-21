@@ -1,7 +1,5 @@
 package com.yukthi.indexer;
 
-import java.util.List;
-
 import com.yukthi.indexer.search.SearchSettings;
 
 /**
@@ -21,5 +19,10 @@ public interface IDataIndex
 	 * Finds the objects with specified query.
 	 * @param query
 	 */
-	public <T> List<T> search(Object query, SearchSettings searchSettings);
+	public <T> IndexSearchResult<T> search(Object query, SearchSettings searchSettings);
+	
+	/**
+	 * Removes all the data from index.
+	 */
+	public void clean();
 }
