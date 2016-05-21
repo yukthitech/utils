@@ -26,6 +26,7 @@ import com.yukthi.utils.MessageFormatter;
 import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 import com.yukthi.utils.rest.GetRestRequest;
+import com.yukthi.utils.rest.PostRestRequest;
 import com.yukthi.utils.rest.RestClient;
 import com.yukthi.utils.rest.RestResult;
 
@@ -264,8 +265,21 @@ public class EsDataIndex implements IDataIndex
 			TypeIndexDetails indexDetails = indexedTypes.get(queryDetails.getIndexType());
 			
 			Map<String, Object> query = queryDetails.buildQuery(queryObj, indexDetails);
+			String queryJson = objectMapper.writeValueAsString(query);
 			
-			logger.debug("Executing search query - \n{}\n", query);
+			logger.debug("Executing search query - \n{}\n", queryJson);
+			
+			PostRestRequest searchRequest = new PostRestRequest("/" + indexName + "/" + indexDetails.getType().getName());
+			searchRequest.setBody(queryJson);
+			
+			RestResult<EsSearchResult> result = restClient.invokeJsonRequest(searchRequest, EsSearchResult.class);
+			
+			if(result.getValue() == null)
+			{
+				throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", result.getStatusCode());
+			}
+			
+			
 			
 		}catch(Exception ex)
 		{

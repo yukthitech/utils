@@ -114,11 +114,18 @@ public class TypeIndexDetails
 	private Map<String, FieldIndexDetails> fields = new HashMap<>();
 	
 	/**
+	 * Index type.
+	 */
+	private Class<?> type;
+	
+	/**
 	 * Loads index details of specified type.
 	 * @param type
 	 */
 	public TypeIndexDetails(Class<?> type)
 	{
+		this.type = type;
+		
 		Field fields[] = type.getDeclaredFields();
 		IndexField indexField = null;
 		
@@ -163,5 +170,10 @@ public class TypeIndexDetails
 	public FieldIndexDetails getField(String name)
 	{
 		return fields.get(name);
+	}
+	
+	public Class<?> getType()
+	{
+		return type;
 	}
 }
