@@ -12,8 +12,29 @@ public interface IDataIndex
 	 * Indexes the specified object.
 	 * @param indexData Data to be used for indexing
 	 * @param data Data to be stored for this index
+	 * @return Returns id of the object indexed
 	 */
-	public void indexObject(Object indexData, Object data);
+	public String indexObject(Object indexData, Object data);
+	
+	/**
+	 * Queries the index with specified query to fetch the object to update.
+	 * With the obtained object id, update data will be used to perform update.
+	 * 
+	 * If query resulted in more than one object, exception will be thrown.
+	 * 
+	 * @param indexType Index type in which object needs to be updated
+	 * @param updateData Specified fields/data to update
+	 * @param id Id of the object to update.
+	 */
+	public void updateObject(Class<?> indexType, Object updateData, Object id);
+	
+	/**
+	 * Fetches object with specified id.
+	 * @param indexType Index type to search
+	 * @param id Id of the object to fetch.
+	 * @return Matching object if any.
+	 */
+	public <T> T getObject(Class<?> indexType, Object id);
 	
 	/**
 	 * Finds the objects with specified query.

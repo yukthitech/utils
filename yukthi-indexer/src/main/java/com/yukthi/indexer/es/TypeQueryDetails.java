@@ -83,7 +83,12 @@ public class TypeQueryDetails
 				return null;
 			}
 			
-			if(fieldDet.getIndexType() == IndexType.NOT_ANALYZED)
+			if(fieldDet.getEsDataType() == EsDataType.STRING && fieldDet.isIgnoreCase())
+			{
+				value = IndexUtils.toLowerCase(value);
+			}
+			
+			if(fieldDet.getEsDataType() != EsDataType.STRING || fieldDet.getIndexType() == IndexType.NOT_ANALYZED)
 			{
 				//perform exact value search
 				if(conditionOperator == ConditionOperator.EQ)

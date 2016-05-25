@@ -10,6 +10,7 @@ import java.util.Map;
 import com.yukthi.indexer.IndexField;
 import com.yukthi.indexer.IndexType;
 import com.yukthi.utils.CommonUtils;
+import com.yukthi.utils.exceptions.InvalidConfigurationException;
 
 /**
  * Index details of a type.
@@ -36,13 +37,26 @@ public class TypeIndexDetails
 		/**
 		 * ES data type name.
 		 */
-		private String esDataType;
+		private EsDataType esDataType;
 		
-		public FieldIndexDetails(String name, IndexType indexType, String esDataType)
+		/**
+		 * Indicates if this id field or not.
+		 */
+		private boolean idField;
+		
+		/**
+		 * Flag to indicate if case should be ignored for this field
+		 */
+		private boolean ignoreCase;
+		
+		public FieldIndexDetails(String name, EsDataType esDataType, IndexField indexField)
 		{
 			this.name = name;
-			this.indexType = indexType;
+			this.indexType = indexField.value();
 			this.esDataType = esDataType;
+			
+			this.ignoreCase = indexField.ignoreCase();
+			this.idField = indexField.idField();
 		}
 
 		/**
@@ -70,41 +84,56 @@ public class TypeIndexDetails
 		 *
 		 * @return the es data type
 		 */
-		public String getEsDataType()
+		public EsDataType getEsDataType()
 		{
 			return esDataType;
 		}
+		
+		public boolean isIgnoreCase()
+		{
+			return ignoreCase;
+		}
+		
+		/**
+		 * Checks if is indicates if this id field or not.
+		 *
+		 * @return the indicates if this id field or not
+		 */
+		public boolean isIdField()
+		{
+			return idField;
+		}
 	}
 	
-	private static Map<Class<?>, String> supportedTypes;
+	private static Map<Class<?>, EsDataType> supportedTypes;
 	
 	static
 	{
 		supportedTypes = CommonUtils.toMap(
-			byte.class, "byte",
-			Byte.class, "byte",
+			byte.class, EsDataType.BYTE,
+			Byte.class, EsDataType.BYTE,
 			
-			short.class, "short",
-			Short.class, "short",
+			short.class, EsDataType.SHORT,
+			Short.class, EsDataType.SHORT,
 
-			int.class, "integer",
-			Integer.class, "integer",
+			int.class, EsDataType.INTEGER,
+			Integer.class, EsDataType.INTEGER,
 
-			long.class, "long",
-			Long.class, "long",
+			long.class, EsDataType.LONG,
+			Long.class, EsDataType.LONG,
 
-			float.class, "float",
-			Float.class, "float",
+			float.class, EsDataType.FLOAT,
+			Float.class, EsDataType.FLOAT,
 
-			double.class, "double",
-			Double.class, "double",
+			double.class, EsDataType.DOUBLE,
+			Double.class, EsDataType.DOUBLE,
 
-			boolean.class, "boolean",
-			Boolean.class, "boolean",
+			boolean.class, EsDataType.BOOLEAN,
+			Boolean.class, EsDataType.BOOLEAN,
 
-			Date.class, "date",
+			Date.class, EsDataType.DATE,
 			
-			String.class, "string"
+			String.class, EsDataType.STRING
 		);
 	}
 	
@@ -131,6 +160,7 @@ public class TypeIndexDetails
 		
 		Class<?> fieldType = null;
 		ParameterizedType parameterizedType = null;
+		FieldIndexDetails fieldIndexDetails = null, idFieldDetails = null;
 		
 		//loop through the fields
 		for(Field field : fields)
@@ -158,7 +188,17 @@ public class TypeIndexDetails
 				continue;
 			}
 			
-			this.fields.put(field.getName(), new FieldIndexDetails(field.getName(), indexField.value(), supportedTypes.get(fieldType)));
+			fieldIndexDetails = new FieldIndexDetails(field.getName(), supportedTypes.get(fieldType), indexField);
+			this.fields.put(field.getName(), fieldIndexDetails);
+			
+			if(fieldIndexDetails.isIdField())
+			{
+				if(idFieldDetails != null)
+				{
+					throw new InvalidConfigurationException("In index type '{}' Multiple fields are marked as id fields - [{}, {}]", 
+							type.getName(), idFieldDetails.getName(), fieldIndexDetails.getName());
+				}
+			}
 		}
 	}
 	

@@ -1,5 +1,7 @@
 package com.yukthi.indexer.es;
 
+import java.util.List;
+
 import com.yukthi.indexer.search.ConditionOperator;
 import com.yukthi.indexer.search.SearchCondition;
 import com.yukthi.indexer.search.SearchQuery;
@@ -13,10 +15,18 @@ public class TestBeanSearchQuery1
 	@SearchCondition
 	private String text;
 	
-	public TestBeanSearchQuery1(String name, String text)
+	@SearchCondition
+	private List<String> keys;
+	
+	@SearchCondition(op = ConditionOperator.GTE)
+	private Integer value;
+
+	public TestBeanSearchQuery1(String name, String text, List<String> keys, Integer value)
 	{
 		this.name = name;
 		this.text = text;
+		this.keys = keys;
+		this.value = value;
 	}
 
 	public String getName()
@@ -39,4 +49,23 @@ public class TestBeanSearchQuery1
 		this.text = text;
 	}
 
+	public List<String> getKeys()
+	{
+		return keys;
+	}
+
+	public void setKeys(List<String> keys)
+	{
+		this.keys = keys;
+	}
+
+	public Integer getValue()
+	{
+		return value;
+	}
+
+	public void setValue(Integer value)
+	{
+		this.value = value;
+	}
 }

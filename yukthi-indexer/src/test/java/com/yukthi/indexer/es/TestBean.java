@@ -7,6 +7,12 @@ import com.yukthi.indexer.IndexType;
 
 public class TestBean
 {
+	/**
+	 * Id field. optionaly can be specified.
+	 */
+	@IndexField(idField = true)
+	private Long id;
+	
 	@IndexField(IndexType.NOT_ANALYZED)
 	private String name;
 	
@@ -28,6 +34,25 @@ public class TestBean
 		this.text = text;
 		this.keys = keys;
 		this.value = value;
+	}
+	
+	public TestBean(Long id, String name, String text, List<String> keys, int value)
+	{
+		this.id = id;
+		this.name = name;
+		this.text = text;
+		this.keys = keys;
+		this.value = value;
+	}
+	
+	public Long getId()
+	{
+		return id;
+	}
+
+	public void setId(Long id)
+	{
+		this.id = id;
 	}
 
 	public String getName()

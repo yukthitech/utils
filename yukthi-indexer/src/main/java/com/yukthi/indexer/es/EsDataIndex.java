@@ -28,7 +28,9 @@ import com.yukthi.utils.exceptions.InvalidStateException;
 import com.yukthi.utils.rest.DeleteRestRequest;
 import com.yukthi.utils.rest.GetRestRequest;
 import com.yukthi.utils.rest.PostRestRequest;
+import com.yukthi.utils.rest.PutRestRequest;
 import com.yukthi.utils.rest.RestClient;
+import com.yukthi.utils.rest.RestRequest;
 import com.yukthi.utils.rest.RestResult;
 
 /**
@@ -39,7 +41,7 @@ public class EsDataIndex implements IDataIndex
 {
 	private static Logger logger = LogManager.getLogger(EsDataIndex.class);
 	
-	private static final String OBJECT_FIELD = "__object";
+	public static final String OBJECT_FIELD = "__object";
 	private static final String OBJECT_TYPE_FIELD = "__objectType";
 	
 	/**
@@ -157,7 +159,7 @@ public class EsDataIndex implements IDataIndex
 		
 		for(TypeIndexDetails.FieldIndexDetails field : typeIndexDetails.getFields())
 		{
-			properties.put(field.getName(), CommonUtils.<String, String>toMap("type", field.getEsDataType(), 
+			properties.put(field.getName(), CommonUtils.<String, String>toMap("type", field.getEsDataType().getName(), 
 					"index", field.getIndexType() == IndexType.ANALYZED ? "analyzed" : "not_analyzed",
 					"store", "false"));
 		}
@@ -184,7 +186,8 @@ public class EsDataIndex implements IDataIndex
 	/* (non-Javadoc)
 	 * @see com.yukthi.indexer.IDataIndex#indexObject(java.lang.Object, java.lang.Object)
 	 */
-	public void indexObject(Object indexData, Object data)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public String indexObject(Object indexData, Object data)
 	{
 		try
 		{
@@ -200,6 +203,7 @@ public class EsDataIndex implements IDataIndex
 			TypeIndexDetails typeIndexDetails = indexedTypes.get(type);
 			Map<String, Object> indexObj = new HashMap<>();
 			Object value = null;
+			Object id = null;
 			
 			for(TypeIndexDetails.FieldIndexDetails field : typeIndexDetails.getFields())
 			{
@@ -216,24 +220,111 @@ public class EsDataIndex implements IDataIndex
 					continue;
 				}
 				
+				if(field.isIgnoreCase() && field.getEsDataType() == EsDataType.STRING)
+				{
+					value = IndexUtils.toLowerCase(value);
+				}
+				
 				indexObj.put(field.getName(), value);
+				
+				if(field.isIdField())
+				{
+					id = value;
+				}
 			}
 			
 			indexObj.put(OBJECT_FIELD, objectMapper.writeValueAsString(data));
 			indexObj.put(OBJECT_TYPE_FIELD, data.getClass().getName());
 			
+			/*
 			client.prepareIndex(indexName, data.getClass().getName(), null)
 		        .setSource(objectMapper.writeValueAsString(indexObj))
 		        .execute()
 		        .actionGet();
+		    */
+			
+			RestRequest<?> request = null;
+			
+			if(id == null)
+			{
+				request = new PostRestRequest("/" + indexName + "/" + typeIndexDetails.getType().getName());
+				((PostRestRequest)request).setBody(objectMapper.writeValueAsString(indexObj));
+			}
+			else
+			{
+				request = new PutRestRequest("/" + indexName + "/" + typeIndexDetails.getType().getName() + "/" + id);
+				((PutRestRequest)request).setBody(objectMapper.writeValueAsString(indexObj));
+			}
+			
+			
+			RestResult<Object> result = restClient.invokeJsonRequest(request, Object.class);
+			
+			if(result.getValue() == null)
+			{
+				throw new InvalidStateException("Failed to index specified object. [Status: {}]", result.getStatusCode());
+			}
+			
+			Map<String, Object> response = (Map)result.getValue();
+			logger.debug("Specified object is successfully indexed with id: {}", response.get("_id"));
 			
 			dataModified = true;
+			
+			return "" + response.get("_id");
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while indexing data - {}", data);
 		}
 	}
 	
+	@Override
+	public void updateObject(Class<?> indexType, Object updateData, Object id)
+	{
+		TypeIndexDetails typeIndexDetails = indexedTypes.get(indexType);
+		
+		if(typeIndexDetails == null)
+		{
+			throw new InvalidArgumentException("Invalid/non-existing index type specified - {}", indexType.getName());
+		}
+		
+		Object updateQuery = UpdateQueryBuilder.buildQuery(typeIndexDetails, updateData);
+		
+		PostRestRequest request = new PostRestRequest("/" + indexName + "/" + typeIndexDetails.getType().getName() + "/" + id + "/_update");
+		request.setJsonBody(updateQuery);
+		
+		RestResult<Object> result = restClient.invokeJsonRequest(request, Object.class);
+		
+		if(result.getValue() == null)
+		{
+			throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", result.getStatusCode());
+		}
+	}
+	
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public <T> T getObject(Class<?> indexType, Object id)
+	{
+		TypeIndexDetails typeIndexDetails = indexedTypes.get(indexType);
+		
+		if(typeIndexDetails == null)
+		{
+			throw new InvalidArgumentException("Invalid/non-existing index type specified - {}", indexType.getName());
+		}
+		
+		GetRestRequest request = new GetRestRequest("/" + indexName + "/" + typeIndexDetails.getType().getName() + "/" + id);
+		RestResult<Object> result = restClient.invokeJsonRequest(request, Object.class);
+		
+		if(result.getValue() == null)
+		{
+			throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", result.getStatusCode());
+		}
+		
+		Map<String, Object> response = (Map)result.getValue();
+		Object matchedObject = toSource((Map)response.get("_source"));
+		
+		return (T)matchedObject;
+	}
+
 	/**
 	 * Gets and loads (if required) the query details for specified search query type.
 	 * @param queryType
@@ -262,12 +353,17 @@ public class EsDataIndex implements IDataIndex
 		return typeQueryDetails;
 	}
 	
-	private Object toSource(EsSearchResult.Hit hit)
+	private Object toSource(Map<String, Object> source)
 	{
+		if(source == null)
+		{
+			return null;
+		}
+		
 		try
 		{
-			String sourceTypeName = (String)hit.getSource().get(OBJECT_TYPE_FIELD);
-			String sourceJson = (String)hit.getSource().get(OBJECT_FIELD);
+			String sourceTypeName = (String)source.get(OBJECT_TYPE_FIELD);
+			String sourceJson = (String)source.get(OBJECT_FIELD);
 			
 			Class<?> sourceType = Class.forName(sourceTypeName);
 			return objectMapper.readValue(sourceJson, sourceType);
@@ -329,7 +425,7 @@ public class EsDataIndex implements IDataIndex
 			
 			for(EsSearchResult.Hit hit : searchResult.finalHits())
 			{
-				finalResult.addResult((T)toSource(hit), hit.getScore());
+				finalResult.addResult((T)toSource(hit.getSource()), hit.getScore());
 			}
 			
 			return finalResult;
