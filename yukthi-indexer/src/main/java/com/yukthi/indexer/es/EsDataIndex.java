@@ -182,12 +182,9 @@ public class EsDataIndex implements IDataIndex
 		
 		logger.debug("Type '{}' is successfully added with response - {}", type.getName(), objectMapper.writeValueAsString(response));
 	}
-
-	/* (non-Javadoc)
-	 * @see com.yukthi.indexer.IDataIndex#indexObject(java.lang.Object, java.lang.Object)
-	 */
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public String indexObject(Object indexData, Object data)
+	private String storeObject(Object id, Object indexData, Object data)
 	{
 		try
 		{
@@ -203,7 +200,6 @@ public class EsDataIndex implements IDataIndex
 			TypeIndexDetails typeIndexDetails = indexedTypes.get(type);
 			Map<String, Object> indexObj = new HashMap<>();
 			Object value = null;
-			Object id = null;
 			
 			for(TypeIndexDetails.FieldIndexDetails field : typeIndexDetails.getFields())
 			{
@@ -227,7 +223,7 @@ public class EsDataIndex implements IDataIndex
 				
 				indexObj.put(field.getName(), value);
 				
-				if(field.isIdField())
+				if(field.isIdField() && id == null)
 				{
 					id = value;
 				}
@@ -275,7 +271,16 @@ public class EsDataIndex implements IDataIndex
 			throw new InvalidStateException(ex, "An error occurred while indexing data - {}", data);
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthi.indexer.IDataIndex#indexObject(java.lang.Object, java.lang.Object)
+	 */
+	public String indexObject(Object indexData, Object data)
+	{
+		return storeObject(null, indexData, data);
+	}
 	
+	/*
 	@Override
 	public void updateObject(Class<?> indexType, Object updateData, Object id)
 	{
@@ -298,6 +303,8 @@ public class EsDataIndex implements IDataIndex
 			throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", result.getStatusCode());
 		}
 	}
+	*/
+	
 	
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -323,6 +330,17 @@ public class EsDataIndex implements IDataIndex
 		Object matchedObject = toSource((Map)response.get("_source"));
 		
 		return (T)matchedObject;
+	}
+
+	@Override
+	public void updateObject(Object id, Object indexData, Object data)
+	{
+		if(id == null)
+		{
+			throw new InvalidArgumentException("No id specified for update");
+		}
+		
+		storeObject(id, indexData, data);
 	}
 
 	/**

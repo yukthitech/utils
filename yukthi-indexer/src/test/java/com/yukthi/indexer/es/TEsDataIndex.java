@@ -42,6 +42,9 @@ public class TEsDataIndex
 		
 		TestBean resBean = dataIndex.getObject(TestBean.class, id);
 		Assert.assertEquals(resBean.getName(), "test123");
+		Assert.assertEquals(resBean.getText(), "This is text of 123");
+		Assert.assertEquals(resBean.getKeys(), Arrays.asList("test", "123"));
+		Assert.assertEquals(resBean.getValue(), 20);
 		
 		//index with id
 		testBean = new TestBean(123L, "test456", "This is text of 123", Arrays.asList("test", "123"), 20);
@@ -58,6 +61,29 @@ public class TEsDataIndex
 	}
 	
 	@Test
+	public void testUpdateIndexing()
+	{
+		//index without id
+		TestBean testBean = new TestBean(null, "updtTest123", "This is text of 123", Arrays.asList("test", "123"), 20);
+		String id = dataIndex.indexObject(testBean, testBean);
+		
+		Assert.assertNotNull(id);
+		
+
+		//update bean with new values
+		testBean = new TestBean(null, "updtTest12345", "This is text of 12345", Arrays.asList("test", "123", "456"), 10);
+		dataIndex.updateObject(id, testBean, testBean);
+		
+		//validate the update op
+		TestBean resBean = dataIndex.getObject(TestBean.class, id);
+		Assert.assertEquals(resBean.getName(), "updtTest12345");
+		Assert.assertEquals(resBean.getText(), "This is text of 12345");
+		Assert.assertEquals(resBean.getKeys(), Arrays.asList("test", "123", "456"));
+		Assert.assertEquals(resBean.getValue(), 10);
+	}
+	
+	/*
+	@Test
 	public void testUpdate()
 	{
 		//index without id
@@ -72,9 +98,8 @@ public class TEsDataIndex
 		Assert.assertEquals(beanFromEs.getText(), "This is text of 345");
 		Assert.assertEquals(beanFromEs.getKeys(), Arrays.asList("test", "123", "345", "678"));
 		Assert.assertEquals(beanFromEs.getValue(), 30);
-		
-		
 	}
+	*/
 
 	@Test
 	public void testSearch()

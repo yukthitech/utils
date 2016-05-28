@@ -25,8 +25,17 @@ public interface IDataIndex
 	 * @param indexType Index type in which object needs to be updated
 	 * @param updateData Specified fields/data to update
 	 * @param id Id of the object to update.
-	 */
+	 * /
 	public void updateObject(Class<?> indexType, Object updateData, Object id);
+	*/
+	
+	/**
+	 * Updates the object with specified id in specified index with specified index data and data.
+	 * @param id Id of the object to be updated
+	 * @param indexData Index data to be updated
+	 * @param data source object to be updated
+	 */
+	public void updateObject(Object id, Object indexData, Object data);
 	
 	/**
 	 * Fetches object with specified id.
