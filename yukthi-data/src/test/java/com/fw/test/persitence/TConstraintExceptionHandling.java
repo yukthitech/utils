@@ -23,6 +23,7 @@
 
 package com.fw.test.persitence;
 
+import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -36,8 +37,6 @@ import com.yukthi.persistence.ForeignConstraintViolationException;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.UniqueConstraintViolationException;
 import com.yukthi.persistence.repository.RepositoryFactory;
-
-import junit.framework.Assert;
 
 /**
  * @author akiran
