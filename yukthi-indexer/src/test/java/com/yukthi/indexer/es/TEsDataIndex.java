@@ -1,16 +1,19 @@
 package com.yukthi.indexer.es;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.yukthi.indexer.IDataIndex;
 import com.yukthi.indexer.IndexSearchResult;
+import com.yukthi.indexer.IndexSearchResult.ResultDetails;
 import com.yukthi.indexer.search.SearchSettings;
 import com.yukthi.utils.CommonUtils;
 
@@ -170,7 +173,40 @@ public class TEsDataIndex
 		Assert.assertEquals(names, CommonUtils.toSet("bvc456", "xop345"));
 	}
 	
-	@AfterClass
+	@Test
+	public void testFieldBoosting()
+	{
+		indexObject( new TestBean("abc123", "This is test as 1", null, 1) );
+		indexObject( new TestBean("cde345", "This was test as 2", null, 1) );
+		indexObject( new TestBean("ghi456", "This has test 3", null, 10) );
+
+		//test with normal query
+		SearchSettings searchSettings = new SearchSettings();
+		
+		IndexSearchResult<TestBean> results = dataIndex.search(new TestBeanSearchQuery1(null, "This test as",  null, null), searchSettings);
+		Assert.assertEquals(results.getResultDetails().size(), 3);
+		
+		Map<String, Double> scores = results.getResultDetails().stream()
+										.collect(Collectors.<ResultDetails<TestBean>, String, Double>toMap(resDet -> resDet.getResult().getName(), ResultDetails::getScore));
+		
+		System.out.println("\n==========>" + scores + "\n");
+		Assert.assertTrue(scores.get("ghi456") < scores.get("cde345"));
+		Assert.assertTrue(scores.get("ghi456") < scores.get("abc123"));
+		
+		/////////////////////////////////////////////////
+		//test with boost query
+		results = dataIndex.search(new TestBeanSearchQueryWithBoost(null, "This test as",  null, null), searchSettings);
+		Assert.assertEquals(results.getResultDetails().size(), 3);
+		
+		scores = results.getResultDetails().stream()
+										.collect(Collectors.<ResultDetails<TestBean>, String, Double>toMap(resDet -> resDet.getResult().getName(), ResultDetails::getScore));
+		
+		System.out.println("\n==========>" + scores + "\n");
+		Assert.assertTrue(scores.get("ghi456") > scores.get("cde345"));
+		Assert.assertTrue(scores.get("ghi456") > scores.get("abc123"));
+	}
+	
+	@AfterMethod
 	public void cleanup()
 	{
 		dataIndex.clean();

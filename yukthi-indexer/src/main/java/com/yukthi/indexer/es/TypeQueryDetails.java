@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.yukthi.indexer.IndexType;
 import com.yukthi.indexer.search.ConditionOperator;
+import com.yukthi.indexer.search.FieldBooster;
 import com.yukthi.indexer.search.JoinOperator;
 import com.yukthi.indexer.search.NullCheck;
 import com.yukthi.indexer.search.SearchCondition;
@@ -133,6 +134,35 @@ public class TypeQueryDetails
 		}
 	}
 	
+	private class FieldBoosterDetails
+	{
+		private String field;
+		private int logFactor;
+		
+		public FieldBoosterDetails(FieldBooster booster)
+		{
+			this.field = booster.field();
+			this.logFactor = booster.logFactor();
+		}
+		
+		public Map<String, Object> toQuery()
+		{
+			Map<String, Object> query = CommonUtils.toMap("field", field);
+			
+			if(logFactor > 0)
+			{
+				query.put("modifier", "log1p");
+				
+				if(logFactor > 1)
+				{
+					query.put("factor", logFactor);
+				}
+			}
+			
+			return query;
+		}
+	}
+	
 	/**
 	 * Conditions grouped using join operator.
 	 */
@@ -153,12 +183,24 @@ public class TypeQueryDetails
 	 * needs to be built.
 	 */
 	private boolean ignoreScore;
+	
+	/**
+	 * Field booster details for the query if any
+	 */
+	private FieldBoosterDetails fieldBoosterDetails;
 
 	public TypeQueryDetails(Class<?> queryType)
 	{
 		loadClassLevelConditons(queryType);
 		
 		loadPropertyConditions(queryType);
+		
+		FieldBooster fieldBooster = queryType.getAnnotation(FieldBooster.class);
+		
+		if(fieldBooster != null)
+		{
+			this.fieldBoosterDetails = new FieldBoosterDetails(fieldBooster);
+		}
 	}
 	
 	private TypeQueryDetails(Class<?> subQueryType, BeanProperty beanProperty)
@@ -324,6 +366,14 @@ public class TypeQueryDetails
 					);
 		}
 		
-		return CommonUtils.toMap("query", query);
+		if(fieldBoosterDetails == null)
+		{
+			return CommonUtils.toMap("query", query);
+		}
+		
+		Map<String, Object> finalQuery = CommonUtils.toMap("query", query, "field_value_factor", fieldBoosterDetails.toQuery());
+		finalQuery = CommonUtils.toMap("function_score", finalQuery);
+		
+		return CommonUtils.toMap("query", finalQuery);
 	}
 }
