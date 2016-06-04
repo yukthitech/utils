@@ -1,6 +1,7 @@
 package com.yukthi.indexer.es;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,9 +29,9 @@ public class TEsDataIndex
 		dataIndex = indexer.getIndex("test");
 	}
 	
-	private void indexObject(TestBean testBean)
+	private String indexObject(Object testBean)
 	{
-		dataIndex.indexObject(testBean, testBean);
+		return dataIndex.indexObject(testBean, testBean);
 	}
 	
 	@Test
@@ -203,6 +204,64 @@ public class TEsDataIndex
 		System.out.println("\n==========>" + scores + "\n");
 		Assert.assertTrue(scores.get("ghi456") > scores.get("cde345"));
 		Assert.assertTrue(scores.get("ghi456") > scores.get("abc123"));
+	}
+	
+	@Test
+	public void testBeanWitMap()
+	{
+		indexObject( new BeanWithMap("test1", CommonUtils.toMap("key1", "val1", "key2", "val2")) );
+		indexObject( new BeanWithMap("test2", CommonUtils.toMap("key21", "val21", "key22", "val2")) );
+		indexObject( new BeanWithMap("test3", CommonUtils.toMap("key1", "val1", "key32", "val32")) );
+
+		//test with single key
+		SearchSettings searchSettings = new SearchSettings();
+		
+		IndexSearchResult<BeanWithMap> results = dataIndex.search(new BeanWithMapQuery(CommonUtils.toMap("key1", "val1")), searchSettings);
+		Assert.assertEquals(results.getResultDetails().size(), 2);
+		
+		Set<String> names = results.getResults().stream()
+				.map(res -> res.getName())
+				.collect(Collectors.toSet());
+		
+		Assert.assertEquals(names, CommonUtils.toSet("test1", "test3"));
+
+		//test with multiple keys where map is part of must
+		results = dataIndex.search(new BeanWithMapQuery(CommonUtils.toMap("key1", "val1", "key2", "val2")), searchSettings);
+		Assert.assertEquals(results.getResultDetails().size(), 1);
+		
+		names = results.getResults().stream()
+				.map(res -> res.getName())
+				.collect(Collectors.toSet());
+		
+		Assert.assertEquals(names, CommonUtils.toSet("test1"));
+
+		//test with multiple keys where map is part of should
+		results = dataIndex.search(new BeanWithMapQuery(null, CommonUtils.toMap("key1", "val1", "key32", "val32")), searchSettings);
+		Assert.assertEquals(results.getResultDetails().size(), 2);
+		
+		//ensure order of the returned results is as expected
+		List<String> nameLst = results.getResults().stream()
+				.map(res -> res.getName())
+				.collect(Collectors.toList());
+		
+		Assert.assertEquals(nameLst, Arrays.asList("test3", "test1"));
+	}
+	
+	@Test
+	public void testDelete()
+	{
+		String id1 = indexObject( new BeanWithMap("test1", CommonUtils.toMap("key1", "val1", "key2", "val2")) );
+		String id2 = indexObject( new BeanWithMap("test2", CommonUtils.toMap("key21", "val21", "key22", "val2")) );
+		
+		Assert.assertEquals(dataIndex.<BeanWithMap>getObject(BeanWithMap.class, id1).getName() , "test1");
+		Assert.assertEquals(dataIndex.<BeanWithMap>getObject(BeanWithMap.class, id2).getName() , "test2");
+		
+		//execute delete
+		dataIndex.deleteObject(BeanWithMap.class, id1);
+		
+		//ensure only target object is deleted
+		Assert.assertNull(dataIndex.<BeanWithMap>getObject(BeanWithMap.class, id1));
+		Assert.assertEquals(dataIndex.<BeanWithMap>getObject(BeanWithMap.class, id2).getName() , "test2");
 	}
 	
 	@AfterMethod

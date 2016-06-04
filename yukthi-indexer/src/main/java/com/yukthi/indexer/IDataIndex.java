@@ -52,6 +52,12 @@ public interface IDataIndex
 	public <T> IndexSearchResult<T> search(Object query, SearchSettings searchSettings);
 	
 	/**
+	 * Removes the object from index with specified id.
+	 * @param id
+	 */
+	public void deleteObject(Class<?> indexType, Object id);
+	
+	/**
 	 * Removes all the data from index.
 	 */
 	public void clean();

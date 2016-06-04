@@ -10,7 +10,9 @@ public enum EsDataType
 	DOUBLE("double"),
 	BOOLEAN("boolean"),
 	DATE("date"),
-	STRING("string");
+	STRING("string"),
+	MAP("object"),
+	OBJECT("object");
 	
 	private String name;
 

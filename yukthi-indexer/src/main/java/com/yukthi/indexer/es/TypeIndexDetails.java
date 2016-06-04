@@ -49,6 +49,11 @@ public class TypeIndexDetails
 		 */
 		private boolean ignoreCase;
 		
+		/**
+		 * Subfields for object field type.
+		 */
+		private Map<String, FieldIndexDetails> subfields;
+		
 		public FieldIndexDetails(String name, EsDataType esDataType, IndexField indexField)
 		{
 			this.name = name;
@@ -103,6 +108,16 @@ public class TypeIndexDetails
 		{
 			return idField;
 		}
+		
+		public Collection<FieldIndexDetails> getSubfields()
+		{
+			if(subfields == null)
+			{
+				return null;
+			}
+			
+			return subfields.values();
+		}
 	}
 	
 	private static Map<Class<?>, EsDataType> supportedTypes;
@@ -154,7 +169,11 @@ public class TypeIndexDetails
 	public TypeIndexDetails(Class<?> type)
 	{
 		this.type = type;
-		
+		this.fetchFields(type, fields);
+	}
+	
+	private void fetchFields(Class<?> type, Map<String, FieldIndexDetails> fieldMap)
+	{
 		Field fields[] = type.getDeclaredFields();
 		IndexField indexField = null;
 		
@@ -174,12 +193,6 @@ public class TypeIndexDetails
 				fieldType = (Class<?>)parameterizedType.getActualTypeArguments()[0];
 			}
 			
-			//if the field type is not supported for indexing
-			if(!supportedTypes.containsKey(fieldType))
-			{
-				continue;
-			}
-			
 			indexField = field.getAnnotation(IndexField.class);
 			
 			//if field is not suppose to be indexed
@@ -188,8 +201,24 @@ public class TypeIndexDetails
 				continue;
 			}
 			
-			fieldIndexDetails = new FieldIndexDetails(field.getName(), supportedTypes.get(fieldType), indexField);
-			this.fields.put(field.getName(), fieldIndexDetails);
+			//if the field type is not supported for indexing
+			if(supportedTypes.containsKey(fieldType))
+			{
+				fieldIndexDetails = new FieldIndexDetails(field.getName(), supportedTypes.get(fieldType), indexField);
+			}
+			else if(Map.class.equals(fieldType))
+			{
+				fieldIndexDetails = new FieldIndexDetails(field.getName(), EsDataType.MAP, indexField);
+			}
+			else
+			{
+				fieldIndexDetails = new FieldIndexDetails(field.getName(), EsDataType.OBJECT, indexField);
+				fieldIndexDetails.subfields = new HashMap<>();
+				
+				fetchFields(fieldType, fieldIndexDetails.subfields);
+			}
+			
+			fieldMap.put(field.getName(), fieldIndexDetails);
 			
 			if(fieldIndexDetails.isIdField())
 			{
@@ -209,7 +238,64 @@ public class TypeIndexDetails
 	
 	public FieldIndexDetails getField(String name)
 	{
-		return fields.get(name);
+		FieldIndexDetails fieldDetails = fields.get(name);
+		
+		//if it is simple field field would be found directly
+		if(fieldDetails != null)
+		{
+			return fieldDetails;
+		}
+		
+		//if name does not refer to nested field
+		if(!name.contains("."))
+		{
+			return null;
+		}
+		
+		//divide the field path into parts and try to find the field
+		String fieldParts[] = name.split("\\.");
+		FieldIndexDetails parentFieldDetails = null, curFieldDetails = null;
+		
+		for(int i = 0; i < fieldParts.length; i++)
+		{
+			//for the first property
+			if(parentFieldDetails == null)
+			{
+				parentFieldDetails = fields.get(fieldParts[i]);
+				
+				//if unable to identify primary part itself
+				if(parentFieldDetails == null)
+				{
+					return null;
+				}
+				
+				continue;
+			}
+			
+			//if current field does not have any sub fields
+			if(parentFieldDetails.subfields == null)
+			{
+				//if map is encountered in the field path, return map field details
+				if(EsDataType.MAP == parentFieldDetails.esDataType)
+				{
+					return parentFieldDetails;
+				}
+				
+				return null;
+			}
+			
+			curFieldDetails = parentFieldDetails.subfields.get(fieldParts[i]);
+			
+			//if next field is not found in parent field
+			if(curFieldDetails == null)
+			{
+				return null;
+			}
+			
+			parentFieldDetails = curFieldDetails;
+		}
+		
+		return curFieldDetails;
 	}
 	
 	public Class<?> getType()

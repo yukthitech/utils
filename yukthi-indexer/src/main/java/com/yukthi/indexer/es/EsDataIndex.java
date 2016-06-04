@@ -1,6 +1,7 @@
 package com.yukthi.indexer.es;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,9 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthi.indexer.IDataIndex;
 import com.yukthi.indexer.IndexSearchResult;
 import com.yukthi.indexer.IndexType;
+import com.yukthi.indexer.es.TypeIndexDetails.FieldIndexDetails;
 import com.yukthi.indexer.search.SearchSettings;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.MessageFormatter;
+import com.yukthi.utils.ObjectWrapper;
 import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 import com.yukthi.utils.rest.DeleteRestRequest;
@@ -156,13 +159,7 @@ public class EsDataIndex implements IDataIndex
 		putMappingRequestBuilder.setType(type.getName());
 		
 		Map<String, Map<String, String>> properties = new HashMap<String, Map<String,String>>();
-		
-		for(TypeIndexDetails.FieldIndexDetails field : typeIndexDetails.getFields())
-		{
-			properties.put(field.getName(), CommonUtils.<String, String>toMap("type", field.getEsDataType().getName(), 
-					"index", field.getIndexType() == IndexType.ANALYZED ? "analyzed" : "not_analyzed",
-					"store", "false"));
-		}
+		addProperties(typeIndexDetails.getFields(), properties, null);
 		
 		properties.put(OBJECT_FIELD, CommonUtils.<String, String>toMap("type", "string", 
 				"index", "no",
@@ -175,12 +172,100 @@ public class EsDataIndex implements IDataIndex
 		Map<Object, Object> requestSource = CommonUtils.toMap("properties", properties);
 		requestSource = CommonUtils.toMap(type.getName(), requestSource);
 		
+		if(logger.isDebugEnabled())
+		{
+			logger.debug("Creating index type '{}' using request source: {}", type.getName(), objectMapper.writeValueAsString(requestSource));
+		}
+		
 		putMappingRequestBuilder.setSource(requestSource);
 
 		PutMappingResponse response = putMappingRequestBuilder.execute().actionGet();
 		indexedTypes.put(type, typeIndexDetails);
 		
 		logger.debug("Type '{}' is successfully added with response - {}", type.getName(), objectMapper.writeValueAsString(response));
+	}
+	
+	private void addProperties(Collection<FieldIndexDetails> fields, Map<String, Map<String, String>> properties, String parentField)
+	{
+		if(fields == null)
+		{
+			return;
+		}
+		
+		String name = null;
+		String indexType = null;
+		Map<String, String> params = null;
+		
+		for(TypeIndexDetails.FieldIndexDetails field : fields)
+		{
+			name = parentField != null ? parentField + "." + field.getName() : field.getName();
+			
+			if(field.getEsDataType() == EsDataType.OBJECT || field.getEsDataType() == EsDataType.MAP)
+			{
+				params = CommonUtils.<String, String>toMap("type", field.getEsDataType().getName()); 
+			}
+			else
+			{
+				indexType = field.getIndexType() == IndexType.ANALYZED ? "analyzed" : "not_analyzed";
+
+				params = CommonUtils.<String, String>toMap("type", field.getEsDataType().getName(), 
+						"index", indexType,
+						"store", "false");
+			}
+			
+			properties.put(name, params);
+			
+			addProperties(field.getSubfields(), properties, name);
+		}
+	}
+	
+	/**
+	 * Creates index object map from specified data and specified fields.
+	 * @param fields
+	 * @param data
+	 * @param idWrapper Object wrapper to hold id field value.
+	 * @return
+	 */
+	private Map<String, Object> toIndexObjectMap(Collection<FieldIndexDetails> fields, Object data, ObjectWrapper<Object> idWrapper)
+	{
+		Object value = null;
+		Map<String, Object> indexObj = new HashMap<>();
+		
+		for(TypeIndexDetails.FieldIndexDetails field : fields)
+		{
+			try
+			{
+				value = PropertyUtils.getProperty(data, field.getName());
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException(ex, "An error occurred while fetching property - {}", field.getName());
+			}
+			
+			if(value == null)
+			{
+				continue;
+			}
+			
+			if(field.isIgnoreCase() && field.getEsDataType() == EsDataType.STRING)
+			{
+				value = IndexUtils.toLowerCase(value);
+			}
+			
+			//for sub objects create index objects recursively
+			if(field.getEsDataType() == EsDataType.OBJECT)
+			{
+				value = toIndexObjectMap(field.getSubfields(), value, null);
+			}
+			
+			indexObj.put(field.getName(), value);
+			
+			if(field.isIdField() && idWrapper != null && idWrapper.getValue() == null)
+			{
+				idWrapper.setValue(value);
+			}
+		}
+		
+		return indexObj;
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -198,36 +283,10 @@ public class EsDataIndex implements IDataIndex
 			}
 			
 			TypeIndexDetails typeIndexDetails = indexedTypes.get(type);
-			Map<String, Object> indexObj = new HashMap<>();
-			Object value = null;
+			ObjectWrapper<Object> idWrapper = new ObjectWrapper<Object>(id);
 			
-			for(TypeIndexDetails.FieldIndexDetails field : typeIndexDetails.getFields())
-			{
-				try
-				{
-					value = PropertyUtils.getProperty(indexData, field.getName());
-				}catch(Exception ex)
-				{
-					throw new InvalidStateException(ex, "An error occurred while fetching property - {}", field.getName());
-				}
-				
-				if(value == null)
-				{
-					continue;
-				}
-				
-				if(field.isIgnoreCase() && field.getEsDataType() == EsDataType.STRING)
-				{
-					value = IndexUtils.toLowerCase(value);
-				}
-				
-				indexObj.put(field.getName(), value);
-				
-				if(field.isIdField() && id == null)
-				{
-					id = value;
-				}
-			}
+			Map<String, Object> indexObj = toIndexObjectMap(typeIndexDetails.getFields(), data, idWrapper);
+			id = idWrapper.getValue();
 			
 			indexObj.put(OBJECT_FIELD, objectMapper.writeValueAsString(data));
 			indexObj.put(OBJECT_TYPE_FIELD, data.getClass().getName());
@@ -427,7 +486,7 @@ public class EsDataIndex implements IDataIndex
 			
 			RestResult<EsSearchResult> restResult = restClient.invokeJsonRequest(searchRequest, EsSearchResult.class);
 			
-			if(restResult.getValue() == null)
+			if(restResult.getStatusCode() != 200)
 			{
 				throw new InvalidStateException("No/invalid response obtained from elastic search. [Status Code: {}]", restResult.getStatusCode());
 			}
@@ -451,6 +510,17 @@ public class EsDataIndex implements IDataIndex
 		{
 			throw new InvalidStateException(ex, "An error occurred while executing search operation with query - {}", queryObj);
 		}
+	}
+	
+	@Override
+	public void deleteObject(Class<?> indexType, Object id)
+	{
+		logger.debug("Deleting object of type '{}' with id - {}", indexType.getName(), id);
+		DeleteRestRequest request = new DeleteRestRequest("/" + indexName + "/" + indexType.getName() + "/" + id);
+		RestResult<String> result =  restClient.invokeRequest(request);
+
+		dataModified = true;
+		logger.debug("Got refresh/commit response as - {}", result.getValue());
 	}
 
 	@Override

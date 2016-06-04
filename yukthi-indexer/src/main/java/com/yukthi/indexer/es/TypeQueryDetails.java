@@ -1,6 +1,7 @@
 package com.yukthi.indexer.es;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ public class TypeQueryDetails
 			this.boost = boost;
 		}
 		
-		public Map<String, Object> toQuery(Object queryObj, TypeIndexDetails indexDetails)
+		public List<Map<String, Object>> toQuery(Object queryObj, TypeIndexDetails indexDetails)
 		{
 			TypeIndexDetails.FieldIndexDetails fieldDet = indexDetails.getField(field);
 			
@@ -65,16 +66,16 @@ public class TypeQueryDetails
 			
 			if(nullCheck)
 			{
-				return CommonUtils.toMap("missing",
+				return Arrays.asList( CommonUtils.toMap("missing",
 						CommonUtils.toMap("field", field)
-					);
+					) );
 			}
 			
 			if(notNullCheck)
 			{
-				return CommonUtils.toMap("exists",
+				return Arrays.asList( CommonUtils.toMap("exists",
 						CommonUtils.toMap("field", field)
-					);
+					) );
 			}
 
 			Object value = beanProperty.getValue(queryObj);
@@ -89,6 +90,44 @@ public class TypeQueryDetails
 				value = IndexUtils.toLowerCase(value);
 			}
 			
+			if(value instanceof Map)
+			{
+				Map<?, ?> map = (Map<?, ?>)value;
+				
+				if(map.isEmpty())
+				{
+					return null;
+				}
+				
+				List<Map<String, Object>> queries = new ArrayList<>();
+				Object entryValue = null;
+				
+				for(Object key : map.keySet())
+				{
+					entryValue = map.get(key);
+					
+					if(entryValue == null)
+					{
+						continue;
+					}
+					
+					if(entryValue instanceof Collection)
+					{
+						queries.add( CommonUtils.toMap("terms", 
+								CommonUtils.toMap(field + "." + key, entryValue))
+								);
+					}
+					else
+					{
+						queries.add( CommonUtils.toMap("term", 
+								CommonUtils.toMap(field + "." + key, entryValue))
+								);
+					}
+				}
+				
+				return queries.isEmpty() ? null : queries;
+			}
+			
 			if(fieldDet.getEsDataType() != EsDataType.STRING || fieldDet.getIndexType() == IndexType.NOT_ANALYZED)
 			{
 				//perform exact value search
@@ -96,21 +135,21 @@ public class TypeQueryDetails
 				{
 					if(value instanceof Collection)
 					{
-						return CommonUtils.toMap("terms", 
+						return Arrays.asList( CommonUtils.toMap("terms", 
 									CommonUtils.toMap(field, value)
-								);
+								) );
 					}
 					
-					return CommonUtils.toMap("term", 
+					return Arrays.asList( CommonUtils.toMap("term", 
 								CommonUtils.toMap(field, value)
-							);
+							) );
 				}
 				
-				return CommonUtils.toMap("range", 
+				return Arrays.asList( CommonUtils.toMap("range", 
 							CommonUtils.toMap(field,
 								CommonUtils.toMap(conditionOperator.name().toLowerCase(), value)
 							)
-						);
+						) );
 			}
 			
 			Map<String, Object> query = CommonUtils.toMap(field, CommonUtils.toMap("query", value));
@@ -130,7 +169,7 @@ public class TypeQueryDetails
 				query.put("boost", boost);
 			}
 			
-			return CommonUtils.toMap("match", query);
+			return Arrays.asList( CommonUtils.toMap("match", query) );
 		}
 	}
 	
@@ -312,7 +351,7 @@ public class TypeQueryDetails
 		Map<String, Object> conditionsGroupMap = new HashMap<>();
 		List<Map<String, Object>> conditionMaps = null;
 		
-		Map<String, Object> conditionQuery = null;
+		List<Map<String, Object>> conditionQueries = null;
 		Object subqueryObj = null;
 		
 		//loop through groups
@@ -325,7 +364,7 @@ public class TypeQueryDetails
 			{
 				if(condition instanceof Condition)
 				{
-					conditionQuery = ((Condition)condition).toQuery(queryObj, indexDetails);
+					conditionQueries = ((Condition)condition).toQuery(queryObj, indexDetails);
 				}
 				else
 				{
@@ -336,12 +375,12 @@ public class TypeQueryDetails
 						continue;
 					}
 					
-					conditionQuery = ((TypeQueryDetails)condition).toBoolQuery(subqueryObj, indexDetails);
+					conditionQueries = Arrays.asList( ((TypeQueryDetails)condition).toBoolQuery(subqueryObj, indexDetails) );
 				}
 				
-				if(conditionQuery != null)
+				if(conditionQueries != null)
 				{
-					conditionMaps.add(conditionQuery);
+					conditionMaps.addAll(conditionQueries);
 				}
 			}
 			
