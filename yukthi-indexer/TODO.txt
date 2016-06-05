@@ -1,0 +1,2 @@
+sub object properties during search is yet to be tested
+	Assuming subobjects are not going to be supported in query objects
