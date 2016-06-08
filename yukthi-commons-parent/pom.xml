@@ -55,6 +55,7 @@
 	</build>
 
 	<modules>
+		<module>../ccg</module>
 		<module>../yukthi-data-mapping</module>
 		<module>../yukthi-data</module>
 		<module>../yukthi-indexer</module>
