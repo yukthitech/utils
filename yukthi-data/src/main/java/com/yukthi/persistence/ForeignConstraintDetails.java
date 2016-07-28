@@ -352,7 +352,7 @@ public class ForeignConstraintDetails
 			// if mapped field is incorrect
 			if(targetFieldDetails == null)
 			{
-				throw new InvalidMappingException(String.format("Invalid mapping field '%1' specified for field '%2.%3'", mappedBy, sourceEntityDetails.getEntityType().getName(), sourceField.getName()));
+				throw new InvalidMappingException(String.format("Invalid mapping field '%1s' specified for field '%2s.%3s'", mappedBy, sourceEntityDetails.getEntityType().getName(), sourceField.getName()));
 			}
 
 			Field targetField = targetFieldDetails.getField();
@@ -361,21 +361,21 @@ public class ForeignConstraintDetails
 			// ensure target field type is matching source entity type
 			if(!targetFieldType.equals(sourceEntityDetails.getEntityType()))
 			{
-				throw new InvalidMappingException(String.format("Entity relation target field's type '%1.%2' is not matching with source entity type '%3'. Relation source field '%3.%4'", targetEntityDetails.getEntityType().getName(), targetField.getName(), sourceEntityDetails.getEntityType().getName(), sourceField.getName()));
+				throw new InvalidMappingException(String.format("Entity relation target field's type '%1s.%2s' is not matching with source entity type '%3s'. Relation source field '%3s.%4s'", targetEntityDetails.getEntityType().getName(), targetField.getName(), sourceEntityDetails.getEntityType().getName(), sourceField.getName()));
 			}
 		}
 		else
 		{
 			if(details.isSaveCascaded)
 			{
-				throw new InvalidMappingException( String.format("Save-cascade is mentioned on non-mapped relation (non-child/parent relation) '%1.%2'. Save cascade is supported only from parent entity to child.", 
+				throw new InvalidMappingException( String.format("Save-cascade is mentioned on non-mapped relation (non-child/parent relation) '%1s.%2s'. Save cascade is supported only from parent entity to child.", 
 						sourceEntityDetails.getEntityType().getName(), sourceField.getName()) );
 			}
 		}
 		
 		if(details.isSaveCascaded && relationType.isCollectionTargetExpected())
 		{
-			throw new InvalidMappingException( String.format("Invalid save-cascade encountered on field '%1.%2'. Save cascade is not supported for many-to-one and many-to-many relation.", 
+			throw new InvalidMappingException( String.format("Invalid save-cascade encountered on field '%1s.%2s'. Save cascade is not supported for many-to-one and many-to-many relation.", 
 					sourceEntityDetails.getEntityType().getName(), sourceField.getName()) );
 		}
 
