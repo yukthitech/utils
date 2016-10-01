@@ -120,7 +120,7 @@ class RepositoryProxy implements InvocationHandler
 			return queryExecutor.execute(queryExecutionContext, dataStore, dataStore.getConversionService(), args);
 		}catch(RuntimeException ex)
 		{
-			logger.error("An error occurred while executing method: " + method.getName(), ex);
+			logger.debug("An error occurred while executing method: " + method.getName() + "\nError: " + ex);
 			throw ex;
 		}
 	}

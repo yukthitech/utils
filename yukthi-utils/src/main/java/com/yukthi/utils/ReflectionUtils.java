@@ -88,6 +88,25 @@ public class ReflectionUtils
 	}
 	
 	/**
+	 * Used to fetch the field value of specified bean.
+	 * @param bean Bean from whose field value needs to be fetched.
+	 * @param field Field whose value needs to be fetched.
+	 * @return Specified field value.
+	 */
+	public static Object getFieldValue(Object bean, String field)
+	{
+		try
+		{
+			Field fieldObj = bean.getClass().getDeclaredField(field);
+			fieldObj.setAccessible(true);
+			return fieldObj.get(bean);
+		} catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while geting field value - " + field, ex);
+		}
+	}
+	
+	/**
 	 * Fetches type of the nested field type
 	 * @param cls Class in which nested field type needs to be fetched
 	 * @param fieldName Nested field name whose type needs to be fetched
