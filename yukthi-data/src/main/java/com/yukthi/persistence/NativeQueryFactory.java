@@ -102,6 +102,18 @@ public class NativeQueryFactory
 	}
 	
 	/**
+	 * Adds list of resources to this factory.
+	 * @param resources Resource files to add.
+	 */
+	public void setResources(List<String> resources)
+	{
+		for(String resource : resources)
+		{
+			addResource(resource);
+		}
+	}
+	
+	/**
 	 * Loads queries from specified file
 	 * @param file File to be loaded
 	 */
@@ -115,6 +127,18 @@ public class NativeQueryFactory
 		}catch(Exception ex)
 		{
 			throw new InvalidArgumentException(ex, "An error occurred while loading file - {}", file);
+		}
+	}
+	
+	/**
+	 * Adds list of specified files to this factory.
+	 * @param files Files to add.
+	 */
+	public void setFiles(List<String> files)
+	{
+		for(String file : files)
+		{
+			addFile(file);
 		}
 	}
 
