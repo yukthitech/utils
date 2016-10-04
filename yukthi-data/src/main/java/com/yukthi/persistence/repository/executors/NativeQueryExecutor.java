@@ -24,6 +24,7 @@ import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.NativeQuery;
 import com.yukthi.persistence.repository.annotations.NativeQueryType;
+import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ReflectionUtils;
 import com.yukthi.utils.exceptions.InvalidStateException;
@@ -117,13 +118,17 @@ public class NativeQueryExecutor extends QueryExecutor
 				returnType = (Class<?>)((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
 			}
 			
-			//load the return type fields
-			returnTypeFields = new HashMap<>();
-			Field fields[] = returnType.getDeclaredFields();
-			
-			for(Field field : fields)
+			//load the return type fields for non primitive types
+			if(!returnType.isPrimitive() && !CommonUtils.isWrapperClass(returnType))
 			{
-				returnTypeFields.put(field.getName().toLowerCase(), field);
+				returnTypeFields = new HashMap<>();
+				
+				Field fields[] = returnType.getDeclaredFields();
+				
+				for(Field field : fields)
+				{
+					returnTypeFields.put(field.getName().toLowerCase(), field);
+				}
 			}
 		}
 		else
@@ -166,6 +171,11 @@ public class NativeQueryExecutor extends QueryExecutor
 	 */
 	private Object parseToReturnType(Record record)
 	{
+		if(returnTypeFields == null)
+		{
+			return ConvertUtils.convert(record.getObject(0), returnType);
+		}
+		
 		Object result = null;
 		
 		//create result object instance

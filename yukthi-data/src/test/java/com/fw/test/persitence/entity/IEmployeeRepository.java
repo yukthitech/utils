@@ -109,6 +109,22 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
 	public Employee readEmployee1(EmpSearchQuery query);
 
+	/**
+	 * Test query to ensure native fetch supports primitive return type.
+	 * @param query
+	 * @return
+	 */
+	@NativeQuery(name = "fetchCount", type = NativeQueryType.READ)
+	public int fetchCount(EmpSearchQuery query);
+
+	/**
+	 * Fetch query to ensure wrapper conversion is supported.
+	 * @param query
+	 * @return
+	 */
+	@NativeQuery(name = "fetchCount", type = NativeQueryType.READ)
+	public Long fetchCount1(EmpSearchQuery query);
+
 	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
 	public List<Employee> readEmployee2(EmpSearchQuery query);
 

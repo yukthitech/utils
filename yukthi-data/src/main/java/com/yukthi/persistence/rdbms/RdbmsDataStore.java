@@ -625,7 +625,7 @@ public class RdbmsDataStore implements IDataStore
 			return count;
 		}catch(Exception ex)
 		{
-			logger.error("An error occurred while saving entity to table '{}' using query: {}", saveQuery.getTableName(), saveQuery, ex);
+			logger.debug("An error occurred while saving entity to table '{}' using query: {}. Error - " + ex, saveQuery.getTableName(), saveQuery);
 
 			SqlExceptionHandler.handleException("An error occurred while saving entity to table '" 
 					+ saveQuery.getTableName() + "'", ex, entityDetailsFactory, false);

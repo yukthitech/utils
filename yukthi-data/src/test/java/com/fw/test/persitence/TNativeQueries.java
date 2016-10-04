@@ -126,6 +126,12 @@ public class TNativeQueries extends TestSuiteBase
 		Assert.assertEquals(e.getEmailId(), "user0@test.com");
 		Assert.assertEquals(e.getPhoneNo(), "1234560");
 		Assert.assertEquals(e.getAge(), 20);
+		
+		int count = repo.fetchCount(new EmpSearchQuery("user1", null, null, null));
+		Assert.assertEquals(count, 1);
+		
+		Long count1 = repo.fetchCount1(new EmpSearchQuery("user1", null, null, null));
+		Assert.assertEquals((long)count1, 1L);
 	}
 
 	@Test(dataProvider = "repositoryFactories")

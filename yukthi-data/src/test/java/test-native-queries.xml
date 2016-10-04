@@ -9,6 +9,15 @@
 		ORDER BY EMP_NO
 	]]></query>
 	
+	<query name="fetchCount"><![CDATA[
+		SELECT COUNT(*)
+		FROM EMPLOYEE
+		WHERE 1 = 1
+		<#if name??>AND ENAME LIKE '%${name}%'</#if>
+		<#if minAge??>AND AGE >= ?{minAge}</#if>
+		<#if maxAge??>AND AGE <= ?{maxAge}</#if>
+	]]></query>
+	
 	<query name="insertQuery"><![CDATA[
 		INSERT INTO EMPLOYEE(EMP_NO, EMAIL_ID, ENAME, PHONE_NO, AGE, UQ_ENTITY_ID)
 		VALUES(?{employeeNo}, ?{emailId}, ?{name}, ?{phoneNo}, ?{age}, ?{time})
