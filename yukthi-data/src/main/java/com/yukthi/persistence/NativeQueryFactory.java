@@ -33,6 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthi.ccg.xml.XMLBeanParser;
 import com.yukthi.persistence.freemarker.TrimDirective;
@@ -50,6 +52,8 @@ import freemarker.template.Template;
  */
 public class NativeQueryFactory
 {
+	private static Logger logger = LogManager.getLogger(NativeQueryFactory.class);
+	
 	/**
 	 * Pattern for query parameters in queries
 	 */
@@ -92,6 +96,7 @@ public class NativeQueryFactory
 	{
 		try
 		{
+			logger.debug("Loading native query resource: {}", resource);
 			InputStream is = NativeQueryFactory.class.getResourceAsStream(resource);
 			addResourceStream(is);
 			is.close();
@@ -121,6 +126,7 @@ public class NativeQueryFactory
 	{
 		try
 		{
+			logger.debug("Loading native query file: {}", file);
 			InputStream is = new FileInputStream(file);
 			addResourceStream(is);
 			is.close();
