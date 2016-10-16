@@ -79,7 +79,7 @@ public abstract class QueryExecutor
 		Field fields[] = queryobjType.getDeclaredFields();
 		Condition condition = null;
 		FieldDetails fieldDetails = null;
-		String name = null;
+		String fieldName = null;
 		boolean found = false;
 		boolean ignoreCase = false;
 		
@@ -95,33 +95,41 @@ public abstract class QueryExecutor
 			}
 			
 			//fetch entity field name
-			name = condition.value();
+			fieldName = condition.value();
 			
 			//if name is not specified in condition
-			if(name.trim().length() == 0)
+			if(fieldName.trim().length() == 0)
 			{
 				//use field name
-				name = field.getName();
+				fieldName = field.getName();
 			}
 			
-			if(!allowNested && name.contains("."))
+			if(!allowNested && fieldName.contains("."))
 			{
-				throw new InvalidRepositoryException(String.format("Nested expression '%1s' when plain properties are expected in %2s", name, methodDesc));
+				throw new InvalidRepositoryException("Nested expression '{}' when plain properties are expected in {}", fieldName, methodDesc);
 			}
 
 			//fetch corresponding field details
-			fieldDetails = this.entityDetails.getFieldDetailsByField(name);
+			fieldDetails = this.entityDetails.getFieldDetailsByField(fieldName);
 			
 			if(fieldDetails == null)
 			{
-				throw new InvalidRepositoryException(String.format(
-						"Invalid @Condition field '%s'[%s] is specified for finder method '%s' of repository: %s", 
-							name, queryobjType.getName(), methodName, repositoryType.getName()));
+				throw new InvalidRepositoryException("Invalid @Condition field '{}'[{}] is specified for finder method '{}' of repository: {}", 
+						fieldName, queryobjType.getName(), methodName, repositoryType.getName());
 			}
 			
 			ignoreCase = (String.class.equals(field.getType()) && condition.ignoreCase());
 			
-			conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), name, condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+			if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
+			{
+				conditionQueryBuilder.addFieldSubquery(null, condition.op(), index, field.getName(), fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+				//throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
+			}
+			else
+			{
+				conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), fieldName, condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+			}
+			
 			found = true;
 		}
 		
@@ -189,15 +197,19 @@ public abstract class QueryExecutor
 				throw new InvalidRepositoryException("No name is specified in @Condition parameter of method '" 
 						+ method.getName() + "' of repository: " + repositoryType.getName());
 			}
+
+			ignoreCase = (String.class.equals(parameters[i].getType()) && condition.ignoreCase());
 			
 			if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 			{
-				throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
+				conditionQueryBuilder.addFieldSubquery(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+				//throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
+			}
+			else
+			{
+				conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
 			}
 			
-			ignoreCase = (String.class.equals(parameters[i].getType()) && condition.ignoreCase());
-			
-			conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
 			found = true;
 		}
 
@@ -243,7 +255,7 @@ public abstract class QueryExecutor
 	 * @param conditionQueryBuilder
 	 * @param methodDesc
 	 */
-	protected void fetchMethodLevelConditions(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc)
+	protected void fetchMethodLevelConditions(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc, boolean allowNested)
 	{
 		//obtain method level conditions
 		List<MethodConditions> methodConditionslst = recursiveAnnotationFactory.findAllAnnotationsRecursively(method, MethodConditions.class); 
@@ -255,6 +267,7 @@ public abstract class QueryExecutor
 		
 		NullCheck nullChecks[] = null;
 		DefaultCondition defConditions[] = null;
+		String fieldName = null;
 		
 		for(MethodConditions methodConditions : methodConditionslst)
 		{
@@ -268,9 +281,18 @@ public abstract class QueryExecutor
 				for(NullCheck check : nullChecks)
 				{
 					operator = check.checkForNotNull() ? Operator.NE : Operator.EQ;
+					fieldName = check.field();
 					
-					//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
-					conditionQueryBuilder.addCondition(null, operator, -1, null, check.field(), check.joinOperator(), methodDesc, true, false, null);
+					if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
+					{
+						conditionQueryBuilder.addFieldSubquery(null, operator, -1, null, fieldName, check.joinOperator(), methodDesc, true, false, null);
+						//throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
+					}
+					else
+					{
+						//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
+						conditionQueryBuilder.addCondition(null, operator, -1, null, fieldName, check.joinOperator(), methodDesc, true, false, null);
+					}
 				}
 			}
 			
@@ -281,8 +303,18 @@ public abstract class QueryExecutor
 			{
 				for(DefaultCondition condition : defConditions)
 				{
-					//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
-					conditionQueryBuilder.addCondition(null, condition.op(), -1, null, condition.field(), condition.joinOperator(), methodDesc, true, false, condition.value());
+					fieldName = condition.field();
+					
+					if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
+					{
+						conditionQueryBuilder.addFieldSubquery(null, condition.op(), -1, null, fieldName, condition.joinOperator(), methodDesc, true, false, condition.value());
+						//throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
+					}
+					else
+					{
+						//by specifying -1 as parameter index, we are telling that the value will not be provided as part of parameters
+						conditionQueryBuilder.addCondition(null, condition.op(), -1, null, fieldName, condition.joinOperator(), methodDesc, true, false, condition.value());
+					}
 				}
 			}
 		}

@@ -21,6 +21,11 @@
 			<#else>
 				<#assign tableCode> </#assign>
 			</#if>
+			
+			<#if condition.subquery??>
+				<#assign res> ${res} ${tableCode}${condition.column} ${condition.operator} ${addSubquery(condition.subquery)}</#assign>
+				<#return res>
+			</#if>
 		
 			<#if condition.value??>
 				<#if condition.ignoreCase>
@@ -48,6 +53,26 @@
 			<#return res>
 		</#function>
 		
+		<#function addSubquery subquery>
+			<#assign query>(SELECT <#list subquery.resultFields as column><@trim>
+						<#if column.tableCode??>${column.tableCode}.</#if>${column.column} <#if column.code??>${column.code}</#if><#if column_has_next>,</#if>
+					</@trim></#list>
+				FROM ${subquery.tableName} ${subquery.mainTableCode}
+				<#list subquery.joinConditions as joinCondition>
+					<#if joinCondition.nullable>
+						LEFT JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
+					<#else>
+						JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
+					</#if>
+				</#list>
+				WHERE 1 = 1
+				<#list subquery.conditions as condition>${addCondition(condition, condition_index, true)}
+				</#list>)
+			</#assign>
+			
+			<#return query>
+		</#function>
+
 	]]></template>	
 
 	<template name="createTableTemplate"><![CDATA[

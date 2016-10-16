@@ -684,14 +684,19 @@ public class RdbmsDataStore implements IDataStore
 				index++;
 			}
 			
-			for(QueryCondition condition: updateQuery.getConditions())
+			//fetch parameter values for conditions
+			List<Object> conditionParams = new ArrayList<>();
+			updateQuery.getConditions().stream().forEach(condition -> condition.fetchQueryParameters(conditionParams));
+			
+			params.addAll(conditionParams);
+
+			//set the condition parameters on query
+			for(Object param : conditionParams)
 			{
-				pstmt.setObject(index, condition.getValue());
-				params.add(condition.getValue());
-				
+				pstmt.setObject(index, param);
 				index++;
 			}
-			
+
 			logger.debug("Executing using params: {}", params);
 			
 			int count = pstmt.executeUpdate();
@@ -740,11 +745,11 @@ public class RdbmsDataStore implements IDataStore
 			int index = 1;
 			List<Object> params = new ArrayList<>();
 			
-			for(QueryCondition condition: deleteQuery.getConditions())
+			deleteQuery.getConditions().stream().forEach(condition -> condition.fetchQueryParameters(params));
+			
+			for(Object param : params)
 			{
-				pstmt.setObject(index, condition.getValue());
-				params.add(condition.getValue());
-				
+				pstmt.setObject(index, param);
 				index++;
 			}
 			
