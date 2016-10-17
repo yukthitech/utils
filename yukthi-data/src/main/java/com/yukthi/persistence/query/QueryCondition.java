@@ -47,6 +47,11 @@ public class QueryCondition implements Cloneable
 	 * Indicates whether the condition should be case insensitive
 	 */
 	private boolean ignoreCase = false;
+	
+	/**
+	 * Subquery to be used as part of this condition.
+	 */
+	private Subquery subquery;
 
 	/**
 	 * Instantiates a new query condition.
@@ -222,6 +227,42 @@ public class QueryCondition implements Cloneable
 		this.ignoreCase = ignoreCase;
 	}
 
+	/**
+	 * Gets the subquery to be used as part of this condition.
+	 *
+	 * @return the subquery to be used as part of this condition
+	 */
+	public Subquery getSubquery()
+	{
+		return subquery;
+	}
+
+	/**
+	 * Sets the subquery to be used as part of this condition.
+	 *
+	 * @param subquery the new subquery to be used as part of this condition
+	 */
+	public void setSubquery(Subquery subquery)
+	{
+		this.subquery = subquery;
+	}
+	
+	/**
+	 * Populates the parameters required by this condition.
+	 * @param params List to which parameters needs to be populated.
+	 */
+	public void fetchQueryParameters(List<Object> params)
+	{
+		if(subquery != null)
+		{
+			subquery.fetchQueryParameters(params);
+		}
+		else
+		{
+			params.add(value);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -251,7 +292,15 @@ public class QueryCondition implements Cloneable
 
 		builder.append(joinOperator).append(" ");
 		builder.append(tableCode).append(".").append(column).append(" ");
-		builder.append(operator).append(" ").append(value);
+		
+		if(subquery != null)
+		{
+			builder.append(operator).append(" ").append(subquery.toString());
+		}
+		else
+		{
+			builder.append(operator).append(" ").append(value);
+		}
 
 		return builder.toString();
 	}

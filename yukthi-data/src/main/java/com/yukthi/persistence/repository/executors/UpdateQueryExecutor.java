@@ -67,7 +67,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			entityUpdate = true;
 			
 			super.fetchConditonsByAnnotations(method, false, conditionQueryBuilder, methodDesc, false);
-			super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
+			super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc, false);
 		}
 		else
 		{
@@ -78,7 +78,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				throw new InvalidRepositoryException("For non-entity update method '" + method.getName() + "' no conditions are specified, in repository: " + repositoryType.getName());
 			}
 			
-			super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
+			super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc, false);
 			
 			if(!fetchColumnsByAnnotations(method))
 			{

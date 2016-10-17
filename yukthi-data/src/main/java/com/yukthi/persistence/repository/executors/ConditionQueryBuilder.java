@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -27,6 +28,7 @@ import com.yukthi.persistence.query.IConditionalQuery;
 import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.QueryJoinCondition;
 import com.yukthi.persistence.query.QueryResultField;
+import com.yukthi.persistence.query.Subquery;
 import com.yukthi.persistence.repository.PersistenceExecutionContext;
 import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
@@ -38,6 +40,7 @@ import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.utils.CommonUtils;
 import com.yukthi.utils.ConvertUtils;
 import com.yukthi.utils.ObjectWrapper;
+import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
@@ -48,9 +51,6 @@ import com.yukthi.utils.exceptions.InvalidStateException;
  */
 public class ConditionQueryBuilder implements Cloneable
 {
-	public static final String DEF_TABLE_CODE = "T0";
-	public static final String DEF_TABLE_ID_COL = "T0_ID";
-
 	/**
 	 * Table information required by the query
 	 * 
@@ -116,54 +116,53 @@ public class ConditionQueryBuilder implements Cloneable
 		/**
 		 * Condition operator
 		 */
-		private Operator operator;
+		Operator operator;
 
 		/**
 		 * Index of the parameter defining this condition
 		 */
-		private int index;
+		int index;
 
 		/**
 		 * Embedded property name to be used when condition object in use
 		 */
-		private String embeddedProperty;
+		String embeddedProperty;
 
 		/**
 		 * Entity field expression
 		 */
-		@SuppressWarnings("unused")
-		private String fieldExpression;
+		String fieldExpression;
 
 		/**
 		 * Table on which this condition needs to be applied
 		 */
-		private TableInfo table;
+		TableInfo table;
 
 		/**
 		 * Field details (with column name) that can be used for condition
 		 */
-		private FieldDetails fieldDetails;
+		FieldDetails fieldDetails;
 
 		/**
 		 * Condition join operator
 		 */
-		private JoinOperator joinOperator;
+		JoinOperator joinOperator;
 		
 		/**
 		 * Indicates the condition should be case insensitive
 		 */
-		private boolean ignoreCase;
+		boolean ignoreCase;
 
 		/**
 		 * Conditions grouped with current condition
 		 */
-		private List<Condition> groupedConditions;
+		List<Object> groupedConditions;
 		
-		private boolean nullable;
+		boolean nullable;
 		
-		private String defaultValue;
+		String defaultValue;
 		
-		private boolean joiningField;
+		boolean joiningField;
 		
 		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable, boolean ignoreCase)
 		{
@@ -200,16 +199,50 @@ public class ConditionQueryBuilder implements Cloneable
 		 * @param condition
 		 *            condition to be added
 		 */
-		public void addCondition(Condition condition)
+		public void addCondition(Object condition)
 		{
 			if(groupedConditions == null)
 			{
-				groupedConditions = new ArrayList<Condition>();
+				groupedConditions = new ArrayList<>();
 			}
 
 			groupedConditions.add(condition);
 		}
 
+	}
+
+	/**
+	 * Represents inner query condition.
+	 * @author akiran
+	 *
+	 */
+	static class InnerQuery
+	{
+		/**
+		 * Current field table to which sub query result should be compared.
+		 */
+		FieldDetails currentTableField;
+		
+		/**
+		 * Sub query field which needs to be fetched from subquery.
+		 */
+		FieldDetails subqueryField;
+		
+		/**
+		 * Condition query builder for building sub query.
+		 */
+		ConditionQueryBuilder subqueryBuilder;
+		
+		JoinOperator joinOperator;
+		
+		public InnerQuery(FieldDetails currentTableField, FieldDetails subqueryField, EntityDetails subqueryEntity, JoinOperator joinOperator, ConditionQueryBuilder conditionQueryBuilder)
+		{
+			this.currentTableField = currentTableField;
+			this.subqueryField = subqueryField;
+			
+			this.subqueryBuilder = new ConditionQueryBuilder(subqueryEntity, conditionQueryBuilder.nextTableCode(), conditionQueryBuilder.nextFieldCode(), conditionQueryBuilder.nextTableId);
+			this.joinOperator = joinOperator;
+		}
 	}
 
 	/**
@@ -284,7 +317,7 @@ public class ConditionQueryBuilder implements Cloneable
 	/**
 	 * List of conditions of this query
 	 */
-	private List<Condition> conditions = new ArrayList<>();
+	private List<Object> conditions = new ArrayList<>();
 
 	/**
 	 * List of result fields of this query
@@ -312,7 +345,7 @@ public class ConditionQueryBuilder implements Cloneable
 	/**
 	 * Counter for generating unique table codes
 	 */
-	private int nextTableId = 1;
+	private AtomicInteger nextTableId;
 
 	/**
 	 * Counter for generating unique field codes
@@ -325,10 +358,22 @@ public class ConditionQueryBuilder implements Cloneable
 	 */
 	private boolean isSingleFieldReturn;
 
+	private String defTableCode;
+	private String defTableIdCol;
+
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
+		this(entityDetails, "T0", "T0_ID", new AtomicInteger(1));
+	}
+
+	private ConditionQueryBuilder(EntityDetails entityDetails, String defTableCode, String defTableIdCol, AtomicInteger nextTableId)
+	{
+		this.defTableCode = defTableCode;
+		this.defTableIdCol = defTableIdCol;
+		
 		this.entityDetails = entityDetails;
-		codeToTable.put(DEF_TABLE_CODE, new TableInfo(DEF_TABLE_CODE, entityDetails.getTableName(), entityDetails, null, null, null, false));
+		this.nextTableId = nextTableId;
+		codeToTable.put(defTableCode, new TableInfo(defTableCode, entityDetails.getTableName(), entityDetails, null, null, null, false));
 	}
 
 	/**
@@ -338,7 +383,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 */
 	private String nextTableCode()
 	{
-		return "T" + (nextTableId++);
+		return "T" + nextTableId.getAndIncrement();
 	}
 
 	/**
@@ -385,7 +430,7 @@ public class ConditionQueryBuilder implements Cloneable
 	{
 		EntityDetails currentEntityDetails = this.entityDetails, targetEntityDetails = null;
 		String currentProp = null;
-		TableInfo currentTableInfo = codeToTable.get(DEF_TABLE_CODE), newTableInfo = null, joinTableInfo = null;
+		TableInfo currentTableInfo = codeToTable.get(defTableCode), newTableInfo = null, joinTableInfo = null;
 		FieldDetails fieldDetails = null, targetFieldDetails = null;
 		int maxIndex = entityFieldPath.length - 1;
 		ForeignConstraintDetails foreignConstraint = null, targetConstraint = null;
@@ -554,6 +599,36 @@ public class ConditionQueryBuilder implements Cloneable
 		return targetEntityDetails.getIdField().getName().equals(entityFieldParts[1]);
 	}
 
+	private boolean isSubqueryRequired(String entityFieldExpression)
+	{
+		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
+		
+		if(entityFieldParts.length < 2)
+		{
+			return false;
+		}
+		
+		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
+		
+		if(fieldDetails == null)
+		{
+			return false;
+		}
+		
+		if(!fieldDetails.isRelationField())
+		{
+			return false;
+		}
+		
+		if(entityFieldParts.length == 2)
+		{
+			EntityDetails targetEntityDetails = fieldDetails.getForeignConstraintDetails().getTargetEntityDetails();
+			return ! targetEntityDetails.getIdField().getName().equals(entityFieldParts[1]);
+		}
+		
+		return true;
+	}
+
 	/**
 	 * Adds the condition with specified details to this builder. This method
 	 * evaluates the required table joins if this condition needs to be included
@@ -591,7 +666,7 @@ public class ConditionQueryBuilder implements Cloneable
 				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in condition parameter '%2s' of %3s", entityFieldExpression, condition.getConditionExpression(), methodDesc));
 			}
 
-			condition.table = codeToTable.get(DEF_TABLE_CODE);
+			condition.table = codeToTable.get(defTableCode);
 			
 			if(groupHead != null)
 			{
@@ -652,6 +727,55 @@ public class ConditionQueryBuilder implements Cloneable
 		return condition;
 	}
 	
+	public InnerQuery addFieldSubquery(Condition groupHead, Operator operator, int index, String embeddedProperty, 
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, 
+			String defaultValue)
+	{
+		if(!isSubqueryRequired(entityFieldExpression))
+		{
+			throw new InvalidArgumentException("Specified expression does not need sub query - {}", entityFieldExpression);
+		}
+		
+		// split the entity field expression
+		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
+
+		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
+		EntityDetails targetEntityDetails = fieldDetails.getForeignConstraintDetails().getTargetEntityDetails();
+
+		InnerQuery innerQuery = null;
+		
+		//if the relation is not owned by current entity
+		if(fieldDetails.isMappedRelationField())
+		{
+			//TODO: Take care when join table is involved
+			String ownerField = fieldDetails.getForeignConstraintDetails().getOwnerField().getName();
+			innerQuery = new InnerQuery(entityDetails.getIdField(), targetEntityDetails.getFieldDetailsByField(ownerField), targetEntityDetails, joinOperator, this);
+		}
+		//if the relation is owner by current entity
+		else
+		{
+			innerQuery = new InnerQuery(fieldDetails, targetEntityDetails.getIdField(), targetEntityDetails, joinOperator, this);
+		}
+		
+		//get sub entity property
+		int propIdx = entityFieldExpression.indexOf(".");
+		String subentityExpr = entityFieldExpression.substring(propIdx + 1, entityFieldExpression.length());
+		
+		innerQuery.subqueryBuilder.addCondition(null, operator, index, embeddedProperty, subentityExpr, 
+				JoinOperator.AND, methodDesc, nullable, ignoreCase, defaultValue);
+		
+		if(groupHead != null)
+		{
+			groupHead.addCondition(innerQuery);
+		}
+		else
+		{
+			conditions.add(innerQuery);
+		}
+		
+		return innerQuery;
+	}
+
 	/**
 	 * Removes result fields matching with specified property name.
 	 * @param propertyName Property name to be removed.
@@ -712,7 +836,7 @@ public class ConditionQueryBuilder implements Cloneable
 				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in result parameter '%2s' of '%3s'", entityFieldExpression, entityFieldExpression, methodDesc));
 			}
 
-			resultField.table = codeToTable.get(DEF_TABLE_CODE);
+			resultField.table = codeToTable.get(defTableCode);
 			resultFields.add(resultField);
 			fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
 
@@ -798,6 +922,11 @@ public class ConditionQueryBuilder implements Cloneable
 	public void loadConditionalQuery(Object repoExecutionContext, IConditionalQuery query, Object params[])
 	{
 		ParameterContext context = new ParameterContext(params, repoExecutionContext);
+		loadConditionalQuery(context, repoExecutionContext, query, params);
+	}
+	
+	private void loadConditionalQuery(ParameterContext context, Object repoExecutionContext, IConditionalQuery query, Object params[])
+	{
 		Set<String> includedTables = new HashSet<>();
 
 		// load the result fields to specified query
@@ -808,14 +937,21 @@ public class ConditionQueryBuilder implements Cloneable
 			query.addResultField(new QueryResultField(field.table.tableCode, field.fieldDetails.getDbColumnName(), field.code));
 		}
 
-		query.addResultField(new QueryResultField(DEF_TABLE_CODE, codeToTable.get(DEF_TABLE_CODE).entityDetails.getIdField().getDbColumnName(), DEF_TABLE_ID_COL));
+		query.addResultField(new QueryResultField(defTableCode, codeToTable.get(defTableCode).entityDetails.getIdField().getDbColumnName(), defTableIdCol));
 
 		QueryCondition queryCondition = null;
 		
 		// load the conditions to the query
-		for(Condition condition : this.conditions)
+		for(Object condition : this.conditions)
 		{
-			queryCondition = buildConditionForQuery(context, includedTables, query, condition);
+			if(condition instanceof Condition)
+			{
+				queryCondition = buildConditionForQueryFromCondition(repoExecutionContext, context, includedTables, query, (Condition) condition, params);
+			}
+			else
+			{
+				queryCondition = buildConditionForQueryFromNested(repoExecutionContext, context, query, (InnerQuery) condition, params);
+			}
 			
 			if(queryCondition != null)
 			{
@@ -832,7 +968,8 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param condition Condition to be converted
 	 * @return Newly built query condition. If value is null, returns null.
 	 */
-	private QueryCondition buildConditionForQuery(ParameterContext context, Set<String> includedTables, IConditionalQuery query, Condition condition)
+	private QueryCondition buildConditionForQueryFromCondition(Object repoExecutionContext, ParameterContext context, 
+			Set<String> includedTables, IConditionalQuery query, Condition condition, Object params[])
 	{
 		Object value = null;
 				
@@ -885,9 +1022,17 @@ public class ConditionQueryBuilder implements Cloneable
 		//if group conditions are present add them recursively to current condition
 		QueryCondition grpCondition = null;
 		
-		for(Condition grpInternalCondition : condition.groupedConditions)
+		for(Object grpInternalCondition : condition.groupedConditions)
 		{
-			grpCondition = buildConditionForQuery(context, includedTables, query, grpInternalCondition);
+			if(grpInternalCondition instanceof Condition)
+			{
+				grpCondition = buildConditionForQueryFromCondition(repoExecutionContext, context, includedTables, query, (Condition) grpInternalCondition, params);
+			}
+			else
+			{
+				grpCondition = buildConditionForQueryFromNested(repoExecutionContext, context, query, (InnerQuery) grpInternalCondition, params);
+			}
+
 			
 			if(grpCondition == null)
 			{
@@ -906,6 +1051,16 @@ public class ConditionQueryBuilder implements Cloneable
 		}
 		
 		return groupHead;
+	}
+
+	private QueryCondition buildConditionForQueryFromNested(Object context, ParameterContext paramContext, IConditionalQuery query, InnerQuery innerQuery, Object params[])
+	{
+		QueryCondition queryCondition = new QueryCondition(defTableCode, innerQuery.currentTableField.getDbColumnName(), Operator.IN, null, innerQuery.joinOperator, false);
+		queryCondition.setSubquery(new Subquery(innerQuery.subqueryBuilder.entityDetails, innerQuery.subqueryBuilder.defTableCode));
+		
+		innerQuery.subqueryBuilder.loadConditionalQuery(paramContext, context, queryCondition.getSubquery(), params);
+		
+		return queryCondition;
 	}
 
 	public void loadOrderByFields(FinderQuery finderQuery)

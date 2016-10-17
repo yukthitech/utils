@@ -55,7 +55,7 @@ public class CountQueryExecutor extends QueryExecutor
 			super.fetchConditionsByName(method, conditionQueryBuilder, methodDesc);
 		}
 		
-		super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc);
+		super.fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc, true);
 		
 		this.returnType = method.getReturnType();
 		
