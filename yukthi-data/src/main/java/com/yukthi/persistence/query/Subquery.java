@@ -19,7 +19,6 @@ public class Subquery extends AbstractConditionalQuery
 	 * Instantiates a new subquery.
 	 *
 	 * @param entityDetails the entity details
-	 * @param mainTable the main table
 	 * @param tableCode the table code
 	 */
 	public Subquery(EntityDetails entityDetails, String tableCode)
