@@ -7,10 +7,13 @@ import java.sql.Clob;
 
 import org.apache.commons.io.IOUtils;
 
-import com.yukthi.common.util.JsonWrapper;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.yukthi.persistence.annotations.DataType;
 import com.yukthi.persistence.annotations.DataTypeMapping;
 import com.yukthi.persistence.conversion.IPersistenceConverter;
+import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
  * This is not a default converter, if needed, this needs to be used explicitly on target entity fields
@@ -21,8 +24,18 @@ import com.yukthi.persistence.conversion.IPersistenceConverter;
  * 
  * @author akiran
  */
-public class JsonConverter implements IPersistenceConverter
+public class JsonWithTypeConverter implements IPersistenceConverter
 {
+	/**
+	 * Object mapper to be used for json to/from object coversaion.
+	 */
+	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	static
+	{
+		objectMapper.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
+	}
+
 	/* (non-Javadoc)
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToJavaType(java.lang.Object, com.fw.persistence.annotations.DataType, java.lang.Class)
 	 */
@@ -34,7 +47,13 @@ public class JsonConverter implements IPersistenceConverter
 			dbObject = toStr(dbObject);
 		}
 		
-		return JsonWrapper.parse((String)dbObject);
+		try
+		{
+			return objectMapper.readValue((String)dbObject, Object.class);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while converting string into java object. Json string: " + dbObject);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -43,7 +62,13 @@ public class JsonConverter implements IPersistenceConverter
 	@Override
 	public Object convertToDBType(Object javaObject, DataType dbType)
 	{
-		return JsonWrapper.format(javaObject);
+		try
+		{
+			return objectMapper.writeValueAsString(javaObject);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while converting java object into string. Object: " + javaObject);
+		}
 	}
 
 	/**
