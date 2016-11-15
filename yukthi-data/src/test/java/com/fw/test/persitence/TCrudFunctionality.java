@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 import com.fw.test.persitence.entity.Address;
 import com.fw.test.persitence.entity.Employee;
 import com.fw.test.persitence.entity.Employee1;
+import com.fw.test.persitence.entity.IEmployee1Repository;
 import com.fw.test.persitence.entity.IEmployeeRepository;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.repository.RepositoryFactory;
@@ -159,7 +160,7 @@ public class TCrudFunctionality extends TestSuiteBase
 	@Test(dataProvider = "repositoryFactories")
 	public void testComplexObjectSave(RepositoryFactory factory)
 	{
-		ICrudRepository<Employee1> empRepository = factory.getRepositoryForEntity(Employee1.class);
+		IEmployee1Repository empRepository = factory.getRepository(IEmployee1Repository.class);
 		
 		Employee1 emp = new Employee1("12345", "kranthi@kk.com", "kranthi", "90232333", 28);
 		emp.setAddress(new Address("city", "state"));
@@ -169,6 +170,12 @@ public class TCrudFunctionality extends TestSuiteBase
 		Assert.assertNotNull(emp.getAddress());
 		Assert.assertEquals(savedEmp.getAddress().getCity(), "city");
 		Assert.assertEquals(savedEmp.getAddress().getState(), "state");
+		
+		//try to fetch complex field directly
+		Address resultAddress = empRepository.fetchAddressById(emp.getId());
+		Assert.assertNotNull(resultAddress);
+		Assert.assertEquals(resultAddress.getCity(), "city");
+		Assert.assertEquals(resultAddress.getState(), "state");
 	}	
 	
 	/*
