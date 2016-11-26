@@ -253,8 +253,8 @@
 		</#if> 
 	]]></template>	
 
-	<template name="countTemplate"><![CDATA[
-		SELECT COUNT(*)
+	<template name="aggregateTemplate"><![CDATA[
+		SELECT ${query.aggregateFunction}(T0.${query.aggregateColumn})
 		FROM ${query.tableName} T0
 		<#list query.joinConditions as joinCondition>
 			<#if joinCondition.nullable>

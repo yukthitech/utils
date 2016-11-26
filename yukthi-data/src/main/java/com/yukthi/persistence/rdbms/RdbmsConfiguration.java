@@ -28,7 +28,7 @@ public class RdbmsConfiguration implements Validateable
 	public static final String SAVE_UPDATE_QUERY = "saveUpdateTemplate";
 	public static final String DELETE_QUERY = "deleteTemplate";
 	public static final String FINDER_QUERY = "finderTemplate";
-	public static final String COUNT_QUERY = "countTemplate";
+	public static final String AGGREGATE_QUERY = "aggregateTemplate";
 	public static final String CHILDREN_EXISTENCE_QUERY = "childrenExistenceTemplate";
 	public static final String FETCH_CHILDREN_IDS_QUERY = "fetchChildrenIdsTemplate";
 	public static final String DROP_QUERY = "dropTableTemplate";
@@ -36,7 +36,7 @@ public class RdbmsConfiguration implements Validateable
 	public static final String MANDATORY_QUERIES[] = {
 		CREATE_TABLE, CREATE_INDEX, CREATE_EXTENDED_TABLE,
 		
-		SAVE_QUERY, UPDATE_QUERY, DELETE_QUERY, FINDER_QUERY, COUNT_QUERY, 
+		SAVE_QUERY, UPDATE_QUERY, DELETE_QUERY, FINDER_QUERY, AGGREGATE_QUERY, 
 		
 		CHILDREN_EXISTENCE_QUERY, FETCH_CHILDREN_IDS_QUERY,
 		

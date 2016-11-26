@@ -18,6 +18,9 @@ public class TSubquery extends TestSuiteBase
 	@Override
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
 	{
+		//this ensures all child classes are created as required before insert is started
+		factory.getRepository(IOrderItemRepository.class);
+
 		GenericRepository genericRepository = new GenericRepository(factory);
 		
 		CustomerGroup group1 = new CustomerGroup("Group1", null);

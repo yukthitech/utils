@@ -57,7 +57,7 @@ public class TestSuiteBase
 				this.cleanFactoryAfterClass(factory);
 			}catch(Exception ex)
 			{
-				ex.printStackTrace();
+				throw new RuntimeException(ex);
 			}
 		}
 

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.ChildrenExistenceQuery;
-import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.AggregateQuery;
 import com.yukthi.persistence.query.CreateExtendedTableQuery;
 import com.yukthi.persistence.query.CreateIndexQuery;
 import com.yukthi.persistence.query.CreateTableQuery;
@@ -46,7 +46,7 @@ public interface IDataStore
 	
 	public void createIndex(CreateIndexQuery query);
 	
-	public long getCount(CountQuery existenceQuery, EntityDetails entityDetails);
+	public Double fetchAggregateValue(AggregateQuery existenceQuery, EntityDetails entityDetails);
 	
 	/**
 	 * Executes the specified save-query using structure details from specified entity-details. And stores

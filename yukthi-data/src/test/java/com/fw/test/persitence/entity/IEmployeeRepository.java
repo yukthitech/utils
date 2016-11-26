@@ -10,7 +10,7 @@ import com.fw.test.persitence.queries.KeyValueBean;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.repository.annotations.Condition;
 import com.yukthi.persistence.repository.annotations.ConditionBean;
-import com.yukthi.persistence.repository.annotations.CountFunction;
+import com.yukthi.persistence.repository.annotations.AggregateFunction;
 import com.yukthi.persistence.repository.annotations.DefaultCondition;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
@@ -92,7 +92,7 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	
 	public int deleteByUserName(@Condition("name") String name);
 	
-	@CountFunction
+	@AggregateFunction
 	public long getCountByMailId(@Condition("emailId") String mail);
 
 	public void deleteAll();

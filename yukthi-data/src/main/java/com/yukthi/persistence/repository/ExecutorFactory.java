@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.yukthi.persistence.EntityDetails;
-import com.yukthi.persistence.repository.executors.CountQueryExecutor;
+import com.yukthi.persistence.repository.executors.AggregateQueryExecutor;
 import com.yukthi.persistence.repository.executors.DeleteQueryExecutor;
 import com.yukthi.persistence.repository.executors.FinderQueryExecutor;
 import com.yukthi.persistence.repository.executors.NativeQueryExecutor;
@@ -151,7 +151,7 @@ public class ExecutorFactory
 	 */
 	protected void registerDefaultExecutors()
 	{
-		registerExecutor(CountQueryExecutor.class);
+		registerExecutor(AggregateQueryExecutor.class);
 		registerExecutor(FinderQueryExecutor.class);
 		registerExecutor(SearchQueryExecutor.class);
 		registerExecutor(SaveQueryExecutor.class);

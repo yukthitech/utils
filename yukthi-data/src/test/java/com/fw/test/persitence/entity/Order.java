@@ -31,6 +31,9 @@ public class Order
 	@OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST})
 	private List<OrderItem> items;
 	
+	@Column(name = "COST")
+	private float cost;
+	
 	public Order()
 	{}
 	
@@ -47,6 +50,14 @@ public class Order
 		this.items = items;
 	}
 	
+	public Order(String title, int orderNo, Customer customer, float cost)
+	{
+		this.title = title;
+		this.orderNo = orderNo;
+		this.customer = customer;
+		this.cost = cost;
+	}
+
 	/**
 	 * @return the {@link #title title}
 	 */
@@ -126,6 +137,14 @@ public class Order
 	{
 		this.items = items;
 	}
-	
-	
+
+	public float getCost()
+	{
+		return cost;
+	}
+
+	public void setCost(float cost)
+	{
+		this.cost = cost;
+	}
 }

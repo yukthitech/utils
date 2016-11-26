@@ -42,7 +42,7 @@ import com.yukthi.persistence.UnsupportedOperationException;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.ChildrenExistenceQuery;
 import com.yukthi.persistence.query.ColumnParam;
-import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.AggregateQuery;
 import com.yukthi.persistence.query.CreateExtendedTableQuery;
 import com.yukthi.persistence.query.CreateIndexQuery;
 import com.yukthi.persistence.query.CreateTableQuery;
@@ -332,9 +332,9 @@ public class RdbmsDataStore implements IDataStore
 	}
 
 	@Override
-	public long getCount(CountQuery countQuery, EntityDetails entityDetails)
+	public Double fetchAggregateValue(AggregateQuery countQuery, EntityDetails entityDetails)
 	{
-		logger.trace("Started method: getCount");
+		logger.trace("Started method: fetchAggregateValue");
 		
 		List<QueryCondition> conditions = countQuery.getConditions();
 		
@@ -345,16 +345,16 @@ public class RdbmsDataStore implements IDataStore
 		}
 		*/
 		
-		logger.debug("Fetching count of records from table '{}' using query: {}", countQuery.getTableName(), countQuery);
+		logger.debug("Fetching aggregate value of records from table '{}' using query: {}", countQuery.getTableName(), countQuery);
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
-			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.COUNT_QUERY, "query", countQuery);
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.AGGREGATE_QUERY, "query", countQuery);
 			
-			logger.debug("Built existence query as: \n\t{}", query);
+			logger.debug("Built aggregate query as: \n\t{}", query);
 			
 			Connection connection = transaction.getTransaction().getConnection();
 			pstmt = connection.prepareStatement(query);
@@ -379,20 +379,20 @@ public class RdbmsDataStore implements IDataStore
 			if(!rs.next())
 			{
 				transaction.commit();
-				return 0;
+				return 0.0;
 			}
 			
-			int count = rs.getInt(1);
+			Double value = rs.getDouble(1);
 			
-			logger.debug("Existence of {} records found from table: {}", count, countQuery.getTableName());
+			logger.debug("Aggregate value {} found from table: {}", value, countQuery.getTableName());
 			
 			transaction.commit();
-			return count;
+			return value;
 		}catch(Exception ex)
 		{
-			logger.error("An error occurred while checking rows existence from table '" 
+			logger.error("An error occurred while checking rows aggregate from table '" 
 					+ countQuery.getTableName() + "' using query: " + countQuery, ex);
-			throw new PersistenceException("An error occurred while checking rows existence from table '" 
+			throw new PersistenceException("An error occurred while checking rows aggregate from table '" 
 						+ countQuery.getTableName() + "' using query: " + countQuery, ex);
 		}finally
 		{

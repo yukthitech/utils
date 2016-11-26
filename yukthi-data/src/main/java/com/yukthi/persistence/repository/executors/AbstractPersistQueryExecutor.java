@@ -15,8 +15,9 @@ import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.UniqueConstraintDetails;
 import com.yukthi.persistence.UniqueConstraintViolationException;
 import com.yukthi.persistence.conversion.ConversionService;
-import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.AggregateQuery;
 import com.yukthi.persistence.query.QueryCondition;
+import com.yukthi.persistence.repository.annotations.AggregateFunctionType;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 
@@ -38,7 +39,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 	{
 		logger.trace("Started method: checkForUniqueConstraints");
 		
-		CountQuery existenceQuery = new CountQuery(entityDetails);
+		AggregateQuery existenceQuery = new AggregateQuery(entityDetails, AggregateFunctionType.COUNT, entityDetails.getIdField().getDbColumnName());
 		FieldDetails fieldDetails = null;
 		Object value = null;
 		String message = null;
@@ -71,7 +72,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 				existenceQuery.addCondition(new QueryCondition(null, entityDetails.getIdField().getDbColumnName(), Operator.NE, entityDetails.getIdField().getValue(entity), JoinOperator.AND, false));
 			}
 			
-			if(dataStore.getCount(existenceQuery, entityDetails) > 0)
+			if(dataStore.fetchAggregateValue(existenceQuery, entityDetails) > 0)
 			{
 				message = formatMessage(uniqueConstraint.getMessage(), fieldValues);
 				message = (message != null) ? message : "Unique constraint violated: " + uniqueConstraint.getName();
@@ -92,7 +93,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 		
 		logger.trace("Started method: checkForForeignConstraints");
 		
-		CountQuery existenceQuery = null;
+		AggregateQuery existenceQuery = null;
 		Object value = null;
 		String message = null;
 		EntityDetails foreignEntityDetails = null;
@@ -109,7 +110,8 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 			}
 			
 			//create existence query that needs to be executed against parent table
-			existenceQuery = new CountQuery(foreignConstraint.getTargetEntityDetails());
+			existenceQuery = new AggregateQuery(foreignConstraint.getTargetEntityDetails(), AggregateFunctionType.COUNT, 
+					foreignConstraint.getTargetEntityDetails().getIdField().getDbColumnName());
 
 			foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
 			ownerFieldDetails = foreignEntityDetails.getFieldDetailsByField(foreignConstraint.getOwnerField().getName());
@@ -125,7 +127,7 @@ public abstract class AbstractPersistQueryExecutor extends QueryExecutor
 			
 			existenceQuery.addCondition(new QueryCondition(null, foreignEntityDetails.getIdField().getDbColumnName(), Operator.EQ, value, JoinOperator.AND, false));
 			
-			if(dataStore.getCount(existenceQuery, foreignEntityDetails) <= 0)
+			if(dataStore.fetchAggregateValue(existenceQuery, foreignEntityDetails) <= 0)
 			{
 				message = "Foreign constraint violated: " + foreignConstraint.getConstraintName();
 				

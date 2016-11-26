@@ -19,9 +19,10 @@ import com.yukthi.persistence.OrderByField;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.RecordCountMistmatchException;
 import com.yukthi.persistence.conversion.ConversionService;
-import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.AggregateQuery;
 import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
+import com.yukthi.persistence.repository.annotations.AggregateFunctionType;
 import com.yukthi.persistence.repository.annotations.SearchFunction;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.persistence.repository.search.SearchCondition;
@@ -99,7 +100,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 	
 	private Long findCount(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
-		CountQuery countQuery = new CountQuery(entityDetails);
+		AggregateQuery countQuery = new AggregateQuery(entityDetails, AggregateFunctionType.COUNT, entityDetails.getIdField().getDbColumnName());
 		SearchQuery searchQuery = (SearchQuery)params[0];
 		
 		//create a clone so that every time dynamic conditions can be added freshly
@@ -118,7 +119,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 
 		logger.debug("Executing search query with params - {}", conditionParams);
 
-		return dataStore.getCount(countQuery, entityDetails);
+		return dataStore.fetchAggregateValue(countQuery, entityDetails).longValue();
 	}
 
 	/* (non-Javadoc)

@@ -3,7 +3,7 @@ package com.yukthi.persistence;
 import java.util.List;
 import java.util.Set;
 
-import com.yukthi.persistence.repository.annotations.CountFunction;
+import com.yukthi.persistence.repository.annotations.AggregateFunction;
 import com.yukthi.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthi.persistence.repository.search.SearchQuery;
 
@@ -69,7 +69,7 @@ public interface ICrudRepository<E>
 	 * Fetches the count of number of entities in this repository 
 	 * @return
 	 */
-	@CountFunction
+	@AggregateFunction
 	public long getCount();
 	
 	/**

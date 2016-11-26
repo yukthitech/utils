@@ -10,21 +10,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthi.persistence.EntityDetails;
+import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.conversion.ConversionService;
-import com.yukthi.persistence.query.CountQuery;
+import com.yukthi.persistence.query.AggregateQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
-import com.yukthi.persistence.repository.annotations.CountFunction;
+import com.yukthi.persistence.repository.annotations.AggregateFunction;
+import com.yukthi.persistence.repository.annotations.AggregateFunctionType;
 import com.yukthi.utils.ConvertUtils;
 
 /**
  * Executor for count queries. Count query methods can have following return types - Boolean, int or long
  * @author akiran
  */
-@QueryExecutorPattern(annotatedWith = CountFunction.class)
-public class CountQueryExecutor extends QueryExecutor
+@QueryExecutorPattern(annotatedWith = AggregateFunction.class)
+public class AggregateQueryExecutor extends QueryExecutor
 {
-	private static Logger logger = LogManager.getLogger(CountQueryExecutor.class);
+	private static Logger logger = LogManager.getLogger(AggregateQueryExecutor.class);
 	
 	/**
 	 * Support return types by this query executor
@@ -32,7 +34,9 @@ public class CountQueryExecutor extends QueryExecutor
 	private static Set<Class<?>> SUPPORTED_RETURN_TYPES = new HashSet<>(Arrays.asList(
 			Boolean.class, boolean.class,
 			Long.class, long.class,
-			Integer.class, int.class
+			Integer.class, int.class,
+			Float.class, float.class,
+			Double.class, double.class
 	));
 	
 	private ReentrantLock queryLock = new ReentrantLock();
@@ -40,13 +44,23 @@ public class CountQueryExecutor extends QueryExecutor
 	private ConditionQueryBuilder conditionQueryBuilder;
 	private String methodDesc;
 	
-	public CountQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
+	/**
+	 * Function type to use.
+	 */
+	private AggregateFunctionType functionType;
+	
+	/**
+	 * Column to use in aggregate function.
+	 */
+	private String column;
+	
+	public AggregateQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
 		super.repositoryType = repositoryType;
 		super.entityDetails = entityDetails;
 		
 		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
-		this.methodDesc = String.format("count query '%s' of entity type - '%s'", method.getName(), repositoryType.getName());
+		this.methodDesc = String.format("Aggregate query '%s' of entity type - '%s'", method.getName(), repositoryType.getName());
 		
 		//find conditions based on annotations
 		if(!super.fetchConditonsByAnnotations(method, true, conditionQueryBuilder, methodDesc, true))
@@ -64,6 +78,27 @@ public class CountQueryExecutor extends QueryExecutor
 			throw new InvalidRepositoryException("Invalid return type encountered for count method '" 
 					+ method.getName() + "' of repository - " + repositoryType.getName() + " (expected return type - boolean, long or int)");
 		}
+		
+		AggregateFunction aggregateFunction = method.getAnnotation(AggregateFunction.class);
+		this.functionType = aggregateFunction.type();
+		
+		String field = aggregateFunction.field();
+		
+		if(field.trim().length() == 0)
+		{
+			this.column = entityDetails.getIdField().getDbColumnName();
+		}
+		else
+		{
+			FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(field);
+			
+			if(fieldDetails == null)
+			{
+				throw new InvalidRepositoryException("Invalid field name '{}' specified in repository function - {}.{}()", field, repositoryType.getName(), method.getName());
+			}
+			
+			this.column = fieldDetails.getDbColumnName();
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -78,22 +113,22 @@ public class CountQueryExecutor extends QueryExecutor
 		
 		try
 		{
-			CountQuery query = new CountQuery(entityDetails);
+			AggregateQuery query = new AggregateQuery(entityDetails, functionType, column);
 			
 			//set condition values on query
 			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), query, params);
 			
 			//execute the query and fetch result count
-			long count = dataStore.getCount(query, entityDetails);
+			Double aggrValue = dataStore.fetchAggregateValue(query, entityDetails);
 			
 			//if return type is boolean
 			if(boolean.class.equals(this.returnType) || Boolean.class.equals(this.returnType))
 			{
-				return (count > 0);
+				return (aggrValue.longValue() > 0);
 			}
 			
 			//convert the count to required return type
-			return ConvertUtils.convert(count, returnType);
+			return ConvertUtils.convert(aggrValue, returnType);
 		}finally
 		{
 			queryLock.unlock();

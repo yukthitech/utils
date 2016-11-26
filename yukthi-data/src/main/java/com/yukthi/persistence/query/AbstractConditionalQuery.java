@@ -146,6 +146,8 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 	{
 		StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("[");
+		
+		toStringPrefix(builder);
 
 		if(CollectionUtils.isNotEmpty(this.resultFields))
 		{
@@ -172,5 +174,12 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 		builder.append("\n]");
 		return builder.toString();
 	}
+	
+	/**
+	 * Can be overridden by child classes to add prefix to final tostring result.
+	 * @param builder builder to which content should be added.
+	 */
+	protected void toStringPrefix(StringBuilder builder)
+	{}
 
 }
