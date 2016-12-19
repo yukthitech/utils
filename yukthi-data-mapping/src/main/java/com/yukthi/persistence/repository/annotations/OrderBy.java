@@ -18,7 +18,7 @@ public @interface OrderBy
 	 * If specified, the output will be ordered according to specified fields
 	 * @return Fields to use for results ordering
 	 */
-	public String[] value();
+	public String[] value() default {};
 	
 	/**
 	 * If specified, the output will be ordered according to specified fields. If this 

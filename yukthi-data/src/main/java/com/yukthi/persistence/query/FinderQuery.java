@@ -1,17 +1,20 @@
 package com.yukthi.persistence.query;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.yukthi.persistence.EntityDetails;
 
 /**
  * Finder query object used to search entities based on specified conditions
  * @author akiran
  */
-public class FinderQuery extends AbstractConditionalQuery
+public class FinderQuery extends AbstractConditionalQuery implements IOrderedQuery
 {
 	/**
 	 * fields in which results should be ordered
 	 */
-	private QueryResultField orderByFields[];
+	private List<QueryResultField> orderByFields;
 	
 	/**
 	 * Row number after which results should be fetched. Used in paging.
@@ -38,7 +41,8 @@ public class FinderQuery extends AbstractConditionalQuery
 	 *
 	 * @return the fields in which results should be ordered
 	 */
-	public QueryResultField[] getOrderByFields()
+	@Override
+	public List<QueryResultField> getOrderByFields()
 	{
 		return orderByFields;
 	}
@@ -48,9 +52,24 @@ public class FinderQuery extends AbstractConditionalQuery
 	 *
 	 * @param orderByFields the new fields in which results should be ordered
 	 */
-	public void setOrderByFields(QueryResultField[] orderByFields)
+	public void setOrderByFields(List<QueryResultField> orderByFields)
 	{
 		this.orderByFields = orderByFields;
+	}
+
+	/**
+	 * Adds specified order by field to the query.
+	 * @param orderByField Field to add
+	 */
+	@Override
+	public void addOrderByField(QueryResultField orderByField)
+	{
+		if(this.orderByFields == null)
+		{
+			this.orderByFields = new ArrayList<>();
+		}
+		
+		this.orderByFields.add(orderByField);
 	}
 
 	/**

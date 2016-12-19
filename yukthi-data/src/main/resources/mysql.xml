@@ -197,6 +197,7 @@
 		</#list>WHERE 1 = 1
 		<#list query.conditions as condition>${addCondition(condition, condition_index, false)}
 		</#list>
+		<#if query.orderByFields??>ORDER BY <#list query.orderByFields as orderField> ${orderField.column} ${orderField.orderByType}<#if orderField_has_next>, </#if>  </#list></#if>
 	]]></template>	
 
 	<template name="deleteTemplate"><![CDATA[

@@ -68,4 +68,19 @@ public class TUpdateOperator extends TestSuiteBase
 		updatedEntity = repo.findById(entity.getId());
 		Assert.assertEquals(updatedEntity.getAge(), 25);
 	}
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testUpdateWithOrder(RepositoryFactory factory)
+	{
+		IEntityWUpdateOpRepo repo = factory.getRepository(IEntityWUpdateOpRepo.class);
+		
+		//save the entity with initial value
+		repo.save(new EntityWithUpdateOperator(100));
+		repo.save(new EntityWithUpdateOperator(200));
+		repo.save(new EntityWithUpdateOperator(300));
+		repo.save(new EntityWithUpdateOperator(400));
+		repo.save(new EntityWithUpdateOperator(500));
+		
+		Assert.assertTrue(repo.updateAges(200, 1) >= 4);
+	}
 }

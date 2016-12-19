@@ -73,6 +73,7 @@ public class TFindersWithRelations extends TestSuiteBase
 		List<Order> orders = repo.findOrdersOfCusomer("Customer1");
 		Assert.assertEquals(orders.size(), 2);
 		Assert.assertEquals(CommonUtils.toSet(orders.get(0).getTitle(), orders.get(1).getTitle()), CommonUtils.toSet("order1", "order2"));
+		Assert.assertEquals(orders.get(0).getItems().size(), 2);
 
 		orders = repo.findOrdersOfCusomer("Customer2");
 		Assert.assertEquals(orders.size(), 1);
@@ -153,5 +154,15 @@ public class TFindersWithRelations extends TestSuiteBase
 
 		groups = repo.findGroupsOfCusomer("nonexisting");
 		Assert.assertEquals(groups.size(), 0);
+	}
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testManyToManyRelations(RepositoryFactory factory)
+	{
+		ICustomerGroupRepository repo = factory.getRepository(ICustomerGroupRepository.class);
+		
+		List<String> titles = repo.findOrderTitles("Group1");
+		
+		System.out.println(titles);
 	}
 }

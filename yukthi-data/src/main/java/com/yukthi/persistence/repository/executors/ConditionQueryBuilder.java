@@ -23,8 +23,8 @@ import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.JoinTableDetails;
 import com.yukthi.persistence.Record;
 import com.yukthi.persistence.conversion.ConversionService;
-import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.query.IConditionalQuery;
+import com.yukthi.persistence.query.IOrderedQuery;
 import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.query.QueryJoinCondition;
 import com.yukthi.persistence.query.QueryResultField;
@@ -1063,28 +1063,22 @@ public class ConditionQueryBuilder implements Cloneable
 		return queryCondition;
 	}
 
-	public void loadOrderByFields(FinderQuery finderQuery)
+	/**
+	 * Loads the order by fields into specified query.
+	 * @param orderedQuery Query to which order by fields should be loaded.
+	 */
+	public void loadOrderByFields(IOrderedQuery orderedQuery)
 	{
 		if(this.orderByFields.isEmpty())
 		{
 			return;
 		}
 
-		List<QueryResultField> orderByCodes = new ArrayList<>();
-
 		// loop through order by fields
 		for(ResultField field : orderByFields)
 		{
-			orderByCodes.add(new QueryResultField(field.table.tableCode, field.fieldDetails.getDbColumnName(), field.code, field.orderType));
+			orderedQuery.addOrderByField(new QueryResultField(field.table.tableCode, field.fieldDetails.getDbColumnName(), field.code, field.orderType));
 		}
-
-		// if enable codes are available
-		if(!orderByCodes.isEmpty())
-		{
-			// add order codes
-			finderQuery.setOrderByFields(orderByCodes.toArray(new QueryResultField[0]));
-		}
-
 	}
 
 	/**

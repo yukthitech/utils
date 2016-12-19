@@ -102,6 +102,11 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			//if the field is not owned by this table
 			if(!field.isTableOwned())
 			{
+				if(field.isTableJoined())
+				{
+					
+				}
+				
 				continue;
 			}
 
@@ -210,6 +215,10 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		}
 	}
 	
+	/**
+	 * Fetches order by fields for the specified method.
+	 * @param method Method from which order by details needs to be fetched.
+	 */
 	protected void fetchOrderDetails(Method method)
 	{
 		OrderBy orderBy = recursiveAnnotationFactory.findAnnotationRecursively(method, OrderBy.class);

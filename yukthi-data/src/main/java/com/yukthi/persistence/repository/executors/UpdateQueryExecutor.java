@@ -2,6 +2,8 @@ package com.yukthi.persistence.repository.executors;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,16 +18,21 @@ import com.yukthi.persistence.FieldDetails;
 import com.yukthi.persistence.ICrudRepository;
 import com.yukthi.persistence.IDataStore;
 import com.yukthi.persistence.ITransaction;
+import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.listeners.EntityEventType;
 import com.yukthi.persistence.query.ColumnParam;
 import com.yukthi.persistence.query.QueryCondition;
+import com.yukthi.persistence.query.QueryResultField;
 import com.yukthi.persistence.query.UpdateColumnParam;
 import com.yukthi.persistence.query.UpdateQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.Field;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.persistence.repository.annotations.OrderBy;
+import com.yukthi.persistence.repository.annotations.OrderByField;
+import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.annotations.UpdateFunction;
 import com.yukthi.persistence.repository.annotations.UpdateOperator;
 import com.yukthi.utils.exceptions.InvalidStateException;
@@ -42,6 +49,8 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 	private String methodDesc;
 	
 	private UpdateQuery updateQuery;
+	
+	private List<QueryResultField> orderByFields = null;
 	
 	public UpdateQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
@@ -92,8 +101,65 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		{
 			throw new InvalidRepositoryException("Update method '" + method.getName() + "' found with non-boolean, non-void and non-int return type in repository: " + repositoryType.getName());
 		}
+		
+		fetchOrderDetails(method);
 	}
 	
+	/**
+	 * Fetches order by fields for the specified method.
+	 * @param method Method from which order by details needs to be fetched.
+	 */
+	private void fetchOrderDetails(Method method)
+	{
+		OrderBy orderBy = recursiveAnnotationFactory.findAnnotationRecursively(method, OrderBy.class);
+		
+		if(orderBy == null)
+		{
+			return;
+		}
+		
+		if(orderBy.fields().length > 0)
+		{
+			for(OrderByField field : orderBy.fields())
+			{
+				if(!entityDetails.hasField(field.name()))
+				{
+					throw new InvalidMappingException("Invalid field '" + field.name() + "' specified in @OrderBy annotation of finder method - " + methodDesc);
+				}
+				
+				addOrdderBy(field.name(), field.type());
+			}
+		}
+		else
+		{
+			for(String field : orderBy.value())
+			{
+				if(!entityDetails.hasField(field))
+				{
+					throw new InvalidMappingException("Invalid field '" + field + "' specified in @OrderBy annotation of finder method - " + methodDesc);
+				}
+
+				addOrdderBy(field, OrderByType.ASC);
+			}
+		}
+	}
+	
+	/**
+	 * Adds specified field to order by list.
+	 * @param field Field to add
+	 * @param orderByType Ordering type
+	 */
+	private void addOrdderBy(String field, OrderByType orderByType)
+	{
+		if(this.orderByFields == null)
+		{
+			this.orderByFields = new ArrayList<>();
+		}
+
+		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(field);
+		this.orderByFields.add(new QueryResultField(null, fieldDetails.getDbColumnName(), null, orderByType));
+	}
+
 	private boolean fetchColumnsByAnnotations(Method method)
 	{
 		logger.trace("Started method: fetchColumnsByAnnotations");
@@ -323,11 +389,20 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			updateQuery.clearConditions();
 			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), updateQuery, params);
 			
+			//add order-by fields
+			if(orderByFields != null)
+			{
+				for(QueryResultField orderField : this.orderByFields)
+				{
+					updateQuery.addOrderByField(orderField);
+				}
+			}
+
 			//TODO: When unique fields are getting updated, make sure unique constraints are not violated
 				//during unique field update might be we have to mandate id is provided as condition
 			
 			
-			//TODO: Extension field update using annotaionts
+			//TODO: Extension field update using annotations
 			FieldDetails field = null;
 			
 			for(ColumnParam column: updateQuery.getColumns())
