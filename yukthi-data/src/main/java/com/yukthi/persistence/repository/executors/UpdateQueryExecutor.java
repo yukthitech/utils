@@ -35,6 +35,7 @@ import com.yukthi.persistence.repository.annotations.OrderByField;
 import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.annotations.UpdateFunction;
 import com.yukthi.persistence.repository.annotations.UpdateOperator;
+import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 @QueryExecutorPattern(prefixes = {"update"}, annotatedWith = UpdateFunction.class)

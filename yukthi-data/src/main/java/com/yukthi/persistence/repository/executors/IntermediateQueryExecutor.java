@@ -1,6 +1,5 @@
 package com.yukthi.persistence.repository.executors;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,38 +18,49 @@ import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 
-@QueryExecutorPattern(prefixes = {"find", "fetch"})
-public class FinderQueryExecutor extends AbstractSearchQuery
+/**
+ * This is similar to finder query executor but used fetch sub fields. 
+ * @author akiran
+ */
+public class IntermediateQueryExecutor extends AbstractSearchQuery
 {
-	private static Logger logger = LogManager.getLogger(FinderQueryExecutor.class);
+	private static Logger logger = LogManager.getLogger(IntermediateQueryExecutor.class);
 	
 	private ReentrantLock queryLock = new ReentrantLock();
 	
-	private int customFieldsIndex = -1;
+	private String mappingFieldCode;
 	
-	public FinderQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
+	private String resultFieldCode;
+	
+	public IntermediateQueryExecutor(Class<?> repositoryType, EntityDetails entityDetails, String representation)
 	{
 		super.repositoryType = repositoryType;
 		super.entityDetails = entityDetails;
 
 		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
-		methodDesc = String.format("finder method '%s' of repository - '%s'", method.getName(), repositoryType.getName());
-
-		fetchReturnDetails(method);
-		
-		if( !fetchConditonsByAnnotations(method, true, conditionQueryBuilder, methodDesc, true) )
-		{
-			fetchConditionsByName(method, conditionQueryBuilder, methodDesc);
-		}
-		
-		fetchMethodLevelConditions(method, conditionQueryBuilder, methodDesc, true);
-		
-		super.fetchOrderDetails(method);
-		
-		customFieldsIndex = super.getExtendedFieldParam(method);
+		methodDesc = String.format("intermediate-finder method '%s' of repository - '%s'", representation, repositoryType.getName());
 	}
 	
-
+	public void setMappingField(String field, Class<?> type)
+	{
+		this.mappingFieldCode = conditionQueryBuilder.addResultField("$MAPPING_FIELD", type, type, field, methodDesc);
+	}
+	
+	public void setResultField(String field, Class<?> type)
+	{
+		this.resultFieldCode = conditionQueryBuilder.addResultField("$RESULT_FIELD", type, type, field, methodDesc);
+	}
+	
+	void setReturnType(Class<?> returnType)
+	{
+		super.returnType = returnType;
+	}
+	
+	void setReturnCollectionType(Class<?> returnCollectionType)
+	{
+		super.collectionReturnType = returnCollectionType;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.yukthi.persistence.repository.executors.QueryExecutor#execute(com.yukthi.persistence.repository.executors.QueryExecutionContext, com.yukthi.persistence.IDataStore, com.yukthi.persistence.conversion.ConversionService, java.lang.Object[])
 	 */
@@ -65,22 +75,6 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 		try
 		{
 			ConditionQueryBuilder conditionQueryBuilder = this.conditionQueryBuilder;
-			
-			if(this.customFieldsIndex >= 0)
-			{
-				Collection<String> customFieldNames = (Collection<String>) params[customFieldsIndex];
-				
-				if(customFieldNames != null && !customFieldNames.isEmpty())
-				{
-					conditionQueryBuilder = this.conditionQueryBuilder.clone();
-					String prefix = entityDetails.getExtendedTableDetails().getEntityField().getName();
-					
-					for(String custFld : customFieldNames)
-					{
-						conditionQueryBuilder.addResultField("@" + custFld, String.class, String.class, prefix + "." + custFld, super.methodDesc);
-					}
-				}
-			}
 			
 			FinderQuery finderQuery = new FinderQuery(entityDetails);
 

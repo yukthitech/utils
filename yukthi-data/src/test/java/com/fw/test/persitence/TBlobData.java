@@ -193,4 +193,20 @@ public class TBlobData extends TestSuiteBase
 		Assert.assertEquals(FileUtils.readFileToString(entityFile), content.toString());
 		Assert.assertEquals(entity.getName(), "TestFile1");
 	}
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testFinderWithBlobCollection(RepositoryFactory factory) throws Exception
+	{
+		List<String> values = new ArrayList<>(Arrays.asList("one", "two", "three"));
+		
+		ObjBlobEntity entity = new ObjBlobEntity(0, "Test_finder", values);
+		IObjBlobRepository repo = factory.getRepository(IObjBlobRepository.class);
+		
+		boolean res = repo.save(entity);
+		
+		Assert.assertEquals(res, true);
+		
+		List<String> valuesFromDb = repo.findValuesByName("Test_finder");
+		Assert.assertEquals(valuesFromDb, values);
+	}
 }

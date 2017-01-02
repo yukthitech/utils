@@ -26,6 +26,7 @@ import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.MethodConditions;
 import com.yukthi.persistence.repository.annotations.NullCheck;
 import com.yukthi.persistence.repository.annotations.Operator;
+import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 
 public abstract class QueryExecutor

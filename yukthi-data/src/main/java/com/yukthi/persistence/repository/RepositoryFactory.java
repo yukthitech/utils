@@ -20,6 +20,11 @@ import com.yukthi.persistence.listeners.EntityListenerManager;
 
 public class RepositoryFactory
 {
+	/**
+	 * Name of the factory used for easy identificaion.
+	 */
+	private String name;
+	
 	private IDataStore dataStore;
 	
 	private Map<Class<?>, ICrudRepository<?>> typeToRepo = new HashMap<>();
@@ -229,4 +234,40 @@ public class RepositoryFactory
 			this.typeToRepo.remove(actualRepoType);
 		}
 	}
+
+	/**
+	 * Gets the name of the factory used for easy identificaion.
+	 *
+	 * @return the name of the factory used for easy identificaion
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+	/**
+	 * Sets the name of the factory used for easy identificaion.
+	 *
+	 * @param name the new name of the factory used for easy identificaion
+	 */
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Name: ").append(name);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

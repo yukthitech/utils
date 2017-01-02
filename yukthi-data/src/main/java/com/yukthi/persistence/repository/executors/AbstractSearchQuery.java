@@ -25,6 +25,7 @@ import com.yukthi.persistence.repository.annotations.OrderByField;
 import com.yukthi.persistence.repository.annotations.OrderByType;
 import com.yukthi.persistence.repository.annotations.ResultMapping;
 import com.yukthi.persistence.repository.annotations.SearchResult;
+import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.utils.annotations.RecursiveAnnotationFactory;
 import com.yukthi.utils.exceptions.InvalidConfigurationException;
@@ -40,6 +41,9 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	private static RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
 	protected Class<?> returnType;
+	
+	protected Type genericReturnType;
+	
 	protected Class<?> collectionReturnType = null;
 
 	/**
@@ -85,7 +89,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 				name = objField.getName();
 			}
 			
-			conditionQueryBuilder.addResultField(objField.getName(), objField.getType(), name, methodDesc);
+			conditionQueryBuilder.addResultField(objField.getName(), objField.getType(), objField.getGenericType(), name, methodDesc);
 		}
 	}
 	
@@ -111,10 +115,11 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			}
 
 			//adds the current field as result field
-			conditionQueryBuilder.addResultField(field.getName(), field.getField().getType(), field.getName(), methodDesc);
+			conditionQueryBuilder.addResultField(field.getName(), field.getField().getType(), field.getField().getGenericType(), field.getName(), methodDesc);
 		}
 		
 		this.returnType = entityDetails.getEntityType();
+		this.genericReturnType = this.returnType;
 	}
 	
 	protected void fetchReturnDetails(Method method)
@@ -122,6 +127,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		logger.trace("Started method: fetchReturnDetails");
 		
 		this.returnType = method.getReturnType();
+		this.genericReturnType = method.getGenericReturnType();
 		
 		if(void.class.equals(this.returnType))
 		{
@@ -179,7 +185,18 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		else if(method.getAnnotation(Field.class) != null)
 		{
 			Field field = method.getAnnotation(Field.class);
-			conditionQueryBuilder.addResultField(null, this.returnType, field.value(), methodDesc);
+			FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(field.value());
+			
+			//In case of converted field type (json fields, etc), if return type matches with field type,
+			// 	then actual return type should be used (even in case of collection return type), not collection element type
+			if(fieldDetails != null && !fieldDetails.isRelationField() && 
+				fieldDetails.getField().getGenericType().equals(method.getGenericReturnType()))
+			{
+				this.collectionReturnType = null;
+				this.returnType = method.getReturnType();
+			}
+			
+			conditionQueryBuilder.addResultField(null, this.returnType, this.genericReturnType, field.value(), methodDesc);
 		}
 		else if(searchResult != null)
 		{
@@ -201,7 +218,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 					for(ResultMapping mapping : mappings)
 					{
 						propertyDescriptor = PropertyUtils.getPropertyDescriptor(returnSampleBean, mapping.property());
-						conditionQueryBuilder.addResultField(mapping.property(), propertyDescriptor.getPropertyType(), mapping.entityField(), methodDesc);
+						conditionQueryBuilder.addResultField(mapping.property(), propertyDescriptor.getPropertyType(), propertyDescriptor.getReadMethod().getGenericReturnType(), mapping.entityField(), methodDesc);
 					}
 				}catch(Exception ex)
 				{

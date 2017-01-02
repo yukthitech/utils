@@ -17,6 +17,7 @@ import com.yukthi.persistence.query.AggregateQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.AggregateFunction;
 import com.yukthi.persistence.repository.annotations.AggregateFunctionType;
+import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthi.utils.ConvertUtils;
 
 /**

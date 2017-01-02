@@ -1,7 +1,9 @@
-package com.yukthi.persistence.repository.executors;
+package com.yukthi.persistence.repository.executors.builder;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
+import com.yukthi.persistence.ConfigurationErrorException;
 import com.yukthi.persistence.EntityDetails;
 import com.yukthi.persistence.ExtendedTableDetails;
 import com.yukthi.persistence.ExtendedTableEntity;
@@ -22,6 +25,7 @@ import com.yukthi.persistence.ForeignConstraintDetails;
 import com.yukthi.persistence.InvalidMappingException;
 import com.yukthi.persistence.JoinTableDetails;
 import com.yukthi.persistence.Record;
+import com.yukthi.persistence.RelationType;
 import com.yukthi.persistence.conversion.ConversionService;
 import com.yukthi.persistence.query.IConditionalQuery;
 import com.yukthi.persistence.query.IOrderedQuery;
@@ -34,6 +38,7 @@ import com.yukthi.persistence.repository.RepositoryFactory;
 import com.yukthi.persistence.repository.annotations.JoinOperator;
 import com.yukthi.persistence.repository.annotations.Operator;
 import com.yukthi.persistence.repository.annotations.OrderByType;
+import com.yukthi.persistence.repository.executors.IntermediateQueryExecutor;
 import com.yukthi.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthi.persistence.repository.search.DynamicResultField;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
@@ -111,7 +116,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 * 
 	 * @author akiran
 	 */
-	static class Condition
+	public static class Condition
 	{
 		/**
 		 * Condition operator
@@ -244,6 +249,22 @@ public class ConditionQueryBuilder implements Cloneable
 			this.joinOperator = joinOperator;
 		}
 	}
+	
+	static class IntermediateQuery
+	{
+		private String resultProperty;
+		
+		private String mappingColumnCode;
+		
+		private IntermediateQueryExecutor intermediateQueryExecutor;
+
+		public IntermediateQuery(String resultProperty, String mappingColumnCode, IntermediateQueryExecutor intermediateQueryExecutor)
+		{
+			this.resultProperty = resultProperty;
+			this.mappingColumnCode = mappingColumnCode;
+			this.intermediateQueryExecutor = intermediateQueryExecutor;
+		}
+	}
 
 	/**
 	 * Result field details that is part current query
@@ -328,6 +349,11 @@ public class ConditionQueryBuilder implements Cloneable
 	 * Mapping from entity field name to result field
 	 */
 	private Map<String, ResultField> fieldToResultField = new HashMap<>();
+	
+	/**
+	 * Mapping from result field to intermediate query required to populate field.
+	 */
+	private Map<String, IntermediateQuery> fieldToIntermediateQuery = new HashMap<>();
 
 	/**
 	 * Mapping from property name to table
@@ -453,7 +479,7 @@ public class ConditionQueryBuilder implements Cloneable
 					//if extended field is used in middle
 					if(i != (maxIndex - 1))
 					{
-						throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s. "
+						throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in %s parameter '%s' of %s. "
 							+ "Extension field is used in middle/end of expression.", currentProp, paramType, conditionExpr, methodDesc));
 					}
 					
@@ -479,7 +505,7 @@ public class ConditionQueryBuilder implements Cloneable
 				}
 				else
 				{
-					throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
+					throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in %s parameter '%s' of %s", currentProp, paramType, conditionExpr, methodDesc));
 				}
 			}
 
@@ -489,7 +515,7 @@ public class ConditionQueryBuilder implements Cloneable
 				// if end field is found to be entity instead of simple property
 				if(fieldDetails.isRelationField())
 				{
-					throw new InvalidMappingException(String.format("Non-simple field mapping '%1s' found as %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
+					throw new InvalidMappingException(String.format("Non-simple field mapping '%s' found as %s parameter '%s' of %s", currentProp, paramType, conditionExpr, methodDesc));
 				}
 
 				fieldDetailsWrapper.setValue(fieldDetails);
@@ -509,7 +535,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 			if(!fieldDetails.isRelationField())
 			{
-				throw new InvalidMappingException(String.format("Non-relational field mapping '%1s' found in %2s parameter '%3s' of %4s", currentProp, paramType, conditionExpr, methodDesc));
+				throw new InvalidMappingException(String.format("Non-relational field mapping '%s' found in %s parameter '%s' of %s", currentProp, paramType, conditionExpr, methodDesc));
 			}
 
 			foreignConstraint = fieldDetails.getForeignConstraintDetails();
@@ -795,15 +821,109 @@ public class ConditionQueryBuilder implements Cloneable
 			}
 		}
 	}
+	
+	private boolean checkAndAddIntermediateQuery(String resultProperty, Class<?> resultPropertyType, Type resultGenericPropertyType, 
+			String entityFieldParts[], String methodDesc)
+	{
+		EntityDetails currentEntityDetails = this.entityDetails;
+		FieldDetails fieldDetails = null;
+		
+		boolean needsIntermediateQuery = false;
+		StringBuilder currentPath = new StringBuilder();
+		
+		ForeignConstraintDetails foreignConstraintDetails = null;
+		
+		String fieldName = null, mainMappingField = null;
+		Class<?> finalFieldType = null;
+		String childProperty = null;
+		EntityDetails intermediateEntityDetails = null;
+		Class<?> mappingFieldType = null;
+		
+		for(int i = 0; i < entityFieldParts.length; i++)
+		{
+			fieldName = entityFieldParts[i];
+			
+			fieldDetails = currentEntityDetails.getFieldDetailsByField(fieldName);
+			
+			//if normal field is encountered in middle
+			if(!fieldDetails.isRelationField())
+			{
+				//if intermediate query is not required
+				if(!needsIntermediateQuery)
+				{
+					return false;
+				}
+				
+				if(i != entityFieldParts.length - 1)
+				{
+					throw new ConfigurationErrorException("intermediate.query.midNonRelationField", fieldName, resultProperty);
+				}
+				
+				finalFieldType = fieldDetails.getField().getType();
+			}
 
+			foreignConstraintDetails = fieldDetails.getForeignConstraintDetails(); 
+			
+			//if MANY relation is found in path
+			if(foreignConstraintDetails.getRelationType() == RelationType.ONE_TO_MANY || foreignConstraintDetails.getRelationType() == RelationType.MANY_TO_MANY)
+			{
+				if(!Collection.class.isAssignableFrom(resultPropertyType))
+				{
+					throw new ConfigurationErrorException("intermediate.query.nonCollectionResultField", fieldName, resultProperty);
+				}
+				
+				//fetch the mapping field path in main query
+				currentPath.append(currentEntityDetails.getIdField().getField().getName());
+				mainMappingField = currentPath.toString();
+				mappingFieldType = currentEntityDetails.getIdField().getField().getType();
+				currentPath.setLength(0);
+				
+				needsIntermediateQuery = true;
+				intermediateEntityDetails = currentEntityDetails;
+			}
+			
+			currentEntityDetails = foreignConstraintDetails.getTargetEntityDetails();
+			currentPath.append(fieldName).append(".");
+		}
+		
+		//remove trailing dot
+		currentPath.deleteCharAt(currentPath.length() - 1);
+		
+		childProperty = currentPath.toString();
+
+		//if intermediate query is not required simply return false.
+		if(!needsIntermediateQuery)
+		{
+			return false;
+		}
+		
+		if(finalFieldType == null)
+		{
+			throw new ConfigurationErrorException("intermediate.query.noFinalField", resultProperty);
+		}
+		
+		String mappingFieldCode = addResultField("$" + resultProperty, mappingFieldType, mappingFieldType, mainMappingField, methodDesc);
+		
+		String interMethodDesc = methodDesc + "[Result Field: " + resultProperty + "]";
+		IntermediateQueryExecutor intermediateQueryExecutor = new IntermediateQueryExecutor(intermediateEntityDetails.getEntityType(), 
+				intermediateEntityDetails, interMethodDesc);
+		
+		intermediateQueryExecutor.setMappingField(intermediateEntityDetails.getIdField().getName(), intermediateEntityDetails.getIdField().getField().getType());
+		intermediateQueryExecutor.setResultField(childProperty, finalFieldType);
+		
+		fieldToIntermediateQuery.put(resultProperty, new IntermediateQuery(resultProperty, mappingFieldCode, intermediateQueryExecutor));
+		return true;
+	}
+	
 	/**
 	 * Adds a result field of the query to this builder
 	 * 
 	 * @param resultProperty
 	 * @param entityFieldExpression
 	 * @param methodDesc
+	 * @return Field code representing the newly added field.
 	 */
-	public void addResultField(String resultProperty, Class<?> resultPropertyType, String entityFieldExpression, String methodDesc)
+	public String addResultField(String resultProperty, Class<?> resultPropertyType, Type resultGenericPropertyType, String entityFieldExpression, String methodDesc)
 	{
 		// if a field is already added as direct return value
 		if(isSingleFieldReturn)
@@ -822,6 +942,13 @@ public class ConditionQueryBuilder implements Cloneable
 
 		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
+		
+		/*
+		if(checkAndAddIntermediateQuery(resultProperty, resultPropertyType, resultGenericPropertyType, entityFieldParts, methodDesc))
+		{
+			return null;
+		}
+		*/
 
 		ResultField resultField = new ResultField(resultProperty, nextFieldCode(), resultPropertyType);
 
@@ -833,7 +960,7 @@ public class ConditionQueryBuilder implements Cloneable
 			// if the field mapping is wrong
 			if(resultField.fieldDetails == null)
 			{
-				throw new InvalidMappingException(String.format("Invalid field mapping '%1s' found in result parameter '%2s' of '%3s'", entityFieldExpression, entityFieldExpression, methodDesc));
+				throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in result parameter '%s' of '%s'", entityFieldExpression, entityFieldExpression, methodDesc));
 			}
 
 			resultField.table = codeToTable.get(defTableCode);
@@ -845,7 +972,7 @@ public class ConditionQueryBuilder implements Cloneable
 				isSingleFieldReturn = true;
 			}
 
-			return;
+			return resultField.code;
 		}
 
 		// if the mapping is for nested entity field (with foreign key
@@ -867,6 +994,8 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			isSingleFieldReturn = true;
 		}
+		
+		return resultField.code;
 	}
 
 	/**

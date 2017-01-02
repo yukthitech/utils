@@ -24,6 +24,7 @@ import com.yukthi.persistence.query.FinderQuery;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
 import com.yukthi.persistence.repository.annotations.AggregateFunctionType;
 import com.yukthi.persistence.repository.annotations.SearchFunction;
+import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthi.persistence.repository.search.IDynamicSearchResult;
 import com.yukthi.persistence.repository.search.SearchCondition;
 import com.yukthi.persistence.repository.search.SearchQuery;
@@ -165,7 +166,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 					//add dynamic fields to condition builder
 					for(String additionalProp : searchQuery.getAdditionalEntityFields())
 					{
-						conditionQueryBuilder.addResultField("#" + additionalProp, Object.class, additionalProp, "<Addidional Property> - " + additionalProp);
+						conditionQueryBuilder.addResultField("#" + additionalProp, Object.class, Object.class, additionalProp, "<Addidional Property> - " + additionalProp);
 					}
 				}
 			}

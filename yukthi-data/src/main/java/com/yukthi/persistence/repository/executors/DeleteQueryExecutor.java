@@ -24,6 +24,7 @@ import com.yukthi.persistence.query.FetchChildrenIdsQuery;
 import com.yukthi.persistence.query.IChildQuery;
 import com.yukthi.persistence.query.QueryCondition;
 import com.yukthi.persistence.repository.InvalidRepositoryException;
+import com.yukthi.persistence.repository.executors.builder.ConditionQueryBuilder;
 
 /**
  * Conditions are not mandatory for delete query
