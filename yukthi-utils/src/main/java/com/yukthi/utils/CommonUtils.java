@@ -3,6 +3,7 @@
  */
 package com.yukthi.utils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +18,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthi.utils.exceptions.InvalidStateException;
+
 /**
  * Contains common utility methods
  * 
@@ -28,6 +31,7 @@ public class CommonUtils
 
 	private static Map<Class<?>, Class<?>> wrapperToPrimitive = new HashMap<Class<?>, Class<?>>();
 	private static Map<Class<?>, Class<?>> primitiveToWrapper = new HashMap<Class<?>, Class<?>>();
+	private static Map<String, Class<?>> primitiveNameToClass = new HashMap<String, Class<?>>();
 
 	static
 	{
@@ -45,6 +49,7 @@ public class CommonUtils
 	{
 		wrapperToPrimitive.put(wrapperType, primType);
 		primitiveToWrapper.put(primType, wrapperType);
+		primitiveNameToClass.put(primType.getName(), primType);
 	}
 
 	private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{([\\w\\.\\(\\)\\=]+)\\}");
@@ -399,5 +404,71 @@ public class CommonUtils
 		}
 	}
 	
+	/**
+	 * Behaves like Class.forName(). But this function also support java primitives like
+	 * int, float, etc (int.class and float.class respectively).
+	 * @param clsType Name of the class or string version of primitive type.
+	 * @return Class represented by clsType
+	 */
+	public static Class<?> getClass(String clsType)
+	{
+		if(clsType == null || clsType.trim().length() == 0)
+		{
+			throw new NullPointerException("Class name cannot be null or empty string.");
+		}
+
+		clsType = clsType.trim();
+
+		if(clsType.endsWith("[]"))
+		{
+			int dimCount = 0;
+			String clsCompType = clsType;
+
+			while(clsCompType.endsWith("[]"))
+			{
+				if(clsCompType.length() == 2)
+				{
+					throw new IllegalArgumentException("Invalid class name specified: " + clsType);
+				}
+
+				clsCompType = clsCompType.substring(0, clsCompType.length() - 2).trim();
+				dimCount++;
+			}
+
+			Class<?> compTypeCls = getClass(clsCompType);
+			int dimArr[] = new int[dimCount];
+			Object inst = Array.newInstance(compTypeCls, dimArr);
+			return inst.getClass();
+		}
+
+		if(clsType.indexOf(".") < 0)
+		{
+			Class<?> primType = primitiveNameToClass.get(clsType);
+			
+			if(primType != null)
+			{
+				return primType;
+			}
+			
+			if("void".equals(clsType))
+			{
+				return void.class;
+			}
+
+			try
+			{
+				return Class.forName("java.lang." + clsType);
+			}catch(Exception ex)
+			{}
+		}
+
+		try
+		{
+			return Class.forName(clsType);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "Error in loading class with name: " + clsType);
+		}
+	}
 	
 }

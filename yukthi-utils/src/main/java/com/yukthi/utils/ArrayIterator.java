@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
  * A iterator wrapper over array. Array can be of primitive type or complex type 
  * @author akiran
  */
-public class ArrayIterator implements Iterator<Object>
+public class ArrayIterator implements Iterator<Object>, Iterable<Object>
 {
 	private Object array;
 	
@@ -59,5 +59,11 @@ public class ArrayIterator implements Iterator<Object>
 	public void remove()
 	{
 		throw new UnsupportedOperationException("Remove operation is not supported on this iterator");
+	}
+
+	@Override
+	public Iterator<Object> iterator()
+	{
+		return this;
 	}
 }
