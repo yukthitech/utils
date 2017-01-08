@@ -23,10 +23,17 @@
 
 package com.yukthi.test;
 
+import java.util.Arrays;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.yukthi.ccg.xml.XMLBeanParser;
+import com.yukthi.test.beans.DynamicTestBean;
+import com.yukthi.test.beans.ListBean;
+import com.yukthi.test.beans.MapBean;
+import com.yukthi.test.beans.TestDataBean;
+import com.yukthi.utils.CommonUtils;
 
 /**
  * @author akiran
@@ -47,5 +54,32 @@ public class TXmlBeanParser
 		
 		TestDataBean testDataBean = (TestDataBean)bean.getData().get("node3");
 		Assert.assertEquals(testDataBean.getIntVal(), 100);
+	}
+	
+	/**
+	 * Tests collection loading from xml.
+	 */
+	@Test
+	public void testCollectionLoading()
+	{
+		ListBean bean = new ListBean();
+		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/list-data.xml"), bean);
+		
+		Assert.assertEquals(bean.getStrList(), Arrays.asList("Value1", "Value2"));
+		Assert.assertEquals(bean.getIntSet(), CommonUtils.toSet(10, 20));
+		Assert.assertEquals(bean.getBeanList(), Arrays.asList(new TestDataBean(5), new TestDataBean(6)));
+		Assert.assertEquals(bean.getObjectList(), Arrays.asList(new TestDataBean(5)));
+	}
+	
+	@Test
+	public void testMapLoading()
+	{
+		MapBean bean = new MapBean();
+		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/map-data.xml"), bean);
+		
+		Assert.assertEquals(bean.getStrMap(), CommonUtils.toMap("key1", "Value1", "key2", "Value2"));
+		Assert.assertEquals(bean.getIntMap(), CommonUtils.toMap(1, 10, 2, 20));
+		Assert.assertEquals(bean.getBeanMap(), CommonUtils.toMap("key1", new TestDataBean(5), "key2", new TestDataBean(6)));
+		Assert.assertEquals(bean.getObjectMap(), CommonUtils.toMap("key1", new TestDataBean(5)));
 	}
 }

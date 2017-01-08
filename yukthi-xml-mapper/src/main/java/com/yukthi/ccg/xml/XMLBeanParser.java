@@ -135,7 +135,7 @@ public class XMLBeanParser
 {
 	private SAXEventHandler saxHandler;
 
-	private Object parseXML(InputStream xmlInput, Object toBean, ParserHandler handler, Schema schema)
+	private Object parseXML(InputStream xmlInput, Object toBean, IParserHandler handler, Schema schema)
 	{
 		try
 		{
@@ -153,7 +153,7 @@ public class XMLBeanParser
 
 			saxFactory.newSAXParser().parse(xmlInput, saxHandler);
 			return saxHandler.getRootBean();
-		} catch(CCGInternalException ex)
+		} catch(InternalException ex)
 		{
 			return null;
 		} catch(SAXException e)
@@ -210,7 +210,7 @@ public class XMLBeanParser
 	 * @param handler
 	 * @return
 	 */
-	public static Object parse(InputStream xmlInput, Object toBean, ParserHandler handler)
+	public static Object parse(InputStream xmlInput, Object toBean, IParserHandler handler)
 	{
 		return parse(xmlInput, toBean, handler, null);
 	}
@@ -234,7 +234,7 @@ public class XMLBeanParser
 	 * @param handler
 	 * @return
 	 */
-	public static Object parse(InputStream xmlInput, ParserHandler handler)
+	public static Object parse(InputStream xmlInput, IParserHandler handler)
 	{
 		return parse(xmlInput, null, handler, null);
 	}
@@ -248,7 +248,7 @@ public class XMLBeanParser
 	 * @param schema
 	 * @return
 	 */
-	public static Object parse(InputStream xmlInput, ParserHandler handler, Schema schema)
+	public static Object parse(InputStream xmlInput, IParserHandler handler, Schema schema)
 	{
 		return parse(xmlInput, null, handler, schema);
 	}
@@ -285,7 +285,7 @@ public class XMLBeanParser
 	 *            Schema that needs to be used to validate input XML (optional).
 	 * @return The root bean represnting the XML data.
 	 */
-	public static Object parse(InputStream xmlInput, Object toBean, ParserHandler handler, Schema schema)
+	public static Object parse(InputStream xmlInput, Object toBean, IParserHandler handler, Schema schema)
 	{
 		return new XMLBeanParser().parseXML(xmlInput, toBean, handler, schema);
 	}

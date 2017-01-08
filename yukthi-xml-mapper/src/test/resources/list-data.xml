@@ -1,0 +1,20 @@
+<listData xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<strList>
+		<ccg:element>Value1</ccg:element>
+		<ccg:element>Value2</ccg:element>
+	</strList>
+	
+	<intSet>
+		<ccg:element>10</ccg:element>
+		<ccg:element>20</ccg:element>
+	</intSet>
+	
+	<beanList>
+		<ccg:element intVal="5"/>
+		<ccg:element intVal="6"/>
+	</beanList>
+	
+	<objectList>
+		<ccg:element ccg:beanType="com.yukthi.test.beans.TestDataBean" intVal="5"/>
+	</objectList>
+</listData>

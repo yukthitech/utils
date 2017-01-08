@@ -46,7 +46,7 @@ class SAXEventHandler extends DefaultHandler
 	private boolean root = true;
 
 	// factory on which methods will be called
-	private ParserHandler factory;
+	private IParserHandler parserHandler;
 
 	// used for reference by XMLBeanParser
 	private Object rootBean;
@@ -57,9 +57,9 @@ class SAXEventHandler extends DefaultHandler
 	/**
 	 * @param factory
 	 */
-	public SAXEventHandler(ParserHandler factory, Object rootBean)
+	public SAXEventHandler(IParserHandler factory, Object rootBean)
 	{
-		this.factory = factory;
+		this.parserHandler = factory;
 		this.rootBean = rootBean;
 	}
 
@@ -78,7 +78,7 @@ class SAXEventHandler extends DefaultHandler
 			return text;
 		}
 
-		return factory.processText(rootBean, text);
+		return parserHandler.processText(rootBean, text);
 	}
 
 	/*
@@ -99,7 +99,7 @@ class SAXEventHandler extends DefaultHandler
 		if(text.length() <= 0)
 			return;
 
-		if(activeNode.getActualBean() instanceof HybridTextBean)
+		if(activeNode.getActualBean() instanceof IHybridTextBean)
 		{
 			activeNode.appendText(text);
 			return;
@@ -157,18 +157,18 @@ class SAXEventHandler extends DefaultHandler
 		BeanNode parentNode = activeNode.getParentNode();
 		String beanDesc = null;
 
-		if(curBean instanceof HybridTextBean)
+		if(curBean instanceof IHybridTextBean)
 		{
 			if(activeNode.containsText())
 			{
-				((HybridTextBean) curBean).addText(processText(activeNode.getActualText()));
+				((IHybridTextBean) curBean).addText(processText(activeNode.getActualText()));
 				activeNode.clearText();
 			}
 		}
 
 		if(!activeNode.isTextNode() && !activeNode.isReservedNullNode())
 		{
-			beanDesc = factory.getBeanDescription(curBean);
+			beanDesc = parserHandler.getBeanDescription(curBean);
 
 			if(beanDesc == null)
 				beanDesc = curBean.getClass().getName();
@@ -177,12 +177,20 @@ class SAXEventHandler extends DefaultHandler
 		if(activeNode.isReserved())
 		{
 			if(activeNode.isReservedNullNode())
+			{
 				curBean = null;
-			else if(!activeNode.isTextNode())
+			}
+			//process the test in active reserve text node
+			else if(activeNode.isTextNode())
+			{
+				String text = processText(activeNode.getText());
+				activeNode.setText(text);
+			}
+			else
 			{
 				try
 				{
-					factory.validateBean(activeNode);
+					parserHandler.validateBean(activeNode);
 				} catch(Exception ex)
 				{
 					throw new XMLLoadException("Error in validating reserved node bean: " + beanDesc, ex, activeNode);
@@ -191,7 +199,7 @@ class SAXEventHandler extends DefaultHandler
 
 			try
 			{
-				factory.processReserveNodeEnd(activeNode, activeNode.getAttributeMap());
+				parserHandler.processReserveNodeEnd(activeNode, activeNode.getAttributeMap());
 			} catch(Exception ex)
 			{
 				throw new XMLLoadException("Error in processing reserve node end: " + name, ex, activeNode);
@@ -203,7 +211,7 @@ class SAXEventHandler extends DefaultHandler
 		try
 		{
 			if(!activeNode.isTextNode())
-				factory.validateBean(activeNode);
+				parserHandler.validateBean(activeNode);
 		} catch(Exception ex)
 		{
 			throw new XMLLoadException("Error in validating bean: " + beanDesc, ex, activeNode);
@@ -216,7 +224,7 @@ class SAXEventHandler extends DefaultHandler
 		Method met = getSubnodeMethod(name, parentBean);
 		Object parameters[] = null;
 		String nodeType = null;
-		beanDesc = factory.getBeanDescription(parentBean);
+		beanDesc = parserHandler.getBeanDescription(parentBean);
 
 		if(met == null && (parentBean instanceof DynamicDataAcceptor))
 		{
@@ -242,12 +250,12 @@ class SAXEventHandler extends DefaultHandler
 			try
 			{
 
-				Object idValue = XMLUtil.parseAttributeObject(activeNode.getID(), idType, factory.getDateFormat());
+				Object idValue = XMLUtil.parseAttributeObject(activeNode.getID(), idType, parserHandler.getDateFormat());
 				Object argValue = null;
 
 				if(activeNode.isTextNode())
 				{
-					argValue = factory.parseTextNodeValue(activeNode, activeNode.getAttributeMap());
+					argValue = parserHandler.parseTextNodeValue(activeNode, activeNode.getAttributeMap());
 					nodeType = "ID-Based Text Node";
 				}
 				else
@@ -270,7 +278,7 @@ class SAXEventHandler extends DefaultHandler
 				String text = processText(activeNode.getText());
 				activeNode.setText(text);
 
-				parameters = new Object[] { factory.parseTextNodeValue(activeNode, activeNode.getAttributeMap()) };
+				parameters = new Object[] { parserHandler.parseTextNodeValue(activeNode, activeNode.getAttributeMap()) };
 				nodeType = "Text Node";
 			} catch(Exception ex)
 			{
@@ -319,7 +327,7 @@ class SAXEventHandler extends DefaultHandler
 			attrMap.put(key, processText((String) attrMap.getReserved(key)), true);
 		}
 
-		String desc = factory.getNodeDescription(newNode, newNode.getAttributeMap());
+		String desc = parserHandler.getNodeDescription(newNode, newNode.getAttributeMap());
 		desc = (desc == null) ? name : desc;
 		newNode.setDescription(desc);
 
@@ -350,11 +358,11 @@ class SAXEventHandler extends DefaultHandler
 
 		Object curBean = (this.activeNode != null) ? this.activeNode.getActualBean() : null;
 
-		if(curBean instanceof HybridTextBean)
+		if(curBean instanceof IHybridTextBean)
 		{
 			if(this.activeNode.containsText())
 			{
-				((HybridTextBean) curBean).addText(this.activeNode.getActualText());
+				((IHybridTextBean) curBean).addText(this.activeNode.getActualText());
 				this.activeNode.clearText();
 			}
 		}
@@ -372,13 +380,13 @@ class SAXEventHandler extends DefaultHandler
 			if(rootBean != null)
 			{
 				newNode.setBean(rootBean);
-				factory.setRootBean(newNode, newNode.getAttributeMap());
+				parserHandler.setRootBean(newNode, newNode.getAttributeMap());
 				setAttributeData(newNode);
 				root = false;
 				return;
 			}
 
-			rootBean = factory.createRootBean(newNode, newNode.getAttributeMap());
+			rootBean = parserHandler.createRootBean(newNode, newNode.getAttributeMap());
 			newNode.setBean(rootBean);
 			setAttributeData(newNode);
 			root = false;
@@ -419,7 +427,7 @@ class SAXEventHandler extends DefaultHandler
 
 			try
 			{
-				parentBean = factory.createBean(parentNode, parentNode.getAttributeMap());// create
+				parentBean = parserHandler.createBean(parentNode, parentNode.getAttributeMap());// create
 																							// the
 																							// replacing
 																							// bean
@@ -441,15 +449,22 @@ class SAXEventHandler extends DefaultHandler
 		{
 			try
 			{
-				nextBean = factory.processReservedNode(newNode, newNode.getAttributeMap());
+				nextBean = parserHandler.processReservedNode(newNode, newNode.getAttributeMap());
 			} catch(Exception ex)
 			{
 				throw new XMLLoadException("Error in processing reserve node: " + name, ex, newNode);
 			}
+			
+			if(newNode.isTextNode())
+			{
+				return;
+			}
 
 			if(nextBean == null)
+			{
 				nextBean = BeanNode.NULL_RESERVED_NODE;
-
+			}
+			
 			newNode.setBean(nextBean);
 			setAttributeData(newNode);
 			return;
@@ -460,12 +475,12 @@ class SAXEventHandler extends DefaultHandler
 
 		// Determine the current node's bean type and create the bean
 		Object parentBean = parentNode.getActualBean();
-		Class<?> typ = getNodeSubelementType(name, parentBean);
+		Class<?> typ = getNodeSubelementType(name, parentBean, newNode);
 		Class<?> dynType = null;
 
 		try
 		{
-			dynType = factory.getDynamicBeanType(newNode, curAttMap);
+			dynType = parserHandler.getDynamicBeanType(newNode, curAttMap);
 		} catch(Exception ex)
 		{
 			throw new XMLLoadException("Error in fetching dynamic type for node: " + name, ex, newNode);
@@ -511,7 +526,7 @@ class SAXEventHandler extends DefaultHandler
 			}
 			else
 			{
-				String beanDesc = factory.getBeanDescription(parentBean);
+				String beanDesc = parserHandler.getBeanDescription(parentBean);
 				if(beanDesc == null)
 					beanDesc = parentBean.getClass().getName();
 
@@ -521,11 +536,11 @@ class SAXEventHandler extends DefaultHandler
 
 		newNode.setActualType(typ);
 		newNode.setType(dynType);
+		
 		// if no non-reserve attributes are found then
 		// assume the current bean to be text-node.
 		// if any sub-node is encountered under this type of node then exception
-		// will be
-		// thrown
+		// will be thrown
 		if(!normalAtt && XMLUtil.isSupportedAttributeClass(dynType))
 		{
 			// if true create text based object and keep it in stack
@@ -536,7 +551,7 @@ class SAXEventHandler extends DefaultHandler
 
 		try
 		{
-			nextBean = factory.createBean(newNode, curAttMap);
+			nextBean = parserHandler.createBean(newNode, curAttMap);
 		} catch(Exception ex)
 		{
 			throw new XMLLoadException("Error in creating bean of type: " + typ.getName(), ex, newNode);
@@ -566,7 +581,7 @@ class SAXEventHandler extends DefaultHandler
 			Object nextBean = null;
 			try
 			{
-				nextBean = factory.createBean(newNode, curAttMap.getReservedMap());
+				nextBean = parserHandler.createBean(newNode, curAttMap.getReservedMap());
 			} catch(Exception ex)
 			{
 				throw new XMLLoadException("Error in creating bean of type: " + valType.getName(), ex, newNode);
@@ -646,7 +661,7 @@ class SAXEventHandler extends DefaultHandler
 		String attName = null;
 		String attValue = null;
 		Iterator<String> nameIterator = att.keySet().iterator();
-		String beanDesc = factory.getBeanDescription(toBean);
+		String beanDesc = parserHandler.getBeanDescription(toBean);
 
 		if(beanDesc == null)
 			beanDesc = toBean.getClass().getName();
@@ -663,9 +678,9 @@ class SAXEventHandler extends DefaultHandler
 
 			if(met == null)
 			{
-				if(toBean instanceof DynamicAttributeAcceptor)
+				if(toBean instanceof IDynamicAttributeAcceptor)
 				{
-					((DynamicAttributeAcceptor) toBean).set(attName, attValue);
+					((IDynamicAttributeAcceptor) toBean).set(attName, attValue);
 					continue;
 				}
 
@@ -675,10 +690,10 @@ class SAXEventHandler extends DefaultHandler
 			argType = met.getParameterTypes()[0];
 			try
 			{
-				Object value = factory.createAttributeBean(newNode, attName, argType);
+				Object value = parserHandler.createAttributeBean(newNode, attName, argType);
 
-				if(value == ParserHandler.NOT_SUPPORTED)
-					value = XMLUtil.parseAttributeObject(attValue, argType, factory.getDateFormat());
+				if(value == IParserHandler.NOT_SUPPORTED)
+					value = XMLUtil.parseAttributeObject(attValue, argType, parserHandler.getDateFormat());
 
 				met.invoke(toBean, new Object[] { value });
 			} catch(Exception e)
@@ -699,26 +714,36 @@ class SAXEventHandler extends DefaultHandler
 	 *            Name of the subnode for which bean type needs to be
 	 *            determined.
 	 * @param parent
-	 *            Bean represnting the parent node of the node.
+	 *            Bean representing the parent node of the node.
+	 * @param newNode Node for which type is being determined. Used to set generic type for this node. 
 	 * @return The type of bean that should be used to represent the node.
 	 */
-	private Class<?> getNodeSubelementType(String name, Object parent)
+	private Class<?> getNodeSubelementType(String name, Object parent, BeanNode newNode)
 	{
 		name = name.toUpperCase();
 
 		Class<?> cls = parent.getClass();
 		MethodList metList = clsToMethods.get(cls);
+		
 		if(metList == null)
 			metList = loadClassMethods(cls, clsToMethods);
 
 		Method met = metList.adders.get(name);
+		
 		if(met == null)
 		{
 			met = metList.setters.get(name);
+		
 			if(met != null)
+			{
+				newNode.setGenericType(met.getGenericParameterTypes()[0]);
 				return met.getParameterTypes()[0];
+			}
+			
 			return null;
 		}
+		
+		newNode.setGenericType(met.getGenericParameterTypes()[0]);
 		return met.getParameterTypes()[0];
 	}
 
@@ -809,7 +834,7 @@ class SAXEventHandler extends DefaultHandler
 	public void setDocumentLocator(Locator locator)
 	{
 		if(stopProcessing)
-			throw new CCGInternalException();
+			throw new InternalException();
 	}
 
 }

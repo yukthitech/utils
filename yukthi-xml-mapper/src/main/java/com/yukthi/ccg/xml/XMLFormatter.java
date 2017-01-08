@@ -8,5 +8,6 @@ import org.w3c.dom.Element;
 public interface XMLFormatter
 {
 	public String toString(Element doc);
-	public void writeTo(Element doc,OutputStream out) throws IOException;
+
+	public void writeTo(Element doc, OutputStream out) throws IOException;
 }

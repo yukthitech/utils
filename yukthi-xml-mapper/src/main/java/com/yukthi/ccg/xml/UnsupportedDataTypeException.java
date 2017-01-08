@@ -4,19 +4,22 @@ import com.yukthi.utils.exceptions.UtilsException;
 
 /**
  * Exception thrown when data type incompatibility is encountered.
+ * 
  * @author akiran
  */
 public class UnsupportedDataTypeException extends UtilsException
 {
-	
+
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Instantiates a new unsupported data type exception.
 	 *
-	 * @param message the message
-	 * @param args the args
+	 * @param message
+	 *            the message
+	 * @param args
+	 *            the args
 	 */
 	public UnsupportedDataTypeException(String message, Object... args)
 	{
@@ -26,9 +29,12 @@ public class UnsupportedDataTypeException extends UtilsException
 	/**
 	 * Instantiates a new unsupported data type exception.
 	 *
-	 * @param cause the cause
-	 * @param message the message
-	 * @param args the args
+	 * @param cause
+	 *            the cause
+	 * @param message
+	 *            the message
+	 * @param args
+	 *            the args
 	 */
 	public UnsupportedDataTypeException(Throwable cause, String message, Object... args)
 	{

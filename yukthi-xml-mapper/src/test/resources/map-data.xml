@@ -1,0 +1,20 @@
+<mapData xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<strMap>
+		<ccg:entry key="key1">Value1</ccg:entry>
+		<ccg:entry key="key2">Value2</ccg:entry>
+	</strMap>
+	
+	<intMap>
+		<ccg:entry key="1">10</ccg:entry>
+		<ccg:entry key="2">20</ccg:entry>
+	</intMap>
+	
+	<beanMap>
+		<ccg:entry key="key1" intVal="5"/>
+		<ccg:entry key="key2" intVal="6"/>
+	</beanMap>
+	
+	<objectMap>
+		<ccg:entry key="key1"  ccg:beanType="com.yukthi.test.beans.TestDataBean" intVal="5"/>
+	</objectMap>
+</mapData>

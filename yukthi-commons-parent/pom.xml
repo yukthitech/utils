@@ -10,6 +10,13 @@
 	<name>yukthi-commons-parent</name>
 	<url>http://maven.apache.org</url>
 
+	<distributionManagement>
+		<repository>
+			<id>nexus-deploy</id>
+			<url>/Users/akiran/git/maven-repo</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -62,5 +69,6 @@
 		<module>../yukthi-utils</module>
 		<module>../yukthi-validators</module>
 		<module>../yukthi-excel-reports</module>
+		<module>../yukthi-xml-mapper</module>
 	</modules>
 </project>

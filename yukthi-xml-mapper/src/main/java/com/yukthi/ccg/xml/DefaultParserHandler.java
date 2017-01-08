@@ -1,79 +1,81 @@
 package com.yukthi.ccg.xml;
 
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
+import com.yukthi.ccg.xml.reserved.ElementNodeHandler;
+import com.yukthi.ccg.xml.reserved.EntryNodeHandler;
+import com.yukthi.ccg.xml.reserved.IReserveNodeHandler;
+import com.yukthi.ccg.xml.reserved.IncludeXmlNodeHandler;
+import com.yukthi.ccg.xml.reserved.NodeName;
+import com.yukthi.ccg.xml.reserved.RegisterNodeHandler;
 import com.yukthi.ccg.xml.util.StringUtil;
 import com.yukthi.ccg.xml.util.ValidateException;
 import com.yukthi.ccg.xml.util.Validateable;
 import com.yukthi.ccg.xml.util.ValueProvider;
 import com.yukthi.utils.CommonUtils;
+import com.yukthi.utils.exceptions.InvalidArgumentException;
 import com.yukthi.utils.exceptions.InvalidStateException;
 
 /**
  * Default Parser handler to convert xml into beans.
  */
-public class DefaultParserHandler implements ParserHandler
+public class DefaultParserHandler implements IParserHandler
 {
-	
-	/** The Constant RNODE_INCLUDE_XML_RES. */
-	public static final String RNODE_INCLUDE_XML_RES = "includeXmlRes";
-	
-	/** The Constant RNODE_CUSTOM_NODE_HANDLER. */
-	public static final String RNODE_CUSTOM_NODE_HANDLER = "customNodeHandler";
-
 	/** The Constant ATTR_PATH. */
 	public static final String ATTR_PATH = "path";
 
 	/** The Constant ATTR_BEAN_TYPE. */
 	public static final String ATTR_BEAN_TYPE = "beanType";
-	
+
 	/** The Constant ATTR_DATE_FORMAT. */
 	public static final String ATTR_DATE_FORMAT = "dateFormat";
-	
+
 	/** The Constant ATTR_PARAMTER_TYPES. */
 	public static final String ATTR_PARAMTER_TYPES = "paramTypes";
-	
+
 	/** The Constant ATTR_PARAMTERS. */
 	public static final String ATTR_PARAMTERS = "params";
-	
+
 	/** The Constant ATTR_BEAN_EXPRESSION. */
 	public static final String ATTR_BEAN_EXPRESSION = "beanExpr";
-	
+
 	/** The Constant ATTR_TRIM_LINES. */
 	public static final String ATTR_TRIM_LINES = "trimLines";
 
 	/** The Constant RNODE_BEAN_FACTORY. */
 	public static final String RNODE_BEAN_FACTORY = "factory";
-	
+
 	/** The Constant ATTR_RNODE_TYPE. */
 	public static final String ATTR_RNODE_TYPE = "type";
-	
+
 	/** The Constant ATTR_RNODE_NAME. */
 	public static final String ATTR_RNODE_NAME = "name";
-	
+
 	/** The Constant ATTR_RNODE_VALUE. */
 	public static final String ATTR_RNODE_VALUE = "value";
 
 	/** The Constant ATTR_BEAN_ID. */
 	public static final String ATTR_BEAN_ID = "beanId";
-	
+
 	/** The Constant ATTR_REF_BEAN. */
 	public static final String ATTR_REF_BEAN = "beanRef";
 
 	/** The Constant RNODE_INIT. */
 	public static final String RNODE_INIT = "init";
-	
+
 	/** The Constant RNODE_CONSTANT. */
 	public static final String RNODE_CONSTANT = "constant";
 
@@ -82,34 +84,64 @@ public class DefaultParserHandler implements ParserHandler
 
 	/** The Constant RNODE_EXPR_PATTERN. */
 	public static final String RNODE_EXPR_PATTERN = "exprPattern";
-	
+
 	/** The Constant ATTR_PATTERN. */
 	public static final String ATTR_PATTERN = "pattern";
-	
+
 	/** The Constant ATTR_ESCAPE_PREFIX. */
 	public static final String ATTR_ESCAPE_PREFIX = "escapePrefix";
-	
+
 	/** The Constant ATTR_ESCAPE_REPLACE. */
 	public static final String ATTR_ESCAPE_REPLACE = "escapeReplace";
-	
+
 	/** The Constant ATTR_ENABLED. */
 	public static final String ATTR_ENABLED = "enabled";
+	
+	/**
+	 * Encapsulation of pattern and handler details.
+	 * @author akiran
+	 */
+	private static class ReserveNodeHandlerDetails
+	{
+		/**
+		 * Node name pattern for which associated handler.
+		 */
+		private Pattern pattern;
+		
+		/**
+		 * Handler to be used.
+		 */
+		private IReserveNodeHandler reserveNodeHandler;
+
+		/**
+		 * Instantiates a new reserve node handler details.
+		 *
+		 * @param pattern the pattern
+		 * @param reserveNodeHandler the reserve node handler
+		 */
+		public ReserveNodeHandlerDetails(Pattern pattern, IReserveNodeHandler reserveNodeHandler)
+		{
+			this.pattern = pattern;
+			this.reserveNodeHandler = reserveNodeHandler;
+		}
+	}
+	
 
 	/** The root. */
 	private Object root;
-	
+
 	/** The date format. */
 	private String dateFormat = STD_DATE_FORMAT;
-	
+
 	/** The type to fact cls. */
 	private HashMap<Class<?>, Class<?>> typeToFactCls = new HashMap<Class<?>, Class<?>>();
-	
+
 	/** The cls to fact inst. */
 	private HashMap<Class<?>, BeanFactory> clsToFactInst = new HashMap<Class<?>, BeanFactory>();
-	
+
 	/** The obj id to obj. */
 	private HashMap<String, Object> objIdToObj = new HashMap<String, Object>();
-	
+
 	/** The class loader. */
 	private ClassLoader classLoader;
 
@@ -121,38 +153,50 @@ public class DefaultParserHandler implements ParserHandler
 
 	/** The expression pattern. */
 	private Pattern expressionPattern = Pattern.compile("\\$+\\{([.[^\\}]]+)\\}");
-	
+
 	/** The escape prefix. */
 	private String escapePrefix = "$$";
-	
+
 	/** The escape replace. */
 	private String escapeReplace = "$";
-	
+
 	/** The expression enabled. */
 	private boolean expressionEnabled = true;
 
-	/** The custom node handler. */
-	private ICustomNodeHandler customNodeHandler;
+	/**
+	 * List of reserve node handlers.
+	 */
+	private List<ReserveNodeHandlerDetails> reserveNodeHandlers = new ArrayList<ReserveNodeHandlerDetails>();
 
 	/**
 	 * If the root is null, then reserve attribute beanType is mandatory in root
 	 * node.
 	 */
 	public DefaultParserHandler()
-	{}
+	{
+		registerReserveNodeHandler(new ElementNodeHandler());
+		registerReserveNodeHandler(new EntryNodeHandler());
+		registerReserveNodeHandler(new IncludeXmlNodeHandler());
+		registerReserveNodeHandler(new RegisterNodeHandler());
+	}
 
 	/**
 	 * Instantiates a new default parser handler.
 	 *
-	 * @param classLoader the class loader
+	 * @param classLoader
+	 *            the class loader
 	 */
 	public DefaultParserHandler(ClassLoader classLoader)
 	{
+		this();
 		this.classLoader = classLoader;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#setParser(com.yukthi.ccg.xml.XMLBeanParser)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.yukthi.ccg.xml.ParserHandler#setParser(com.yukthi.ccg.xml.
+	 * XMLBeanParser)
 	 */
 	public void setParser(XMLBeanParser parser)
 	{
@@ -163,7 +207,7 @@ public class DefaultParserHandler implements ParserHandler
 	 * Loads the date format. This method is spearated so that is can be used in
 	 * setRootBean() and createRootBean().
 	 * 
-	 * @param att 
+	 * @param att
 	 */
 	private void loadHandlerConfigurationData(XMLAttributeMap att)
 	{
@@ -185,26 +229,36 @@ public class DefaultParserHandler implements ParserHandler
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#setRootBean(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#setRootBean(com.yukthi.ccg.xml.BeanNode,
+	 * com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public void setRootBean(BeanNode node, XMLAttributeMap att)
 	{
 		this.root = node.getActualBean();
 		loadHandlerConfigurationData(att);
-		//BeanParserSession.createSession(root);
+		// BeanParserSession.createSession(root);
+	}
+	
+	@Override
+	public Object getRootBean()
+	{
+		return root;
 	}
 
-	/* (non-Javadoc)
-	 * A bean is created using beanType. If root bean is not specified in
-	 * XMLBeanParser parse() method then beanType is mandatory argument. <BR>
-	 * If paramTypes, params are specified, they will be used to make
-	 * constructor call. <BR>
-	 * If dateFormat is specified, then the same will be used as date format for
-	 * parsing date properties. <BR>
+	/*
+	 * (non-Javadoc) A bean is created using beanType. If root bean is not
+	 * specified in XMLBeanParser parse() method then beanType is mandatory
+	 * argument. <BR> If paramTypes, params are specified, they will be used to
+	 * make constructor call. <BR> If dateFormat is specified, then the same
+	 * will be used as date format for parsing date properties. <BR>
 	 * 
-	 * @see com.yukthi.ccg.xml.ParserHandler#createRootBean(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	 * @see com.yukthi.ccg.xml.ParserHandler#createRootBean(com.yukthi.ccg.xml.
+	 * BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public Object createRootBean(BeanNode node, XMLAttributeMap att)
@@ -223,8 +277,12 @@ public class DefaultParserHandler implements ParserHandler
 		return root;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#createBean(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#createBean(com.yukthi.ccg.xml.BeanNode,
+	 * com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public Object createBean(BeanNode node, XMLAttributeMap att)
@@ -232,8 +290,12 @@ public class DefaultParserHandler implements ParserHandler
 		return createBean(node, att, classLoader);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#getDynamicBeanType(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#getDynamicBeanType(com.yukthi.ccg.xml.
+	 * BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public Class<?> getDynamicBeanType(BeanNode node, XMLAttributeMap att)
@@ -260,8 +322,12 @@ public class DefaultParserHandler implements ParserHandler
 		return btype;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#parseTextNodeValue(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#parseTextNodeValue(com.yukthi.ccg.xml.
+	 * BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	public Object parseTextNodeValue(BeanNode node, XMLAttributeMap att)
 	{
@@ -303,9 +369,12 @@ public class DefaultParserHandler implements ParserHandler
 	/**
 	 * Creates the bean.
 	 *
-	 * @param node the node
-	 * @param att the att
-	 * @param loader the loader
+	 * @param node
+	 *            the node
+	 * @param att
+	 *            the att
+	 * @param loader
+	 *            the loader
 	 * @return the object
 	 */
 	public Object createBean(BeanNode node, XMLAttributeMap att, ClassLoader loader)
@@ -389,8 +458,12 @@ public class DefaultParserHandler implements ParserHandler
 		return bean;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#createAttributeBean(com.yukthi.ccg.xml.BeanNode, java.lang.String, java.lang.Class)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#createAttributeBean(com.yukthi.ccg.xml.
+	 * BeanNode, java.lang.String, java.lang.Class)
 	 */
 	@Override
 	public Object createAttributeBean(BeanNode node, String attName, Class<?> type)
@@ -407,8 +480,11 @@ public class DefaultParserHandler implements ParserHandler
 		return NOT_SUPPORTED;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#validateBean(com.yukthi.ccg.xml.BeanNode)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.yukthi.ccg.xml.ParserHandler#validateBean(com.yukthi.ccg.xml.
+	 * BeanNode)
 	 */
 	@Override
 	public void validateBean(BeanNode node) throws ValidateException
@@ -427,12 +503,16 @@ public class DefaultParserHandler implements ParserHandler
 				fact = it.next();
 				fact.finalize();
 			}
-			//BeanParserSession.destroyCurrentSession();
+			// BeanParserSession.destroyCurrentSession();
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#processReservedNode(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#processReservedNode(com.yukthi.ccg.xml.
+	 * BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public Object processReservedNode(BeanNode node, XMLAttributeMap att)
@@ -478,20 +558,6 @@ public class DefaultParserHandler implements ParserHandler
 			return null;
 		}
 
-		if(RNODE_INCLUDE_XML_RES.equals(node.getName()))
-		{
-			String path = att.get(ATTR_PATH, null);
-
-			if(path == null)
-			{
-				throw new IllegalStateException("Mandatory attribute \"path\" is missing in node: " + RNODE_INCLUDE_XML_RES);
-			}
-
-			InputStream xmlInput = DefaultParserHandler.class.getResourceAsStream(path);
-			XMLBeanParser.parse(xmlInput, root);
-			return null;
-		}
-
 		if(RNODE_CONSTANT.equals(node.getName()))
 		{
 			String name = att.get(ATTR_RNODE_NAME, null);
@@ -524,23 +590,26 @@ public class DefaultParserHandler implements ParserHandler
 			return null;
 		}
 
-		if(RNODE_CUSTOM_NODE_HANDLER.equals(node.getName()))
+		String nodeName = node.getName();
+		
+		for(ReserveNodeHandlerDetails reserveNodeHandler : this.reserveNodeHandlers)
 		{
-			Object nodeHandler = createBean(node, classLoader);
-			this.customNodeHandler = (ICustomNodeHandler) nodeHandler;
-			return null;
-		}
-
-		if(customNodeHandler != null)
-		{
-			return customNodeHandler.createCustomNodeBean(node, att);
+			if(!reserveNodeHandler.pattern.matcher(nodeName).matches())
+			{
+				continue;
+			}
+			
+			return reserveNodeHandler.reserveNodeHandler.createCustomNodeBean(this, node, att);
 		}
 
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#getBeanDescription(java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#getBeanDescription(java.lang.Object)
 	 */
 	@Override
 	public String getBeanDescription(Object bean)
@@ -548,8 +617,12 @@ public class DefaultParserHandler implements ParserHandler
 		return bean.getClass().getName();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#getNodeDescription(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#getNodeDescription(com.yukthi.ccg.xml.
+	 * BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public String getNodeDescription(BeanNode node, XMLAttributeMap att)
@@ -572,7 +645,9 @@ public class DefaultParserHandler implements ParserHandler
 		return builder.toString();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.yukthi.ccg.xml.ParserHandler#getDateFormat()
 	 */
 	@Override
@@ -581,15 +656,26 @@ public class DefaultParserHandler implements ParserHandler
 		return dateFormat;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#processReserveNodeEnd(com.yukthi.ccg.xml.BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yukthi.ccg.xml.ParserHandler#processReserveNodeEnd(com.yukthi.ccg.xml
+	 * .BeanNode, com.yukthi.ccg.xml.XMLAttributeMap)
 	 */
 	@Override
 	public void processReserveNodeEnd(BeanNode node, XMLAttributeMap att)
 	{
-		if(customNodeHandler != null)
+		String nodeName = node.getName();
+		
+		for(ReserveNodeHandlerDetails reserveNodeHandler : this.reserveNodeHandlers)
 		{
-			customNodeHandler.handleCustomNodeEnd(node, att);
+			if(!reserveNodeHandler.pattern.matcher(nodeName).matches())
+			{
+				continue;
+			}
+			
+			reserveNodeHandler.reserveNodeHandler.handleCustomNodeEnd(this, node, att);
 		}
 	}
 
@@ -612,8 +698,10 @@ public class DefaultParserHandler implements ParserHandler
 	/**
 	 * Adds the bean factory.
 	 *
-	 * @param type the type
-	 * @param factCls the fact cls
+	 * @param type
+	 *            the type
+	 * @param factCls
+	 *            the fact cls
 	 */
 	public void addBeanFactory(Class<?> type, Class<?> factCls)
 	{
@@ -629,7 +717,9 @@ public class DefaultParserHandler implements ParserHandler
 		typeToFactCls.put(type, factCls);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.yukthi.ccg.xml.ParserHandler#getBeanFactory(java.lang.Class)
 	 */
 	@Override
@@ -660,8 +750,10 @@ public class DefaultParserHandler implements ParserHandler
 	/**
 	 * Creates the bean.
 	 *
-	 * @param node the node
-	 * @param loader the loader
+	 * @param node
+	 *            the node
+	 * @param loader
+	 *            the loader
 	 * @return the object
 	 */
 	public static Object createBean(BeanNode node, ClassLoader loader)
@@ -717,12 +809,18 @@ public class DefaultParserHandler implements ParserHandler
 	/**
 	 * Creates the bean.
 	 *
-	 * @param type the type
-	 * @param preferredType the preferred type
-	 * @param paramTypes the param types
-	 * @param paramValues the param values
-	 * @param dateFormat the date format
-	 * @param loader the loader
+	 * @param type
+	 *            the type
+	 * @param preferredType
+	 *            the preferred type
+	 * @param paramTypes
+	 *            the param types
+	 * @param paramValues
+	 *            the param values
+	 * @param dateFormat
+	 *            the date format
+	 * @param loader
+	 *            the loader
 	 * @return the object
 	 */
 	public static Object createBean(Class<?> type, String preferredType, String paramTypes, String paramValues, String dateFormat, ClassLoader loader)
@@ -800,7 +898,9 @@ public class DefaultParserHandler implements ParserHandler
 				throw new IllegalStateException("No constructor found in class \"" + type.getName() + "\" with arguments: " + paramTypes);
 
 			for(i = 0; i < values.length; i++)
+			{
 				actValues[i] = XMLUtil.parseAttributeObject((String) values[i], paramTypeCls[i], dateFormat);
+			}
 
 			try
 			{
@@ -809,6 +909,20 @@ public class DefaultParserHandler implements ParserHandler
 			{
 				throw new InvalidStateException(ex, "Error in creating bean of type: " + type.getName() + "\nRootCause: " + ex);
 			}
+		}
+		
+		//Handle common collection types
+		if(type.isAssignableFrom(ArrayList.class))
+		{
+			type = ArrayList.class;
+		}
+		else if(type.isAssignableFrom(HashSet.class))
+		{
+			type = HashSet.class;
+		}
+		else if(type.isAssignableFrom(HashMap.class))
+		{
+			type = HashMap.class;
 		}
 
 		try
@@ -926,7 +1040,9 @@ public class DefaultParserHandler implements ParserHandler
 		parser.stopProcessing();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.yukthi.ccg.xml.ParserHandler#getConstantValue(java.lang.String)
 	 */
 	@Override
@@ -960,8 +1076,11 @@ public class DefaultParserHandler implements ParserHandler
 		return value;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthi.ccg.xml.ParserHandler#processText(java.lang.Object, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.yukthi.ccg.xml.ParserHandler#processText(java.lang.Object,
+	 * java.lang.String)
 	 */
 	@Override
 	public String processText(final Object rootBean, String text)
@@ -995,22 +1114,35 @@ public class DefaultParserHandler implements ParserHandler
 
 		return StringUtil.getPatternString(text, valueProvider, expressionPattern, escapePrefix, escapeReplace);
 	}
-
+	
 	/**
-	 * @param customNodeHandler
-	 *            the {@link #customNodeHandler customNodeHandler} to set
+	 * Register reserve node handler.
+	 *
+	 * @param handler the handler
 	 */
-	public void setCustomNodeHandler(ICustomNodeHandler customNodeHandler)
+	@Override
+	public void registerReserveNodeHandler(IReserveNodeHandler handler)
 	{
-		this.customNodeHandler = customNodeHandler;
+		NodeName nodeName = handler.getClass().getAnnotation(NodeName.class);
+		
+		if(nodeName == null)
+		{
+			throw new InvalidArgumentException("Specified handler type '{}' does not have @NodeName annotation", handler.getClass().getName());
+		}
+		
+		Pattern pattern = Pattern.compile(nodeName.namePattern());
+		this.reserveNodeHandlers.add(new ReserveNodeHandlerDetails(pattern, handler));
 	}
 
 	/**
 	 * Sets the expression pattern.
 	 *
-	 * @param expressionPattern the expression pattern
-	 * @param escapePrefix the escape prefix
-	 * @param escapeReplace the escape replace
+	 * @param expressionPattern
+	 *            the expression pattern
+	 * @param escapePrefix
+	 *            the escape prefix
+	 * @param escapeReplace
+	 *            the escape replace
 	 */
 	public void setExpressionPattern(String expressionPattern, String escapePrefix, String escapeReplace)
 	{

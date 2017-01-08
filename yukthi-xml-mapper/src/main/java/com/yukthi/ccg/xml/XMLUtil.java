@@ -217,11 +217,6 @@ public class XMLUtil
 		return newElem;
 	}
 
-	public static String toString(Element element)
-	{
-		return new CCGFormatter().toString(element);
-	}
-
 	private static String toText(Object obj, String defVal)
 	{
 		if(obj == null)

@@ -3,19 +3,20 @@ package com.yukthi.ccg.xml;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.yukthi.ccg.xml.DynamicAttributeAcceptor;
+import com.yukthi.ccg.xml.IDynamicAttributeAcceptor;
 import com.yukthi.ccg.xml.DynamicDataAcceptor;
 
 /**
  * Generic bean that can be used to accept dynamic properties.
+ * 
  * @author akiran
  */
-public class DynamicBean implements DynamicDataAcceptor, DynamicAttributeAcceptor
+public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAcceptor
 {
 	/**
 	 * Map to hold dynamic properties and values.
 	 */
-	private Map<String, Object> properties = new HashMap<>();
+	private Map<String, Object> properties = new HashMap<String, Object>();
 
 	@Override
 	public void set(String propName, String value)
@@ -38,7 +39,7 @@ public class DynamicBean implements DynamicDataAcceptor, DynamicAttributeAccepto
 	{
 		return false;
 	}
-	
+
 	/**
 	 * Gets the map to hold dynamic properties and values.
 	 *
@@ -48,7 +49,7 @@ public class DynamicBean implements DynamicDataAcceptor, DynamicAttributeAccepto
 	{
 		return properties;
 	}
-	
+
 	public Object get(String name)
 	{
 		return properties.get(name);

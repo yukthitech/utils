@@ -144,6 +144,16 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 	{
 		return null;
 	}
+	
+	/**
+	 * Removes specified attribute from this attribute map.
+	 * @param key Key to remove
+	 * @return Removed attribute.
+	 */
+	public Attribute removeAttribute(Object key)
+	{
+		return super.remove(key);
+	}
 
 	/**
 	 * Returns attribute value whose name matches with key.
