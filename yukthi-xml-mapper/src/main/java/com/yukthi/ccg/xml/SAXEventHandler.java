@@ -139,6 +139,8 @@ class SAXEventHandler extends DefaultHandler
 	 */
 	public void endElement(String uri, String name, String qname)
 	{
+		name = XMLUtil.replaceHyphens(name);
+		
 		if(skipModeElements.size() > 0)
 		{
 			skipModeElements.pop();
@@ -345,6 +347,8 @@ class SAXEventHandler extends DefaultHandler
 	 */
 	public void startElement(String uri, String name, String qname, Attributes att)
 	{
+		name = XMLUtil.replaceHyphens(name);
+		
 		if(skipModeElements.size() > 0)
 		{
 			skipModeElements.push(name);
@@ -564,7 +568,7 @@ class SAXEventHandler extends DefaultHandler
 		newNode.setBean(nextBean);
 		setAttributeData(newNode);
 	}
-
+	
 	private void loadIDBasedNode(BeanNode newNode, XMLAttributeMap curAttMap, Class<?> valType, Class<?> dynType)
 	{
 		String attName = (String) curAttMap.getKeySet(false).toArray()[0];

@@ -58,17 +58,25 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 		String name = null;
 		String value = null;
 		boolean isReserved = false;
+		
 		for(int i = 0; i < len; i++)
 		{
 			name = att.getLocalName(i);
+			name = XMLUtil.replaceHyphens(name);
+
 			value = att.getValue(i);
 			isReserved = XMLConstants.CCG_URI.equals(att.getURI(i));
 			super.put(name, new Attribute(value, isReserved));
+			
 			if(!hasReserveAttributes && isReserved)
+			{
 				hasReserveAttributes = true;
+			}
 
 			if(!isReserved)
+			{
 				normalAttCount++;
+			}
 		}
 	}
 

@@ -4,17 +4,17 @@
 		<ccg:entry key="key2">Value2</ccg:entry>
 	</strMap>
 	
-	<intMap>
+	<intMap->
 		<ccg:entry key="1">10</ccg:entry>
 		<ccg:entry key="2">20</ccg:entry>
-	</intMap>
+	</intMap->
 	
-	<beanMap>
-		<ccg:entry key="key1" intVal="5"/>
+	<bean-map>
+		<ccg:entry key="key1" int-val="5"/>
 		<ccg:entry key="key2" intVal="6"/>
-	</beanMap>
+	</bean-map>
 	
-	<objectMap>
-		<ccg:entry key="key1"  ccg:beanType="com.yukthi.test.beans.TestDataBean" intVal="5"/>
-	</objectMap>
+	<object-Map>
+		<ccg:entry key="key1"  ccg:bean-type="com.yukthi.test.beans.TestDataBean" intVal="5"/>
+	</object-Map>
 </mapData>

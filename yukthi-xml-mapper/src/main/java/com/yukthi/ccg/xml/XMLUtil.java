@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -17,6 +19,11 @@ import com.yukthi.utils.exceptions.InvalidStateException;
 
 public class XMLUtil
 {
+	/**
+	 * Pattern to look for while replacing hyphens
+	 */
+	private static Pattern HYPHEN_PATTERN = Pattern.compile("\\-+(.*)");
+	
 	private static HashSet<Class<?>> supportedAttrTypes = new HashSet<Class<?>>();
 
 	static
@@ -270,5 +277,29 @@ public class XMLUtil
 	public static void setTextNodeValue(Element textNode, Object value)
 	{
 		setTextNodeValue(textNode, value, "null");
+	}
+
+	/**
+	 * Replaces hyphens with camel case.
+	 * @param name Name in which hyphens to be replaced
+	 * @return Result camel case string
+	 */
+	public static String replaceHyphens(String name)
+	{
+		if(name.indexOf("-") < 0)
+		{
+			return name;
+		}
+		
+		Matcher matcher = HYPHEN_PATTERN.matcher(name);
+		StringBuffer builder = new StringBuffer();
+		
+		while(matcher.find())
+		{
+			matcher.appendReplacement(builder, matcher.group(1).toUpperCase());
+		}
+		
+		matcher.appendTail(builder);
+		return builder.toString();
 	}
 }
