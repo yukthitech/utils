@@ -72,7 +72,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	/**
 	 * Map to hold file fields.
 	 */
-	private List<RequestPart> multiparts = new ArrayList<>();
+	private List<RequestPart> multiparts = new ArrayList<RequestPart>();
 
 	/**
 	 * Object mapper that will be used to convert objects to json

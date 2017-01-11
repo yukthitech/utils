@@ -388,7 +388,7 @@ public class CommonUtils
 		//convert to map
 		try
 		{
-			Map<K, V> map = new HashMap<>();
+			Map<K, V> map = new HashMap<K, V>();
 			Object value = null;
 			
 			for(Object obj : list)

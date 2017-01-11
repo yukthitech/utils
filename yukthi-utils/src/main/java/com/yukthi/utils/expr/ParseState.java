@@ -12,7 +12,7 @@ class ParseState
 	/**
 	 * Tokens of the expression.
 	 */
-	List<Token> tokens = new LinkedList<>();
+	List<Token> tokens = new LinkedList<Token>();
 	
 	/**
 	 * Characters from expression string.

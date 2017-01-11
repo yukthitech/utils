@@ -76,7 +76,7 @@ public class RecursiveAnnotationFactory
 		/**
 		 * Map to keep track overridden properties
 		 */
-		private Map<String, Object> overriddenProp = new HashMap<>();
+		private Map<String, Object> overriddenProp = new HashMap<String, Object>();
 		
 		public AnnotationMethodHandler(Annotation actualAnnotation)
 		{
@@ -108,7 +108,7 @@ public class RecursiveAnnotationFactory
 		private Integer[] getArrayIndexes(String methodDet, String arrStr)
 		{
 			Matcher matcher = ARR_IDX_PATTERN.matcher(arrStr);
-			List<Integer> indexes = new ArrayList<>();
+			List<Integer> indexes = new ArrayList<Integer>();
 			
 			while(matcher.find())
 			{
@@ -278,7 +278,7 @@ public class RecursiveAnnotationFactory
 	private <A extends Annotation> AnnotationMethodHandler<A> newAnnotation(A actualAnnotation)
 	{
 		//create handler and proxy class
-		AnnotationMethodHandler<A> handler = new AnnotationMethodHandler<>(actualAnnotation);
+		AnnotationMethodHandler<A> handler = new AnnotationMethodHandler<A>(actualAnnotation);
 		A proxy = (A)Proxy.newProxyInstance(RecursiveAnnotationFactory.class.getClassLoader(), new Class[]{actualAnnotation.annotationType()}, handler);
 		
 		handler.proxyAnnotation = proxy;
@@ -306,7 +306,7 @@ public class RecursiveAnnotationFactory
 		String propertyTokens[] = null;
 		Object value = null;
 		AnnotationMethodHandler<Annotation> handler = null;
-		List<OverrideProperty> overridePropertyLst = new ArrayList<>();
+		List<OverrideProperty> overridePropertyLst = new ArrayList<OverrideProperty>();
 		String methodName = null;
 		
 		//loop through parent annotation methods and find which methods are overriding target annotation properties
@@ -355,7 +355,7 @@ public class RecursiveAnnotationFactory
 			if(handler == null)
 			{
 				//create new handler and proxy annotation
-				handler = newAnnotation(targetAnnotation);
+				handler = newAnnotation((Annotation) targetAnnotation);
 			}
 			
 			methodName = parentAnnotation.annotationType().getName() + "." + method.getName() + "()";
@@ -434,7 +434,7 @@ public class RecursiveAnnotationFactory
 		
 		//queue to maintain annotations order level wise
 		//next level annotation are appended, and annotation are popped from start for processing
-		LinkedList<Annotation> annotationQueue = new LinkedList<>();
+		LinkedList<Annotation> annotationQueue = new LinkedList<Annotation>();
 		
 		//find other annotations and add them to queue for further recursive processing
 		Annotation annotations[] = annotatedElement.getAnnotations();
@@ -495,7 +495,7 @@ public class RecursiveAnnotationFactory
 	 */
 	public <A extends Annotation> List<A> findAllAnnotationsRecursively(AnnotatedElement annotatedElement, Class<A> targetAnnotationType)
 	{
-		List<A> matchingAnnot = new ArrayList<>();
+		List<A> matchingAnnot = new ArrayList<A>();
 		
 		//check if annotation is defined directly.
 		A targetAnnotation = annotatedElement.getAnnotation(targetAnnotationType);
@@ -519,7 +519,7 @@ public class RecursiveAnnotationFactory
 		
 		//queue to maintain annotations order level wise
 		//next level annotation are appended, and annotation are popped from start for processing
-		LinkedList<Annotation> annotationQueue = new LinkedList<>();
+		LinkedList<Annotation> annotationQueue = new LinkedList<Annotation>();
 		
 		//find other annotations and add them to queue for further recursive processing
 		Annotation annotations[] = annotatedElement.getAnnotations();

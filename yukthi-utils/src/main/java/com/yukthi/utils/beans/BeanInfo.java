@@ -45,13 +45,13 @@ class BeanInfo
 	/**
 	 * Map of property information
 	 */
-	private Map<String, PropertyInfo> properties = new HashMap<>();
+	private Map<String, PropertyInfo> properties = new HashMap<String, PropertyInfo>();
 	
 	/**
 	 * Maintains custom mappings. Key would be the source class which needs custom mapping
 	 * and value would field to mapping-info which involves custom mapping. 
 	 */
-	private Map<Class<?>, List<MappingInfo>> customMappings = new HashMap<>();
+	private Map<Class<?>, List<MappingInfo>> customMappings = new HashMap<Class<?>, List<MappingInfo>>();
 	
 	/**
 	 * Instantiates a new bean info.
@@ -118,7 +118,7 @@ class BeanInfo
 				
 		if(mappings == null)
 		{
-			mappings = new ArrayList<>();
+			mappings = new ArrayList<MappingInfo>();
 			customMappings.put(forType, mappings);
 		}
 		

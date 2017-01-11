@@ -54,7 +54,7 @@ public class ExpressionEvaluator
 			throw new ParseException("Invalid single-token encountered while parsing expression - {}", expressionStr);
 		}
 		
-		List<Object> operands = new ArrayList<>();
+		List<Object> operands = new ArrayList<Object>();
 		int index = 0;
 		IExpressionPart finalExpression = null;
 		
@@ -224,8 +224,8 @@ public class ExpressionEvaluator
 		Token tokens[] = tokenLst.toArray(new Token[0]);
 		Token token = null, subtoken = null;
 		
-		LinkedList<Token> outputQueue = new LinkedList<>();
-		Stack<Token> stack = new Stack<>();
+		LinkedList<Token> outputQueue = new LinkedList<Token>();
+		Stack<Token> stack = new Stack<Token>();
 		int maxLen = tokens.length - 1;
 		boolean found = false;
 		

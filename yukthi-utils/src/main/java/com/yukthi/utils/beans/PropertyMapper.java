@@ -54,7 +54,7 @@ public class PropertyMapper
 	/**
 	 * Cache map which caches the properties of different classes
 	 */
-	private static Map<Class<?>, BeanInfo> typeToProp = new HashMap<>();
+	private static Map<Class<?>, BeanInfo> typeToProp = new HashMap<Class<?>, BeanInfo>();
 	
 	/**
 	 * Validates the field information specified in the "mapping" and adds the mapping information

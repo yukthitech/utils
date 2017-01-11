@@ -39,12 +39,12 @@ public class NestedProperty
 	/**
 	 * List of getters in sequence for this nested property
 	 */
-	private List<Method> getters = new ArrayList<>();
+	private List<Method> getters = new ArrayList<Method>();
 	
 	/**
 	 * List of setters in sequence for this nested property
 	 */
-	private List<Method> setters = new ArrayList<>();
+	private List<Method> setters = new ArrayList<Method>();
 	
 	/**
 	 * Result type of this nested property

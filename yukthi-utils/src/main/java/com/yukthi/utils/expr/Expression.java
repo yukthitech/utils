@@ -39,7 +39,7 @@ public class Expression
 	 */
 	public Set<String> getVariableNames()
 	{
-		Set<String> variableNames = new HashSet<>();
+		Set<String> variableNames = new HashSet<String>();
 		expressionPart.collectVariables(variableNames);
 		
 		return variableNames;

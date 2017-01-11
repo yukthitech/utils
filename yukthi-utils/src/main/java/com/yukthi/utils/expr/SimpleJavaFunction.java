@@ -167,7 +167,7 @@ public class SimpleJavaFunction implements IFunction
 	@Override
 	public Object evaluate(Object[] parameters)
 	{
-		List<Object> methodArgs = new ArrayList<>();
+		List<Object> methodArgs = new ArrayList<Object>();
 		
 		Class<?> funcParamTypes[] = this.method.getParameterTypes();
 		int lastIdx = this.method.getParameterTypes().length - 1;

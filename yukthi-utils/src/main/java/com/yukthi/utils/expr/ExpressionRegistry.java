@@ -26,12 +26,12 @@ public class ExpressionRegistry
 	/**
 	 * Operator map.
 	 */
-	private Map<String, IOperator> operatorMap = new HashMap<>();
+	private Map<String, IOperator> operatorMap = new HashMap<String, IOperator>();
 	
 	/**
 	 * Function map.
 	 */
-	private Map<String, IFunction> functionMap = new HashMap<>();
+	private Map<String, IFunction> functionMap = new HashMap<String, IFunction>();
 	
 	/**
 	 * Adds specified operator to the registry.

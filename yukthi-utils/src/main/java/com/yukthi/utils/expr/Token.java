@@ -91,7 +91,7 @@ class Token
 	 */
 	public static List<Token> tokens(String... tokens)
 	{
-		List<Token> tokenLst = new ArrayList<>();
+		List<Token> tokenLst = new ArrayList<Token>();
 		
 		for(String token : tokens)
 		{

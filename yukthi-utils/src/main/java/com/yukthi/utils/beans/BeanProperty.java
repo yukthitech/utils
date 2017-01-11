@@ -209,7 +209,7 @@ public class BeanProperty
 	{
 		PropertyDescriptor propertyDescriptors[] = PropertyUtils.getPropertyDescriptors(beanType);
 		
-		List<BeanProperty> beanProperties = new ArrayList<>(propertyDescriptors.length);
+		List<BeanProperty> beanProperties = new ArrayList<BeanProperty>(propertyDescriptors.length);
 		Field field = null;
 		
 		for(PropertyDescriptor prop : propertyDescriptors)
