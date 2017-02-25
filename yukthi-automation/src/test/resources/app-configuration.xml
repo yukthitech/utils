@@ -1,0 +1,57 @@
+<app xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+
+	<!-- 
+		Folder where test suite xmls can be found 
+	-->
+	<testSuiteFolder>./executeAlltestcases/test</testSuiteFolder>
+
+	<!--
+		Specifies base packages to be scanned for steps and validators.
+		
+		Note: By default com.yukthitech is scanned.
+	-->
+	<!--   
+		<wrap:basePackages>
+			<basePackage>com.yukthitech</basePackage>
+		</wrap:basePackages>
+	-->
+	
+	<!--
+		Different configurations can be specified here. These configuration in turn
+		will be used by steps and validators. 
+	 -->
+	<wrap:configurations>
+	
+		<!-- Selenium configuration for web based automation -->	
+		<selenium-configuration>
+			<wrap:drivers>
+				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
+				</driver>
+				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
+					<system-property name="webdriver.chrome.driver" value="./drivers/chromedriver.exe"/>
+				</driver>
+			</wrap:drivers>
+		</selenium-configuration>
+	
+		<!-- Db configuration for sql base steps -->
+		<db-configuration>
+			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>com.mysql.jdbc.Driver</driverClassName>
+				<url>jdbc:mysql://localhost:3306/agilepro</url>
+				<username>root</username>
+				<password>pritam285</password>
+			</dataSource>
+		</db-configuration>
+			
+	</wrap:configurations>
+
+	<!--
+		Specify common data beans that can be used across the test suites. 
+	 -->
+	<!--  
+		<wrap:data-beans>
+			<data-bean name="bean1" ccg:beanType="com.yodlee.TestBean">
+			</data-bean>
+		</wrap:data-beans>
+	-->
+</app>
