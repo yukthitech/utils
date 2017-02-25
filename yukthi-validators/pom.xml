@@ -71,7 +71,7 @@
 	</dependencies>
 
 	<parent>
-		<groupId>com.yukthi</groupId>
+		<groupId>com.yukthitech</groupId>
 		<artifactId>yukthi-commons-parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../yukthi-commons-parent</relativePath>
