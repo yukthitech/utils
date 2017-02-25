@@ -15,6 +15,6 @@
 	</beanList>
 	
 	<objectList>
-		<ccg:element ccg:beanType="com.yukthi.test.beans.TestDataBean" intVal="5"/>
+		<ccg:element ccg:beanType="com.yukthitech.test.beans.TestDataBean" intVal="5"/>
 	</objectList>
 </listData>

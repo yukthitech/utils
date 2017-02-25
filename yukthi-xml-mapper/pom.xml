@@ -24,6 +24,14 @@
 			<version>3.4</version>
 		</dependency>
 
+		<!-- Used by class scanning services which in turn is used to load repositories, 
+			actions, models, etc -->
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.9-RC2</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
@@ -32,7 +40,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.yukthi</groupId>
+			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-utils</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
@@ -53,7 +61,7 @@
 	</build>
 
 	<parent>
-		<groupId>com.yukthi</groupId>
+		<groupId>com.yukthitech</groupId>
 		<artifactId>yukthi-commons-parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../yukthi-commons-parent</relativePath>
