@@ -1,4 +1,4 @@
-package com.yukthi.persistence.repository.annotations;
+package com.yukthitech.persistence.repository.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

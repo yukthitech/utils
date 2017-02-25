@@ -21,31 +21,17 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
+package com.yukthitech.persistence.repository.search;
 
 /**
- * Specifies the type of target native query
+ * Used to indicate search method return type can hold dynamic return values (which are not part of standard fields).
  * @author akiran
  */
-public enum NativeQueryType
+public interface IDynamicSearchResult
 {
 	/**
-	 * Indicates target query type is read query
+	 * Adds dynamic field with value.
+	 * @param field Field with value
 	 */
-	READ,
-	
-	/**
-	 * Indicates target query type is insert query
-	 */
-	INSERT,
-	
-	/**
-	 * Indicates target query type is update query
-	 */
-	UPDATE,
-	
-	/**
-	 * Indicates target query type is delete query
-	 */
-	DELETE
+	public void addField(DynamicResultField field);
 }

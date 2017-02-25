@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2016 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
+ * Copyright (c) 2015 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,22 +21,30 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
+package com.yukthitech.persistence.repository.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Enumeration of character sets.
+ * Conditions that can be specified at method level
  * @author akiran
  */
-public enum Charset
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+public @interface MethodConditions
 {
-	UTF8,
+	/**
+	 * Specifies null based condition checks
+	 * @return null based conditions
+	 */
+	public NullCheck[] nullChecks() default {};
 	
-	UTF16,
-	
-	LATIN1;
-	
-	public String getCharsetName()
-	{
-		return name();
-	}
+	/**
+	 * Default conditions on the method
+	 * @return default conditions on the method
+	 */
+	public DefaultCondition[] conditions() default {};
 }

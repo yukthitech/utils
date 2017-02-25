@@ -21,17 +21,21 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.search;
+package com.yukthitech.persistence.repository.annotations;
 
 /**
- * Used to indicate search method return type can hold dynamic return values (which are not part of standard fields).
+ * Enumerates the order by types
  * @author akiran
  */
-public interface IDynamicSearchResult
+public enum OrderByType
 {
 	/**
-	 * Adds dynamic field with value.
-	 * @param field Field with value
+	 * Descending order
 	 */
-	public void addField(DynamicResultField field);
+	DESC,
+	
+	/**
+	 * Ascending order
+	 */
+	ASC
 }

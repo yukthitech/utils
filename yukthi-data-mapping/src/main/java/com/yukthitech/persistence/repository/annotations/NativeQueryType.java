@@ -21,21 +21,31 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
+package com.yukthitech.persistence.repository.annotations;
 
 /**
- * Enumerates the order by types
+ * Specifies the type of target native query
  * @author akiran
  */
-public enum OrderByType
+public enum NativeQueryType
 {
 	/**
-	 * Descending order
+	 * Indicates target query type is read query
 	 */
-	DESC,
+	READ,
 	
 	/**
-	 * Ascending order
+	 * Indicates target query type is insert query
 	 */
-	ASC
+	INSERT,
+	
+	/**
+	 * Indicates target query type is update query
+	 */
+	UPDATE,
+	
+	/**
+	 * Indicates target query type is delete query
+	 */
+	DELETE
 }

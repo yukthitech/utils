@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.search;
+package com.yukthitech.persistence.repository.search;
 
 /**
  * Dynamic field with value from search results

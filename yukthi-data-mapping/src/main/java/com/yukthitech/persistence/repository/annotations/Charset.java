@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2015 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
+ * Copyright (c) 2016 "Yukthi Techsoft Pvt. Ltd." (http://yukthi-tech.co.in)
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,22 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
+package com.yukthitech.persistence.repository.annotations;
 
 /**
- * Operator that can be used to join conditions
+ * Enumeration of character sets.
  * @author akiran
  */
-public enum JoinOperator
+public enum Charset
 {
-	AND, OR;
+	UTF8,
+	
+	UTF16,
+	
+	LATIN1;
+	
+	public String getCharsetName()
+	{
+		return name();
+	}
 }

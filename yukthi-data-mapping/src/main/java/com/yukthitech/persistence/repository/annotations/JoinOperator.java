@@ -21,30 +21,13 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.yukthitech.persistence.repository.annotations;
 
 /**
- * Conditions that can be specified at method level
+ * Operator that can be used to join conditions
  * @author akiran
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-public @interface MethodConditions
+public enum JoinOperator
 {
-	/**
-	 * Specifies null based condition checks
-	 * @return null based conditions
-	 */
-	public NullCheck[] nullChecks() default {};
-	
-	/**
-	 * Default conditions on the method
-	 * @return default conditions on the method
-	 */
-	public DefaultCondition[] conditions() default {};
+	AND, OR;
 }

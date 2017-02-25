@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package com.yukthi.persistence.repository.annotations;
+package com.yukthitech.persistence.repository.annotations;
 
 /**
  * Used in {@link Field} annotation in update queries, to update entity with value based on current value.
