@@ -1,7 +1,7 @@
-package com.yukthi.excel.importer;
+package com.yukthitech.excel.importer;
 
-import static com.yukthi.excel.importer.IExcelImporterConstants.DEFAULT_DATE_FORMAT;
-import static com.yukthi.excel.importer.IExcelImporterConstants.DEFAULT_NUMBER_FORMAT;
+import static com.yukthitech.excel.importer.IExcelImporterConstants.DEFAULT_DATE_FORMAT;
+import static com.yukthitech.excel.importer.IExcelImporterConstants.DEFAULT_NUMBER_FORMAT;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,10 +17,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import com.yukthi.excel.importer.data.Column;
-import com.yukthi.excel.importer.data.ColumnType;
-import com.yukthi.excel.importer.data.IDataDigester;
-import com.yukthi.excel.importer.data.IExcelDataFactory;
+import com.yukthitech.excel.importer.data.Column;
+import com.yukthitech.excel.importer.data.ColumnType;
+import com.yukthitech.excel.importer.data.IDataDigester;
+import com.yukthitech.excel.importer.data.IExcelDataFactory;
 
 public class ExcelImporter
 {

@@ -1,4 +1,4 @@
-package com.yukthi.excel.exporter.data;
+package com.yukthitech.excel.exporter.data;
 
 public class Cell
 {

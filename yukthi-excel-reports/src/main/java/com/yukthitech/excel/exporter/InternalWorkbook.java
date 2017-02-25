@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package com.yukthi.excel.exporter;
+package com.yukthitech.excel.exporter;
 
 import java.awt.Color;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.yukthi.excel.exporter;
+package com.yukthitech.excel.exporter;
 
 import java.awt.Color;
 import java.io.FileOutputStream;
@@ -13,9 +13,9 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
-import com.yukthi.excel.exporter.data.IExcelDataReport;
-import com.yukthi.excel.exporter.style.Border;
-import com.yukthi.excel.exporter.style.BorderStyle;
+import com.yukthitech.excel.exporter.data.IExcelDataReport;
+import com.yukthitech.excel.exporter.style.Border;
+import com.yukthitech.excel.exporter.style.BorderStyle;
 
 public class ExcelExporter
 {
@@ -85,19 +85,19 @@ public class ExcelExporter
 			rowIndex++;
 		}
 		
-		List<List<com.yukthi.excel.exporter.data.Cell>> rows = report.rows();
+		List<List<com.yukthitech.excel.exporter.data.Cell>> rows = report.rows();
 		
 		if(rows != null && !rows.isEmpty())
 		{
 			Row currentRow = null;
 			int cellIndex = 0;
 			
-			for(List<com.yukthi.excel.exporter.data.Cell> row: rows)
+			for(List<com.yukthitech.excel.exporter.data.Cell> row: rows)
 			{
 				currentRow = sheet.createRow(rowIndex);
 				cellIndex = 0;
 				
-				for(com.yukthi.excel.exporter.data.Cell dataCell: row)
+				for(com.yukthitech.excel.exporter.data.Cell dataCell: row)
 				{
 					cell = currentRow.createCell(cellIndex);
 					cell.setCellValue(dataCell.getValue());
@@ -110,7 +110,7 @@ public class ExcelExporter
 			}
 
 			//Autosize all the columns as per data content
-			List<com.yukthi.excel.exporter.data.Cell> row = rows.get(0);
+			List<com.yukthitech.excel.exporter.data.Cell> row = rows.get(0);
 			int colCount = row.size();
 			
 			for(int i = 0; i < colCount; i++)

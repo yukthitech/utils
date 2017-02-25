@@ -1,4 +1,4 @@
-package com.yukthi.excel.util;
+package com.yukthitech.excel.util;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package com.yukthi.excel.exporter;
+package com.yukthitech.excel.exporter;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -31,8 +31,8 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.yukthi.excel.exporter.data.Cell;
-import com.yukthi.excel.exporter.data.IExcelDataReport;
+import com.yukthitech.excel.exporter.data.Cell;
+import com.yukthitech.excel.exporter.data.IExcelDataReport;
 
 /**
  * @author akiran

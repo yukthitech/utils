@@ -1,6 +1,6 @@
-package com.yukthi.excel.importer.data;
+package com.yukthitech.excel.importer.data;
 
-import static com.yukthi.excel.importer.IExcelImporterConstants.*;
+import static com.yukthitech.excel.importer.IExcelImporterConstants.*;
 
 import java.text.ParseException;
 import java.util.HashMap;

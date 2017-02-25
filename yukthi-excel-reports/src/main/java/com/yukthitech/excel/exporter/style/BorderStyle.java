@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package com.yukthi.excel.exporter.style;
+package com.yukthitech.excel.exporter.style;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 

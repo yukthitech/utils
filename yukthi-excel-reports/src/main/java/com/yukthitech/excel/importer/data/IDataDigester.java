@@ -1,4 +1,4 @@
-package com.yukthi.excel.importer.data;
+package com.yukthitech.excel.importer.data;
 
 public interface IDataDigester<T>
 {

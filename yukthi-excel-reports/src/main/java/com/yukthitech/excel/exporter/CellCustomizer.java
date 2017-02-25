@@ -21,11 +21,11 @@
  * SOFTWARE.
  */
 
-package com.yukthi.excel.exporter;
+package com.yukthitech.excel.exporter;
 
 import java.awt.Color;
 
-import com.yukthi.excel.exporter.style.Border;
+import com.yukthitech.excel.exporter.style.Border;
 
 /**
  * Used to customize the heading cell of the generated excel sheets
