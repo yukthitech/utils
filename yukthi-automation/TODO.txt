@@ -1,0 +1,73 @@
+DML query step
+Multi dml query step (single transaction)
+
+setup and cleanup
+
+functions (repeatable set of stpes)
+	step to invoke functions with params
+
+step to set context variables
+	value in turn can be expression on context
+
+Validate form with field level validations
+
+step to load property file on context 
+
+invoke method step (with params)
+	result should be set on context
+		result attribute name
+		
+	exception also on context
+	
+	ability to validate exception or result (Which is on result)
+
+	ability to invoke method with different variations - form validations
+
+
+ui form validator
+	different variations of data
+	
+Drag and drop step
+
+==================================================	
+Test cases
+
+==================================================	
+
+Loggers
+	local console logger
+	local file log monitor
+	
+	remote file monitor
+	
+Ability to define multiple log monitors -> in app config file
+	mark them as default ones
+	
+Ability to include or exclude log monitors
+
+
+================================================
+Reports
+	Simple overview report without external dependencies
+		as pdf??
+		logo??
+	
+	Detail report
+		logo
+		links to logs (normal log + log monitors)
+		stripped tables
+			highlighting row
+		fixed position headers
+		Filters based on 
+			test suite and 
+			test case
+			success/failure/skipped
+			
+	Log displayers
+		Pattern to define columns
+		Line grouping
+			based on group values
+		excluded and included line texts	
+		group value based filter
+	
+	
