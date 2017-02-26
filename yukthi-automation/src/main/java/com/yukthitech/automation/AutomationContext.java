@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.yukthitech.automation.config.IApplicationConfiguration;
+import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IConfiguration;
 
 /**
@@ -29,7 +29,7 @@ public class AutomationContext
 	/**
 	 * Application configuration.
 	 */
-	private IApplicationConfiguration appConfiguration;
+	private ApplicationConfiguration appConfiguration;
 	
 	/**
 	 * Completed test suite list.
@@ -49,13 +49,13 @@ public class AutomationContext
 	/**
 	 * Maintains list of required sub configurations required by loaded test suites.
 	 */
-	private Set<IConfiguration<?>> requiredConfiurations = new HashSet<>();
+	private Map<Class<?>, IConfiguration<?>> requiredConfiurations = new HashMap<>();
 	
 	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
 	 */
-	public AutomationContext(IApplicationConfiguration appConfiguration)
+	public AutomationContext(ApplicationConfiguration appConfiguration)
 	{
 		this.appConfiguration = appConfiguration;
 	}
@@ -125,7 +125,7 @@ public class AutomationContext
 	 */
 	void addRequireConfiguration(IConfiguration<?> configuration)
 	{
-		this.requiredConfiurations.add(configuration);
+		this.requiredConfiurations.put(configuration.getClass(), configuration);
 	}
 	
 	/**
@@ -134,7 +134,18 @@ public class AutomationContext
 	 */
 	public Collection<IConfiguration<?>> getConfigurations()
 	{
-		return Collections.unmodifiableCollection(requiredConfiurations);
+		return Collections.unmodifiableCollection(requiredConfiurations.values());
+	}
+	
+	/**
+	 * Fetches the configuration of specified configuration type.
+	 * @param configType configuration type to fetch
+	 * @return matching configuration
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends IConfiguration<?>> T getConfiguration(Class<T> configType)
+	{
+		return (T) requiredConfiurations.get(configType);
 	}
 	
 	/**
@@ -142,7 +153,7 @@ public class AutomationContext
 	 *
 	 * @return the application configuration
 	 */
-	public IApplicationConfiguration getAppConfiguration()
+	public ApplicationConfiguration getAppConfiguration()
 	{
 		return appConfiguration;
 	}

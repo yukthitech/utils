@@ -12,12 +12,13 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
-import com.yukthitech.automation.config.IApplicationConfiguration;
+import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IConfiguration;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
+import com.yukthitech.ccg.xml.reserved.NodeName;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -25,6 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
+@NodeName(namePattern = ".*")
 public class AutomationReserveNodeHandler implements IReserveNodeHandler
 {
 	private static Logger logger = LogManager.getLogger(AutomationReserveNodeHandler.class);
@@ -42,7 +44,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	/**
 	 * Current application configuration.
 	 */
-	private IApplicationConfiguration applicationConfiguration;
+	private ApplicationConfiguration applicationConfiguration;
 	
 	/**
 	 * Current context.
@@ -55,7 +57,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	 * @param appConfiguraion
 	 *            the app configuraion
 	 */
-	public AutomationReserveNodeHandler(AutomationContext context, IApplicationConfiguration appConfiguraion)
+	public AutomationReserveNodeHandler(AutomationContext context, ApplicationConfiguration appConfiguraion)
 	{
 		this.context = context;
 		this.applicationConfiguration = appConfiguraion;

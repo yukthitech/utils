@@ -99,7 +99,7 @@ public class SeleniumDriverConfig
 	 * @param name Name of the property.
 	 * @param value value of the property.
 	 */
-	public void addSytemProperty(String name, String value)
+	public void setSystemProperty(String name, String value)
 	{
 		this.systemProperties.put(name, value);
 	}

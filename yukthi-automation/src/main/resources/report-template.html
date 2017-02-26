@@ -1,0 +1,127 @@
+<html>
+	<head>
+		<title>Test Results</title>
+		
+		<style>
+			th
+			{
+				background-color: rgb(210, 210, 210);
+				font-weight: bold;
+				font-size: 1.2em;
+				text-align: center;
+			}
+
+			td
+			{
+				text-align: center;
+			}
+			
+			.successVal
+			{
+				font-weight: bold;
+				color: green;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+		</style>
+	</head>
+	
+	<body>
+		<table style="width: 100%;">
+			<tr>
+				<th>Total Test Cases</th>
+				<th>Success Count</th>
+				<th>Failure Count</th>
+				<th>Error Count</th>
+			</tr>
+			<tr>
+				<td>${fullTestCount}</td>
+				<td>${successCount}</td>
+				<td class="errorVal">${failureCount}</td>
+				<td class="errorVal">${errorCount}</td>
+			</tr>
+		</table>
+		
+		<br/><br/>
+		<table>
+			<tr>
+				<th>Test Suite</th>
+				<th>Status</th>
+				<th>Status Message</th>
+				<th>Success Count</th>
+				<th>Failure Count</th>
+				<th>Error Count</th>
+			</tr>
+	
+			<#list testSuiteResults as testSuiteResult>
+				<tr>
+					<td>
+						<#if testSuiteResult.statusString == 'SKIPPED'>
+							${testSuiteResult.suiteName}
+						<#else>
+							<a href="#testSuite_${testSuiteResult.suiteName}">${testSuiteResult.suiteName}</a>
+						</#if>
+					</td>
+					<td>
+						${testSuiteResult.status}
+					</td>
+					<td>
+					</td>
+					<td>
+						${testSuiteResult.successCount}
+					</td>
+					<td class="errorVal">
+						${testSuiteResult.failureCount}
+					</td>
+					<td class="errorVal">
+						${testSuiteResult.errorCount}
+					</td>
+				</tr>
+			</#list>
+		</table>
+	
+		<hr/>
+		<br/><br/>
+		<#list testSuiteResults as testSuiteResult>
+			<#if testSuiteResult.statusString != 'SKIPPED'>
+				<table id="testSuite_${testSuiteResult.suiteName}" style="width: 100%;">
+					<tr>
+						<th colspan="3" style="background-color: blue; color: white;">
+							${testSuiteResult.suiteName}
+						</th>
+					</tr>
+					<tr>
+						<th>Test Case</th>
+						<th>Status</th>
+						<th>Log</th>
+					</tr>
+			
+					<#list testSuiteResult.testCaseResults as testResult>
+						<tr>
+							<td>
+								${testResult.testCaseName}
+							</td>
+							<td class="<#if testResult.statusString == 'SUCCESSUFUL'>successVal<#else>errorVal</#if>" >
+								${testResult.statusString}
+							</td>
+							<td>
+								<a href="./logs/${testSuiteResult.suiteName}_${testResult.testCaseName}.log">Log</a>
+							</td>
+						</tr>
+					</#list>
+				</table>
+				
+				<BR/>
+				<HR/>
+				<BR/>
+			</#if>
+		</#list>
+		
+		
+	</body>
+</html>

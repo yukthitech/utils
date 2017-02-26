@@ -2,8 +2,11 @@ package com.yukthitech.automation.test;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +42,13 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	 * Description about test case.
 	 */
 	private String description;
+	
+	/**
+	 * Dependency test cases within the current test suite. Dependencies are considered valid only if they occur
+	 * in the same test suite and occurs before current test suite. If a valid dependency test case
+	 * was not executed successfully then current test case will be skipped.
+	 */
+	private String dependencies;
 
 	/**
 	 * Steps for the test case.
@@ -69,6 +79,41 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+	
+	/**
+	 * Gets the dependency test cases within the current test suite. Dependencies are considered valid only if they occur in the same test suite and occurs before current test suite. If a valid dependency test case was not executed successfully then current test case will be skipped.
+	 *
+	 * @return the dependency test cases within the current test suite
+	 */
+	public String getDependencies()
+	{
+		return dependencies;
+	}
+
+	/**
+	 * Sets the dependency test cases within the current test suite. Dependencies are considered valid only if they occur in the same test suite and occurs before current test suite. If a valid dependency test case was not executed successfully then current test case will be skipped.
+	 *
+	 * @param dependencies the new dependency test cases within the current test suite
+	 */
+	public void setDependencies(String dependencies)
+	{
+		this.dependencies = dependencies;
+	}
+	
+	/**
+	 * Fetches dependencies as a set.
+	 * @return dependencies set
+	 */
+	public Set<String> getDependenciesSet()
+	{
+		if(StringUtils.isBlank(dependencies))
+		{
+			return null;
+		}
+		
+		String depArr[] = dependencies.trim().split("\\s*\\,\\s*");
+		return new HashSet<>(Arrays.asList(depArr));
 	}
 
 	/**

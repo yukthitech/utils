@@ -3,18 +3,21 @@ package com.yukthitech.automation.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Configuration needed by selenium.
  * @author akiran
  */
-public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurationArgs>
+public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurationArgs>, Validateable
 {
 	private static Logger logger = LogManager.getLogger(SeleniumConfiguration.class);
 	
@@ -27,6 +30,16 @@ public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurati
 	 * Active driver to be used for the current automation execution.
 	 */
 	private WebDriver activeDriver;
+	
+	/**
+	 * Active driver name, useful during driver reset.
+	 */
+	private String activeDriverName;
+	
+	/**
+	 * Base url of the application.
+	 */
+	private String baseUrl;
 	
 	@Override
 	public Class<SeleniumConfigurationArgs> getArgumentBeanType()
@@ -63,6 +76,41 @@ public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurati
 		}
 		
 		return firstName;
+	}
+	
+	/**
+	 * Sets the base url of the application.
+	 *
+	 * @param baseUrl the new base url of the application
+	 */
+	public void setBaseUrl(String baseUrl)
+	{
+		if(baseUrl.endsWith("/"))
+		{
+			baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+		}
+		
+		this.baseUrl = baseUrl;
+	}
+	
+	/**
+	 * Gets the base url of the application.
+	 *
+	 * @return the base url of the application
+	 */
+	public String getBaseUrl()
+	{
+		return baseUrl;
+	}
+	
+	public String getResourceUrl(String resource)
+	{
+		if(!resource.startsWith("/"))
+		{
+			resource = "/" + resource;
+		}
+		
+		return baseUrl + resource;
 	}
 
 	/* (non-Javadoc)
@@ -101,6 +149,7 @@ public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurati
 		
 		try
 		{
+			activeDriverName = driverName;
 			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
 		}catch(Exception ex)
 		{
@@ -115,5 +164,36 @@ public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurati
 	public WebDriver getWebDriver()
 	{
 		return activeDriver;
+	}
+	
+	/**
+	 * Recreates the driver object. Note this method will not close
+	 * the existing driver.
+	 */
+	public void resetDriver()
+	{
+		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
+		
+		try
+		{
+			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName());
+		}
+	}
+
+	@Override
+	public void validate() throws ValidateException
+	{
+		if(drivers.isEmpty())
+		{
+			throw new ValidateException("No drivers are specified.");
+		}
+		
+		if(StringUtils.isBlank(baseUrl))
+		{
+			throw new ValidateException("No base url is specified.");
+		}
 	}
 }

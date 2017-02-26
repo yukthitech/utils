@@ -1,8 +1,6 @@
 package com.yukthitech.automation.test;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -11,135 +9,6 @@ import java.util.TreeMap;
  */
 public class FullExecutionDetails
 {
-	/**
-	 * All test case results of test suite.
-	 * 
-	 * @author akiran
-	 */
-	public static class TestSuiteResults
-	{
-		/**
-		 * Test suite name.
-		 */
-		private String suiteName;
-
-		/**
-		 * Test suite.
-		 */
-		private TestSuite testSuite;
-
-		/**
-		 * List of test case results.
-		 */
-		private List<TestCaseResult> testCaseResults = new ArrayList<>();
-
-		/**
-		 * Test case success count in this suite.
-		 */
-		private int successCount = 0;
-
-		/**
-		 * Test case failure count in this suite.
-		 */
-		private int failureCount = 0;
-
-		/**
-		 * Test case error counr in this suite.
-		 */
-		private int errorCount = 0;
-
-		/**
-		 * Instantiates a new test suite results.
-		 *
-		 * @param suiteName the suite name
-		 * @param suite the suite
-		 */
-		public TestSuiteResults(String suiteName, TestSuite suite)
-		{
-			this.suiteName = suiteName;
-			this.testSuite = suite;
-		}
-		
-		/**
-		 * Gets the test suite status.
-		 *
-		 * @return the test suite status
-		 */
-		public TestSuiteStatus getStatus()
-		{
-			return testSuite.getStatus();
-		}
-		
-		/**
-		 * Gets the test suite status as string.
-		 * @return test suite status as string.
-		 */
-		public String getStatusString()
-		{
-			return "" + testSuite.getStatus();
-		}
-		
-		/**
-		 * Gets the test suite status message.
-		 *
-		 * @return the test suite status message
-		 */
-		public String getStatusMessage()
-		{
-			return testSuite.getStatusMessage();
-		}
-		
-		/**
-		 * Gets the test suite name.
-		 *
-		 * @return the test suite name
-		 */
-		public String getSuiteName()
-		{
-			return suiteName;
-		}
-
-		/**
-		 * Gets the list of test case results.
-		 *
-		 * @return the list of test case results
-		 */
-		public List<TestCaseResult> getTestCaseResults()
-		{
-			return testCaseResults;
-		}
-
-		/**
-		 * Gets the test case success count in this suite.
-		 *
-		 * @return the test case success count in this suite
-		 */
-		public int getSuccessCount()
-		{
-			return successCount;
-		}
-
-		/**
-		 * Gets the test case failure count in this suite.
-		 *
-		 * @return the test case failure count in this suite
-		 */
-		public int getFailureCount()
-		{
-			return failureCount;
-		}
-
-		/**
-		 * Gets the test case error counr in this suite.
-		 *
-		 * @return the test case error counr in this suite
-		 */
-		public int getErrorCount()
-		{
-			return errorCount;
-		}
-	}
-
 	/**
 	 * The suite to results.
 	 */
@@ -166,6 +35,11 @@ public class FullExecutionDetails
 	private int errorCount = 0;
 
 	/**
+	 * Full skip count.
+	 */
+	private int skipCount = 0;
+
+	/**
 	 * Adds specified test result in specified suite.
 	 * 
 	 * @param suite
@@ -183,7 +57,7 @@ public class FullExecutionDetails
 			suiteToResults.put(suite.getName(), results);
 		}
 
-		results.testCaseResults.add(result);
+		results.addResult(result);
 
 		if(result.getStatus() == TestStatus.SUCCESSUFUL)
 		{
@@ -195,6 +69,11 @@ public class FullExecutionDetails
 			this.failureCount++;
 			results.failureCount++;
 		}
+		else if(result.getStatus() == TestStatus.SKIPPED)
+		{
+			this.skipCount++;
+			results.skipCount++;
+		}
 		else
 		{
 			this.errorCount++;
@@ -202,6 +81,24 @@ public class FullExecutionDetails
 		}
 
 		this.fullTestCount++;
+	}
+	
+	/**
+	 * Fetches test case result of specified test case.
+	 * @param testSuiteName Parent test suite name
+	 * @param testCaseName test case name
+	 * @return test case result, null if it does not exist yet
+	 */
+	public TestCaseResult getTestCaseResult(String testSuiteName, String testCaseName)
+	{
+		TestSuiteResults suiteResults = this.suiteToResults.get(testSuiteName);
+		
+		if(suiteResults == null)
+		{
+			return null;
+		}
+		
+		return suiteResults.getTestCaseResult(testCaseName);
 	}
 
 	/**
@@ -252,5 +149,15 @@ public class FullExecutionDetails
 	public int getErrorCount()
 	{
 		return errorCount;
+	}
+	
+	/**
+	 * Gets the full skip count.
+	 *
+	 * @return the full skip count
+	 */
+	public int getSkipCount()
+	{
+		return skipCount;
 	}
 }

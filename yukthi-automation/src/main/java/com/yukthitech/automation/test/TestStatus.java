@@ -17,6 +17,11 @@ public enum TestStatus
 	FAILED,
 	
 	/**
+	 * Indicates test case is skipped.
+	 */
+	SKIPPED,
+	
+	/**
 	 * Indicates an error occurred while test case execution.
 	 */
 	ERRORED;
