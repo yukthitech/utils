@@ -24,7 +24,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * SQL based validation.
  */
-@Executable(value = "validateWithSql", requiredConfigurationTypes = DbConfiguration.class)
+@Executable(value = "validateWithSql", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified query and validates expected data is returned")
 public class SqlValidation extends AbstractValidation
 {
 	private static Logger logger = LogManager.getLogger(SqlValidation.class);

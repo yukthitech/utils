@@ -7,10 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.AutomationLauncher;
 import com.yukthitech.automation.BasicArguments;
@@ -180,7 +181,7 @@ public class TestSuiteExecutor
 						testCase.getName(), depTestCase, depTestCaseResult.getStatus());
 					logger.info(skipMssg);
 					
-					fullExecutionDetails.addTestResult(testSuite, new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, "", skipMssg));
+					fullExecutionDetails.addTestResult(testSuite, new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg));
 					
 					continue TEST_CASE_LOOP;
 				}
@@ -197,7 +198,13 @@ public class TestSuiteExecutor
 			{
 				successful = false;
 			}
+			
+			if( testCaseResult.getExecutionLog() != null)
+			{
+				testCaseResult.getExecutionLog().copyResources(logsFolder);
+			}
 
+			/*
 			try
 			{
 				FileUtils.writeStringToFile(new File(logsFolder, testFileName + LOG), testCaseResult.getExecutionLog());
@@ -206,6 +213,7 @@ public class TestSuiteExecutor
 			{
 				throw new InvalidStateException(ex, "An error occurred while creating test log file - {}", new File(logsFolder, testFileName + LOG));
 			}
+			*/
 
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 
@@ -284,6 +292,9 @@ public class TestSuiteExecutor
 
 			writer.flush();
 			writer.close();
+			
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(reportFolder, "test-results.json"), fullExecutionDetails);
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while generating test result report");

@@ -22,6 +22,12 @@ public @interface Executable
 	public String value();
 	
 	/**
+	 * Message representing the target.
+	 * @return Message
+	 */
+	public String message();
+	
+	/**
 	 * Configuration type required by current executable (step or validator)
 	 * @return required configuration type.
 	 */

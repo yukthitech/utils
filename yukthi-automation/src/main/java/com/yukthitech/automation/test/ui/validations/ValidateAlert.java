@@ -13,7 +13,7 @@ import com.yukthitech.automation.test.ui.steps.WaitForStep;
 /**
  * Validates alert box is displayed and closes the dialog.
  */
-@Executable(value = "validateAlert", requiredConfigurationTypes = SeleniumConfiguration.class)
+@Executable(value = "validateAlert", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates an alert comes up with specified message")
 public class ValidateAlert extends AbstractValidation
 {
 	/**

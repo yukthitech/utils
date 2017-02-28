@@ -15,10 +15,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.IStepContainer;
 import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.IValidationContainer;
+import com.yukthitech.automation.test.log.ExecutorType;
+import com.yukthitech.automation.test.log.TestExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -241,22 +244,24 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		TestExecutionLogger exeLogger = new TestExecutionLogger();
-
+		TestExecutionLogger exeLogger = new TestExecutionLogger(name, description, ExecutorType.TEST_CASE);
+		Executable executable = null;
+		
 		// execute the steps involved
 		for(IStep step : steps)
 		{
 			exeLogger.debug("Executing step: {}", step);
-
+			executable = step.getClass().getAnnotation(Executable.class);
+			
 			try
 			{
 				replaceExpressions(context, step);
-				step.execute(context, exeLogger.getSubLogger());
+				step.execute(context, exeLogger.getSubLogger(executable.value(), executable.message(), ExecutorType.STEP));
 			} catch(Exception ex)
 			{
 				exeLogger.error(ex, "An error occurred while executing step - " + step);
 
-				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.toString(), "Step errored - " + step);
+				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 			}
 
 			exeLogger.debug("Completed step: " + step);
@@ -266,26 +271,27 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		for(IValidation validation : validations)
 		{
 			exeLogger.debug("Executing validation: {}", validation);
-
+			executable = validation.getClass().getAnnotation(Executable.class);
+			
 			try
 			{
-				if(!validation.validate(context, exeLogger.getSubLogger()))
+				if(!validation.validate(context, exeLogger.getSubLogger(executable.value(), executable.message(), ExecutorType.VALIDATOR)))
 				{
 					exeLogger.error("Validation failed - " + validation);
 
-					return new TestCaseResult(this.name, TestStatus.FAILED, exeLogger.toString(), validation.getFailureMessage());
+					return new TestCaseResult(this.name, TestStatus.FAILED, exeLogger.getExecutionLogData(), validation.getFailureMessage());
 				}
 			} catch(Exception ex)
 			{
 				exeLogger.error(ex, "An error occurred while executing validation - " + validation);
 
-				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.toString(), "Validation errored - " + validation);
+				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored - " + validation);
 			}
 
 			exeLogger.debug("Completed validation: " + validation);
 		}
 
-		return new TestCaseResult(this.name, TestStatus.SUCCESSUFUL, exeLogger.toString(), null);
+		return new TestCaseResult(this.name, TestStatus.SUCCESSUFUL, exeLogger.getExecutionLogData(), null);
 	}
 
 	/*

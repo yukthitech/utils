@@ -22,7 +22,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(value = "fillForm", requiredConfigurationTypes = SeleniumConfiguration.class)
+@Executable(value = "fillForm", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Fills the form with specified data")
 public class FillFormStep implements IStep
 {
 	/**

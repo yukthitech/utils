@@ -1,5 +1,7 @@
 package com.yukthitech.automation.test;
 
+import com.yukthitech.automation.test.log.ExecutionLogData;
+
 /**
  * The Class TestCaseResult.
  */
@@ -18,12 +20,12 @@ public class TestCaseResult
 	/**
 	 *  execution log.
 	 */
-	private String executionLog;
+	private ExecutionLogData executionLog;
 	
 	/**
 	 * Failure message.
 	 */
-	private String failureMessage;
+	private String message;
 
 	/**
 	 * Instantiates a new test case result.
@@ -37,14 +39,14 @@ public class TestCaseResult
 	 * @param testCaseName Test case name
 	 * @param status the status
 	 * @param executionLog the execution log
-	 * @param failureMessage the failure message
+	 * @param message the failure message
 	 */
-	public TestCaseResult(String testCaseName, TestStatus status, String executionLog, String failureMessage)
+	public TestCaseResult(String testCaseName, TestStatus status, ExecutionLogData executionLog, String message)
 	{
 		this.testCaseName = testCaseName;
 		this.status = status;
 		this.executionLog = executionLog;
-		this.failureMessage = failureMessage;
+		this.message = message;
 	}
 	
 	/**
@@ -101,7 +103,7 @@ public class TestCaseResult
 	 *
 	 * @return the execution log
 	 */
-	public String getExecutionLog()
+	public ExecutionLogData getExecutionLog()
 	{
 		return executionLog;
 	}
@@ -111,7 +113,7 @@ public class TestCaseResult
 	 *
 	 * @param executionLog the new execution log
 	 */
-	public void setExecutionLog(String executionLog)
+	public void setExecutionLog(ExecutionLogData executionLog)
 	{
 		this.executionLog = executionLog;
 	}
@@ -121,9 +123,9 @@ public class TestCaseResult
 	 *
 	 * @return the failure message
 	 */
-	public String getFailureMessage()
+	public String getMessage()
 	{
-		return failureMessage;
+		return message;
 	}
 
 	/**
@@ -131,8 +133,8 @@ public class TestCaseResult
 	 *
 	 * @param failureMessage the new failure message
 	 */
-	public void setFailureMessage(String failureMessage)
+	public void setMessage(String failureMessage)
 	{
-		this.failureMessage = failureMessage;
+		this.message = failureMessage;
 	}
 }

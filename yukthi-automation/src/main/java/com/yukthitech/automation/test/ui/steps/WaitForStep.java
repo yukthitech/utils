@@ -14,7 +14,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(value = "waitFor", requiredConfigurationTypes = SeleniumConfiguration.class)
+@Executable(value = "waitFor", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Waits for specified element to become visible/hidden")
 public class WaitForStep implements IStep
 {
 	/**
