@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.AutomationLauncher;
 import com.yukthitech.automation.BasicArguments;
@@ -33,12 +33,14 @@ public class TestSuiteExecutor
 	 * Free marker configuraton.
 	 */
 	private static Configuration freemarkerConfiguration = new Configuration();
-
+	
 	/**
 	 * The log.
 	 **/
-	private static String LOG = ".log";
-
+	private static String JSON = ".json";
+	
+	private static ObjectMapper objectMapper = new ObjectMapper();
+	
 	/**
 	 * Application context to be used.
 	 */
@@ -202,18 +204,15 @@ public class TestSuiteExecutor
 			if( testCaseResult.getExecutionLog() != null)
 			{
 				testCaseResult.getExecutionLog().copyResources(logsFolder);
+				
+				try
+				{
+					objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(logsFolder, testFileName + JSON), testCaseResult.getExecutionLog());
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException(ex, "An error occurred while creating test log json file - {}", new File(logsFolder, testFileName + JSON));
+				}
 			}
-
-			/*
-			try
-			{
-				FileUtils.writeStringToFile(new File(logsFolder, testFileName + LOG), testCaseResult.getExecutionLog());
-				testCaseResult.setExecutionLog("");
-			} catch(Exception ex)
-			{
-				throw new InvalidStateException(ex, "An error occurred while creating test log file - {}", new File(logsFolder, testFileName + LOG));
-			}
-			*/
 
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 
@@ -293,11 +292,21 @@ public class TestSuiteExecutor
 			writer.flush();
 			writer.close();
 			
-			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(reportFolder, "test-results.json"), fullExecutionDetails);
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while generating test result report");
+		}
+		
+		File resourcesFolder = new File(reportFolder, "resources");
+		resourcesFolder.mkdir();
+		
+		try
+		{
+			FileUtils.copyDirectory(new File("." + File.separator + "report-resources"), resourcesFolder);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while copying resource files to report folder - {}", reportFolder.getPath());
 		}
 	}
 }

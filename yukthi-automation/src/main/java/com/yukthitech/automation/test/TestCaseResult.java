@@ -1,5 +1,6 @@
 package com.yukthitech.automation.test;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yukthitech.automation.test.log.ExecutionLogData;
 
 /**
@@ -103,6 +104,7 @@ public class TestCaseResult
 	 *
 	 * @return the execution log
 	 */
+	@JsonIgnore
 	public ExecutionLogData getExecutionLog()
 	{
 		return executionLog;
