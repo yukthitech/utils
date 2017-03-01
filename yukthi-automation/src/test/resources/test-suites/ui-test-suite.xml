@@ -1,16 +1,16 @@
-<testSuite xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap" name="ui-test-suites">
-
-	<testCase name="buttonClick">
-		<description>Validates button click action is working</description>
-		
-		<wrap:steps>
-			<ccg:gotoPage uri="/index.html" />
-			<ccg:click locator="id: button"/>
-		</wrap:steps>
-
-		<wrap:validations>
-			<ccg:validateValue locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
-		</wrap:validations>
-	</testCase>
-
-</testSuite>
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<testSuite name="ui-test-suites">
+		<testCase name="buttonClick">
+			<description>Validates button click action is working</description>
+			
+			<wrap:steps>
+				<ccg:gotoPage uri="/index.html" />
+				<ccg:click locator="id: button"/>
+			</wrap:steps>
+	
+			<wrap:validations>
+				<ccg:validateValue locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
+			</wrap:validations>
+		</testCase>
+	</testSuite>
+</testData>

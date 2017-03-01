@@ -18,11 +18,6 @@ public class TestSuiteResults
 	private String suiteName;
 
 	/**
-	 * Test suite.
-	 */
-	private TestSuite testSuite;
-
-	/**
 	 * List of test case results.
 	 */
 	private List<TestCaseResult> testCaseResults = new ArrayList<>();
@@ -31,37 +26,35 @@ public class TestSuiteResults
 	 * Mapping from test case name to result.
 	 */
 	private Map<String, TestCaseResult> nameToResult = new HashMap<>();
-
-	/**
-	 * Test case success count in this suite.
-	 */
-	int successCount = 0;
-
-	/**
-	 * Test case failure count in this suite.
-	 */
-	int failureCount = 0;
-
-	/**
-	 * Test case error count in this suite.
-	 */
-	int errorCount = 0;
 	
 	/**
-	 * Test case skip count in this suite.
+	 * Status of the test suite.
 	 */
-	int skipCount = 0;
+	private TestStatus status;
+	
+	/**
+	 * Status message.
+	 */
+	private String statusMessage;
 
 	/**
 	 * Instantiates a new test suite results.
 	 *
 	 * @param suiteName the suite name
-	 * @param suite the suite
 	 */
-	public TestSuiteResults(String suiteName, TestSuite suite)
+	public TestSuiteResults(String suiteName)
 	{
 		this.suiteName = suiteName;
-		this.testSuite = suite;
+	}
+	
+	/**
+	 * Sets the status of the test suite.
+	 *
+	 * @param status the new status of the test suite
+	 */
+	public void setStatus(TestStatus status)
+	{
+		this.status = status;
 	}
 	
 	/**
@@ -69,9 +62,9 @@ public class TestSuiteResults
 	 *
 	 * @return the test suite status
 	 */
-	public TestSuiteStatus getStatus()
+	public TestStatus getStatus()
 	{
-		return testSuite.getStatus();
+		return status;
 	}
 	
 	/**
@@ -80,7 +73,17 @@ public class TestSuiteResults
 	 */
 	public String getStatusString()
 	{
-		return "" + testSuite.getStatus();
+		return "" + status;
+	}
+	
+	/**
+	 * Sets the status message.
+	 *
+	 * @param statusMessage the new status message
+	 */
+	public void setStatusMessage(String statusMessage)
+	{
+		this.statusMessage = statusMessage;
 	}
 	
 	/**
@@ -90,7 +93,7 @@ public class TestSuiteResults
 	 */
 	public String getStatusMessage()
 	{
-		return testSuite.getStatusMessage();
+		return statusMessage;
 	}
 	
 	/**
@@ -112,6 +115,26 @@ public class TestSuiteResults
 	{
 		return testCaseResults;
 	}
+	
+	/**
+	 * Fetches number of test cases having specified status.
+	 * @param status Status to be checked.
+	 * @return Number of test cases with specified status.
+	 */
+	private int getStatusCount(TestStatus status)
+	{
+		int count = 0;
+		
+		for(TestCaseResult result : this.testCaseResults)
+		{
+			if(result.getStatus() == status)
+			{
+				count ++;
+			}
+		}
+		
+		return count;
+	}
 
 	/**
 	 * Gets the test case success count in this suite.
@@ -120,7 +143,7 @@ public class TestSuiteResults
 	 */
 	public int getSuccessCount()
 	{
-		return successCount;
+		return getStatusCount(TestStatus.SUCCESSUFUL);
 	}
 
 	/**
@@ -130,17 +153,17 @@ public class TestSuiteResults
 	 */
 	public int getFailureCount()
 	{
-		return failureCount;
+		return getStatusCount(TestStatus.FAILED);
 	}
 
 	/**
-	 * Gets the test case error counr in this suite.
+	 * Gets the test case error count in this suite.
 	 *
-	 * @return the test case error counr in this suite
+	 * @return the test case error count in this suite
 	 */
 	public int getErrorCount()
 	{
-		return errorCount;
+		return getStatusCount(TestStatus.ERRORED);
 	}
 	
 	/**
@@ -150,7 +173,16 @@ public class TestSuiteResults
 	 */
 	public int getSkipCount()
 	{
-		return skipCount;
+		return getStatusCount(TestStatus.SKIPPED);
+	}
+	
+	/**
+	 * Fetches number of test cases.
+	 * @return count
+	 */
+	public int getTotalCount()
+	{
+		return testCaseResults.size();
 	}
 	
 	/**
@@ -172,4 +204,6 @@ public class TestSuiteResults
 	{
 		return this.nameToResult.get(testCaseName);
 	}
+	
+	
 }

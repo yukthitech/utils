@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Represents a group of test cases to be executed.
@@ -43,14 +44,14 @@ public class TestSuite implements Validateable
 	private List<String> dependencies;
 	
 	/**
-	 * Status of the test suite.
+	 * Setup steps to be executed before executing test suite.
 	 */
-	private TestSuiteStatus status;
+	private Setup setup;
 	
 	/**
-	 * Status message.
+	 * Cleanup steps to be executed after executing test suite.
 	 */
-	private String statusMessage;
+	private Cleanup cleanup;
 
 	/**
 	 * Gets the name of the test suite.
@@ -206,43 +207,53 @@ public class TestSuite implements Validateable
 	}
 
 	/**
-	 * Gets the status of the test suite.
+	 * Gets the setup steps to be executed before executing test suite.
 	 *
-	 * @return the status of the test suite
+	 * @return the setup steps to be executed before executing test suite
 	 */
-	public TestSuiteStatus getStatus()
+	public Setup getSetup()
 	{
-		return status;
+		return setup;
 	}
 
 	/**
-	 * Sets the status of the test suite.
+	 * Sets the setup steps to be executed before executing test suite.
 	 *
-	 * @param status the new status of the test suite
+	 * @param setup the new setup steps to be executed before executing test suite
 	 */
-	public void setStatus(TestSuiteStatus status)
+	public void setSetup(Setup setup)
 	{
-		this.status = status;
+		if(this.setup != null)
+		{
+			throw new InvalidStateException("Multiple setup are specified under single test suite");
+		}
+		
+		this.setup = setup;
 	}
 
 	/**
-	 * Gets the status message.
+	 * Gets the cleanup steps to be executed after executing test suite.
 	 *
-	 * @return the status message
+	 * @return the cleanup steps to be executed after executing test suite
 	 */
-	public String getStatusMessage()
+	public Cleanup getCleanup()
 	{
-		return statusMessage;
+		return cleanup;
 	}
 
 	/**
-	 * Sets the status message.
+	 * Sets the cleanup steps to be executed after executing test suite.
 	 *
-	 * @param statusMessage the new status message
+	 * @param cleanup the new cleanup steps to be executed after executing test suite
 	 */
-	public void setStatusMessage(String statusMessage)
+	public void setCleanup(Cleanup cleanup)
 	{
-		this.statusMessage = statusMessage;
+		if(this.cleanup != null)
+		{
+			throw new InvalidStateException("Multiple cleanup are specified under single test suite");
+		}
+		
+		this.cleanup = cleanup;
 	}
 
 	/* (non-Javadoc)

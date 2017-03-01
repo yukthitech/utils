@@ -10,7 +10,7 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.automation.test.ui.common.FieldOption;
 import com.yukthitech.automation.test.ui.common.FormFieldType;
 
@@ -223,13 +223,13 @@ public class ValidateFormFields extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		WebElement formElement = AutomationUtils.findElement(context, null, locator);
+		WebElement formElement = UiAutomationUtils.findElement(context, null, locator);
 		List<WebElement> fieldElements = null;
 		FormFieldType fieldType = null;
 
 		for(FormField field : this.fields)
 		{
-			fieldElements = AutomationUtils.findElements(context, formElement, field.locator);
+			fieldElements = UiAutomationUtils.findElements(context, formElement, field.locator);
 
 			if(fieldElements == null || fieldElements.isEmpty())
 			{
@@ -247,7 +247,7 @@ public class ValidateFormFields extends AbstractValidation
 			{
 				for(WebElement element : fieldElements)
 				{
-					fieldType = AutomationUtils.getFormFieldType(element);
+					fieldType = UiAutomationUtils.getFormFieldType(element);
 
 					if(fieldType == null)
 					{

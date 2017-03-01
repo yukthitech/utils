@@ -7,7 +7,6 @@ import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.automation.config.DbConfiguration;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -15,7 +14,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * Validator to validate if specified value matches with specified context expression.
  * @author akiran
  */
-@Executable(value = "validateContextParam", requiredConfigurationTypes = DbConfiguration.class, message = "Validates specified context param is present with specified value")
+@Executable(value = "validateContextParam", message = "Validates specified context param is present with specified value")
 public class ValidateContextParamStep extends AbstractValidation implements Validateable
 {
 	/**

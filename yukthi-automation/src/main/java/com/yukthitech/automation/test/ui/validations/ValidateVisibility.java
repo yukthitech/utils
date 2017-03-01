@@ -9,7 +9,7 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -57,8 +57,8 @@ public class ValidateVisibility extends AbstractValidation
 		
 		replaceExpressions(context, this);
 
-		AutomationUtils.validateWithWait(() -> {
-			WebElement element = AutomationUtils.findElement(context, null, locator);
+		UiAutomationUtils.validateWithWait(() -> {
+			WebElement element = UiAutomationUtils.findElement(context, null, locator);
 
 			if(hidden)
 			{
@@ -66,11 +66,11 @@ public class ValidateVisibility extends AbstractValidation
 			}
 
 			return (element != null && element.isDisplayed());
-		} , AutomationUtils.FIVE_SECONDS, "Waiting for element: " + locator, new InvalidStateException("Failed to find element - " + locator));
+		} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + locator, new InvalidStateException("Failed to find element - " + locator));
 
 		if(message != null)
 		{
-			WebElement element = AutomationUtils.findElement(context, null, locator);
+			WebElement element = UiAutomationUtils.findElement(context, null, locator);
 			String actualMessage = element.getText().trim();
 
 			if(actualMessage == null || !actualMessage.contains(message))

@@ -13,7 +13,7 @@ import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -37,8 +37,8 @@ public class DragAndDropStep implements IStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger logger)
 	{
-		WebElement sourceElement = AutomationUtils.findElement(context, null, source);
-		WebElement destinationElement = AutomationUtils.findElement(context, null, destination);
+		WebElement sourceElement = UiAutomationUtils.findElement(context, null, source);
+		WebElement destinationElement = UiAutomationUtils.findElement(context, null, destination);
 
 		dragAndDrop(context, sourceElement, destinationElement);
 	}

@@ -7,7 +7,7 @@ import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -36,8 +36,8 @@ public class WaitForStep implements IStep
 	{
 		exeLogger.debug("Waiting for element: {}", locator);
 		
-		AutomationUtils.validateWithWait(() -> {
-			WebElement element = AutomationUtils.findElement(context, null, locator);
+		UiAutomationUtils.validateWithWait(() -> {
+			WebElement element = UiAutomationUtils.findElement(context, null, locator);
 			
 			if(hidden)
 			{
@@ -45,7 +45,7 @@ public class WaitForStep implements IStep
 			}
 			
 			return (element != null && element.isDisplayed());
-		}, AutomationUtils.FIVE_SECONDS, "Waiting for element: " + locator, 
+		}, UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + locator, 
 			new InvalidStateException("Failed to find element - " + locator));
 	}
 

@@ -7,7 +7,7 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.automation.test.ui.steps.WaitForStep;
 
 /**
@@ -52,8 +52,8 @@ public class ValidateAlert extends AbstractValidation
 		waitStep.setLocator("//div[@id='webutilsAlertDialog']");
 		
 		//ensure alert has required message
-		WebElement alertBox = AutomationUtils.findElement(context, null, "id: webutilsAlertDialog");
-		WebElement bodyElement = AutomationUtils.findElement(context, alertBox, "xpath: .//div[@class='modal-body']");
+		WebElement alertBox = UiAutomationUtils.findElement(context, null, "id: webutilsAlertDialog");
+		WebElement bodyElement = UiAutomationUtils.findElement(context, alertBox, "xpath: .//div[@class='modal-body']");
 		String bodyText = bodyElement.getAttribute("innerHTML");
 		
 		if(!bodyText.equals(message))
@@ -62,7 +62,7 @@ public class ValidateAlert extends AbstractValidation
 			return false;
 		}
 		
-		WebElement buttonElement = AutomationUtils.findElement(context, alertBox, "xpath: .//button");
+		WebElement buttonElement = UiAutomationUtils.findElement(context, alertBox, "xpath: .//button");
 		buttonElement.click();
 		
 		return true;

@@ -10,7 +10,7 @@ import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -62,7 +62,7 @@ public class PopulateFieldStep implements IStep
 	 */
 	private void pressEnter(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		WebElement webElement = AutomationUtils.findElement(context, null, locator);
+		WebElement webElement = UiAutomationUtils.findElement(context, null, locator);
 		webElement.sendKeys(Keys.ENTER);
 
 		logger.debug("Successfully enter key is pressed");
@@ -80,7 +80,7 @@ public class PopulateFieldStep implements IStep
 	{
 		logger.debug(DEBUG_MESSAGE, locator, value);
 		
-		if(!AutomationUtils.populateField(context, null, locator, value))
+		if(!UiAutomationUtils.populateField(context, null, locator, value))
 		{
 			logger.error(ERROR_MESSAGE, locator, value);
 			throw new InvalidStateException(ERROR_MESSAGE, locator, value);

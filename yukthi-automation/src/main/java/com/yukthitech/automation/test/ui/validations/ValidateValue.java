@@ -9,7 +9,7 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 
 /**
  * Waits for locator to be part of the page and is visible.
@@ -50,7 +50,7 @@ public class ValidateValue extends AbstractValidation
 		
 		replaceExpressions(context, this);
 
-		WebElement element = AutomationUtils.findElement(context, null, locator);
+		WebElement element = UiAutomationUtils.findElement(context, null, locator);
 		String actualMessage = null;
 		
 		if("input".equals(element.getTagName().toLowerCase()))

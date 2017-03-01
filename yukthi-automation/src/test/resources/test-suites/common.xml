@@ -1,0 +1,9 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<setup>
+		<ccg:log message="Message from global setup."/>
+	</setup>
+	
+	<cleanup>
+		<ccg:log message="Message from global cleanup."/>
+	</cleanup>
+</testData>

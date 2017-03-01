@@ -26,14 +26,14 @@ import com.yukthitech.utils.exceptions.UnsupportedOperationException;
  * 
  * @author akiran
  */
-public class AutomationUtils
+public class UiAutomationUtils
 {
 	/**
 	 * Five seconds.
 	 */
 	public static final int FIVE_SECONDS = 5;
 
-	private static Logger logger = LogManager.getLogger(AutomationUtils.class);
+	private static Logger logger = LogManager.getLogger(UiAutomationUtils.class);
 
 	/**
 	 * Min wait duration.

@@ -1,9 +1,6 @@
 package com.yukthitech.automation.test;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -13,13 +10,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.automation.AutomationContext;
-import com.yukthitech.automation.AutomationLauncher;
 import com.yukthitech.automation.BasicArguments;
+import com.yukthitech.automation.test.log.ExecutionLogData;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 /**
  * Test suites executors.
@@ -35,10 +31,18 @@ public class TestSuiteExecutor
 	private static Configuration freemarkerConfiguration = new Configuration();
 	
 	/**
-	 * The log.
+	 * The log json file extension.
 	 **/
-	private static String JSON = ".json";
+	private static String LOG_JSON = "_log.json";
 	
+	/**
+	 * log js file extension.
+	 */
+	private static String LOG_JS = ".js";
+	
+	/**
+	 * Used to generate json files.
+	 */
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	/**
@@ -49,7 +53,7 @@ public class TestSuiteExecutor
 	/**
 	 * Test suites to be executed.
 	 */
-	private Map<String, TestSuite> testSuiteMap;
+	private TestSuiteGroup testSuiteGroup;
 	
 	/**
 	 * Folder in which reports should be generated.
@@ -70,13 +74,13 @@ public class TestSuiteExecutor
 	 * Instantiates a new test suite executor.
 	 *
 	 * @param context the context
-	 * @param testSuiteMap the test suite map
+	 * @param testSuiteGroup the test suite map
 	 * @param reportFolder the report folder
 	 */
-	public TestSuiteExecutor(AutomationContext context, Map<String, TestSuite> testSuiteMap, File reportFolder)
+	public TestSuiteExecutor(AutomationContext context, TestSuiteGroup testSuiteGroup, File reportFolder)
 	{
 		this.context = context;
-		this.testSuiteMap = testSuiteMap;
+		this.testSuiteGroup = testSuiteGroup;
 		this.reportFolder = reportFolder;
 
 		// create logs folder
@@ -93,13 +97,13 @@ public class TestSuiteExecutor
 	 */
 	private boolean executeTestSuite(TestSuite testSuite)
 	{
-		if(context.isTestSuiteExecuted(testSuite.getName()))
+		if(fullExecutionDetails.isTestSuiteExecuted(testSuite.getName()))
 		{
-			return context.isTestSuiteCompleted(testSuite.getName());
+			return fullExecutionDetails.isTestSuiteCompleted(testSuite.getName());
 		}
 
 		logger.debug("Executing test suite - {}", testSuite.getName());
-		context.testSuiteInProgress(testSuite.getName());
+		fullExecutionDetails.testSuiteInProgress(testSuite.getName());
 
 		// if test suite has dependencies execute them first
 		if(testSuite.getDependencies() != null)
@@ -109,29 +113,26 @@ public class TestSuiteExecutor
 			for(String dependencyTestSuite : testSuite.getDependencies())
 			{
 				// if dependency is already completed, ignore
-				if(context.isTestSuiteCompleted(dependencyTestSuite))
+				if(fullExecutionDetails.isTestSuiteCompleted(dependencyTestSuite))
 				{
 					continue;
 				}
 
 				// if dependency is failed, skip the test case
-				if(context.isTestSuiteFailed(dependencyTestSuite))
+				if(fullExecutionDetails.isTestSuiteFailed(dependencyTestSuite))
 				{
-					context.testSuiteFailed(testSuite.getName());
-					testSuite.setStatus(TestSuiteStatus.SKIPPED);
-					testSuite.setStatusMessage("Skipping as dependency test suite is failed/skipped - " + dependencyTestSuite);
-
+					fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as dependency test suite is failed/skipped - " + dependencyTestSuite);
 					return false;
 				}
 
 				// if dependency is already in progress, then it is recursion,
 				// throw error
-				if(context.isTestSuiteInProgress(dependencyTestSuite))
+				if(fullExecutionDetails.isTestSuiteInProgress(dependencyTestSuite))
 				{
 					throw new InvalidStateException("Encountered circular dependency with '{}' in test suite - {}", depTestSuite, testSuite.getName());
 				}
 
-				depTestSuite = testSuiteMap.get(dependencyTestSuite);
+				depTestSuite = testSuiteGroup.getTestSuite(dependencyTestSuite);
 
 				executeTestSuite(depTestSuite);
 			}
@@ -152,6 +153,12 @@ public class TestSuiteExecutor
 		Set<String> dependencyTestCases = null;
 		TestCaseResult depTestCaseResult = null;
 
+		if( !executeSetup(testSuite.getName(), testSuite.getSetup()) )
+		{
+			fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
+			return false;
+		}
+		
 		TEST_CASE_LOOP: for(TestCase testCase : testSuite.getTestCases())
 		{
 			if(restrictedTestCases != null && !restrictedTestCases.contains(testCase.getName()))
@@ -200,19 +207,8 @@ public class TestSuiteExecutor
 			{
 				successful = false;
 			}
-			
-			if( testCaseResult.getExecutionLog() != null)
-			{
-				testCaseResult.getExecutionLog().copyResources(logsFolder);
-				
-				try
-				{
-					objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(logsFolder, testFileName + JSON), testCaseResult.getExecutionLog());
-				}catch(Exception ex)
-				{
-					throw new InvalidStateException(ex, "An error occurred while creating test log json file - {}", new File(logsFolder, testFileName + JSON));
-				}
-			}
+
+			createLogFiles(testCaseResult, testFileName);
 
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 
@@ -221,19 +217,90 @@ public class TestSuiteExecutor
 				break;
 			}
 		}
+		
+		if( !executeCleanup(testSuite.getName(), testSuite.getCleanup()) )
+		{
+			fullExecutionDetails.testSuiteFailed(testSuite, "Failing as cleanup of test suite is failed");
+			return false;
+		}
 
 		if(successful)
 		{
-			testSuite.setStatus(TestSuiteStatus.SUCCESSFUL);
-			context.testSuiteCompleted(testSuite.getName());
+			fullExecutionDetails.testSuiteCompleted(testSuite);
 		}
 		else
 		{
-			testSuite.setStatus(TestSuiteStatus.FAILED);
-			context.testSuiteFailed(testSuite.getName());
+			fullExecutionDetails.testSuiteFailed(testSuite, "Failing as one or more test cases failed");
 		}
 
 		return successful;
+	}
+	
+	/**
+	 * Creates log files from specified test case result.
+	 * @param testCaseResult result from which log data needs to be fetched
+	 * @param logFilePrefix log file name prefix
+	 */
+	private void createLogFiles(TestCaseResult testCaseResult, String logFilePrefix)
+	{
+		ExecutionLogData executionLogData = testCaseResult.getExecutionLog();
+		
+		if( executionLogData == null)
+		{
+			return;
+		}
+		
+		executionLogData.copyResources(logsFolder);
+		
+		try
+		{
+			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(executionLogData);
+			String jsContent = "var logData = " + jsonContent;
+			
+			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JSON), jsonContent);
+			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JS), jsContent);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while creating test log json file - {}", new File(logsFolder, logFilePrefix + LOG_JSON));
+		}
+	}
+	
+	/**
+	 * Executes the setup steps.
+	 */
+	private boolean executeSetup(String prefix, Setup setup)
+	{
+		if(setup == null)
+		{
+			logger.debug("No {} setup steps found, ignoring global setup execution.", prefix);
+			return true;
+		}
+		
+		logger.debug("Executing {} setup steps...", prefix);
+		
+		TestCaseResult testCaseResult = testSuiteGroup.getSetup().execute(context);
+		createLogFiles(testCaseResult, prefix + "-setup");
+		
+		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
+	}
+
+	/**
+	 * Executes the cleanup steps.
+	 */
+	private boolean executeCleanup(String prefix, Cleanup cleanup)
+	{
+		if(testSuiteGroup.getCleanup() == null)
+		{
+			logger.debug("No {} cleanup steps found, ignoring global cleanup execution.", prefix);
+			return true;
+		}
+		
+		logger.debug("Executing {} cleanup steps...", prefix);
+		
+		TestCaseResult testCaseResult = testSuiteGroup.getCleanup().execute(context);
+		createLogFiles(testCaseResult, prefix + "-cleanup");
+		
+		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
 	}
 
 	/**
@@ -241,63 +308,75 @@ public class TestSuiteExecutor
 	 * 
 	 * @param context
 	 *            Context to be used for automation.
-	 * @param testSuiteMap
+	 * @param testSuiteGroup
 	 *            Test suites to execute.
 	 * @param reportFolder
 	 *            Folder where output report needs to be generated
 	 */
-	public void executeTestSuites()
+	public boolean executeTestSuites()
 	{
-		BasicArguments basicArguments = context.getBasicArguments();
+		boolean successful = true;
 		
-		Set<String> limitedTestSuites = basicArguments.getTestSuitesSet();
-
-		// if limited test suites are specified, only execute them and their
-		// dependencies
-		if(CollectionUtils.isNotEmpty(limitedTestSuites))
+		if(! executeSetup("_global", testSuiteGroup.getSetup()) )
 		{
-			logger.debug("Executing limited test suites - {}", limitedTestSuites);
-
-			TestSuite testSuite = null;
-
-			for(String name : limitedTestSuites)
-			{
-				testSuite = testSuiteMap.get(name);
-
-				if(testSuite == null)
-				{
-					throw new InvalidConfigurationException("Invalid test suite name '{}' specified in limited test suites", name);
-				}
-
-				executeTestSuite(testSuite);
-			}
-		}
-		// if no limited test suites are specified execute all test suites
-		else
-		{
-			for(TestSuite testSuite : testSuiteMap.values())
-			{
-				executeTestSuite(testSuite);
-			}
-		}
-
-		try
-		{
-			Template freemarkerTemplate = new Template("report", 
-					new InputStreamReader(AutomationLauncher.class.getResourceAsStream("/report-template.html")), freemarkerConfiguration);
-
-			FileWriter writer = new FileWriter(new File(reportFolder, "test-report.html"));
-			freemarkerTemplate.process(fullExecutionDetails, writer);
-
-			writer.flush();
-			writer.close();
+			logger.error("Skipping all test suite execution as global setup failed.");
+			fullExecutionDetails.setSetupSuccessful(false);
 			
-			objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(reportFolder, "test-results.json"), fullExecutionDetails);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while generating test result report");
+			successful = false;
 		}
 		
+		//if setup was not successful dont execute any test suites
+		if(successful)
+		{
+			BasicArguments basicArguments = context.getBasicArguments();
+			
+			Set<String> limitedTestSuites = basicArguments.getTestSuitesSet();
+
+			// if limited test suites are specified, only execute them and their
+			// dependencies
+			if(CollectionUtils.isNotEmpty(limitedTestSuites))
+			{
+				logger.debug("Executing limited test suites - {}", limitedTestSuites);
+	
+				TestSuite testSuite = null;
+	
+				for(String name : limitedTestSuites)
+				{
+					testSuite = testSuiteGroup.getTestSuite(name);
+	
+					if(testSuite == null)
+					{
+						throw new InvalidConfigurationException("Invalid test suite name '{}' specified in limited test suites", name);
+					}
+	
+					if( !executeTestSuite(testSuite) )
+					{
+						successful = false;
+					}
+				}
+			}
+			// if no limited test suites are specified execute all test suites
+			else
+			{
+				for(TestSuite testSuite : testSuiteGroup.getTestSuites())
+				{
+					if( !executeTestSuite(testSuite) )
+					{
+						successful = false;
+					}
+				}
+			}
+		}
+		
+		if( !executeCleanup("_global", testSuiteGroup.getCleanup()) )
+		{
+			logger.error("Global cleanup failed.");
+			fullExecutionDetails.setCleanupSuccessful(false);
+			
+			successful = false;
+		}
+
+		//copy the resource files into output folder
 		File resourcesFolder = new File(reportFolder, "resources");
 		resourcesFolder.mkdir();
 		
@@ -308,5 +387,31 @@ public class TestSuiteExecutor
 		{
 			throw new InvalidStateException("An error occurred while copying resource files to report folder - {}", reportFolder.getPath());
 		}
+
+		//create final report files
+		try
+		{
+			/*
+			Template freemarkerTemplate = new Template("report", 
+					new InputStreamReader(AutomationLauncher.class.getResourceAsStream("/report-template.html")), freemarkerConfiguration);
+
+			FileWriter writer = new FileWriter(new File(reportFolder, "test-report.html"));
+			freemarkerTemplate.process(fullExecutionDetails, writer);
+
+			writer.flush();
+			writer.close();
+			*/
+			
+			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(fullExecutionDetails);
+			String jsContent = "var reportData = " + jsonContent;
+			
+			FileUtils.write(new File(reportFolder, "test-results.json"), jsonContent);
+			FileUtils.write(new File(reportFolder, "test-results.js"), jsContent);
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while generating test result report");
+		}
+		
+		return successful;
 	}
 }

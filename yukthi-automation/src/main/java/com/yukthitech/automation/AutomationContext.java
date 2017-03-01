@@ -3,9 +3,7 @@ package com.yukthitech.automation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IConfiguration;
@@ -31,21 +29,6 @@ public class AutomationContext
 	 */
 	private ApplicationConfiguration appConfiguration;
 	
-	/**
-	 * Completed test suite list.
-	 */
-	private Set<String> completedTestSuites = new HashSet<>();
-	
-	/**
-	 * Failed test suite list.
-	 */
-	private Set<String> failedTestSuites = new HashSet<>();
-	
-	/**
-	 * In progress test suite list.
-	 */
-	private Set<String> inProgressTestSuites = new HashSet<>();
-
 	/**
 	 * Maintains list of required sub configurations required by loaded test suites.
 	 */
@@ -156,74 +139,5 @@ public class AutomationContext
 	public ApplicationConfiguration getAppConfiguration()
 	{
 		return appConfiguration;
-	}
-	
-	/**
-	 * Marks specified test suite as in progress. 
-	 * @param testSuite Test suite to be marked
-	 */
-	public void testSuiteInProgress(String testSuite)
-	{
-		this.inProgressTestSuites.add(testSuite);
-	}
-	
-	/**
-	 * Marks specified test suite as completed. 
-	 * @param testSuite Test suite to be marked
-	 */
-	public void testSuiteCompleted(String testSuite)
-	{
-		this.inProgressTestSuites.remove(testSuite);
-		this.completedTestSuites.add(testSuite);
-	}
-	
-	/**
-	 * Marks specified test suite as failed. 
-	 * @param testSuite Test suite to be marked
-	 */
-	public void testSuiteFailed(String testSuite)
-	{
-		this.inProgressTestSuites.remove(testSuite);
-		this.failedTestSuites.add(testSuite);
-	}
-	
-	/**
-	 * Checks if the specified test suite is completed.
-	 * @param testSuite Test suite to check
-	 * @return true if completed
-	 */
-	public boolean isTestSuiteCompleted(String testSuite)
-	{
-		return completedTestSuites.contains(testSuite);
-	}
-	
-	/**
-	 * Checks if the specified test suite is failed.
-	 * @param testSuite Test suite to check
-	 * @return true if failed
-	 */
-	public boolean isTestSuiteFailed(String testSuite)
-	{
-		return failedTestSuites.contains(testSuite);
-	}
-	
-	/**
-	 * Checks if the specified test suite is completed or failed.
-	 * @param testSuite Test suite to check
-	 * @return true if completed or failed
-	 */
-	public boolean isTestSuiteExecuted(String testSuite)
-	{
-		return completedTestSuites.contains(testSuite) || failedTestSuites.contains(testSuite);
-	}
-	
-	/**
-	 * Checks if the specified test suite is in-progress.
-	 * @param testSuite Test suite to check
-	 * @return true if in-progress
-	 */
-	public boolean isTestSuiteInProgress(String testSuite)
-	{
-		return inProgressTestSuites.contains(testSuite);
 	}
 }

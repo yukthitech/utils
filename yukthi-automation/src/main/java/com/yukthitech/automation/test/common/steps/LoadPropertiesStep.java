@@ -15,14 +15,13 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.DbConfiguration;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Loads specified properties file as map on to context.
  * @author akiran
  */
-@Executable(value = "loadProperties", requiredConfigurationTypes = DbConfiguration.class, message = "Loads specified properties file as map on to context")
+@Executable(value = "loadProperties", message = "Loads specified properties file as map on to context")
 public class LoadPropertiesStep implements IStep 
 {
 	/**

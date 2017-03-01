@@ -1,16 +1,11 @@
 package com.yukthitech.automation.test;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,22 +15,17 @@ import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.IStepContainer;
 import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.IValidationContainer;
+import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.test.log.ExecutorType;
 import com.yukthitech.automation.test.log.TestExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Test case with validations to be executed.
  */
 public class TestCase implements IStepContainer, IValidationContainer, Validateable
 {
-	/**
-	 * Pattern used to replace expressions in step properties.
-	 */
-	private static Pattern CONTEXT_EXPR_PATTERN = Pattern.compile("\\{\\{(.+)\\}\\}");
-
 	/**
 	 * Name of the test case.
 	 */
@@ -177,65 +167,6 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	}
 	
 	/**
-	 * Replaces expressions in specified step properties.
-	 * @param context Context to fetch values for expressions.
-	 * @param step Step in which expression has to be replaced
-	 */
-	private void replaceExpressions(AutomationContext context, IStep step)
-	{
-		Field fields[] = step.getClass().getDeclaredFields();
-		String value = null;
-		String propertyExpr = null;
-		
-		Matcher matcher = null;
-		StringBuffer buffer = new StringBuffer();
-		
-		Map<String, Object> contextAttr = context.getAttributeMap();
-		
-		for(Field field : fields)
-		{
-			//ignore non string fields
-			if(!String.class.equals(field.getType()))
-			{
-				continue;
-			}
-
-			try
-			{
-				field.setAccessible(true);
-				
-				value = (String) field.get(step);
-				
-				//ignore null field values
-				if(value == null)
-				{
-					continue;
-				}
-				
-				matcher = CONTEXT_EXPR_PATTERN.matcher(value);
-				buffer.setLength(0);
-	
-				//replace the expressions in the field value
-				while(matcher.find())
-				{
-					propertyExpr = matcher.group(1);
-					
-					matcher.appendReplacement(buffer, BeanUtils.getProperty(contextAttr, propertyExpr));
-				}
-				
-				matcher.appendTail(buffer);
-				
-				//set the result string back to field
-				field.set(step, buffer.toString());
-			} catch(Exception ex)
-			{
-				throw new InvalidStateException(ex, "An error occurred while parsing expressions in field '{}' in class - {}", 
-					field.getName(), step.getClass().getName());
-			}
-		}
-	}
-
-	/**
 	 * Execute.
 	 *
 	 * @param context
@@ -255,7 +186,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 			
 			try
 			{
-				replaceExpressions(context, step);
+				AutomationUtils.replaceExpressions(context, step);
 				step.execute(context, exeLogger.getSubLogger(executable.value(), executable.message(), ExecutorType.STEP));
 			} catch(Exception ex)
 			{
@@ -271,10 +202,13 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		for(IValidation validation : validations)
 		{
 			exeLogger.debug("Executing validation: {}", validation);
+			
 			executable = validation.getClass().getAnnotation(Executable.class);
 			
 			try
 			{
+				AutomationUtils.replaceExpressions(context, validation);
+				
 				if(!validation.validate(context, exeLogger.getSubLogger(executable.value(), executable.message(), ExecutorType.VALIDATOR)))
 				{
 					exeLogger.error("Validation failed - " + validation);

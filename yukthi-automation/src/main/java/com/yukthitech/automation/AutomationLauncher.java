@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -18,8 +17,10 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IConfiguration;
+import com.yukthitech.automation.test.TestDataFile;
 import com.yukthitech.automation.test.TestSuite;
 import com.yukthitech.automation.test.TestSuiteExecutor;
+import com.yukthitech.automation.test.TestSuiteGroup;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.cli.CommandLineOptions;
@@ -48,7 +49,7 @@ public class AutomationLauncher
 	 *            Application config to be used
 	 * @return Test suites mapped by name.
 	 */
-	private static Map<String, TestSuite> loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
+	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
 	{
 		AutomationReserveNodeHandler reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
 		
@@ -65,21 +66,58 @@ public class AutomationLauncher
 			System.exit(-1);
 		}
 
-		Map<String, TestSuite> testSuites = new HashMap<>();
-
 		// load the test suites recursively
 		TreeSet<File> xmlFiles = AutomationUtils.loadXmlFiles(testCaseFolder);
 		
+		TestDataFile testDataFile = new TestDataFile();
+		FileInputStream fis = null;
+		String filePath = null;
+		
+		TestSuiteGroup testSuiteGroup = new TestSuiteGroup();
+		
+		File setupFile = null, cleanupFile = null;
+		
 		for(File xmlFile : xmlFiles)
 		{
-			TestSuite testSuite = new TestSuite();
+			testDataFile = new TestDataFile();
 
 			try
 			{
-				FileInputStream fis = new FileInputStream(xmlFile);
-				XMLBeanParser.parse(fis, testSuite, defaultParserHandler);
-				testSuites.put(testSuite.getName(), testSuite);
+				filePath = xmlFile.getPath();
+				fis = new FileInputStream(xmlFile);
+
+				logger.debug("Loading test data file: {}", filePath);
+				
+				XMLBeanParser.parse(fis, testDataFile, defaultParserHandler);
 				fis.close();
+				
+				for(TestSuite testSuite : testDataFile.getTestSuites())
+				{
+					logger.debug("Loading test suite '{}' from file: {}", testSuite.getName(), filePath);
+					testSuiteGroup.addTestSuite(testSuite);
+				}
+				
+				if(testDataFile.getSetup() != null)
+				{
+					if(setupFile != null)
+					{
+						throw new InvalidStateException("Duplicate global setups specified. Files: [{}, {}]", setupFile.getPath(), xmlFile.getPath());
+					}
+					
+					testSuiteGroup.setSetup(testDataFile.getSetup());
+					setupFile = xmlFile;
+				}
+				
+				if(testDataFile.getCleanup() != null)
+				{
+					if(cleanupFile != null)
+					{
+						throw new InvalidStateException("Duplicate global cleaups specified. Files: [{}, {}]", cleanupFile.getPath(), xmlFile.getPath());
+					}
+					
+					testSuiteGroup.setCleanup(testDataFile.getCleanup());
+					cleanupFile = xmlFile;
+				}
 			} catch(Exception ex)
 			{
 				throw new InvalidStateException(ex, "An error occurred while loading test suite from file: {}", xmlFile.getPath());
@@ -87,7 +125,7 @@ public class AutomationLauncher
 		}
 		
 		// validate test suites has valid dependencies
-		for(TestSuite testSuite : testSuites.values())
+		for(TestSuite testSuite : testSuiteGroup.getTestSuites())
 		{
 			if(testSuite.getDependencies() == null)
 			{
@@ -96,7 +134,7 @@ public class AutomationLauncher
 
 			for(String dependency : testSuite.getDependencies())
 			{
-				if(!testSuites.containsKey(dependency))
+				if(!testSuiteGroup.isValidTestSuiteName(dependency))
 				{
 					throw new InvalidConfigurationException("Invalid dependency '{}' specified for test suite - {}", dependency, testSuite.getName());
 				}
@@ -105,7 +143,7 @@ public class AutomationLauncher
 		
 		logger.debug("Found required configurations by this context to be: {}", context.getConfigurations());
 		
-		return testSuites;
+		return testSuiteGroup;
 	}
 	
 	/**
@@ -218,7 +256,7 @@ public class AutomationLauncher
 		AutomationContext context = new AutomationContext(appConfig);
 		
 		// load test suites
-		Map<String, TestSuite> testSuites = loadTestSuites(context, appConfig);
+		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig);
 
 		//initialize the configurations
 		String extendedCommandLineArgs[] = {};
@@ -232,7 +270,7 @@ public class AutomationLauncher
 		initalizeConfigurations(context, extendedCommandLineArgs);
 		
 		//execute test suites
-		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuites, reportFolder);
+		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup, reportFolder);
 		testSuiteExecutor.executeTestSuites();
 	}
 }

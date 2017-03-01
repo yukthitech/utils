@@ -9,7 +9,7 @@ import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -40,7 +40,7 @@ public class ClickStep implements IStep
 	{
 		logger.trace("Clicking the button: {}", locator);
 
-		WebElement buttonElement = AutomationUtils.findElement(context, null, locator);
+		WebElement buttonElement = UiAutomationUtils.findElement(context, null, locator);
 
 		if(buttonElement == null)
 		{
@@ -48,7 +48,7 @@ public class ClickStep implements IStep
 			throw new NullPointerException(FAILED_MESSAGE + locator);
 		}
 
-		AutomationUtils.validateWithWait(() -> {
+		UiAutomationUtils.validateWithWait(() -> {
 			try
 			{
 				buttonElement.click();
@@ -62,7 +62,7 @@ public class ClickStep implements IStep
 
 				throw ex;
 			}
-		} , AutomationUtils.FIVE_SECONDS, "Waiting for element to be clickable: " + locator, new InvalidStateException("Failed to click element - " + locator));
+		} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element to be clickable: " + locator, new InvalidStateException("Failed to click element - " + locator));
 	}
 
 	/**

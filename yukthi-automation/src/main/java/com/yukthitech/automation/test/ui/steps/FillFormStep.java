@@ -13,7 +13,7 @@ import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumConfiguration;
-import com.yukthitech.automation.test.ui.common.AutomationUtils;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -62,7 +62,7 @@ public class FillFormStep implements IStep
 	 */
 	private void fillWithStandardBean(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		WebElement parentElement = AutomationUtils.findElement(context, null, locator);
+		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
 		PropertyDescriptor propDescLst[] = PropertyUtils.getPropertyDescriptors(data.getClass());
 		Object value = null;
@@ -91,7 +91,7 @@ public class FillFormStep implements IStep
 
 			exeLogger.debug(DEBUG_MESSAGE, desc.getName(), value);
 
-			if(!AutomationUtils.populateField(context, parentElement, desc.getName(), "" + value))
+			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), "" + value))
 			{
 				exeLogger.error(ERROR_MESSAGE, desc.getName(), value);
 				throw new InvalidStateException(ERROR_MESSAGE, desc.getName(), value);
@@ -109,7 +109,7 @@ public class FillFormStep implements IStep
 	 */
 	private void fillWithDynamicBean(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		WebElement parentElement = AutomationUtils.findElement(context, null, locator);
+		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
 		DynamicBean dynamicBean = (DynamicBean) data;
 		Map<String, Object> properties = dynamicBean.getProperties();
@@ -127,7 +127,7 @@ public class FillFormStep implements IStep
 
 			exeLogger.debug(DEBUG_MESSAGE, name, value);
 
-			if(!AutomationUtils.populateField(context, parentElement, name, "" + value))
+			if(!UiAutomationUtils.populateField(context, parentElement, name, "" + value))
 			{
 				exeLogger.error(ERROR_MESSAGE, name, value);
 				throw new InvalidStateException(ERROR_MESSAGE, name, locator, value);

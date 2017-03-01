@@ -70,4 +70,30 @@ Reports
 		excluded and included line texts	
 		group value based filter
 	
-	
+==========================
+Rename sub config to plugin and make approp annotation changes
+
+Dml Query / Multi Dml
+ Error on DML failure
+ Log the query
+ Log the update count
+ 
+ means of setting update count on context
+ 
+ on error log the exception and message to ui
+ 
+Prop Step
+ Load from file or resource
+ on error log the exception and message to ui
+ 
+
+General
+ Ensure log4j logging is done for input parameters
+ and on errors
+ 
+ Use Validatable interface to ensure required params are provided
+ 
+Step to set context variable
+
+Use ValidateContextParamStep to validate sql load is successul
+
