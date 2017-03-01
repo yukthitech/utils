@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+		<title>Test Results</title>
+		
+		<style>
+			table
+			{
+				width: 100%; 
+			}
+			
+			tr > th
+			{
+				background-color: rgb(210, 210, 210);
+				font-weight: bold;
+				font-size: 1.2em;
+				text-align: center;
+				border-right: 3px solid white;
+			}
+
+			td
+			{
+				text-align: center;
+			}
+			
+			.successVal
+			{
+				font-weight: bold;
+				color: #6666ff;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+			.defaultVal
+			{
+				font-weight: bold;
+				color: brown;
+			}
+			.resultBox
+			{
+				margin: 1em; 
+				margin-bottom: 3em;
+				border: 2px solid rgb(210, 210, 210); 
+				padding-top: 0.3em; 
+				padding-left: 0.2em;
+			}
+		</style>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	    <script src="js/jquery-2.2.0.js"></script>
+	    
+	    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	    <script src="js/bootstrap.min.js"></script>
+	    
+		<script src="js/angular.js"></script>
+		
+		<script src="js/index.js"></script>
+	</head>
+	
+	<body ng-app="testAutomationApp" ng-controller="testAutomationAppController" ng-init="fetchJsonObjects()">
+		
+		<div style="text-align: center; padding-top: 0.7em;">
+			<span style="background-color: #80aaff; padding: 0.5em; color: black;">Test Results</span>
+		</div>
+		
+		<div class="resultBox">
+			<table>
+				<tr>
+					<th>Total Test Cases</th>
+					<th>Success Count</th>
+					<th>Failure Count</th>
+					<th>Error Count</th>
+					<th>Skip Count</th>
+				</tr>
+				<tr>
+					<td class="defaultVal">{{testResults.fullTestCount}}</td>
+					<td class="successVal">{{testResults.successCount}}</td>
+					<td class="errorVal">{{testResults.failureCount}}</td>
+					<td class="errorVal">{{testResults.errorCount}}</td>
+					<td class="errorVal">{{testResults.skipCount}}</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox">
+			<table>
+				<tr>
+					<th>Test Suite</th>
+					<th>Status</th>
+					<th>Status Message</th>
+					<th>Success Count</th>
+					<th>Failure Count</th>
+					<th>Error Count</th>
+					<th>Skip Count</th>
+				</tr>
+				<tr ng-repeat="result in testResults.testSuiteResults">
+					<td class="defaultVal">
+						<a href="#result.suiteName">{{result.suiteName}}</a>
+					</td>
+					<td ng-class="result.failureCount > 0 ? 'errorVal' : 'successVal'">
+						{{result.status}}	
+					</td>
+					<td>
+						{{result.statusMessage}}	
+					</td>
+					<td class="successVal">
+						{{result.successCount}}	
+					</td>
+					<td class="errorVal">
+						{{result.failureCount}}	
+					</td>
+					<td class="errorVal">
+						{{result.errorCount}}	
+					</td>
+					<td class="errorVal">
+						{{result.skipCount}}
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div id="result.suiteName" class="resultBox" ng-repeat="result in testResultsArr">
+			<table>
+				<tr>
+					<th colspan="3" style="background-color: brown; color: white;">
+							{{result.suiteName}}
+					</th>
+				</tr>
+				<tr>
+					<th>Test Case</th>
+					<th>Status</th>
+					<th>Log</th>
+				</tr>
+				<tr ng-repeat="suiteResult in result.testCaseResults">
+					<td style="color: #3973ac; font-weight: bold;">{{suiteResult.testCaseName}}</td>
+					<td ng-class="suiteResult.status == 'FAILED' ? 'errorVal' : 'successVal'">{{suiteResult.status}}</td>
+					<td><a href="./log.html?{{result.suiteName}}_{{suiteResult.testCaseName}}" target="_blank">Log</a></td>
+				</tr>
+			</table>
+		</div>
+		
+	</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+	    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	    <script src="js/jquery-2.2.0.js"></script>
+	    
+	    <script src="js/angular.js"></script>
+		
+	    <script src="js/log.js"></script>
+	    
+	    <style>
+	    	
+			.successVal
+			{
+				font-weight: bold;
+				color: #6666ff;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+			.defaultVal
+			{
+				font-weight: bold;
+				color: brown;
+			}
+			.resultBox
+			{
+				margin: 1em; 
+				margin-bottom: 3em;
+				border: 2px solid rgb(210, 210, 210); 
+				padding: 0.5em; 
+				font-weight: bold;
+			}
+		</style>
+		
+	</head>
+	
+	<body ng-app="testLogApp" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
+		
+		<div class="resultBox" style="background-color: grey; color: white;">
+			<table>
+				<tr>
+					<td>Executor Name </td>
+					<td>:</td>
+					<td>{{testLogs.executorName}}</td>
+				</tr>
+				<tr>
+					<td>Executor Type</td>
+					<td>:</td>
+					<td>{{testLogs.executorType}}</td>
+				</tr>
+				<tr>
+					<td>Executor Description</td>
+					<td>:</td>
+					<td>{{testLogs.executorDescription}}</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox" style="background-color: lightblue; color: black;">
+			<div ng-repeat="message in testLogs.messages">		
+				
+				<div ng-show="message.logLevel" style="">
+					<table style="width: 100%;">
+						<tr>
+							<td style="width: 10%;">Log level</td> 
+							<td style="width: 10%;"> {{message.logLevel}}</td>
+							<td style="width: 10%;">Message</td> 
+							<td style="width: 50%;">{{message.message}}</td>
+							<td style="width: 10%;">Time </td> 
+							<td style="width: 10%;"> {{message.time}}</td>
+						</tr>
+					</table>
+				</div>
+				
+				<div ng-show="message.executorName" style="">
+					
+					<table style="width: 100%;">
+						<tr>
+							<td style="width: 10%;">Executor Name</td> 
+							<td style="width: 10%;"> {{message.executorName}}</td>
+							<td style="width: 10%;">Executor Description </td> 
+							<td style="width: 50%;">{{message.executorDescription}}</td>
+							<td style="width: 10%;">ExecutorType</td> 
+							<td style="width: 10%;"> {{message.executorType}}</td>
+						</tr>
+					</table>
+					
+					<div ng-repeat="errorMessage in message.messages">
+						<table style="width: 100%;">
+							<tr>
+								<td style="width: 10%;">Log level</td> 
+								<td style="width: 10%;"> {{errorMessage.logLevel}}</td>
+								<td style="width: 10%;">Message</td> 
+								<td style="width: 50%;">{{errorMessage.message}}</td>
+								<td style="width: 10%;">Time</td> 
+								<td style="width: 10%;">{{errorMessage.time}}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</body>
+</html>
