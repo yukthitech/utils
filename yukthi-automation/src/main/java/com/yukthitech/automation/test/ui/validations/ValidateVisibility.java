@@ -17,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(value = "validateVisibility", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified element is visible/hidden")
+@Executable(name = "validateVisibility", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified element is visible/hidden")
 public class ValidateVisibility extends AbstractValidation
 {
 	/**

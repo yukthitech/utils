@@ -1,12 +1,16 @@
 package com.yukthitech.automation;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IConfiguration;
+import com.yukthitech.automation.logmon.ILogMonitor;
 
 /**
  * Automation Context information. 
@@ -35,12 +39,24 @@ public class AutomationContext
 	private Map<Class<?>, IConfiguration<?>> requiredConfiurations = new HashMap<>();
 	
 	/**
+	 * List of configured log monitors.
+	 */
+	private Map<String, ILogMonitor> logMonitors;
+	
+	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
 	 */
 	public AutomationContext(ApplicationConfiguration appConfiguration)
 	{
 		this.appConfiguration = appConfiguration;
+		
+		List<ILogMonitor> logMontLst = appConfiguration.getLogMonitors();
+		
+		if(logMontLst != null && !logMontLst.isEmpty())
+		{
+			logMonitors = logMontLst.stream().collect(Collectors.toMap(monit -> monit.getName() , monit -> monit));
+		}
 	}
 	
 	/**
@@ -139,5 +155,42 @@ public class AutomationContext
 	public ApplicationConfiguration getAppConfiguration()
 	{
 		return appConfiguration;
+	}
+	
+	/**
+	 * Starts all registered log monitors.
+	 */
+	public void startLogMonitoring()
+	{
+		if(logMonitors == null)
+		{
+			return;
+		}
+		
+		for(ILogMonitor monitor : logMonitors.values())
+		{
+			monitor.startMonitoring();
+		}
+	}
+	
+	/**
+	 * Stops the log monitors and collects the log files generated.
+	 * @return Collected log files
+	 */
+	public Map<String, File> stopLogMonitoring()
+	{
+		if(logMonitors == null)
+		{
+			return null;
+		}
+		
+		Map<String, File> logFiles = new HashMap<>();
+		
+		for(Map.Entry<String, ILogMonitor> entry : this.logMonitors.entrySet())
+		{
+			logFiles.put(entry.getKey(), entry.getValue().stopMonitoring());
+		}
+		
+		return logFiles;
 	}
 }

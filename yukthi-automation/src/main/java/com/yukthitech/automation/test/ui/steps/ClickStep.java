@@ -17,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(value = "click", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Clicks the specified target")
+@Executable(name = "click", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Clicks the specified target")
 public class ClickStep implements IStep
 {
 	/**

@@ -21,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author Pritam.
  */
-@Executable(value = "dragAndDrop", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Drags the specified element to specified target")
+@Executable(name = "dragAndDrop", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Drags the specified element to specified target")
 public class DragAndDropStep implements IStep
 {
 	/**

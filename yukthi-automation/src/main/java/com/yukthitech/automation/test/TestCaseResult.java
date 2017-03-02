@@ -1,5 +1,8 @@
 package com.yukthitech.automation.test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yukthitech.automation.test.log.ExecutionLogData;
 
@@ -27,6 +30,11 @@ public class TestCaseResult
 	 * Failure message.
 	 */
 	private String message;
+	
+	/**
+	 * Monitor logs.
+	 */
+	private Map<String, String> monitorLogs = new HashMap<>();
 
 	/**
 	 * Instantiates a new test case result.
@@ -138,5 +146,26 @@ public class TestCaseResult
 	public void setMessage(String failureMessage)
 	{
 		this.message = failureMessage;
+	}
+
+	/**
+	 * Gets the monitor logs.
+	 *
+	 * @return the monitor logs
+	 */
+	public Map<String, String> getMonitorLogs()
+	{
+		return monitorLogs;
+	}
+	
+	/**
+	 * Sets the monitor log.
+	 *
+	 * @param name the name
+	 * @param fileName the file name
+	 */
+	public void setMonitorLog(String name, String fileName)
+	{
+		monitorLogs.put(name, fileName);
 	}
 }

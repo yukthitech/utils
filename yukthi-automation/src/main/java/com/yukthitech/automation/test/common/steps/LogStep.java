@@ -9,7 +9,7 @@ import com.yukthitech.automation.IStep;
  * Loads specified properties file as map on to context.
  * @author akiran
  */
-@Executable(value = "log", message = "Logs specified message")
+@Executable(name = "log", message = "Logs specified message")
 public class LogStep implements IStep 
 {
 	/**

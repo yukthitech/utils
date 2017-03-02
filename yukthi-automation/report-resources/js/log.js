@@ -6,21 +6,35 @@ testLogApp.controller('testLogAppController', function($scope){
 		
 		var urlStr = (window.location).search;
 		
-		urlStr = urlStr.slice(1, urlStr.length) + ".json";
-		
-		$.ajax({ dataType: "json", url: urlStr,
-			 success: function (data, textStatus) {
-				 
-				 $scope.testLogs = data;
-				
-				 console.log($scope.testLogs);
-				 try
-				 {
-					 $scope.$apply();
-				 }catch(ex)
-				 {}
-			 }
-		});
-		
+		urlStr = "logs/" + urlStr.slice(1, urlStr.length) + ".js";
+		$scope.importScript(urlStr, $scope.displayLogs);
 	};
+	
+	$scope.importScript = function (sSrc, fOnload){
+		
+		  var oScript = document.createElement("script");
+		  oScript.type = "text\/javascript";
+		  
+		  if(fOnload) 
+		  { 
+			 oScript.onload = fOnload; 
+		  }
+		  
+		 var logScript = document.getElementById('logScript');
+			
+		 logScript.parentNode.insertBefore(oScript, logScript);
+		 oScript.src = sSrc;
+	};
+	
+	$scope.displayLogs = function(){
+		
+		$scope.testLogs = logData;
+		
+		try
+		{
+			$scope.$apply();
+		}catch(ex)
+		{}
+	};
+	
 });

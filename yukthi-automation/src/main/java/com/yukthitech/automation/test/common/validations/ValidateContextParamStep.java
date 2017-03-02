@@ -14,7 +14,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * Validator to validate if specified value matches with specified context expression.
  * @author akiran
  */
-@Executable(value = "validateContextParam", message = "Validates specified context param is present with specified value")
+@Executable(name = "validateContextParam", message = "Validates specified context param is present with specified value")
 public class ValidateContextParamStep extends AbstractValidation implements Validateable
 {
 	/**

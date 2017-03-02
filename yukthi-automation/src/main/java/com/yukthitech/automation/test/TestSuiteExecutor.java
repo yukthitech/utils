@@ -1,6 +1,9 @@
 package com.yukthitech.automation.test;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -10,12 +13,15 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.automation.AutomationLauncher;
 import com.yukthitech.automation.BasicArguments;
+import com.yukthitech.automation.logmon.LogMonitorContext;
 import com.yukthitech.automation.test.log.ExecutionLogData;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 /**
  * Test suites executors.
@@ -201,14 +207,21 @@ public class TestSuiteExecutor
 
 			testFileName = testSuite.getName() + "_" + testCase.getName();
 
+			//start monitoring logs
+			context.startLogMonitoring();
+			
+			//execute actual test case
 			testCaseResult = testCase.execute(context);
+			
+			//stop monitoring logs
+			Map<String, File> monitoringLogs = context.stopLogMonitoring();
 
 			if(testCaseResult.getStatus() != TestStatus.SUCCESSUFUL)
 			{
 				successful = false;
 			}
 
-			createLogFiles(testCaseResult, testFileName);
+			createLogFiles(testCaseResult, testFileName, monitoringLogs);
 
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 
@@ -240,8 +253,9 @@ public class TestSuiteExecutor
 	 * Creates log files from specified test case result.
 	 * @param testCaseResult result from which log data needs to be fetched
 	 * @param logFilePrefix log file name prefix
+	 * @param monitoringLogs Monitoring logs to be copied
 	 */
-	private void createLogFiles(TestCaseResult testCaseResult, String logFilePrefix)
+	private void createLogFiles(TestCaseResult testCaseResult, String logFilePrefix, Map<String, File> monitoringLogs)
 	{
 		ExecutionLogData executionLogData = testCaseResult.getExecutionLog();
 		
@@ -263,6 +277,41 @@ public class TestSuiteExecutor
 		{
 			throw new InvalidStateException(ex, "An error occurred while creating test log json file - {}", new File(logsFolder, logFilePrefix + LOG_JSON));
 		}
+
+		if(monitoringLogs != null)
+		{
+			for(Map.Entry<String, File> log : monitoringLogs.entrySet())
+			{
+				if(log.getValue() == null)
+				{
+					continue;
+				}
+				
+				try
+				{
+					FileUtils.copyFile(log.getValue(), new File(logsFolder, logFilePrefix + "_" + log.getKey() + ".log"));
+					
+					Template freemarkerTemplate = new Template("monitor-log-template", 
+							new InputStreamReader(AutomationLauncher.class.getResourceAsStream("/monitor-log-template.html")), freemarkerConfiguration);
+
+					File logHtmlFile = new File(logsFolder, logFilePrefix + "_" + log.getKey() + ".log.html");
+					FileWriter writer = new FileWriter(logHtmlFile);
+					String logContent = FileUtils.readFileToString(log.getValue());
+					
+					freemarkerTemplate.process(new LogMonitorContext(testCaseResult.getTestCaseName(), log.getKey(), logContent), writer);
+
+					testCaseResult.setMonitorLog(log.getKey(), logHtmlFile.getName());
+					
+					writer.flush();
+					writer.close();
+					
+					log.getValue().delete();
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("An error occurred while creating monitoring log file - {}", log.getKey());
+				}
+			}
+		}
 	}
 	
 	/**
@@ -279,7 +328,7 @@ public class TestSuiteExecutor
 		logger.debug("Executing {} setup steps...", prefix);
 		
 		TestCaseResult testCaseResult = testSuiteGroup.getSetup().execute(context);
-		createLogFiles(testCaseResult, prefix + "-setup");
+		createLogFiles(testCaseResult, prefix + "-setup", null);
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
 	}
@@ -298,7 +347,7 @@ public class TestSuiteExecutor
 		logger.debug("Executing {} cleanup steps...", prefix);
 		
 		TestCaseResult testCaseResult = testSuiteGroup.getCleanup().execute(context);
-		createLogFiles(testCaseResult, prefix + "-cleanup");
+		createLogFiles(testCaseResult, prefix + "-cleanup", null);
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
 	}
@@ -388,17 +437,6 @@ public class TestSuiteExecutor
 		//create final report files
 		try
 		{
-			/*
-			Template freemarkerTemplate = new Template("report", 
-					new InputStreamReader(AutomationLauncher.class.getResourceAsStream("/report-template.html")), freemarkerConfiguration);
-
-			FileWriter writer = new FileWriter(new File(reportFolder, "test-report.html"));
-			freemarkerTemplate.process(fullExecutionDetails, writer);
-
-			writer.flush();
-			writer.close();
-			*/
-			
 			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(fullExecutionDetails);
 			String jsContent = "var reportData = " + jsonContent;
 			

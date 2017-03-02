@@ -21,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Step to execute DML Query.
  * @author akiran
  */
-@Executable(value = "dmlQuery", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified DML Query")
+@Executable(name = "dmlQuery", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified DML Query")
 public class DmlQueryStep implements IStep 
 {
 	/**

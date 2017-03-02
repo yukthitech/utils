@@ -18,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author Pritam.
  */
-@Executable(value = "populateField", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Populates specified field with specified message")
+@Executable(name = "populateField", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Populates specified field with specified message")
 public class PopulateFieldStep implements IStep
 {
 	/**

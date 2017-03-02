@@ -107,7 +107,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 					continue;
 				}
 
-				nameToStepType.put(executable.value(), stepType);
+				nameToStepType.put(executable.name(), stepType);
 			}
 		}
 	}
@@ -144,7 +144,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 					continue;
 				}
 
-				nameToValidationType.put(executable.value(), validationType);
+				nameToValidationType.put(executable.name(), validationType);
 			}
 		}
 	}

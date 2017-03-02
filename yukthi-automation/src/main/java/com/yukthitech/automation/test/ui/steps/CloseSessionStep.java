@@ -13,7 +13,7 @@ import com.yukthitech.automation.config.SeleniumConfiguration;
  * Simulates the click event on the specified button.
  * @author akiran
  */
-@Executable(value = "closeSession", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Closes the browser")
+@Executable(name = "closeSession", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Closes the browser")
 public class CloseSessionStep implements IStep
 {
 	/**

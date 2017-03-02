@@ -1,10 +1,15 @@
 package com.yukthitech.automation.config;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.yukthitech.automation.logmon.ConsoleLogMonitor;
+import com.yukthitech.automation.logmon.ILogMonitor;
 
 /**
  * Application configuration for applications being automated.
@@ -30,6 +35,11 @@ public class ApplicationConfiguration
 	 * Test data beans that can be used by test cases.
 	 */
 	private Map<String, Object> dataBeans = new HashMap<>();
+	
+	/**
+	 * List of log monitors to be used.
+	 */
+	private List<ILogMonitor> logMonitors = new ArrayList<>();
 
 	/**
 	 * Gets the folder containing test suite xmls.
@@ -134,5 +144,38 @@ public class ApplicationConfiguration
 	public Object getDataBean(String name)
 	{
 		return dataBeans.get(name);
+	}
+	
+	/**
+	 * Adds log monitor to the configuration.
+	 * @param monitor monitor to add
+	 */
+	public void addLogMonitor(ILogMonitor monitor)
+	{
+		if(monitor == null)
+		{
+			throw new NullPointerException("Monitor can not be null");
+		}
+		
+		this.logMonitors.add(monitor);
+	}
+	
+	/**
+	 * Adds console log monitor to this configuration.
+	 * @param monitor monitor to add.
+	 */
+	public void addConsoleLogMonitor(ConsoleLogMonitor monitor)
+	{
+		addLogMonitor(monitor);
+	}
+	
+	/**
+	 * Gets the list of log monitors to be used.
+	 *
+	 * @return the list of log monitors to be used
+	 */
+	public List<ILogMonitor> getLogMonitors()
+	{
+		return logMonitors;
 	}
 }

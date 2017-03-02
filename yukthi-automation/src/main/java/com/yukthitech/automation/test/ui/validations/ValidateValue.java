@@ -16,7 +16,7 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
  * 
  * @author akiran
  */
-@Executable(value = "validateValue", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified element has specified value/text")
+@Executable(name = "validateValue", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified element has specified value/text")
 public class ValidateValue extends AbstractValidation
 {
 	/**

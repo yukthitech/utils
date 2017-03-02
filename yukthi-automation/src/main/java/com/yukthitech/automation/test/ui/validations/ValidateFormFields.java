@@ -17,7 +17,7 @@ import com.yukthitech.automation.test.ui.common.FormFieldType;
 /**
  * Validates specified form has specified fields with specified field details.
  */
-@Executable(value = "validateFormFields", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified form fields are present")
+@Executable(name = "validateFormFields", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified form fields are present")
 public class ValidateFormFields extends AbstractValidation
 {
 	/**

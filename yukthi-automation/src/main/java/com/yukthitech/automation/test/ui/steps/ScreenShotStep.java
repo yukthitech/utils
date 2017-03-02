@@ -12,7 +12,7 @@ import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumConfiguration;
 
-@Executable(value = "logScreenShot", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Takes current screen snapshot")
+@Executable(name = "logScreenShot", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Takes current screen snapshot")
 public class ScreenShotStep implements IStep
 {
 	/**

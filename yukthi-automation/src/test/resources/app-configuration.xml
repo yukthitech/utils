@@ -1,5 +1,10 @@
 <app xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 
+	<!-- Specify log monitors -->
+	<wrap:logMonitors>
+		<console-log-monitor name="client-output"/>
+	</wrap:logMonitors>
+
 	<!-- 
 		Folder where test suite xmls can be found 
 	-->

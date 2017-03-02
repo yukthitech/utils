@@ -1,0 +1,59 @@
+<html>
+	<head>
+		<title>Monitor Log</title>
+		
+		<style>
+			th
+			{
+				background-color: rgb(210, 210, 210);
+				font-weight: bold;
+				font-size: 1.2em;
+				text-align: center;
+			}
+
+			td
+			{
+				text-align: center;
+			}
+			
+			.successVal
+			{
+				font-weight: bold;
+				color: green;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+		</style>
+	</head>
+	
+	<body>
+		<table style="width: 100%;">
+			<tr>
+				<th>Test Case</th>
+				<th>Log Name</th>
+			</tr>
+			<tr>
+				<td>${testCaseName}</td>
+				<td>${monitorName}</td>
+			</tr>
+		</table>
+		
+		<br/><br/>
+		Log Content:
+		
+		<table>
+			<#list contentLines as line>
+				<tr>
+					<td>
+						${line}
+					</td>
+				</tr>
+			</#list>
+		</table>
+	</body>
+</html>

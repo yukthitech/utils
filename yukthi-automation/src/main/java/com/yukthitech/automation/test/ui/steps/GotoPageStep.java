@@ -14,7 +14,7 @@ import com.yukthitech.automation.config.SeleniumConfiguration;
  * Goes to the specified page url.
  * @author akiran
  */
-@Executable(value = "gotoPage", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Goes to specified page")
+@Executable(name = "gotoPage", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Goes to specified page")
 public class GotoPageStep implements IStep
 {
 	private static Logger logger = LogManager.getLogger(GotoPageStep.class);

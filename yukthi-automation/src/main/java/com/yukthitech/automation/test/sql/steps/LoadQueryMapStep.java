@@ -23,7 +23,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(value = "loadQueryMap", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified query and loads the results as map on context")
+@Executable(name = "loadQueryMap", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified query and loads the results as map on context")
 public class LoadQueryMapStep implements IStep
 {
 	private static Logger logger = LogManager.getLogger(LoadQueryMapStep.class);
