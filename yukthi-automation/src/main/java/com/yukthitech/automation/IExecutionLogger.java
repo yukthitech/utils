@@ -2,26 +2,12 @@ package com.yukthitech.automation;
 
 import java.io.File;
 
-import com.yukthitech.automation.test.log.ExecutorType;
-
 /**
  * Logger that will be passed to validation steps that can be used for logging.
  * @author akiran
  */
 public interface IExecutionLogger
 {
-	
-	/**
-	 * Fetches a sub logger of current logger. So that log messages on this sub-logger will
-	 * get sub indented compared to parent logger.
-	 *  
-	 * @param executorName the executor name
-	 * @param executorDescription the executor description
-	 * @param executorType the executor type
-	 * @return the sub logger
-	 */
-	public IExecutionLogger getSubLogger(String executorName, String executorDescription, ExecutorType executorType);
-	
 	/**
 	 * Used to log error messages as part of current execution.
 	 * @param mssgTemplate Message template with params.

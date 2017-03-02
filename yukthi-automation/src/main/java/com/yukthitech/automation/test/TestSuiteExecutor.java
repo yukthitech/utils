@@ -375,14 +375,11 @@ public class TestSuiteExecutor
 			
 			successful = false;
 		}
-
-		//copy the resource files into output folder
-		File resourcesFolder = new File(reportFolder, "resources");
-		resourcesFolder.mkdir();
 		
+		//copy the resource files into output folder
 		try
 		{
-			FileUtils.copyDirectory(new File("." + File.separator + "report-resources"), resourcesFolder);
+			FileUtils.copyDirectory(new File("." + File.separator + "report-resources"), reportFolder);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while copying resource files to report folder - {}", reportFolder.getPath());

@@ -169,14 +169,9 @@ public class ExecutionLogData
 	private String executorDescription;
 	
 	/**
-	 * Type of executor.
-	 */
-	private ExecutorType executorType;
-	
-	/**
 	 * Messages or sub loggers.
 	 */
-	private List<Object> messages = new ArrayList<>();
+	private List<Message> messages = new ArrayList<>();
 
 	/**
 	 * Instantiates a new execution log data.
@@ -185,11 +180,10 @@ public class ExecutionLogData
 	 * @param executorDescription the executor description
 	 * @param executorType the executor type
 	 */
-	public ExecutionLogData(String executorName, String executorDescription, ExecutorType executorType)
+	public ExecutionLogData(String executorName, String executorDescription)
 	{
 		this.executorName = executorName;
 		this.executorDescription = executorDescription;
-		this.executorType = executorType;
 	}
 
 	/**
@@ -213,21 +207,11 @@ public class ExecutionLogData
 	}
 
 	/**
-	 * Gets the type of executor.
-	 *
-	 * @return the type of executor
-	 */
-	public ExecutorType getExecutorType()
-	{
-		return executorType;
-	}
-
-	/**
 	 * Gets the messages or sub loggers.
 	 *
 	 * @return the messages or sub loggers
 	 */
-	public List<Object> getMessages()
+	public List<Message> getMessages()
 	{
 		return messages;
 	}
@@ -242,32 +226,14 @@ public class ExecutionLogData
 	}
 	
 	/**
-	 * Adds sublog data with specified information.
-	 * @param executorName
-	 * @param executorDescription
-	 * @param executorType
-	 * @return returns added sub log data
-	 */
-	public ExecutionLogData sublog(String executorName, String executorDescription, ExecutorType executorType)
-	{
-		ExecutionLogData sublog = new ExecutionLogData(executorName, executorDescription, executorType);
-		this.messages.add(sublog);
-		
-		return sublog;
-	}
-	
-	/**
 	 * Copies required resources to output folder.
 	 * @param outFolder folder to copy
 	 */
 	public void copyResources(File outFolder)
 	{
-		for(Object message : messages)
+		for(Message message : messages)
 		{
-			if(message instanceof ExecutionLogData)
-			{
-				((ExecutionLogData)message).copyResources(outFolder);
-			}
+			message.copyResources(outFolder);
 		}
 	}
 }

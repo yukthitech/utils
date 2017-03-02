@@ -1,0 +1,104 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<testSuite name="dml-test-suites">
+
+		<testCase name="insertQuery">
+			<description>Validates for inserting record in a table</description>
+
+			<wrap:steps>
+				<ccg:dmlQuery dataSourceName="dataSource">
+					<query>
+						INSERT INTO EMPLOYEE VALUES (1, 'employee1');
+					</query>
+				</ccg:dmlQuery>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateWithSql dataSourceName="dataSource">
+					<query>
+						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
+					</query>
+
+					<expectedRow>
+						<column name="NAME">employee1</column>
+					</expectedRow>
+				</ccg:validateWithSql>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="updateQuery">
+			<description>Validates for updating record in a table</description>
+
+			<wrap:steps>
+				<ccg:dmlQuery dataSourceName="dataSource">
+					<query>
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = 1;
+					</query>
+				</ccg:dmlQuery>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateWithSql dataSourceName="dataSource">
+					<query>
+						SELECT * FROM EMPLOYEE WHERE NAME = 'employee2'
+					</query>
+
+					<expectedRow>
+						<column name="NAME">employee2</column>
+					</expectedRow>
+				</ccg:validateWithSql>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="deleteQuery">
+			<description>Validates for deleting record in a table</description>
+
+			<wrap:steps>
+				<ccg:dmlQuery dataSourceName="dataSource">
+					<query>
+						DELETE FROM EMPLOYEE WHERE ID = 1;
+					</query>
+				</ccg:dmlQuery>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateWithSql dataSourceName="dataSource">
+					<query>
+						SELECT * FROM EMPLOYEE WHERE NAME = 'employee2'
+					</query>
+
+					<expectedRow>
+						<column name="NAME">null</column>
+					</expectedRow>
+				</ccg:validateWithSql>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="multipleQuery">
+			<description>Validates for executing multiple query in table</description>
+
+			<wrap:steps>
+				<ccg:multiDmlQuery dataSourceName="dataSource">
+					<query>
+						INSERT INTO EMPLOYEE VALUES (1, 'employee1');
+					</query>
+
+					<query>
+						INSERT INTO EMPLOYEE VALUES (2, 'employee2');
+					</query>
+				</ccg:multiDmlQuery>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateWithSql dataSourceName="dataSource">
+					<query>
+						SELECT COUNT(*) FROM EMPLOYEE
+					</query>
+
+					<expectedRow>
+						<column name="COUNT(*)">2</column>
+					</expectedRow>
+				</ccg:validateWithSql>
+			</wrap:validations>
+		</testCase>
+	</testSuite>
+</testData>

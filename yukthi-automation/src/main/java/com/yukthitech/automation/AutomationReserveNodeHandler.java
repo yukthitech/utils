@@ -170,11 +170,14 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		if(parent instanceof IValidationContainer)
 		{
 			Object validator = newValidation(beanNode.getName());
-			return validator;
+			
+			if(validator != null)
+			{
+				return validator;
+			}
 		}
 
-		logger.warn("************************No step or validator found with name - " + beanNode.getName());
-		return null;
+		throw new InvalidStateException("No step/validator found with name: {}", beanNode.getName());
 	}
 
 	/* (non-Javadoc)

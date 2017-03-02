@@ -23,7 +23,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Step to execute multiple dml queries in single transaction.
  * @author akiran
  */
-@Executable(value = "dmlQueriesSingleTransaction", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified multiple DML queries in single transaction")
+@Executable(value = "multiDmlQuery", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified multiple DML queries in single transaction")
 public class MultiDmlQueryStep implements IStep
 {
 	/**

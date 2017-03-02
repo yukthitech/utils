@@ -6,11 +6,9 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.automation.AutomationContext;
-import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.IStepContainer;
 import com.yukthitech.automation.common.AutomationUtils;
-import com.yukthitech.automation.test.log.ExecutorType;
 import com.yukthitech.automation.test.log.TestExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -67,19 +65,17 @@ public class Setup implements IStepContainer, Validateable
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		TestExecutionLogger exeLogger = new TestExecutionLogger(NAME, NAME, ExecutorType.TEST_CASE);
-		Executable executable = null;
+		TestExecutionLogger exeLogger = new TestExecutionLogger(NAME, NAME);
 		
 		// execute the steps involved
 		for(IStep step : steps)
 		{
 			exeLogger.debug("Executing step: {}", step);
-			executable = step.getClass().getAnnotation(Executable.class);
 			
 			try
 			{
 				AutomationUtils.replaceExpressions(context, step);
-				step.execute(context, exeLogger.getSubLogger(executable.value(), executable.message(), ExecutorType.STEP));
+				step.execute(context, exeLogger);
 			} catch(Exception ex)
 			{
 				exeLogger.error(ex, "An error occurred while executing step - " + step);

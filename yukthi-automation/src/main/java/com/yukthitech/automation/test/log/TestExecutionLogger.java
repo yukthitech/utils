@@ -27,14 +27,9 @@ public class TestExecutionLogger implements IExecutionLogger
 	 */
 	private ExecutionLogData executionLogData;
 
-	public TestExecutionLogger(String executorName, String executorDescription, ExecutorType executorType)
+	public TestExecutionLogger(String executorName, String executorDescription)
 	{
-		this.executionLogData = new ExecutionLogData(executorName, executorDescription, executorType);
-	}
-	
-	private TestExecutionLogger(ExecutionLogData executionLogData)
-	{
-		this.executionLogData = executionLogData;
+		this.executionLogData = new ExecutionLogData(executorName, executorDescription);
 	}
 
 	/*
@@ -87,18 +82,6 @@ public class TestExecutionLogger implements IExecutionLogger
 
 		logger.debug(finalMssg);
 		executionLogData.addMessage(new ExecutionLogData.Message(LogLevel.DEBUG, finalMssg, new Date()));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.yukthitech.automation.IExecutionLogger#getSubLogger()
-	 */
-	@Override
-	public IExecutionLogger getSubLogger(String executorName, String executorDescription, ExecutorType executorType)
-	{
-		TestExecutionLogger testExecutionLogger = new TestExecutionLogger(executionLogData.sublog(executorName, executorDescription, executorType));
-		return testExecutionLogger;
 	}
 
 	@Override
