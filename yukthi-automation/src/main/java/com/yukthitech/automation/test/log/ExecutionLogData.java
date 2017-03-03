@@ -151,6 +151,7 @@ public class ExecutionLogData
 				FileUtils.copyFile(imageFile, copy);
 				
 				imageFile.delete();
+				this.imageFile = copy;
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while copying image fiel {} to {}", imageFile.getPath(), copy.getPath());

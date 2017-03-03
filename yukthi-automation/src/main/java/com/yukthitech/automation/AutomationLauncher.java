@@ -224,6 +224,7 @@ public class AutomationLauncher
 	 */
 	public static void main(String[] args) throws Exception
 	{
+		System.out.println("Executing main function of aautomation layunche...");
 		File currentFolder = new File(".");
 
 		logger.debug("Executing from folder: " + currentFolder.getCanonicalPath());

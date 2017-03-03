@@ -327,7 +327,7 @@ public class TestSuiteExecutor
 		
 		logger.debug("Executing {} setup steps...", prefix);
 		
-		TestCaseResult testCaseResult = testSuiteGroup.getSetup().execute(context);
+		TestCaseResult testCaseResult = setup.execute(context);
 		createLogFiles(testCaseResult, prefix + "-setup", null);
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
@@ -338,7 +338,7 @@ public class TestSuiteExecutor
 	 */
 	private boolean executeCleanup(String prefix, Cleanup cleanup)
 	{
-		if(testSuiteGroup.getCleanup() == null)
+		if(cleanup == null)
 		{
 			logger.debug("No {} cleanup steps found, ignoring global cleanup execution.", prefix);
 			return true;
@@ -346,7 +346,7 @@ public class TestSuiteExecutor
 		
 		logger.debug("Executing {} cleanup steps...", prefix);
 		
-		TestCaseResult testCaseResult = testSuiteGroup.getCleanup().execute(context);
+		TestCaseResult testCaseResult = cleanup.execute(context);
 		createLogFiles(testCaseResult, prefix + "-cleanup", null);
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;

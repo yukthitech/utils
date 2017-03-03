@@ -13,17 +13,21 @@
 	</properties>
 
 	<dependencies>
+		<!-- For selenium based steps and validations -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
 			<version>2.52.0</version>
 		</dependency>
+		
+		<!-- For SQL based steps and validations, to define data sources -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 			<version>2.1</version>
 		</dependency>
 
+		<!-- for template processing -->
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
@@ -36,6 +40,16 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 
+		<!-- for remote file monitoring -->
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.54</version>
+		</dependency>
+
+		<!-- ************************************************************** -->
+		<!-- Test related dependencies -->
+		
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
@@ -43,7 +57,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
+		<!-- Jetty to start embedded server -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>

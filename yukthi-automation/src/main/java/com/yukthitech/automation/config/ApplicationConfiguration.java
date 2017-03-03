@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.yukthitech.automation.logmon.ConsoleLogMonitor;
+import com.yukthitech.automation.logmon.FileLogMonitor;
 import com.yukthitech.automation.logmon.ILogMonitor;
 
 /**
@@ -161,10 +161,10 @@ public class ApplicationConfiguration
 	}
 	
 	/**
-	 * Adds console log monitor to this configuration.
+	 * Adds file log monitor to this configuration.
 	 * @param monitor monitor to add.
 	 */
-	public void addConsoleLogMonitor(ConsoleLogMonitor monitor)
+	public void addFileLogMonitor(FileLogMonitor monitor)
 	{
 		addLogMonitor(monitor);
 	}

@@ -17,5 +17,6 @@ public class TAutomation
 	public void startAutomation() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", "./output"});
+		System.out.println("From test case printing this...");
 	}
 }

@@ -160,7 +160,7 @@ public class AutomationContext
 	/**
 	 * Starts all registered log monitors.
 	 */
-	public void startLogMonitoring()
+	public synchronized void startLogMonitoring()
 	{
 		if(logMonitors == null)
 		{
@@ -177,7 +177,7 @@ public class AutomationContext
 	 * Stops the log monitors and collects the log files generated.
 	 * @return Collected log files
 	 */
-	public Map<String, File> stopLogMonitoring()
+	public synchronized Map<String, File> stopLogMonitoring()
 	{
 		if(logMonitors == null)
 		{
