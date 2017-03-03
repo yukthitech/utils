@@ -187,7 +187,7 @@ public class TestSuiteExecutor
 						continue;
 					}
 					
-					if(depTestCaseResult.getStatus() == TestStatus.SUCCESSUFUL)
+					if(depTestCaseResult.getStatus() == TestStatus.SUCCESSFUL)
 					{
 						continue;
 					}
@@ -216,7 +216,7 @@ public class TestSuiteExecutor
 			//stop monitoring logs
 			Map<String, File> monitoringLogs = context.stopLogMonitoring();
 
-			if(testCaseResult.getStatus() != TestStatus.SUCCESSUFUL)
+			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
 			{
 				successful = false;
 			}
@@ -330,7 +330,7 @@ public class TestSuiteExecutor
 		TestCaseResult testCaseResult = setup.execute(context);
 		createLogFiles(testCaseResult, prefix + "-setup", null);
 		
-		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
+		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
 	}
 
 	/**
@@ -349,7 +349,7 @@ public class TestSuiteExecutor
 		TestCaseResult testCaseResult = cleanup.execute(context);
 		createLogFiles(testCaseResult, prefix + "-cleanup", null);
 		
-		return testCaseResult.getStatus() == TestStatus.SUCCESSUFUL;
+		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
 	}
 
 	/**

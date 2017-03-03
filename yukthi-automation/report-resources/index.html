@@ -76,36 +76,41 @@
 					<td style="width: 10%;">
 						<img alt="Yukthi Logo" src="">
 					</td>
-					<td style="width: 50%;">
+					<td style="width: 38%;">
 						aaa
 					</td>
 					<td style="width: 15%;">
-						<div style=" padding: 0.2em;">
+						<div>
 							<input type="text" ng-model="searchTestSuiteName" class="form-control" placeholder="Test Suite Name"
 							ng-keyup="filterTestSuite($event)"/>
 						</div>
 					</td>
 					<td style="width: 15%;">
-						<div style=" padding: 0.2em;">
+						<div style="margin-left: 0.6em;">
 							<input type="text" ng-model="searchTestCaseName" class="form-control" placeholder="Test Case Name"
 							ng-keyup="filterTestCase($event)"/>
 						</div>
 					</td>
-					<td style="width: 10%;">
-						<div style="padding: 0.2em;">
-							<div class="dropdown">
-							    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"
-							    	 style="max-width: 7em; min-width: 7em;">
-							    {{status}}
-							    <span class="caret"></span></button>
-							    <ul class="dropdown-menu">
-							      <li><a href="#" ng-click="onChangeStatus('All')">All</a></li>
-							      <li><a href="#" ng-click="onChangeStatus('Success')">Success</a></li>
-							      <li><a href="#" ng-click="onChangeStatus('Error')">Error</a></li>
-							      <li><a href="#" ng-click="onChangeStatus('Failed')">Failed</a></li>
-							      <li><a href="#" ng-click="onChangeStatus('Skipped')">Skipped</a></li>
-							    </ul>
-							  </div>
+					<td style="width: 22%;">
+						<div class="btn-group">
+							<button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em; cursor: default;">
+								Test Case Status 
+							</button>
+						    
+						    <button type="button" class="btn btn-primary" style="max-width: 7em; min-width: 7em; cursor: default;">
+						    	{{status}}
+						    </button>
+						    
+						    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						      <span class="caret"></span>
+						    </button>
+						    <ul class="dropdown-menu" role="menu">
+						       <li><a href="#" ng-click="onChangeStatus('All')">All</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Success')">Success</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Error')">Error</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Failed')">Failed</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Skipped')">Skipped</a></li>
+						    </ul>
 						</div>
 					</td>
 				</tr>
@@ -175,14 +180,13 @@
 		<div class="resultBox">
 			<table class="table table-hover table-striped table-bordered">
 				<tr>
-					<th>Test Suite</th>
-					<th>Status</th>
-					<th>Message</th>
-					<th>Status String</th>
-					<th>Success Count</th>
-					<th>Failure Count</th>
-					<th>Error Count</th>
-					<th>Skip Count</th>
+					<th style="width: 20%;">Test Suite</th>
+					<th style="width: 15%;">Status</th>
+					<th style="width: 24%;">Message</th>
+					<th style="width: 11%;">Success Count</th>
+					<th style="width: 10%;">Failure Count</th>
+					<th style="width: 10%;">Error Count</th>
+					<th style="width: 10%;">Skip Count</th>
 				</tr>
 				<tr ng-repeat="result in testSuiteResults" ng-show="result.display">
 					<td class="defaultVal">
@@ -193,9 +197,6 @@
 					</td>
 					<td>
 						{{result.message}}
-					</td>
-					<td ng-class="result.statusString == 'FAILED' ? 'errorVal' : 'successVal'">
-						{{result.statusString}}	
 					</td>
 					<td class="successVal">
 						{{result.successCount}}	
@@ -214,7 +215,7 @@
 		</div>
 		
 		<div id="result.suiteName" class="resultBox" ng-repeat="result in testResultsArr" ng-show="result.display">
-			<table class="table table-hover table-striped table-bordered">
+			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
 				<tr>
 					<td colspan="5" style="background-color: #8585ad; font-weight: bold; color: black;">
 							{{result.suiteName}}
@@ -224,24 +225,25 @@
 					<th>Test Case</th>
 					<th>Status</th>
 					<th>Message</th>
-					<th>Status String</th>
 					<th>Log</th>
 				</tr>
 				<tr ng-repeat="suiteResult in result.testCaseResults" ng-show="suiteResult.display">
-					<td style="color: #3973ac; font-weight: bold;">
+					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;">
 						{{suiteResult.testCaseName}}
 					</td>
-					<td ng-class="suiteResult.status == 'FAILED' ? 'errorVal' : 'successVal'">
+					<td ng-class="suiteResult.status == 'FAILED' ? 'errorVal' : 'successVal'" style="width: 20%;">
 						{{suiteResult.status}}
 					</td>
-					<td>
+					<td style="width: 50%;">
 						{{suiteResult.message}}
 					</td>
-					<td ng-class="suiteResult.statusString == 'FAILED' ? 'errorVal' : 'successVal'">
-						{{suiteResult.statusString}}
-					</td>
-					<td>
+					<td style="width: 10%;">
 						<a href="./log.html?{{result.suiteName}}_{{suiteResult.testCaseName}}" target="_blank">Log</a>
+						
+						<a href="logs/{{suiteResult.monitorLogs['client-output']}}" target="_blank"
+							style="color: brown;">
+							Monitor
+						</a>
 					</td>
 				</tr>
 			</table>

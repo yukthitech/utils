@@ -3,6 +3,9 @@ var testAutomationApp = angular.module('testAutomationApp', []);
 testAutomationApp.controller('testAutomationAppController', function($scope){
 	
 	$scope.status = "Status";
+	$scope.searchTestCaseName = "";
+	
+	$scope.statusToName = {"All" : "ALL", "Success" : "SUCCESSFUL", "Error" : "ERRORED", "Failed" : "FAILED", "Skipped" : "SKIPPED"};
 	
 	/**
 	 * Gets invoked on init.
@@ -43,9 +46,35 @@ testAutomationApp.controller('testAutomationAppController', function($scope){
 	/**
 	 * On change of status.
 	 */
-	$scope.onChangeStatus = function(data){
+	$scope.onChangeStatus = function(dataDisplay){
 		
-		$scope.status = data;
+		$scope.status = dataDisplay;
+		
+		var dataFilter = $scope.statusToName[dataDisplay];
+		
+		if($scope.searchTestCaseName.length > 0)
+		{
+			
+		}
+		
+		for(var i = 0 ; i < $scope.testSuiteResults.length ; i++)
+		 {
+			 var testCaseResults = $scope.testSuiteResults[i].testCaseResults;
+			 
+			 for(var j = 0 ; j < testCaseResults.length ; j++)
+			 {
+				 var testCaseObj = testCaseResults[j];
+				 
+				if(dataFilter == "ALL")
+				{
+					testCaseObj.display = true; 
+				}else
+				{
+					testCaseObj.display = testCaseObj.status.includes(dataFilter);
+				}
+				 
+			 }
+		 }
 	};
 	
 	/**

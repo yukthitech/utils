@@ -9,7 +9,7 @@ public enum TestStatus
 	/**
 	 * Represents success state of test case.
 	 */
-	SUCCESSUFUL,
+	SUCCESSFUL,
 	
 	/**
 	 * Indicates test case failed.

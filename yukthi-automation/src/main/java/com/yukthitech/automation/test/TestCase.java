@@ -219,7 +219,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 			exeLogger.debug("Completed validation: " + validation);
 		}
 
-		return new TestCaseResult(this.name, TestStatus.SUCCESSUFUL, exeLogger.getExecutionLogData(), null);
+		return new TestCaseResult(this.name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
 
 	/*

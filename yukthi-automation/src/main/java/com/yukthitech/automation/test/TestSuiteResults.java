@@ -143,7 +143,7 @@ public class TestSuiteResults
 	 */
 	public int getSuccessCount()
 	{
-		return getStatusCount(TestStatus.SUCCESSUFUL);
+		return getStatusCount(TestStatus.SUCCESSFUL);
 	}
 
 	/**

@@ -119,7 +119,7 @@ public class FullExecutionDetails
 			
 			switch (status)
 			{
-				case SUCCESSUFUL:
+				case SUCCESSFUL:
 					count += result.getSuccessCount();
 				break;
 				case ERRORED:
@@ -152,7 +152,7 @@ public class FullExecutionDetails
 	 */
 	public int getTestSuiteSuccessCount()
 	{
-		return getTestSuiteCount(TestStatus.SUCCESSUFUL);
+		return getTestSuiteCount(TestStatus.SUCCESSFUL);
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class FullExecutionDetails
 	 */
 	public int getTestCaseSuccessCount()
 	{
-		return getTestCaseCount(TestStatus.SUCCESSUFUL);
+		return getTestCaseCount(TestStatus.SUCCESSFUL);
 	}
 
 	/**
@@ -285,7 +285,7 @@ public class FullExecutionDetails
 	public void testSuiteCompleted(TestSuite testSuite)
 	{
 		this.inProgressTestSuites.remove(testSuite);
-		updateTestSuiteStatus(testSuite, TestStatus.SUCCESSUFUL, "");
+		updateTestSuiteStatus(testSuite, TestStatus.SUCCESSFUL, "");
 	}
 	
 	/**
@@ -324,7 +324,7 @@ public class FullExecutionDetails
 			return false;
 		}
 		
-		return results.getStatus() == TestStatus.SUCCESSUFUL;
+		return results.getStatus() == TestStatus.SUCCESSFUL;
 	}
 	
 	/**
@@ -341,7 +341,7 @@ public class FullExecutionDetails
 			return false;
 		}
 		
-		return results.getStatus() != TestStatus.SUCCESSUFUL;
+		return results.getStatus() != TestStatus.SUCCESSFUL;
 	}
 	
 	/**

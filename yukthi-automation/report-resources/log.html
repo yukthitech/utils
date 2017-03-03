@@ -61,7 +61,7 @@
 	
 	<body ng-app="testLogApp" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
 		
-		<div class="resultBox" style="background-color: grey; color: white; padding: 0.2em; font-weight: bold;">
+		<div class="resultBox" style="background-color: grey; color: white; padding: 0.5em; font-weight: bold;">
 			<table>
 				<tr>
 					<td style="text-align: left;">Test Case: </td>
@@ -77,18 +77,49 @@
 		<div class="resultBox">
 			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
 				<tr>
-					<th>Level</th>
-					<th>Message</th>
-					<th>Time</th>
+					<td colspan="3" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: black;">
+						{{testLogs.executorName}}
+					</td>
 				</tr>
-				<tr ng-repeat="message in testLogs.messages">
+				<tr>
+					<td style="width: 15%">
+						<div class="btn-group">
+						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em;">
+						    	{{filterLevel}}
+						    </button>
+						    
+						    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						      <span class="caret"></span>
+						    </button>
+						    
+						    <ul class="dropdown-menu" role="menu">
+						      <li><a href="#" ng-click="onChangeLevel('DEBUG')">DEBUG</a></li>
+						      <li><a href="#" ng-click="onChangeLevel('ERROR')">ERROR</a></li>
+						      <li><a href="#" ng-click="onChangeLevel('INFO')">INFO</a></li>
+						      <li><a href="#" ng-click="onChangeLevel('TRACE')">TRACE</a></li>
+						    </ul>
+						</div>
+					</td>
+					<td colspan="2" style="width: 65%">
+						<input placeholder="Search by message" ng-model="searchByMessage" class="form-control" style="margin: 0;"/>
+					</td>
+				</tr>
+				<tr>
+					<th style="width: 15%">Level</th>
+					<th style="width: 65%">Message</th>
+					<th style="width: 20%">Time</th>
+				</tr>
+				<tr ng-repeat="message in messages | filter:searchByMessage" ng-show="message.display">
 					<td>
 						{{message.logLevel}}
 					</td>
 					<td>
 						{{message.message}}
-						
-						<img alt="{{message.imageFileName}}" src="{{message.imageFileName}}"/>
+							
+						<a ng-if="message.imageFileName" href="../output/logs/{{message.imageFileName}}" target="_blank">
+					       <img alt="{{message.imageFileName}}" src="../output/logs/{{message.imageFileName}}" 
+					       	style="width: 30em; height: 20em; border: 1px solid black;"/>
+					    </a>
 					</td>
 					<td>
 						{{message.time}}

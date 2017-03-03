@@ -86,7 +86,7 @@ public class Setup implements IStepContainer, Validateable
 			exeLogger.debug("Completed step: " + step);
 		}
 
-		return new TestCaseResult(NAME, TestStatus.SUCCESSUFUL, exeLogger.getExecutionLogData(), null);
+		return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
 
 	/*
