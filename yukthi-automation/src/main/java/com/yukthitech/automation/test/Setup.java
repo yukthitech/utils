@@ -8,8 +8,8 @@ import org.apache.commons.collections.CollectionUtils;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.IStepContainer;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.common.AutomationUtils;
-import com.yukthitech.automation.test.log.TestExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -65,13 +65,12 @@ public class Setup implements IStepContainer, Validateable
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		TestExecutionLogger exeLogger = new TestExecutionLogger(NAME, NAME);
+		ExecutionLogger exeLogger = new ExecutionLogger(NAME, NAME);
+		exeLogger.debug("Started setup process");
 		
 		// execute the steps involved
 		for(IStep step : steps)
 		{
-			exeLogger.debug("Executing step: {}", step);
-			
 			try
 			{
 				AutomationUtils.replaceExpressions(context, step);
@@ -82,10 +81,9 @@ public class Setup implements IStepContainer, Validateable
 
 				return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 			}
-
-			exeLogger.debug("Completed step: " + step);
 		}
 
+		exeLogger.debug("Completed setup process");
 		return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
 

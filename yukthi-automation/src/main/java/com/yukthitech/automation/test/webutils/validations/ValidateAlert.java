@@ -2,10 +2,10 @@ package com.yukthitech.automation.test.webutils.validations;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
+import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.automation.test.ui.steps.WaitForStep;
@@ -14,7 +14,7 @@ import com.yukthitech.automation.test.ui.steps.WaitForStep;
  * Validates alert box is displayed and closes the dialog.
  */
 @Executable(name = "validateAlert", requiredPluginTypes = SeleniumPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
-public class ValidateAlert extends AbstractValidation
+public class ValidateAlert implements IValidation
 {
 	/**
 	 * Expected alert message.
@@ -45,7 +45,7 @@ public class ValidateAlert extends AbstractValidation
 	 * @see com.yukthitech.ui.automation.IValidation#execute(com.yukthitech.ui.automation.AutomationContext, java.io.PrintWriter)
 	 */
 	@Override
-	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
+	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Waiting for alert with message - {}", message);
 		

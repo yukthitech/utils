@@ -13,12 +13,13 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 
-import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
+import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.DbPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.sql.steps.QueryUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -26,7 +27,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * SQL based validation.
  */
 @Executable(name = "validateWithSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
-public class SqlValidation extends AbstractValidation
+public class SqlValidation implements IValidation
 {
 	/**
 	 * Result row expectation.
@@ -122,7 +123,7 @@ public class SqlValidation extends AbstractValidation
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
+	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
@@ -143,9 +144,9 @@ public class SqlValidation extends AbstractValidation
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {}", dataSource, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
+			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {}", dataSource, processedQuery, values);
 
 			ResultSetHandler<Boolean> rsHandler = new ResultSetHandler<Boolean>()
 			{
@@ -160,7 +161,7 @@ public class SqlValidation extends AbstractValidation
 					{
 						if(expectedRows.size() <= rowIdx)
 						{
-							exeLogger.error("Actual rows are more than expected row count- {}", expectedRows.size());
+							exeLogger.error("Actual rows are more than expected row count: {}", expectedRows.size());
 							return false;
 						}
 
@@ -173,7 +174,7 @@ public class SqlValidation extends AbstractValidation
 
 							if(!expectedVal.equals(actualVal))
 							{
-								exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value - {}", rowIdx, column, expectedVal, actualVal);
+								exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
 								return false;
 							}
 						}
@@ -185,12 +186,12 @@ public class SqlValidation extends AbstractValidation
 				}
 			};
 			
-			Boolean res = QueryUtils.getQueryRunner().query(processedQuery, rsHandler);
+			Boolean res = QueryUtils.getQueryRunner().query(connection, processedQuery, rsHandler);
 			return res;
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
-			throw new InvalidStateException(ex, "An erorr occurred while executing sql validation with query - {}", query);
+			throw new TestCaseFailedException("An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

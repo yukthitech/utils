@@ -15,10 +15,11 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.DbPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -119,14 +120,14 @@ public class LoadQueryRowBeanStep implements IStep
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
 
 		if(dataSource == null)
 		{
-			throw new InvalidStateException("No data source found with specified name - {}", dataSourceName);
+			throw new InvalidStateException("No data source found with specified name: {}", dataSourceName);
 		}
 
 		Connection connection = null;
@@ -140,15 +141,15 @@ public class LoadQueryRowBeanStep implements IStep
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
+			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 
 			Object result = null;
 			
 			if(processAllRows)
 			{
-				exeLogger.debug("Loading muliple row beans on context attribute - {}", contextAttribute);
+				exeLogger.debug("Loading muliple row beans on context attribute: {}", contextAttribute);
 				result = QueryUtils.getQueryRunner().query(processedQuery, new BeanHandler<>(beanType), values);
 				
 				if(result == null)
@@ -158,7 +159,7 @@ public class LoadQueryRowBeanStep implements IStep
 			}
 			else
 			{
-				exeLogger.debug("Loading first-row as bean on context attribute - {}", contextAttribute);
+				exeLogger.debug("Loading first-row as bean on context attribute: {}", contextAttribute);
 				result = QueryUtils.getQueryRunner().query(processedQuery, new BeanListHandler<>(beanType), values);
 				
 				if(result == null)
@@ -170,9 +171,9 @@ public class LoadQueryRowBeanStep implements IStep
 			context.setAttribute(contextAttribute, result);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query - {}", query);
+			exeLogger.error(ex, "An error occurred while executing query: {}", query);
 			
-			throw new InvalidStateException(ex, "An erorr occurred while executing query - {}", query);
+			throw new TestCaseFailedException("An erorr occurred while executing query: {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

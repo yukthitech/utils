@@ -10,12 +10,12 @@ import org.openqa.selenium.interactions.Actions;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Drag and drop the web elements.
@@ -38,7 +38,7 @@ public class DragAndDropStep implements IStep
 	private String destination;
 
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger logger)
+	public void execute(AutomationContext context, ExecutionLogger logger)
 	{
 		logger.debug("Dragging element '{}' to element - {}", source, destination);
 		
@@ -56,20 +56,20 @@ public class DragAndDropStep implements IStep
 	 * @param destinationElement
 	 *            area to be dropped.
 	 */
-	private void dragAndDrop(AutomationContext context, WebElement sourceElement, WebElement destinationElement, IExecutionLogger logger)
+	private void dragAndDrop(AutomationContext context, WebElement sourceElement, WebElement destinationElement, ExecutionLogger logger)
 	{
 		if(!sourceElement.isDisplayed())
 		{
 			logger.error("Failed to find source element to be dragged. Locator: {}", source);
 			
-			throw new InvalidStateException("Failed to find drag element - '{}'", source);
+			throw new TestCaseFailedException("Failed to find drag element - '{}'", source);
 		}
 
 		if(!destinationElement.isDisplayed())
 		{
 			logger.error("Failed to find targer element to be dropped. Locator: {}", destination);
 			
-			throw new InvalidStateException("Failed to find drop area element - '{}'", destination);
+			throw new TestCaseFailedException("Failed to find drop area element - '{}'", destination);
 		}
 
 		try
@@ -92,15 +92,15 @@ public class DragAndDropStep implements IStep
 		} catch(StaleElementReferenceException ex)
 		{
 			logger.error(ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
-			throw new InvalidStateException("Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
+			throw new TestCaseFailedException("Element with {} or {} is not attached to the page document", sourceElement, destinationElement, ex);
 		} catch(NoSuchElementException e)
 		{
 			logger.error(e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
-			throw new InvalidStateException("Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
+			throw new TestCaseFailedException("Element with {} or {} was not found in DOM ", sourceElement, destinationElement, e);
 		} catch(Exception e)
 		{
 			logger.error(e, "Error occurred while performing drag and drop operation");
-			throw new InvalidStateException("Error occurred while performing drag and drop operation ", e);
+			throw new TestCaseFailedException("Error occurred while performing drag and drop operation ", e);
 		}
 	}
 

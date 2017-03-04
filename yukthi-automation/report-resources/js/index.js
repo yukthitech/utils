@@ -2,7 +2,7 @@ var testAutomationApp = angular.module('testAutomationApp', []);
 
 testAutomationApp.controller('testAutomationAppController', function($scope){
 	
-	$scope.status = "Status";
+	$scope.status = "Test Case Status";
 	$scope.searchTestCaseName = "";
 	
 	$scope.statusToName = {"All" : "ALL", "Success" : "SUCCESSFUL", "Error" : "ERRORED", "Failed" : "FAILED", "Skipped" : "SKIPPED"};
@@ -12,6 +12,7 @@ testAutomationApp.controller('testAutomationAppController', function($scope){
 	 */
 	$scope.fetchObjects = function(){
 		
+		//reportData global variable present in included js file.
 		$scope.testResults = reportData;
 		
 		$scope.testSuiteResults = $scope.testResults.testSuiteResults;
@@ -30,6 +31,8 @@ testAutomationApp.controller('testAutomationAppController', function($scope){
 			 for(var j = 0 ; j < testCaseResults.length ; j++)
 			 {
 				 var testCaseObj = testCaseResults[j];
+				 testCaseObj.filterByStatus = false; 
+				 testCaseObj.filterByTestCaseName = false;
 				 testCaseObj.display = true;
 			 }
 			 
@@ -52,30 +55,101 @@ testAutomationApp.controller('testAutomationAppController', function($scope){
 		
 		var dataFilter = $scope.statusToName[dataDisplay];
 		
+		var filterByNameAndStatus = false;
 		if($scope.searchTestCaseName.length > 0)
 		{
-			
+			filterByNameAndStatus = true;
 		}
+		
+		$scope.commonFilterTestCaseNameStatus("STATUS", dataFilter, filterByNameAndStatus);
+	};
+	
+	
+	
+	/**
+	 * Gets invoked on type for filter test case.
+	 */
+	$scope.filterTestCase = function(event){
+		
+		var searchString = $scope.searchTestCaseName.toLowerCase();
+		
+		var filterByNameAndStatus = false;
+		if($scope.status != "Test Case Status")
+		{
+			filterByNameAndStatus = true;
+		}
+		
+		$scope.commonFilterTestCaseNameStatus("TEST_CASE_NAME", searchString, filterByNameAndStatus);
+	};
+	
+	/**
+	 * Common filter for status and name.
+	 */
+	$scope.commonFilterTestCaseNameStatus = function(filterType, filterValue, filterByNameAndStatus){
 		
 		for(var i = 0 ; i < $scope.testSuiteResults.length ; i++)
 		 {
+			 var testSuiteObj = $scope.testSuiteResults[i];
 			 var testCaseResults = $scope.testSuiteResults[i].testCaseResults;
+			 
+			 var allRowsAreFiltered = true;
 			 
 			 for(var j = 0 ; j < testCaseResults.length ; j++)
 			 {
-				 var testCaseObj = testCaseResults[j];
-				 
-				if(dataFilter == "ALL")
+				var testCaseObj = testCaseResults[j];
+
+				switch(filterType)
 				{
-					testCaseObj.display = true; 
+					case "STATUS":
+						{
+							if(filterValue == "ALL")
+							{
+								testCaseObj.filterByStatus = true
+							}else
+							{
+								testCaseObj.filterByStatus = testCaseObj.status.includes(filterValue);
+							}
+							break;
+						}
+						
+					case "TEST_CASE_NAME":
+						{
+							testCaseObj.filterByTestCaseName = testCaseObj.testCaseName.toLowerCase().includes(filterValue);
+						}
+				}
+				
+				if(filterByNameAndStatus)
+				{
+					if(testCaseObj.filterByStatus && testCaseObj.filterByTestCaseName)
+					{
+						testCaseObj.display = true;
+					}else
+					{
+						testCaseObj.display = false;
+					}
 				}else
 				{
-					testCaseObj.display = testCaseObj.status.includes(dataFilter);
+					if(testCaseObj.filterByStatus || testCaseObj.filterByTestCaseName)
+					{
+						testCaseObj.display = true;
+					}else
+					{
+						testCaseObj.display = false;
+					}
 				}
-				 
+				
+				// check for if all rows are filtered
+				if(testCaseObj.display)
+				{
+					allRowsAreFiltered = false;
+				}
 			 }
+			 
+			// set display value if all rows are hidden. 
+			$scope.suiteNameToObj[testSuiteObj.suiteName].display = !allRowsAreFiltered; 
 		 }
 	};
+	
 	
 	/**
 	 * Gets  invoked on type for filter test suite.
@@ -95,22 +169,27 @@ testAutomationApp.controller('testAutomationAppController', function($scope){
 	};
 	
 	/**
-	 * Gets invoked on type for filter test case.
+	 * Replace all.
 	 */
-	$scope.filterTestCase = function(event){
+	$scope.replaceAll = function(data, target, replacement){
 		
-		var searchString = $scope.searchTestCaseName.toLowerCase();
+		  return data.split(target).join(replacement);
+	};
 		
-		for(var i = 0 ; i < $scope.testSuiteResults.length ; i++)
-		 {
-			 var testCaseResults = $scope.testSuiteResults[i].testCaseResults;
-			 
-			 for(var j = 0 ; j < testCaseResults.length ; j++)
-			 {
-				 var testCaseObj = testCaseResults[j];
-				 testCaseObj.display = testCaseObj.testCaseName.toLowerCase().includes(searchString);;
-			 }
-		 }
+	/**
+	 * Replace the message.
+	 */
+	$scope.replaceMessage = function(message){
+		
+		if(!message)
+		{
+			return message;
+		}
+		
+		var result = $scope.replaceAll(message, "/n", "<BR/>");
+		
+		return result;
+		
 	};
 	
 });

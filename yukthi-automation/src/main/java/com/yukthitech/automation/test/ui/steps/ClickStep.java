@@ -4,10 +4,11 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -26,7 +27,7 @@ public class ClickStep implements IStep
 	private String locator;
 	
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Clicking the element specified by locator: {}", locator);
 
@@ -59,7 +60,7 @@ public class ClickStep implements IStep
 		}catch(InvalidStateException ex)
 		{
 			exeLogger.error(ex, "Failed to click element - {}", locator);
-			throw ex;
+			throw new TestCaseFailedException("Failed to click element - {}", locator, ex);
 		}
 	}
 

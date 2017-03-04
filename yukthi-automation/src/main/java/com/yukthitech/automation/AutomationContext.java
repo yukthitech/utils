@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
+
 import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IPlugin;
 import com.yukthitech.automation.logmon.ILogMonitor;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Automation Context information. 
@@ -44,6 +47,11 @@ public class AutomationContext
 	private Map<String, ILogMonitor> logMonitors;
 	
 	/**
+	 * Work directory to be used for this context.
+	 */
+	private File workDirectory;
+	
+	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
 	 */
@@ -56,6 +64,17 @@ public class AutomationContext
 		if(logMontLst != null && !logMontLst.isEmpty())
 		{
 			logMonitors = logMontLst.stream().collect(Collectors.toMap(monit -> monit.getName() , monit -> monit));
+		}
+		
+		this.workDirectory = new File(appConfiguration.getWorkDirectory());
+		
+		try
+		{
+			FileUtils.deleteDirectory(workDirectory);
+			FileUtils.forceMkdir(workDirectory);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while cleaning up work directory", ex);
 		}
 	}
 	
@@ -114,6 +133,15 @@ public class AutomationContext
 	 * @return Context attributes.
 	 */
 	public Map<String, Object> getAttributeMap()
+	{
+		return Collections.unmodifiableMap(nameToAttr);
+	}
+	
+	/**
+	 * Fetches the attributes on the context as map.
+	 * @return Context attributes.
+	 */
+	public Map<String, Object> getAttr()
 	{
 		return Collections.unmodifiableMap(nameToAttr);
 	}
@@ -192,5 +220,15 @@ public class AutomationContext
 		}
 		
 		return logFiles;
+	}
+	
+	/**
+	 * Gets the work directory to be used for this context.
+	 *
+	 * @return the work directory to be used for this context
+	 */
+	public File getWorkDirectory()
+	{
+		return workDirectory;
 	}
 }

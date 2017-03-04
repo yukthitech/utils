@@ -5,9 +5,9 @@
 			<description>Validates for inserting record in a table</description>
 
 			<wrap:steps>
-				<ccg:dmlQuery dataSourceName="dataSource">
+				<ccg:dmlQuery dataSourceName="dataSource" failOnNoUpdate="true">
 					<query>
-						INSERT INTO EMPLOYEE VALUES (1, 'employee1');
+						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
@@ -25,51 +25,39 @@
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="updateQuery">
+		<testCase name="updateQuery" dependencies="insertQuery">
 			<description>Validates for updating record in a table</description>
 
 			<wrap:steps>
-				<ccg:dmlQuery dataSourceName="dataSource">
+				<ccg:setContextParam name="empId" value="1"/>
+				
+				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="updateCount">
 					<query>
-						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = 1;
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = {{attr.empId}}
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateWithSql dataSourceName="dataSource">
-					<query>
-						SELECT * FROM EMPLOYEE WHERE NAME = 'employee2'
-					</query>
-
-					<expectedRow>
-						<column name="NAME">employee2</column>
-					</expectedRow>
-				</ccg:validateWithSql>
+				<ccg:validateContextParam expression="attr.updateCount" value="1"/>
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="deleteQuery">
+		<testCase name="deleteQuery" dependencies="insertQuery">
 			<description>Validates for deleting record in a table</description>
 
 			<wrap:steps>
-				<ccg:dmlQuery dataSourceName="dataSource">
+				<ccg:setContextParam name="empId" value="1" type="java.lang.Integer"/>
+				
+				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="deleteCount">
 					<query>
-						DELETE FROM EMPLOYEE WHERE ID = 1;
+						DELETE FROM EMPLOYEE WHERE ID = ?{attr.empId}
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateWithSql dataSourceName="dataSource">
-					<query>
-						SELECT * FROM EMPLOYEE WHERE NAME = 'employee2'
-					</query>
-
-					<expectedRow>
-						<column name="NAME">null</column>
-					</expectedRow>
-				</ccg:validateWithSql>
+				<ccg:validateContextParam expression="attr.deleteCount" value="1"/>
 			</wrap:validations>
 		</testCase>
 
@@ -79,11 +67,11 @@
 			<wrap:steps>
 				<ccg:multiDmlQuery dataSourceName="dataSource">
 					<query>
-						INSERT INTO EMPLOYEE VALUES (1, 'employee1');
+						INSERT INTO EMPLOYEE VALUES (2, 'employee1')
 					</query>
 
 					<query>
-						INSERT INTO EMPLOYEE VALUES (2, 'employee2');
+						INSERT INTO EMPLOYEE VALUES (3, 'employee2')
 					</query>
 				</ccg:multiDmlQuery>
 			</wrap:steps>
@@ -91,11 +79,11 @@
 			<wrap:validations>
 				<ccg:validateWithSql dataSourceName="dataSource">
 					<query>
-						SELECT COUNT(*) FROM EMPLOYEE
+						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 2
 					</query>
 
 					<expectedRow>
-						<column name="COUNT(*)">2</column>
+						<column name="COUNT">2</column>
 					</expectedRow>
 				</ccg:validateWithSql>
 			</wrap:validations>

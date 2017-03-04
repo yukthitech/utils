@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
+import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -18,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "validateVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
-public class ValidateVisibility extends AbstractValidation
+public class ValidateVisibility implements IValidation
 {
 	/**
 	 * The logger.
@@ -51,12 +51,10 @@ public class ValidateVisibility extends AbstractValidation
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
+	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		logger.trace("Waiting for element: {}", locator);
 		
-		replaceExpressions(context, this);
-
 		UiAutomationUtils.validateWithWait(() -> {
 			WebElement element = UiAutomationUtils.findElement(context, null, locator);
 

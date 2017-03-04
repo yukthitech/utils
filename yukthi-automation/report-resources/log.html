@@ -9,80 +9,44 @@
 	    <script src="js/jquery-2.2.0.js"></script>
 	    
 	    <script src="js/angular.js"></script>
+	    <script src="js/angular-sanitize.min.js"></script>
+	    <script src="js/angular-app.js"></script>
 	    
 		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/common.css" rel="stylesheet">
 		
 	    <!-- Include all compiled plugins (below), or include individual files as needed -->
 	    <script src="js/bootstrap.min.js"></script>
 	    
 	    <script id="logScript" src="js/log.js"></script>
 	    
-	    <style>
-	    	
-	    	tr > th
-			{
-				background-color: #484848;
-				font-weight: bold;
-				font-size: 1.1em;
-				text-align: center;
-				color: white;
-			}
-	    	
-	    	td
-			{
-				text-align: center;
-			}
-			
-			.successVal
-			{
-				font-weight: bold;
-				color: #6666ff;
-			}
-			
-			.errorVal
-			{
-				font-weight: bold;
-				color: red;
-			}
-			
-			.defaultVal
-			{
-				font-weight: bold;
-				color: brown;
-			}
-			.resultBox
-			{
-				margin: 1em;
-				margin-bottom: 2em;
-			}
-		</style>
-		
+	    <link href="highlight/styles/agate.css" rel="stylesheet">
+	    <script src="highlight/highlight.pack.js"></script>
+	    
 	</head>
 	
-	<body ng-app="testLogApp" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
-		
-		<div class="resultBox" style="background-color: grey; color: white; padding: 0.5em; font-weight: bold;">
-			<table>
-				<tr>
-					<td style="text-align: left;">Test Case: </td>
-					<td style="text-align: left; padding-left: 2em;">{{testLogs.executorName}}</td>
-				</tr>
-				<tr>
-					<td style="text-align: left;">Description: </td>
-					<td style="text-align: left; padding-left: 2em;">{{testLogs.executorDescription}}</td>
-				</tr>
-			</table>
-		</div>
-		
+	<body ng-app="application" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
 		<div class="resultBox">
 			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
 				<tr>
-					<td colspan="3" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: black;">
-						{{testLogs.executorName}}
+					<td colspan="4" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: white; font-weight: bold;">
+						<table style="width: 100%;">
+							<tr>
+								<td style="text-align: left; width: 1em;">Test Case: </td>
+								<td style="text-align: left; padding-left: 2em; width: 1em;">{{testLogs.executorName}}</td>
+								<td style="text-align:  right; padding-right: 2em;">
+									Status: {{testLogs.status}}
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left; width: 1em;">Description: </td>
+								<td colspan="2" style="text-align: left; padding-left: 2em; width: 1em;">{{testLogs.executorDescription}}</td>
+							</tr>
+						</table>
 					</td>
 				</tr>
 				<tr>
-					<td style="width: 15%">
+					<td colspan="2">
 						<div class="btn-group">
 						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em;">
 						    	{{filterLevel}}
@@ -93,35 +57,39 @@
 						    </button>
 						    
 						    <ul class="dropdown-menu" role="menu">
-						      <li><a href="#" ng-click="onChangeLevel('DEBUG')">DEBUG</a></li>
-						      <li><a href="#" ng-click="onChangeLevel('ERROR')">ERROR</a></li>
-						      <li><a href="#" ng-click="onChangeLevel('INFO')">INFO</a></li>
-						      <li><a href="#" ng-click="onChangeLevel('TRACE')">TRACE</a></li>
+						      <li ng-repeat="level in levels">
+						      	<a href="#" ng-click="onChangeLevel(level)">{{level}}</a>
+						      </li>
 						    </ul>
 						</div>
 					</td>
-					<td colspan="2" style="width: 65%">
-						<input placeholder="Search by message" ng-model="searchByMessage" class="form-control" style="margin: 0;"/>
+					<td colspan="2">
+						<input placeholder="Search by message [Multiple values separated by | (pipe)]" ng-model="searchByMessage" class="form-control" style="margin: 0;"/>
 					</td>
 				</tr>
 				<tr>
-					<th style="width: 15%">Level</th>
-					<th style="width: 65%">Message</th>
-					<th style="width: 20%">Time</th>
+					<th style="width: 1em;">Level</th>
+					<th style="width: 1em;">Source</th>
+					<th style="">Message</th>
+					<th style="width: 1em;">Time</th>
 				</tr>
-				<tr ng-repeat="message in messages | filter:searchByMessage" ng-show="message.display">
-					<td>
+				<tr ng-repeat="message in messages | filter:filterLogs() | filter:highlightFilter()" ng-show="message.display">
+					<td ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
 						{{message.logLevel}}
 					</td>
-					<td>
-						{{message.message}}
+					<td ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
+						{{message.source}}
+					</td>
+					<td style="text-align: left;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
+						<div ng-bind-html="replaceMessage(message.message) | unsafe">
+						</div>
 							
-						<a ng-if="message.imageFileName" href="../output/logs/{{message.imageFileName}}" target="_blank">
+						<a ng-if="message.imageFileName" href="../output/logs/{{message.imageFileName}}">
 					       <img alt="{{message.imageFileName}}" src="../output/logs/{{message.imageFileName}}" 
 					       	style="width: 30em; height: 20em; border: 1px solid black;"/>
 					    </a>
 					</td>
-					<td>
+					<td style="white-space: nowrap;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
 						{{message.time}}
 					</td>
 				</tr>

@@ -76,7 +76,7 @@
 					<td style="width: 10%;">
 						<img alt="Yukthi Logo" src="">
 					</td>
-					<td style="width: 38%;">
+					<td style="width: 46%;">
 						aaa
 					</td>
 					<td style="width: 15%;">
@@ -91,13 +91,10 @@
 							ng-keyup="filterTestCase($event)"/>
 						</div>
 					</td>
-					<td style="width: 22%;">
+					<td style="width: 14%;">
 						<div class="btn-group">
-							<button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em; cursor: default;">
-								Test Case Status 
-							</button>
-						    
-						    <button type="button" class="btn btn-primary" style="max-width: 7em; min-width: 7em; cursor: default;">
+						
+						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em; cursor: default;">
 						    	{{status}}
 						    </button>
 						    
@@ -122,56 +119,50 @@
 			<table>
 				<tr>
 					<td>
-						<div style="border-right: 3px solid white;">
-							
-							<table class="table table-hover table-striped table-bordered">
-								<tr>
-									<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: black;">
-									Test Suites
-									</td>
-								</tr>
-								<tr>
-									<th>Total Test Suites</th>
-									<th>Success Count</th>
-									<th>Failure Count</th>
-									<th>Skip Count</th>
-									<th>Set up Success</th>
-									<th>Clean up Success</th>
-								</tr>
-								<tr>
-									<td class="defaultVal">{{testResults.testSuiteCount}}</td>
-									<td class="successVal">{{testResults.testSuiteSuccessCount}}</td>
-									<td class="errorVal">{{testResults.testSuiteFailureCount}}</td>
-									<td class="errorVal">{{testResults.testSuiteSkippedCount}}</td>
-									<td ng-class="testResults.setupSuccessful ? 'successVal' : 'errorVal'">{{testResults.setupSuccessful}}</td>
-									<td ng-class="testResults.cleanupSuccessful ? 'successVal' : 'errorVal'">{{testResults.cleanupSuccessful}}</td>
-								</tr>
-							</table>
-						</div>
+						<table class="table table-hover table-striped table-bordered">
+							<tr>
+								<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: black;">
+								Test Suites
+								</td>
+							</tr>
+							<tr>
+								<th>Total Test Suites</th>
+								<th>Success Count</th>
+								<th>Failure Count</th>
+								<th>Skip Count</th>
+								<th>Set up Success</th>
+								<th>Clean up Success</th>
+							</tr>
+							<tr>
+								<td class="defaultVal">{{testResults.testSuiteCount}}</td>
+								<td class="successVal">{{testResults.testSuiteSuccessCount}}</td>
+								<td class="errorVal">{{testResults.testSuiteFailureCount}}</td>
+								<td class="errorVal">{{testResults.testSuiteSkippedCount}}</td>
+								<td ng-class="testResults.setupSuccessful ? 'successVal' : 'errorVal'">{{testResults.setupSuccessful}}</td>
+								<td ng-class="testResults.cleanupSuccessful ? 'successVal' : 'errorVal'">{{testResults.cleanupSuccessful}}</td>
+							</tr>
+						</table>
 					</td>
 					<td>
-						<div>
-							
-							<table class="table table-hover table-striped table-bordered">
-								<tr>
-									<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: black;">
-									Test Cases
-									</td>
-								</tr>
-								<tr>
-									<th>Total Test Cases</th>
-									<th>Success Count</th>
-									<th>Failure Count</th>
-									<th>Skip Count</th>
-								</tr>
-								<tr>
-									<td class="defaultVal">{{testResults.testCaseCount}}</td>
-									<td class="successVal">{{testResults.testCaseSuccessCount}}</td>
-									<td class="errorVal">{{testResults.testCaseFailureCount}}</td>
-									<td class="errorVal">{{testResults.testCaseSkippedCount}}</td>
-								</tr>
-							</table>
-						</div>
+						<table class="table table-hover table-striped table-bordered">
+							<tr>
+								<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: black;">
+								Test Cases
+								</td>
+							</tr>
+							<tr>
+								<th>Total Test Cases</th>
+								<th>Success Count</th>
+								<th>Failure Count</th>
+								<th>Skip Count</th>
+							</tr>
+							<tr>
+								<td class="defaultVal">{{testResults.testCaseCount}}</td>
+								<td class="successVal">{{testResults.testCaseSuccessCount}}</td>
+								<td class="errorVal">{{testResults.testCaseFailureCount}}</td>
+								<td class="errorVal">{{testResults.testCaseSkippedCount}}</td>
+							</tr>
+						</table>
 					</td>
 				</tr>
 			</table>
@@ -196,7 +187,7 @@
 						{{result.status}}	
 					</td>
 					<td>
-						{{result.message}}
+						{{replaceMessage(result.message)}}
 					</td>
 					<td class="successVal">
 						{{result.successCount}}	
@@ -238,8 +229,9 @@
 						{{suiteResult.message}}
 					</td>
 					<td style="width: 10%;">
-						<a href="./log.html?{{result.suiteName}}_{{suiteResult.testCaseName}}" target="_blank">Log</a>
+						<a href="./log.html?{{result.suiteName}}_{{suiteResult.testCaseName}}" target="_blank">System Log</a>
 						
+						<br/>
 						<a href="logs/{{suiteResult.monitorLogs['client-output']}}" target="_blank"
 							style="color: brown;">
 							Monitor

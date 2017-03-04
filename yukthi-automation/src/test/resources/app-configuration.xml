@@ -37,10 +37,8 @@
 		<!-- Db plugin for sql base steps -->
 		<db-plugin>
 			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
-				<driverClassName>com.mysql.jdbc.Driver</driverClassName>
-				<url>jdbc:mysql://localhost:3306/agile</url>
-				<username>root</username>
-				<password>kranthi</password>
+				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
+				<url>jdbc:derby:./work/testDB;create=true</url>
 			</dataSource>
 		</db-plugin>
 			

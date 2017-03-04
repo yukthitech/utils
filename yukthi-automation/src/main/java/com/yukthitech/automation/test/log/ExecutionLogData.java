@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yukthitech.automation.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -22,6 +23,11 @@ public class ExecutionLogData
 	 */
 	public static class Message
 	{
+		/**
+		 * Source location from where logging was done.
+		 */
+		private String source;
+		
 		/**
 		 * Log level at which message is logged.
 		 */
@@ -44,11 +50,22 @@ public class ExecutionLogData
 		 * @param message the message
 		 * @param time the time
 		 */
-		public Message(LogLevel logLevel, String message, Date time)
+		public Message(String source, LogLevel logLevel, String message, Date time)
 		{
+			this.source = source;
 			this.logLevel = logLevel;
 			this.message = message;
 			this.time = time;
+		}
+		
+		/**
+		 * Gets the source location from where logging was done.
+		 *
+		 * @return the source location from where logging was done
+		 */
+		public String getSource()
+		{
+			return source;
 		}
 
 		/**
@@ -110,9 +127,9 @@ public class ExecutionLogData
 		 * @param time the time
 		 * @param imageFile the image file
 		 */
-		public ImageMessage(LogLevel logLevel, String message, Date time, String name, File imageFile)
+		public ImageMessage(String source, LogLevel logLevel, String message, Date time, String name, File imageFile)
 		{
-			super(logLevel, message, time);
+			super(source, logLevel, message, time);
 			
 			this.name = name;
 			this.imageFile = imageFile;
@@ -170,6 +187,11 @@ public class ExecutionLogData
 	private String executorDescription;
 	
 	/**
+	 * Status of the execution.
+	 */
+	private TestStatus status;
+	
+	/**
 	 * Messages or sub loggers.
 	 */
 	private List<Message> messages = new ArrayList<>();
@@ -205,6 +227,26 @@ public class ExecutionLogData
 	public String getExecutorDescription()
 	{
 		return executorDescription;
+	}
+	
+	/**
+	 * Gets the status of the execution.
+	 *
+	 * @return the status of the execution
+	 */
+	public TestStatus getStatus()
+	{
+		return status;
+	}
+	
+	/**
+	 * Sets the status of the execution.
+	 *
+	 * @param status the new status of the execution
+	 */
+	public void setStatus(TestStatus status)
+	{
+		this.status = status;
 	}
 
 	/**

@@ -15,10 +15,11 @@ import org.apache.commons.dbutils.DbUtils;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.DbPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -118,7 +119,7 @@ public class LoadQueryMapStep implements IStep
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
@@ -142,9 +143,9 @@ public class LoadQueryMapStep implements IStep
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
+			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, processedQuery, values);
 			
 			rs = statement.executeQuery(query);
 
@@ -160,13 +161,13 @@ public class LoadQueryMapStep implements IStep
 				rowCount++;
 			}
 			
-			exeLogger.debug("Processed number of rows {} and setting result map on context with attribute name - {}", rowCount, contextAttribute);
+			exeLogger.debug("Processed number of rows {} and setting result map on context with attribute name: {}", rowCount, contextAttribute);
 			context.setAttribute(contextAttribute, resMap);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query - {}", query);
+			exeLogger.error(ex, "An error occurred while executing query: {}", query);
 			
-			throw new InvalidStateException(ex, "An erorr occurred while executing query - {}", query);
+			throw new TestCaseFailedException("An erorr occurred while executing query: {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection, statement, rs);

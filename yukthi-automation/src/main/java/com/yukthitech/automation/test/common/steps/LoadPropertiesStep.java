@@ -10,9 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -77,7 +78,7 @@ public class LoadPropertiesStep implements IStep, Validateable
 	 * @param properties properties to load
 	 * @param exeLogger logger
 	 */
-	private void loadFile(Properties properties, IExecutionLogger exeLogger)
+	private void loadFile(Properties properties, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Loading properties file {} to context attribute - {}", file, contextAttribute);
 		
@@ -91,8 +92,8 @@ public class LoadPropertiesStep implements IStep, Validateable
 			fileInputStream.close();
 		}catch(Exception ex)
 		{
-			exeLogger.error("An error occurred while loading properties file - {}.\nError: {}", file, ex);
-			throw new InvalidStateException(ex, "An error occurred while loading properties file - {}", file);
+			exeLogger.error(ex, "An error occurred while loading properties file - {}.\nError: {}", file);
+			throw new TestCaseFailedException("An error occurred while loading properties file - {}", file, ex);
 		}
 	}
 
@@ -101,7 +102,7 @@ public class LoadPropertiesStep implements IStep, Validateable
 	 * @param properties properties to load
 	 * @param exeLogger logger
 	 */
-	private void loadResource(Properties properties, IExecutionLogger exeLogger)
+	private void loadResource(Properties properties, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Loading properties resource {} to context attribute - {}", resource, contextAttribute);
 		
@@ -115,14 +116,14 @@ public class LoadPropertiesStep implements IStep, Validateable
 			is.close();
 		}catch(Exception ex)
 		{
-			exeLogger.error("An error occurred while loading properties resource - {}.\nError: {}", resource, ex);
-			throw new InvalidStateException(ex, "An error occurred while loading properties resource - {}", resource);
+			exeLogger.error(ex, "An error occurred while loading properties resource - {}.\nError: {}", resource);
+			throw new TestCaseFailedException("An error occurred while loading properties resource - {}", resource, ex);
 		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		Properties properties = new Properties();	
 		

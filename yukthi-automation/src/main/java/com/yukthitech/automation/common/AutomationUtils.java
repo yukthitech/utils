@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Stack;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -90,13 +89,11 @@ public class AutomationUtils
 	public static void replaceExpressions(AutomationContext context, Object executable)
 	{
 		Field fields[] = executable.getClass().getDeclaredFields();
-		String value = null;
+		String fieldValue = null, value= null;
 		String propertyExpr = null;
 		
 		Matcher matcher = null;
 		StringBuffer buffer = new StringBuffer();
-		
-		Map<String, Object> contextAttr = context.getAttributeMap();
 		
 		for(Field field : fields)
 		{
@@ -110,15 +107,15 @@ public class AutomationUtils
 			{
 				field.setAccessible(true);
 				
-				value = (String) field.get(executable);
+				fieldValue = (String) field.get(executable);
 				
 				//ignore null field values
-				if(value == null)
+				if(fieldValue == null)
 				{
 					continue;
 				}
 				
-				matcher = CONTEXT_EXPR_PATTERN.matcher(value);
+				matcher = CONTEXT_EXPR_PATTERN.matcher(fieldValue);
 				buffer.setLength(0);
 	
 				//replace the expressions in the field value
@@ -126,17 +123,29 @@ public class AutomationUtils
 				{
 					propertyExpr = matcher.group(1);
 					
-					matcher.appendReplacement(buffer, BeanUtils.getProperty(contextAttr, propertyExpr));
+					try
+					{
+						value = BeanUtils.getProperty(context, propertyExpr);
+					}catch(Exception ex)
+					{
+						throw new InvalidStateException("An error occurred while parsing context expression '{}' in field {}.{}", 
+							matcher.group(1), executable.getClass().getName(), field.getName());
+					}
+					
+					matcher.appendReplacement(buffer, value);
 				}
 				
 				matcher.appendTail(buffer);
 				
 				//set the result string back to field
 				field.set(executable, buffer.toString());
+			} catch(InvalidStateException ex)
+			{
+				throw ex;
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while parsing expressions in field '{}' in class - {}", 
-					field.getName(), executable.getClass().getName());
+				throw new InvalidStateException(ex, "An error occurred while parsing expressions in field: {}.{}", 
+					executable.getClass().getName(), field.getName());
 			}
 		}
 	}

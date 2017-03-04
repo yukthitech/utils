@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
+import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 
@@ -17,7 +17,7 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
  * @author akiran
  */
 @Executable(name = "validateValue", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
-public class ValidateValue extends AbstractValidation
+public class ValidateValue implements IValidation
 {
 	/**
 	 * The logger.
@@ -44,12 +44,10 @@ public class ValidateValue extends AbstractValidation
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
+	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		logger.trace("Validating if locator '{}' has value - {}", locator, value);
 		
-		replaceExpressions(context, this);
-
 		WebElement element = UiAutomationUtils.findElement(context, null, locator);
 		String actualMessage = null;
 		

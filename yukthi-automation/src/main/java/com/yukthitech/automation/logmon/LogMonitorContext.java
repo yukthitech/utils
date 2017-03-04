@@ -17,9 +17,9 @@ public class LogMonitorContext
 	private String monitorName;
 	
 	/**
-	 * Content lines
+	 * Content
 	 */
-	private String contentLines[];
+	private String content;
 
 	/**
 	 * Instantiates a new log monitor context.
@@ -32,15 +32,7 @@ public class LogMonitorContext
 	{
 		this.testCaseName = testCaseName;
 		this.monitorName = monitorName;
-		
-		if(content != null)
-		{
-			this.contentLines = content.split("\\n");
-		}
-		else
-		{
-			this.contentLines = new String[]{""};
-		}
+		this.content = content;
 	}
 
 	/**
@@ -64,12 +56,12 @@ public class LogMonitorContext
 	}
 
 	/**
-	 * Gets the content lines.
+	 * Gets the content.
 	 *
-	 * @return the content lines
+	 * @return the content
 	 */
-	public String[] getContentLines()
+	public String getContent()
 	{
-		return contentLines;
+		return content;
 	}
 }

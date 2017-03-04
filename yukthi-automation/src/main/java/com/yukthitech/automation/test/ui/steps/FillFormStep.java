@@ -8,13 +8,13 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Step to fill the target form with specified data.
@@ -46,7 +46,7 @@ public class FillFormStep implements IStep
 	 * @param exeLogger
 	 *            Logger to be used.
 	 */
-	private void fillWithStandardBean(AutomationContext context, IExecutionLogger exeLogger)
+	private void fillWithStandardBean(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
 		
@@ -82,7 +82,7 @@ public class FillFormStep implements IStep
 			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), "" + value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
-				throw new InvalidStateException("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
+				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 			}
 		}
 	}
@@ -95,7 +95,7 @@ public class FillFormStep implements IStep
 	 * @param exeLogger
 	 *            logger
 	 */
-	private void fillWithDynamicBean(AutomationContext context, IExecutionLogger exeLogger)
+	private void fillWithDynamicBean(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
 		
@@ -120,7 +120,7 @@ public class FillFormStep implements IStep
 			if(!UiAutomationUtils.populateField(context, parentElement, name, "" + value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, value);
-				throw new InvalidStateException("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
+				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
 			}
 		}
 	}
@@ -133,7 +133,7 @@ public class FillFormStep implements IStep
 	 *            Current automation context
 	 */
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(data instanceof DynamicBean)
 		{

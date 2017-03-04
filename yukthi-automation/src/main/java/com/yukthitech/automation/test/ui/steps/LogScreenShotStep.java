@@ -8,7 +8,7 @@ import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
@@ -53,7 +53,7 @@ public class LogScreenShotStep implements IStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();

@@ -4,10 +4,11 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -35,7 +36,7 @@ public class WaitForStep implements IStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Waiting for element '{}' to become {}", locator, hidden ? "Invisible" : "visible");
 		
@@ -57,7 +58,7 @@ public class WaitForStep implements IStep
 		} catch(InvalidStateException ex)
 		{
 			exeLogger.error(ex, ex.getMessage());
-			throw ex;
+			throw new TestCaseFailedException(ex.getMessage(), ex);
 		}
 	}
 

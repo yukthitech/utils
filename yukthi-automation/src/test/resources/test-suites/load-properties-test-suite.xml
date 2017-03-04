@@ -2,26 +2,19 @@
 	<testSuite name="load-properties-test-suites">
 
 		<testCase name="loadProperties">
-			<description>Validates for taking the screen shot</description>
+			<description>Validates loading of properties file to context</description>
 
 			<wrap:steps>
-				<ccg:loadProperties contextAttribute="keyValueProperty">
+				<ccg:loadProperties contextAttribute="propFile">
 					<file>
-						C:\Users\user1\newgit\utils\yukthi-automation\src\test\resources\test.properties
+						.\src\test\resources\test-suites\test.properties
 					</file>
 				</ccg:loadProperties>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateWithSql dataSourceName="dataSource">
-					<query>
-						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
-					</query>
-
-					<expectedRow>
-						<column name="NAME">employee1</column>
-					</expectedRow>
-				</ccg:validateWithSql>
+				<ccg:validateContextParam expression="attr.propFile.key1" value="value1"/>
+				<ccg:validateContextParam expression="attr.propFile.key2" value="value2"/>
 			</wrap:validations>
 		</testCase>
 

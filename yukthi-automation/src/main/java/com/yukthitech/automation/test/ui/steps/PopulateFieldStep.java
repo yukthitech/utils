@@ -7,11 +7,11 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Fill form with action fills the form and then goes for the provided action.
@@ -25,16 +25,6 @@ public class PopulateFieldStep implements IStep
 	 * The logger.
 	 */
 	private static Logger logger = LogManager.getLogger(PopulateFieldStep.class);
-
-	/**
-	 * The error message.
-	 **/
-	private static String DEBUG_MESSAGE = "Populating field {} with value - {}";
-
-	/**
-	 * The error message.
-	 **/
-	private static String ERROR_MESSAGE = "Failed to fill element '{}' with value - {}";
 
 	/**
 	 * Html locator of the form or container (like DIV) enclosing the input
@@ -60,7 +50,7 @@ public class PopulateFieldStep implements IStep
 	 * @param exeLogger
 	 *            logger.
 	 */
-	private void pressEnter(AutomationContext context, IExecutionLogger exeLogger)
+	private void pressEnter(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		WebElement webElement = UiAutomationUtils.findElement(context, null, locator);
 		webElement.sendKeys(Keys.ENTER);
@@ -76,14 +66,14 @@ public class PopulateFieldStep implements IStep
 	 *            Current automation context
 	 */
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger logger)
+	public void execute(AutomationContext context, ExecutionLogger logger)
 	{
-		logger.debug(DEBUG_MESSAGE, locator, value);
+		logger.debug("Populating field {} with value - {}", locator, value);
 		
 		if(!UiAutomationUtils.populateField(context, null, locator, value))
 		{
-			logger.error(ERROR_MESSAGE, locator, value);
-			throw new InvalidStateException(ERROR_MESSAGE, locator, value);
+			logger.error("Failed to fill element '{}' with value - {}", locator, value);
+			throw new TestCaseFailedException("Failed to fill element '{}' with value - {}", locator, value);
 		}
 
 		if(pressEnterAtEnd)

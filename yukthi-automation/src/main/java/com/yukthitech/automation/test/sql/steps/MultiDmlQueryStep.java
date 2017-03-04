@@ -14,10 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.DbPlugin;
+import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -86,7 +87,7 @@ public class MultiDmlQueryStep implements IStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
@@ -109,23 +110,25 @@ public class MultiDmlQueryStep implements IStep
 			
 			for (int i = 0; i < queries.size(); i++) 
 			{
+				query = queries.get(i);
+				
 				paramMap.clear();
 				values.clear();
 				
 				processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 				
-				exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
+				exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 				
-				exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
+				exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 				
 				int count = QueryUtils.executeDml(connection, processedQuery, values);
 				
-				exeLogger.debug("Number of rows affected - {}", count);
+				exeLogger.debug("Number of rows affected: {}", count);
 				
 				if(count <= 0 && failOnNoUpdate)
 				{
 					exeLogger.error("No records got updated by query failing test case.");
-					throw new InvalidStateException("No records got updated by query - {}", query);
+					throw new InvalidStateException("No records got updated by query: {}", query);
 				}
 			}
 			
@@ -133,16 +136,10 @@ public class MultiDmlQueryStep implements IStep
 
 		} catch(SQLException ex)
 		{
-			try 
-			{
-				connection.rollback();
-			} 
-			catch (SQLException e) 
-			{
-				throw new InvalidStateException(ex, "An erorr occurred while rolling back");
-			}
+			exeLogger.error(ex, "An error occurred while executing query: {}", query);
+			DbUtils.rollbackAndCloseQuietly(connection);
 			
-			throw new InvalidStateException(ex, "An erorr occurred while executing sql query - {}", query);
+			throw new TestCaseFailedException("An erorr occurred while executing sql query: {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

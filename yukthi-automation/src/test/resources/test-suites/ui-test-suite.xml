@@ -6,6 +6,8 @@
 			<wrap:steps>
 				<ccg:gotoPage uri="/index.html" />
 				<ccg:click locator="id: button"/>
+				
+				<ccg:logScreenShot name="test.png" />
 			</wrap:steps>
 	
 			<wrap:validations>

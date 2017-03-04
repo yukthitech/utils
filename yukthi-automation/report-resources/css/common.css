@@ -1,0 +1,35 @@
+tr > th
+{
+	background-color: #484848;
+	font-weight: bold;
+	font-size: 1.1em;
+	text-align: center;
+	color: white;
+}
+  	
+td
+{
+	text-align: center;
+}
+
+.resultBox
+{
+	margin: 1em;
+	margin-bottom: 2em;
+}
+
+.successVal
+{
+	font-weight: bold;
+	color: #6666ff;
+}
+
+.errorVal
+{
+	color: red;
+}
+
+.defaultVal
+{
+	color: black;
+}

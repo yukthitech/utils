@@ -12,11 +12,5 @@ public interface IValidation
 	 * @param exeLogger Logger to log execution messages.
 	 * @return true if validation is successful, otherwise false
 	 */
-	public boolean validate(AutomationContext context, IExecutionLogger exeLogger);
-	
-	/**
-	 * Should return message to be used when validation fails.
-	 * @return Failure message.
-	 */
-	public String getFailureMessage();
+	public boolean validate(AutomationContext context, ExecutionLogger exeLogger);
 }

@@ -2,7 +2,7 @@ package com.yukthitech.automation.test.ui.steps;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumPlugin;
 
@@ -14,7 +14,7 @@ import com.yukthitech.automation.config.SeleniumPlugin;
 public class CloseSessionStep implements IStep
 {
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Closing current session");
 		

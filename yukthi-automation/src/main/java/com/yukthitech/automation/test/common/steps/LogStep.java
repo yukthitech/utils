@@ -2,12 +2,12 @@ package com.yukthitech.automation.test.common.steps;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 
 /**
- * Loads specified properties file as map on to context.
+ * Logs the specified message using execution logger.
  * @author akiran
  */
 @Executable(name = "log", message = "Logs specified message")
@@ -30,7 +30,7 @@ public class LogStep implements IStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		exeLogger.debug(message);
 	}

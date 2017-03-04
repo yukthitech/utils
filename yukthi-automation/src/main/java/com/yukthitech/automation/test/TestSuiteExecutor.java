@@ -224,11 +224,6 @@ public class TestSuiteExecutor
 			createLogFiles(testCaseResult, testFileName, monitoringLogs);
 
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
-
-			if(!successful)
-			{
-				break;
-			}
 		}
 		
 		if( !executeCleanup(testSuite.getName(), testSuite.getCleanup()) )
@@ -263,6 +258,8 @@ public class TestSuiteExecutor
 		{
 			return;
 		}
+		
+		executionLogData.setStatus(testCaseResult.getStatus());
 		
 		executionLogData.copyResources(logsFolder);
 		

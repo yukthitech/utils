@@ -3,7 +3,13 @@
 		<title>Monitor Log</title>
 		
 		<script src="../js/angular.js"></script>
-		<script src="../js/test-monitor-log-template.js"></script>
+		
+		<script src="../js/jquery-2.2.0.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
+		
+		<script src="../js/monitor-log.js"></script>
+		
+		<script src="../js/common.js"></script>
 		
 		<style>
 			tr > th
@@ -43,59 +49,59 @@
 				margin-bottom: 2em;
 			}
 			
+			.headerText
+			{
+				color: white;
+				font-weight: bold;
+				text-align: left;
+			}
+			
 		</style>
 	</head>
 	
-	<body ng-app="testMonitorApp" ng-controller="testMonitorController" ng-init="createDummyRecords()">
+	<body ng-app="monitorApp" ng-controller="monitorController" ng-init="initContent()">
 	
+		<div id="testCaseName" style="display: none;">${testCaseName}</div>
+		
+		<div id="monitorName" style="display: none;">${monitorName}</div>
+		
+		<textarea id="logContentContainer" style="display: none;">
+			${content}
+		</textarea>
 		
 	
-		<!-- <table style="width: 100%;">
-			<tr>
-				<th>Test Case</th>
-				<th>Log Name</th>
-			</tr>
-			<tr>
-				<td>${testCaseName}</td>
-				<td>${monitorName}</td>
-			</tr>
-		</table>
-		
-		<br/><br/>
-		Log Content:
-		
-		<table>
-			<#list contentLines as line>
-				<tr>
-					<td>
-						${line}
-					</td>
-				</tr>
-			</#list>
-		</table> -->
-		
-		<div class="resultBox" style="background-color: grey; color: white; padding: 0.5em; font-weight: bold;">
+		<div class="resultBox" style="background-color: grey; padding: 0.5em;">
 			<table>
 				<tr>
-					<td style="text-align: left;">Test Case: </td>
-					<td style="text-align: left; padding-left: 2em;">{{testCaseName}}</td>
+					<td class="headerText">Test Case: </td>
+					<td class="headerText" style="padding-left: 2em;">{{testCaseName}}</td>
 				</tr>
 				<tr>
-					<td style="text-align: left;">Monitor Name: </td>
-					<td style="text-align: left; padding-left: 2em;">{{monitorName}}</td>
+					<td class="headerText">Monitor Name: </td>
+					<td class="headerText" style="padding-left: 2em;">{{monitorName}}</td>
 				</tr>
 			</table>
 		</div>
 		
 	
-		<table class="table table-hover table-striped table-bordered" style="width: 100%;">
-			<tr ng-repeat="line in contentLines">
-				<td>
-					{{line}}
-				</td>
-			</tr>
-		</table>
-			
+		<div class="resultBox">
+			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
+				<tr>
+					<td colspan="2">
+						<input type="text" ng-model="searchLog" class="form-control"
+							placeholder="Please type your search text here "/>
+					</td>
+				</tr>
+				<tr id="{{obj.id}}" ng-repeat="obj in contentLines | filter:searchLog">
+					<td>
+						<a href="#" ng-click="goToLine(obj.id)">{{obj.id}}</a>
+					</td>
+					<td style="text-align: left;">
+						{{obj.line}}
+					</td>
+				</tr>
+			</table>
+		</div>
 		
 	</body>
 </html>

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.automation.logmon.FileLogMonitor;
 import com.yukthitech.automation.logmon.ILogMonitor;
 
@@ -40,6 +42,12 @@ public class ApplicationConfiguration
 	 * List of log monitors to be used.
 	 */
 	private List<ILogMonitor> logMonitors = new ArrayList<>();
+	
+	/**
+	 * Work directory in which temp files and folders will be created.
+	 * The work directory by default will be deleted and recreated during starting.
+	 */
+	private String workDirectory = "./work";
 
 	/**
 	 * Gets the folder containing test suite xmls.
@@ -177,5 +185,30 @@ public class ApplicationConfiguration
 	public List<ILogMonitor> getLogMonitors()
 	{
 		return logMonitors;
+	}
+
+	/**
+	 * Gets the work directory in which temp files and folders will be created. The work directory by default will be deleted and recreated during starting.
+	 *
+	 * @return the work directory in which temp files and folders will be created
+	 */
+	public String getWorkDirectory()
+	{
+		return workDirectory;
+	}
+
+	/**
+	 * Sets the work directory in which temp files and folders will be created. The work directory by default will be deleted and recreated during starting.
+	 *
+	 * @param workDirectory the new work directory in which temp files and folders will be created
+	 */
+	public void setWorkDirectory(String workDirectory)
+	{
+		if(StringUtils.isBlank(workDirectory))
+		{
+			throw new NullPointerException("Work directory can not be null or empty.");
+		}
+		
+		this.workDirectory = workDirectory;
 	}
 }

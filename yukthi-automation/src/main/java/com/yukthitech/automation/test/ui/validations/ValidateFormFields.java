@@ -5,20 +5,20 @@ import java.util.List;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
-import com.yukthitech.automation.IExecutionLogger;
+import com.yukthitech.automation.ExecutionLogger;
+import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.config.SeleniumPlugin;
-import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.automation.test.ui.common.FieldOption;
 import com.yukthitech.automation.test.ui.common.FormFieldType;
+import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 
 /**
  * Validates specified form has specified fields with specified field details.
  */
 @Executable(name = "validateFormFields", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
-public class ValidateFormFields extends AbstractValidation
+public class ValidateFormFields implements IValidation
 {
 	/**
 	 * Represents field details to validate.
@@ -221,8 +221,10 @@ public class ValidateFormFields extends AbstractValidation
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
+	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
+		exeLogger.debug("Validating form  - {}", locator);
+		
 		WebElement formElement = UiAutomationUtils.findElement(context, null, locator);
 		List<WebElement> fieldElements = null;
 		FormFieldType fieldType = null;
