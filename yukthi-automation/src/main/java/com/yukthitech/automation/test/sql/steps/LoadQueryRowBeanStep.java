@@ -1,9 +1,7 @@
 package com.yukthitech.automation.test.sql.steps;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +10,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
@@ -25,32 +25,27 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(name = "loadQueryMap", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as map on context. "
-		+ "\nIn case of zero results empty map will be kept on context. \nPer row new entry will be added.")
-public class LoadQueryMapStep implements IStep
+@Executable(name = "loadQueryMap", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as bean(s) on context. "
+		+ "\nIn case of zero results empty map will be kept on context. \nPer row new bean will be created.")
+public class LoadQueryRowBeanStep implements IStep
 {
 	/**
 	 * Query to execute.
 	 */
-	@Param(description = "Query to execute, the results will be used to create map.")
+	@Param(description = "Query to execute, the results will be used to create bean.")
 	private String query;
-
+	
 	/**
-	 * Key column to be used to load the map.
+	 * Flag to indicate if all rows should be processed into bean. If true, list of beans will be loaded on context otherwise first row map will be loaded
+	 * on context.
 	 */
-	@Param(description = "Results column name whose values should be used as key in result map.")
-	private String keyColumn;
-
-	/**
-	 * Value column to be used to load the map.
-	 */
-	@Param(description = "Results column name whose values should be used as value in result map.")
-	private String valueColumn;
+	@Param(description = "If false, only first row will be processed into bean. If true, per row new map will be created and loads of this beans into context.\nDefault: true", required = false)
+	private boolean processAllRows = true;
 
 	/**
 	 * Context attribute to be used to load the map.
 	 */
-	@Param(description = "Name of the attribute which should be used to keep the result map on the context.")
+	@Param(description = "Name of the attribute which should be used to keep the result bean on the context.")
 	private String contextAttribute;
 
 	/**
@@ -58,6 +53,12 @@ public class LoadQueryMapStep implements IStep
 	 */
 	@Param(description = "Name of the data source to be used for query execution.")
 	private String dataSourceName;
+	
+	/**
+	 * Type of beans to which rows should be converted.
+	 */
+	@Param(description = "Type of bean to which rows should be converted.")
+	private Class<?> beanType;
 
 	/**
 	 * Sets the query to execute.
@@ -71,23 +72,13 @@ public class LoadQueryMapStep implements IStep
 	}
 
 	/**
-	 * Sets the key column to be used to load the map.
+	 * Sets the flag to indicate if all rows should be processed into map. If true, list of maps will be loaded on context otherwise first row map will be loaded on context.
 	 *
-	 * @param keyColumn the new key column to be used to load the map
+	 * @param processAllRows the new flag to indicate if all rows should be processed into map
 	 */
-	public void setKeyColumn(String keyColumn)
+	public void setProcessAllRows(boolean processAllRows)
 	{
-		this.keyColumn = keyColumn;
-	}
-
-	/**
-	 * Sets the value column to be used to load the map.
-	 *
-	 * @param valueColumn the new value column to be used to load the map
-	 */
-	public void setValueColumn(String valueColumn)
-	{
-		this.valueColumn = valueColumn;
+		this.processAllRows = processAllRows;
 	}
 
 	/**
@@ -109,6 +100,16 @@ public class LoadQueryMapStep implements IStep
 	{
 		this.dataSourceName = dataSourceName;
 	}
+	
+	/**
+	 * Sets the type of beans to which rows should be converted.
+	 *
+	 * @param beanType the new type of beans to which rows should be converted
+	 */
+	public void setBeanType(Class<?> beanType)
+	{
+		this.beanType = beanType;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -129,13 +130,10 @@ public class LoadQueryMapStep implements IStep
 		}
 
 		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
 
 		try
 		{
 			connection = dataSource.getConnection();
-			statement = connection.createStatement();
 
 			Map<String, Object> paramMap = new HashMap<>();
 			List<Object> values = new ArrayList<>();
@@ -145,23 +143,31 @@ public class LoadQueryMapStep implements IStep
 			exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
 			
 			exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
-			
-			rs = statement.executeQuery(query);
 
-			Map<Object, Object> resMap = new HashMap<>();
-
-			exeLogger.debug("Loading results as map using key-column '{}' and value-column '{}'", keyColumn, valueColumn);
+			Object result = null;
 			
-			int rowCount = 0;
-			
-			while(rs.next())
+			if(processAllRows)
 			{
-				resMap.put(rs.getObject(keyColumn), rs.getObject(valueColumn));
-				rowCount++;
+				exeLogger.debug("Loading muliple row beans on context attribute - {}", contextAttribute);
+				result = QueryUtils.getQueryRunner().query(processedQuery, new BeanHandler<>(beanType), values);
+				
+				if(result == null)
+				{
+					result = new ArrayList<>();
+				}
+			}
+			else
+			{
+				exeLogger.debug("Loading first-row as bean on context attribute - {}", contextAttribute);
+				result = QueryUtils.getQueryRunner().query(processedQuery, new BeanListHandler<>(beanType), values);
+				
+				if(result == null)
+				{
+					result = new HashMap<>();
+				}
 			}
 			
-			exeLogger.debug("Processed number of rows {} and setting result map on context with attribute name - {}", rowCount, contextAttribute);
-			context.setAttribute(contextAttribute, resMap);
+			context.setAttribute(contextAttribute, result);
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing query - {}", query);
@@ -169,7 +175,7 @@ public class LoadQueryMapStep implements IStep
 			throw new InvalidStateException(ex, "An erorr occurred while executing query - {}", query);
 		} finally
 		{
-			DbUtils.closeQuietly(connection, statement, rs);
+			DbUtils.closeQuietly(connection);
 		}
 	}
 }

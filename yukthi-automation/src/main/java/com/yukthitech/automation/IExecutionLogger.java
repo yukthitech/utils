@@ -31,6 +31,13 @@ public interface IExecutionLogger
 	public void debug(String mssgTemplate, Object... args);
 	
 	/**
+	 * Used to log trace messages as part of current execution.
+	 * @param mssgTemplate Message template with params.
+	 * @param args Arguments for message template.
+	 */
+	public void trace(String mssgTemplate, Object... args);
+
+	/**
 	 * Adds the specified image file to the debug log.
 	 * @param name Name of the image file for easy identification
 	 * @param message Message to be logged along with image

@@ -1,14 +1,13 @@
 package com.yukthitech.automation.test.ui.steps;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -17,62 +16,51 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "click", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Clicks the specified target")
+@Executable(name = "click", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
 public class ClickStep implements IStep
 {
 	/**
-	 * The logger.
-	 */
-	private static Logger logger = LogManager.getLogger(ClickStep.class);
-	
-	/** 
-	 * The failed message. 
-	 **/
-	private static String FAILED_MESSAGE = "Failed to find button with locator: ";
-
-	/**
 	 * locator for button.
 	 */
+	@Param(description = "Locator of the element to be triggered.")
 	private String locator;
 	
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		logger.trace("Clicking the button: {}", locator);
+		exeLogger.trace("Clicking the element specified by locator: {}", locator);
 
-		WebElement buttonElement = UiAutomationUtils.findElement(context, null, locator);
+		WebElement webElement = UiAutomationUtils.findElement(context, null, locator);
 
-		if(buttonElement == null)
+		if(webElement == null)
 		{
-			exeLogger.error(FAILED_MESSAGE + locator);
-			throw new NullPointerException(FAILED_MESSAGE + locator);
+			exeLogger.error("Failed to find element with locator: {}", locator);
+			throw new NullPointerException("Failed to find element with locator: " + locator);
 		}
 
-		UiAutomationUtils.validateWithWait(() -> {
-			try
+		try
+		{
+			UiAutomationUtils.validateWithWait(() -> 
 			{
-				buttonElement.click();
-				return true;
-			} catch(RuntimeException ex)
-			{
-				if(ex.getMessage().toLowerCase().contains("not clickable"))
+				try
 				{
-					return false;
+					webElement.click();
+					return true;
+				} catch(RuntimeException ex)
+				{
+					if(ex.getMessage().toLowerCase().contains("not clickable"))
+					{
+						return false;
+					}
+	
+					throw ex;
 				}
-
-				throw ex;
-			}
-		} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element to be clickable: " + locator, new InvalidStateException("Failed to click element - " + locator));
-	}
-
-	/**
-	 * Gets the locator for button.
-	 *
-	 * @return the locator for button
-	 */
-	public String getLocator()
-	{
-		return locator;
+			} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element to be clickable: " + locator, new InvalidStateException("Failed to click element - " + locator));
+		}catch(InvalidStateException ex)
+		{
+			exeLogger.error(ex, "Failed to click element - {}", locator);
+			throw ex;
+		}
 	}
 
 	/**

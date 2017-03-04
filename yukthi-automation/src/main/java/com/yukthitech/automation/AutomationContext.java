@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.yukthitech.automation.config.ApplicationConfiguration;
-import com.yukthitech.automation.config.IConfiguration;
+import com.yukthitech.automation.config.IPlugin;
 import com.yukthitech.automation.logmon.ILogMonitor;
 
 /**
@@ -34,9 +34,9 @@ public class AutomationContext
 	private ApplicationConfiguration appConfiguration;
 	
 	/**
-	 * Maintains list of required sub configurations required by loaded test suites.
+	 * Maintains list of required plugins required by loaded test suites.
 	 */
-	private Map<Class<?>, IConfiguration<?>> requiredConfiurations = new HashMap<>();
+	private Map<Class<?>, IPlugin<?>> requiredPlugins = new HashMap<>();
 	
 	/**
 	 * List of configured log monitors.
@@ -119,32 +119,32 @@ public class AutomationContext
 	}
 	
 	/**
-	 * Adds required configuration to the context.
-	 * @param configuration configuration to add
+	 * Adds required plugin to the context.
+	 * @param plugin plugin to add
 	 */
-	void addRequireConfiguration(IConfiguration<?> configuration)
+	void addRequirePlugin(IPlugin<?> plugin)
 	{
-		this.requiredConfiurations.put(configuration.getClass(), configuration);
+		this.requiredPlugins.put(plugin.getClass(), plugin);
 	}
 	
 	/**
-	 * Fetches all required configurations required by this context.
-	 * @return required configurations.
+	 * Fetches all required plugins required by this context.
+	 * @return required plugins.
 	 */
-	public Collection<IConfiguration<?>> getConfigurations()
+	public Collection<IPlugin<?>> getPlugins()
 	{
-		return Collections.unmodifiableCollection(requiredConfiurations.values());
+		return Collections.unmodifiableCollection(requiredPlugins.values());
 	}
 	
 	/**
-	 * Fetches the configuration of specified configuration type.
-	 * @param configType configuration type to fetch
-	 * @return matching configuration
+	 * Fetches the plugin of specified plugin type.
+	 * @param pluginType plugin type to fetch
+	 * @return matching plugin
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends IConfiguration<?>> T getConfiguration(Class<T> configType)
+	public <T extends IPlugin<?>> T getPlugin(Class<T> pluginType)
 	{
-		return (T) requiredConfiurations.get(configType);
+		return (T) requiredPlugins.get(pluginType);
 	}
 	
 	/**

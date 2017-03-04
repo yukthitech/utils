@@ -3,10 +3,10 @@ package com.yukthitech.automation.config;
 import com.yukthitech.automation.AutomationContext;
 
 /**
- * Marker interface indicating the target object is configuration object.
+ * Interface indicating the target object is Plugin.
  * @author akiran
  */
-public interface IConfiguration<AT>
+public interface IPlugin<AT>
 {
 	/**
 	 * Fetches the argument bean type required by this configuration. Can be null. Command line arguments will be mapped

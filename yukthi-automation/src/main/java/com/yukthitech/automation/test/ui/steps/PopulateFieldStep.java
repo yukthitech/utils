@@ -9,7 +9,7 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -18,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author Pritam.
  */
-@Executable(name = "populateField", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Populates specified field with specified message")
+@Executable(name = "populateField", requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
 public class PopulateFieldStep implements IStep
 {
 	/**

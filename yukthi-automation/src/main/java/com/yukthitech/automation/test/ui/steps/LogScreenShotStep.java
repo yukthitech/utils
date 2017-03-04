@@ -10,21 +10,33 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.SeleniumPlugin;
 
-@Executable(name = "logScreenShot", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Takes current screen snapshot")
-public class ScreenShotStep implements IStep
+/**
+ * Takes the screen shot of the browser and adds it to the log .
+ * @author akiran
+ */
+@Executable(name = "logScreenShot", requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
+public class LogScreenShotStep implements IStep
 {
 	/**
 	 * Name of the file provided by the user.
 	 */
+	@Param(description = "Name of the screenshot image file to be created")
 	private String name;
 	
 	/**
 	 * Message to be logged along with image;
 	 */
+	@Param(description = "Message to be logged along with image", required = false)
 	private String message;
 
+	/**
+	 * Sets the name of the file provided by the user.
+	 *
+	 * @param fileName the new name of the file provided by the user
+	 */
 	public void setName(String fileName) 
 	{
 		this.name = fileName;
@@ -43,7 +55,7 @@ public class ScreenShotStep implements IStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
 	{
-		SeleniumConfiguration seleniumConfiguration = context.getConfiguration(SeleniumConfiguration.class);
+		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);

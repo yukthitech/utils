@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.yukthitech.automation.config.IConfiguration;
+import com.yukthitech.automation.config.IPlugin;
 
 /**
  * Used to mark a step/validation as executable, so that they can be found dynamically.
@@ -28,8 +28,8 @@ public @interface Executable
 	public String message();
 	
 	/**
-	 * Configuration type required by current executable (step or validator)
-	 * @return required configuration type.
+	 * Plugin types required by current executable (step or validator)
+	 * @return required plugin type.
 	 */
-	public Class<? extends IConfiguration<?>>[] requiredConfigurationTypes() default {};
+	public Class<? extends IPlugin<?>>[] requiredPluginTypes() default {};
 }

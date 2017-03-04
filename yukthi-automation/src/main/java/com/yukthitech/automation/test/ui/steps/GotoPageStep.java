@@ -1,27 +1,25 @@
 package com.yukthitech.automation.test.ui.steps;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.SeleniumPlugin;
 
 /**
  * Goes to the specified page url.
  * @author akiran
  */
-@Executable(name = "gotoPage", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Goes to specified page")
+@Executable(name = "gotoPage", requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified uri")
 public class GotoPageStep implements IStep
 {
-	private static Logger logger = LogManager.getLogger(GotoPageStep.class);
-	
 	/**
 	 * Url to which browser should be taken.
 	 */
+	@Param(description = "URI of the page to load")
 	private String uri;
 
 	/**
@@ -31,10 +29,9 @@ public class GotoPageStep implements IStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		logger.trace("Going to page: {}", uri);
-		exeLogger.debug("Going to page url - {}", uri);
+		exeLogger.debug("Going to page with uri - {}", uri);
 
-		SeleniumConfiguration seleniumConfiguration = context.getConfiguration(SeleniumConfiguration.class);
+		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 		driver.navigate().to( seleniumConfiguration.getResourceUrl(uri) );

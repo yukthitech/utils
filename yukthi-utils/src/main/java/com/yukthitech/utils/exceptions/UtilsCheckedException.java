@@ -23,10 +23,6 @@
 
 package com.yukthitech.utils.exceptions;
 
-import java.util.regex.Matcher;
-
-import com.yukthitech.utils.MessageFormatter;
-
 /**
  * Base exception for utils checked exception
  * @author akiran
@@ -35,31 +31,26 @@ public class UtilsCheckedException extends Exception
 {
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Instantiates a new utils checked exception.
+	 *
+	 * @param cause the cause
+	 * @param message the message
+	 * @param args the args
+	 */
 	public UtilsCheckedException(Throwable cause, String message, Object... args)
 	{
-		super(buildMessage(message, args), cause);
+		super(UtilsException.buildMessage(message, args), cause);
 	}
 
+	/**
+	 * Instantiates a new utils checked exception.
+	 *
+	 * @param message the message
+	 * @param args the args
+	 */
 	public UtilsCheckedException(String message, Object... args)
 	{
-		super(buildMessage(message, args));
-	}
-	
-	private static String buildMessage(String message, Object... args)
-	{
-		String strArgs[] = null;
-		
-		if(args != null)
-		{
-			strArgs = new String[args.length];
-			
-			for(int i = 0; i < args.length; i++)
-			{
-				strArgs[i] = "" + args[i];
-				strArgs[i] = Matcher.quoteReplacement(strArgs[i]);
-			}
-		}
-		
-		return MessageFormatter.format(message, (Object[])strArgs);
+		super(UtilsException.buildMessage(message, args), UtilsException.getRootCause(args));
 	}
 }

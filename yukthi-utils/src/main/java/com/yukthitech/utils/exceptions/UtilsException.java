@@ -35,17 +35,56 @@ public class UtilsException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Instantiates a new utils exception.
+	 *
+	 * @param cause the cause
+	 * @param message the message
+	 * @param args the args
+	 */
 	public UtilsException(Throwable cause, String message, Object... args)
 	{
 		super(buildMessage(message, args), cause);
 	}
 
+	/**
+	 * Instantiates a new utils exception.
+	 *
+	 * @param message the message
+	 * @param args the args
+	 */
 	public UtilsException(String message, Object... args)
 	{
-		super(buildMessage(message, args));
+		super(buildMessage(message, args), getRootCause(args));
 	}
 	
-	private static String buildMessage(String message, Object... args)
+	/**
+	 * Checks if the last argument is throwable, if it is the same will be returned.
+	 * @param args arguments to check
+	 * @return throwable if found
+	 */
+	static Throwable getRootCause(Object... args)
+	{
+		if(args == null || args.length == 0)
+		{
+			return null;
+		}
+		
+		if(args[args.length - 1] instanceof Throwable)
+		{
+			return (Throwable)args[args.length - 1];
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Replaces the argument holders in message with argument values.
+	 * @param message Message to be processed.
+	 * @param args Values to be used
+	 * @return Processed message
+	 */
+	static String buildMessage(String message, Object... args)
 	{
 		String strArgs[] = null;
 		

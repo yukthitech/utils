@@ -9,7 +9,7 @@ import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.automation.test.ui.common.FieldOption;
 import com.yukthitech.automation.test.ui.common.FormFieldType;
@@ -17,7 +17,7 @@ import com.yukthitech.automation.test.ui.common.FormFieldType;
 /**
  * Validates specified form has specified fields with specified field details.
  */
-@Executable(name = "validateFormFields", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified form fields are present")
+@Executable(name = "validateFormFields", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
 public class ValidateFormFields extends AbstractValidation
 {
 	/**

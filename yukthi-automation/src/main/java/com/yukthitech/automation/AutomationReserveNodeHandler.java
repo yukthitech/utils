@@ -6,14 +6,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
+import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.ApplicationConfiguration;
-import com.yukthitech.automation.config.IConfiguration;
+import com.yukthitech.automation.config.IPlugin;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -29,8 +28,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @NodeName(namePattern = ".*")
 public class AutomationReserveNodeHandler implements IReserveNodeHandler
 {
-	private static Logger logger = LogManager.getLogger(AutomationReserveNodeHandler.class);
-	
 	/**
 	 * Mapping from step name to type.
 	 */
@@ -179,7 +176,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 
 		throw new InvalidStateException("No step/validator found with name: {}", beanNode.getName());
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.reserved.IReserveNodeHandler#handleCustomNodeEnd(com.yukthitech.ccg.xml.IParserHandler, com.yukthitech.ccg.xml.BeanNode, com.yukthitech.ccg.xml.XMLAttributeMap)
 	 */
@@ -191,15 +188,19 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 
 		if((bean instanceof IStep) && (parent instanceof IStepContainer))
 		{
+			AutomationUtils.validateRequiredParams(bean);
+			
 			((IStepContainer) parent).addStep((IStep) bean);
 		}
 
 		if((bean instanceof IValidation) && (parent instanceof IValidationContainer))
 		{
+			AutomationUtils.validateRequiredParams(bean);
+			
 			((IValidationContainer) parent).addValidation((IValidation) bean);
 		}
 	}
-
+	
 	/**
 	 * Creates a new step with specified name. A step can be named using @
 	 * {@link Executable}
@@ -219,18 +220,18 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		}
 		
 		Executable executable = stepType.getAnnotation(Executable.class);
-		IConfiguration<?> configuration = null;
+		IPlugin<?> plugin = null;
 		
-		for(Class<? extends IConfiguration> configType : executable.requiredConfigurationTypes())
+		for(Class<? extends IPlugin> pluginType : executable.requiredPluginTypes())
 		{
-			configuration = applicationConfiguration.getConfiguration(configType);
+			plugin = applicationConfiguration.getPlugin(pluginType);
 			
-			if(configuration == null)
+			if(plugin == null)
 			{
-				throw new InvalidStateException("Configuration-type {} is not specified by application-configuration which is required by step: {}", configType.getName(), stepTypeName);
+				throw new InvalidStateException("Plugin-type {} is not specified by application-configuration which is required by step: {}", pluginType.getName(), stepTypeName);
 			}
 			
-			context.addRequireConfiguration(configuration);
+			context.addRequirePlugin(plugin);
 		}
 
 		try
@@ -261,18 +262,18 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		}
 
 		Executable executable = validationType.getAnnotation(Executable.class);
-		IConfiguration<?> configuration = null;
+		IPlugin<?> plugin = null;
 		
-		for(Class<? extends IConfiguration> configType : executable.requiredConfigurationTypes())
+		for(Class<? extends IPlugin> pluginType : executable.requiredPluginTypes())
 		{
-			configuration = applicationConfiguration.getConfiguration(configType);
+			plugin = applicationConfiguration.getPlugin(pluginType);
 			
-			if(configuration == null)
+			if(plugin == null)
 			{
-				throw new InvalidStateException("Configuration-type {} is not specified by application-configuration which is required by validator: {}", validationType.getName(), validationTypeName);
+				throw new InvalidStateException("Plugin-type {} is not specified by application-configuration which is required by validator: {}", validationType.getName(), validationTypeName);
 			}
 			
-			context.addRequireConfiguration(configuration);
+			context.addRequirePlugin(plugin);
 		}
 
 		try

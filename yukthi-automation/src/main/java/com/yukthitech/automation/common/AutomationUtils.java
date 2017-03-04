@@ -12,8 +12,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.automation.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -136,6 +138,51 @@ public class AutomationUtils
 				throw new InvalidStateException(ex, "An error occurred while parsing expressions in field '{}' in class - {}", 
 					field.getName(), executable.getClass().getName());
 			}
+		}
+	}
+
+	/**
+	 * Validates required parameters, configured by {@link Param}, are specified for target bean.
+	 * @param bean bean to validate
+	 */
+	public static void validateRequiredParams(Object bean)
+	{
+		Field fields[] = bean.getClass().getDeclaredFields();
+		Param param = null;
+		Object value = null;
+		
+		try
+		{
+			for(Field field : fields)
+			{
+				param = field.getAnnotation(Param.class);
+				
+				//if field is not require, ignore
+				if(param == null || !param.required())
+				{
+					continue;
+				}
+	
+				field.setAccessible(true);
+				value = field.get(bean);
+				
+				//validate value is provided and not blank
+				if(value == null)
+				{
+					throw new InvalidStateException("Required param {} is not specified", field.getName());
+				}
+				
+				if( (value instanceof String) && StringUtils.isBlank(value.toString()) )
+				{
+					throw new InvalidStateException("Blank value is specified for required param {}", field.getName());
+				}
+			}
+		} catch(InvalidStateException ex)
+		{
+			throw ex;
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while validating bean - {}", bean, ex);
 		}
 	}
 }

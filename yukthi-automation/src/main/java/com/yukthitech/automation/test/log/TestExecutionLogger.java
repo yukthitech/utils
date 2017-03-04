@@ -83,6 +83,15 @@ public class TestExecutionLogger implements IExecutionLogger
 		logger.debug(finalMssg);
 		executionLogData.addMessage(new ExecutionLogData.Message(LogLevel.DEBUG, finalMssg, new Date()));
 	}
+	
+	@Override
+	public void trace(String mssgTemplate, Object... args)
+	{
+		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+
+		logger.trace(finalMssg);
+		executionLogData.addMessage(new ExecutionLogData.Message(LogLevel.TRACE, finalMssg, new Date()));
+	}
 
 	@Override
 	public void logImage(String name, String message, File imageFile)

@@ -1,30 +1,30 @@
 package com.yukthitech.automation.test.common.validations;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.ccg.xml.util.ValidateException;
-import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.automation.Param;
 
 /**
  * Validator to validate if specified value matches with specified context expression.
  * @author akiran
  */
 @Executable(name = "validateContextParam", message = "Validates specified context param is present with specified value")
-public class ValidateContextParamStep extends AbstractValidation implements Validateable
+public class ValidateContextParamStep extends AbstractValidation
 {
 	/**
 	 * Expression to be evaluated on context.
 	 */
+	@Param(description = "Expression to be evaluated on context")
 	private String expression;
 	
 	/**
 	 * Value to be matched. Can be null, if null, only presence of param will be validated.
 	 */
+	@Param(description = "Value to be matched. If not specifed, only presence of param will be validated.", required = false)
 	private String value;
 
 	/**
@@ -45,15 +45,6 @@ public class ValidateContextParamStep extends AbstractValidation implements Vali
 	public void setValue(String value)
 	{
 		this.value = value;
-	}
-
-	@Override
-	public void validate() throws ValidateException
-	{
-		if(StringUtils.isBlank(expression))
-		{
-			throw new ValidateException("Expression can not be null");
-		}
 	}
 
 	@Override

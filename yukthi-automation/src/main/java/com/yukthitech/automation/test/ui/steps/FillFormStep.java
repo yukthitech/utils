@@ -4,15 +4,14 @@ import java.beans.PropertyDescriptor;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -22,34 +21,21 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "fillForm", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Fills the form with specified data")
+@Executable(name = "fillForm", requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
 public class FillFormStep implements IStep
 {
-	/**
-	 * The logger.
-	 */
-	private static Logger logger = LogManager.getLogger(FillFormStep.class);
-
-	/** 
-	 * The error message. 
-	 **/
-	private static String DEBUG_MESSAGE = "Populating field {} with value - {}";
-	
-	/** 
-	 * The error message. 
-	 **/
-	private static String ERROR_MESSAGE = "Failed to fill element '{}' under parent '{}' with value - {}";
-	
 	/**
 	 * Html locator of the form or container (like DIV) enclosing the input
 	 * elements.
 	 */
+	@Param(description = "Html locator of the form or container (like DIV) enclosing the input elements")
 	private String locator;
 
 	/**
 	 * Data to be filled. All the fields matching with the property names of
 	 * specified bean will be searched and populated with corresponding data.
 	 */
+	@Param(description = "Data to populate in the form")
 	private Object data;
 
 	/**
@@ -62,6 +48,8 @@ public class FillFormStep implements IStep
 	 */
 	private void fillWithStandardBean(AutomationContext context, IExecutionLogger exeLogger)
 	{
+		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
+		
 		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
 		PropertyDescriptor propDescLst[] = PropertyUtils.getPropertyDescriptors(data.getClass());
@@ -85,16 +73,16 @@ public class FillFormStep implements IStep
 				}
 			} catch(Exception ex)
 			{
-				logger.error("An error occurred while setting property - " + desc.getName(), ex);
+				exeLogger.error(ex, "An error occurred while setting property - " + desc.getName());
 				continue;
 			}
 
-			exeLogger.debug(DEBUG_MESSAGE, desc.getName(), value);
+			exeLogger.debug("Populating field {} with value - {}", desc.getName(), value);
 
 			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), "" + value))
 			{
-				exeLogger.error(ERROR_MESSAGE, desc.getName(), value);
-				throw new InvalidStateException(ERROR_MESSAGE, desc.getName(), value);
+				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
+				throw new InvalidStateException("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 			}
 		}
 	}
@@ -109,6 +97,8 @@ public class FillFormStep implements IStep
 	 */
 	private void fillWithDynamicBean(AutomationContext context, IExecutionLogger exeLogger)
 	{
+		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
+		
 		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
 		DynamicBean dynamicBean = (DynamicBean) data;
@@ -125,12 +115,12 @@ public class FillFormStep implements IStep
 				continue;
 			}
 
-			exeLogger.debug(DEBUG_MESSAGE, name, value);
+			exeLogger.debug("Populating field {} with value - {}", name, value);
 
 			if(!UiAutomationUtils.populateField(context, parentElement, name, "" + value))
 			{
-				exeLogger.error(ERROR_MESSAGE, name, value);
-				throw new InvalidStateException(ERROR_MESSAGE, name, locator, value);
+				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, value);
+				throw new InvalidStateException("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
 			}
 		}
 	}
@@ -156,18 +146,6 @@ public class FillFormStep implements IStep
 	}
 
 	/**
-	 * Gets the html locator of the form or container (like DIV) enclosing the
-	 * input elements.
-	 *
-	 * @return the html locator of the form or container (like DIV) enclosing
-	 *         the input elements
-	 */
-	public String getLocator()
-	{
-		return locator;
-	}
-
-	/**
 	 * Sets the html locator of the form or container (like DIV) enclosing the
 	 * input elements.
 	 *
@@ -178,18 +156,6 @@ public class FillFormStep implements IStep
 	public void setLocator(String locator)
 	{
 		this.locator = locator;
-	}
-
-	/**
-	 * Gets the data to be filled. All the fields matching with the property
-	 * names of specified bean will be searched and populated with corresponding
-	 * data.
-	 *
-	 * @return the data to be filled
-	 */
-	public Object getData()
-	{
-		return data;
 	}
 
 	/**

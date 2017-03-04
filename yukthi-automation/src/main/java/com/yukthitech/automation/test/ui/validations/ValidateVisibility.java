@@ -8,7 +8,7 @@ import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -17,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "validateVisibility", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified element is visible/hidden")
+@Executable(name = "validateVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
 public class ValidateVisibility extends AbstractValidation
 {
 	/**

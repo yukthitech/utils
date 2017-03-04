@@ -27,9 +27,9 @@ public class ApplicationConfiguration
 	private Set<String> basePackages = new HashSet<>();
 	
 	/**
-	 * Subconfigurations configured which would be required by different steps and validators.
+	 * Plugins configured which would be required by different steps and validators.
 	 */
-	private Map<Class<?>, IConfiguration<?>> configurations = new HashMap<>();
+	private Map<Class<?>, IPlugin<?>> plugins = new HashMap<>();
 	
 	/**
 	 * Test data beans that can be used by test cases.
@@ -80,50 +80,50 @@ public class ApplicationConfiguration
 	}
 
 	/**
-	 * Generic adder for adding any type of configuration object. 
-	 * @param configuration configuration to be added.
+	 * Generic adder for adding any type of plugin object. 
+	 * @param plugin plugin to be added.
 	 */
-	public void addConfiguration(IConfiguration<?> configuration)
+	public void addPlugin(IPlugin<?> plugin)
 	{
-		this.configurations.put(configuration.getClass(), configuration);
+		this.plugins.put(plugin.getClass(), plugin);
 	}
 	
 	/**
-	 * Sets specified selenium configuration.
-	 * @param configuration selenium configuration to set
+	 * Sets specified selenium plugin.
+	 * @param plugin selenium plugin to set
 	 */
-	public void setSeleniumConfiguration(SeleniumConfiguration configuration)
+	public void setSeleniumPlugin(SeleniumPlugin plugin)
 	{
-		this.addConfiguration(configuration);
+		this.addPlugin(plugin);
 	}
 	
 	/**
-	 * Sets specified db configuration.
-	 * @param configuration db configuration to set
+	 * Sets specified db plugin.
+	 * @param plugin db plugin to set
 	 */
-	public void setDbConfiguration(DbConfiguration configuration)
+	public void setDbPlugin(DbPlugin plugin)
 	{
-		this.addConfiguration(configuration);
+		this.addPlugin(plugin);
 	}
 	
 	/**
-	 * Gets the configuration from configured configurations of specified type.
-	 * @return Matching configuration.
+	 * Gets the plugin from configured plugins of specified type.
+	 * @return Matching plugin.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends IConfiguration<?>> T getConfiguration(Class<T> configurationType)
+	public <T extends IPlugin<?>> T getPlugin(Class<T> pluginType)
 	{
-		return (T) configurations.get(configurationType);
+		return (T) plugins.get(pluginType);
 	}
 	
 	/**
-	 * Fetches all configurations.
-	 * @return all configurations
+	 * Fetches all plugins.
+	 * @return all plugins
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Collection<IConfiguration<?>> getAllConfigurations()
+	public Collection<IPlugin<?>> getAllPlugins()
 	{
-		return (Collection) configurations.values();
+		return (Collection) plugins.values();
 	}
 
 	/**

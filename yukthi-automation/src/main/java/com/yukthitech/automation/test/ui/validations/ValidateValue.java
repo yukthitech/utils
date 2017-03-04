@@ -8,7 +8,7 @@ import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 
 /**
@@ -16,7 +16,7 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
  * 
  * @author akiran
  */
-@Executable(name = "validateValue", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates specified element has specified value/text")
+@Executable(name = "validateValue", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
 public class ValidateValue extends AbstractValidation
 {
 	/**

@@ -8,10 +8,10 @@ import javax.sql.DataSource;
 import com.yukthitech.automation.AutomationContext;
 
 /**
- * Configuration related to db related steps or validators.
+ * plugin related to db related steps or validators.
  * @author akiran
  */
-public class DbConfiguration implements IConfiguration<Object>
+public class DbPlugin implements IPlugin<Object>
 {
 	/**
 	 * Application data sources.

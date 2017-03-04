@@ -1,4 +1,4 @@
-package com.yukthitech.automation.test.ui.validations;
+package com.yukthitech.automation.test.webutils.validations;
 
 import org.openqa.selenium.WebElement;
 
@@ -6,14 +6,14 @@ import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.automation.test.ui.steps.WaitForStep;
 
 /**
  * Validates alert box is displayed and closes the dialog.
  */
-@Executable(name = "validateAlert", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Validates an alert comes up with specified message")
+@Executable(name = "validateAlert", requiredPluginTypes = SeleniumPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
 public class ValidateAlert extends AbstractValidation
 {
 	/**
@@ -47,9 +47,12 @@ public class ValidateAlert extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
 	{
+		exeLogger.debug("Waiting for alert with message - {}", message);
+		
 		//wait and validate alert box is displayed
 		WaitForStep waitStep = new WaitForStep();
 		waitStep.setLocator("//div[@id='webutilsAlertDialog']");
+		waitStep.execute(context, exeLogger);
 		
 		//ensure alert has required message
 		WebElement alertBox = UiAutomationUtils.findElement(context, null, "id: webutilsAlertDialog");

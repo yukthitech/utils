@@ -17,7 +17,7 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.config.AutomationConfiguration;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.UnsupportedOperationException;
 
@@ -196,7 +196,7 @@ public class UiAutomationUtils
 	{
 		logger.trace("Trying to find element with location '{}' under parent - {}", locator, parent);
 
-		SeleniumConfiguration seleniumConfiguration = context.getConfiguration(SeleniumConfiguration.class);
+		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 
 		Matcher matcher = LOCATOR_PATTERN.matcher(locator);
@@ -347,7 +347,7 @@ public class UiAutomationUtils
 		StringBuilder builder = new StringBuilder(OPENBRACKET);
 		boolean first = true;
 		
-		SeleniumConfiguration seleniumConfiguration = context.getConfiguration(SeleniumConfiguration.class);
+		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		JavascriptExecutor jsExecutor = (JavascriptExecutor) seleniumConfiguration.getWebDriver();
 
 		for(WebElement element : elements)

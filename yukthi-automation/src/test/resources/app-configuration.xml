@@ -16,13 +16,13 @@
 	-->
 	
 	<!--
-		Different configurations can be specified here. These configuration in turn
+		Different plugins can be specified here. These plugin in turn
 		will be used by steps and validators. 
 	 -->
-	<wrap:configurations>
+	<wrap:plugins>
 	
-		<!-- Selenium configuration for web based automation -->	
-		<selenium-configuration>
+		<!-- Selenium plugin for web based automation -->	
+		<selenium-plugin>
 			<base-url>http://localhost:8080</base-url>
 			
 			<wrap:drivers>
@@ -32,19 +32,19 @@
 					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
 				</driver>
 			</wrap:drivers>
-		</selenium-configuration>
+		</selenium-plugin>
 	
-		<!-- Db configuration for sql base steps -->
-		<db-configuration>
+		<!-- Db plugin for sql base steps -->
+		<db-plugin>
 			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
 				<driverClassName>com.mysql.jdbc.Driver</driverClassName>
 				<url>jdbc:mysql://localhost:3306/agile</url>
 				<username>root</username>
 				<password>kranthi</password>
 			</dataSource>
-		</db-configuration>
+		</db-plugin>
 			
-	</wrap:configurations>
+	</wrap:plugins>
 
 	<!--
 		Specify common data beans that can be used across the test suites. 

@@ -14,12 +14,12 @@ import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Configuration needed by selenium.
+ * Plugin needed by selenium based steps or validators.
  * @author akiran
  */
-public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurationArgs>, Validateable
+public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 {
-	private static Logger logger = LogManager.getLogger(SeleniumConfiguration.class);
+	private static Logger logger = LogManager.getLogger(SeleniumPlugin.class);
 	
 	/**
 	 * Selenium drivers to use for automation.
@@ -42,9 +42,9 @@ public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurati
 	private String baseUrl;
 	
 	@Override
-	public Class<SeleniumConfigurationArgs> getArgumentBeanType()
+	public Class<SeleniumPluginArgs> getArgumentBeanType()
 	{
-		return SeleniumConfigurationArgs.class;
+		return SeleniumPluginArgs.class;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class SeleniumConfiguration implements IConfiguration<SeleniumConfigurati
 	 * @see com.yukthitech.automation.config.IConfiguration#initialize(com.yukthitech.automation.AutomationContext, java.lang.Object)
 	 */
 	@Override
-	public void initialize(AutomationContext context, SeleniumConfigurationArgs args)
+	public void initialize(AutomationContext context, SeleniumPluginArgs args)
 	{
 		String driverName = args.getWebDriver();
 		

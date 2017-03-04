@@ -98,5 +98,84 @@ Step to set context variable
 Use ValidateContextParamStep to validate sql load is successul
 
 
+Param and auto doc generation
+
+why first driver is not being used?
 
 Source of the log in the system log
+
+even in init error display command line args
+
+step to set context param value
+
+=============================
+
+property files to load to context
+	that can be used in app config also and in steps also
+
+Extra params in final report
+	like build, environment, date, custom params
+	
+list loading by delimiter
+	
+Extra steps
+	json parsing
+	
+	get and post urls?
+	
+	post with file upload
+	
+	create temp file in work dir
+	
+	read and write file
+		write json object to fil
+		
+	data provider steps
+		at test case level and step level
+	
+	expressions using freemarker
+	
+	screen shot on error
+	
+	log message step
+	
+	test case to ensure skip and failure
+	
+	eror and failure differentiation
+	
+	
+	test cases to validate cmd args
+	
+	group names in test cases
+	
+	file upload and download
+		resources
+		
+	jx path validation of properties
+	
+	Step to fail test case
+	
+	if-else
+	
+	loops
+	
+	reusing of step groups
+	
+	cloned copy of bean
+	
+	deep-cloned copy of bean
+	
+	Name of the report
+	
+	Freemarker to have common header and for report files
+		using some file to get list of files to copy
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	

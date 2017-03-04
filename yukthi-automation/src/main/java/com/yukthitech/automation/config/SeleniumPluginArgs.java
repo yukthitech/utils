@@ -3,10 +3,10 @@ package com.yukthitech.automation.config;
 import com.yukthitech.utils.cli.CliArgument;
 
 /**
- * Command line arguments expected by selenium configuration.
+ * Command line arguments expected by selenium plugin.
  * @author akiran
  */
-public class SeleniumConfigurationArgs
+public class SeleniumPluginArgs
 {
 	/**
 	 * Name of the web driver to be used.

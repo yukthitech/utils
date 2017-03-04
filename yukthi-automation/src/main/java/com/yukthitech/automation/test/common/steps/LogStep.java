@@ -4,17 +4,19 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
+import com.yukthitech.automation.Param;
 
 /**
  * Loads specified properties file as map on to context.
  * @author akiran
  */
 @Executable(name = "log", message = "Logs specified message")
-public class LogStep implements IStep 
+public class LogStep implements IStep
 {
 	/**
 	 * Logs specified message in ui.
 	 */
+	@Param(description = "Message to log")
 	private String message;
 	
 	/**

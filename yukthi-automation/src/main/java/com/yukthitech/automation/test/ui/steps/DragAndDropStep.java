@@ -12,7 +12,8 @@ import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.SeleniumConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -21,26 +22,30 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author Pritam.
  */
-@Executable(name = "dragAndDrop", requiredConfigurationTypes = SeleniumConfiguration.class, message = "Drags the specified element to specified target")
+@Executable(name = "dragAndDrop", requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
 public class DragAndDropStep implements IStep
 {
 	/**
 	 * Source html element to be dragged.
 	 */
+	@Param(description = "Locator of element which needs to be dragged")
 	private String source;
 
 	/**
 	 * Destination html element area to drop.
 	 */
+	@Param(description = "Locator of element on which source element should be dropped")
 	private String destination;
 
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger logger)
 	{
+		logger.debug("Dragging element '{}' to element - {}", source, destination);
+		
 		WebElement sourceElement = UiAutomationUtils.findElement(context, null, source);
 		WebElement destinationElement = UiAutomationUtils.findElement(context, null, destination);
 
-		dragAndDrop(context, sourceElement, destinationElement);
+		dragAndDrop(context, sourceElement, destinationElement, logger);
 	}
 
 	/**
@@ -51,21 +56,25 @@ public class DragAndDropStep implements IStep
 	 * @param destinationElement
 	 *            area to be dropped.
 	 */
-	private void dragAndDrop(AutomationContext context, WebElement sourceElement, WebElement destinationElement)
+	private void dragAndDrop(AutomationContext context, WebElement sourceElement, WebElement destinationElement, IExecutionLogger logger)
 	{
+		if(!sourceElement.isDisplayed())
+		{
+			logger.error("Failed to find source element to be dragged. Locator: {}", source);
+			
+			throw new InvalidStateException("Failed to find drag element - '{}'", source);
+		}
+
+		if(!destinationElement.isDisplayed())
+		{
+			logger.error("Failed to find targer element to be dropped. Locator: {}", destination);
+			
+			throw new InvalidStateException("Failed to find drop area element - '{}'", destination);
+		}
+
 		try
 		{
-			if(!sourceElement.isDisplayed())
-			{
-				throw new InvalidStateException("Failed to find drag element - '{}'", source);
-			}
-
-			if(!destinationElement.isDisplayed())
-			{
-				throw new InvalidStateException("Failed to find drop area element - '{}'", destination);
-			}
-
-			SeleniumConfiguration seleniumConfiguration = context.getConfiguration(SeleniumConfiguration.class);
+			SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 			seleniumConfiguration.getWebDriver().manage().timeouts().implicitlyWait(10000, TimeUnit.MILLISECONDS);
 			
 			Thread.sleep(2000);
@@ -82,12 +91,15 @@ public class DragAndDropStep implements IStep
 			dragAndDrop.perform();
 		} catch(StaleElementReferenceException ex)
 		{
+			logger.error(ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
 			throw new InvalidStateException("Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
 		} catch(NoSuchElementException e)
 		{
+			logger.error(e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
 			throw new InvalidStateException("Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
 		} catch(Exception e)
 		{
+			logger.error(e, "Error occurred while performing drag and drop operation");
 			throw new InvalidStateException("Error occurred while performing drag and drop operation ", e);
 		}
 	}

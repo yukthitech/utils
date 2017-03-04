@@ -1,46 +1,50 @@
 package com.yukthitech.automation.test.sql.steps;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
 import com.yukthitech.automation.IStep;
-import com.yukthitech.automation.config.DbConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.DbPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Step to execute multiple dml queries in single transaction.
  * @author akiran
  */
-@Executable(name = "multiDmlQuery", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified multiple DML queries in single transaction")
+@Executable(name = "multiDmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified multiple DML queries in single transaction")
 public class MultiDmlQueryStep implements IStep
 {
 	/**
-	 * Logger.
-	 */
-	private static Logger logger = LogManager.getLogger(MultiDmlQueryStep.class);
-	
-	/**
 	 * List of queries executed in single transaction.
 	 */
-	private List<String> queries = new ArrayList<String>();
+	@Param(description = "Queries to execute.")
+	private List<String> queries;
 	
 	/**
 	 * Name of the data source to use.
 	 */
+	@Param(description = "Data source to be used for sql execution.")
 	private String dataSourceName;
 	
+	/**
+	 * Flag to indicate, if test case has to failed if there are no updates.
+	 */
+	@Param(description = "If true, error will be thrown if no rows are affected by specified DML.\nDefault Value: false", required = false)
+	private boolean failOnNoUpdate = false;
+
 	/**
 	 * Sets the name of the data source to use.
 	 *
@@ -58,13 +62,33 @@ public class MultiDmlQueryStep implements IStep
 	 */
 	public void addQuery(String query) 
 	{
+		if(StringUtils.isBlank(query))
+		{
+			throw new NullPointerException("Null or blank query is specified");
+		}
+		
+		if(this.queries == null)
+		{
+			this.queries = new ArrayList<>();
+		}
+		
 		this.queries.add(query);
+	}
+	
+	/**
+	 * Sets the flag to indicate, if test case has to failed if there are no updates.
+	 *
+	 * @param failOnNoUpdate the new flag to indicate, if test case has to failed if there are no updates
+	 */
+	public void setFailOnNoUpdate(boolean failOnNoUpdate)
+	{
+		this.failOnNoUpdate = failOnNoUpdate;
 	}
 
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbConfiguration dbConfiguration = context.getConfiguration(DbConfiguration.class);
+		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
 
 		if(dataSource == null)
@@ -73,22 +97,36 @@ public class MultiDmlQueryStep implements IStep
 		}
 
 		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
 
 		String query = null;
+		Map<String, Object> paramMap = new HashMap<>();
+		List<Object> values = new ArrayList<>();
+		String processedQuery = null;
 		
 		try
 		{
 			connection = dataSource.getConnection();
-			connection.setAutoCommit(false);
 			
-			statement = connection.createStatement();
-
 			for (int i = 0; i < queries.size(); i++) 
 			{
-				query = queries.get(i);
-				statement.execute(query);
+				paramMap.clear();
+				values.clear();
+				
+				processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
+				
+				exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
+				
+				exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
+				
+				int count = QueryUtils.executeDml(connection, processedQuery, values);
+				
+				exeLogger.debug("Number of rows affected - {}", count);
+				
+				if(count <= 0 && failOnNoUpdate)
+				{
+					exeLogger.error("No records got updated by query failing test case.");
+					throw new InvalidStateException("No records got updated by query - {}", query);
+				}
 			}
 			
 			connection.commit();
@@ -107,27 +145,7 @@ public class MultiDmlQueryStep implements IStep
 			throw new InvalidStateException(ex, "An erorr occurred while executing sql query - {}", query);
 		} finally
 		{
-			try
-			{
-				if(rs != null)
-				{
-					rs.close();
-				}
-
-				if(statement != null)
-				{
-					statement.close();
-				}
-
-				if(connection != null)
-				{
-					connection.close();
-				}
-			} catch(Exception ex)
-			{
-				logger.warn("An error occurred while closing sql resources", ex);
-			}
+			DbUtils.closeQuietly(connection);
 		}
-
 	}
 }

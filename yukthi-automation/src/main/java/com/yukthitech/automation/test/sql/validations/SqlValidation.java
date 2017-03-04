@@ -3,7 +3,6 @@ package com.yukthitech.automation.test.sql.validations;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,24 +10,24 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.IExecutionLogger;
-import com.yukthitech.automation.config.DbConfiguration;
+import com.yukthitech.automation.Param;
+import com.yukthitech.automation.config.DbPlugin;
+import com.yukthitech.automation.test.sql.steps.QueryUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * SQL based validation.
  */
-@Executable(name = "validateWithSql", requiredConfigurationTypes = DbConfiguration.class, message = "Executes specified query and validates expected data is returned")
+@Executable(name = "validateWithSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
 public class SqlValidation extends AbstractValidation
 {
-	private static Logger logger = LogManager.getLogger(SqlValidation.class);
-
 	/**
 	 * Result row expectation.
 	 * 
@@ -68,16 +67,19 @@ public class SqlValidation extends AbstractValidation
 	/**
 	 * Name of the data source to use.
 	 */
+	@Param(description = "Name of the data source to be used for query execution.")
 	private String dataSourceName;
 
 	/**
 	 * Query to execute.
 	 */
+	@Param(description = "Query to execute whose results needs to be validated.")
 	private String query;
 
 	/**
 	 * Rows and expected values.
 	 */
+	@Param(description = "Expected rows of values from query result. Each row will have list of column (name-value pairs)")
 	private List<ExpectedRow> expectedRows = new ArrayList<>();
 	
 	/**
@@ -122,7 +124,7 @@ public class SqlValidation extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbConfiguration dbConfiguration = context.getConfiguration(DbConfiguration.class);
+		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
 
 		if(dataSource == null)
@@ -131,69 +133,67 @@ public class SqlValidation extends AbstractValidation
 		}
 
 		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
 
 		try
 		{
 			connection = dataSource.getConnection();
-			statement = connection.createStatement();
 
-			rs = statement.executeQuery(query);
+			Map<String, Object> paramMap = new HashMap<>();
+			List<Object> values = new ArrayList<>();
 
-			int rowIdx = 0;
-			ExpectedRow row = null;
-			String actualVal = null, expectedVal = null;
+			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
+			
+			exeLogger.debug("On data-source '{}' executing query: \n\n{} \n\nParams: {}", dataSource, query, paramMap);
+			
+			exeLogger.trace("On data-source '{}' executing processed query: \n\n{} \n\nParams: {}", dataSource, processedQuery, values);
 
-			while(rs.next())
+			ResultSetHandler<Boolean> rsHandler = new ResultSetHandler<Boolean>()
 			{
-				if(expectedRows.size() <= rowIdx)
+				@Override
+				public Boolean handle(ResultSet rs) throws SQLException
 				{
-					exeLogger.error("Actual rows are more than expected row count- {}", expectedRows.size());
-					return false;
-				}
+					int rowIdx = 0;
+					ExpectedRow row = null;
+					String actualVal = null, expectedVal = null;
 
-				row = expectedRows.get(rowIdx);
-
-				for(String column : row.columnToValue.keySet())
-				{
-					actualVal = rs.getString(column);
-					expectedVal = row.columnToValue.get(column);
-
-					if(!expectedVal.equals(actualVal))
+					while(rs.next())
 					{
-						exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value - {}", rowIdx, column, expectedVal, actualVal);
-						return false;
-					}
-				}
-			}
+						if(expectedRows.size() <= rowIdx)
+						{
+							exeLogger.error("Actual rows are more than expected row count- {}", expectedRows.size());
+							return false;
+						}
 
-			return true;
+						row = expectedRows.get(rowIdx);
+
+						for(String column : row.columnToValue.keySet())
+						{
+							actualVal = rs.getString(column);
+							expectedVal = row.columnToValue.get(column);
+
+							if(!expectedVal.equals(actualVal))
+							{
+								exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value - {}", rowIdx, column, expectedVal, actualVal);
+								return false;
+							}
+						}
+						
+						rowIdx ++;
+					}
+
+					return true;
+				}
+			};
+			
+			Boolean res = QueryUtils.getQueryRunner().query(processedQuery, rsHandler);
+			return res;
 		} catch(SQLException ex)
 		{
+			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
 			throw new InvalidStateException(ex, "An erorr occurred while executing sql validation with query - {}", query);
 		} finally
 		{
-			try
-			{
-				if(rs != null)
-				{
-					rs.close();
-				}
-
-				if(statement != null)
-				{
-					statement.close();
-				}
-
-				if(connection != null)
-				{
-					connection.close();
-				}
-			} catch(Exception ex)
-			{
-				logger.warn("An error occurred while closing sql resources", ex);
-			}
+			DbUtils.closeQuietly(connection);
 		}
 	}
 }

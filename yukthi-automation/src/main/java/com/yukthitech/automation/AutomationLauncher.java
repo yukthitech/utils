@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.ApplicationConfiguration;
-import com.yukthitech.automation.config.IConfiguration;
+import com.yukthitech.automation.config.IPlugin;
 import com.yukthitech.automation.test.TestDataFile;
 import com.yukthitech.automation.test.TestSuite;
 import com.yukthitech.automation.test.TestSuiteExecutor;
@@ -141,7 +141,7 @@ public class AutomationLauncher
 			}
 		}
 		
-		logger.debug("Found required configurations by this context to be: {}", context.getConfigurations());
+		logger.debug("Found required configurations by this context to be: {}", context.getPlugins());
 		
 		return testSuiteGroup;
 	}
@@ -152,10 +152,10 @@ public class AutomationLauncher
 	 * @param extendedCommandLineArgs Extended command line arguments
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void initalizeConfigurations(AutomationContext context, String extendedCommandLineArgs[])
+	private static void initalizePlugins(AutomationContext context, String extendedCommandLineArgs[])
 	{
 		//fetch the argument configuration types required
-		List<Class<?>> argBeanTypes = context.getConfigurations().stream()
+		List<Class<?>> argBeanTypes = context.getPlugins().stream()
 				.map(config -> config.getArgumentBeanType())
 				.filter(type -> (type != null))
 				.collect(Collectors.toList());
@@ -186,14 +186,14 @@ public class AutomationLauncher
 		
 		//initialize the configurations
 		Object args = null;
-		Collection<IConfiguration<Object>> configurations = (Collection) context.getConfigurations();
+		Collection<IPlugin<Object>> plugins = (Collection) context.getPlugins();
 		
-		for(IConfiguration<Object> config : configurations)
+		for(IPlugin<Object> plugin : plugins)
 		{
-			logger.debug("Initializing configuration bean: {}", config.getClass().getName());
+			logger.debug("Initializing plugin: {}", plugin.getClass().getName());
 			
-			args = argBeans.get(config.getArgumentBeanType());
-			config.initialize(context, args);
+			args = argBeans.get(plugin.getArgumentBeanType());
+			plugin.initialize(context, args);
 		}
 	}
 
@@ -268,7 +268,7 @@ public class AutomationLauncher
 		}
 	
 		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
-		initalizeConfigurations(context, extendedCommandLineArgs);
+		initalizePlugins(context, extendedCommandLineArgs);
 		
 		//execute test suites
 		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup, reportFolder);
