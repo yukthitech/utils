@@ -1,6 +1,4 @@
-var testAutomationApp = angular.module('testAutomationApp', []);
-
-testAutomationApp.controller('testAutomationAppController', function($scope){
+$.application.controller('testAutomationAppController', function($scope){
 	
 	$scope.status = "Test Case Status";
 	$scope.searchTestCaseName = "";
@@ -36,7 +34,7 @@ testAutomationApp.controller('testAutomationAppController', function($scope){
 				 testCaseObj.display = true;
 			 }
 			 
-			 var obj = {"suiteName" : $scope.testSuiteResults[i].suiteName, "testCaseResults" : testCaseResults};
+			 var obj = {"suiteName" : $scope.testSuiteResults[i].suiteName, "testCaseResults" : testCaseResults, "testSuiteResult": $scope.testSuiteResults[i]};
 			 obj.display = true;
 			 
 			 $scope.suiteNameToObj[obj.suiteName] = obj;

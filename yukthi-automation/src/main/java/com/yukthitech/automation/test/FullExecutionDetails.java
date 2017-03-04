@@ -201,6 +201,15 @@ public class FullExecutionDetails
 	}
 
 	/**
+	 * Fetches number of errored test cases.
+	 * @return number of errored test cases
+	 */
+	public int getTestCaseErroredCount()
+	{
+		return getTestCaseCount(TestStatus.ERRORED);
+	}
+
+	/**
 	 * Fetches number of skipped test cases.
 	 * @return number of skipped test cases
 	 */
