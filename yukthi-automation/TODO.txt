@@ -1,8 +1,3 @@
-DML query step
-Multi dml query step (single transaction)
-
-setup and cleanup
-
 functions (repeatable set of stpes)
 	step to invoke functions with params
 
@@ -10,8 +5,6 @@ step to set context variables
 	value in turn can be expression on context
 
 Validate form with field level validations
-
-step to load property file on context 
 
 invoke method step (with params)
 	result should be set on context
@@ -27,24 +20,10 @@ invoke method step (with params)
 ui form validator
 	different variations of data
 	
-Drag and drop step
 
-==================================================	
-Test cases
+Test Drag and drop step
 
-==================================================	
-
-Loggers
-	local console logger
-	local file log monitor
-	
-	remote file monitor
-	
-Ability to define multiple log monitors -> in app config file
-	mark them as default ones
-	
-Ability to include or exclude log monitors
-
+Test remote file log monitor
 
 ================================================
 Reports
@@ -52,59 +31,14 @@ Reports
 		as pdf??
 		logo??
 	
-	Detail report
-		logo
-		links to logs (normal log + log monitors)
-		stripped tables
-			highlighting row
-		fixed position headers
-		Filters based on 
-			test suite and 
-			test case
-			success/failure/skipped
-			
-	Log displayers
-		Pattern to define columns
-		Line grouping
-			based on group values
-		excluded and included line texts	
-		group value based filter
-	
 ==========================
-Rename sub config to plugin and make approp annotation changes
-
-Dml Query / Multi Dml
- Error on DML failure
- Log the query
- Log the update count
- 
- means of setting update count on context
- 
- on error log the exception and message to ui
- 
-Prop Step
- Load from file or resource
- on error log the exception and message to ui
- 
-
-General
- Ensure log4j logging is done for input parameters
- and on errors
- 
- Use Validatable interface to ensure required params are provided
- 
-Step to set context variable
-
-Use ValidateContextParamStep to validate sql load is successul
 
 
 Param and auto doc generation
 
 why first driver is not being used?
 
-Source of the log in the system log
-
-even in init error display command line args
+even in init error, display command line args
 
 step to set context param value
 
@@ -175,7 +109,10 @@ Extra steps
 	
 	
 	
+Date and time formats from app config
 	
 	
 	
-	
+Setup and cleanup logs in report
+
+Remove unwanted class names from log

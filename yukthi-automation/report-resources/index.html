@@ -51,15 +51,15 @@
 	
 	<body ng-app="application" ng-controller="testAutomationAppController" ng-init="fetchObjects()">
 		
-		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: white;
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
 				border-bottom: 2px solid grey;">
 			<table style="width: 100%;">
 				<tr>
 					<td style="width: 10%;">
-						<img alt="Yukthi Logo" src="">
+						<img alt="Yukthi Logo" src="img/logo.png" style="width: 12em; height: 3.8em;">
 					</td>
-					<td style="width: 46%;">
-						aaa
+					<td style="width: 46%; color: white; font-size: 1.6em; font-weight: bold;">
+						{{testResults.reportName}} <sub style="font-size: 0.8em;">({{testResults.executionDate}})</sub>
 					</td>
 					<td style="width: 15%;">
 						<div>

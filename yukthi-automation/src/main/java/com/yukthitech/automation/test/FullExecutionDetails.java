@@ -1,16 +1,29 @@
 package com.yukthitech.automation.test;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
- * The Class FullExecutionDetails.
+ * Final execution details used for report generation.
  */
 public class FullExecutionDetails
 {
+	/**
+	 * Name of the report.
+	 */
+	private String reportName;
+	
+	/**
+	 * Date on which execution was started.
+	 */
+	private Date executionDate = new Date();
+	
 	/**
 	 * Flag indicating if global setup was successful.
 	 */
@@ -30,6 +43,38 @@ public class FullExecutionDetails
 	 * Maintains test suites in progress.
 	 */
 	private Set<String> inProgressTestSuites = new HashSet<>();
+	
+
+	/**
+	 * Gets the name of the report.
+	 *
+	 * @return the name of the report
+	 */
+	public String getReportName()
+	{
+		return reportName;
+	}
+
+	/**
+	 * Sets the name of the report.
+	 *
+	 * @param reportName the new name of the report
+	 */
+	public void setReportName(String reportName)
+	{
+		this.reportName = reportName;
+	}
+
+	/**
+	 * Gets the date on which execution was started.
+	 *
+	 * @return the date on which execution was started
+	 */
+	@JsonFormat(pattern = "dd/MM/yyyy")
+	public Date getExecutionDate()
+	{
+		return executionDate;
+	}
 
 	/**
 	 * Adds specified test result in specified suite.

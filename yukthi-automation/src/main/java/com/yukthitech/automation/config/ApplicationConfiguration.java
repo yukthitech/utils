@@ -19,6 +19,11 @@ import com.yukthitech.automation.logmon.ILogMonitor;
 public class ApplicationConfiguration
 {
 	/**
+	 * Name of the report. Length should be less than 30 chars.
+	 */
+	private String reportName = "Automation";
+	
+	/**
 	 * Folder containing test suite xmls.
 	 */
 	private String testSuiteFolder;
@@ -48,6 +53,26 @@ public class ApplicationConfiguration
 	 * The work directory by default will be deleted and recreated during starting.
 	 */
 	private String workDirectory = "./work";
+	
+	/**
+	 * Gets the name of the report. Length should be less than 30 chars.
+	 *
+	 * @return the name of the report
+	 */
+	public String getReportName()
+	{
+		return reportName;
+	}
+
+	/**
+	 * Sets the name of the report. Length should be less than 30 chars.
+	 *
+	 * @param reportName the new name of the report
+	 */
+	public void setReportName(String reportName)
+	{
+		this.reportName = reportName;
+	}
 
 	/**
 	 * Gets the folder containing test suite xmls.

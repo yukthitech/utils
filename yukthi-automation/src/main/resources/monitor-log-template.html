@@ -2,106 +2,86 @@
 	<head>
 		<title>Monitor Log</title>
 		
-		<script src="../js/angular.js"></script>
-		
 		<script src="../js/jquery-2.2.0.js"></script>
+
+		<script src="../js/angular.js"></script>
+	    <script src="../js/angular-sanitize.min.js"></script>
+	    <script src="../js/angular-app.js"></script>
+		
 		<script src="../js/bootstrap.min.js"></script>
+		<link href="../css/bootstrap.min.css" rel="stylesheet">
+
+		<link href="../css/common.css" rel="stylesheet">
 		
 		<script src="../js/monitor-log.js"></script>
 		
-		<script src="../js/common.js"></script>
-		
-		<style>
-			tr > th
-			{
-				background-color: #484848;
-				font-weight: bold;
-				font-size: 1.1em;
-				text-align: center;
-				color: white;
-			}
-	    	
-	    	td
-			{
-				text-align: center;
-			}
-			
-			.successVal
-			{
-				font-weight: bold;
-				color: #6666ff;
-			}
-			
-			.errorVal
-			{
-				font-weight: bold;
-				color: red;
-			}
-			
-			.defaultVal
-			{
-				font-weight: bold;
-				color: brown;
-			}
-			.resultBox
-			{
-				margin: 1em;
-				margin-bottom: 2em;
-			}
-			
-			.headerText
-			{
-				color: white;
-				font-weight: bold;
-				text-align: left;
-			}
-			
-		</style>
+	    <link href="../highlight/styles/agate.css" rel="stylesheet">
+	    <script src="../highlight/highlight.pack.js"></script>
 	</head>
 	
-	<body ng-app="monitorApp" ng-controller="monitorController" ng-init="initContent()">
+	<body ng-app="application" ng-controller="monitorController" ng-init="initContent()">
 	
-		<div id="testCaseName" style="display: none;">${testCaseName}</div>
-		
-		<div id="monitorName" style="display: none;">${monitorName}</div>
-		
 		<textarea id="logContentContainer" style="display: none;">
 			${content}
 		</textarea>
-		
-	
-		<div class="resultBox" style="background-color: grey; padding: 0.5em;">
-			<table>
+
+		<div class="resultBox" style="border: 2px solid black;">
+			<table class="table table-hover table-bordered table-striped" style="width: 100%;">
 				<tr>
-					<td class="headerText">Test Case: </td>
-					<td class="headerText" style="padding-left: 2em;">{{testCaseName}}</td>
+					<td colspan="2" style="background-color: #8585ad;">
+						<table style="width: 100%;">
+							<tr>
+								<td style="text-align: left; width: 1em;" class="headingCell">
+									Test Case: 
+								</td>
+								<td style="text-align: left; padding-left: 2em;" class="headingCell">
+									${testCaseName}
+								</td>
+								<td style="text-align:  right; padding-right: 2em;"  class="headingCell">
+									Status: ${status}
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left; width: 1em;" class="headingCell">
+									Monitor Name: 
+								</td>
+								<td style="text-align: left; padding-left: 2em;" class="headingCell">
+									${monitorName}
+								</td>
+								<td style="text-align:  right; padding-right: 2em;">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left;" class="headingCell">
+									Description: 
+								</td>
+								<td colspan="2" style="text-align: left; padding-left: 2em; " class="headingCell">
+									${description}
+								</td>
+							</tr>
+						</table>
+					</td>
 				</tr>
-				<tr>
-					<td class="headerText">Monitor Name: </td>
-					<td class="headerText" style="padding-left: 2em;">{{monitorName}}</td>
-				</tr>
-			</table>
-		</div>
-		
-	
-		<div class="resultBox">
-			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
 				<tr>
 					<td colspan="2">
-						<input type="text" ng-model="searchLog" class="form-control"
-							placeholder="Please type your search text here "/>
+						<input placeholder="Search by message [Multiple values separated by | ]" ng-model="searchByMessage" class="form-control" style="margin: 0;"/>
 					</td>
 				</tr>
-				<tr id="{{obj.id}}" ng-repeat="obj in contentLines | filter:searchLog">
-					<td>
-						<a href="#" ng-click="goToLine(obj.id)">{{obj.id}}</a>
-					</td>
-					<td style="text-align: left;">
-						{{obj.line}}
+				<tr style="font-size: 1.2rem;">
+					<th style="width: 1em;">#</th>
+					<th style="width: 1em;">Message</th>
+				</tr>
+				<tr ng-repeat="message in messages | filter:filterLogs() | filter:highlightFilter()" style="font-size: 1.5rem;">
+					<th style="padding: 0px; font-size: 1.2rem; text-align: right; padding-right: 0.5rem; padding-left: 0.5rem; cursor: pointer;" onclick="goToLine(event)" data-line-no="{{message.lineNo}}">
+						<a style="color: white;" data-line-no="{{message.lineNo}}">{{message.lineNo}}</a>
+					</th>
+					<td id="line_{{message.lineNo}}" style="text-align: left; padding: 0px; padding-left: 1em; border-width: 0px;">
+						<div ng-bind-html="message.line | unsafe">
+						</div>
 					</td>
 				</tr>
 			</table>
 		</div>
-		
 	</body>
 </html>

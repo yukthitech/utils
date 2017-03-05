@@ -46,6 +46,7 @@ $.application.controller('testLogAppController', function($scope){
 		for(var i = 0 ; i < $scope.messages.length ; i++)
 		{
 			var obj = $scope.messages[i];
+			obj.lineNo = i + 1;
 			obj.display = true;
 		}
 		
@@ -57,7 +58,10 @@ $.application.controller('testLogAppController', function($scope){
 		
 		$scope.highlightCode();
 	};
-	
+
+	/**
+	 * Wraps the <code> elements with <pre> tag and highlights them.
+	 */
 	$scope.highlightCode = function() {
 		$("pre code").unwrap();
 		$("code").wrap('<pre style="padding: 4px; margin: 0.5em; display: inline-block;"></pre>');
@@ -67,6 +71,9 @@ $.application.controller('testLogAppController', function($scope){
 		});	
 	};
 	
+	/**
+	 * Hihhlights all <code> elements and this function is made for use with filters.
+	 */
 	$scope.highlightFilter = function() {
 		
 		$scope.highlightCode();
@@ -83,6 +90,9 @@ $.application.controller('testLogAppController', function($scope){
 		$scope.filterLevel = data;
 	};
 	
+	/**
+	 * Filter function to filter the logs. 
+	 */
 	$scope.filterLogs = function() {
 		var filterFunc = function(item) {
 			
@@ -142,4 +152,28 @@ $.application.controller('testLogAppController', function($scope){
 		
 	};
 	
+	/**
+	 * Goto
+	 */
+	goToLine = $.proxy(function(event){
+		var line = $(event.target).attr("data-line-no"); 
+		
+		this.$scope.searchByMessage = "";
+		this.$scope.filterLevel = "ALL";
+		
+		var location = window.location.href;
+		
+		if(location.indexOf("#") > 0)
+		{
+			location = location.substr(0, location.indexOf("#"));
+		}
+
+		try
+		{
+			this.$scope.$apply();
+		}catch(ex)
+		{}
+		
+		window.location.href = location + "#line_" + line;		
+	}, {"$scope": $scope});
 });

@@ -26,10 +26,10 @@
 	</head>
 	
 	<body ng-app="application" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
-		<div class="resultBox">
+		<div class="resultBox"style="border: 2px solid black;">
 			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
 				<tr>
-					<td colspan="4" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: white; font-weight: bold;">
+					<td colspan="5" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: white; font-weight: bold;">
 						<table style="width: 100%;">
 							<tr>
 								<td style="text-align: left; width: 1em;">Test Case: </td>
@@ -46,7 +46,7 @@
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2">
+					<td colspan="3">
 						<div class="btn-group">
 						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em;">
 						    	{{filterLevel}}
@@ -68,12 +68,16 @@
 					</td>
 				</tr>
 				<tr>
+					<th style="width: 1em;">#</th>
 					<th style="width: 1em;">Level</th>
 					<th style="width: 1em;">Source</th>
 					<th style="">Message</th>
 					<th style="width: 1em;">Time</th>
 				</tr>
 				<tr ng-repeat="message in messages | filter:filterLogs() | filter:highlightFilter()" ng-show="message.display">
+					<th style="padding: 0px; font-size: 1.2rem; text-align: right; padding-right: 0.5rem; padding-left: 0.5rem; cursor: pointer;" onclick="goToLine(event)" data-line-no="{{message.lineNo}}">
+						<a style="color: white;" data-line-no="{{message.lineNo}}">{{message.lineNo}}</a>
+					</th>
 					<td ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
 						{{message.logLevel}}
 					</td>

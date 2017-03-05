@@ -1,4 +1,6 @@
 <app xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<report-name>Automation Test</report-name>
+
 	<!-- 
 		Folder where test suite xmls can be found 
 	-->

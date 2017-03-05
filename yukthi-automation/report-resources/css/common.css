@@ -33,3 +33,11 @@ td
 {
 	color: black;
 }
+
+.headingCell
+{
+	font-size: 1em; 
+	color: white; 
+	font-weight: bold; 
+	white-space: nowrap;
+}

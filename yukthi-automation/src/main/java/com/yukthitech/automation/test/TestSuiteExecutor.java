@@ -92,6 +92,8 @@ public class TestSuiteExecutor
 		// create logs folder
 		logsFolder = new File(reportFolder, "logs");
 		logsFolder.mkdirs();
+		
+		fullExecutionDetails.setReportName(context.getAppConfiguration().getReportName());
 	}
 
 	/**
@@ -221,7 +223,7 @@ public class TestSuiteExecutor
 				successful = false;
 			}
 
-			createLogFiles(testCaseResult, testFileName, monitoringLogs);
+			createLogFiles(testCaseResult, testFileName, monitoringLogs, testCase.getDescription());
 
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 		}
@@ -249,8 +251,9 @@ public class TestSuiteExecutor
 	 * @param testCaseResult result from which log data needs to be fetched
 	 * @param logFilePrefix log file name prefix
 	 * @param monitoringLogs Monitoring logs to be copied
+	 * @param description Description about the test case.
 	 */
-	private void createLogFiles(TestCaseResult testCaseResult, String logFilePrefix, Map<String, File> monitoringLogs)
+	private void createLogFiles(TestCaseResult testCaseResult, String logFilePrefix, Map<String, File> monitoringLogs, String description)
 	{
 		ExecutionLogData executionLogData = testCaseResult.getExecutionLog();
 		
@@ -295,7 +298,7 @@ public class TestSuiteExecutor
 					FileWriter writer = new FileWriter(logHtmlFile);
 					String logContent = FileUtils.readFileToString(log.getValue());
 					
-					freemarkerTemplate.process(new LogMonitorContext(testCaseResult.getTestCaseName(), log.getKey(), logContent), writer);
+					freemarkerTemplate.process(new LogMonitorContext(testCaseResult.getTestCaseName(), log.getKey(), logContent, testCaseResult.getStatus(), description), writer);
 
 					testCaseResult.setMonitorLog(log.getKey(), logHtmlFile.getName());
 					
@@ -325,7 +328,7 @@ public class TestSuiteExecutor
 		logger.debug("Executing {} setup steps...", prefix);
 		
 		TestCaseResult testCaseResult = setup.execute(context);
-		createLogFiles(testCaseResult, prefix + "-setup", null);
+		createLogFiles(testCaseResult, prefix + "-setup", null, "");
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
 	}
@@ -344,7 +347,7 @@ public class TestSuiteExecutor
 		logger.debug("Executing {} cleanup steps...", prefix);
 		
 		TestCaseResult testCaseResult = cleanup.execute(context);
-		createLogFiles(testCaseResult, prefix + "-cleanup", null);
+		createLogFiles(testCaseResult, prefix + "-cleanup", null, "");
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
 	}
