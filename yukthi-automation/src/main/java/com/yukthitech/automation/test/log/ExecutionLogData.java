@@ -6,9 +6,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.utils.DateUtils;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -93,11 +94,21 @@ public class ExecutionLogData
 		 *
 		 * @return the time at which message is logged
 		 */
-		@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
 		public Date getTime()
 		{
 			return time;
 		}
+		
+		/**
+		 * Gets the time at which message is logged.
+		 *
+		 * @return the time at which message is logged
+		 */
+		public String getTimeStr()
+		{
+			return DateUtils.formatDate(time, ApplicationConfiguration.getInstance().getTimeFomat());
+		}
+		
 		
 		/**
 		 * Copies required resources to output folder.
@@ -195,6 +206,11 @@ public class ExecutionLogData
 	 * Messages or sub loggers.
 	 */
 	private List<Message> messages = new ArrayList<>();
+	
+	/**
+	 * Execution date on which current test case was executed.
+	 */
+	private Date executionDate = new Date();
 
 	/**
 	 * Instantiates a new execution log data.
@@ -278,5 +294,25 @@ public class ExecutionLogData
 		{
 			message.copyResources(outFolder);
 		}
+	}
+	
+	/**
+	 * Gets the execution date on which current test case was executed.
+	 *
+	 * @return the execution date on which current test case was executed
+	 */
+	public Date getExecutionDate()
+	{
+		return executionDate;
+	}
+	
+	/**
+	 * Gets the execution date on which current test case was executed.
+	 *
+	 * @return the execution date on which current test case was executed
+	 */
+	public String getExecutionDateStr()
+	{
+		return DateUtils.formatDate(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
 	}
 }

@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.http.client.utils.DateUtils;
+
+import com.yukthitech.automation.config.ApplicationConfiguration;
 
 /**
  * Final execution details used for report generation.
@@ -70,10 +72,19 @@ public class FullExecutionDetails
 	 *
 	 * @return the date on which execution was started
 	 */
-	@JsonFormat(pattern = "dd/MM/yyyy")
 	public Date getExecutionDate()
 	{
 		return executionDate;
+	}
+
+	/**
+	 * Gets the date on which execution was started.
+	 *
+	 * @return the date on which execution was started
+	 */
+	public String getExecutionDateStr()
+	{
+		return DateUtils.formatDate(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
 	}
 
 	/**
@@ -424,4 +435,5 @@ public class FullExecutionDetails
 	{
 		return inProgressTestSuites.contains(testSuite);
 	}
+	
 }

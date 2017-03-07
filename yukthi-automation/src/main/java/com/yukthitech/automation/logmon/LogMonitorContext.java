@@ -1,5 +1,10 @@
 package com.yukthitech.automation.logmon;
 
+import java.util.Date;
+
+import org.apache.http.client.utils.DateUtils;
+
+import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.test.TestStatus;
 
 /**
@@ -32,6 +37,11 @@ public class LogMonitorContext
 	 * Description of the test case.
 	 */
 	private String description;
+	
+	/**
+	 * Date on which monitor log was obtained.
+	 */
+	private String executionDateStr;
 
 	/**
 	 * Instantiates a new log monitor context.
@@ -48,6 +58,8 @@ public class LogMonitorContext
 		this.content = content;
 		this.status = status;
 		this.description = description;
+		
+		this.executionDateStr = DateUtils.formatDate(new Date(), ApplicationConfiguration.getInstance().getDateFomat());
 	}
 
 	/**
@@ -98,5 +110,15 @@ public class LogMonitorContext
 	public String getDescription()
 	{
 		return description;
+	}
+	
+	/**
+	 * Gets the date on which monitor log was obtained.
+	 *
+	 * @return the date on which monitor log was obtained
+	 */
+	public String getExecutionDateStr()
+	{
+		return executionDateStr;
 	}
 }

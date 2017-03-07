@@ -19,6 +19,11 @@ import com.yukthitech.automation.logmon.ILogMonitor;
 public class ApplicationConfiguration
 {
 	/**
+	 * Static instance of current application configuration.
+	 */
+	private static ApplicationConfiguration applicationConfiguration;
+	
+	/**
 	 * Name of the report. Length should be less than 30 chars.
 	 */
 	private String reportName = "Automation";
@@ -54,6 +59,46 @@ public class ApplicationConfiguration
 	 */
 	private String workDirectory = "./work";
 	
+	/**
+	 * Date format to be used in reports.
+	 */
+	private String dateFomat = "dd/MM/YYYY";
+	
+	/**
+	 * Date-time format to be used in reports.
+	 */
+	private String dateTimeFomat = "dd/MM/YYYY HH:mm:ss";
+	
+	/**
+	 * Time format to be used in reports.
+	 */
+	private String timeFomat = "hh:mm:ss aa";
+	
+	public ApplicationConfiguration()
+	{
+		ApplicationConfiguration.applicationConfiguration = this;
+	}
+	
+	/**
+	 * Gets the static instance of current application configuration.
+	 *
+	 * @return the static instance of current application configuration
+	 */
+	public static ApplicationConfiguration getInstance()
+	{
+		return applicationConfiguration;
+	}
+
+	/**
+	 * Sets the static instance of current application configuration.
+	 *
+	 * @param applicationConfiguration the new static instance of current application configuration
+	 */
+	public static void setApplicationConfiguration(ApplicationConfiguration applicationConfiguration)
+	{
+		ApplicationConfiguration.applicationConfiguration = applicationConfiguration;
+	}
+
 	/**
 	 * Gets the name of the report. Length should be less than 30 chars.
 	 *
@@ -235,5 +280,65 @@ public class ApplicationConfiguration
 		}
 		
 		this.workDirectory = workDirectory;
+	}
+
+	/**
+	 * Gets the date format to be used in reports.
+	 *
+	 * @return the date format to be used in reports
+	 */
+	public String getDateFomat()
+	{
+		return dateFomat;
+	}
+
+	/**
+	 * Sets the date format to be used in reports.
+	 *
+	 * @param dateFomat the new date format to be used in reports
+	 */
+	public void setDateFomat(String dateFomat)
+	{
+		this.dateFomat = dateFomat;
+	}
+
+	/**
+	 * Gets the date-time format to be used in reports.
+	 *
+	 * @return the date-time format to be used in reports
+	 */
+	public String getDateTimeFomat()
+	{
+		return dateTimeFomat;
+	}
+
+	/**
+	 * Sets the date-time format to be used in reports.
+	 *
+	 * @param dateTimeFomat the new date-time format to be used in reports
+	 */
+	public void setDateTimeFomat(String dateTimeFomat)
+	{
+		this.dateTimeFomat = dateTimeFomat;
+	}
+
+	/**
+	 * Gets the time format to be used in reports.
+	 *
+	 * @return the time format to be used in reports
+	 */
+	public String getTimeFomat()
+	{
+		return timeFomat;
+	}
+
+	/**
+	 * Sets the time format to be used in reports.
+	 *
+	 * @param timeFomat the new time format to be used in reports
+	 */
+	public void setTimeFomat(String timeFomat)
+	{
+		this.timeFomat = timeFomat;
 	}
 }

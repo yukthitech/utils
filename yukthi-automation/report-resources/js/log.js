@@ -1,6 +1,6 @@
 $.application.controller('testLogAppController', function($scope){
 	
-	$scope.filterLevel = "ALL";
+	$scope.filterLevel = "LEVEL";
 	$scope.levels = ["ALL", "DEBUG", "ERROR", "INFO", "TRACE"];
 	
 	/**
@@ -96,7 +96,7 @@ $.application.controller('testLogAppController', function($scope){
 	$scope.filterLogs = function() {
 		var filterFunc = function(item) {
 			
-			if($scope.filterLevel != "ALL")
+			if($scope.filterLevel != "ALL" && $scope.filterLevel != "LEVEL")
 			{
 				if($scope.filterLevel != item.logLevel)
 				{

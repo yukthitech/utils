@@ -55,26 +55,22 @@
 				border-bottom: 2px solid grey;">
 			<table style="width: 100%;">
 				<tr>
-					<td style="width: 10%;">
+					<td style="text-align: left; vertical-align: top; width: 1em;">
 						<img alt="Yukthi Logo" src="img/logo.png" style="width: 12em; height: 3.8em;">
 					</td>
-					<td style="width: 46%; color: white; font-size: 1.6em; font-weight: bold;">
-						{{testResults.reportName}} <sub style="font-size: 0.8em;">({{testResults.executionDate}})</sub>
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
+						{{testResults.reportName}} <sub style="font-size: 0.6em;">({{testResults.executionDateStr}})</sub>
 					</td>
-					<td style="width: 15%;">
-						<div>
-							<input type="text" ng-model="searchTestSuiteName" class="form-control" placeholder="Test Suite Name"
-							ng-keyup="filterTestSuite($event)"/>
-						</div>
-					</td>
-					<td style="width: 15%;">
-						<div style="margin-left: 0.6em;">
-							<input type="text" ng-model="searchTestCaseName" class="form-control" placeholder="Test Case Name"
-							ng-keyup="filterTestCase($event)"/>
-						</div>
-					</td>
-					<td style="width: 14%;">
-						<div class="btn-group">
+					
+					<td style="text-align: right; width: 1em; white-space: nowrap;">
+						<input type="text" ng-model="searchTestSuiteName" placeholder="Test Suite Name" class="filterField"
+						ng-keyup="filterTestSuite($event)"/>
+						
+						<input type="text" ng-model="searchTestCaseName" placeholder="Test Case Name"  class="filterField"
+						ng-keyup="filterTestCase($event)"/>
+
+						<div class="btn-group" style="margin-right: 2em;">
 						
 						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em; cursor: default;">
 						    	{{status}}
@@ -96,7 +92,7 @@
 			</table>
 		</div>
 		
-		<div class="resultBox" style="margin-top: 5em;">
+		<div class="resultBox" style="margin-top: 5em; border: 2px solid black;">
 		
 			<table style="margin-bottom: 0px;">
 				<tr>
@@ -160,7 +156,7 @@
 		
 		<hr/>
 		
-		<div class="resultBox">
+		<div class="resultBox"  style="border: 2px solid black;">
 			<table class="table table-hover table-striped table-bordered">
 				<tr>
 					<th style="width: 1em; white-space: nowrap;">Test Suite</th>

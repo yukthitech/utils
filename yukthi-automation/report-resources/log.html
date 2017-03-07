@@ -5,6 +5,8 @@
 	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	    <meta name="viewport" content="width=device-width, initial-scale=1">
 	    
+   	    <title>Yukthi - System Log</title>
+	    
 	    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 	    <script src="js/jquery-2.2.0.js"></script>
 	    
@@ -26,28 +28,24 @@
 	</head>
 	
 	<body ng-app="application" ng-controller="testLogAppController" ng-init="fetchJsonObjects()">
-		<div class="resultBox"style="border: 2px solid black;">
-			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
+		
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
+				border-bottom: 2px solid grey;">
+			<table style="width: 100%;">
 				<tr>
-					<td colspan="5" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: white; font-weight: bold;">
-						<table style="width: 100%;">
-							<tr>
-								<td style="text-align: left; width: 1em;">Test Case: </td>
-								<td style="text-align: left; padding-left: 2em; width: 1em;">{{testLogs.executorName}}</td>
-								<td style="text-align:  right; padding-right: 2em;">
-									Status: {{testLogs.status}}
-								</td>
-							</tr>
-							<tr>
-								<td style="text-align: left; width: 1em;">Description: </td>
-								<td colspan="2" style="text-align: left; padding-left: 2em; width: 1em;">{{testLogs.executorDescription}}</td>
-							</tr>
-						</table>
+					<td style="text-align: left; vertical-align: top; width: 1em;">
+						<img alt="Yukthi Logo" src="img/logo.png" style="width: 12em; height: 3.8em;">
 					</td>
-				</tr>
-				<tr>
-					<td colspan="3">
-						<div class="btn-group">
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold; text-transform: uppercase;">
+						{{testLogs.executorName}} <sub style="font-size: 0.6em;">({{testLogs.executionDateStr}})</sub>
+					</td>
+					
+					<td style="text-align: right; width: 1em; white-space: nowrap;">
+						<input placeholder="Search by message [Multiple values separated by | ]" ng-model="searchByMessage" class="filterField" 
+							style="width: 30em;"/>
+
+						<div class="btn-group" style="margin-right: 2em;">
 						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em;">
 						    	{{filterLevel}}
 						    </button>
@@ -63,8 +61,27 @@
 						    </ul>
 						</div>
 					</td>
-					<td colspan="2">
-						<input placeholder="Search by message [Multiple values separated by | ]" ng-model="searchByMessage" class="form-control" style="margin: 0;"/>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox" style="margin-top: 5em; border: 2px solid black;">
+			<table class="table table-hover table-striped table-bordered" style="width: 100%;">
+				<tr>
+					<td colspan="5" style="background-color: #8585ad; font-weight: bold; font-size: 1em; color: white; font-weight: bold;">
+						<table style="width: 100%;">
+							<tr>
+								<td style="text-align: left; width: 1em;">Test Case: </td>
+								<td style="text-align: left; padding-left: 2em; width: 1em;">{{testLogs.executorName}}</td>
+								<td style="text-align:  right; padding-right: 1em;">
+									Status: {{testLogs.status}}
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: left; width: 1em;">Description: </td>
+								<td colspan="2" style="text-align: left; padding-left: 2em; width: 1em;">{{testLogs.executorDescription}}</td>
+							</tr>
+						</table>
 					</td>
 				</tr>
 				<tr>
@@ -94,7 +111,7 @@
 					    </a>
 					</td>
 					<td style="white-space: nowrap;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
-						{{message.time}}
+						{{message.timeStr}}
 					</td>
 				</tr>
 			</table>

@@ -41,3 +41,11 @@ td
 	font-weight: bold; 
 	white-space: nowrap;
 }
+
+.filterField
+{
+	width: 15em;
+	min-width: 10em;
+	padding: 0.5em;
+	border-radius: 8px;	
+}
