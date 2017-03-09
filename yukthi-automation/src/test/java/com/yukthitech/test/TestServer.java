@@ -1,4 +1,4 @@
-package com.yukthitech.test.ui;
+package com.yukthitech.test;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;

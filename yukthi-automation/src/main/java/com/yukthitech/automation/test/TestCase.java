@@ -21,6 +21,7 @@ import com.yukthitech.automation.IValidationContainer;
 import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Test case with validations to be executed.
@@ -55,6 +56,11 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	 * Validations of test case.
 	 */
 	private List<IValidation> validations = new ArrayList<>();
+	
+	/**
+	 * Details of the exception expected from this test case.
+	 */
+	private ExceptionExpected expectedException;
 
 	/**
 	 * Gets the name of the test case.
@@ -168,7 +174,17 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 
 		validations.add(validation);
 	}
-	
+
+	/**
+	 * Sets the details of the exception expected from this test case.
+	 *
+	 * @param expectedException the new details of the exception expected from this test case
+	 */
+	public void setExpectedException(ExceptionExpected expectedException)
+	{
+		this.expectedException = expectedException;
+	}
+
 	/**
 	 * Execute.
 	 *
@@ -179,6 +195,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	public TestCaseResult execute(AutomationContext context)
 	{
 		ExecutionLogger exeLogger = new ExecutionLogger(name, description);
+		boolean expectedExcpetionOccurred = (expectedException == null);
 		
 		// execute the steps involved
 		for(IStep step : steps)
@@ -191,9 +208,31 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 			{
 				Executable executable = step.getClass().getAnnotation(Executable.class);
 				
-				exeLogger.error(ex, "An error occurred while executing step: " + executable.name());
-				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
+				if(expectedException != null)
+				{
+					try
+					{
+						expectedException.validateMatch(ex);
+						expectedExcpetionOccurred = true;
+					}catch(InvalidArgumentException iex)
+					{
+						exeLogger.error(ex, ex.getMessage());
+						return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
+					}
+				}
+				
+				//return error only if the exception was not expected one
+				if(!expectedExcpetionOccurred)
+				{
+					exeLogger.error(ex, "An error occurred while executing step: " + executable.name());
+					return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
+				}
 			}
+		}
+		
+		if(!expectedExcpetionOccurred)
+		{
+			return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType().getName() + "' did not occur.");
 		}
 
 		// execute the validations
@@ -206,9 +245,9 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 				if(!validation.validate(context, exeLogger))
 				{
 					Executable executable = validation.getClass().getAnnotation(Executable.class);
-					exeLogger.error("Validation failed: " + executable.name());
+					exeLogger.error("Validation failed: " + executable.name() + validation);
 
-					return new TestCaseResult(this.name, TestStatus.FAILED, exeLogger.getExecutionLogData(), "Validation failed: " + executable.name());
+					return new TestCaseResult(this.name, TestStatus.FAILED, exeLogger.getExecutionLogData(), "Validation failed: " + executable.name() + validation);
 				}
 			} catch(TestCaseFailedException ex)
 			{
@@ -250,7 +289,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 			throw new ValidateException("No description is provided for test case - " + name);
 		}
 
-		if(CollectionUtils.isEmpty(validations))
+		if(CollectionUtils.isEmpty(validations) && expectedException == null)
 		{
 			throw new ValidateException("No validations provided for test case - " + name);
 		}

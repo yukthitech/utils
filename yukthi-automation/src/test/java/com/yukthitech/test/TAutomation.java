@@ -1,4 +1,4 @@
-package com.yukthitech.test.ui;
+package com.yukthitech.test;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,7 +16,7 @@ public class TAutomation
 	@Test
 	public void startAutomation() throws Exception
 	{
-		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", "./output"});
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", "./output", "-ts", "jobj-test-suites"});
 		System.out.println("From test case printing this...");
 	}
 }

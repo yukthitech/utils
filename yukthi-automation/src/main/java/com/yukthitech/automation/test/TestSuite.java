@@ -2,10 +2,9 @@ package com.yukthitech.automation.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -31,11 +30,6 @@ public class TestSuite implements Validateable
 	 * List of test cases to be executed in this test suite.
 	 */
 	private List<TestCase> testCases = new ArrayList<>();
-	
-	/**
-	 * Test data beans that can be used by test cases.
-	 */
-	private Map<String, Object> dataBeans = new HashMap<>();
 	
 	/**
 	 * Dependency test suites. If specified, framework will ensure the specified test suites will be executed
@@ -132,48 +126,13 @@ public class TestSuite implements Validateable
 	}
 
 	/**
-	 * Gets the test data beans that can be used by test cases.
-	 *
-	 * @return the test data beans that can be used by test cases
-	 */
-	public Map<String, Object> getDataBeans()
-	{
-		return dataBeans;
-	}
-
-	/**
-	 * Sets the test data beans that can be used by test cases.
-	 *
-	 * @param dataBeans the new test data beans that can be used by test cases
-	 */
-	public void setDataBeans(Map<String, Object> dataBeans)
-	{
-		if(dataBeans == null)
-		{
-			throw new NullPointerException("Data beans can not be null");
-		}
-		
-		this.dataBeans = dataBeans;
-	}
-	
-	/**
-	 * Adds specified data bean to this test suite.
+	 * Adds specified data bean to this application.
 	 * @param name Name of the data bean.
 	 * @param bean Bean to be added.
 	 */
 	public void addDataBean(String name, Object bean)
 	{
-		dataBeans.put(name, bean);
-	}
-
-	/**
-	 * Gets data bean with specified name.
-	 * @param name Name of the data bean
-	 * @return matching data bean
-	 */
-	public Object getDataBean(String name)
-	{
-		return dataBeans.get(name);
+		ApplicationConfiguration.getInstance().addDataBean(name, bean);
 	}
 
 	/**

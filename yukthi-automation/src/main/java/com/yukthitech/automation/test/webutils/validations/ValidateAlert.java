@@ -77,7 +77,7 @@ public class ValidateAlert implements IValidation
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
+		StringBuilder builder = new StringBuilder();
 		builder.append("[");
 
 		builder.append("Message: ").append(message);

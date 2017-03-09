@@ -183,6 +183,11 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	@Override
 	public void handleCustomNodeEnd(IParserHandler handler, BeanNode beanNode, XMLAttributeMap attrMap)
 	{
+		if("beanRef".equals(beanNode.getName()))
+		{
+			
+		}
+		
 		Object parent = beanNode.getParent();
 		Object bean = beanNode.getActualBean();
 

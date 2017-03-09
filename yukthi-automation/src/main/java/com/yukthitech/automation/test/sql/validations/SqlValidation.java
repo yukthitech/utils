@@ -197,4 +197,20 @@ public class SqlValidation implements IValidation
 			DbUtils.closeQuietly(connection);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+
+		builder.append("Query: ").append(query);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

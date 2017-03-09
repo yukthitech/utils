@@ -22,6 +22,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class AutomationContext
 {
 	/**
+	 * Automation context that can be accessed anywhere needed.
+	 */
+	private static AutomationContext instance;
+	
+	/**
 	 * Basic arguments specified from command line context.
 	 */
 	private BasicArguments basicArguments;
@@ -76,6 +81,18 @@ public class AutomationContext
 		{
 			throw new InvalidStateException("An error occurred while cleaning up work directory", ex);
 		}
+		
+		AutomationContext.instance = this;
+	}
+	
+	/**
+	 * Gets the automation context that can be accessed anywhere needed.
+	 *
+	 * @return the automation context that can be accessed anywhere needed
+	 */
+	public static AutomationContext getInstance()
+	{
+		return instance;
 	}
 	
 	/**

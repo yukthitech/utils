@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -11,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
@@ -184,6 +186,11 @@ public class AutomationUtils
 				if( (value instanceof String) && StringUtils.isBlank(value.toString()) )
 				{
 					throw new InvalidStateException("Blank value is specified for required param {}", field.getName());
+				}
+				
+				if( (value instanceof Collection) && CollectionUtils.isEmpty((Collection<?>)value) )
+				{
+					throw new InvalidStateException("No value(s) specified for required param {}", field.getName());
 				}
 			}
 		} catch(InvalidStateException ex)

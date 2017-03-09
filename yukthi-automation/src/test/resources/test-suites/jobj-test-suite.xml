@@ -1,0 +1,84 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<testSuite name="jobj-test-suites">
+
+	<wrap:data-beans>
+		<data-bean id="beanFromTestSuite" ccg:beanType="com.yukthitech.test.beans.TestObject">
+			<name>beanFromTestSuite</name>
+		</data-bean>
+	</wrap:data-beans>
+
+		<testCase name="invokeMethodOnAppBean">
+			<description>Invokes simple method on bean declared in app-config</description>
+
+			<wrap:steps>
+				<ccg:invokeMethod name="toText">
+					<object ccg:beanRef="beanFromApp"/>
+					
+					<parameter ccg:beanType="com.yukthitech.test.beans.SimpleBean" name="someName">
+					</parameter>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.returnValue" value="beanFromApp:someName"/>
+			</wrap:validations>
+		</testCase>
+
+
+		<testCase name="invokeMethodOnBeanCopy">
+			<description>
+				Invokes simple method on bean copy declared in test suite.
+			</description>
+
+			<wrap:steps>
+				<ccg:invokeMethod name="toText" paramTypes="com.yukthitech.test.beans.NameBean">
+					<object ccg:beanCopy="beanFromTestSuite">
+						<name>beanCopy</name>
+					</object>
+					
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="someName1">
+					</parameter>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.returnValue" value="beanCopy=>someName1"/>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="invokeMethodOnSuiteBean">
+			<description>
+				Invokes simple method on bean declared in test suite.
+			</description>
+
+			<wrap:steps>
+				<ccg:invokeMethod name="toText" paramTypes="com.yukthitech.test.beans.NameBean">
+					<object ccg:beanRef="beanFromTestSuite"/>
+					
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="someName1">
+					</parameter>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.returnValue" value="beanFromTestSuite=>someName1"/>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="invokeMethodOnSuiteBean">
+			<description>
+				Invokes method where an exception is expected.
+			</description>
+
+			<wrap:steps>
+				<ccg:invokeMethod name="throwError">
+					<object ccg:beanRef="beanFromTestSuite"/>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<expectedException type="com.yukthitech.utils.exceptions.InvalidArgumentException">
+				<property name="message" value="MESSAGE"/>
+			</expectedException>
+		</testCase>
+	</testSuite>
+</testData>

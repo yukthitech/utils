@@ -1,3 +1,27 @@
+java object steps
+
+Rest based Steps
+
+Reusable step groups
+
+data provider in steps
+
+logging the object as json
+
+Expected exception and properties in test case
+
+
+
+Folder wise execution
+	Multiple folders
+	
+
+
+hyphen in reserve node names
+
+Listener and ui
+
+
 functions (repeatable set of stpes)
 	step to invoke functions with params
 
@@ -37,8 +61,6 @@ Reports
 Param and auto doc generation
 
 why first driver is not being used?
-
-even in init error, display command line args
 
 step to set context param value
 
@@ -113,6 +135,3 @@ Date and time formats from app config
 	
 	
 	
-Setup and cleanup logs in report
-
-Remove unwanted class names from log

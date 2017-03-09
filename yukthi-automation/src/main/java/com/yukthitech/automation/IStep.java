@@ -11,5 +11,5 @@ public interface IStep
 	 * @param context Current automation context
 	 * @param logger Logger to log messages.
 	 */
-	public void execute(AutomationContext context, ExecutionLogger logger);
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception;
 }

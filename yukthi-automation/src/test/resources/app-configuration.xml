@@ -49,12 +49,12 @@
 	<!--
 		Specify common data beans that can be used across the test suites. 
 	 -->
-	<!--  
-		<wrap:data-beans>
-			<data-bean name="bean1" ccg:beanType="com.yodlee.TestBean">
-			</data-bean>
-		</wrap:data-beans>
-	-->
+	<wrap:data-beans>
+		<data-bean id="beanFromApp" ccg:beanType="com.yukthitech.test.beans.TestObject">
+			<name>beanFromApp</name>
+		</data-bean>
+	</wrap:data-beans>
+		
 	<!-- Specify log monitors -->
 	<wrap:logMonitors>
 		<file-log-monitor name="client-output" path="c:\automation.log"/>

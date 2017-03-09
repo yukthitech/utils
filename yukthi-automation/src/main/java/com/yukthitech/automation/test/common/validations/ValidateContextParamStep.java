@@ -93,10 +93,27 @@ public class ValidateContextParamStep implements IValidation
 		}
 		else
 		{
-			exeLogger.debug("Validation failed, found expected value and context value are different. "
+			exeLogger.error("Validation failed, found expected value and context value are different. "
 					+ "\n[Value from context: {}, Expected Value: {}]", actualValue, value);
 		}
 		
 		return res;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+
+		builder.append("expression: ").append(expression);
+		builder.append(", ").append("value: ").append(value);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

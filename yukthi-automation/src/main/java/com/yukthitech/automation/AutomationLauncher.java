@@ -51,10 +51,7 @@ public class AutomationLauncher
 	 */
 	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
 	{
-		AutomationReserveNodeHandler reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
-		
-		DefaultParserHandler defaultParserHandler = new DefaultParserHandler();
-		defaultParserHandler.registerReserveNodeHandler(reserveNodeHandler);
+		DefaultParserHandler defaultParserHandler = new AutomationParserHandler(context, appConfig);
 		
 		logger.debug("Loading test suites from folder - {}", appConfig.getTestSuiteFolder());
 
@@ -231,8 +228,11 @@ public class AutomationLauncher
 
 		if(args.length < 2)
 		{
+			CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
+			
 			System.err.println("Invalid number of arguments specified");
-			System.err.println("Syntax: " + COMMAND_SYNTAX);
+			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
 			System.exit(-1);
 		}
 
@@ -241,7 +241,11 @@ public class AutomationLauncher
 
 		if(!appConfigurationFile.exists())
 		{
+			CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
+			
 			System.err.println("Invalid application configuration file - " + appConfigurationFile);
+			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
 			System.exit(-1);
 		}
 

@@ -118,8 +118,8 @@ public class ValidateValue implements IValidation
 	@Override
 	public String toString()
 	{
-		String comma = ",";
-		StringBuilder builder = new StringBuilder(super.toString());
+		String comma = ", ";
+		StringBuilder builder = new StringBuilder();
 		builder.append("[");
 
 		builder.append("Locator: ").append(locator);
