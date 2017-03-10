@@ -2,10 +2,10 @@ package com.yukthitech.automation.test.ui.steps;
 
 import org.openqa.selenium.WebDriver;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 
@@ -14,7 +14,7 @@ import com.yukthitech.automation.config.SeleniumPlugin;
  * @author akiran
  */
 @Executable(name = "gotoPage", requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified uri")
-public class GotoPageStep implements IStep
+public class GotoPageStep extends AbstractStep
 {
 	/**
 	 * Url to which browser should be taken.

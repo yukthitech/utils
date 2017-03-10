@@ -8,10 +8,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
@@ -23,7 +23,7 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
  * @author Pritam.
  */
 @Executable(name = "dragAndDrop", requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
-public class DragAndDropStep implements IStep
+public class DragAndDropStep extends AbstractStep
 {
 	/**
 	 * Source html element to be dragged.

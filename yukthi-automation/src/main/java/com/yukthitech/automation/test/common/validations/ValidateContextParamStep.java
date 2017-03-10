@@ -2,10 +2,10 @@ package com.yukthitech.automation.test.common.validations;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.Param;
 
 /**
@@ -13,7 +13,7 @@ import com.yukthitech.automation.Param;
  * @author akiran
  */
 @Executable(name = "validateContextParam", message = "Validates specified context param is present with specified value")
-public class ValidateContextParamStep implements IValidation
+public class ValidateContextParamStep extends AbstractValidation
 {
 	/**
 	 * Expression to be evaluated on context.

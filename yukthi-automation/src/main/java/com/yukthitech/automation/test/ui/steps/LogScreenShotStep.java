@@ -6,10 +6,10 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 
@@ -18,7 +18,7 @@ import com.yukthitech.automation.config.SeleniumPlugin;
  * @author akiran
  */
 @Executable(name = "logScreenShot", requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
-public class LogScreenShotStep implements IStep
+public class LogScreenShotStep extends AbstractStep
 {
 	/**
 	 * Name of the file provided by the user.

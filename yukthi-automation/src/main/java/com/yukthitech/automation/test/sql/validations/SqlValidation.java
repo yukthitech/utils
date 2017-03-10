@@ -13,11 +13,13 @@ import javax.sql.DataSource;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 
+import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IValidation;
 import com.yukthitech.automation.Param;
+import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.DbPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.sql.steps.QueryUtils;
@@ -27,7 +29,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * SQL based validation.
  */
 @Executable(name = "validateWithSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
-public class SqlValidation implements IValidation
+public class SqlValidation extends AbstractValidation
 {
 	/**
 	 * Result row expectation.
@@ -213,4 +215,9 @@ public class SqlValidation implements IValidation
 		return builder.toString();
 	}
 
+	@Override
+	public IValidation clone()
+	{
+		return AutomationUtils.deepClone(this);
+	}
 }

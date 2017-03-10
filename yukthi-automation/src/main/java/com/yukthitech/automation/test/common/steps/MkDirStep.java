@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.test.TestCaseFailedException;
 
@@ -17,7 +17,7 @@ import com.yukthitech.automation.test.TestCaseFailedException;
  * @author akiran
  */
 @Executable(name = "mkdir", message = "Creates a directory with required parent folder as needed in work folder.")
-public class MkDirStep implements IStep
+public class MkDirStep extends AbstractStep
 {
 	/**
 	 * Directory path to create.

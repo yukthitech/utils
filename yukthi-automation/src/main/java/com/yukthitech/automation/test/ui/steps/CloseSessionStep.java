@@ -1,9 +1,9 @@
 package com.yukthitech.automation.test.ui.steps;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumPlugin;
 
 /**
@@ -11,7 +11,7 @@ import com.yukthitech.automation.config.SeleniumPlugin;
  * @author akiran
  */
 @Executable(name = "closeSession", requiredPluginTypes = SeleniumPlugin.class, message = "Closes the curren browser window.")
-public class CloseSessionStep implements IStep
+public class CloseSessionStep extends AbstractStep
 {
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger)

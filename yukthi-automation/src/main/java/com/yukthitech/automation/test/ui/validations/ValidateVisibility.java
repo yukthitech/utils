@@ -4,10 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IValidation;
+import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -18,7 +19,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "validateVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
-public class ValidateVisibility implements IValidation
+public class ValidateVisibility extends AbstractValidation
 {
 	/**
 	 * The logger.
@@ -28,17 +29,20 @@ public class ValidateVisibility implements IValidation
 	/**
 	 * locator to wait for.
 	 */
+	@Param(description = "Locator of the element to validate")
 	private String locator;
 
 	/**
 	 * If true, this step waits for element with specified locator gets removed
 	 * or hidden.
 	 */
-	private boolean hidden = false;
+	@Param(description = "Flag indicating if the validation is for visibility or invisibility.\nDefault: false", required = false)
+	private String hidden = "false";
 
 	/**
 	 * Message expected in the target element.
 	 */
+	@Param(description = "Message expected in the target element.", required = false)
 	private String message = null;
 
 	/**
@@ -53,12 +57,12 @@ public class ValidateVisibility implements IValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		logger.trace("Waiting for element: {}", locator);
+		logger.trace("Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		UiAutomationUtils.validateWithWait(() -> {
 			WebElement element = UiAutomationUtils.findElement(context, null, locator);
 
-			if(hidden)
+			if("true".equals(hidden))
 			{
 				return (element == null || !element.isDisplayed());
 			}
@@ -109,7 +113,7 @@ public class ValidateVisibility implements IValidation
 	 * @return the if true, this step waits for element with specified locator
 	 *         gets removed or hidden
 	 */
-	public boolean isHidden()
+	public String isHidden()
 	{
 		return hidden;
 	}
@@ -122,7 +126,7 @@ public class ValidateVisibility implements IValidation
 	 *            the new if true, this step waits for element with specified
 	 *            locator gets removed or hidden
 	 */
-	public void setHidden(boolean hidden)
+	public void setHidden(String hidden)
 	{
 		this.hidden = hidden;
 	}

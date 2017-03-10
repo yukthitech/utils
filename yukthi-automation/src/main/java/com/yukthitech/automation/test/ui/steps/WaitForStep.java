@@ -2,10 +2,10 @@ package com.yukthitech.automation.test.ui.steps;
 
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
@@ -17,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "waitFor", requiredPluginTypes = SeleniumPlugin.class, message = "Waits for specified element to become visible/hidden")
-public class WaitForStep implements IStep
+public class WaitForStep extends AbstractStep
 {
 	/**
 	 * locator to wait for.
@@ -29,7 +29,7 @@ public class WaitForStep implements IStep
 	 * If true, this step waits for element with specified locator gets removed or hidden.
 	 */
 	@Param(description = "If true, this step waits for element with specified locator gets removed or hidden.\nDefault: false", required = false)
-	private boolean hidden = false;
+	private String hidden = "false";
 
 	/**
 	 * Simulates the click event on the specified button.
@@ -38,7 +38,7 @@ public class WaitForStep implements IStep
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Waiting for element '{}' to become {}", locator, hidden ? "Invisible" : "visible");
+		exeLogger.debug("Waiting for element '{}' to become {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		try
 		{
@@ -46,7 +46,7 @@ public class WaitForStep implements IStep
 			{
 				WebElement element = UiAutomationUtils.findElement(context, null, locator);
 				
-				if(hidden)
+				if("true".equals(hidden))
 				{
 					return (element == null || !element.isDisplayed());
 				}
@@ -80,6 +80,16 @@ public class WaitForStep implements IStep
 	public void setLocator(String locator)
 	{
 		this.locator = locator;
+	}
+	
+	/**
+	 * Sets the if true, this step waits for element with specified locator gets removed or hidden.
+	 *
+	 * @param hidden the new if true, this step waits for element with specified locator gets removed or hidden
+	 */
+	public void setHidden(String hidden)
+	{
+		this.hidden = hidden;
 	}
 
 	/* (non-Javadoc)

@@ -5,10 +5,12 @@ import java.util.List;
 
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.automation.AbstractValidation;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.IValidation;
+import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.ui.common.FieldOption;
 import com.yukthitech.automation.test.ui.common.FormFieldType;
@@ -18,7 +20,7 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
  * Validates specified form has specified fields with specified field details.
  */
 @Executable(name = "validateFormFields", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
-public class ValidateFormFields implements IValidation
+public class ValidateFormFields extends AbstractValidation
 {
 	/**
 	 * Represents field details to validate.
@@ -320,5 +322,11 @@ public class ValidateFormFields implements IValidation
 
 		builder.append("]");
 		return builder.toString();
+	}
+	
+	@Override
+	public IValidation clone()
+	{
+		return AutomationUtils.deepClone(this);
 	}
 }

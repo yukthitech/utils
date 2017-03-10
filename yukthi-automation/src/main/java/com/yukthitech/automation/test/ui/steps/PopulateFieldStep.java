@@ -5,10 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
@@ -19,7 +19,7 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
  * @author Pritam.
  */
 @Executable(name = "populateField", requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
-public class PopulateFieldStep implements IStep
+public class PopulateFieldStep extends AbstractStep
 {
 	/**
 	 * The logger.

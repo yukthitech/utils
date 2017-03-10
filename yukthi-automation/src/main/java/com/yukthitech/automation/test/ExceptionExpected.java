@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.commons.beanutils.BeanUtils;
 
 import com.yukthitech.automation.Param;
+import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Used to capture the expected exception details for a test case.
@@ -67,7 +69,7 @@ public class ExceptionExpected
 	 * Type of exception expected.
 	 */
 	@Param(description = "Type of exception expected.")
-	private Class<?> type;
+	private String type;
 	
 	/**
 	 * Expected properties (key-value) pairs of the exception.
@@ -76,17 +78,18 @@ public class ExceptionExpected
 	private List<Property> properties = new ArrayList<>();
 	
 	/**
+	 * Flag indicating if expected exception is enabled or not. Useful for enabling/disabling with data provider using expressions.
+	 */
+	@Param(description = "Flag indicating if expected exception is enabled or not. Useful for enabling/disabling with data provider using expressions.\nDefault: true", required = false)
+	private String enabled = "true";
+	
+	/**
 	 * Sets the type of exception expected.
 	 *
 	 * @param type the new type of exception expected
 	 */
-	public void setType(Class<?> type)
+	public void setType(String type)
 	{
-		if(!Exception.class.isAssignableFrom(type))
-		{
-			throw new InvalidArgumentException("Invalid exception type specified: {}", type.getName());
-		}
-		
 		this.type = type;
 	}
 	
@@ -95,7 +98,7 @@ public class ExceptionExpected
 	 *
 	 * @return the type of exception expected
 	 */
-	public Class<?> getType()
+	public String getType()
 	{
 		return type;
 	}
@@ -110,11 +113,36 @@ public class ExceptionExpected
 	}
 	
 	/**
+	 * Sets the flag indicating if expected exception is enabled or not. Useful for enabling/disabling with data provider using expressions.
+	 *
+	 * @param enabled the new flag indicating if expected exception is enabled or not
+	 */
+	public void setEnabled(String enabled)
+	{
+		this.enabled = enabled;
+	}
+	
+	/**
 	 * Validates the provided exception is matching with current expected exception.
 	 * @param ex Actual exception object.
 	 */
 	public void validateMatch(Exception ex)
 	{
+		Class<?> type = null;
+		
+		try
+		{
+			type = Class.forName(this.type);
+		}catch(Exception rex)
+		{
+			throw new InvalidStateException("Invalid class name specified for exception type - {}", this.type);
+		}
+		
+		if(!Exception.class.isAssignableFrom(type))
+		{
+			throw new InvalidArgumentException("Invalid exception type specified: {}", type.getName());
+		}
+
 		if(!type.equals(ex.getClass()))
 		{
 			throw new InvalidArgumentException(ex, "Expected exception type {} and actual exception type are not matching", type.getName(), ex.getClass().getName());
@@ -146,5 +174,13 @@ public class ExceptionExpected
 						type.getName(), prop.name, actualValue, prop.value);
 			}
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public ExceptionExpected clone()
+	{
+		return AutomationUtils.deepClone(this);
 	}
 }

@@ -197,9 +197,20 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		ExecutionLogger exeLogger = new ExecutionLogger(name, description);
 		boolean expectedExcpetionOccurred = (expectedException == null);
 		
+		ExceptionExpected expectedException = null;
+		
+		if(this.expectedException != null)
+		{
+			expectedException = this.expectedException.clone();
+			AutomationUtils.replaceExpressions(context, expectedException);
+		}
+		
 		// execute the steps involved
 		for(IStep step : steps)
 		{
+			//clone the step, so that expression replacement will not affect actual step
+			step = step.clone();
+			
 			try
 			{
 				AutomationUtils.replaceExpressions(context, step);
@@ -232,12 +243,14 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		
 		if(!expectedExcpetionOccurred)
 		{
-			return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType().getName() + "' did not occur.");
+			return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
 		}
 
 		// execute the validations
 		for(IValidation validation : validations)
 		{
+			validation = validation.clone();
+			
 			try
 			{
 				AutomationUtils.replaceExpressions(context, validation);

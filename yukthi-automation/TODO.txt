@@ -1,5 +1,3 @@
-java object steps
-
 Rest based Steps
 
 Reusable step groups
@@ -8,16 +6,12 @@ data provider in steps
 
 logging the object as json
 
-Expected exception and properties in test case
-
-
+fail step
 
 Folder wise execution
 	Multiple folders
 	
 
-
-hyphen in reserve node names
 
 Listener and ui
 
@@ -117,10 +111,6 @@ Extra steps
 	
 	reusing of step groups
 	
-	cloned copy of bean
-	
-	deep-cloned copy of bean
-	
 	Name of the report
 	
 	Freemarker to have common header and for report files
@@ -133,5 +123,10 @@ Extra steps
 	
 Date and time formats from app config
 	
+freemarker in queries and expressions	
+	
+In all steps and validations only string params should be accepted
+	so that they can be replaced by expresssions by user
 	
 	
+Ability to disable expected exception

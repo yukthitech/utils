@@ -1,9 +1,9 @@
 package com.yukthitech.automation.test.common.steps;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 
 /**
@@ -11,7 +11,7 @@ import com.yukthitech.automation.Param;
  * @author akiran
  */
 @Executable(name = "log", message = "Logs specified message")
-public class LogStep implements IStep
+public class LogStep extends AbstractStep
 {
 	/**
 	 * Logs specified message in ui.

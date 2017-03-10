@@ -6,10 +6,10 @@ import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
@@ -22,7 +22,7 @@ import com.yukthitech.ccg.xml.DynamicBean;
  * @author akiran
  */
 @Executable(name = "fillForm", requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
-public class FillFormStep implements IStep
+public class FillFormStep extends AbstractStep
 {
 	/**
 	 * Html locator of the form or container (like DIV) enclosing the input

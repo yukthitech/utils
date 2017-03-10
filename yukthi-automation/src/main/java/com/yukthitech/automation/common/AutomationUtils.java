@@ -2,22 +2,26 @@ package com.yukthitech.automation.common;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Stack;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
 /**
  * Common util functions.
@@ -26,9 +30,25 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class AutomationUtils
 {
 	/**
-	 * Pattern used to replace expressions in step properties.
+	 * Freemarker template config used to parse expressions.
 	 */
-	private static Pattern CONTEXT_EXPR_PATTERN = Pattern.compile("\\{\\{(.+)\\}\\}");
+	private static Configuration configuration = new Configuration();
+	
+	/**
+	 * Object mapper for json coversions.
+	 */
+	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	static
+	{
+		try
+		{
+			configuration.setSetting("number_format", "#");
+		} catch(TemplateException ex)
+		{
+			throw new InvalidStateException("An error occurred while init freemarker context", ex);
+		}
+	}
 
 	/**
 	 * Loads the xml files from specified folder. Returned set will be ordered by their relative paths.
@@ -82,34 +102,104 @@ public class AutomationUtils
 
 		return xmlFiles;
 	}
+	
+	/**
+	 * Treats provided template as freemarker template and processes them. The result will be returned.
+	 * @param context Automation context which would be used as freemarker context for processing.
+	 * @param template Template in which expressions should be replaced
+	 * @return Processed string
+	 */
+	public static String replaceExpressions(AutomationContext context, String templateStr)
+	{
+		try
+		{
+			Template template = new Template("template", templateStr, configuration);
+			
+			StringWriter writer = new StringWriter();
+			template.process(context, writer);
+			writer.flush();
+			
+			return writer.toString();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while processing template:\n" + templateStr, ex);
+		}
+	}
 
 	/**
 	 * Replaces expressions in specified step properties.
 	 * @param context Context to fetch values for expressions.
 	 * @param executable Step/validator or other executable in which expressions has to be replaced
 	 */
+	@SuppressWarnings("unchecked")
 	public static void replaceExpressions(AutomationContext context, Object executable)
 	{
-		Field fields[] = executable.getClass().getDeclaredFields();
-		String fieldValue = null, value= null;
-		String propertyExpr = null;
+		if(executable == null)
+		{
+			return;
+		}
 		
-		Matcher matcher = null;
-		StringBuffer buffer = new StringBuffer();
+		//when executable is collection
+		if(executable instanceof Collection)
+		{
+			Collection<Object> collection = (Collection<Object>) executable;
+			
+			if(collection.isEmpty())
+			{
+				return;
+			}
+			
+			for(Object element : collection)
+			{
+				replaceExpressions(context, element);
+			}
+			
+			return;
+		}
+			
+		//when executable is map
+		if(executable instanceof Map)
+		{
+			Map<Object, Object> map = (Map<Object, Object>) executable;
+			
+			if(map.isEmpty())
+			{
+				return;
+			}
+			
+			for(Object element : map.values())
+			{
+				replaceExpressions(context, element);
+			}
+			
+			return;
+		}
+
+		Field fields[] = executable.getClass().getDeclaredFields();
+		Object fieldValue = null;
+		Class<?> fieldType = null;
 		
 		for(Field field : fields)
 		{
-			//ignore non string fields
-			if(!String.class.equals(field.getType()))
-			{
-				continue;
-			}
-
 			try
 			{
+				fieldType = field.getType();
+				
+				if(!Collection.class.isAssignableFrom(fieldType) &&
+						!Map.class.isAssignableFrom(fieldType) &&
+						fieldType.getName().startsWith("java"))
+				{
+					continue;
+				}
+				
+				if(fieldType.isPrimitive())
+				{
+					continue;
+				}
+
 				field.setAccessible(true);
 				
-				fieldValue = (String) field.get(executable);
+				fieldValue = field.get(executable);
 				
 				//ignore null field values
 				if(fieldValue == null)
@@ -117,30 +207,16 @@ public class AutomationUtils
 					continue;
 				}
 				
-				matcher = CONTEXT_EXPR_PATTERN.matcher(fieldValue);
-				buffer.setLength(0);
-	
-				//replace the expressions in the field value
-				while(matcher.find())
+				if(fieldValue instanceof String)
 				{
-					propertyExpr = matcher.group(1);
+					fieldValue = replaceExpressions(context, (String) fieldValue);
 					
-					try
-					{
-						value = BeanUtils.getProperty(context, propertyExpr);
-					}catch(Exception ex)
-					{
-						throw new InvalidStateException("An error occurred while parsing context expression '{}' in field {}.{}", 
-							matcher.group(1), executable.getClass().getName(), field.getName());
-					}
-					
-					matcher.appendReplacement(buffer, value);
+					//set the result string back to field
+					field.set(executable, fieldValue);
+					continue;
 				}
 				
-				matcher.appendTail(buffer);
-				
-				//set the result string back to field
-				field.set(executable, buffer.toString());
+				replaceExpressions(context, fieldValue);
 			} catch(InvalidStateException ex)
 			{
 				throw ex;
@@ -199,6 +275,24 @@ public class AutomationUtils
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while validating bean - {}", bean, ex);
+		}
+	}
+	
+	/**
+	 * Deep clones the object by converting object to json and back to object.
+	 * @param object object to be cloned.
+	 * @return cloned object
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T deepClone(T object)
+	{
+		try
+		{
+			String jsonStr = objectMapper.writeValueAsString(object);
+			return (T) objectMapper.readValue(jsonStr, object.getClass());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while deep cloning object: {}", object, ex);
 		}
 	}
 }

@@ -13,10 +13,10 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.DbPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
@@ -28,7 +28,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 @Executable(name = "loadQueryMap", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as map on context. "
 		+ "\nIn case of zero results empty map will be kept on context. \nPer row new entry will be added.")
-public class LoadQueryMapStep implements IStep
+public class LoadQueryMapStep extends AbstractStep
 {
 	/**
 	 * Query to execute.

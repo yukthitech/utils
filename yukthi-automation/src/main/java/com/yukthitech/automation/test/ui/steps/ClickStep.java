@@ -2,10 +2,10 @@ package com.yukthitech.automation.test.ui.steps;
 
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.SeleniumPlugin;
 import com.yukthitech.automation.test.TestCaseFailedException;
@@ -18,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "click", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
-public class ClickStep implements IStep
+public class ClickStep extends AbstractStep
 {
 	/**
 	 * locator for button.

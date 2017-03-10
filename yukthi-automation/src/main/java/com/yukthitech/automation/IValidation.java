@@ -4,7 +4,7 @@ package com.yukthitech.automation;
  * Represents validation to be done.
  * @author akiran
  */
-public interface IValidation
+public interface IValidation extends Cloneable
 {
 	/**
 	 * Method which should execute current validation.
@@ -13,4 +13,10 @@ public interface IValidation
 	 * @return true if validation is successful, otherwise false
 	 */
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger);
+
+	/**
+	 * Clones and makes a copy of current validation.
+	 * @return copy of current validation
+	 */
+	public IValidation clone();
 }

@@ -8,22 +8,20 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.test.TestCaseFailedException;
 import com.yukthitech.ccg.xml.util.ValidateException;
-import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Loads specified properties file as map on to context.
  * @author akiran
  */
 @Executable(name = "loadProperties", message = "Loads specified properties file/resource as map on to context")
-public class LoadPropertiesStep implements IStep, Validateable
+public class LoadPropertiesStep extends AbstractStep
 {
 	/**
 	 * Holds the path of file.

@@ -240,6 +240,15 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Fetches the data bean map.
+	 * @return data bean map.
+	 */
+	public Map<String, Object> getDataBeans()
+	{
+		return appConfiguration.getDataBeans();
+	}
+	
+	/**
 	 * Gets the work directory to be used for this context.
 	 *
 	 * @return the work directory to be used for this context

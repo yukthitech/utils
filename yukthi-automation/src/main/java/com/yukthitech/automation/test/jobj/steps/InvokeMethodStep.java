@@ -7,21 +7,20 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
-import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.config.DbPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
-import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.CommonUtils;
 
 /**
  * Step to invoke method on target object.
  */
 @Executable(name = "invokeMethod", requiredPluginTypes = DbPlugin.class, message = "Executes specified method on specified bean.")
-public class InvokeMethodStep implements IStep, Validateable 
+public class InvokeMethodStep extends AbstractStep
 {
 	/**
 	 * Object on which method needs to be invoked.

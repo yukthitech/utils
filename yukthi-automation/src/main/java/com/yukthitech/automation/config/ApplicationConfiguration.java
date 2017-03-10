@@ -225,6 +225,16 @@ public class ApplicationConfiguration
 	}
 	
 	/**
+	 * Gets the test data beans that can be used by test cases.
+	 *
+	 * @return the test data beans that can be used by test cases
+	 */
+	public Map<String, Object> getDataBeans()
+	{
+		return dataBeans;
+	}
+	
+	/**
 	 * Adds log monitor to the configuration.
 	 * @param monitor monitor to add
 	 */
