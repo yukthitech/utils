@@ -32,7 +32,7 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	{}
 
 	@Override
-	public boolean isIDBased(String arg0)
+	public boolean isIdBased(String arg0)
 	{
 		return false;
 	}

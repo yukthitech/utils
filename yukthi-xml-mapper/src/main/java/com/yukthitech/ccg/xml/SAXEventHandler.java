@@ -520,7 +520,7 @@ class SAXEventHandler extends DefaultHandler
 
 				DynamicDataAcceptor acceptor = (DynamicDataAcceptor) parentBean;
 
-				if(curAttMap.getNormalAttributeCount() == 1 && acceptor.isIDBased(newNode.getName()))
+				if(curAttMap.getNormalAttributeCount() == 1 && acceptor.isIdBased(newNode.getName()))
 				{
 					loadIDBasedNode(newNode, curAttMap, dynType, dynType);
 					return;
