@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -912,17 +913,20 @@ public class DefaultParserHandler implements IParserHandler
 		}
 		
 		//Handle common collection types
-		if(type.isAssignableFrom(ArrayList.class))
+		if(Collection.class.isAssignableFrom(type))
 		{
-			type = ArrayList.class;
-		}
-		else if(type.isAssignableFrom(HashSet.class))
-		{
-			type = HashSet.class;
-		}
-		else if(type.isAssignableFrom(HashMap.class))
-		{
-			type = HashMap.class;
+			if(type.isAssignableFrom(ArrayList.class))
+			{
+				type = ArrayList.class;
+			}
+			else if(type.isAssignableFrom(HashSet.class))
+			{
+				type = HashSet.class;
+			}
+			else if(type.isAssignableFrom(HashMap.class))
+			{
+				type = HashMap.class;
+			}
 		}
 
 		try
@@ -1076,12 +1080,13 @@ public class DefaultParserHandler implements IParserHandler
 		return value;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * This method will be called by passing the text of attribute and node-text. This method
+	 * should replace all the expressions and return final output.
 	 * 
-	 * @see com.yukthitech.ccg.xml.ParserHandler#processText(java.lang.Object,
-	 * java.lang.String)
-	 */
+	 * Default parser handler by default, replaces ${} expressions by using root-bean as context. 
+	 * The default pattern and its behaviour can be changed by using {@link #setExpressionPattern(String, String, String)}
+	 */ 
 	@Override
 	public String processText(final Object rootBean, String text)
 	{
@@ -1135,14 +1140,15 @@ public class DefaultParserHandler implements IParserHandler
 	}
 
 	/**
-	 * Sets the expression pattern.
+	 * Sets the expression pattern to be used for processing expressions within target xml.
 	 *
-	 * @param expressionPattern
-	 *            the expression pattern
-	 * @param escapePrefix
-	 *            the escape prefix
-	 * @param escapeReplace
-	 *            the escape replace
+	 * @param expressionPattern Pattern to be used to identify expressions. By default this is ${}. This pattern should include escape prefix also.
+	 * 	By default $+{} is used as expression, in other terms multiple $ can be used in expressions. If more than one $ is found it is considered to be escaped
+	 *  and will not be processed.  
+	 * @param escapePrefix In the match, when expression should be considered as escaped. By default, this value is $$. That means if expression starts with 
+	 * 	more than one $ it is considered to be escaped.
+	 * @param escapeReplace In escaped match, what string should be used as replacement for escaped string. By default this is $. That means for escaped
+	 *  string first $$ of escaped expression will be replaced by $.
 	 */
 	public void setExpressionPattern(String expressionPattern, String escapePrefix, String escapeReplace)
 	{

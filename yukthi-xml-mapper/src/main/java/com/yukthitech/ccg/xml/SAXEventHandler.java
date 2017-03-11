@@ -563,6 +563,15 @@ class SAXEventHandler extends DefaultHandler
 
 		if(nextBean == null)
 			throw new XMLLoadException("A null value is returned by the factory for attributed node: " + name, newNode);
+		
+		//if final bean type is found to be Object, then treat is as text node
+		// so that enclosed text can be set as value
+		if(Object.class.equals(nextBean.getClass()))
+		{
+			newNode.setTextNodeFlag(true);
+			return;
+		}
+		
 		// this will take care of throwing exception when factory returns null
 		// for non-text object
 		newNode.setBean(nextBean);

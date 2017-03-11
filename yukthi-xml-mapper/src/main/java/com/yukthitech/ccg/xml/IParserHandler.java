@@ -229,7 +229,8 @@ public interface IParserHandler extends XMLConstants
 	public String getConstantValue(String name);
 
 	/**
-	 * Process text.
+	 * This method will be called by passing the text of attribute and node-text. This method
+	 * should replace all the expressions and return final output. 
 	 *
 	 * @param rootBean
 	 *            the root bean
