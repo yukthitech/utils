@@ -49,7 +49,7 @@ public class AutomationParserHandler extends DefaultParserHandler
 			
 			if(bean == null)
 			{
-				throw new InvalidStateException("Invalid data-bean name specified in bean-copy. Name: ", beanCopyName);
+				throw new InvalidStateException("Invalid data-bean name specified in bean-copy. Name: {}", beanCopyName);
 			}
 
 			try
@@ -66,4 +66,9 @@ public class AutomationParserHandler extends DefaultParserHandler
 		return super.createBean(node, att, loader);
 	}
 	
+	@Override
+	public String processText(Object rootBean, String text)
+	{
+		return text;
+	}
 }

@@ -1,5 +1,6 @@
 package com.yukthitech.automation.test.sql.validations;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,13 +32,17 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "validateWithSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
 public class SqlValidation extends AbstractValidation
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Result row expectation.
 	 * 
 	 * @author akiran
 	 */
-	public static class ExpectedRow
+	public static class ExpectedRow implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Expected column to value mapping.
 		 */

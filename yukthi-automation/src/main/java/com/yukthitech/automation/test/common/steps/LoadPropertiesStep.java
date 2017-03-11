@@ -23,6 +23,8 @@ import com.yukthitech.ccg.xml.util.ValidateException;
 @Executable(name = "loadProperties", message = "Loads specified properties file/resource as map on to context")
 public class LoadPropertiesStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Holds the path of file.
 	 */

@@ -1,6 +1,6 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<testSuite name="ui-test-suites">
-		<testCase name="buttonClick">
+		<testCase name="button_Click">
 			<description>Validates button click action is working</description>
 			
 			<wrap:steps>
@@ -14,5 +14,10 @@
 				<ccg:validateValue locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
 			</wrap:validations>
 		</testCase>
+
+		<cleanup>
+			<ccg:closeSession/>
+		</cleanup>
 	</testSuite>
+	
 </testData>

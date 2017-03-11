@@ -21,6 +21,8 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 @Executable(name = "populateField", requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
 public class PopulateFieldStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The logger.
 	 */

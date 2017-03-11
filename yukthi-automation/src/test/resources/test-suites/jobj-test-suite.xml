@@ -25,7 +25,7 @@
 		</testCase>
 
 
-		<testCase name="invokeMethodOnBeanCopy">
+		<testCase name="invoke_method_On_Bean_Copy">
 			<description>
 				Invokes simple method on bean copy declared in test suite.
 			</description>
@@ -46,7 +46,7 @@
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="invokeMethodOnSuiteBean">
+		<testCase name="invoke_Method_On_Suite_Bean">
 			<description>
 				Invokes simple method on bean declared in test suite.
 			</description>
@@ -65,7 +65,7 @@
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="invokeMethodOnSuiteBean">
+		<testCase name="invoke_Method_On_Suite_Bean">
 			<description>
 				Invokes method where an exception is expected.
 			</description>
@@ -80,5 +80,31 @@
 				<property name="message" value="MESSAGE"/>
 			</expectedException>
 		</testCase>
+
+		<testCase name="invoke_Method_With_Data_Provder">
+			<description>
+				Invokes simple method on bean with data provider and ensures data-provider working.
+			</description>
+
+			<list-data-provider name="dataString">
+				<data>abc</data>
+				<data>def</data>
+				<data>ghi</data>
+			</list-data-provider>
+
+			<wrap:steps>
+				<ccg:invokeMethod name="toText" paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true">
+					<object ccg:beanRef="beanFromTestSuite"/>
+					
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="${attr.dataString}">
+					</parameter>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.returnValue" value="beanFromTestSuite=>${attr.dataString}"/>
+			</wrap:validations>
+		</testCase>
+
 	</testSuite>
 </testData>

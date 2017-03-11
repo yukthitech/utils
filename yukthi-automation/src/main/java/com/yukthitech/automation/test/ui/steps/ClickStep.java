@@ -20,6 +20,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "click", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
 public class ClickStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * locator for button.
 	 */

@@ -1,9 +1,14 @@
 package com.yukthitech.automation.common;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Comparator;
@@ -13,8 +18,9 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -29,15 +35,12 @@ import freemarker.template.TemplateException;
  */
 public class AutomationUtils
 {
+	private static Logger logger = LogManager.getLogger(AutomationUtils.class);
+	
 	/**
 	 * Freemarker template config used to parse expressions.
 	 */
 	private static Configuration configuration = new Configuration();
-	
-	/**
-	 * Object mapper for json coversions.
-	 */
-	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	static
 	{
@@ -132,12 +135,26 @@ public class AutomationUtils
 	 * @param executable Step/validator or other executable in which expressions has to be replaced
 	 */
 	@SuppressWarnings("unchecked")
-	public static void replaceExpressions(AutomationContext context, Object executable)
+	public static Object replaceExpressions(AutomationContext context, Object executable)
 	{
 		if(executable == null)
 		{
-			return;
+			return null;
 		}
+		
+		Class<?> executableType = executable.getClass();
+		
+		if(executableType.isPrimitive() || executableType.isArray())
+		{
+			return executable;
+		}
+		
+		if(executable instanceof String)
+		{
+			return replaceExpressions(context, (String) executable);
+		}
+
+		logger.debug("Processing expressions in object: {}", executable);
 		
 		//when executable is collection
 		if(executable instanceof Collection)
@@ -146,15 +163,25 @@ public class AutomationUtils
 			
 			if(collection.isEmpty())
 			{
-				return;
+				return collection;
+			}
+			
+			Collection<Object> resCollection = null;
+			
+			try
+			{
+				resCollection = (Collection<Object>) executableType.newInstance();
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while parsing expressions", ex);
 			}
 			
 			for(Object element : collection)
 			{
-				replaceExpressions(context, element);
+				resCollection.add( replaceExpressions(context, element) );
 			}
 			
-			return;
+			return resCollection;
 		}
 			
 		//when executable is map
@@ -164,15 +191,30 @@ public class AutomationUtils
 			
 			if(map.isEmpty())
 			{
-				return;
+				return map;
 			}
 			
-			for(Object element : map.values())
+			Map<Object, Object> resMap = null;
+			
+			try
 			{
-				replaceExpressions(context, element);
+				resMap = (Map<Object, Object>) executableType.newInstance();
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while parsing expressions", ex);
 			}
 			
-			return;
+			for(Map.Entry<Object, Object> entry : map.entrySet())
+			{
+				resMap.put( entry.getKey(), replaceExpressions(context, entry.getValue()) ) ;
+			}
+			
+			return resMap;
+		}
+		
+		if(executableType.getName().startsWith("java"))
+		{
+			return executable;
 		}
 
 		Field fields[] = executable.getClass().getDeclaredFields();
@@ -181,18 +223,16 @@ public class AutomationUtils
 		
 		for(Field field : fields)
 		{
+			if(Modifier.isStatic(field.getModifiers()))
+			{
+				continue;
+			}
+			
 			try
 			{
 				fieldType = field.getType();
 				
-				if(!Collection.class.isAssignableFrom(fieldType) &&
-						!Map.class.isAssignableFrom(fieldType) &&
-						fieldType.getName().startsWith("java"))
-				{
-					continue;
-				}
-				
-				if(fieldType.isPrimitive())
+				if(fieldType.isPrimitive() || fieldType.isArray())
 				{
 					continue;
 				}
@@ -207,16 +247,9 @@ public class AutomationUtils
 					continue;
 				}
 				
-				if(fieldValue instanceof String)
-				{
-					fieldValue = replaceExpressions(context, (String) fieldValue);
-					
-					//set the result string back to field
-					field.set(executable, fieldValue);
-					continue;
-				}
+				fieldValue = replaceExpressions(context, fieldValue);
+				field.set(executable, fieldValue);
 				
-				replaceExpressions(context, fieldValue);
 			} catch(InvalidStateException ex)
 			{
 				throw ex;
@@ -226,6 +259,8 @@ public class AutomationUtils
 					executable.getClass().getName(), field.getName());
 			}
 		}
+		
+		return executable;
 	}
 
 	/**
@@ -288,8 +323,19 @@ public class AutomationUtils
 	{
 		try
 		{
-			String jsonStr = objectMapper.writeValueAsString(object);
-			return (T) objectMapper.readValue(jsonStr, object.getClass());
+			//covert object into bytes
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			
+			oos.writeObject(object);
+			oos.flush();
+			bos.flush();
+			
+			//read bytes back to object which would be deep copy
+			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+			ObjectInputStream ois = new ObjectInputStream(bis);
+			
+			return (T) ois.readObject();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while deep cloning object: {}", object, ex);

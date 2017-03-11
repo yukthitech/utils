@@ -1,10 +1,12 @@
 package com.yukthitech.automation;
 
+import java.io.Serializable;
+
 /**
  * Represents validation to be done.
  * @author akiran
  */
-public interface IValidation extends Cloneable
+public interface IValidation extends Cloneable, Serializable
 {
 	/**
 	 * Method which should execute current validation.

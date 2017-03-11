@@ -13,6 +13,8 @@ import com.yukthitech.automation.Param;
 @Executable(name = "log", message = "Logs specified message")
 public class LogStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Logs specified message in ui.
 	 */

@@ -28,6 +28,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "multiDmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified multiple DML queries in single transaction")
 public class MultiDmlQueryStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * List of queries executed in single transaction.
 	 */

@@ -13,6 +13,8 @@ import com.yukthitech.automation.config.SeleniumPlugin;
 @Executable(name = "closeSession", requiredPluginTypes = SeleniumPlugin.class, message = "Closes the curren browser window.")
 public class CloseSessionStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{

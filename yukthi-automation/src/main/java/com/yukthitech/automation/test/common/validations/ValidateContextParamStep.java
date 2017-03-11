@@ -15,6 +15,8 @@ import com.yukthitech.automation.Param;
 @Executable(name = "validateContextParam", message = "Validates specified context param is present with specified value")
 public class ValidateContextParamStep extends AbstractValidation
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Expression to be evaluated on context.
 	 */

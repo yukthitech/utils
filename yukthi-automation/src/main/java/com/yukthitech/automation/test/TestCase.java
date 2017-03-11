@@ -61,6 +61,11 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	 * Details of the exception expected from this test case.
 	 */
 	private ExceptionExpected expectedException;
+	
+	/**
+	 * Data provider to be used for this test case.
+	 */
+	private IDataProvider dataProvider;
 
 	/**
 	 * Gets the name of the test case.
@@ -101,6 +106,44 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	public void setDependencies(String dependencies)
 	{
 		this.dependencies = dependencies;
+	}
+	
+	/**
+	 * Sets the data provider to be used for this test case.
+	 *
+	 * @param dataProvider the new data provider to be used for this test case
+	 */
+	public void setDataProvider(IDataProvider dataProvider)
+	{
+		this.dataProvider = dataProvider;
+	}
+	
+	/**
+	 * Gets the data provider to be used for this test case.
+	 *
+	 * @return the data provider to be used for this test case
+	 */
+	public IDataProvider getDataProvider()
+	{
+		return dataProvider;
+	}
+	
+	/**
+	 * Sets the specified list data provider as data-provider for this test case.
+	 * @param dataProvider data provider to set
+	 */
+	public void setListDataProvider(ListDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
+	}
+	
+	/**
+	 * Sets the specified range data provider as data-provider for this test case.
+	 * @param dataProvider data provider to set
+	 */
+	public void setRangeDataProvider(RangeDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
 	}
 	
 	/**
@@ -184,17 +227,21 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	{
 		this.expectedException = expectedException;
 	}
-
+	
 	/**
-	 * Execute.
-	 *
+	 * Called internally multiple times per data object provided by data provider.
 	 * @param context
-	 *            the context
-	 * @return the test case result
+	 * @return
 	 */
-	public TestCaseResult execute(AutomationContext context)
+	public TestCaseResult execute(AutomationContext context, TestCaseData testCaseData, ExecutionLogger exeLogger)
 	{
-		ExecutionLogger exeLogger = new ExecutionLogger(name, description);
+		String name = this.name;
+		
+		if(testCaseData != null)
+		{
+			name += "[" + testCaseData.getName() + "]";
+		}
+		
 		boolean expectedExcpetionOccurred = (expectedException == null);
 		
 		ExceptionExpected expectedException = null;
@@ -228,7 +275,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 					}catch(InvalidArgumentException iex)
 					{
 						exeLogger.error(ex, ex.getMessage());
-						return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
+						return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
 					}
 				}
 				
@@ -236,14 +283,14 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 				if(!expectedExcpetionOccurred)
 				{
 					exeLogger.error(ex, "An error occurred while executing step: " + executable.name());
-					return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
+					return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
 				}
 			}
 		}
 		
 		if(!expectedExcpetionOccurred)
 		{
-			return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
+			return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
 		}
 
 		// execute the validations
@@ -260,7 +307,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 					Executable executable = validation.getClass().getAnnotation(Executable.class);
 					exeLogger.error("Validation failed: " + executable.name() + validation);
 
-					return new TestCaseResult(this.name, TestStatus.FAILED, exeLogger.getExecutionLogData(), "Validation failed: " + executable.name() + validation);
+					return new TestCaseResult(name, TestStatus.FAILED, exeLogger.getExecutionLogData(), "Validation failed: " + executable.name() + validation);
 				}
 			} catch(TestCaseFailedException ex)
 			{
@@ -269,7 +316,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 				//for handled exceptions dont log on ui
 				logger.error("An error occurred while executing validation: " + executable.name(), ex);
 				
-				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + executable.name());
+				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + executable.name());
 			} catch(Exception ex)
 			{
 				Executable executable = validation.getClass().getAnnotation(Executable.class);
@@ -277,13 +324,13 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 				//for unhandled exceptions dont log on ui
 				exeLogger.error(ex, "An error occurred while executing validation: " + executable.name());
 				
-				return new TestCaseResult(this.name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + executable.name());
+				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + executable.name());
 			}
 		}
 
-		return new TestCaseResult(this.name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+		return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

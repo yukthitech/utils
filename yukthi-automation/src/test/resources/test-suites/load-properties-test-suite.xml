@@ -1,7 +1,7 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<testSuite name="load-properties-test-suites">
 
-		<testCase name="loadProperties">
+		<testCase name="load_Properties">
 			<description>Validates loading of properties file to context</description>
 
 			<wrap:steps>

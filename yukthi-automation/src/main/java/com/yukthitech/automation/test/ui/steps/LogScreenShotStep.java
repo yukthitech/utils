@@ -20,6 +20,8 @@ import com.yukthitech.automation.config.SeleniumPlugin;
 @Executable(name = "logScreenShot", requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
 public class LogScreenShotStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of the file provided by the user.
 	 */

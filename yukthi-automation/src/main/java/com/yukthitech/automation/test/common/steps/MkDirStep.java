@@ -19,6 +19,8 @@ import com.yukthitech.automation.test.TestCaseFailedException;
 @Executable(name = "mkdir", message = "Creates a directory with required parent folder as needed in work folder.")
 public class MkDirStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Directory path to create.
 	 */

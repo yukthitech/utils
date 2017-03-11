@@ -3,6 +3,8 @@ package com.yukthitech.automation.test;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.AutomationLauncher;
 import com.yukthitech.automation.BasicArguments;
+import com.yukthitech.automation.ExecutionLogger;
 import com.yukthitech.automation.logmon.LogMonitorContext;
 import com.yukthitech.automation.test.log.ExecutionLogData;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
@@ -95,6 +98,96 @@ public class TestSuiteExecutor
 		
 		fullExecutionDetails.setReportName(context.getAppConfiguration().getReportName());
 	}
+	
+	/**
+	 * Executes the test case. If data provider is specified, test case is executed for each data object.
+	 *
+	 * @param context
+	 *            the context
+	 * @return the test case result
+	 */
+	public TestCaseResult executeTestCase(AutomationContext context, List<TestCaseResult> testCaseDatsResults, TestCase testCase, String testFileName)
+	{
+		IDataProvider dataProvider = testCase.getDataProvider();
+		
+		if(dataProvider == null)
+		{
+			ExecutionLogger exeLogger = new ExecutionLogger(testCase.getName(), testCase.getDescription());
+			TestCaseResult result = null;
+			
+			//start monitoring logs
+			context.startLogMonitoring();
+
+			try
+			{
+				result = testCase.execute(context, null, exeLogger);
+			}catch(Exception ex)
+			{
+				exeLogger.error(ex, "An error occurred while executing test case: {}", testCase.getName());
+				result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case.");
+			} 
+			
+			//stop monitoring logs
+			Map<String, File> monitoringLogs = context.stopLogMonitoring();
+			createLogFiles(result, testFileName, monitoringLogs, testCase.getDescription());
+			
+			return result;
+		}
+		
+		List<TestCaseData> dataLst = dataProvider.getStepData();
+
+		//Log error and fail test case if data is missing
+		if(dataLst == null)
+		{
+			return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName());
+		}
+		
+		TestCaseResult result = null;
+		ExecutionLogger exeLogger = null;
+		String name = null;
+		TestStatus finalStatus = TestStatus.SUCCESSFUL;
+		
+		for(TestCaseData data : dataLst)
+		{
+			name = testCase.getName() + "[" + data.getName() + "]";
+			exeLogger = new ExecutionLogger(name, testCase.getDescription());
+					
+			//set data provider data on context
+			context.setAttribute(dataProvider.getName(), data.getValue());
+
+			//start monitoring logs
+			context.startLogMonitoring();
+
+			//execute test case for current data
+			try
+			{
+				result = testCase.execute(context, data, exeLogger);
+			}catch(Exception ex)
+			{
+				exeLogger.error(ex, "An error occurred while executing test case '{}' with data: {}", testCase.getName(), data);
+				result = new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case with data: " + data);
+			}
+			
+			//stop monitoring logs
+			Map<String, File> monitoringLogs = context.stopLogMonitoring();
+			createLogFiles(result, testFileName + "[" + data.getName() + "]", monitoringLogs, data + "\n" + testCase.getDescription());
+
+			if(result.getStatus() == TestStatus.ERRORED)
+			{
+				finalStatus = TestStatus.ERRORED;
+			}
+			
+			if(result.getStatus() == TestStatus.FAILED && finalStatus != TestStatus.ERRORED)
+			{
+				finalStatus = TestStatus.FAILED;
+			}
+			
+			testCaseDatsResults.add(result);
+		}
+		
+		return new TestCaseResult(testCase.getName(), finalStatus, null, "");
+	}
+	
 
 	/**
 	 * Executes specified test suite and its dependencies recursively.
@@ -147,6 +240,7 @@ public class TestSuiteExecutor
 		}
 
 		TestCaseResult testCaseResult = null;
+		List<TestCaseResult> testCaseDatsResults = new ArrayList<>();
 		String testFileName = null;
 
 		boolean successful = true;
@@ -209,23 +303,21 @@ public class TestSuiteExecutor
 
 			testFileName = testSuite.getName() + "_" + testCase.getName();
 
-			//start monitoring logs
-			context.startLogMonitoring();
-			
 			//execute actual test case
-			testCaseResult = testCase.execute(context);
+			testCaseDatsResults.clear();
+			testCaseResult = executeTestCase(context, testCaseDatsResults, testCase, testFileName);
 			
-			//stop monitoring logs
-			Map<String, File> monitoringLogs = context.stopLogMonitoring();
-
 			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
 			{
 				successful = false;
 			}
 
-			createLogFiles(testCaseResult, testFileName, monitoringLogs, testCase.getDescription());
-
 			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
+			
+			for(TestCaseResult dataResult : testCaseDatsResults)
+			{
+				fullExecutionDetails.addTestResult(testSuite, dataResult);
+			}
 		}
 		
 		if( !executeCleanup(testSuite.getName(), testSuite.getCleanup()) )

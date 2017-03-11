@@ -16,6 +16,8 @@ import com.yukthitech.automation.test.ui.steps.WaitForStep;
 @Executable(name = "validateAlert", requiredPluginTypes = SeleniumPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
 public class ValidateAlert extends AbstractValidation
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Expected alert message.
 	 */

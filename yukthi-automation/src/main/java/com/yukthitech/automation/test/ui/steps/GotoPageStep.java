@@ -16,6 +16,8 @@ import com.yukthitech.automation.config.SeleniumPlugin;
 @Executable(name = "gotoPage", requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified uri")
 public class GotoPageStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Url to which browser should be taken.
 	 */

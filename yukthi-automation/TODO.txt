@@ -1,8 +1,24 @@
-Rest based Steps
+data provider in steps
+
+invoke method step (with params)
+	result should be set on context
+		result attribute name
+		
+	exception also on context
+	
+	ability to validate exception or result (Which is on result)
+
+	ability to invoke method with different variations - form validations
 
 Reusable step groups
 
-data provider in steps
+	
+Rest based Steps
+	get and post urls?
+	
+	post with file upload
+
+
 
 logging the object as json
 
@@ -16,23 +32,8 @@ Folder wise execution
 Listener and ui
 
 
-functions (repeatable set of stpes)
-	step to invoke functions with params
-
-step to set context variables
-	value in turn can be expression on context
-
 Validate form with field level validations
 
-invoke method step (with params)
-	result should be set on context
-		result attribute name
-		
-	exception also on context
-	
-	ability to validate exception or result (Which is on result)
-
-	ability to invoke method with different variations - form validations
 
 
 ui form validator
@@ -56,8 +57,6 @@ Param and auto doc generation
 
 why first driver is not being used?
 
-step to set context param value
-
 =============================
 
 property files to load to context
@@ -71,9 +70,6 @@ list loading by delimiter
 Extra steps
 	json parsing
 	
-	get and post urls?
-	
-	post with file upload
 	
 	create temp file in work dir
 	
@@ -82,8 +78,6 @@ Extra steps
 		
 	data provider steps
 		at test case level and step level
-	
-	expressions using freemarker
 	
 	screen shot on error
 	
@@ -123,10 +117,36 @@ Extra steps
 	
 Date and time formats from app config
 	
-freemarker in queries and expressions	
-	
 In all steps and validations only string params should be accepted
 	so that they can be replaced by expresssions by user
 	
 	
 Ability to disable expected exception
+
+Log file processor
+
+support for app properties/json and via dynamic class
+
+Startup (initial log) log by logi monitors
+
+time taken by test cases and steps
+=======================================
+
+Test Cases
+	Expected Exception
+		Successful
+		never occurred
+		mismatched
+	
+	Basic
+		step results in error
+		validation result in error
+		validation failed
+		
+	Data provider
+		provides empty list
+		one object results in error
+		one object results in failure
+		
+		
+		

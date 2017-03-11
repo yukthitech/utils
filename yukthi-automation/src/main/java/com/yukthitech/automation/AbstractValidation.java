@@ -10,6 +10,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public abstract class AbstractValidation implements IValidation, Validateable
 {
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public IValidation clone()
 	{

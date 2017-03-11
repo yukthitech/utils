@@ -19,6 +19,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "waitFor", requiredPluginTypes = SeleniumPlugin.class, message = "Waits for specified element to become visible/hidden")
 public class WaitForStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * locator to wait for.
 	 */

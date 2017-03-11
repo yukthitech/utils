@@ -1,5 +1,6 @@
 package com.yukthitech.automation.test.jobj.steps;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,9 @@ import com.yukthitech.automation.AbstractStep;
 import com.yukthitech.automation.AutomationContext;
 import com.yukthitech.automation.Executable;
 import com.yukthitech.automation.ExecutionLogger;
+import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
+import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.DbPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.CommonUtils;
@@ -22,6 +25,10 @@ import com.yukthitech.utils.CommonUtils;
 @Executable(name = "invokeMethod", requiredPluginTypes = DbPlugin.class, message = "Executes specified method on specified bean.")
 public class InvokeMethodStep extends AbstractStep
 {
+	
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Object on which method needs to be invoked.
 	 */
@@ -63,8 +70,20 @@ public class InvokeMethodStep extends AbstractStep
 	/**
 	 * Context parameter name to be used to set the result on context.
 	 */
-	@Param(description = "Context parameter name to be used to set the result on context. \nDefault: $result", required = false)
+	@Param(description = "Context parameter name to be used to set the result on context. \nDefault: returnValue", required = false)
 	private String resultParameter = "returnValue";
+	
+	/**
+	 * When set to false, object will not be deep cloned. Which means property expressions if any, will be processed only once. Default false.
+	 */
+	@Param(description = "When set to false, object will not be deep cloned. Which means property expressions if any, will be processed only once.\nDefault false", required = false)
+	private boolean deepCloneObject = false;
+	
+	/**
+	 * When set to false, parameters will not be deep cloned. Which means property expressions if any, will be processed only once. Default false.
+	 */
+	@Param(description = "When set to false, parameters will not be deep cloned. Which means property expressions if any, will be processed only once.\nDefault false", required = false)
+	private boolean deepCloneParams = false;
 	
 	/**
 	 * Sets the object on which method needs to be invoked.
@@ -139,6 +158,26 @@ public class InvokeMethodStep extends AbstractStep
 	{
 		this.resultParameter = resultParameter;
 	}
+	
+	/**
+	 * Sets the when set to false, object will not be deep cloned. Which means property expressions if any, will be processed only once. Default false.
+	 *
+	 * @param deepCloneObject the new when set to false, object will not be deep cloned
+	 */
+	public void setDeepCloneObject(boolean deepCloneObject)
+	{
+		this.deepCloneObject = deepCloneObject;
+	}
+
+	/**
+	 * Sets the when set to false, parameters will not be deep cloned. Which means property expressions if any, will be processed only once. Default false.
+	 *
+	 * @param deepCloneParams the new when set to false, parameters will not be deep cloned
+	 */
+	public void setDeepCloneParams(boolean deepCloneParams)
+	{
+		this.deepCloneParams = deepCloneParams;
+	}
 
 	/**
 	 * Extracts the class types from types string.
@@ -166,6 +205,13 @@ public class InvokeMethodStep extends AbstractStep
 		return types;
 	}
 	
+	/**
+	 * Invoke method.
+	 *
+	 * @param logger the logger
+	 * @return the object
+	 * @throws Exception the exception
+	 */
 	private Object invokeMethod(ExecutionLogger logger) throws Exception
 	{
 		Object params[] = parameters.isEmpty() ? null : parameters.toArray(new Object[0]);
@@ -229,6 +275,9 @@ public class InvokeMethodStep extends AbstractStep
 		context.setAttribute(resultParameter, result);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.yukthitech.automation.AbstractStep#validate()
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{
@@ -241,5 +290,26 @@ public class InvokeMethodStep extends AbstractStep
 		{
 			throw new ValidateException("No/invalid object specified for instance method invocation.");
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.automation.AbstractStep#clone()
+	 */
+	@Override
+	public IStep clone()
+	{
+		InvokeMethodStep clone = (InvokeMethodStep) super.clone();
+		
+		if(deepCloneObject)
+		{
+			clone.object = AutomationUtils.deepClone(object);
+		}
+		
+		if(deepCloneParams)
+		{
+			clone.parameters = AutomationUtils.deepClone(this.parameters);
+		}
+		
+		return clone;
 	}
 }

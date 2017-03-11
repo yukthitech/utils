@@ -1,5 +1,6 @@
 package com.yukthitech.automation.test;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,14 +15,18 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Used to capture the expected exception details for a test case.
  * @author akiran
  */
-public class ExceptionExpected
+public class ExceptionExpected implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Expected property of the test case.
 	 * @author akiran
 	 */
-	public static class Property
+	public static class Property implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Name of the property.
 		 */

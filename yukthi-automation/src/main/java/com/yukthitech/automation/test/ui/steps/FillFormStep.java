@@ -24,6 +24,8 @@ import com.yukthitech.ccg.xml.DynamicBean;
 @Executable(name = "fillForm", requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
 public class FillFormStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Html locator of the form or container (like DIV) enclosing the input
 	 * elements.

@@ -1,5 +1,6 @@
 package com.yukthitech.automation.test.ui.validations;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,13 +23,17 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 @Executable(name = "validateFormFields", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
 public class ValidateFormFields extends AbstractValidation
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Represents field details to validate.
 	 * 
 	 * @author akiran
 	 */
-	public static class FormField
+	public static class FormField implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * locator of the field.
 		 */

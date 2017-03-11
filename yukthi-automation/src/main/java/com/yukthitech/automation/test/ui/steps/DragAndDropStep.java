@@ -25,6 +25,8 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 @Executable(name = "dragAndDrop", requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
 public class DragAndDropStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Source html element to be dragged.
 	 */

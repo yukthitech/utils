@@ -16,6 +16,8 @@ import com.yukthitech.utils.ConvertUtils;
 @Executable(name = "setContextParam", message = "Sets the specified context attribute with specified value")
 public class SetContextParamStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Name of attribute to set.
 	 */

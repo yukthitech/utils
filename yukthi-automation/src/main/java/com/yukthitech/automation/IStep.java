@@ -1,10 +1,12 @@
 package com.yukthitech.automation;
 
+import java.io.Serializable;
+
 /**
  * Represents automation step to be performed.
  * @author akiran
  */
-public interface IStep extends Cloneable
+public interface IStep extends Cloneable, Serializable
 {
 	/**
 	 * Method which should execute current step.

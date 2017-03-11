@@ -19,6 +19,8 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 @Executable(name = "validateValue", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
 public class ValidateValue extends AbstractValidation
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The logger.
 	 */

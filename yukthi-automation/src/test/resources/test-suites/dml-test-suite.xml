@@ -1,7 +1,7 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<testSuite name="dml-test-suites">
 
-		<testCase name="insertQuery">
+		<testCase name="insert_query">
 			<description>Validates for inserting record in a table</description>
 
 			<wrap:steps>
@@ -25,7 +25,7 @@
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="updateQuery" dependencies="insertQuery">
+		<testCase name="update_query" dependencies="insert_query">
 			<description>Validates for updating record in a table</description>
 
 			<wrap:steps>
@@ -33,7 +33,7 @@
 				
 				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="updateCount">
 					<query>
-						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = {{attr.empId}}
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
@@ -43,7 +43,7 @@
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="deleteQuery" dependencies="insertQuery">
+		<testCase name="delete_query" dependencies="insert_query">
 			<description>Validates for deleting record in a table</description>
 
 			<wrap:steps>
@@ -61,7 +61,7 @@
 			</wrap:validations>
 		</testCase>
 
-		<testCase name="multipleQuery">
+		<testCase name="multiple_query">
 			<description>Validates for executing multiple query in table</description>
 
 			<wrap:steps>
