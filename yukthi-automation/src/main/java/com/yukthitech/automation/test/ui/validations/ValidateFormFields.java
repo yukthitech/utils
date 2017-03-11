@@ -230,6 +230,12 @@ public class ValidateFormFields extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			return true;
+		}
+		
 		exeLogger.debug("Validating form  - {}", locator);
 		
 		WebElement formElement = UiAutomationUtils.findElement(context, null, locator);

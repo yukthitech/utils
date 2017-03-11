@@ -1,6 +1,5 @@
 package com.yukthitech.automation.test.jobj.steps;
 
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,7 @@ import com.yukthitech.automation.IStep;
 import com.yukthitech.automation.Param;
 import com.yukthitech.automation.common.AutomationUtils;
 import com.yukthitech.automation.config.DbPlugin;
+import com.yukthitech.automation.test.ObjectCopy;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.CommonUtils;
 
@@ -45,7 +45,7 @@ public class InvokeMethodStep extends AbstractStep
 	 * Name of the method to be invoked.
 	 */
 	@Param(description = "Name of the method to be invoked.") 
-	private String name;
+	private String method;
 	
 	/**
 	 * List of method argument types delimited by comma. Needs to be used when particular method needs to be invoked.
@@ -100,9 +100,9 @@ public class InvokeMethodStep extends AbstractStep
 	 *
 	 * @param name the new name of the method to be invoked
 	 */
-	public void setName(String name)
+	public void setMethod(String name)
 	{
-		this.name = name;
+		this.method = name;
 	}
 
 	/**
@@ -217,39 +217,59 @@ public class InvokeMethodStep extends AbstractStep
 		Object params[] = parameters.isEmpty() ? null : parameters.toArray(new Object[0]);
 		Class<?> types[] = getParameterTypes(this.paramTypes);
 		
+		Object object = this.object;
+		
+		//if object is instanceof object-copy, create copy instance
+		if(object instanceof ObjectCopy)
+		{
+			object = ((ObjectCopy) object).createCopy();
+		}
+		
+		//check if any of params is copy-object create copy of current param
+		if(params != null)
+		{
+			for(int i = 0; i < params.length; i++)
+			{
+				if(params[i] instanceof ObjectCopy)
+				{
+					params[i] = ((ObjectCopy) params[i]).createCopy();
+				}
+			}
+		}
+		
 		try
 		{
 			if(isStatic)
 			{
 				if(paramTypes != null)
 				{
-					logger.debug("On class {} invoking static method '{}' with parameter types - {}", objectType.getName(), name, paramTypes);
+					logger.debug("On class {} invoking static method '{}' with parameter types - {}", objectType.getName(), method, paramTypes);
 					logger.debug("Params used: {}", parameters);
 					
-					return MethodUtils.invokeExactStaticMethod(objectType, name, params, types);
+					return MethodUtils.invokeExactStaticMethod(objectType, method, params, types);
 				}
 				else
 				{
-					logger.debug("On class {} invoking static method '{}' matching with specified parameters", objectType.getName(), name);
+					logger.debug("On class {} invoking static method '{}' matching with specified parameters", objectType.getName(), method);
 					logger.debug("Params used: {}", parameters);
 					
-					return MethodUtils.invokeStaticMethod(objectType, name, params);
+					return MethodUtils.invokeStaticMethod(objectType, method, params);
 				}
 			}
 			
 			if(paramTypes != null)
 			{
-				logger.debug("On object {} invoking instance method '{}' with parameter types - {}", object, name, paramTypes);
+				logger.debug("On object {} invoking instance method '{}' with parameter types - {}", object, method, paramTypes);
 				logger.debug("Params used: {}", parameters);
 
-				return MethodUtils.invokeExactMethod(object, name, params, types);
+				return MethodUtils.invokeExactMethod(object, method, params, types);
 			}
 			else
 			{
-				logger.debug("On object {} invoking instance method '{}' matching with specified parameters", object, name);
+				logger.debug("On object {} invoking instance method '{}' matching with specified parameters", object, method);
 				logger.debug("Params used: {}", parameters);
 				
-				return MethodUtils.invokeMethod(object, name, params);
+				return MethodUtils.invokeMethod(object, method, params);
 			}
 		} catch(Exception ex)
 		{
@@ -259,7 +279,7 @@ public class InvokeMethodStep extends AbstractStep
 				ex = (Exception) ex.getCause();
 			}
 
-			logger.error(ex, "An error occurred while invoking method - {}", name);
+			logger.error(ex, "An error occurred while invoking method - {}", method);
 			
 			throw ex;
 		} 

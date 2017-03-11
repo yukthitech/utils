@@ -10,8 +10,11 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -217,7 +220,20 @@ public class AutomationUtils
 			return executable;
 		}
 
-		Field fields[] = executable.getClass().getDeclaredFields();
+		List<Field> fields = new ArrayList<>();
+		Class<?> curClass = executable.getClass();
+		
+		while(true)
+		{
+			fields.addAll(Arrays.asList(curClass.getDeclaredFields()));
+			curClass = curClass.getSuperclass();
+			
+			if(curClass.getName().startsWith("java"))
+			{
+				break;
+			}
+		}
+		
 		Object fieldValue = null;
 		Class<?> fieldType = null;
 		

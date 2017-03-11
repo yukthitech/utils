@@ -1,7 +1,5 @@
 package com.yukthitech.automation.test.ui.validations;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AbstractValidation;
@@ -20,11 +18,6 @@ import com.yukthitech.automation.test.ui.common.UiAutomationUtils;
 public class ValidateValue extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * The logger.
-	 */
-	private static Logger logger = LogManager.getLogger(ValidateValue.class);
 
 	/**
 	 * locator of which value needs to be validated.
@@ -48,7 +41,13 @@ public class ValidateValue extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		logger.trace("Validating if locator '{}' has value - {}", locator, value);
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			return true;
+		}
+		
+		exeLogger.trace("Validating if locator '{}' has value - {}", locator, value);
 		
 		WebElement element = UiAutomationUtils.findElement(context, null, locator);
 		String actualMessage = null;

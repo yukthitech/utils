@@ -1,12 +1,4 @@
-data provider in steps
-
 invoke method step (with params)
-	result should be set on context
-		result attribute name
-		
-	exception also on context
-	
-	ability to validate exception or result (Which is on result)
 
 	ability to invoke method with different variations - form validations
 

@@ -15,7 +15,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Used to capture the expected exception details for a test case.
  * @author akiran
  */
-public class ExceptionExpected implements Serializable
+public class ExpectedException implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -128,6 +128,16 @@ public class ExceptionExpected implements Serializable
 	}
 	
 	/**
+	 * Gets the flag indicating if expected exception is enabled or not. Useful for enabling/disabling with data provider using expressions.
+	 *
+	 * @return the flag indicating if expected exception is enabled or not
+	 */
+	public String getEnabled()
+	{
+		return enabled;
+	}
+	
+	/**
 	 * Validates the provided exception is matching with current expected exception.
 	 * @param ex Actual exception object.
 	 */
@@ -184,7 +194,7 @@ public class ExceptionExpected implements Serializable
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
 	 */
-	public ExceptionExpected clone()
+	public ExpectedException clone()
 	{
 		return AutomationUtils.deepClone(this);
 	}

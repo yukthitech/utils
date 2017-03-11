@@ -49,6 +49,12 @@ public class ValidateAlert extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			return true;
+		}
+		
 		exeLogger.debug("Waiting for alert with message - {}", message);
 		
 		//wait and validate alert box is displayed

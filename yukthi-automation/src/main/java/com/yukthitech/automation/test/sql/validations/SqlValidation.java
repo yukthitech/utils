@@ -132,6 +132,12 @@ public class SqlValidation extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			return true;
+		}
+		
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
 

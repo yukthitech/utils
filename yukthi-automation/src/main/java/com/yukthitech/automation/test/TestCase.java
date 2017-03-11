@@ -60,7 +60,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	/**
 	 * Details of the exception expected from this test case.
 	 */
-	private ExceptionExpected expectedException;
+	private ExpectedException expectedException;
 	
 	/**
 	 * Data provider to be used for this test case.
@@ -223,7 +223,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	 *
 	 * @param expectedException the new details of the exception expected from this test case
 	 */
-	public void setExpectedException(ExceptionExpected expectedException)
+	public void setExpectedException(ExpectedException expectedException)
 	{
 		this.expectedException = expectedException;
 	}
@@ -242,15 +242,21 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 			name += "[" + testCaseData.getName() + "]";
 		}
 		
-		boolean expectedExcpetionOccurred = (expectedException == null);
-		
-		ExceptionExpected expectedException = null;
+		ExpectedException expectedException = null;
 		
 		if(this.expectedException != null)
 		{
 			expectedException = this.expectedException.clone();
 			AutomationUtils.replaceExpressions(context, expectedException);
+			
+			//if expected exception is disabled, ignore the expected exception
+			if(!"true".equals(expectedException.getEnabled()))
+			{
+				expectedException = null;
+			}
 		}
+		
+		boolean expectedExcpetionOccurred = (expectedException == null);
 		
 		// execute the steps involved
 		for(IStep step : steps)
@@ -272,6 +278,8 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 					{
 						expectedException.validateMatch(ex);
 						expectedExcpetionOccurred = true;
+						
+						exeLogger.debug("Expected excpetion occurred: {}", ex);
 					}catch(InvalidArgumentException iex)
 					{
 						exeLogger.error(ex, ex.getMessage());

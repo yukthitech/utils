@@ -1,7 +1,5 @@
 package com.yukthitech.automation.test.ui.validations;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.automation.AbstractValidation;
@@ -22,11 +20,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class ValidateVisibility extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * The logger.
-	 */
-	private static Logger logger = LogManager.getLogger(ValidateVisibility.class);
 
 	/**
 	 * locator to wait for.
@@ -59,7 +52,13 @@ public class ValidateVisibility extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		logger.trace("Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			return true;
+		}
+		
+		exeLogger.trace("Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		UiAutomationUtils.validateWithWait(() -> {
 			WebElement element = UiAutomationUtils.findElement(context, null, locator);

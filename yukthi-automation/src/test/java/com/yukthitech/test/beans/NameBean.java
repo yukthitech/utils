@@ -12,6 +12,11 @@ public class NameBean implements Serializable
 		this.name = name;
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

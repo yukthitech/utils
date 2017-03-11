@@ -11,6 +11,12 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public abstract class AbstractValidation implements IValidation, Validateable
 {
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Enables/disables current validation.\nDefault: true.
+	 */
+	@Param(description = "Enables/disables current validation.\nDefault: true", required = false)
+	protected String enabled = "true";
 
 	@Override
 	public IValidation clone()
@@ -27,4 +33,14 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	@Override
 	public void validate() throws ValidateException
 	{}
+	
+	/**
+	 * Sets the enables/disables current validation.\nDefault: true.
+	 *
+	 * @param enabled the new enables/disables current validation
+	 */
+	public void setEnabled(String enabled)
+	{
+		this.enabled = enabled;
+	}
 }

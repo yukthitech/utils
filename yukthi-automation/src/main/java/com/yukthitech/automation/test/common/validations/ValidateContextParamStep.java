@@ -52,6 +52,12 @@ public class ValidateContextParamStep extends AbstractValidation
 	@Override
 	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
 	{
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
+			return true;
+		}
+		
 		if(value == null)
 		{
 			exeLogger.debug("Validating context expression '{}' is present", expression);

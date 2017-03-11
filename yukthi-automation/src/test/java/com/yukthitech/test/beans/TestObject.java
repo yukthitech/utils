@@ -29,4 +29,21 @@ public class TestObject implements Serializable
 	{
 		throw new InvalidArgumentException("MESSAGE");
 	}
+	
+	public String validate(NameBean bean)
+	{
+		String name = bean.getName();
+		
+		if(name.length() <= 3)
+		{
+			throw new InvalidArgumentException("Name should be greater than 3");
+		}
+
+		if(name.length() >= 6)
+		{
+			throw new InvalidArgumentException("Name should be less than 6");
+		}
+		
+		return bean.getName();
+	}
 }
