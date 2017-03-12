@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -55,18 +54,23 @@ public class AutomationLauncher
 	{
 		DefaultParserHandler defaultParserHandler = new AutomationParserHandler(context, appConfig);
 		
-		logger.debug("Loading test suites from folder - {}", appConfig.getTestSuiteFolder());
+		logger.debug("Loading test suites from folders - {}", appConfig.getTestSuiteFolders());
+		
+		List<File> xmlFiles = new ArrayList<>();
 
-		File testCaseFolder = new File(appConfig.getTestSuiteFolder());
-
-		if(!testCaseFolder.exists() && !testCaseFolder.isDirectory())
+		for(String folder : appConfig.getTestSuiteFolders())
 		{
-			System.err.println("Invalid test suite folder specified - " + testCaseFolder);
-			System.exit(-1);
+			File testCaseFolder = new File(folder);
+	
+			if(!testCaseFolder.exists() && !testCaseFolder.isDirectory())
+			{
+				System.err.println("Invalid test suite folder specified - " + testCaseFolder);
+				System.exit(-1);
+			}
+	
+			// load the test suites recursively
+			xmlFiles.addAll( AutomationUtils.loadXmlFiles(testCaseFolder) );
 		}
-
-		// load the test suites recursively
-		TreeSet<File> xmlFiles = AutomationUtils.loadXmlFiles(testCaseFolder);
 		
 		TestDataFile testDataFile = new TestDataFile();
 		FileInputStream fis = null;

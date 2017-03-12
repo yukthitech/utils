@@ -32,7 +32,7 @@ public class ApplicationConfiguration
 	/**
 	 * Folder containing test suite xmls.
 	 */
-	private String testSuiteFolder;
+	private List<String> testSuiteFolders = new ArrayList<>();
 	
 	/**
 	 * Base packages to be scanned for steps and validators.
@@ -131,9 +131,9 @@ public class ApplicationConfiguration
 	 *
 	 * @return the folder containing test suite xmls
 	 */
-	public String getTestSuiteFolder()
+	public List<String> getTestSuiteFolders()
 	{
-		return testSuiteFolder;
+		return testSuiteFolders;
 	}
 
 	/**
@@ -141,9 +141,9 @@ public class ApplicationConfiguration
 	 *
 	 * @param testSuiteFolder the new folder containing test suite xmls
 	 */
-	public void setTestSuiteFolder(String testSuiteFolder)
+	public void addTestSuiteFolder(String testSuiteFolder)
 	{
-		this.testSuiteFolder = testSuiteFolder;
+		this.testSuiteFolders.add(testSuiteFolder);
 	}
 
 	/**

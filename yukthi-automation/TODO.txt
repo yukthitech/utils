@@ -13,9 +13,6 @@ logging the object as json
 
 fail step
 
-Folder wise execution
-	Multiple folders
-	
 
 
 Listener and ui
@@ -40,9 +37,6 @@ Param and auto doc generation
 why first driver is not being used?
 
 =============================
-
-property files to load to context
-	that can be used in app config also and in steps also
 
 Extra params in final report
 	like build, environment, date, custom params
@@ -82,17 +76,7 @@ Extra steps
 		
 	
 	
-	
-	
-	
-Date and time formats from app config
-	
-	
 Log file processor
-
-support for app properties/json and via dynamic class
-
-Startup (initial log) log by logi monitors
 
 time taken by test cases and steps
 =======================================

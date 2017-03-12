@@ -518,13 +518,7 @@ public class TestSuiteExecutor
 		}
 		
 		//copy the resource files into output folder
-		try
-		{
-			FileUtils.copyDirectory(new File("." + File.separator + "report-resources"), reportFolder);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while copying resource files to report folder - {}", reportFolder.getPath());
-		}
+		ReportResourceManager.getInstance().copyResources(reportFolder);
 
 		//create final report files
 		try
