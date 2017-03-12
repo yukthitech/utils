@@ -61,7 +61,14 @@ public class OptionsFactory
 			
 			valueRequired = !boolean.class.equals(field.getType()) && !Boolean.class.equals(field.getType());
 			
-			option = new Option(argAnnot.name(), argAnnot.longName(), valueRequired , argAnnot.description());
+			String description = argAnnot.description();
+			
+			if(argAnnot.required())
+			{
+				description = "[Mandatory] " + description;
+			}
+			
+			option = new Option(argAnnot.name(), argAnnot.longName(), valueRequired, description);
 			option.setArgName(field.getName());
 			
 			options.addOption( type, field, option, argAnnot.required() );

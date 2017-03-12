@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.automation.common.AutomationUtils;
+import com.yukthitech.automation.config.AppConfigParserHandler;
 import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.automation.config.IPlugin;
 import com.yukthitech.automation.test.TestDataFile;
@@ -38,7 +40,7 @@ public class AutomationLauncher
 {
 	private static Logger logger = LogManager.getLogger(AutomationLauncher.class);
 	
-	private static final String COMMAND_SYNTAX = String.format("java %s <app-config-file> <report-folder> extended-args...", AutomationLauncher.class.getName());
+	private static final String COMMAND_SYNTAX = String.format("java %s <app-config-file> extended-args...", AutomationLauncher.class.getName());
 
 	/**
 	 * Loads test suites from the test suite folder specified by app
@@ -158,6 +160,8 @@ public class AutomationLauncher
 				.collect(Collectors.toList());
 		
 		argBeanTypes = new ArrayList<>(argBeanTypes);
+		
+		//Add basic arguments type, so that on error its properties are not skipped in error message
 		argBeanTypes.add(BasicArguments.class);
 
 		//if any type is required creation command line options and parse command line arguments
@@ -169,7 +173,7 @@ public class AutomationLauncher
 			argBeans = commandLineOptions.parseBeans(extendedCommandLineArgs);
 		} catch(MissingArgumentException e)
 		{
-			System.err.println(e.getMessage());
+			System.err.println("Error: " + e.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			System.exit(-1);
 		} catch(Exception ex)
@@ -178,8 +182,6 @@ public class AutomationLauncher
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			System.exit(-1);
 		}
-		
-		context.setBasicArguments( (BasicArguments) argBeans.get(BasicArguments.class) );
 		
 		//initialize the configurations
 		Object args = null;
@@ -201,12 +203,20 @@ public class AutomationLauncher
 	 *            Application config file to load.
 	 * @return Loaded application config.
 	 */
-	private static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile) throws Exception
+	private static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile, BasicArguments basicArguments) throws Exception
 	{
+		Properties appProperties = new Properties();
+		
+		if(basicArguments.getPropertiesFile() != null)
+		{
+			FileInputStream propInputStream = new FileInputStream(basicArguments.getPropertiesFile());
+			appProperties.load(propInputStream);
+		}
+		
 		FileInputStream fis = new FileInputStream(appConfigurationFile);
 		
-		ApplicationConfiguration appConfig = new ApplicationConfiguration();
-		XMLBeanParser.parse(fis, appConfig);
+		ApplicationConfiguration appConfig = new ApplicationConfiguration(appProperties);
+		XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
 		
 		fis.close();
 
@@ -221,15 +231,15 @@ public class AutomationLauncher
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		System.out.println("Executing main function of aautomation layunche...");
+		System.out.println("Executing main function of automation layunche...");
 		File currentFolder = new File(".");
+		
+		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
 
 		logger.debug("Executing from folder: " + currentFolder.getCanonicalPath());
 
-		if(args.length < 2)
+		if(args.length < 1)
 		{
-			CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
-			
 			System.err.println("Invalid number of arguments specified");
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
@@ -237,17 +247,45 @@ public class AutomationLauncher
 		}
 
 		File appConfigurationFile = new File(args[0]);
-		File reportFolder = new File(args[1]);
 
 		if(!appConfigurationFile.exists())
 		{
-			CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
-			
 			System.err.println("Invalid application configuration file - " + appConfigurationFile);
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			
 			System.exit(-1);
 		}
+		
+		//initialize the configurations
+		String extendedCommandLineArgs[] = {};
+		
+		if(args.length > 1)
+		{
+			extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
+		}
+
+		BasicArguments basicArguments = null;
+		
+		try
+		{
+			basicArguments = (BasicArguments) commandLineOptions.parseBean(extendedCommandLineArgs);
+		}catch(MissingArgumentException ex)
+		{
+			System.err.println("Error: " + ex.getMessage());
+			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
+			System.exit(-1);
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+
+			System.err.println("Error: " + ex.getMessage());
+			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
+			System.exit(-1);
+		}
+
+		File reportFolder = new File(basicArguments.getReportsFolder());
 
 		// force delete report folder, if any
 		if(reportFolder.exists())
@@ -257,20 +295,13 @@ public class AutomationLauncher
 		}
 
 		// load the configuration file
-		ApplicationConfiguration appConfig = loadApplicationConfiguration(appConfigurationFile);
+		ApplicationConfiguration appConfig = loadApplicationConfiguration(appConfigurationFile, basicArguments);
 		AutomationContext context = new AutomationContext(appConfig);
+		context.setBasicArguments(basicArguments);
 		
 		// load test suites
 		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig);
 
-		//initialize the configurations
-		String extendedCommandLineArgs[] = {};
-		
-		if(args.length > 2)
-		{
-			extendedCommandLineArgs = Arrays.copyOfRange(args, 2, args.length);
-		}
-	
 		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
 		initalizePlugins(context, extendedCommandLineArgs);
 		

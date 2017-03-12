@@ -2,23 +2,39 @@ package com.yukthitech.automation;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import com.yukthitech.automation.config.AppConfigParserHandler;
+import com.yukthitech.automation.config.AppConfigValueProvider;
 import com.yukthitech.automation.config.ApplicationConfiguration;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
+import com.yukthitech.ccg.xml.util.StringUtil;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
+/**
+ * Parser handler for loading test suite files.
+ * @author akiran
+ */
 public class AutomationParserHandler extends DefaultParserHandler
 {
 	private static final String ATTR_BEAN_REF = "beanRef";
 	
 	private static final String ATTR_BEAN_COPY = "beanCopy";
 	
+	/**
+	 * Application configuration.
+	 */
 	private ApplicationConfiguration appConfig;
+
+	/**
+	 * Value provider for providing application properties and system/env properties.
+	 */
+	private AppConfigValueProvider appConfigValueProvider;
 
 	public AutomationParserHandler(AutomationContext context, ApplicationConfiguration appConfig)
 	{
 		this.appConfig = appConfig;
+		appConfigValueProvider = new AppConfigValueProvider(appConfig.getApplicationProperties());
 		
 		AutomationReserveNodeHandler reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
 		super.registerReserveNodeHandler(reserveNodeHandler);
@@ -69,6 +85,6 @@ public class AutomationParserHandler extends DefaultParserHandler
 	@Override
 	public String processText(Object rootBean, String text)
 	{
-		return text;
+		return StringUtil.getPatternString(text, appConfigValueProvider, AppConfigParserHandler.EXPR_PATTERN, AppConfigParserHandler.EXPR_ESCAPE_PREFIX, AppConfigParserHandler.EXPR_ESCAPE_REPLACE);
 	}
 }

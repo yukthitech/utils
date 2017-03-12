@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.automation.test.log.ExecutionLogData;
 
 /**
- * The Class TestCaseResult.
+ * Represents result of a test case.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCaseResult
 {
 	/**

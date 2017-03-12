@@ -25,6 +25,18 @@ public class BasicArguments
 	 */
 	@CliArgument(name = "tc", longName = "test-cases", description = "Test cases to be executed (comma separated). All dependency test cases also should be included.", required = false)
 	private String testCases;
+	
+	/**
+	 * Used to specify application properties which can then be injected into config files using {{}} expressions.
+	 */
+	@CliArgument(name = "prop", longName = "property-file", description = "Used to specify application properties which can then be injected into config files using {{}} expressions", required = false)
+	private String propertiesFile;
+
+	/**
+	 * Folder in which reports should be generated.
+	 */
+	@CliArgument(name = "rf", longName = "reports-folder", description = "Folder in which reports should be generated.", required = true)
+	private String reportsFolder;
 
 	/**
 	 * Gets the if specified the execution will be limited only for this test suites.
@@ -95,5 +107,44 @@ public class BasicArguments
 		Set<String> cases = new HashSet<>( Arrays.asList(testCases.trim().split("\\s*\\,\\s*")) );
 		return cases;
 	}
-	
+
+	/**
+	 * Gets the used to specify application properties which can then be injected into config files using {{}} expressions.
+	 *
+	 * @return the used to specify application properties which can then be injected into config files using {{}} expressions
+	 */
+	public String getPropertiesFile()
+	{
+		return propertiesFile;
+	}
+
+	/**
+	 * Sets the used to specify application properties which can then be injected into config files using {{}} expressions.
+	 *
+	 * @param properties the new used to specify application properties which can then be injected into config files using {{}} expressions
+	 */
+	public void setPropertiesFile(String properties)
+	{
+		this.propertiesFile = properties;
+	}
+
+	/**
+	 * Gets the folder in which reports should be generated.
+	 *
+	 * @return the folder in which reports should be generated
+	 */
+	public String getReportsFolder()
+	{
+		return reportsFolder;
+	}
+
+	/**
+	 * Sets the folder in which reports should be generated.
+	 *
+	 * @param reportsFolder the new folder in which reports should be generated
+	 */
+	public void setReportsFolder(String reportsFolder)
+	{
+		this.reportsFolder = reportsFolder;
+	}
 }

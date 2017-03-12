@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * All test case results of test suite.
  * 
  * @author akiran
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TestSuiteResults
 {
 	/**
@@ -36,6 +39,9 @@ public class TestSuiteResults
 	 * Status message.
 	 */
 	private String statusMessage;
+
+	public TestSuiteResults()
+	{}
 
 	/**
 	 * Instantiates a new test suite results.

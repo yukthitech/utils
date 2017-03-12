@@ -9,11 +9,13 @@ import java.util.TreeMap;
 
 import org.apache.http.client.utils.DateUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.automation.config.ApplicationConfiguration;
 
 /**
  * Final execution details used for report generation.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FullExecutionDetails
 {
 	/**

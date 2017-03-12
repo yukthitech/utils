@@ -25,7 +25,7 @@
 	
 		<!-- Selenium plugin for web based automation -->	
 		<selenium-plugin>
-			<base-url>http://localhost:8080</base-url>
+			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
@@ -40,7 +40,7 @@
 		<db-plugin>
 			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
 				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
-				<url>jdbc:derby:./work/testDB;create=true</url>
+				<url>jdbc:derby:#{derby.folder};create=true</url>
 			</dataSource>
 		</db-plugin>
 			

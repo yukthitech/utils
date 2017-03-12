@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -74,8 +75,14 @@ public class ApplicationConfiguration
 	 */
 	private String timeFomat = "hh:mm:ss aa";
 	
-	public ApplicationConfiguration()
+	/**
+	 * Application properties.
+	 */
+	private Properties applicationProperties;
+	
+	public ApplicationConfiguration(Properties applicationProperties)
 	{
+		this.applicationProperties = applicationProperties;
 		ApplicationConfiguration.applicationConfiguration = this;
 	}
 	
@@ -88,15 +95,15 @@ public class ApplicationConfiguration
 	{
 		return applicationConfiguration;
 	}
-
+	
 	/**
-	 * Sets the static instance of current application configuration.
+	 * Gets the application properties.
 	 *
-	 * @param applicationConfiguration the new static instance of current application configuration
+	 * @return the application properties
 	 */
-	public static void setApplicationConfiguration(ApplicationConfiguration applicationConfiguration)
+	public Properties getApplicationProperties()
 	{
-		ApplicationConfiguration.applicationConfiguration = applicationConfiguration;
+		return applicationProperties;
 	}
 
 	/**

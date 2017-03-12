@@ -1,6 +1,3 @@
-invoke method step (with params)
-
-	ability to invoke method with different variations - form validations
 
 Reusable step groups
 
@@ -24,13 +21,6 @@ Folder wise execution
 Listener and ui
 
 
-Validate form with field level validations
-
-
-
-ui form validator
-	different variations of data
-	
 
 Test Drag and drop step
 
@@ -57,7 +47,6 @@ property files to load to context
 Extra params in final report
 	like build, environment, date, custom params
 	
-list loading by delimiter
 	
 Extra steps
 	json parsing
@@ -68,21 +57,12 @@ Extra steps
 	read and write file
 		write json object to fil
 		
-	data provider steps
-		at test case level and step level
-	
 	screen shot on error
 	
 	log message step
 	
 	test case to ensure skip and failure
 	
-	eror and failure differentiation
-	
-	
-	test cases to validate cmd args
-	
-	group names in test cases
 	
 	file upload and download
 		resources
@@ -97,8 +77,6 @@ Extra steps
 	
 	reusing of step groups
 	
-	Name of the report
-	
 	Freemarker to have common header and for report files
 		using some file to get list of files to copy
 		
@@ -109,12 +87,7 @@ Extra steps
 	
 Date and time formats from app config
 	
-In all steps and validations only string params should be accepted
-	so that they can be replaced by expresssions by user
 	
-	
-Ability to disable expected exception
-
 Log file processor
 
 support for app properties/json and via dynamic class
@@ -141,4 +114,5 @@ Test Cases
 		one object results in failure
 		
 		
-		
+	test cases to validate cmd args
+	
