@@ -11,6 +11,11 @@
 			<description>Invokes simple method on bean declared in app-config</description>
 
 			<wrap:steps>
+				<ccg:log>
+					<message>Invoking method using object from app config: </message>
+					<message ccg:beanRef="beanFromApp"></message>
+				</ccg:log>
+				
 				<ccg:invokeMethod method="toText">
 					<object ccg:beanRef="beanFromApp"/>
 					

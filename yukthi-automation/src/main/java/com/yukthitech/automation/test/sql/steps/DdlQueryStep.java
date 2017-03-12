@@ -23,6 +23,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "ddlQuery", message = "Executes specified DDL query on specified data source.")
 public class DdlQueryStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Ddl query to execute.
 	 */

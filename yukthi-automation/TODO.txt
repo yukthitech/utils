@@ -9,8 +9,6 @@ Rest based Steps
 
 
 
-logging the object as json
-
 fail step
 
 
@@ -70,11 +68,6 @@ Extra steps
 	loops
 	
 	reusing of step groups
-	
-	Freemarker to have common header and for report files
-		using some file to get list of files to copy
-		
-	
 	
 Log file processor
 

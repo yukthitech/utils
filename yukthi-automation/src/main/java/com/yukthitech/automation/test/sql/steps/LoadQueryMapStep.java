@@ -30,6 +30,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 		+ "\nIn case of zero results empty map will be kept on context. \nPer row new entry will be added.")
 public class LoadQueryMapStep extends AbstractStep
 {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Query to execute.
 	 */

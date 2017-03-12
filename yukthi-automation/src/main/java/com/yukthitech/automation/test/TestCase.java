@@ -256,7 +256,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 			}
 		}
 		
-		boolean expectedExcpetionOccurred = (expectedException == null);
+		boolean expectedExcpetionOccurred = false;
 		
 		// execute the steps involved
 		for(IStep step : steps)
@@ -280,6 +280,7 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 						expectedExcpetionOccurred = true;
 						
 						exeLogger.debug("Expected excpetion occurred: {}", ex);
+						break;
 					}catch(InvalidArgumentException iex)
 					{
 						exeLogger.error(ex, ex.getMessage());
@@ -288,15 +289,12 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 				}
 				
 				//return error only if the exception was not expected one
-				if(!expectedExcpetionOccurred)
-				{
-					exeLogger.error(ex, "An error occurred while executing step: " + executable.name());
-					return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
-				}
+				exeLogger.error(ex, "An error occurred while executing step: " + executable.name());
+				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
 			}
 		}
 		
-		if(!expectedExcpetionOccurred)
+		if(expectedException != null && !expectedExcpetionOccurred)
 		{
 			return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
 		}

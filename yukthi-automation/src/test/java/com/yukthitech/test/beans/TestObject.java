@@ -15,6 +15,11 @@ public class TestObject implements Serializable
 		this.name = name;
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
+	
 	public String toText(Object obj)
 	{
 		return name + ":" + obj;
