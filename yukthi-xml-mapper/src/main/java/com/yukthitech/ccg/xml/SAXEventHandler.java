@@ -688,6 +688,11 @@ class SAXEventHandler extends DefaultHandler
 
 			attValue = (String) att.get(attName);
 			met = metList.setters.get(attName.toUpperCase());
+			
+			if(met == null)
+			{
+				met = metList.adders.get(attName.toUpperCase());
+			}
 
 			if(met == null)
 			{
