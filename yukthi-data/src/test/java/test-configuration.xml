@@ -1,6 +1,6 @@
 <configuration xmlns:ccg="/fw/ccg/XMLBeanParser">
 	<repositoryFactory createTables="true" name="DERBY">
-		<dataStore ccg:beanType="com.yukthi.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="derby">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="derby">
 			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
 				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
 				<url>jdbc:derby:.\db\testDB;create=true</url>
@@ -9,7 +9,7 @@
 	</repositoryFactory>
 
 	<repositoryFactory createTables="true" name="MYSQL">
-		<dataStore ccg:beanType="com.yukthi.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="mysql">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="mysql">
 			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
 				<driverClassName>com.mysql.jdbc.Driver</driverClassName>
 				<url>jdbc:mysql://localhost:3306/test</url>
