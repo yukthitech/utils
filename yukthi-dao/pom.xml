@@ -29,7 +29,7 @@
 
 		<dependency>
 			<groupId>com.yukthi</groupId>
-			<artifactId>yukthi-xml-mapping</artifactId>
+			<artifactId>ccg</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
