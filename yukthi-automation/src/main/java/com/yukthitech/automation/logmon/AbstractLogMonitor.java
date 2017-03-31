@@ -1,9 +1,14 @@
 package com.yukthitech.automation.logmon;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.ccg.xml.util.Validateable;
+
 /**
  * Base abstract for log monitors which provides functionality to manage name.
  */
-public abstract class AbstractLogMonitor implements ILogMonitor
+public abstract class AbstractLogMonitor implements ILogMonitor, Validateable
 {
 	/**
 	 * Name of the log monitor.
@@ -27,5 +32,14 @@ public abstract class AbstractLogMonitor implements ILogMonitor
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+	
+	@Override
+	public void validate() throws ValidateException
+	{
+		if(StringUtils.isBlank(name))
+		{
+			throw new ValidateException("No/empty name specified for log monitor.");
+		}
 	}
 }

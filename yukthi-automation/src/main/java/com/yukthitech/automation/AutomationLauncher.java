@@ -235,7 +235,7 @@ public class AutomationLauncher
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		System.out.println("Executing main function of automation layunche...");
+		System.out.println("Executing main function of automation launcher...");
 		File currentFolder = new File(".");
 		
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
@@ -312,5 +312,7 @@ public class AutomationLauncher
 		//execute test suites
 		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup, reportFolder);
 		testSuiteExecutor.executeTestSuites();
+		
+		System.exit(0);
 	}
 }

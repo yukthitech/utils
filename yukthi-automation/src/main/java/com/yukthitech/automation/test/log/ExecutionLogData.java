@@ -217,7 +217,6 @@ public class ExecutionLogData
 	 *
 	 * @param executorName the executor name
 	 * @param executorDescription the executor description
-	 * @param executorType the executor type
 	 */
 	public ExecutionLogData(String executorName, String executorDescription)
 	{

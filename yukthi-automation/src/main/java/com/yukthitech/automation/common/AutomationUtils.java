@@ -112,7 +112,7 @@ public class AutomationUtils
 	/**
 	 * Treats provided template as freemarker template and processes them. The result will be returned.
 	 * @param context Automation context which would be used as freemarker context for processing.
-	 * @param template Template in which expressions should be replaced
+	 * @param templateStr Template in which expressions should be replaced
 	 * @return Processed string
 	 */
 	public static String replaceExpressions(AutomationContext context, String templateStr)
@@ -131,42 +131,66 @@ public class AutomationUtils
 			throw new InvalidStateException("An error occurred while processing template:\n" + templateStr, ex);
 		}
 	}
+	
+	/**
+	 * Gets all fields of specified type and also its ancestors.
+	 * @param type Type from which fields needs to be extracted
+	 * @return Fields from specified type and its ancestors
+	 */
+	private static List<Field> getAllInstanceFields(Class<?> type)
+	{
+		List<Field> fields = new ArrayList<>();
+		Class<?> curClass = type;
+		
+		while(true)
+		{
+			fields.addAll(Arrays.asList(curClass.getDeclaredFields()));
+			curClass = curClass.getSuperclass();
+			
+			if(curClass.getName().startsWith("java"))
+			{
+				break;
+			}
+		}
+		
+		return fields;
+	}
 
 	/**
 	 * Replaces expressions in specified step properties.
 	 * @param context Context to fetch values for expressions.
-	 * @param executable Step/validator or other executable in which expressions has to be replaced
+	 * @param object Object in which expressions has to be replaced
 	 */
 	@SuppressWarnings("unchecked")
-	public static Object replaceExpressions(AutomationContext context, Object executable)
+	public static <T> T replaceExpressions(AutomationContext context, T object)
 	{
-		if(executable == null)
+		if(object == null)
 		{
 			return null;
 		}
 		
-		Class<?> executableType = executable.getClass();
+		Class<?> executableType = object.getClass();
 		
 		if(executableType.isPrimitive() || executableType.isArray())
 		{
-			return executable;
+			return object;
 		}
 		
-		if(executable instanceof String)
+		if(object instanceof String)
 		{
-			return replaceExpressions(context, (String) executable);
+			return (T) replaceExpressions(context, (String) object);
 		}
 
-		logger.debug("Processing expressions in object: {}", executable);
+		logger.debug("Processing expressions in object: {}", object);
 		
 		//when executable is collection
-		if(executable instanceof Collection)
+		if(object instanceof Collection)
 		{
-			Collection<Object> collection = (Collection<Object>) executable;
+			Collection<Object> collection = (Collection<Object>) object;
 			
 			if(collection.isEmpty())
 			{
-				return collection;
+				return (T) collection;
 			}
 			
 			Collection<Object> resCollection = null;
@@ -184,17 +208,17 @@ public class AutomationUtils
 				resCollection.add( replaceExpressions(context, element) );
 			}
 			
-			return resCollection;
+			return (T) resCollection;
 		}
 			
 		//when executable is map
-		if(executable instanceof Map)
+		if(object instanceof Map)
 		{
-			Map<Object, Object> map = (Map<Object, Object>) executable;
+			Map<Object, Object> map = (Map<Object, Object>) object;
 			
 			if(map.isEmpty())
 			{
-				return map;
+				return (T) map;
 			}
 			
 			Map<Object, Object> resMap = null;
@@ -212,27 +236,15 @@ public class AutomationUtils
 				resMap.put( entry.getKey(), replaceExpressions(context, entry.getValue()) ) ;
 			}
 			
-			return resMap;
+			return (T) resMap;
 		}
 		
 		if(executableType.getName().startsWith("java"))
 		{
-			return executable;
+			return object;
 		}
 
-		List<Field> fields = new ArrayList<>();
-		Class<?> curClass = executable.getClass();
-		
-		while(true)
-		{
-			fields.addAll(Arrays.asList(curClass.getDeclaredFields()));
-			curClass = curClass.getSuperclass();
-			
-			if(curClass.getName().startsWith("java"))
-			{
-				break;
-			}
-		}
+		List<Field> fields = getAllInstanceFields(object.getClass());
 		
 		Object fieldValue = null;
 		Class<?> fieldType = null;
@@ -255,7 +267,7 @@ public class AutomationUtils
 
 				field.setAccessible(true);
 				
-				fieldValue = field.get(executable);
+				fieldValue = field.get(object);
 				
 				//ignore null field values
 				if(fieldValue == null)
@@ -264,7 +276,7 @@ public class AutomationUtils
 				}
 				
 				fieldValue = replaceExpressions(context, fieldValue);
-				field.set(executable, fieldValue);
+				field.set(object, fieldValue);
 				
 			} catch(InvalidStateException ex)
 			{
@@ -272,11 +284,11 @@ public class AutomationUtils
 			} catch(Exception ex)
 			{
 				throw new InvalidStateException(ex, "An error occurred while parsing expressions in field: {}.{}", 
-					executable.getClass().getName(), field.getName());
+					object.getClass().getName(), field.getName());
 			}
 		}
 		
-		return executable;
+		return object;
 	}
 
 	/**
@@ -285,7 +297,7 @@ public class AutomationUtils
 	 */
 	public static void validateRequiredParams(Object bean)
 	{
-		Field fields[] = bean.getClass().getDeclaredFields();
+		List<Field> fields = getAllInstanceFields(bean.getClass());
 		Param param = null;
 		Object value = null;
 		

@@ -1,5 +1,4 @@
-
-Reusable step groups
+Param and auto doc generation
 
 	
 Rest based Steps
@@ -7,7 +6,9 @@ Rest based Steps
 	
 	post with file upload
 
+Reusable step groups
 
+step to covert json into object and keep it on context
 
 fail step
 
@@ -21,6 +22,8 @@ Test Drag and drop step
 
 Test remote file log monitor
 
+Doc upload to yukthitech.com
+
 ================================================
 Reports
 	Simple overview report without external dependencies
@@ -30,7 +33,6 @@ Reports
 ==========================
 
 
-Param and auto doc generation
 
 why first driver is not being used?
 
@@ -50,8 +52,6 @@ Extra steps
 		write json object to fil
 		
 	screen shot on error
-	
-	log message step
 	
 	test case to ensure skip and failure
 	

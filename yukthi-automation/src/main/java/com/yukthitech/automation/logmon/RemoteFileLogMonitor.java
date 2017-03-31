@@ -66,6 +66,11 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 		
 	}
 	
+	static
+	{
+		JSch.setConfig("StrictHostKeyChecking", "no");
+	}
+	
 	/**
 	 * Path of file to monitor.
 	 */
@@ -101,9 +106,24 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	private long startPosition = -1;
 	
+	/**
+	 * Jsch interaction instance.
+	 */
 	private JSch jsch=new JSch();
 	
+	/**
+	 * Internal variable, used to maintain sftp connection.
+	 */
+	private ChannelSftp sftp;
+	
+	/**
+	 * Internal variable, used to maintain session.
+	 */
 	private Session session;
+	
+	public RemoteFileLogMonitor()
+	{
+	}
 
 	/**
 	 * Sets the path of file to monitor.
@@ -178,16 +198,45 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 		
 		if(StringUtils.isNoneBlank(password))
 		{
+			logger.debug("Starting ssh session with remote host using password - {}:{}", host, port);
+			
 			session = jsch.getSession(user, host, port);
 			session.setUserInfo(new RemoteUserInfo());
 		}
 		else
 		{
+			logger.debug("Starting ssh session with remote host using private key - {}:{}", host, port);
+			
 			jsch.addIdentity(privateKeyPath);
 			session = jsch.getSession(user, host, port);
 		}
 		
+		session.connect();
 		return session;
+	}
+	
+	/**
+	 * Opens a sftp channel and returns the same. If connection was already open, this 
+	 * method returns old connection.
+	 * @return sftp channel
+	 * @throws JSchException 
+	 */
+	private ChannelSftp getChannel() throws JSchException
+	{
+		if(sftp != null && sftp.isConnected())
+		{
+			return sftp;
+		}
+		
+		Session session = getSession();
+		
+		logger.debug("Establishing sftp connection to remote host: {}", host);
+
+		ChannelSftp sftp = (ChannelSftp ) session.openChannel("sftp");
+		sftp.connect();
+		
+		this.sftp = sftp;
+		return sftp;
 	}
 	
 
@@ -200,9 +249,9 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	{
 		try
 		{
-			Session session = getSession();
+			ChannelSftp sftp = getChannel();
 			
-			ChannelSftp sftp = (ChannelSftp ) session.openChannel("sftp");
+			logger.debug("Getting position of remote file: {}", remoteFilePath);
 			
 			Vector<ChannelSftp.LsEntry> lsEntries = sftp.ls(remoteFilePath);
 			
@@ -215,8 +264,6 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			
 			ChannelSftp.LsEntry lsEntry = lsEntries.get(0);
 			startPosition = lsEntry.getAttrs().getSize();
-			
-			sftp.disconnect();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remoteFilePath);
@@ -232,9 +279,9 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	{
 		try
 		{
-			Session session = getSession();
+			ChannelSftp sftp = getChannel();
 			
-			ChannelSftp sftp = (ChannelSftp ) session.openChannel("sftp");
+			logger.debug("Getting content from remote file: {}", remoteFilePath);
 			
 			Vector<ChannelSftp.LsEntry> lsEntries = sftp.ls(remoteFilePath);
 			
@@ -301,7 +348,6 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				sftp.get(remoteFilePath, fos, progressMonitor, ChannelSftp.RESUME, startPosition);
 				
 				fos.close();
-				sftp.disconnect();
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while creating monitoring log.", ex);
@@ -321,6 +367,8 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public void validate() throws ValidateException
 	{
+		super.validate();
+		
 		if(StringUtils.isBlank(host))
 		{
 			throw new ValidateException("Host can not be null or empty");

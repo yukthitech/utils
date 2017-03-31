@@ -447,12 +447,6 @@ public class TestSuiteExecutor
 	/**
 	 * Executes test suites with specified context.
 	 * 
-	 * @param context
-	 *            Context to be used for automation.
-	 * @param testSuiteGroup
-	 *            Test suites to execute.
-	 * @param reportFolder
-	 *            Folder where output report needs to be generated
 	 */
 	public boolean executeTestSuites()
 	{

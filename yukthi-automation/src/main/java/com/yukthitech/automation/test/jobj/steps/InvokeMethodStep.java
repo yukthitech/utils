@@ -123,7 +123,7 @@ public class InvokeMethodStep extends AbstractStep
 	/**
 	 * Sets the list of arguments to be passed to method.
 	 *
-	 * @param parameters the new list of arguments to be passed to method
+	 * @param param parameter to be passed to method
 	 */
 	public void addParameter(Object param)
 	{

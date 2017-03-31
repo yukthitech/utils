@@ -7,6 +7,7 @@ $.application.controller("monitorController", function($scope){
 		
 		var content = $("#logContentContainer").text().trim();
 		content = content.replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;");
+		content = content.replace(/\ /g, "&nbsp;");
 
 		var contentArr = content.split("\n")
 		

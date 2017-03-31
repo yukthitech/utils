@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.logmon.FileLogMonitor;
 import com.yukthitech.automation.logmon.ILogMonitor;
+import com.yukthitech.automation.logmon.RemoteFileLogMonitor;
 
 /**
  * Application configuration for applications being automated.
@@ -191,6 +192,11 @@ public class ApplicationConfiguration
 		this.addPlugin(plugin);
 	}
 	
+	public void setRestPlugin(RestPlugin plugin)
+	{
+		this.addPlugin(plugin);
+	}
+	
 	/**
 	 * Gets the plugin from configured plugins of specified type.
 	 * @return Matching plugin.
@@ -260,6 +266,15 @@ public class ApplicationConfiguration
 	 * @param monitor monitor to add.
 	 */
 	public void addFileLogMonitor(FileLogMonitor monitor)
+	{
+		addLogMonitor(monitor);
+	}
+	
+	/**
+	 * Adds specified remote log monitor.
+	 * @param monitor monitor to add
+	 */
+	public void addRemoteLogMonitor(RemoteFileLogMonitor monitor)
 	{
 		addLogMonitor(monitor);
 	}

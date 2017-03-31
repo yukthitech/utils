@@ -61,7 +61,7 @@ public class MultiDmlQueryStep extends AbstractStep
 	/**
 	 * Adds the query to execute.
 	 * 
-	 * @param queries the new queries.
+	 * @param query query to add.
 	 */
 	public void addQuery(String query) 
 	{

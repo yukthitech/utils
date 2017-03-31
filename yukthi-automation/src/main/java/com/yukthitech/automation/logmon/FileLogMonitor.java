@@ -130,6 +130,8 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 	@Override
 	public void validate() throws ValidateException
 	{
+		super.validate();
+		
 		if(StringUtils.isBlank(path))
 		{
 			throw new ValidateException("Path can not be null or empty");
