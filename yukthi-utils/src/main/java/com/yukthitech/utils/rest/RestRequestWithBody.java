@@ -32,6 +32,8 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 {
 	private static final String JSON_CONTENT_TYPE = "application/json";
 	
+	private static final String TEXT_CONTENT_TYPE = "application/text";
+	
 	private static final class RequestPart
 	{
 		private String name;
@@ -258,6 +260,25 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		{
 			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
 		}
+		
+		return (T)this;
+	}
+
+	/**
+	 * Adds the specified object as string part to this multipart request
+	 * @param partName Name of the request part
+	 * @param object string to be added
+	 * @return current request instance
+	 */
+	@SuppressWarnings("unchecked")
+	public T addTextPart(String partName, String object)
+	{
+		if(!multipartRequest)
+		{
+			throw new IllegalStateException("Parts can be added only to multi part request");
+		}
+		
+		this.multiparts.add(new RequestPart(partName, object, TEXT_CONTENT_TYPE));
 		
 		return (T)this;
 	}
