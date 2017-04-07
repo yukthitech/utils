@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.automation.AutomationLauncher;
+import com.yukthitech.autox.AutomationLauncher;
 
 public class TAutomation
 {
