@@ -6,20 +6,30 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.automation.Executable;
+import com.yukthitech.automation.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.rest.RestClient;
 
+/**
+ * Plugin for REST based steps and validations.
+ * @author akiran
+ */
+@Executable(name = "RestPlugin", message = "Plugin for REST based steps and validations.")
 public class RestPlugin implements IPlugin<Object>, Validateable
 {
 	/**
 	 * Base url for REST api invocation.
 	 */
+	@Param(description = "Default base url to be used for REST steps and validations.", required = true)
 	private String baseUrl;
 	
 	/**
 	 * Default headers to be passed with every method invocation.
 	 */
+	@Param(description = "Default HTTP headers that will be added before sending the request. The headers defined at step/validation level will override this header."
+			+ "<b>The values can contain free-marker expressions.</b>", required = false)
 	private Map<String, String> defaultHeaders = new HashMap<>();
 	
 	/**

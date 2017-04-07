@@ -1,3 +1,15 @@
+Doc
+============
+Examples for each
+other documents
+
+rename setJxContextParam
+
+command line arguments doc
+
+==============
+
+
 Param and auto doc generation
 
 	
@@ -6,6 +18,7 @@ Rest based Steps
 	
 	post with file upload
 
+	file download
 Reusable step groups
 
 step to covert json into object and keep it on context

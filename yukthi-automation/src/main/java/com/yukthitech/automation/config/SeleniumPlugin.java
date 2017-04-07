@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.automation.Executable;
+import com.yukthitech.automation.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -17,6 +19,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Plugin needed by selenium based steps or validators.
  * @author akiran
  */
+@Executable(name = "SeleniumPlugin", message = "Plugin needed by selenium/ui-automation based steps or validators.")
 public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 {
 	private static Logger logger = LogManager.getLogger(SeleniumPlugin.class);
@@ -24,6 +27,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	/**
 	 * Selenium drivers to use for automation.
 	 */
+	@Param(description = "Name to basic configuration to be used for different drivers. Like - name, class-name and default system properties to set.", required = true)
 	private Map<String, SeleniumDriverConfig> drivers = new HashMap<>();
 	
 	/**
@@ -39,6 +43,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	/**
 	 * Base url of the application.
 	 */
+	@Param(description = "Base url to be used for ui automation", required = true)
 	private String baseUrl;
 	
 	@Override
@@ -51,8 +56,10 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	 * Adds specified driver configuration.
 	 * @param driverConfig configuration to be added
 	 */
-	public void addDriver(SeleniumDriverConfig driverConfig)
+	public void addDriver(SeleniumDriverConfig driverConfig) throws ValidateException
 	{
+		driverConfig.validate();
+		
 		drivers.put(driverConfig.getName(), driverConfig);
 	}
 	

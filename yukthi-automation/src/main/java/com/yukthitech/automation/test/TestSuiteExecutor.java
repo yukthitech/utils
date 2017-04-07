@@ -512,7 +512,7 @@ public class TestSuiteExecutor
 		}
 		
 		//copy the resource files into output folder
-		ReportResourceManager.getInstance().copyResources(reportFolder);
+		ResourceManager.getInstance().copyReportResources(reportFolder);
 
 		//create final report files
 		try

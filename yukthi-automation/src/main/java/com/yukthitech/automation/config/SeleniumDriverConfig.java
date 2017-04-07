@@ -3,11 +3,16 @@ package com.yukthitech.automation.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.ccg.xml.util.Validateable;
+
 /**
  * Selenium driver configuration.
  * @author akiran
  */
-public class SeleniumDriverConfig
+public class SeleniumDriverConfig implements Validateable
 {
 	/**
 	 * Name of the driver.
@@ -122,5 +127,19 @@ public class SeleniumDriverConfig
 	public void setDefault(boolean isDefault)
 	{
 		this.isDefault = isDefault;
+	}
+
+	@Override
+	public void validate() throws ValidateException
+	{
+		if(StringUtils.isBlank(name))
+		{
+			throw new ValidateException("Name can not be null or empty.");
+		}
+		
+		if(StringUtils.isBlank(className))
+		{
+			throw new ValidateException("Class-name can not be null or empty.");
+		}
 	}
 }

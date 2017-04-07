@@ -5,17 +5,25 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.automation.AutomationContext;
+import com.yukthitech.automation.Executable;
+import com.yukthitech.automation.Param;
+import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.ccg.xml.util.Validateable;
 
 /**
  * plugin related to db related steps or validators.
  * @author akiran
  */
-public class DbPlugin implements IPlugin<Object>
+@Executable(name = "DbPlugin", message = "Plugin related to db related steps or validators.")
+public class DbPlugin implements IPlugin<Object>, Validateable
 {
 	/**
 	 * Application data sources.
 	 */
+	@Param(description = "Name to data source mapping for different data sources that are available in this app automation.", required = true)
 	private Map<String, DataSource> dataSourceMap = new HashMap<>();
 
 	@Override
@@ -31,6 +39,16 @@ public class DbPlugin implements IPlugin<Object>
 	 */
 	public void addDataSource(String name, DataSource dataSource)
 	{
+		if(StringUtils.isBlank(name))
+		{
+			throw new NullPointerException("Data source name can not be null or empty.");
+		}
+		
+		if(dataSource == null)
+		{
+			throw new NullPointerException("Data source can not be null");
+		}
+		
 		this.dataSourceMap.put(name, dataSource);
 	}
 	
@@ -47,5 +65,14 @@ public class DbPlugin implements IPlugin<Object>
 	@Override
 	public void initialize(AutomationContext context, Object args)
 	{
+	}
+
+	@Override
+	public void validate() throws ValidateException
+	{
+		if(dataSourceMap.isEmpty())
+		{
+			throw new ValidateException("No data sources are defined.");
+		}
 	}
 }

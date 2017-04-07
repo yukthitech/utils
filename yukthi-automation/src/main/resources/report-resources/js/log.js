@@ -10,7 +10,7 @@ $.application.controller('testLogAppController', function($scope){
 		
 		var urlStr = (window.location).search;
 		
-		urlStr = "../output/logs/" + urlStr.slice(1, urlStr.length) + ".js";
+		urlStr = "./logs/" + urlStr.slice(1, urlStr.length) + ".js";
 		$scope.importScript(urlStr, $scope.displayLogs);
 	};
 	
