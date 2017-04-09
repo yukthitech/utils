@@ -14,8 +14,6 @@ Param and auto doc generation
 
 	
 Rest based Steps
-	get and post urls?
-	
 	post with file upload
 
 	file download
@@ -32,8 +30,6 @@ Listener and ui
 
 
 Test Drag and drop step
-
-Test remote file log monitor
 
 Doc upload to yukthitech.com
 
@@ -56,9 +52,6 @@ Extra params in final report
 	
 	
 Extra steps
-	json parsing
-	
-	
 	create temp file in work dir
 	
 	read and write file
@@ -72,8 +65,6 @@ Extra steps
 	file upload and download
 		resources
 		
-	jx path validation of properties
-	
 	Step to fail test case
 	
 	if-else
@@ -82,7 +73,6 @@ Extra steps
 	
 	reusing of step groups
 	
-Log file processor
 
 time taken by test cases and steps
 =======================================

@@ -1,9 +1,6 @@
 package com.yukthitech.autox.test.common.steps;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AbstractStep;
@@ -17,24 +14,24 @@ import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
 /**
- * Loads specified properties file as map on to context.
+ * Loads specified resource as text on to context.
  * @author akiran
  */
-@Executable(name = "loadProperties", message = "Loads specified properties file/resource as map on to context")
-public class LoadPropertiesStep extends AbstractStep
+@Executable(name = "loadText", message = "Loads specified properties file/resource as text on to context")
+public class LoadTextStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Path of the resource to load.
 	 */
-	@Param(description = "Properties resource to load. Can be file or classpath resource.", required = false)
+	@Param(description = "Text resource to load. Can be file or classpath resource.", required = false)
 	private String resource;
 	
 	/**
 	 * Context attribute to be used to load the map.
 	 */
-	@Param(description = "Name of context attribute to be used to set loaded map on context")
+	@Param(description = "Name of context attribute to be used to set loaded text on context")
 	private String contextAttribute;
 	
 	/**
@@ -48,42 +45,32 @@ public class LoadPropertiesStep extends AbstractStep
 	}
 	
 	/**
-	 * Sets the context attribute to be used to load the map.
+	 * Sets the context attribute to be used to load the text.
 	 *
-	 * @param contextAttribute the new context attribute to be used to load the map
+	 * @param contextAttribute the new context attribute to be used to load the text
 	 */
 	public void setContextAttribute(String contextAttribute)
 	{
 		this.contextAttribute = contextAttribute;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		Properties properties = new Properties();	
 		IResource resObj = ResourceFactory.getResource(resource, exeLogger);
-		
-		if(resObj == null)
-		{
-			throw new TestCaseFailedException("Invalid resource specified: {}", resource);
-		}
+		String value = null;
 		
 		try
 		{
-			properties.load(resObj.getInputStream());
+			value = IOUtils.toString(resObj.getInputStream());
+			resObj.close();
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while loading properties resource - {}.\nError: {}", resource);
-			throw new TestCaseFailedException("An error occurred while loading properties resource - {}", resource, ex);
+			exeLogger.error(ex, "An error occurred while loading resource - {}.\nError: {}", resource);
+			throw new TestCaseFailedException("An error occurred while loading resource - {}", resource, ex);
 		}
 		
-		resObj.close();
-		
-		Map<String, String> resMap = new HashMap<String, String>();
-		resMap.putAll((Map) properties);
-		
-		context.setAttribute(contextAttribute, resMap);
+		context.setAttribute(contextAttribute, value);
 	}
 
 	@Override

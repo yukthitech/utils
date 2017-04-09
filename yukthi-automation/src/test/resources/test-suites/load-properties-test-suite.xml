@@ -6,9 +6,9 @@
 
 			<wrap:steps>
 				<ccg:loadProperties contextAttribute="propFile">
-					<file>
-						.\src\test\resources\test-suites\test.properties
-					</file>
+					<resource>
+						file:.\src\test\resources\test-suites\test.properties
+					</resource>
 				</ccg:loadProperties>
 			</wrap:steps>
 

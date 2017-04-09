@@ -2,12 +2,12 @@ package com.yukthitech.autox.test.common.steps;
 
 import org.apache.commons.jxpath.JXPathContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.ConvertUtils;
 
@@ -16,13 +16,11 @@ import com.yukthitech.utils.ConvertUtils;
  * 
  * @author akiran
  */
-@Executable(name = "setJxContextParam", message = "Sets the specified context attribute with specified value using jx path.")
-public class SetJxContextParamStep extends AbstractStep
+@Executable(name = "setXpathContextParam", message = "Sets the specified context attribute with specified value using jx path.")
+public class SetXpathContextParamStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
 	/**
 	 * Name of attribute to set.
 	 */
@@ -36,7 +34,7 @@ public class SetJxContextParamStep extends AbstractStep
 	private String valueExpression;
 
 	/** The source. */
-	@Param(description = "Source on which jx expression has to be evaluated.")
+	@Param(description = "Source on which jx expression has to be evaluated. Source can be a bean or json string or a file resource (file:resource-path)")
 	private Object source;
 
 	/**
@@ -105,22 +103,7 @@ public class SetJxContextParamStep extends AbstractStep
 			}
 		}
 		
-		Object sourceValue = null;
-		
-		if(source instanceof String)
-		{
-			try
-			{
-				sourceValue = OBJECT_MAPPER.readValue( (String) source, Object.class );
-			}catch(Exception ex)
-			{
-				throw new IllegalStateException("An exception occurred while parsing source: \n" + source, ex);
-			}
-		}
-		else
-		{
-			sourceValue = source;
-		}
+		Object sourceValue = IAutomationConstants.PARSE_OBJ_SOURCE(context, exeLogger, source);
 		
 		Object value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
 

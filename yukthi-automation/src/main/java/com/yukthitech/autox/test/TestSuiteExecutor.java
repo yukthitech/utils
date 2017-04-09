@@ -527,6 +527,15 @@ public class TestSuiteExecutor
 			throw new InvalidStateException(ex, "An error occurred while generating test result report");
 		}
 		
+		System.out.println(String.format(
+			"[Total Test Cases: %s, Successful: %s, Failed: %s, Errored: %s, Skipped: %s]", 
+			fullExecutionDetails.getTestCaseCount(), 
+			fullExecutionDetails.getTestCaseSuccessCount(), 
+			fullExecutionDetails.getTestCaseFailureCount(),
+			fullExecutionDetails.getTestCaseErroredCount(),
+			fullExecutionDetails.getTestCaseSkippedCount()
+		));
+		
 		return successful;
 	}
 }

@@ -142,5 +142,25 @@
 			</wrap:validations>
 		</testCase>
 
+		<testCase name="xpath_test">
+			<description>
+				Ensures xpath steps and validations works as expected.
+			</description>
+			
+			<wrap:steps>
+				<ccg:setXpathContextParam name="xpathAttr1" source="file:./src/test/resources/data/data.json" valueExpression="//bean1/prop1"/>
+				<ccg:setXpathContextParam name="xpathAttr2" source="res:/data/data.json" valueExpression="//bean1/subbean1/sprop1"/>
+				<ccg:loadJson contextAttribute="xpathObj" resource="res:/data/data.json"/>
+			</wrap:steps>
+			
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.xpathAttr1" value="value1" />
+				<ccg:validateXpathValue source="res:/data/data.json" valueExpression="//bean1/subbean1/sprop2" value="value3" />
+				
+				<ccg:validateXpathValue valueExpression="//bean1/subbean1/sprop2" value="value3" source="ref:attr.xpathObj">
+				</ccg:validateXpathValue>
+			</wrap:validations>
+		</testCase>
+		
 	</testSuite>
 </testData>
