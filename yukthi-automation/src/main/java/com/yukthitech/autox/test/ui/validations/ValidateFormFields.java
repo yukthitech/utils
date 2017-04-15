@@ -228,7 +228,7 @@ public class ValidateFormFields extends AbstractValidation
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{

@@ -8,28 +8,21 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.IValidation;
-import com.yukthitech.autox.IValidationContainer;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Test case with validations to be executed.
  */
-public class TestCase implements IStepContainer, IValidationContainer, Validateable
+public class TestCase implements IStepContainer, Validateable
 {
-	private static Logger logger = LogManager.getLogger(TestCase.class);
-	
 	/**
 	 * Name of the test case.
 	 */
@@ -52,11 +45,6 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 	 */
 	private List<IStep> steps = new ArrayList<>();
 
-	/**
-	 * Validations of test case.
-	 */
-	private List<IValidation> validations = new ArrayList<>();
-	
 	/**
 	 * Details of the exception expected from this test case.
 	 */
@@ -200,24 +188,6 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		steps.add(step);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.yukthitech.ui.automation.IValidationContainer#addValidation(com.yukthitech.ui
-	 * .automation.IValidation)
-	 */
-	@Override
-	public void addValidation(IValidation validation)
-	{
-		if(validations == null)
-		{
-			validations = new ArrayList<IValidation>();
-		}
-
-		validations.add(validation);
-	}
-
 	/**
 	 * Sets the details of the exception expected from this test case.
 	 *
@@ -261,77 +231,26 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		// execute the steps involved
 		for(IStep step : steps)
 		{
-			//clone the step, so that expression replacement will not affect actual step
-			step = step.clone();
-			
 			try
 			{
-				AutomationUtils.replaceExpressions(context, step);
-				step.execute(context, exeLogger);
+				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
-				Executable executable = step.getClass().getAnnotation(Executable.class);
+				TestCaseResult result = StepExecutor.handleException(step, exeLogger, ex, expectedException);
 				
-				if(expectedException != null)
+				if(result != null)
 				{
-					try
-					{
-						expectedException.validateMatch(ex);
-						expectedExcpetionOccurred = true;
-						
-						exeLogger.debug("Expected excpetion occurred: {}", ex);
-						break;
-					}catch(InvalidArgumentException iex)
-					{
-						exeLogger.error(ex, ex.getMessage());
-						return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
-					}
+					return result;
 				}
 				
-				//return error only if the exception was not expected one
-				exeLogger.error(ex, "An error occurred while executing step: " + executable.name());
-				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored: " + executable.name());
+				expectedExcpetionOccurred = true;
+				break;
 			}
 		}
 		
 		if(expectedException != null && !expectedExcpetionOccurred)
 		{
 			return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
-		}
-
-		// execute the validations
-		for(IValidation validation : validations)
-		{
-			validation = validation.clone();
-			
-			try
-			{
-				AutomationUtils.replaceExpressions(context, validation);
-				
-				if(!validation.validate(context, exeLogger))
-				{
-					Executable executable = validation.getClass().getAnnotation(Executable.class);
-					exeLogger.error("Validation failed: " + executable.name() + validation);
-
-					return new TestCaseResult(name, TestStatus.FAILED, exeLogger.getExecutionLogData(), "Validation failed: " + executable.name() + validation);
-				}
-			} catch(TestCaseFailedException ex)
-			{
-				Executable executable = validation.getClass().getAnnotation(Executable.class);
-				
-				//for handled exceptions dont log on ui
-				logger.error("An error occurred while executing validation: " + executable.name(), ex);
-				
-				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + executable.name());
-			} catch(Exception ex)
-			{
-				Executable executable = validation.getClass().getAnnotation(Executable.class);
-				
-				//for unhandled exceptions dont log on ui
-				exeLogger.error(ex, "An error occurred while executing validation: " + executable.name());
-				
-				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + executable.name());
-			}
 		}
 
 		return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
@@ -354,10 +273,17 @@ public class TestCase implements IStepContainer, IValidationContainer, Validatea
 		{
 			throw new ValidateException("No description is provided for test case - " + name);
 		}
-
-		if(CollectionUtils.isEmpty(validations) && expectedException == null)
+		
+		if(CollectionUtils.isEmpty(steps))
 		{
-			throw new ValidateException("No validations provided for test case - " + name);
+			throw new ValidateException("No steps specified for execution of test case - " + name);
+		}
+		
+		IStep lastStep = steps.get(steps.size() - 1);
+
+		if( !(lastStep instanceof IValidation) && expectedException == null)
+		{
+			throw new ValidateException("No validations provided at end of test case - " + name);
 		}
 	}
 }

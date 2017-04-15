@@ -57,7 +57,7 @@ public class MkDirStep extends AbstractStep
 	 * @see com.yukthitech.automation.IStep#execute(com.yukthitech.automation.AutomationContext, com.yukthitech.automation.IExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Creating directory {} in work folder: {}", path, context.getWorkDirectory().getPath());
 		
@@ -76,5 +76,6 @@ public class MkDirStep extends AbstractStep
 			throw new TestCaseFailedException("An error occurred while creating directory - {}", path, ex);
 		}
 		
+		return true;
 	}
 }

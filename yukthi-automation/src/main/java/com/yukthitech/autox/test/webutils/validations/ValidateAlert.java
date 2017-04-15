@@ -47,7 +47,7 @@ public class ValidateAlert extends AbstractValidation
 	 * @see com.yukthitech.ui.automation.IValidation#execute(com.yukthitech.ui.automation.AutomationContext, java.io.PrintWriter)
 	 */
 	@Override
-	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{

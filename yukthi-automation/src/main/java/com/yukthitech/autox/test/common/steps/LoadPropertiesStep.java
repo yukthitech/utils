@@ -59,7 +59,7 @@ public class LoadPropertiesStep extends AbstractStep
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		Properties properties = new Properties();	
 		IResource resObj = ResourceFactory.getResource(resource, exeLogger);
@@ -84,6 +84,7 @@ public class LoadPropertiesStep extends AbstractStep
 		resMap.putAll((Map) properties);
 		
 		context.setAttribute(contextAttribute, resMap);
+		return true;
 	}
 
 	@Override

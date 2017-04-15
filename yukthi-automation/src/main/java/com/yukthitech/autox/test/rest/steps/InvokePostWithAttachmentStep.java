@@ -52,7 +52,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		PostRestRequest postRestRequest = new PostRestRequest(uri);
 		postRestRequest.setMultipartRequest(true);
@@ -92,6 +92,8 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		
 		super.populate(context, postRestRequest, exeLogger);
 		super.invoke(context, postRestRequest, exeLogger);
+		
+		return true;
 	}
 
 }

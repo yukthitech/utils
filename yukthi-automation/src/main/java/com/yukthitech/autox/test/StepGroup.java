@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.IValidation;
-import com.yukthitech.autox.IValidationContainer;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -16,7 +15,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
-public class StepGroup implements IStepContainer, IValidationContainer, Validateable
+public class StepGroup implements IStepContainer, Validateable
 {
 	/**
 	 * Name of this group.
@@ -51,12 +50,6 @@ public class StepGroup implements IStepContainer, IValidationContainer, Validate
 	public String getName()
 	{
 		return name;
-	}
-
-	@Override
-	public void addValidation(IValidation validation)
-	{
-		validations.add(validation);
 	}
 
 	@Override

@@ -52,7 +52,7 @@ public class InvokePutWithAttachmentStep extends AbstractRestStep implements Val
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		PutRestRequest putRestRequest = new PutRestRequest(uri);
 		putRestRequest.setMultipartRequest(true);
@@ -92,6 +92,8 @@ public class InvokePutWithAttachmentStep extends AbstractRestStep implements Val
 		
 		super.populate(context, putRestRequest, exeLogger);
 		super.invoke(context, putRestRequest, exeLogger);
+		
+		return true;
 	}
 
 }

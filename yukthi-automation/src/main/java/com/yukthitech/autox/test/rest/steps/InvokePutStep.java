@@ -33,7 +33,7 @@ public class InvokePutStep extends AbstractRestStep
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		PutRestRequest putRestRequest = new PutRestRequest(uri);
 		
@@ -48,5 +48,7 @@ public class InvokePutStep extends AbstractRestStep
 		
 		super.populate(context, putRestRequest, logger);
 		super.invoke(context, putRestRequest, logger);
+		
+		return true;
 	}
 }

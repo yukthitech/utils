@@ -50,7 +50,7 @@ public class ValidateVisibility extends AbstractValidation
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{

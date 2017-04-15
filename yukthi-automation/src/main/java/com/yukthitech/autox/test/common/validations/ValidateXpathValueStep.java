@@ -65,7 +65,7 @@ public class ValidateXpathValueStep extends AbstractValidation
 	}
 
 	@Override
-	public boolean validate(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{

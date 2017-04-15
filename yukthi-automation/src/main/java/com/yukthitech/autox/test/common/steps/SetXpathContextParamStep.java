@@ -88,7 +88,7 @@ public class SetXpathContextParamStep extends AbstractStep
 	 * @see com.yukthitech.automation.IStep#execute(com.yukthitech.automation.AutomationContext, com.yukthitech.automation.ExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		Class<?> type = null;
 
@@ -116,5 +116,6 @@ public class SetXpathContextParamStep extends AbstractStep
 		}
 
 		context.setAttribute(name, value);
+		return true;
 	}
 }

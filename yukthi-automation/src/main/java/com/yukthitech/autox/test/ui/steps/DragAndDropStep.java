@@ -40,7 +40,7 @@ public class DragAndDropStep extends AbstractStep
 	private String destination;
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger)
+	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
 		logger.debug("Dragging element '{}' to element - {}", source, destination);
 		
@@ -48,6 +48,8 @@ public class DragAndDropStep extends AbstractStep
 		WebElement destinationElement = UiAutomationUtils.findElement(context, null, destination);
 
 		dragAndDrop(context, sourceElement, destinationElement, logger);
+		
+		return true;
 	}
 
 	/**

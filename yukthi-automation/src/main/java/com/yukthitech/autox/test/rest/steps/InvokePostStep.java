@@ -33,7 +33,7 @@ public class InvokePostStep extends AbstractRestStep
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		PostRestRequest postRestRequest = new PostRestRequest(uri);
 		
@@ -48,6 +48,8 @@ public class InvokePostStep extends AbstractRestStep
 		
 		super.populate(context, postRestRequest, logger);
 		super.invoke(context, postRestRequest, logger);
+		
+		return true;
 	}
 
 }

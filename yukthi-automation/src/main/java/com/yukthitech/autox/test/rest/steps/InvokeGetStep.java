@@ -16,12 +16,14 @@ public class InvokeGetStep extends AbstractRestStep
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		GetRestRequest getRestRequest = new GetRestRequest(uri);
 		
 		super.populate(context, getRestRequest, logger);
 		super.invoke(context, getRestRequest, logger);
+		
+		return true;
 	}
 
 }

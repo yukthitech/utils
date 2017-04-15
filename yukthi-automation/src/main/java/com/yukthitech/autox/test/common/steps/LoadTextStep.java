@@ -55,7 +55,7 @@ public class LoadTextStep extends AbstractStep
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		IResource resObj = ResourceFactory.getResource(resource, exeLogger);
 		String value = null;
@@ -71,6 +71,7 @@ public class LoadTextStep extends AbstractStep
 		}
 		
 		context.setAttribute(contextAttribute, value);
+		return true;
 	}
 
 	@Override

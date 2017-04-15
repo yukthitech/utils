@@ -29,7 +29,7 @@ public class ClickStep extends AbstractStep
 	private String locator;
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Clicking the element specified by locator: {}", locator);
 
@@ -64,6 +64,8 @@ public class ClickStep extends AbstractStep
 			exeLogger.error(ex, "Failed to click element - {}", locator);
 			throw new TestCaseFailedException("Failed to click element - {}", locator, ex);
 		}
+		
+		return true;
 	}
 
 	/**

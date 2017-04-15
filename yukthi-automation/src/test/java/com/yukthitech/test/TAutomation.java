@@ -22,7 +22,7 @@ public class TAutomation
 	@Test
 	public void startAutomation() throws Exception
 	{
-		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", "-rf", "./output", "-prop", "./src/test/resources/app.properties", "-tc", "stepsFromGroup"});
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", "-rf", "./output", "-prop", "./src/test/resources/app.properties"});
 		
 		ExecutionResult exeResult = objectMapper.readValue(new File("./output/test-results.json"), ExecutionResult.class);
 		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 0, "Found one more test cases errored.");

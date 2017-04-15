@@ -36,11 +36,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	private Map<String, Class<? extends IStep>> nameToStepType = new HashMap<>();
 
 	/**
-	 * Mapping from name to validation type.
-	 */
-	private Map<String, Class<? extends IValidation>> nameToValidationType = new HashMap<>();
-	
-	/**
 	 * Current application configuration.
 	 */
 	private ApplicationConfiguration applicationConfiguration;
@@ -71,7 +66,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		basePackages.add("com.yukthitech");
 
 		loadStepTypes(basePackages);
-		loadValidationTypes(basePackages);
 	}
 
 	/**
@@ -112,43 +106,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	}
 
 	/**
-	 * Loads all validation types found in specified base packages.
-	 * 
-	 * @param basePackages
-	 *            Base packages to be scanned
-	 */
-	private void loadValidationTypes(Set<String> basePackages)
-	{
-		Reflections reflections = null;
-		Set<Class<? extends IValidation>> validationTypes = null;
-		Executable executable = null;
-
-		for(String pack : basePackages)
-		{
-			reflections = new Reflections(pack, new TypeAnnotationsScanner(), new SubTypesScanner());
-
-			validationTypes = reflections.getSubTypesOf(IValidation.class);
-
-			for(Class<? extends IValidation> validationType : validationTypes)
-			{
-				if(validationType.isInterface() || Modifier.isAbstract(validationType.getModifiers()))
-				{
-					continue;
-				}
-
-				executable = validationType.getAnnotation(Executable.class);
-
-				if(executable == null)
-				{
-					continue;
-				}
-
-				nameToValidationType.put(executable.name(), validationType);
-			}
-		}
-	}
-	
-	/**
 	 * Fetches the step group represented by specified bean node and adds the steps/validations
 	 * from that group to specified parent.
 	 * @param parent parent to which steps/validations to be added
@@ -156,7 +113,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	 */
 	private void addStepGroup(Object parent, BeanNode beanNode)
 	{
-		if(!(parent instanceof IStepContainer) && !(parent instanceof IValidationContainer))
+		if(!(parent instanceof IStepContainer))
 		{
 			return;
 		}
@@ -182,16 +139,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			for(IStep step : stepGroup.getSteps())
 			{
 				stepContainer.addStep(step.clone());
-			}
-		}
-
-		if((parent instanceof IValidationContainer) && stepGroup.getValidations() != null)
-		{
-			IValidationContainer validationContainer = (IValidationContainer) parent;
-			
-			for(IValidation validation : stepGroup.getValidations())
-			{
-				validationContainer.addValidation(validation.clone());
 			}
 		}
 	}
@@ -220,16 +167,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			}
 		}
 
-		if(parent instanceof IValidationContainer)
-		{
-			Object validator = newValidation(beanNode.getName());
-			
-			if(validator != null)
-			{
-				return validator;
-			}
-		}
-
 		throw new InvalidStateException("No step/validator found with name: {}", beanNode.getName());
 	}
 	
@@ -247,13 +184,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			AutomationUtils.validateRequiredParams(bean);
 			
 			((IStepContainer) parent).addStep((IStep) bean);
-		}
-
-		if((bean instanceof IValidation) && (parent instanceof IValidationContainer))
-		{
-			AutomationUtils.validateRequiredParams(bean);
-			
-			((IValidationContainer) parent).addValidation((IValidation) bean);
 		}
 	}
 	
@@ -296,48 +226,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while creating step of type - {}", stepType.getName());
-		}
-	}
-
-	/**
-	 * Creates a new validation with specified name. A step can be named using @
-	 * {@link Executable}
-	 * 
-	 * @param validationTypeName
-	 *            Validation name
-	 * @return Matching validation instance
-	 */
-	@SuppressWarnings("rawtypes")
-	public IValidation newValidation(String validationTypeName)
-	{
-		Class<? extends IValidation> validationType = nameToValidationType.get(validationTypeName);
-
-		if(validationType == null)
-		{
-			return null;
-		}
-
-		Executable executable = validationType.getAnnotation(Executable.class);
-		IPlugin<?> plugin = null;
-		
-		for(Class<? extends IPlugin> pluginType : executable.requiredPluginTypes())
-		{
-			plugin = applicationConfiguration.getPlugin(pluginType);
-			
-			if(plugin == null)
-			{
-				throw new InvalidStateException("Plugin-type {} is not specified by application-configuration which is required by validator: {}", validationType.getName(), validationTypeName);
-			}
-			
-			context.addRequirePlugin(plugin);
-		}
-
-		try
-		{
-			return validationType.newInstance();
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while creating validation of type - {}", validationType.getName());
 		}
 	}
 }

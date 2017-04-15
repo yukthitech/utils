@@ -16,7 +16,7 @@ public class CloseSessionStep extends AbstractStep
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Closing current session");
 		
@@ -24,5 +24,7 @@ public class CloseSessionStep extends AbstractStep
 		
 		seleniumConfiguration.getWebDriver().close();
 		seleniumConfiguration.resetDriver();
+		
+		return true;
 	}
 }

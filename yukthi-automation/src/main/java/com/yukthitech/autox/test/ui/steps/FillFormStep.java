@@ -135,7 +135,7 @@ public class FillFormStep extends AbstractStep
 	 *            Current automation context
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(data instanceof DynamicBean)
 		{
@@ -145,6 +145,8 @@ public class FillFormStep extends AbstractStep
 		{
 			fillWithStandardBean(context, exeLogger);
 		}
+		
+		return true;
 	}
 
 	/**

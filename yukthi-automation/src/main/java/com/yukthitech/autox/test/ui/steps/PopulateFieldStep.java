@@ -68,7 +68,7 @@ public class PopulateFieldStep extends AbstractStep
 	 *            Current automation context
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger)
+	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
 		logger.debug("Populating field {} with value - {}", locator, value);
 		
@@ -84,6 +84,8 @@ public class PopulateFieldStep extends AbstractStep
 
 			pressEnter(context, logger);
 		}
+		
+		return true;
 	}
 
 	/**

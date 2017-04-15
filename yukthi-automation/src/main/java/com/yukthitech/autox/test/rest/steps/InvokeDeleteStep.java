@@ -16,12 +16,13 @@ public class InvokeDeleteStep extends AbstractRestStep
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		DeleteRestRequest deleteRestRequest = new DeleteRestRequest(uri);
 		
 		super.populate(context, deleteRestRequest, logger);
 		super.invoke(context, deleteRestRequest, logger);
+		return true;
 	}
 
 }

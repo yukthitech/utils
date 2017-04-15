@@ -67,7 +67,7 @@ public class SetContextParamStep extends AbstractStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		Class<?> type = null;
 		
@@ -93,5 +93,6 @@ public class SetContextParamStep extends AbstractStep
 		}
 		
 		context.setAttribute(name, value);
+		return true;
 	}
 }
