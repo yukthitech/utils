@@ -3,6 +3,7 @@ package com.yukthitech.autox.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -11,6 +12,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class TestDataFile
 {
+	/**
+	 * Context under which this file is being loaded.
+	 */
+	private AutomationContext context;
+	
 	/**
 	 * Test suites to be loaded.
 	 */
@@ -25,6 +31,16 @@ public class TestDataFile
 	 * Cleanup steps to be executed after executing all test suites.
 	 */
 	private Cleanup cleanup;
+	
+	/**
+	 * Instantiates a new test data file.
+	 *
+	 * @param context the context
+	 */
+	public TestDataFile(AutomationContext context)
+	{
+		this.context = context;
+	}
 
 	/**
 	 * Gets the setup steps to be executed before executing any test suite.
@@ -110,5 +126,14 @@ public class TestDataFile
 	public void addTestSuite(TestSuite testSuite)
 	{
 		testSuites.add(testSuite);
+	}
+	
+	/**
+	 * Adds specified test group.
+	 * @param stepGroup group to add.
+	 */
+	public void addStepGroup(StepGroup stepGroup)
+	{
+		context.addStepGroup(stepGroup);
 	}
 }

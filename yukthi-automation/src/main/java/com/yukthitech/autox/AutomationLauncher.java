@@ -72,7 +72,7 @@ public class AutomationLauncher
 			xmlFiles.addAll( AutomationUtils.loadXmlFiles(testCaseFolder) );
 		}
 		
-		TestDataFile testDataFile = new TestDataFile();
+		TestDataFile testDataFile = null;
 		FileInputStream fis = null;
 		String filePath = null;
 		
@@ -82,7 +82,7 @@ public class AutomationLauncher
 		
 		for(File xmlFile : xmlFiles)
 		{
-			testDataFile = new TestDataFile();
+			testDataFile = new TestDataFile(context);
 
 			try
 			{

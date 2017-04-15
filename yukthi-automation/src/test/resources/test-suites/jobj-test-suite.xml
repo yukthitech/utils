@@ -1,12 +1,20 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+
+	<step-group name="simpleGroup">
+		<ccg:log message="This message is from step group"/>
+		<ccg:setContextParam name="simpleGroupOutput" value="true"/>
+		
+		<ccg:validateContextParam expression="attr.simpleGroupInput" value="true"/>
+	</step-group>
+
 	<testSuite name="jobj-test-suites">
 
-	<wrap:data-beans>
-		<data-bean id="beanFromTestSuite" ccg:beanType="com.yukthitech.test.beans.TestObject">
-			<name>beanFromTestSuite</name>
-		</data-bean>
-	</wrap:data-beans>
-
+		<wrap:data-beans>
+			<data-bean id="beanFromTestSuite" ccg:beanType="com.yukthitech.test.beans.TestObject">
+				<name>beanFromTestSuite</name>
+			</data-bean>
+		</wrap:data-beans>
+		
 		<testCase name="invokeMethodOnAppBean">
 			<description>Invokes simple method on bean declared in app-config</description>
 
@@ -15,39 +23,45 @@
 					<message>Invoking method using object from app config: </message>
 					<message ccg:beanRef="beanFromApp"></message>
 				</ccg:log>
-				
+
 				<ccg:invokeMethod method="toText">
-					<object ccg:beanRef="beanFromApp"/>
-					
-					<parameter ccg:beanType="com.yukthitech.test.beans.SimpleBean" name="someName">
+					<object ccg:beanRef="beanFromApp" />
+
+					<parameter ccg:beanType="com.yukthitech.test.beans.SimpleBean"
+						name="someName">
 					</parameter>
 				</ccg:invokeMethod>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue" value="beanFromApp:someName"/>
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="beanFromApp:someName" />
 			</wrap:validations>
 		</testCase>
 
 
 		<testCase name="invoke_method_On_Bean_Copy">
 			<description>
-				Invokes simple method on bean copy declared in test suite.
+				Invokes simple method on bean copy declared in test
+				suite.
 			</description>
 
 			<wrap:steps>
-				<ccg:invokeMethod method="toText" paramTypes="com.yukthitech.test.beans.NameBean">
+				<ccg:invokeMethod method="toText"
+					paramTypes="com.yukthitech.test.beans.NameBean">
 					<object ccg:beanCopy="beanFromTestSuite">
 						<name>beanCopy</name>
 					</object>
-					
-					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="someName1">
+
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean"
+						name="someName1">
 					</parameter>
 				</ccg:invokeMethod>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue" value="beanCopy=>someName1"/>
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="beanCopy=>someName1" />
 			</wrap:validations>
 		</testCase>
 
@@ -57,16 +71,19 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:invokeMethod method="toText" paramTypes="com.yukthitech.test.beans.NameBean">
-					<object ccg:beanRef="beanFromTestSuite"/>
-					
-					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="someName1">
+				<ccg:invokeMethod method="toText"
+					paramTypes="com.yukthitech.test.beans.NameBean">
+					<object ccg:beanRef="beanFromTestSuite" />
+
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean"
+						name="someName1">
 					</parameter>
 				</ccg:invokeMethod>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue" value="beanFromTestSuite=>someName1"/>
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="beanFromTestSuite=>someName1" />
 			</wrap:validations>
 		</testCase>
 
@@ -77,18 +94,20 @@
 
 			<wrap:steps>
 				<ccg:invokeMethod method="throwError">
-					<object ccg:beanRef="beanFromTestSuite"/>
+					<object ccg:beanRef="beanFromTestSuite" />
 				</ccg:invokeMethod>
 			</wrap:steps>
 
-			<expectedException type="com.yukthitech.utils.exceptions.InvalidArgumentException">
-				<property name="message" value="MESSAGE"/>
+			<expectedException
+				type="com.yukthitech.utils.exceptions.InvalidArgumentException">
+				<property name="message" value="MESSAGE" />
 			</expectedException>
 		</testCase>
 
 		<testCase name="invoke_Method_With_Data_Provder">
 			<description>
-				Invokes simple method on bean with data provider and ensures data-provider working.
+				Invokes simple method on bean with data provider and
+				ensures data-provider working.
 			</description>
 
 			<list-data-provider name="dataString">
@@ -98,45 +117,56 @@
 			</list-data-provider>
 
 			<wrap:steps>
-				<ccg:invokeMethod method="toText" paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true">
-					<object ccg:beanRef="beanFromTestSuite"/>
-					
-					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="${attr.dataString}">
+				<ccg:invokeMethod method="toText"
+					paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true">
+					<object ccg:beanRef="beanFromTestSuite" />
+
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean"
+						name="${attr.dataString}">
 					</parameter>
 				</ccg:invokeMethod>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue" value="beanFromTestSuite=>${attr.dataString}"/>
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="beanFromTestSuite=>${attr.dataString}" />
 			</wrap:validations>
 		</testCase>
 
 		<testCase name="invoke_Method_Data_Provder_Validations">
 			<description>
-				Invokes simple method on bean with data provider with dynamic validations.
+				Invokes simple method on bean with data provider with
+				dynamic validations.
 			</description>
 
 			<list-data-provider name="data">
-				<map-data name="smallString" value="abc" errorCase="true" errorMssg="Name should be greater than 3"/>
-				<map-data name="longString" value="abcdefg" errorCase="true" errorMssg="Name should be less than 6"/>
-				<map-data name="correctString" value="abcd" errorCase="false" errorMssg=""/>
+				<map-data name="smallString" value="abc" errorCase="true"
+					errorMssg="Name should be greater than 3" />
+				<map-data name="longString" value="abcdefg" errorCase="true"
+					errorMssg="Name should be less than 6" />
+				<map-data name="correctString" value="abcd" errorCase="false"
+					errorMssg="" />
 			</list-data-provider>
-			
-			<expectedException enabled="${attr.data.errorCase}" type="com.yukthitech.utils.exceptions.InvalidArgumentException">
-				<property name="message" value="${attr.data.errorMssg}"/>
+
+			<expectedException enabled="${attr.data.errorCase}"
+				type="com.yukthitech.utils.exceptions.InvalidArgumentException">
+				<property name="message" value="${attr.data.errorMssg}" />
 			</expectedException>
 
 			<wrap:steps>
-				<ccg:invokeMethod method="validate" paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true">
-					<object ccg:beanRef="beanFromTestSuite"/>
-					
-					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean" name="${attr.data.value}">
+				<ccg:invokeMethod method="validate"
+					paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true">
+					<object ccg:beanRef="beanFromTestSuite" />
+
+					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean"
+						name="${attr.data.value}">
 					</parameter>
 				</ccg:invokeMethod>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue" value="${attr.data.value}" >
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="${attr.data.value}">
 					<enabled><![CDATA[<#if attr.data.errorCase == 'true'>false<#else>true</#if>]]></enabled>
 				</ccg:validateContextParam>
 			</wrap:validations>
@@ -146,21 +176,38 @@
 			<description>
 				Ensures xpath steps and validations works as expected.
 			</description>
-			
+
 			<wrap:steps>
-				<ccg:setXpathContextParam name="xpathAttr1" source="file:./src/test/resources/data/data.json" valueExpression="//bean1/prop1"/>
-				<ccg:setXpathContextParam name="xpathAttr2" source="res:/data/data.json" valueExpression="//bean1/subbean1/sprop1"/>
-				<ccg:loadJson contextAttribute="xpathObj" resource="res:/data/data.json"/>
+				<ccg:setXpathContextParam name="xpathAttr1"
+					source="file:./src/test/resources/data/data.json" valueExpression="//bean1/prop1" />
+				<ccg:setXpathContextParam name="xpathAttr2"
+					source="res:/data/data.json" valueExpression="//bean1/subbean1/sprop1" />
+				<ccg:loadJson contextAttribute="xpathObj" resource="res:/data/data.json" />
 			</wrap:steps>
-			
+
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.xpathAttr1" value="value1" />
-				<ccg:validateXpathValue source="res:/data/data.json" valueExpression="//bean1/subbean1/sprop2" value="value3" />
-				
-				<ccg:validateXpathValue valueExpression="//bean1/subbean1/sprop2" value="value3" source="ref:attr.xpathObj">
+				<ccg:validateContextParam expression="attr.xpathAttr1"
+					value="value1" />
+				<ccg:validateXpathValue source="res:/data/data.json"
+					valueExpression="//bean1/subbean1/sprop2" value="value3" />
+
+				<ccg:validateXpathValue valueExpression="//bean1/subbean1/sprop2"
+					value="value3" source="ref:attr.xpathObj">
 				</ccg:validateXpathValue>
 			</wrap:validations>
 		</testCase>
 		
+		<testCase name="stepsFromGroup">
+			<description>
+				Ensures steps and validations from specified group are added properly.
+			</description>
+			
+			<ccg:setContextParam name="simpleGroupInput" value="true"/>
+			
+			<ccg:step-group-ref name="simpleGroup"/>
+			
+			<ccg:validateContextParam expression="attr.simpleGroupOutput" value="true"/>
+		</testCase>
+
 	</testSuite>
 </testData>

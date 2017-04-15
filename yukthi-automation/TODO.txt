@@ -1,37 +1,50 @@
+===================
+	screen shot on error
+	
+	
+	
+	Step to fail test case
+	
+	if-else
+	
+	loops
+	
+	not equals validation
+
+	renmote log
+		fetch only on error
+		enabled/disabled
+
+Exection plan
+	executing dependency test cases
+
+In final report skip test suites which are not executed
+
+artifacts/Doc upload to yukthitech.com
+
+========================
 Doc
 ============
 Examples for each
 other documents
 
-rename setJxContextParam
-
 command line arguments doc
+resource and references
+data beans and load time references
+
+expected exception doc
+
+step groups and references
 
 ==============
 
-
-Param and auto doc generation
-
+Extra params in final report
+	like build, environment, date, custom params
 	
-Rest based Steps
-	post with file upload
+	
+time taken by test cases and steps
 
-	file download
-Reusable step groups
-
-step to covert json into object and keep it on context
-
-fail step
-
-
-
-Listener and ui
-
-
-
-Test Drag and drop step
-
-Doc upload to yukthitech.com
+Line number in xml based errors
 
 ================================================
 Reports
@@ -45,36 +58,6 @@ Reports
 
 why first driver is not being used?
 
-=============================
-
-Extra params in final report
-	like build, environment, date, custom params
-	
-	
-Extra steps
-	create temp file in work dir
-	
-	read and write file
-		write json object to fil
-		
-	screen shot on error
-	
-	test case to ensure skip and failure
-	
-	
-	file upload and download
-		resources
-		
-	Step to fail test case
-	
-	if-else
-	
-	loops
-	
-	reusing of step groups
-	
-
-time taken by test cases and steps
 =======================================
 
 Test Cases
@@ -95,4 +78,11 @@ Test Cases
 		
 		
 	test cases to validate cmd args
+
+	file upload and download
+		resources
+		
+	test case to ensure skip and failure
+========================================
+Listener and ui
 	

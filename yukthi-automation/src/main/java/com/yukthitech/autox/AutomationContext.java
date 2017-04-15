@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.logmon.ILogMonitor;
+import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -56,6 +57,11 @@ public class AutomationContext
 	 */
 	private File workDirectory;
 	
+	/**
+	 * Name to step group mapping.
+	 */
+	private Map<String, StepGroup> nameToGroup = new HashMap<>();
+
 	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
@@ -256,5 +262,39 @@ public class AutomationContext
 	public File getWorkDirectory()
 	{
 		return workDirectory;
+	}
+	
+	/**
+	 * Adds specified test group.
+	 * @param stepGroup group to add.
+	 */
+	public void addStepGroup(StepGroup group)
+	{
+		if(nameToAttr.containsKey(group.getName()))
+		{
+			throw new InvalidStateException("Duplicate step group name encountered: {}", group.getName());
+		}
+		
+		nameToGroup.put(group.getName(), group);
+	}
+	
+	/**
+	 * Adds the specified step groups.
+	 *
+	 * @param stepGroups step groups to add
+	 */
+	public void addStepGroups(Map<String, StepGroup> stepGroups)
+	{
+		nameToGroup.putAll(stepGroups);
+	}
+	
+	/**
+	 * Fetches the step group with specified name.
+	 * @param name name of step group.
+	 * @return matching group
+	 */
+	public StepGroup getStepGroup(String name)
+	{
+		return nameToGroup.get(name);
 	}
 }

@@ -13,11 +13,13 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.reserved.NodeName;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -145,6 +147,54 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			}
 		}
 	}
+	
+	/**
+	 * Fetches the step group represented by specified bean node and adds the steps/validations
+	 * from that group to specified parent.
+	 * @param parent parent to which steps/validations to be added
+	 * @param beanNode node representing step group
+	 */
+	private void addStepGroup(Object parent, BeanNode beanNode)
+	{
+		if(!(parent instanceof IStepContainer) && !(parent instanceof IValidationContainer))
+		{
+			return;
+		}
+		
+		String name = beanNode.getAttributeMap().get("name", null);
+		
+		if(name == null)
+		{
+			throw new InvalidStateException("Mandatory attribute 'name' is not specified in step-group-ref node");
+		}
+		
+		StepGroup stepGroup = context.getStepGroup(name);
+		
+		if(stepGroup == null)
+		{
+			throw new InvalidArgumentException("No step-group found with specified name - {}", name);
+		}
+		
+		if((parent instanceof IStepContainer) && stepGroup.getSteps() != null)
+		{
+			IStepContainer stepContainer = (IStepContainer) parent;
+			
+			for(IStep step : stepGroup.getSteps())
+			{
+				stepContainer.addStep(step.clone());
+			}
+		}
+
+		if((parent instanceof IValidationContainer) && stepGroup.getValidations() != null)
+		{
+			IValidationContainer validationContainer = (IValidationContainer) parent;
+			
+			for(IValidation validation : stepGroup.getValidations())
+			{
+				validationContainer.addValidation(validation.clone());
+			}
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.reserved.IReserveNodeHandler#createCustomNodeBean(com.yukthitech.ccg.xml.IParserHandler, com.yukthitech.ccg.xml.BeanNode, com.yukthitech.ccg.xml.XMLAttributeMap)
@@ -153,6 +203,12 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	public Object createCustomNodeBean(IParserHandler handler, BeanNode beanNode, XMLAttributeMap attrMap)
 	{
 		Object parent = beanNode.getParent();
+		
+		if("stepGroupRef".equals(beanNode.getName()))
+		{
+			addStepGroup(parent, beanNode);
+			return null;
+		}
 
 		if(parent instanceof IStepContainer)
 		{
@@ -183,11 +239,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	@Override
 	public void handleCustomNodeEnd(IParserHandler handler, BeanNode beanNode, XMLAttributeMap attrMap)
 	{
-		if("beanRef".equals(beanNode.getName()))
-		{
-			
-		}
-		
 		Object parent = beanNode.getParent();
 		Object bean = beanNode.getActualBean();
 
