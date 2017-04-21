@@ -36,7 +36,7 @@ public class LogStep extends AbstractStep
 	/**
 	 * Logging level.
 	 */
-	@Param(description = "Logging level.")
+	@Param(description = "Logging level. Default Value: DEBUG", required = false)
 	private LogLevel level = LogLevel.DEBUG;
 	
 	/**

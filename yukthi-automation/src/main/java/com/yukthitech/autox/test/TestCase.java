@@ -180,11 +180,6 @@ public class TestCase implements IStepContainer, Validateable
 	@Override
 	public void addStep(IStep step)
 	{
-		if(steps == null)
-		{
-			steps = new ArrayList<IStep>();
-		}
-
 		steps.add(step);
 	}
 

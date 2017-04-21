@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -42,6 +44,12 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public ParamInfo(Field field, Param paramAnnot)
 	{
 		this.name = field.getName();
+		
+		if(StringUtils.isNotBlank(paramAnnot.name()))
+		{
+			this.name = paramAnnot.name();
+		}
+		
 		this.description = paramAnnot.description();
 		this.mandatory = paramAnnot.required();
 		

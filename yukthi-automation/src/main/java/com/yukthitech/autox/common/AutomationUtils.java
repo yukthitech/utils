@@ -369,4 +369,36 @@ public class AutomationUtils
 			throw new InvalidStateException("An error occurred while deep cloning object: {}", object, ex);
 		}
 	}
+	
+	/**
+	 * Evaluates specified free marker condition and returns the result.
+	 * @param context Context to be used
+	 * @param condition Condition to be evaluated
+	 * @return true, if condition evaluated to be true
+	 */
+	public static boolean evaluateCondition(AutomationContext context, String condition)
+	{
+		if("true".equalsIgnoreCase(condition))
+		{
+			return true;
+		}
+
+		if("false".equalsIgnoreCase(condition))
+		{
+			return false;
+		}
+
+		String ifCondition = String.format("<#if %s>true<#else>false</#if>", condition);
+		String res = null;
+		
+		try
+		{
+			res = AutomationUtils.replaceExpressions(context, ifCondition);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while evaluating condition: {}", condition, ex);
+		}
+		
+		return "true".equals(res);
+	}
 }

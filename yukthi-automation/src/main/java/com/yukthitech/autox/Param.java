@@ -16,6 +16,12 @@ import java.lang.annotation.Target;
 public @interface Param
 {
 	/**
+	 * Name of the parameter, by default takes the field name.
+	 * @return name of the param
+	 */
+	public String name() default "";
+	
+	/**
 	 * Description about the parameter.
 	 * @return Description about the parameter.
 	 */
