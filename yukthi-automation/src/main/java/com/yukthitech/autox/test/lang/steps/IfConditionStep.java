@@ -75,7 +75,7 @@ public class IfConditionStep extends AbstractStep
 		
 		exeLogger.debug("Condition evaluation resulted in '{}'. Condition: {}", res, condition);
 		
-		if("true".equals(res))
+		if(res)
 		{
 			then.execute(context, exeLogger);
 		}

@@ -43,13 +43,14 @@ public class StepExecutor
 	
 	/**
 	 * Expected to be invoked by test cases, to process the exception and get appropriate result.
+	 * @param testCase Test case being tested
 	 * @param step Step which resulted in exception
 	 * @param exeLogger logger to be used
 	 * @param ex exception to be handled
 	 * @param expectedException If test case is expecting exception, those details
 	 * @return result based on input exception
 	 */
-	public static TestCaseResult handleException(IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
+	public static TestCaseResult handleException(TestCase testCase, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
 	{
 		Executable executable = step.getClass().getAnnotation(Executable.class);
 		String name = executable.name();
@@ -58,12 +59,12 @@ public class StepExecutor
 		
 		if(ex instanceof TestCaseValidationFailedException)
 		{
-			return new TestCaseResult(name, TestStatus.FAILED, exeLogger.getExecutionLogData(), ex.getMessage());
+			return new TestCaseResult(testCase.getName(), TestStatus.FAILED, exeLogger.getExecutionLogData(), ex.getMessage());
 		}
 		
 		if(ex instanceof TestCaseFailedException)
 		{
-			return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name);
+			return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name);
 		}
 		
 		if(expectedException != null)
@@ -77,13 +78,13 @@ public class StepExecutor
 			}catch(InvalidArgumentException iex)
 			{
 				exeLogger.error(ex, ex.getMessage());
-				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
+				return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
 			}
 		}
 
 		//for unhandled exceptions log on ui
 		exeLogger.error(ex, "An error occurred while executing validation: " + name);
 		
-		return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());
+		return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());
 	}
 }

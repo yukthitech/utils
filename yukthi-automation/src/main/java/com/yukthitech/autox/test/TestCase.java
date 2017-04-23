@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
@@ -23,6 +25,8 @@ import com.yukthitech.ccg.xml.util.Validateable;
  */
 public class TestCase implements IStepContainer, Validateable
 {
+	private static Logger logger = LogManager.getLogger(TestCase.class);
+	
 	/**
 	 * Name of the test case.
 	 */
@@ -200,6 +204,8 @@ public class TestCase implements IStepContainer, Validateable
 	 */
 	public TestCaseResult execute(AutomationContext context, TestCaseData testCaseData, ExecutionLogger exeLogger)
 	{
+		logger.debug("Executing test case: {}", this.name);
+		
 		String name = this.name;
 		
 		if(testCaseData != null)
@@ -231,7 +237,7 @@ public class TestCase implements IStepContainer, Validateable
 				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
-				TestCaseResult result = StepExecutor.handleException(step, exeLogger, ex, expectedException);
+				TestCaseResult result = StepExecutor.handleException(this, step, exeLogger, ex, expectedException);
 				
 				if(result != null)
 				{

@@ -1,0 +1,36 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+
+	<step-group name="simpleGroup">
+		<ccg:if condition="attr.flag == 1">
+			<then>
+				<ccg:setContextParam name="ifExec" value="if-then"/>
+			</then>
+			<else>
+				<ccg:setContextParam name="ifExec" value="if-else"/>
+			</else>
+		</ccg:if>
+	</step-group>
+
+	<testSuite name="lang-test-suites">
+
+		<testCase name="testIfThenCondition">
+			<description>Tests if condition "then" is working</description>
+
+			<wrap:steps>
+				<ccg:setContextParam name="flag" value="1" type="java.lang.Integer"/>
+				<ccg:step-group-ref name="simpleGroup"/>
+				<ccg:validateContextParam expression="attr.ifExec" value="if-then" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testIfElseCondition">
+			<description>Tests if condition "else" is working</description>
+
+			<wrap:steps>
+				<ccg:setContextParam name="flag" value="2" type="java.lang.Integer"/>
+				<ccg:step-group-ref name="simpleGroup"/>
+				<ccg:validateContextParam expression="attr.ifExec" value="if-else" />
+			</wrap:steps>				
+		</testCase>
+	</testSuite>
+</testData>
