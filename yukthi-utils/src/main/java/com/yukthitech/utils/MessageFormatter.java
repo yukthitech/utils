@@ -109,6 +109,8 @@ public class MessageFormatter
 			{
 				arg = "null";
 			}
+
+			arg = Matcher.quoteReplacement(arg.toString());
 			
 			matcher.appendReplacement(buffer, arg.toString());
 			loopIndex++;
