@@ -29,13 +29,16 @@ public class ElementNodeHandler implements IReserveNodeHandler
 		}
 		
 		Type genericType = node.getParentNode().getGenericType();
+		Class<?> elementType = null;
 		
 		if(genericType == null || !(genericType instanceof ParameterizedType))
 		{
-			throw new InvalidStateException("For <element> failed to determine the parent collection element type");
+			elementType = String.class;
 		}
-		
-		Class<?> elementType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[0];
+		else
+		{
+			elementType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[0];			
+		}
 		
 		node.setType(elementType);
 		node.setActualType(elementType);

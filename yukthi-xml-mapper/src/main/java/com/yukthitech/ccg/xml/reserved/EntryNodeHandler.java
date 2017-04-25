@@ -9,7 +9,6 @@ import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.XMLLoadException;
 import com.yukthitech.ccg.xml.XMLUtil;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Reserve node handler to load entries into parent map.
@@ -30,16 +29,16 @@ public class EntryNodeHandler implements IReserveNodeHandler
 		}
 		
 		Type genericType = node.getParentNode().getGenericType();
+		Class<?> keyType = Object.class;
+		Class<?> valueType = Object.class;
 
-		if(genericType == null || !(genericType instanceof ParameterizedType))
+		if(genericType != null && (genericType instanceof ParameterizedType))
 		{
-			throw new InvalidStateException("For <entry> failed to determine the parent Map key/value type");
+			keyType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[0];
+			valueType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[1];
 		}
 		
-		Class<?> keyType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[0];
-		Class<?> valueType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[1];
-		
-		if(!XMLUtil.isSupportedAttributeClass(keyType))
+		if(!XMLUtil.isSupportedAttributeClass(keyType) && !Object.class.equals(keyType))
 		{
 			throw new XMLLoadException("<entry> reserved node does not support non-attributable key type - " + keyType.getName(), node);
 		}
@@ -59,7 +58,7 @@ public class EntryNodeHandler implements IReserveNodeHandler
 		node.setType(valueType);
 		node.setActualType(valueType);
 
-		if(XMLUtil.isSupportedAttributeClass(valueType))
+		if(XMLUtil.isSupportedAttributeClass(valueType) || Object.class.equals(valueType))
 		{
 			//set key on context so that it can be used during end node processing
 			node.setContextAttribute("key", key);
