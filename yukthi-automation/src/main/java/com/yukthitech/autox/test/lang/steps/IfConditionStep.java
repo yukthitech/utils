@@ -4,17 +4,21 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Evaluates specified condition and if evaluates to true execute 'then'
- * otherwise execute 'else'.
+ * otherwise execute 'else'. For ease 'if' supports direct addition of steps which would be added to then block.
  * 
  * @author akiran
  */
-@Executable(name = "if", message = "Evaluates specified condition and if evaluates to true execute 'then' otherwise execute 'else'")
-public class IfConditionStep extends AbstractStep
+@Executable(name = "if", message = "Evaluates specified condition and if evaluates to true execute 'then' otherwise execute 'else'. "
+		+ "For ease 'if' supports direct addition of steps which would be added to then block.")
+public class IfConditionStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
 
@@ -35,7 +39,7 @@ public class IfConditionStep extends AbstractStep
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * false.
 	 */
-	@Param(name = "else", description = "Group of steps/validations to be executed when condition evaluated to be false.")
+	@Param(name = "else", description = "Group of steps/validations to be executed when condition evaluated to be false.", required = false)
 	private StepGroup elseGroup;
 
 	/**
@@ -65,7 +69,23 @@ public class IfConditionStep extends AbstractStep
 	 */
 	public void setElse(StepGroup elseGroup)
 	{
+		if(this.elseGroup != null)
+		{
+			throw new InvalidStateException("else group is already defined.");
+		}
+		
 		this.elseGroup = elseGroup;
+	}
+	
+	@Override
+	public void addStep(IStep step)
+	{
+		if(then == null)
+		{
+			then = new StepGroup();
+		}
+		
+		then.addStep(step);
 	}
 
 	@Override
@@ -81,7 +101,10 @@ public class IfConditionStep extends AbstractStep
 		}
 		else
 		{
-			elseGroup.execute(context, exeLogger);
+			if(elseGroup != null)
+			{
+				elseGroup.execute(context, exeLogger);
+			}
 		}
 		
 		return true;

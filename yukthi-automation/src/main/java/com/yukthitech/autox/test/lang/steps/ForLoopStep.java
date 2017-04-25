@@ -7,6 +7,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
 /**
@@ -23,6 +24,7 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
+	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
 	private StepGroup steps;
 
@@ -80,13 +82,18 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public void addStep(IStep step)
 	{
+		if(steps == null)
+		{
+			steps = new StepGroup();
+		}
+		
 		steps.addStep(step);
 	}
 
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
-		for(int i = start; i < end; i++)
+		for(int i = start; i <= end; i++)
 		{
 			context.setAttribute(loopVar, i);
 			

@@ -9,7 +9,7 @@ import com.yukthitech.autox.ExecutionLogger;
  * Continues current loop.
  * @author akiran
  */
-@Executable(name = "break", message = "Continues current loop")
+@Executable(name = "continue", message = "Continues current loop")
 public class ContinueStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

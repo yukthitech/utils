@@ -13,6 +13,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -20,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "for", message = "Loops through specified collection or string tokens and for each iteration executed underlying steps")
+@Executable(name = "forEach", message = "Loops through specified collection or string tokens and for each iteration executed underlying steps")
 public class ForEachLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
@@ -29,6 +30,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
+	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
 	private StepGroup steps;
 
@@ -41,8 +43,8 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	/**
 	 * If expression evaluated to string, delimiter to be used to split the string.
 	 */
-	@Param(description = "If expression evaluated to string, delimiter to be used to split the string. Default Value: comma (,)", required = false)
-	private String delimiter = ",";
+	@Param(description = "If expression evaluated to string, delimiter to be used to split the string. Default Value: comma (\\s*\\,\\s*)", required = false)
+	private String delimiter = "\\s*\\,\\s*";
 	
 	/**
 	 * Loop variable that will be used to set loop iteration object on context. Default: loopVar.
@@ -76,6 +78,11 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public void addStep(IStep step)
 	{
+		if(steps == null)
+		{
+			steps = new StepGroup();
+		}
+		
 		steps.addStep(step);
 	}
 	

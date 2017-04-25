@@ -255,6 +255,15 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Ease method to access data beans.
+	 * @return
+	 */
+	public Map<String, Object> getData()
+	{
+		return appConfiguration.getDataBeans();
+	}
+
+	/**
 	 * Gets the work directory to be used for this context.
 	 *
 	 * @return the work directory to be used for this context
@@ -266,7 +275,7 @@ public class AutomationContext
 	
 	/**
 	 * Adds specified test group.
-	 * @param stepGroup group to add.
+	 * @param group group to add.
 	 */
 	public void addStepGroup(StepGroup group)
 	{

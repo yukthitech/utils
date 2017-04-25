@@ -3,10 +3,10 @@
 	<step-group name="simpleGroup">
 		<ccg:if condition="attr.flag == 1">
 			<then>
-				<ccg:setContextParam name="ifExec" value="if-then"/>
+				<ccg:set name="ifExec" value="if-then"/>
 			</then>
 			<else>
-				<ccg:setContextParam name="ifExec" value="if-else"/>
+				<ccg:set name="ifExec" value="if-else"/>
 			</else>
 		</ccg:if>
 	</step-group>
@@ -17,7 +17,7 @@
 			<description>Tests if condition "then" is working</description>
 
 			<wrap:steps>
-				<ccg:setContextParam name="flag" value="1" type="java.lang.Integer"/>
+				<ccg:set name="flag" value="1" type="java.lang.Integer"/>
 				<ccg:step-group-ref name="simpleGroup"/>
 				<ccg:validateContextParam expression="attr.ifExec" value="if-then" />
 			</wrap:steps>				
@@ -27,10 +27,185 @@
 			<description>Tests if condition "else" is working</description>
 
 			<wrap:steps>
-				<ccg:setContextParam name="flag" value="2" type="java.lang.Integer"/>
+				<ccg:set name="flag" value="2" type="java.lang.Integer"/>
 				<ccg:step-group-ref name="simpleGroup"/>
 				<ccg:validateContextParam expression="attr.ifExec" value="if-else" />
 			</wrap:steps>				
 		</testCase>
+
+		<testCase name="testSimpleFor">
+			<description>Tests if for loop is working properly</description>
+
+			<wrap:steps>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:for start="1" end="5">
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
+				</ccg:for>
+				
+				<ccg:validateContextParam expression="attr.res" value="|1|2|3|4|5" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testForWithBreanAndContinue">
+			<description>Tests if for loop is working properly with break and continue</description>
+
+			<wrap:steps>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:for start="1" end="20">
+					<ccg:if condition="attr.loopVar % 2 != 0">
+						<ccg:continue/>
+					</ccg:if>
+					
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
+					
+					<ccg:if condition="attr.loopVar gte 10">
+						<ccg:break/>
+					</ccg:if>
+				</ccg:for>
+				
+				<ccg:validateContextParam expression="attr.res" value="|2|4|6|8|10" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testSimpleWhileLoop">
+			<description>Tests if simple while loop working</description>
+
+			<wrap:steps>
+				<ccg:set name="i" value="1" type="java.lang.Integer"/>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:while condition="attr.i lt 5">
+					<ccg:set name="res" value="${attr.res}|${attr.i}"/>
+					<ccg:set name="i" value="${attr.i + 1}" type="java.lang.Integer"/>
+				</ccg:while>
+				
+				<ccg:validateContextParam expression="attr.res" value="|1|2|3|4" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testWhileLoopWithBranAndContinue">
+			<description>Tests if while loop working with break and continue</description>
+
+			<wrap:steps>
+				<ccg:set name="i" value="0" type="java.lang.Integer"/>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:while condition="attr.i lt 20">
+					<ccg:set name="i" value="${attr.i + 1}" type="java.lang.Integer"/>
+
+					<ccg:if condition="attr.i % 2 != 0">
+						<ccg:continue/>
+					</ccg:if>
+					
+					<ccg:set name="res" value="${attr.res}|${attr.i}"/>
+					
+					<ccg:if condition="attr.i gte 10">
+						<ccg:break/>
+					</ccg:if>
+					
+				</ccg:while>
+				
+				<ccg:validateContextParam expression="attr.res" value="|2|4|6|8|10" />
+			</wrap:steps>				
+		</testCase>
+		
+		<!-- =======================================================
+			For Each loop test cases
+		=================================================================== -->
+		
+		<testCase name="testSimpleForEachLoopWithStr">
+			<description>Tests if simple for-each loop working with string</description>
+			
+			<wrap:steps>
+				<ccg:set name="loopExpr" value="a,b,  c, d,e, f"/>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:forEach expression="attr.loopExpr">
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
+				</ccg:forEach>
+				
+				<ccg:validateContextParam expression="attr.res" value="|a|b|c|d|e|f" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testSimpleForEachLoopWithList">
+			<description>Tests if simple for-each loop working with list</description>
+
+			<wrap:steps>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:forEach expression="data.dataList">
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
+				</ccg:forEach>
+				
+				<ccg:validateContextParam expression="attr.res" value="|a|b|c" />
+			</wrap:steps>				
+		</testCase>
+
+		<data-bean id="dataList" ccg:beanType="java.util.ArrayList">
+			<ccg:element>a</ccg:element>
+			<ccg:element>b</ccg:element>
+			<ccg:element>c</ccg:element>
+		</data-bean>
+
+		<testCase name="testSimpleForEachLoopWithList">
+			<description>Tests if simple for-each loop working with list</description>
+
+			<wrap:steps>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:forEach expression="data.dataList">
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
+				</ccg:forEach>
+				
+				<ccg:validateContextParam expression="attr.res" value="|a|b|c" />
+			</wrap:steps>				
+		</testCase>
+
+		<data-bean id="dataMap" ccg:beanType="java.util.HashMap">
+			<ccg:entry key="key1">Value1</ccg:entry>
+			<ccg:entry key="key2">Value2</ccg:entry>
+			<ccg:entry key="key3">Value3</ccg:entry>
+		</data-bean>
+
+		<testCase name="testSimpleForEachLoopWithMap">
+			<description>Tests if simple for-each loop working with Map</description>
+
+			<wrap:steps>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:forEach expression="data.dataMap">
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
+				</ccg:forEach>
+				
+				<ccg:validateContextParam expression="attr.res" value="|key1=Value1|key2=Value2|key3=Value3" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testForEachLoopWithBreakAndContinue">
+			<description>Tests if for-each loop working with break and continue</description>
+			
+			<wrap:steps>
+				<ccg:set name="loopExpr" value="a,b,  c, d,e, f"/>
+				<ccg:set name="res" value=""/>
+				
+				<ccg:forEach expression="attr.loopExpr">
+					<ccg:if condition="attr.loopVar == 'b'">
+						<ccg:continue/>
+					</ccg:if>
+					
+					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
+					
+					<ccg:if condition="attr.loopVar == 'e'">
+						<ccg:break/>
+					</ccg:if>
+				</ccg:forEach>
+				
+				<ccg:validateContextParam expression="attr.res" value="|a|c|d|e" />
+			</wrap:steps>				
+		</testCase>
+
 	</testSuite>
 </testData>

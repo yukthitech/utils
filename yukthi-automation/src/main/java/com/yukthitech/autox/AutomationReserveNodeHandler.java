@@ -165,9 +165,11 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			{
 				return step;
 			}
+			
+			throw new InvalidStateException("No step/validator found with name: {}.\nAvailable Steps/Validators: {}", beanNode.getName(), nameToStepType.keySet());
 		}
 
-		throw new InvalidStateException("No step/validator found with name: {}", beanNode.getName());
+		throw new InvalidStateException("Unsupported custom node encountered. If it is step/validator ensure it is defined under right parent. Node name: {}", beanNode.getName());
 	}
 	
 	/* (non-Javadoc)

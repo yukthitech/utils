@@ -45,9 +45,13 @@ public class StepGroup implements IStepContainer
 				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
-				Executable executable = step.getClass().getAnnotation(Executable.class);
+				if(ex instanceof LangException)
+				{
+					throw ex;
+				}
 				
-				exeLogger.error("An error occurred while executed child-step '{}'. Error: {}", executable.name(), ex);
+				Executable executable = step.getClass().getAnnotation(Executable.class);
+				exeLogger.error("An error occurred while executing child-step '{}'. Error: {}", executable.name(), ex);
 				throw ex;
 			}
 		}

@@ -16,7 +16,7 @@ import com.yukthitech.utils.ConvertUtils;
  * 
  * @author akiran
  */
-@Executable(name = "setXpathContextParam", message = "Sets the specified context attribute with specified value using jx path.")
+@Executable(name = "setXpath", message = "Sets the specified context attribute with specified value using jx path.")
 public class SetXpathContextParamStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
@@ -99,6 +99,7 @@ public class SetXpathContextParamStep extends AbstractStep
 				type = Class.forName(this.type);
 			} catch(Exception ex)
 			{
+				exeLogger.error("Invalid type specified for value conversion. Type - {}", this.type);
 				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}

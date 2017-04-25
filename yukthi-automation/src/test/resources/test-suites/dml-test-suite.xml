@@ -29,7 +29,7 @@
 			<description>Validates for updating record in a table</description>
 
 			<wrap:steps>
-				<ccg:setContextParam name="empId" value="1"/>
+				<ccg:set name="empId" value="1"/>
 				
 				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="updateCount">
 					<query>
@@ -47,7 +47,7 @@
 			<description>Validates for deleting record in a table</description>
 
 			<wrap:steps>
-				<ccg:setContextParam name="empId" value="1" type="java.lang.Integer"/>
+				<ccg:set name="empId" value="1" type="java.lang.Integer"/>
 				
 				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="deleteCount">
 					<query>

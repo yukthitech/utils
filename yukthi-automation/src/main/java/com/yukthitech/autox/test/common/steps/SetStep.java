@@ -13,8 +13,8 @@ import com.yukthitech.utils.ConvertUtils;
  * 
  * @author akiran
  */
-@Executable(name = "setContextParam", message = "Sets the specified context attribute with specified value")
-public class SetContextParamStep extends AbstractStep
+@Executable(name = "set", message = "Sets the specified context attribute with specified value")
+public class SetStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -27,7 +27,7 @@ public class SetContextParamStep extends AbstractStep
 	/**
 	 * Value of the attribute to set.
 	 */
-	@Param(description = "Value of the attribute to set.")
+	@Param(description = "Value of the attribute to set. Default: empty string", required = false)
 	private String value;
 	
 	/**
@@ -69,6 +69,11 @@ public class SetContextParamStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
+		if(value == null)
+		{
+			value = "";
+		}
+		
 		Class<?> type = null;
 		
 		if(this.type != null)
@@ -78,6 +83,7 @@ public class SetContextParamStep extends AbstractStep
 				type = Class.forName(this.type);
 			}catch(Exception ex)
 			{
+				exeLogger.error("Invalid type specified for value conversion. Type - {}", this.type);
 				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}

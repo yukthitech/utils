@@ -2,7 +2,7 @@
 
 	<step-group name="simpleGroup">
 		<ccg:log message="This message is from step group"/>
-		<ccg:setContextParam name="simpleGroupOutput" value="true"/>
+		<ccg:set name="simpleGroupOutput" value="true"/>
 		
 		<ccg:validateContextParam expression="attr.simpleGroupInput" value="true"/>
 	</step-group>
@@ -178,9 +178,9 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:setXpathContextParam name="xpathAttr1"
+				<ccg:setXpath name="xpathAttr1"
 					source="file:./src/test/resources/data/data.json" valueExpression="//bean1/prop1" />
-				<ccg:setXpathContextParam name="xpathAttr2"
+				<ccg:setXpath name="xpathAttr2"
 					source="res:/data/data.json" valueExpression="//bean1/subbean1/sprop1" />
 				<ccg:loadJson contextAttribute="xpathObj" resource="res:/data/data.json" />
 			</wrap:steps>
@@ -202,7 +202,7 @@
 				Ensures steps and validations from specified group are added properly.
 			</description>
 			
-			<ccg:setContextParam name="simpleGroupInput" value="true"/>
+			<ccg:set name="simpleGroupInput" value="true"/>
 			
 			<ccg:step-group-ref name="simpleGroup"/>
 			

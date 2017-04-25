@@ -256,6 +256,12 @@ public class AutomationUtils
 				continue;
 			}
 			
+			//skip fields which are annotated with SkipParsing 
+			if(field.getAnnotation(SkipParsing.class) != null)
+			{
+				continue;
+			}
+			
 			try
 			{
 				fieldType = field.getType();
