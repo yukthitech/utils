@@ -26,7 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(name = "loadQueryMap", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as map(s) on context. "
+@Executable(name = "loadQueryRowMap", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as map(s) on context. "
 		+ "\nIn case of zero results empty map will be kept on context. \nPer row new map will be created.")
 public class LoadQueryRowMapStep extends AbstractStep
 {

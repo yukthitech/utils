@@ -4,7 +4,8 @@
 		
 		"subbean1" : {
 			"sprop1": "value2",
-			"sprop2": "value3"
+			"sprop2": "value3",
+			"sprop3": "${attr.resAttribute}"
 		}
 	}
 }

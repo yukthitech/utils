@@ -178,7 +178,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		exeLogger.debug("Populating {} with uri {}"
 				+ "\n\tHeaders: {}"
 				+ "\n\tPath Variables: {}"
-				+ "\n\tParams: {}", request.getClass().getSimpleName(), headers, pathVariables, params);
+				+ "\n\tParams: {}", request.getClass().getSimpleName(), uri, headers, pathVariables, params);
 		
 		RestPlugin restPlugin = context.getPlugin(RestPlugin.class);
 		
