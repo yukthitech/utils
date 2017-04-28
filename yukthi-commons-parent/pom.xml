@@ -96,5 +96,6 @@
 		<module>../yukthi-validators</module>
 		<module>../yukthi-excel-reports</module>
 		<module>../yukthi-xml-mapper</module>
+		<module>../yukthi-free-marker</module>
 	</modules>
 </project>
