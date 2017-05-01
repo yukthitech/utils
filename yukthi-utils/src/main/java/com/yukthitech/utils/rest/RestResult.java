@@ -67,4 +67,21 @@ public class RestResult<T>
 	{
 		return httpResponse;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Status Code: ").append(statusCode);
+		builder.append(",").append("Value: ").append(value);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

@@ -196,6 +196,26 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
 		}
 	}
+	
+	/**
+	 * Gets the request body.
+	 *
+	 * @return the request body
+	 */
+	public String getRequestBody()
+	{
+		return requestBody;
+	}
+	
+	/**
+	 * Gets the map to hold file fields.
+	 *
+	 * @return the map to hold file fields
+	 */
+	public List<RequestPart> getMultiparts()
+	{
+		return multiparts;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -263,22 +283,34 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		
 		return (T)this;
 	}
-
+	
 	/**
 	 * Adds the specified object as string part to this multipart request
 	 * @param partName Name of the request part
 	 * @param object string to be added
 	 * @return current request instance
 	 */
-	@SuppressWarnings("unchecked")
 	public T addTextPart(String partName, String object)
+	{
+		return addTextPart(partName, object, TEXT_CONTENT_TYPE);
+	}
+
+	/**
+	 * Adds the specified object as string part to this multipart request
+	 * @param partName Name of the request part
+	 * @param object string to be added
+	 * @param contentType Content type of the part
+	 * @return current request instance
+	 */
+	@SuppressWarnings("unchecked")
+	public T addTextPart(String partName, String object, String contentType)
 	{
 		if(!multipartRequest)
 		{
 			throw new IllegalStateException("Parts can be added only to multi part request");
 		}
 		
-		this.multiparts.add(new RequestPart(partName, object, TEXT_CONTENT_TYPE));
+		this.multiparts.add(new RequestPart(partName, object, contentType));
 		
 		return (T)this;
 	}

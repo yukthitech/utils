@@ -198,7 +198,7 @@ public class RestClient
 	public <T> RestResult<T> invokeJsonRequest(RestRequest<?> request, final JavaType expectedResponseType)
 	{
 		//invoked the request
-		RestResult<String> stringResult = makeRequest(request);
+		RestResult<String> stringResult = makeRequest(request, new RestResultHandler());
 		T resultValue = null;
 
 		//if response has body
@@ -236,7 +236,7 @@ public class RestClient
 	 */
 	public RestResult<String> invokeRequest(RestRequest<?> request)
 	{
-		RestResult<String> result = makeRequest(request);
+		RestResult<String> result = makeRequest(request, new RestResultHandler());
 		
 		if(restClientListener != null)
 		{
@@ -247,7 +247,26 @@ public class RestClient
 		return result;
 	}
 	
-	private RestResult<String> makeRequest(RestRequest<?> request)
+	/**
+	 * Invokes the request with custom handler
+	 * @param request request to processed
+	 * @param handler Handler to handle response
+	 * @return result of processing
+	 */
+	public <T> RestResult<T> invokeRequest(RestRequest<?> request, ResponseHandler<RestResult<T>> handler)
+	{
+		RestResult<T> result = makeRequest(request, handler);
+		
+		if(restClientListener != null)
+		{
+			logger.debug("Calling rest client listener before sending result to caller");
+			restClientListener.postrequest(request, result);
+		}
+		
+		return result;
+	}
+	
+	private <T> RestResult<T> makeRequest(RestRequest<?> request, ResponseHandler<RestResult<T>> handler)
 	{
 		try
 		{
@@ -271,7 +290,7 @@ public class RestClient
 			HttpRequestBase convertedRequest = request.toHttpRequestBase(baseUrl);
 			
 			//invoke the request and capture the response
-			RestResult<String> result = httpclient.execute(convertedRequest, new RestResultHandler());
+			RestResult<T> result = httpclient.execute(convertedRequest, handler);
 
 			return result;
 		}catch(Exception ex)
