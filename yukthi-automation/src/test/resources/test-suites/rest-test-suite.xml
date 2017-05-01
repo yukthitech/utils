@@ -1,0 +1,99 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+
+	<testSuite name="rest-test-suites">
+	
+		<testCase name="testPost">
+			<description>Test post api invocation</description>
+
+			<wrap:steps>
+				<ccg:invokePost uri="/emp/save">
+					<body><![CDATA[
+						{
+							"name" : "Emp1",
+							"address": "some address"
+						}
+					]]></body>
+				</ccg:invokePost>
+				
+				<ccg:setXpath valueExpression="//id" name="emp1_id">
+					<source>${attr.response}</source>
+				</ccg:setXpath>
+
+				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+
+
+				<ccg:invokePost uri="/emp/save">
+					<body><![CDATA[
+						{
+							"name" : "Emp2",
+							"address": "some address"
+						}
+					]]></body>
+				</ccg:invokePost>
+				
+				<ccg:setXpath valueExpression="//id" name="emp2_id">
+					<source>${attr.response}</source>
+				</ccg:setXpath>
+				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="testGet" dependencies="testPost">
+			<description>Tests get api invocation</description>
+
+			<ccg:invokeGet uri="/emp/get/{id}">
+				<pathVariable name="id">${attr.emp2_id}</pathVariable>
+			</ccg:invokeGet>
+			
+			<ccg:validateXpathValue valueExpression="//name" value="Emp2" source="${attr.response}"/>
+		</testCase>
+
+		<testCase name="testDelete" dependencies="testPost">
+			<description>Tests delete api invocation</description>
+
+			<ccg:invokeDelete uri="/emp/delete/{id}">
+				<pathVariable name="id">${attr.emp2_id}</pathVariable>
+			</ccg:invokeDelete>
+			
+			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+			
+			<ccg:invokeGet uri="/emp/get/{id}">
+				<pathVariable name="id">${attr.emp2_id}</pathVariable>
+			</ccg:invokeGet>
+			
+			<!-- As emp2 is deleted, get should result in 400 error -->
+			<ccg:validateContextParam expression="attr.result.statusCode" value="400" />
+		</testCase>
+
+		<testCase name="testMultiPart" dependencies="testPost">
+			<description>Tests multi part post request</description>
+
+			<ccg:invokeMultipartPost uri="/emp/saveWithFile">
+				<part name="details">
+					<value>
+						{
+							"name" : "Emp3",
+							"address": "some address"
+						}
+					</value>
+				</part>
+
+				<attachment name="file">file:./src/test/resources/testFile.txt</attachment>				
+			</ccg:invokeMultipartPost>
+			
+			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+			
+			<ccg:setXpath valueExpression="//id" name="emp3_id">
+				<source>${attr.response}</source>
+			</ccg:setXpath>
+			
+			<ccg:invokeGetFile uri="/emp/getFile/{id}">
+				<pathVariable name="id">${attr.emp3_id}</pathVariable>
+			</ccg:invokeGetFile>
+			
+			<ccg:loadText resource="file:${attr.response}" contextAttribute="outputContent"/>
+			
+			<ccg:validateContextParam expression="attr.outputContent" value="This is simple test file for upload." />
+		</testCase>
+	</testSuite>
+</testData>

@@ -132,11 +132,12 @@ public class LoadQueryRowMapStep extends AbstractStep
 			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 
 			Object result = null;
+			Object valueArr[] = values.isEmpty() ? null : values.toArray();
 			
 			if(processAllRows)
 			{
 				exeLogger.debug("Loading muliple row maps on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(processedQuery, new MapListHandler(), values);
+				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new MapListHandler(), valueArr);
 				
 				if(result == null)
 				{
@@ -146,7 +147,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 			else
 			{
 				exeLogger.debug("Loading first-row as map on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(processedQuery, new MapHandler(), values);
+				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new MapHandler(), valueArr);
 				
 				if(result == null)
 				{
@@ -155,6 +156,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 			}
 			
 			context.setAttribute(contextAttribute, result);
+			exeLogger.debug("Data loaded on ontext with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing query: {}", query);

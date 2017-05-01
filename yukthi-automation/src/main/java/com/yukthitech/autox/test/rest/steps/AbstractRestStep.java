@@ -3,6 +3,8 @@ package com.yukthitech.autox.test.rest.steps;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.client.ResponseHandler;
+
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
@@ -20,10 +22,9 @@ import com.yukthitech.utils.rest.RestResult;
  */
 public abstract class AbstractRestStep extends AbstractStep
 {
-	
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
-
+	
 	/**
 	 * Base Url to be used. 
 	 */
@@ -75,8 +76,8 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Request content type to be used. default: null.
 	 */
-	@Param(description = "Request content type to be used. default: null", required = false)
-	protected String contentType;
+	@Param(description = "Request content type to be used. default: " + IRestConstants.JSON_CONTENT_TYPE, required = false)
+	protected String contentType = IRestConstants.JSON_CONTENT_TYPE;
 	
 	/**
 	 * Sets the base Url to be used.
@@ -235,25 +236,38 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		if(baseUrl != null)
 		{
-			exeLogger.debug("Invoking request with base url: {}", baseUrl);
+			exeLogger.debug("With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", baseUrl, expectedResponseType, request);
 		}
 		else
 		{
-			exeLogger.debug("Invoking request with base url: {}", restPlugin.getBaseUrl());
+			exeLogger.debug("With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", restPlugin.getBaseUrl(), expectedResponseType, request);
 		}
 		
 		RestClient client = restPlugin.getRestClient(baseUrl);
 		
 		RestResult<Object> result = null;
 		
-		if(expectedResponseType == null)
+		ResponseHandler<RestResult<?>> handler = getRestResultHandler(exeLogger);
+		
+		if(handler != null)
 		{
-			result = (RestResult) client.invokeRequest(request);
+			exeLogger.debug("Using current step handler for processing response and building the result");
+			
+			result = (RestResult) client.invokeRequest( (RestRequest) request, (ResponseHandler) handler);
 		}
 		else
 		{
-			result = (RestResult) client.invokeJsonRequest(request, expectedResponseType);
+			if(expectedResponseType == null)
+			{
+				result = (RestResult) client.invokeRequest(request);
+			}
+			else
+			{
+				result = (RestResult) client.invokeJsonRequest(request, expectedResponseType);
+			}
 		}
+		
+		exeLogger.debug("Using context attributes [Result attribute: {}, Response attribute: {}]. Obtained result:\n{}", resultContextAttribute, responseContextAttribure, result);
 		
 		context.setAttribute(resultContextAttribute, result);
 		
@@ -270,5 +284,10 @@ public abstract class AbstractRestStep extends AbstractStep
 	public IStep clone()
 	{
 		return AutomationUtils.deepClone(this);
+	}
+	
+	protected ResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
+	{
+		return null;
 	}
 }

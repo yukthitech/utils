@@ -45,6 +45,10 @@
 				<url>jdbc:derby:#{derby.folder};create=true</url>
 			</dataSource>
 		</db-plugin>
+		
+		<rest-plugin>
+			<baseUrl>http://localhost:8080/app/api</baseUrl>
+		</rest-plugin>
 			
 	</wrap:plugins>
 

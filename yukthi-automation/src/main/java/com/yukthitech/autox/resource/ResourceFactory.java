@@ -15,7 +15,7 @@ public class ResourceFactory
 	/**
 	 * Pattern used to specify file resources.
 	 */
-	public static Pattern RESOURCE_PATTERN = Pattern.compile("(\\w+)\\:(.+)");
+	public static Pattern RESOURCE_PATTERN = Pattern.compile("(\\w+)\\:(.+)", Pattern.MULTILINE);
 	
 	/**
 	 * Builds the {@link IResource} object from specified resource.
@@ -40,6 +40,11 @@ public class ResourceFactory
 			{
 				exeLogger.debug("Loading classpath resource: {}", matcher.group(2));
 				return new ClassPathResource(matcher.group(2));
+			}
+			else if("string".equalsIgnoreCase(resType))
+			{
+				exeLogger.debug("Loading specified content itseld as resource: {}", matcher.group(2));
+				return new StringResource(matcher.group(2));
 			}
 			else
 			{

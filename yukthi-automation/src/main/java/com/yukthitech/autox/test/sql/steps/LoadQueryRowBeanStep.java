@@ -148,11 +148,12 @@ public class LoadQueryRowBeanStep extends AbstractStep
 			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 
 			Object result = null;
+			Object valueArr[] = values.isEmpty() ? null : values.toArray();
 			
 			if(processAllRows)
 			{
 				exeLogger.debug("Loading muliple row beans on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(processedQuery, new BeanHandler<>(beanType), values);
+				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new BeanHandler<>(beanType), valueArr);
 				
 				if(result == null)
 				{
@@ -162,7 +163,7 @@ public class LoadQueryRowBeanStep extends AbstractStep
 			else
 			{
 				exeLogger.debug("Loading first-row as bean on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(processedQuery, new BeanListHandler<>(beanType), values);
+				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new BeanListHandler<>(beanType), valueArr);
 				
 				if(result == null)
 				{
@@ -171,6 +172,7 @@ public class LoadQueryRowBeanStep extends AbstractStep
 			}
 			
 			context.setAttribute(contextAttribute, result);
+			exeLogger.debug("Data loaded on ontext with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing query: {}", query);

@@ -209,5 +209,18 @@
 			<ccg:validateContextParam expression="attr.simpleGroupOutput" value="true"/>
 		</testCase>
 
+		<testCase name="testFreeMarkerMethod">
+			<description>
+				Tests the ability to invoke dynamic free marker expressions.
+			</description>
+
+			<wrap:steps>
+				<ccg:set name="dateStr" value="Date: ${dateToStr('dd/MM/yyyy')}"/>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.dateStr" value="Date: ${dateToStr(addDays(0),'dd/MM/yyyy')}"/>
+			</wrap:validations>
+		</testCase>
 	</testSuite>
 </testData>

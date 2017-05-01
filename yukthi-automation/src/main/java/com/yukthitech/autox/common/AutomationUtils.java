@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
@@ -24,12 +23,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthi.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 /**
@@ -43,17 +41,28 @@ public class AutomationUtils
 	/**
 	 * Freemarker template config used to parse expressions.
 	 */
-	private static Configuration configuration = new Configuration();
+	private static FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 	
 	static
 	{
 		try
 		{
-			configuration.setSetting("number_format", "#");
+			freeMarkerEngine.getConfiguration().setSetting("number_format", "#");
 		} catch(TemplateException ex)
 		{
 			throw new InvalidStateException("An error occurred while init freemarker context", ex);
 		}
+		
+		loadFreeMarkerClass(DefaultFreeMarkerMethods.class);
+	}
+	
+	/**
+	 * Loads free marker class.
+	 * @param cls class to load
+	 */
+	public static void loadFreeMarkerClass(Class<?> cls)
+	{
+		freeMarkerEngine.loadClass(cls);
 	}
 
 	/**
@@ -119,13 +128,7 @@ public class AutomationUtils
 	{
 		try
 		{
-			Template template = new Template("template", templateStr, configuration);
-			
-			StringWriter writer = new StringWriter();
-			template.process(context, writer);
-			writer.flush();
-			
-			return writer.toString();
+			return freeMarkerEngine.processTemplate("template", templateStr, context);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while processing template:\n" + templateStr, ex);

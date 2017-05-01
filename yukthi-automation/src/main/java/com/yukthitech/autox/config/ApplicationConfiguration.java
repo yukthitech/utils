@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.RemoteFileLogMonitor;
@@ -372,5 +373,14 @@ public class ApplicationConfiguration
 	public void setTimeFomat(String timeFomat)
 	{
 		this.timeFomat = timeFomat;
+	}
+	
+	/**
+	 * Adds specified free marker class and loads it.
+	 * @param cls
+	 */
+	public void addFreeMarkerClass(Class<?> cls)
+	{
+		AutomationUtils.loadFreeMarkerClass(cls);
 	}
 }
