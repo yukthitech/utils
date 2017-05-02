@@ -41,7 +41,6 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 
 	/**
 	 * Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.
-	 * @param name Name of the part to set.
 	 * @param part part to be set.
 	 */
 	public void addPart(HttpPart part)

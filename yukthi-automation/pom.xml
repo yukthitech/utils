@@ -81,11 +81,13 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>9.4.2.v20170220</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
 			<version>9.4.2.v20170220</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Spring to support test controllers -->
@@ -93,12 +95,14 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>4.1.6.RELEASE</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.3</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Derby embedded db driver -->
@@ -106,6 +110,7 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<version>10.12.1.1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
