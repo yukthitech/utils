@@ -86,7 +86,7 @@ public class DefaultFreeMarkerMethods
 
 	/**
 	 * Converts map of objects into string.
-	 * @param lst list of objects to be converted
+	 * @param map map of objects to be converted
 	 * @param template Template representing how key and value should be converted into string (the string can have #key and #value which will act as place holders)
 	 * @param prefix prefix to be used at the starting.
 	 * @param delimiter Delimiter to be used between elements.
