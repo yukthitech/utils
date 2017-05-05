@@ -3,6 +3,8 @@ package com.yukthitech.autox.common;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -75,6 +77,42 @@ public class DefaultFreeMarkerMethods
 			}
 			
 			builder.append(elem);
+			first = false;
+		}
+		
+		builder.append(suffix);
+		return builder.toString();
+	}
+
+	/**
+	 * Converts map of objects into string.
+	 * @param lst list of objects to be converted
+	 * @param template Template representing how key and value should be converted into string (the string can have #key and #value which will act as place holders)
+	 * @param prefix prefix to be used at the starting.
+	 * @param delimiter Delimiter to be used between elements.
+	 * @param suffix Suffix to be used at end of string.
+	 * @param emptyString String that will be returned if input list is null or empty.
+	 * @return result string.
+	 */
+	@FreeMarkerMethod
+	public static String mapToString(Map<Object, Object> map, String template, String prefix, String delimiter, String suffix, String emptyString)
+	{
+		if(map == null || map.isEmpty())
+		{
+			return emptyString;
+		}
+		
+		StringBuilder builder = new StringBuilder(prefix);
+		boolean first = true;
+		
+		for(Entry<Object, Object> entry : map.entrySet())
+		{
+			if(!first)
+			{
+				builder.append(delimiter);
+			}
+			
+			builder.append( template.replace("#key", "" + entry.getKey()).replace("#value", "" + entry.getValue()) );
 			first = false;
 		}
 		

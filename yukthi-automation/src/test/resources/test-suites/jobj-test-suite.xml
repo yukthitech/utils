@@ -215,6 +215,12 @@
 			<ccg:element>c</ccg:element>
 		</data-bean>
 
+		<data-bean id="dataMap" ccg:beanType="java.util.HashMap">
+			<ccg:entry key="key1">Value1</ccg:entry>
+			<ccg:entry key="key2">Value2</ccg:entry>
+			<ccg:entry key="key3">Value3</ccg:entry>
+		</data-bean>
+
 		<testCase name="testFreeMarkerMethod">
 			<description>
 				Tests the ability to invoke dynamic free marker expressions.
@@ -222,10 +228,12 @@
 
 			<wrap:steps>
 				<ccg:set name="listStr" value="${collectionToString(data.listForFuncTest, '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
+				<ccg:set name="mapStr" value="${mapToString(data.dataMap, '#key=#value', '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
 			</wrap:steps>
 
 			<wrap:validations>
 				<ccg:validateContextParam expression="attr.listStr" value="&quot;a&quot;,&quot;b&quot;,&quot;c&quot;"/>
+				<ccg:validateContextParam expression="attr.mapStr" value="&quot;key1=Value1&quot;,&quot;key2=Value2&quot;,&quot;key3=Value3&quot;"/>
 			</wrap:validations>
 		</testCase>
 	</testSuite>

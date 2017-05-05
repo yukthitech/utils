@@ -12,6 +12,7 @@ import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
+import freemarker.template.SimpleHash;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
@@ -101,6 +102,12 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 						methodArgs[i] = ((SimpleSequence) arguments.get(i)).toList();
 						continue;
 					}
+				}
+				
+				if(arguments.get(i) instanceof SimpleHash)
+				{
+					methodArgs[i] = ((SimpleHash) arguments.get(i)).toMap();
+					continue;
 				}
 				
 				methodArgs[i] = ConvertUtils.convert(arguments.get(i), argTypes[i]);
