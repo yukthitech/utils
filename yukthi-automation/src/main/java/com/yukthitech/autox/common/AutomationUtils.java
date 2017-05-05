@@ -7,14 +7,17 @@ import java.io.FileFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
@@ -22,10 +25,15 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
 
 import com.yukthi.utils.fmarker.FreeMarkerEngine;
+import com.yukthi.utils.fmarker.annotaion.FreeMarkerDirective;
+import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 import freemarker.template.TemplateException;
@@ -53,18 +61,60 @@ public class AutomationUtils
 			throw new InvalidStateException("An error occurred while init freemarker context", ex);
 		}
 		
-		loadFreeMarkerClass(DefaultFreeMarkerMethods.class);
+		loadFreeMarkerMethods();
 	}
 	
-	/**
-	 * Loads free marker class.
-	 * @param cls class to load
-	 */
-	public static void loadFreeMarkerClass(Class<?> cls)
+	private static void loadFreeMarkerMethods()
 	{
-		freeMarkerEngine.loadClass(cls);
-	}
+		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
+		Set<String> basePackages = applicationConfiguration.getBasePackages();
 
+		if(basePackages == null)
+		{
+			basePackages = new HashSet<>();
+		}
+
+		basePackages.add("com.yukthitech");
+
+		Reflections reflections = null;
+		Set<Method> freeMarkerMethods = null, freeMarkerDirectiveMethods = null;
+		
+		Set<Class<?>> fmClasses = new HashSet<>();
+
+		for(String pack : basePackages)
+		{
+			logger.debug("Scanning for free marker methods in package - {}", pack);
+			reflections = new Reflections(pack, new MethodAnnotationsScanner());
+
+			freeMarkerMethods = reflections.getMethodsAnnotatedWith(FreeMarkerMethod.class);
+			freeMarkerDirectiveMethods = reflections.getMethodsAnnotatedWith(FreeMarkerDirective.class);
+			
+			if(freeMarkerMethods != null)
+			{
+				for(Method method : freeMarkerMethods)
+				{
+					fmClasses.add(method.getDeclaringClass());
+				}
+			}
+
+			if(freeMarkerDirectiveMethods != null)
+			{
+				for(Method method : freeMarkerDirectiveMethods)
+				{
+					fmClasses.add(method.getDeclaringClass());
+				}
+			}
+		}
+		
+		logger.debug("Found free marker method container classes to be: {}", fmClasses);
+		
+		for(Class<?> cls : fmClasses)
+		{
+			logger.debug("Loading free marker class: {}", cls.getName());
+			freeMarkerEngine.loadClass(cls);
+		}
+	}
+	
 	/**
 	 * Loads the xml files from specified folder. Returned set will be ordered by their relative paths.
 	 * @param folder folder to be loaded.

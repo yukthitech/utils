@@ -2,11 +2,17 @@ package com.yukthi.utils.fmarker;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
+import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
 
@@ -41,7 +47,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 	/* (non-Javadoc)
 	 * @see freemarker.template.TemplateMethodModelEx#exec(java.util.List)
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object exec(List arguments) throws TemplateModelException
 	{
@@ -54,7 +60,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		{
 			if(argsSize != argTypes.length)
 			{
-				throw new InvalidArgumentException("Invalid number of arguments specified for method - {}", methodName);
+				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected count: {}, Actual Count: {}, Arguments: {}]", methodName, argTypes.length, argsSize, arguments);
 			}
 
 			//for normal arguments, number of method arguments will be equal to actual arguments
@@ -64,7 +70,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		{
 			if(argsSize < argTypes.length - 1)
 			{
-				throw new InvalidArgumentException("Invalid number of arguments specified for method - {}", methodName);
+				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected min count: {}, Actual Count: {}, Arguments: {}]", methodName, argTypes.length - 1, argsSize, arguments);
 			}
 			
 			//for var args number of arguments will be equal to number of declared parameters in method
@@ -78,6 +84,25 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 			
 			for(int i = 0; i < stdArgCount; i++)
 			{
+				if(arguments.get(i) instanceof SimpleSequence)
+				{
+					if(List.class.isAssignableFrom(argTypes[i]))
+					{
+						methodArgs[i] = ((SimpleSequence) arguments.get(i)).toList();
+						continue;
+					}
+					else if(Set.class.isAssignableFrom(argTypes[i]))
+					{
+						methodArgs[i] = new HashSet( ((SimpleSequence) arguments.get(i)).toList() );
+						continue;
+					}
+					else if(Collection.class.isAssignableFrom(argTypes[i]))
+					{
+						methodArgs[i] = ((SimpleSequence) arguments.get(i)).toList();
+						continue;
+					}
+				}
+				
 				methodArgs[i] = ConvertUtils.convert(arguments.get(i), argTypes[i]);
 			}
 			
@@ -100,7 +125,8 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 			return freeMarkerMethod.invoke(null, methodArgs);
 		}catch(Exception ex)
 		{
-			throw new TemplateModelException(ex);
+			throw new InvalidStateException("An error occurred while invoking method '{}'. Arguments used: {}", 
+					freeMarkerMethod.getName(), Arrays.toString( methodArgs ), ex);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.yukthitech.autox.common;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
@@ -20,7 +21,6 @@ public class DefaultFreeMarkerMethods
 	@FreeMarkerMethod
 	public static Date now()
 	{
-		System.out.println("===========>now is called");
 		return new Date();
 	}
 	
@@ -32,7 +32,6 @@ public class DefaultFreeMarkerMethods
 	@FreeMarkerMethod
 	public static String dateToStr(String format)
 	{
-		System.out.println("===========>dateToStr is called");
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
 		return simpleDateFormat.format(new Date());
 	}
@@ -45,7 +44,41 @@ public class DefaultFreeMarkerMethods
 	@FreeMarkerMethod
 	public static Date addDays(int days)
 	{
-		System.out.println("===========>addDays is called");
 		return DateUtils.addDays(new Date(), days);
+	}
+	
+	/**
+	 * Converts collection of objects into string.
+	 * @param lst list of objects to be converted
+	 * @param prefix prefix to be used at the starting.
+	 * @param delimiter Delimiter to be used between elements.
+	 * @param suffix Suffix to be used at end of string.
+	 * @param emptyString String that will be returned if input list is null or empty.
+	 * @return result string.
+	 */
+	@FreeMarkerMethod
+	public static String collectionToString(Collection<Object> lst, String prefix, String delimiter, String suffix, String emptyString)
+	{
+		if(lst == null || lst.isEmpty())
+		{
+			return emptyString;
+		}
+		
+		StringBuilder builder = new StringBuilder(prefix);
+		boolean first = true;
+		
+		for(Object elem : lst)
+		{
+			if(!first)
+			{
+				builder.append(delimiter);
+			}
+			
+			builder.append(elem);
+			first = false;
+		}
+		
+		builder.append(suffix);
+		return builder.toString();
 	}
 }

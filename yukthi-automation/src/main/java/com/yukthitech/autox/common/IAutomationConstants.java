@@ -24,7 +24,7 @@ public interface IAutomationConstants
 	public ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	
 	/**
-	 * Pattern used to specify file resources.
+	 * Pattern used to refer property in the source.
 	 */
 	public Pattern REF_PATTERN = Pattern.compile("ref\\:(.+)");
 	

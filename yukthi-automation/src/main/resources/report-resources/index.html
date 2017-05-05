@@ -216,7 +216,7 @@
 					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;">
 						{{suiteResult.testCaseName}}
 					</td>
-					<td ng-class="suiteResult.status == 'FAILED' ? 'errorVal' : 'successVal'" style="width: 20%;">
+					<td ng-class="suiteResult.status != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 20%;">
 						{{suiteResult.status}}
 					</td>
 					<td style="width: 50%; text-align: left; padding-left: 1em;">
