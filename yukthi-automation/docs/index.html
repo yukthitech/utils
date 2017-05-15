@@ -23,11 +23,16 @@
 		<link rel="stylesheet" href="jstree/themes/default/style.min.css" />
 		<script src="jstree/jstree.js"></script>
 		
+	    <link href="js/highlight/styles/agate.css" rel="stylesheet">
+	    <script src="js/highlight/highlight.pack.js"></script>
+
 		<script src="js/main-controller.js"></script>
 		
-		<script src="doc/data.js"></script>
-		<script src="doc/doc.js"></script>
-
+		<link href="api/css/doc.css" rel="stylesheet">
+		<script src="api/js/data.js"></script>
+		<script src="api/js/doc.js"></script>
+		
+		<script>hljs.initHighlightingOnLoad();</script>
 	</head>
 	
 	<body ng-app="application" ng-controller="mainController" ng-init="init()">

@@ -16,7 +16,7 @@
 		</testCase>
 
 		<cleanup>
-			<ccg:closeSession/>
+			<ccg:quitSession/>
 		</cleanup>
 	</testSuite>
 	

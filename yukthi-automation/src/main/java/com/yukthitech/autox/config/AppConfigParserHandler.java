@@ -15,7 +15,7 @@ public class AppConfigParserHandler extends DefaultParserHandler
 	/**
 	 * Expression to be used for accessing application properties or system/environment properties.
 	 */
-	public static final Pattern EXPR_PATTERN = Pattern.compile("\\#+\\{(.+)\\}");
+	public static final Pattern EXPR_PATTERN = Pattern.compile("\\#+\\{(.+?)\\}");
 	
 	/**
 	 * Prefix to be used to skip expression patterns.
@@ -48,6 +48,6 @@ public class AppConfigParserHandler extends DefaultParserHandler
 	@Override
 	public String processText(Object rootBean, String text)
 	{
-		return StringUtil.getPatternString(text, appConfigValueProvider, EXPR_PATTERN, "##", "#");
+		return StringUtil.getPatternString(text, appConfigValueProvider, EXPR_PATTERN, EXPR_ESCAPE_PREFIX, EXPR_ESCAPE_REPLACE);
 	}
 }

@@ -1,9 +1,7 @@
 $.application.controller('mainController', function($scope){
 	$scope.headerLinks = [
 	    {"id": "home", "label": "Home", file: "home.html"},
-	    {"id": "internals", "label": "Internals", file: "internals.html"},
-	    {"id": "customizations", "label": "Customizations", file: "customizations.html"},
-	    {"id": "apiIndex", "label": "API Index", file: "doc-index.html"}
+	    {"id": "apiIndex", "label": "API Index", file: "api/doc-index.html"}
 	];
 	
 	$scope.activeHeaderLink = null;
@@ -26,6 +24,12 @@ $.application.controller('mainController', function($scope){
 		}
 		
 		$scope.activeHeaderLink = newLink;
+		
+		setTimeout(function(){ 
+			$('pre code').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		}, 500);
 	};
 	
 	$scope.init = function() {

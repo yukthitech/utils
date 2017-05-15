@@ -12,6 +12,20 @@
 	</step-group>
 
 	<testSuite name="lang-test-suites">
+	
+		<testCase name="testExpressions">
+			<description>Tests expressions are replaced in test suite files properly</description>
+			
+			<ccg:set name="testAttr" value="SimpleValue"/>
+			<ccg:set name="testAttr2" value="Value: #{test.app.prop}"/>
+			<ccg:set name="testAttr3">
+				<value>Value: #{test.app.prop} ${attr.testAttr}</value>
+			</ccg:set>
+			
+			<ccg:validateContextParam expression="attr.testAttr2" value="Value: TestValue" />
+			<ccg:validateContextParam expression="attr.testAttr3" value="Value: TestValue SimpleValue" />
+			
+		</testCase>
 
 		<testCase name="testIfThenCondition">
 			<description>Tests if condition "then" is working</description>

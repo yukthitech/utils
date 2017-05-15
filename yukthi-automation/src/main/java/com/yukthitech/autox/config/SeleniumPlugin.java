@@ -1,6 +1,6 @@
 package com.yukthitech.autox.config;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	 * Selenium drivers to use for automation.
 	 */
 	@Param(description = "Name to basic configuration to be used for different drivers. Like - name, class-name and default system properties to set.", required = true)
-	private Map<String, SeleniumDriverConfig> drivers = new HashMap<>();
+	private Map<String, SeleniumDriverConfig> drivers = new LinkedHashMap<>();
 	
 	/**
 	 * Active driver to be used for the current automation execution.
@@ -160,7 +160,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName());
+			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
 		}
 	}
 	

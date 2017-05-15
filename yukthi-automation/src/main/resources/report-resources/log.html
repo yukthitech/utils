@@ -33,8 +33,8 @@
 				border-bottom: 2px solid grey;">
 			<table style="width: 100%;">
 				<tr>
-					<td style="text-align: left; vertical-align: top; width: 1em;">
-						<img alt="Yukthi Logo" src="img/logo.png" style="width: 12em; height: 3.8em;">
+					<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em;">
+						<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
 					</td>
 					
 					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
@@ -107,7 +107,7 @@
 							
 						<a ng-if="message.imageFileName" href="./logs/{{message.imageFileName}}">
 					       <img alt="{{message.imageFileName}}" src="../output/logs/{{message.imageFileName}}" 
-					       	style="width: 30em; height: 20em; border: 1px solid black;"/>
+					       	style="width: 50em; border: 1px solid black;"/>
 					    </a>
 					</td>
 					<td style="white-space: nowrap;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">

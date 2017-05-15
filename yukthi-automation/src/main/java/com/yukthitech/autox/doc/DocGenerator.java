@@ -13,7 +13,6 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.config.IPlugin;
-import com.yukthitech.autox.test.ResourceManager;
 
 /**
  * Tool to generate documentation for all plugins, steps and validations.
@@ -142,13 +141,12 @@ public class DocGenerator
 		ObjectMapper objectMapper = new ObjectMapper();
 		String json = objectMapper.writeValueAsString(docInformation);
 		
-		File dataJsFolder = new File(outFolder, "doc");
+		File apiFolder = new File(outFolder, "api");
+		File dataJsFolder = new File(apiFolder, "js");
 		
 		dataJsFolder.mkdirs();
 		
 		File dataJsFile = new File(dataJsFolder, "data.js");
-		FileUtils.writeStringToFile(dataJsFile, "var docData = " + json + ";");
-		
-		ResourceManager.getInstance().copyDocResources(new File(outFolder));
+		FileUtils.write(dataJsFile, "var docData = " + json + ";", (String) null);
 	}
 }

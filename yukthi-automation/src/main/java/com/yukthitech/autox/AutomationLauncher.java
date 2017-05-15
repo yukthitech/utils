@@ -1,5 +1,6 @@
 package com.yukthitech.autox;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class AutomationLauncher
 	 */
 	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
 	{
-		DefaultParserHandler defaultParserHandler = new AutomationParserHandler(context, appConfig);
+		DefaultParserHandler defaultParserHandler = new TestSuiteParserHandler(context, appConfig);
 		
 		logger.debug("Loading test suites from folders - {}", appConfig.getTestSuiteFolders());
 		
@@ -311,8 +312,16 @@ public class AutomationLauncher
 		
 		//execute test suites
 		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup, reportFolder);
-		testSuiteExecutor.executeTestSuites();
+		boolean res = testSuiteExecutor.executeTestSuites();
+
+		try
+		{
+			Desktop.getDesktop().open(new File(reportFolder, "index.html"));
+		}catch(Exception ex)
+		{
+			logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
+		}
 		
-		System.exit(0);
+		System.exit( res ? 0 : -1 );
 	}
 }
