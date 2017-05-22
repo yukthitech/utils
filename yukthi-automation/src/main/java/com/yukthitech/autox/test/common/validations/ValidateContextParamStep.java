@@ -1,6 +1,6 @@
 package com.yukthitech.autox.test.common.validations;
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
@@ -71,7 +71,7 @@ public class ValidateContextParamStep extends AbstractValidation
 		
 		try
 		{
-			actualValue = BeanUtils.getProperty(context, expression);
+			actualValue = PropertyUtils.getProperty(context, expression);
 		}catch(Exception ex)
 		{
 			exeLogger.error(ex, "An error occurred while fetching property '{}' from context", expression);

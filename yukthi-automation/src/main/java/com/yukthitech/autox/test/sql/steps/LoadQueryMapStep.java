@@ -162,9 +162,9 @@ public class LoadQueryMapStep extends AbstractStep
 				resMap.put(rs.getObject(keyColumn), rs.getObject(valueColumn));
 				rowCount++;
 			}
-			
-			exeLogger.debug("Processed number of rows {} and setting result map on context with attribute name: {}", rowCount, contextAttribute);
+
 			context.setAttribute(contextAttribute, resMap);
+			exeLogger.debug("Processed number of rows {} and set result map on context with attribute name '{}'. Data Map: {}", rowCount, contextAttribute, resMap);
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing query: {}", query);

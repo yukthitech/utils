@@ -33,7 +33,7 @@ public class ResourceManager
 		try
 		{
 			XMLBeanParser.parse(ResourceManager.class.getResourceAsStream("/report-resource-list.xml"), instance.reportResources);
-			XMLBeanParser.parse(ResourceManager.class.getResourceAsStream("/doc-resource-list.xml"), instance.docResources);
+			//XMLBeanParser.parse(ResourceManager.class.getResourceAsStream("/doc-resource-list.xml"), instance.docResources);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while loading report resource list", ex);

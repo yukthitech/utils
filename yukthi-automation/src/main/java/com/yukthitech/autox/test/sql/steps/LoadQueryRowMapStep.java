@@ -156,7 +156,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 			}
 			
 			context.setAttribute(contextAttribute, result);
-			exeLogger.debug("Data loaded on ontext with name {}. Data: {}", contextAttribute, result);
+			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing query: {}", query);

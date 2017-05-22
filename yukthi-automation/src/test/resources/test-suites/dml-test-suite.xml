@@ -88,5 +88,24 @@
 				</ccg:validateWithSql>
 			</wrap:validations>
 		</testCase>
+
+		<testCase name="column_list_query" dependencies="multiple_query">
+			<description>Validates for executing column-list query</description>
+
+			<wrap:steps>
+				<ccg:loadQueryColumnList dataSourceName="dataSource" contextAttribute="empNames">
+					<query>
+						SELECT NAME 
+						FROM EMPLOYEE
+						WHERE NAME IN ('employee1', 'employee2')
+						ORDER BY NAME
+					</query>
+				</ccg:loadQueryColumnList>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.empNames" value="[employee1, employee2]"/>
+			</wrap:validations>
+		</testCase>
 	</testSuite>
 </testData>

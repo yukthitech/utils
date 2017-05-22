@@ -10,8 +10,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -26,29 +25,22 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(name = "loadQueryRowBean", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as bean(s) on context. "
-		+ "\nIn case of zero results empty map will be kept on context. \nPer row new bean will be created.")
-public class LoadQueryRowBeanStep extends AbstractStep
+@Executable(name = "loadQueryColumnList", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the result first column values as list on the context. "
+		+ "\nIn case of zero results empty map will be kept on context. \nPer row new map will be created.")
+public class LoadQueryColumnListStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Query to execute.
 	 */
-	@Param(description = "Query to execute, the results will be used to create bean.")
+	@Param(description = "Query to execute, the result's first column will be used to create list.")
 	private String query;
 	
 	/**
-	 * Flag to indicate if all rows should be processed into bean. If true, list of beans will be loaded on context otherwise first row map will be loaded
-	 * on context.
-	 */
-	@Param(description = "If false, only first row will be processed into bean. If true, per row new map will be created and loads of this beans into context.\nDefault: true", required = false)
-	private boolean processAllRows = true;
-
-	/**
 	 * Context attribute to be used to load the map.
 	 */
-	@Param(description = "Name of the attribute which should be used to keep the result bean on the context.")
+	@Param(description = "Name of the attribute which should be used to keep the result map on the context.")
 	private String contextAttribute;
 
 	/**
@@ -56,12 +48,6 @@ public class LoadQueryRowBeanStep extends AbstractStep
 	 */
 	@Param(description = "Name of the data source to be used for query execution.")
 	private String dataSourceName;
-	
-	/**
-	 * Type of beans to which rows should be converted.
-	 */
-	@Param(description = "Type of bean to which rows should be converted.")
-	private Class<?> beanType;
 
 	/**
 	 * Sets the query to execute.
@@ -72,16 +58,6 @@ public class LoadQueryRowBeanStep extends AbstractStep
 	public void setQuery(String query)
 	{
 		this.query = query;
-	}
-
-	/**
-	 * Sets the flag to indicate if all rows should be processed into map. If true, list of maps will be loaded on context otherwise first row map will be loaded on context.
-	 *
-	 * @param processAllRows the new flag to indicate if all rows should be processed into map
-	 */
-	public void setProcessAllRows(boolean processAllRows)
-	{
-		this.processAllRows = processAllRows;
 	}
 
 	/**
@@ -103,16 +79,6 @@ public class LoadQueryRowBeanStep extends AbstractStep
 	{
 		this.dataSourceName = dataSourceName;
 	}
-	
-	/**
-	 * Sets the type of beans to which rows should be converted.
-	 *
-	 * @param beanType the new type of beans to which rows should be converted
-	 */
-	public void setBeanType(Class<?> beanType)
-	{
-		this.beanType = beanType;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -129,7 +95,7 @@ public class LoadQueryRowBeanStep extends AbstractStep
 
 		if(dataSource == null)
 		{
-			throw new InvalidStateException("No data source found with specified name: {}", dataSourceName);
+			throw new InvalidStateException("No data source found with specified name - {}", dataSourceName);
 		}
 
 		Connection connection = null;
@@ -143,34 +109,21 @@ public class LoadQueryRowBeanStep extends AbstractStep
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 			
 			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 
 			Object result = null;
 			Object valueArr[] = values.isEmpty() ? null : values.toArray();
 			
-			if(processAllRows)
+			exeLogger.debug("Loading result first column as list on context attribute: {}", contextAttribute);
+			result = QueryUtils.getQueryRunner().query(connection, processedQuery, new ColumnListHandler<>(), valueArr);
+			
+			if(result == null)
 			{
-				exeLogger.debug("Loading muliple row beans on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new BeanHandler<>(beanType), valueArr);
-				
-				if(result == null)
-				{
-					result = new ArrayList<>();
-				}
+				result = new ArrayList<>();
 			}
-			else
-			{
-				exeLogger.debug("Loading first-row as bean on context attribute: {}", contextAttribute);
-				result = QueryUtils.getQueryRunner().query(connection, processedQuery, new BeanListHandler<>(beanType), valueArr);
-				
-				if(result == null)
-				{
-					result = new HashMap<>();
-				}
-			}
-
+			
 			context.setAttribute(contextAttribute, result);
 			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)

@@ -119,4 +119,20 @@ public class DefaultFreeMarkerMethods
 		builder.append(suffix);
 		return builder.toString();
 	}
+	
+	/**
+	 * Converts specified value to string.
+	 * @param value value to covert
+	 * @return result string.
+	 */
+	@FreeMarkerMethod
+	public static String toString(Object value)
+	{
+		if(value == null)
+		{
+			return "null";
+		}
+		
+		return value.toString();
+	}
 }
