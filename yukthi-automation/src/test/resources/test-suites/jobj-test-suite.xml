@@ -197,6 +197,21 @@
 			</wrap:validations>
 		</testCase>
 		
+		<testCase name="setProp_test">
+			<description>
+				Ensures set-property step works as expected.
+			</description>
+
+			<wrap:steps>
+				<ccg:setProperty name="propAttr1"
+					source="file:./src/test/resources/data/data1.json" valueExpression="bean1.prop1" />
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.propAttr1" value="value1" />
+			</wrap:validations>
+		</testCase>
+
 		<testCase name="stepsFromGroup">
 			<description>
 				Ensures steps and validations from specified group are added properly.

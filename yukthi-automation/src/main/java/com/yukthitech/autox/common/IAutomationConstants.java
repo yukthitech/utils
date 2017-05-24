@@ -60,7 +60,7 @@ public interface IAutomationConstants
 		}
 
 		//check if string is resource
-		IResource resource = ResourceFactory.getResource(sourceStr, exeLogger);
+		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger);
 		
 		if(resource != null)
 		{

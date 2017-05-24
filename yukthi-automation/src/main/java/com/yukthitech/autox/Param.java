@@ -32,4 +32,10 @@ public @interface Param
 	 * @return mandatory or not
 	 */
 	public boolean required() default true;
+	
+	/**
+	 * Indicates the parameter represents a resource string.
+	 * @return flag indicating if resource or not. Default false.
+	 */
+	public SourceType sourceType() default SourceType.NONE;
 }

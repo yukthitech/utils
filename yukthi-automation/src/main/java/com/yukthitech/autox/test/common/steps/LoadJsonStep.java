@@ -8,6 +8,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.resource.IResource;
@@ -27,7 +28,7 @@ public class LoadJsonStep extends AbstractStep
 	/**
 	 * Path of the resource to load.
 	 */
-	@Param(description = "Json resource to load. Can be file or classpath resource.", required = false)
+	@Param(description = "Json resource to load.", required = false, sourceType = SourceType.RESOURCE)
 	private String resource;
 	
 	/**
@@ -91,7 +92,7 @@ public class LoadJsonStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		IResource resObj = ResourceFactory.getResource(resource, exeLogger);
+		IResource resObj = ResourceFactory.getResource(context, resource, exeLogger);
 		
 		if(resObj == null)
 		{
@@ -116,7 +117,7 @@ public class LoadJsonStep extends AbstractStep
 		
 		try
 		{
-			String jsonContent = IOUtils.toString(resObj.getInputStream());
+			String jsonContent = IOUtils.toString(resObj.getInputStream(), (String) null);
 			
 			if(template)
 			{

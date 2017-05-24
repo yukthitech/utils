@@ -7,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.ConvertUtils;
@@ -17,7 +18,7 @@ import com.yukthitech.utils.ConvertUtils;
  * @author akiran
  */
 @Executable(name = "setXpath", message = "Sets the specified context attribute with specified value using jx path.")
-public class SetXpathContextParamStep extends AbstractStep
+public class SetXpathStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -34,7 +35,7 @@ public class SetXpathContextParamStep extends AbstractStep
 	private String valueExpression;
 
 	/** The source. */
-	@Param(description = "Source on which jx expression has to be evaluated. Source can be a bean or json string or a file resource (file:resource-path)")
+	@Param(description = "Source on which jx expression has to be evaluated.", sourceType = SourceType.OBJECT)
 	private Object source;
 
 	/**
@@ -105,6 +106,8 @@ public class SetXpathContextParamStep extends AbstractStep
 		}
 		
 		Object sourceValue = IAutomationConstants.PARSE_OBJ_SOURCE(context, exeLogger, source);
+		
+		exeLogger.debug("Fetching xpath '{}' value from specified source", valueExpression);
 		
 		Object value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
 

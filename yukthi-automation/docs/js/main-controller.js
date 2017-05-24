@@ -1,6 +1,7 @@
 $.application.controller('mainController', function($scope){
 	$scope.headerLinks = [
 	    {"id": "home", "label": "Home", file: "home.html"},
+	    {"id": "documentation", "label": "Documentation", file: "doc.html"},
 	    {"id": "apiIndex", "label": "API Index", file: "api/doc-index.html"}
 	];
 	

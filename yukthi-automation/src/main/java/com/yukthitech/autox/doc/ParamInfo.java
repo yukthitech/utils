@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -36,6 +37,11 @@ public class ParamInfo implements Comparable<ParamInfo>
 	private String type;
 	
 	/**
+	 * Type of source for this param.
+	 */
+	private SourceType sourceType;
+	
+	/**
 	 * Instantiates a new param info.
 	 *
 	 * @param field the field
@@ -52,6 +58,7 @@ public class ParamInfo implements Comparable<ParamInfo>
 		
 		this.description = paramAnnot.description();
 		this.mandatory = paramAnnot.required();
+		this.sourceType = paramAnnot.sourceType();
 		
 		Type genericType = field.getType();
 		
@@ -117,6 +124,16 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public String getType()
 	{
 		return type;
+	}
+
+	/**
+	 * Gets the type of source for this param.
+	 *
+	 * @return the type of source for this param
+	 */
+	public SourceType getSourceType()
+	{
+		return sourceType;
 	}
 
 	@Override

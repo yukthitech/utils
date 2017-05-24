@@ -13,6 +13,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
@@ -31,7 +32,7 @@ public class LoadPropertiesStep extends AbstractStep
 	/**
 	 * Path of the resource to load.
 	 */
-	@Param(description = "Properties resource to load. Can be file or classpath resource.", required = false)
+	@Param(description = "Properties resource to load.", required = false, sourceType = SourceType.RESOURCE)
 	private String resource;
 	
 	/**
@@ -81,7 +82,7 @@ public class LoadPropertiesStep extends AbstractStep
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		Properties properties = new Properties();	
-		IResource resObj = ResourceFactory.getResource(resource, exeLogger);
+		IResource resObj = ResourceFactory.getResource(context, resource, exeLogger);
 		
 		if(resObj == null)
 		{
@@ -90,7 +91,7 @@ public class LoadPropertiesStep extends AbstractStep
 		
 		try
 		{
-			String propContent = IOUtils.toString(resObj.getInputStream());
+			String propContent = IOUtils.toString(resObj.getInputStream(), (String) null);
 			
 			if(template)
 			{

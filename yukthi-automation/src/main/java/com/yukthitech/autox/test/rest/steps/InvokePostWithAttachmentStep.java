@@ -13,6 +13,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
@@ -36,7 +37,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 	@Param(description = "Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.", required = false)
 	private List<HttpPart> parts = new ArrayList<>();
 	
-	@Param(description = "List of files to be attachment with this request.", required = false)
+	@Param(description = "List of files to be attachment with this request. Values are resources", required = false, sourceType = SourceType.RESOURCE)
 	private Map<String, String> attachments = new HashMap<>();
 
 	/**
@@ -94,7 +95,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		{
 			try
 			{
-				resource = ResourceFactory.getResource(attachEntry.getValue(), exeLogger);
+				resource = ResourceFactory.getResource(context, attachEntry.getValue(), exeLogger);
 			}catch(Exception ex)
 			{
 				throw new TestCaseFailedException("An error occurred while loading resource: {}", attachEntry.getValue(), ex);

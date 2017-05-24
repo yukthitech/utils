@@ -8,6 +8,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
@@ -26,7 +27,7 @@ public class LoadTextStep extends AbstractStep
 	/**
 	 * Path of the resource to load.
 	 */
-	@Param(description = "Text resource to load. Can be file or classpath resource.", required = false)
+	@Param(description = "Text resource to load.", required = false, sourceType = SourceType.RESOURCE)
 	private String resource;
 	
 	/**
@@ -74,12 +75,12 @@ public class LoadTextStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		IResource resObj = ResourceFactory.getResource(resource, exeLogger);
+		IResource resObj = ResourceFactory.getResource(context, resource, exeLogger);
 		String value = null;
 		
 		try
 		{
-			value = IOUtils.toString(resObj.getInputStream());
+			value = IOUtils.toString(resObj.getInputStream(), (String) null);
 			resObj.close();
 
 			if(template)

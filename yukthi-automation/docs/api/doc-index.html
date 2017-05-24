@@ -46,7 +46,17 @@
 				<tr ng-repeat="param in selectedItem.data.params">
 					<td ng-class="param.mandatory ? 'tdMandatory' : 'tdNormal' ">{{param.name}}</td>
 					<td>{{param.type}}</td>
-					<td>{{param.description}}</td>
+					<td>
+						<B ng-if="param.sourceType == 'RESOURCE'"><I>
+							This is a <a href="#resource">Resource Param.</a> <BR/>
+						</I></B>
+						
+						<B ng-if="param.sourceType == 'OBJECT'"><I>
+							This is a <a href="#object">Object Param.</a> <BR/>
+						</I></B>
+						
+						{{param.description}}
+					</td>
 				</tr>
 				<tr>
 					<td ng-if="!selectedItem.data.params || selectedItem.data.params.length == 0" colspan="3" style="font-weight: bold; ">

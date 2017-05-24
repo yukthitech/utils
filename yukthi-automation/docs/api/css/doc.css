@@ -5,6 +5,11 @@
 	text-align: center !important;
 }
 
+.bordered
+{
+	border: 1px solid black;
+}
+
 .doc_mainHeading
 {
 	font-weight: bold;

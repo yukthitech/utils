@@ -7,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
 
 /**
@@ -25,7 +26,7 @@ public class ValidateXpathValueStep extends AbstractValidation
 	private String valueExpression;
 
 	/** The source. */
-	@Param(description = "Source on which jx expression has to be evaluated. Source can be a bean or json string or a file resource (file:resource-path)")
+	@Param(description = "Source on which jx expression has to be evaluated.", sourceType = SourceType.OBJECT)
 	private Object source;
 	
 	/**

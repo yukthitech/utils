@@ -1,0 +1,39 @@
+Object is extension of <a href="#resourceParamType">Resource parameters</a>. The specified resource should result in JSON content which will be parsed to Object.
+<BR/>
+		
+Ohter than the types supported by resource, following extra types are supported:
+
+<table class="doc_table stripped">
+	<tr>
+		<th class="doc_mainHeading bordered">Resource Type</th>
+		<th class="doc_mainHeading bordered">Example</th>
+		<th class="doc_mainHeading bordered">Description</th>
+	</tr>
+	
+	<tr>
+		<td>
+			ref
+		</td>
+		<td>
+			ref:attr.emp
+		</td>
+		<td>
+			Fetches specified property from context, and uses the result property-value as the value for param.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			&nbsp;
+		</td>
+		<td>
+			{<br/>
+				&nbsp;&nbsp;&nbsp;"name": "someName",<br/>
+				&nbsp;&nbsp;&nbsp;"age": 30<br/>
+			}<br/>
+		</td>
+		<td>
+			When no type is specified, the specified string value will be used input json source and parses it into object.
+		</td>
+	</tr>
+</table>
