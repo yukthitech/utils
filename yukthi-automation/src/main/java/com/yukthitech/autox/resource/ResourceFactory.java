@@ -4,9 +4,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.io.IOUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -41,13 +43,34 @@ public class ResourceFactory
 	 */
 	public static final String TYPE_STRING = "string";
 
+	public static IResource getResource(AutomationContext context, String resource, ExecutionLogger exeLogger, boolean parseExpressions)
+	{
+		IResource resourceObj = getResource(context, resource, exeLogger);
+		
+		if(!parseExpressions)
+		{
+			return resourceObj;
+		}
+		
+		try
+		{
+			String content = IOUtils.toString(resourceObj.getInputStream(), (String) null);
+			content = AutomationUtils.replaceExpressions(context, content);
+			
+			return new StringResource(content);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while replacing expressions in resource: {}", resource, ex);
+		}
+	}
+	
 	/**
 	 * Builds the {@link IResource} object from specified resource.
 	 * @param resource resource to load
 	 * @param exeLogger logger to log messages
 	 * @return Resource object representing resource
 	 */
-	public static IResource getResource(AutomationContext context, String resource, ExecutionLogger exeLogger)
+	private static IResource getResource(AutomationContext context, String resource, ExecutionLogger exeLogger)
 	{
 		Matcher matcher = RESOURCE_PATTERN.matcher( (String) resource );
 		
@@ -96,7 +119,9 @@ public class ResourceFactory
 				throw new InvalidArgumentException("Invalid resource type specified: {}", resource);
 			}
 		}
-
-		return null;
+		else
+		{
+			return new StringResource(resource);
+		}
 	}
 }

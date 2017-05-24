@@ -28,7 +28,7 @@ public class LoadJsonStep extends AbstractStep
 	/**
 	 * Path of the resource to load.
 	 */
-	@Param(description = "Json resource to load.", required = false, sourceType = SourceType.RESOURCE)
+	@Param(description = "Json resource to load.", required = true, sourceType = SourceType.RESOURCE)
 	private String resource;
 	
 	/**
@@ -92,13 +92,7 @@ public class LoadJsonStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		IResource resObj = ResourceFactory.getResource(context, resource, exeLogger);
-		
-		if(resObj == null)
-		{
-			throw new TestCaseFailedException("Invalid resource specified: {}", resource);
-		}
-
+		IResource resObj = ResourceFactory.getResource(context, resource, exeLogger, false);
 		Object value = null;
 		
 		Class<?> resType = Object.class;

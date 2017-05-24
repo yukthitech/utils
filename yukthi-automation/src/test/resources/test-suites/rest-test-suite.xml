@@ -78,7 +78,7 @@
 					</value>
 				</part>
 
-				<attachment name="file">file:./src/test/resources/testFile.txt</attachment>				
+				<attachment name="file" file="file:./src/test/resources/testFile.txt"/>				
 			</ccg:invokeMultipartPost>
 			
 			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />

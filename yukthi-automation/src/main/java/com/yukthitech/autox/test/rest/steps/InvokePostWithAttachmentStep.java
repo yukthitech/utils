@@ -3,9 +3,7 @@ package com.yukthitech.autox.test.rest.steps;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 
@@ -17,9 +15,7 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
-import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.rest.PostRestRequest;
 
 /**
@@ -34,11 +30,11 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 	/**
 	 * Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.
 	 */
-	@Param(description = "Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.", required = false)
+	@Param(description = "Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.", required = false, sourceType = SourceType.RESOURCE)
 	private List<HttpPart> parts = new ArrayList<>();
 	
 	@Param(description = "List of files to be attachment with this request. Values are resources", required = false, sourceType = SourceType.RESOURCE)
-	private Map<String, String> attachments = new HashMap<>();
+	private List<HttpAttachment> attachments = new ArrayList<>();
 
 	/**
 	 * Parts to be set on the request. If non-string is specified, object will be converted to json and content-type of part will be set as JSON.
@@ -54,16 +50,9 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 	 * @param name Name of the field.
 	 * @param file File path to be attached.
 	 */
-	public void addAttachment(String name, String file)
+	public void addAttachment(HttpAttachment attachment)
 	{
-		file = file.trim();
-		
-		if(file.length() == 0)
-		{
-			throw new InvalidArgumentException("Invalid file value specified: {}", file);
-		}
-		
-		attachments.put(name, file.trim());
+		attachments.add(attachment);
 	}
 	
 	@Override
@@ -72,11 +61,16 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		PostRestRequest postRestRequest = new PostRestRequest(uri);
 		postRestRequest.setMultipartRequest(true);
 		
+		IResource partResource = null;
+		
 		for(HttpPart partEntry : parts)
 		{
+			exeLogger.debug("Adding part with name: {}", partEntry.getName());
+			
 			if(partEntry.getValue() instanceof String)
 			{
-				postRestRequest.addTextPart(partEntry.getName(), (String) partEntry.getValue(), partEntry.getContentType());
+				partResource = ResourceFactory.getResource(context, (String) partEntry.getValue(), exeLogger, true);
+				postRestRequest.addTextPart(partEntry.getName(), partResource.toText(), partEntry.getContentType());
 			}
 			else
 			{
@@ -87,33 +81,38 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		File file = null;
 		
 		//add attachments
-		exeLogger.debug("Adding attachments with names: {}", attachments.keySet());
-		
 		IResource resource = null;
+		List<File> filesToDelete = new ArrayList<>();
 		
-		for(Map.Entry<String, String> attachEntry : attachments.entrySet())
+		for(HttpAttachment attachment : attachments)
 		{
-			try
-			{
-				resource = ResourceFactory.getResource(context, attachEntry.getValue(), exeLogger);
-			}catch(Exception ex)
-			{
-				throw new TestCaseFailedException("An error occurred while loading resource: {}", attachEntry.getValue(), ex);
-			}
+			exeLogger.debug("Adding attachment with name: {}", attachment.getName());
 			
-			file = File.createTempFile(attachEntry.getKey(), ".tmp");
+			resource = ResourceFactory.getResource(context, attachment.getFile(), exeLogger, attachment.isParseAsTemplate());
+			
+			file = File.createTempFile(attachment.getName(), ".tmp");
 			
 			FileOutputStream fos = new FileOutputStream(file);
 			IOUtils.copy(resource.getInputStream(), fos);
 			
 			fos.flush();
 			fos.close();
+			resource.close();
 			
-			postRestRequest.addAttachment(attachEntry.getKey(), file, null);
+			postRestRequest.addAttachment(attachment.getName(), file, null);
+			filesToDelete.add(file);
 		}
 		
 		super.populate(context, postRestRequest, exeLogger);
 		super.invoke(context, postRestRequest, exeLogger);
+		
+		for(File fileToDel : filesToDelete)
+		{
+			if(!fileToDel.delete())
+			{
+				exeLogger.debug("Failed to delete temp file: {}", fileToDel.getPath());
+			}
+		}
 		
 		return true;
 	}

@@ -60,29 +60,17 @@ public interface IAutomationConstants
 		}
 
 		//check if string is resource
-		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger);
+		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger, true);
 		
-		if(resource != null)
-		{
-			try
-			{
-				Object value = OBJECT_MAPPER.readValue(resource.getInputStream(), Object.class);
-				resource.close();
-				
-				return value;
-			}catch(Exception ex)
-			{
-				throw new IllegalStateException("An exception occurred while parsing json resource: " + sourceStr, ex);
-			}
-		}
-		
-		//otherwise consider the source as json string and parse it
 		try
 		{
-			return OBJECT_MAPPER.readValue(sourceStr, Object.class );
+			Object value = OBJECT_MAPPER.readValue(resource.getInputStream(), Object.class);
+			resource.close();
+			
+			return value;
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("An exception occurred while parsing json source: " + sourceStr, ex);
+			throw new IllegalStateException("An exception occurred while parsing json resource: " + sourceStr, ex);
 		}
 	}
 }

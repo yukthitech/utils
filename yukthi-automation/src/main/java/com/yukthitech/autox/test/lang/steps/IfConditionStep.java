@@ -25,14 +25,14 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	/**
 	 * Freemarker condition to be evaluated.
 	 */
-	@Param(description = "Freemarker condition to be evaluated.")
+	@Param(description = "Freemarker condition to be evaluated.", required = true)
 	private String condition;
 
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
-	@Param(description = "Group of steps/validations to be executed when condition evaluated to be true.")
+	@Param(description = "Group of steps/validations to be executed when condition evaluated to be true.", required = true)
 	private StepGroup then;
 
 	/**

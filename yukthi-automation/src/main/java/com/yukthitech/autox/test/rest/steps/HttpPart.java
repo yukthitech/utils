@@ -2,22 +2,31 @@ package com.yukthitech.autox.test.rest.steps;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
+import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.ccg.xml.util.Validateable;
+
 /**
  * Represents part of the http request.
  * @author akiran
  */
-public class HttpPart implements Serializable
+public class HttpPart implements Serializable, Validateable
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Name of the part.
 	 */
+	@Param(name = "name", description = "Name of the part", required = true)
 	private String name;
 	
 	/**
 	 * Value for the part.
 	 */
+	@Param(name = "value", description = "Value for the part. Can be object or resource source.", required = true, sourceType = SourceType.RESOURCE)
 	private Object value;
 	
 	/**
@@ -83,5 +92,19 @@ public class HttpPart implements Serializable
 	public void setContentType(String contentType)
 	{
 		this.contentType = contentType;
+	}
+
+	@Override
+	public void validate() throws ValidateException
+	{
+		if(StringUtils.isBlank(name))
+		{
+			throw new ValidateException("Name can not be null or blank");
+		}
+		
+		if(value == null)
+		{
+			throw new ValidateException("Value can not be null.");
+		}
 	}
 }

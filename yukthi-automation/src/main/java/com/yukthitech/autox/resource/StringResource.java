@@ -26,6 +26,12 @@ public class StringResource implements IResource
 	}
 
 	@Override
+	public String toText()
+	{
+		return content;
+	}
+
+	@Override
 	public void close()
 	{
 	}

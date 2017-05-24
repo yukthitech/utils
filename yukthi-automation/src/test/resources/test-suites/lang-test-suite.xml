@@ -221,5 +221,16 @@
 			</wrap:steps>				
 		</testCase>
 
+		<testCase name="testPollAndCheck">
+			<description>Ensures polling step works properly</description>
+			
+			<ccg:set name="checkVar" value="0" type="java.lang.Integer"/>
+			
+			<ccg:pollAndCheck checkCondition="attr.checkVar gte 5" timeOut="20000" pollingInterval="500">
+				<poll>
+					<ccg:set name="checkVar" value="${attr.checkVar + 1}" type="java.lang.Integer"/>
+				</poll>
+			</ccg:pollAndCheck>
+		</testCase>
 	</testSuite>
 </testData>

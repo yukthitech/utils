@@ -15,6 +15,12 @@ public interface IResource
 	public InputStream getInputStream();
 	
 	/**
+	 * Fetches string from underlying stream and returns the same. This will close the underlying stream.
+	 * @return content represented by this stream.
+	 */
+	public String toText();
+	
+	/**
 	 * Closes the stream.
 	 */
 	public void close();
