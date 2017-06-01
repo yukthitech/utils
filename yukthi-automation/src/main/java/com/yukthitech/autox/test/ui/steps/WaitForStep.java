@@ -7,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -24,7 +25,7 @@ public class WaitForStep extends AbstractStep
 	/**
 	 * locator to wait for.
 	 */
-	@Param(description = "Locator of the element to be waited for")
+	@Param(description = "Locator of the element to be waited for", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 	
 	/**

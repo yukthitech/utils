@@ -6,6 +6,8 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 
@@ -22,11 +24,13 @@ public class ValidateValue extends AbstractValidation
 	/**
 	 * locator of which value needs to be validated.
 	 */
+	@Param(description = "Locator of the element to be validated.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 
 	/**
-	 * Value expected in the targer element.
+	 * Value expected in the target element.
 	 */
+	@Param(description = "Expected value of the element.")
 	private String value;
 
 	/**

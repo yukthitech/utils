@@ -47,8 +47,7 @@ public class InvokePutWithAttachmentStep extends AbstractRestStep implements Val
 	
 	/**
 	 * Adds the specified file as attachment.
-	 * @param name Name of the field.
-	 * @param file File path to be attached.
+	 * @param attachment Attachment to add.
 	 */
 	public void addAttachment(HttpAttachment attachment)
 	{

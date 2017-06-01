@@ -7,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -25,7 +26,7 @@ public class ClickStep extends AbstractStep
 	/**
 	 * locator for button.
 	 */
-	@Param(description = "Locator of the element to be triggered.")
+	@Param(description = "Locator of the element to be triggered. Out of located elements, first element will be clicked.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 	
 	@Override

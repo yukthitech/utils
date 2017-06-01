@@ -9,6 +9,8 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -32,17 +34,20 @@ public class PopulateFieldStep extends AbstractStep
 	 * Html locator of the form or container (like DIV) enclosing the input
 	 * elements.
 	 */
+	@Param(description = "Locator of the element to be populated", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 
 	/**
 	 * Value to be filled. 
 	 */
+	@Param(description = "Value to be filled with")
 	private String value;
 
 	/**
 	 * PressEnterAtEnd if true then for the provided action or else ignore.
 	 */
-	private boolean pressEnterAtEnd;
+	@Param(description = "If true, an enter-key press will be simulated on target element after populating value. Default: false", required = false)
+	private boolean pressEnterAtEnd = false;
 
 	/**
 	 * Press Enter sets the key value as enter for the web element.

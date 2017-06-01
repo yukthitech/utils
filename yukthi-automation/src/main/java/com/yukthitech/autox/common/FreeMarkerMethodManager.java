@@ -40,7 +40,7 @@ public class FreeMarkerMethodManager
 		loadFreeMarkerMethods();
 	}
 	
-	public static void loadFreeMarkerMethods()
+	private static void loadFreeMarkerMethods()
 	{
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
 		Set<String> basePackages = applicationConfiguration.getBasePackages();

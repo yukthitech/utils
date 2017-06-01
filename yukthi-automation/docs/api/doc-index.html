@@ -1,8 +1,11 @@
 <div ng-controller="docController" ng-init="load()">
-	<div id="dataTree" style="position: absolute; bottom: 0px; left: 0px; top: 0px; width: 25em; overflow: auto; background: rgb(250, 250, 100);">
+	<div id="dataTree" style="position: absolute; bottom: 0px; left: 0px; top: 0px; width: 25em; overflow: auto; background: rgb(250, 250, 100); padding: 0.5em;">
 	</div>		
 	
 	<div style="position: absolute; bottom: 0px; left: 25em; right: 0px; top: 0px; overflow: auto;">
+		<div ng-if="selectedPage" ng-include="selectedPage.doc" style="padding: 1em; width: 95%; padding-top: 0px;">
+		</div>
+		
 		<div style="width: 95%;" ng-if="selectedItem">
 			<table class="doc_table">
 				<tr>
@@ -48,13 +51,17 @@
 					<td>{{param.type}}</td>
 					<td>
 						<B ng-if="param.sourceType == 'RESOURCE'"><I>
-							This is a <a href="#resource">Resource Param.</a> <BR/>
+							This is a <a href="#apiIndex$general_resourceParamType">Resource Param.</a> <BR/>
 						</I></B>
 						
 						<B ng-if="param.sourceType == 'OBJECT'"><I>
-							This is a <a href="#object">Object Param.</a> <BR/>
+							This is a <a href="#apiIndex$general_objectParamType">Object Param.</a> <BR/>
 						</I></B>
 						
+						<B ng-if="param.sourceType == 'UI_LOCATOR'"><I>
+							This is a <a href="#apiIndex$general_uiLocators">UI locator param.</a> <BR/>
+						</I></B>
+
 						{{param.description}}
 					</td>
 				</tr>

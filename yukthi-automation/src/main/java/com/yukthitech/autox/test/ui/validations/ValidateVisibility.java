@@ -7,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -24,7 +25,7 @@ public class ValidateVisibility extends AbstractValidation
 	/**
 	 * locator to wait for.
 	 */
-	@Param(description = "Locator of the element to validate")
+	@Param(description = "Locator of the element to validate", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 
 	/**

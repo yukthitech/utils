@@ -29,7 +29,7 @@ public class BasicArguments
 	/**
 	 * Used to specify application properties which can then be injected into config files using {{}} expressions.
 	 */
-	@CliArgument(name = "prop", longName = "property-file", description = "Used to specify application properties which can then be injected into config files using {{}} expressions", required = false)
+	@CliArgument(name = "prop", longName = "property-file", description = "Used to specify application properties which can then be injected into config files using #{} expressions", required = false)
 	private String propertiesFile;
 
 	/**

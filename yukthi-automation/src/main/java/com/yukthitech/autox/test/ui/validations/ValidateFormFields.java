@@ -11,6 +11,8 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IValidation;
+import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.FieldOption;
@@ -186,11 +188,13 @@ public class ValidateFormFields extends AbstractValidation
 	/**
 	 * Locator for the form.
 	 */
+	@Param(description = "Locator of the form to be validated.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 
 	/**
 	 * Field details to validate.
 	 */
+	@Param(description = "Form fields to be validated.")
 	private List<FormField> fields;
 
 	/**

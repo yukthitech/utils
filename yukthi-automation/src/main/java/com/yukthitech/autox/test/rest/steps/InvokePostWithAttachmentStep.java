@@ -47,8 +47,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 	
 	/**
 	 * Adds the specified file as attachment.
-	 * @param name Name of the field.
-	 * @param file File path to be attached.
+	 * @param attachment Attachment to add.
 	 */
 	public void addAttachment(HttpAttachment attachment)
 	{

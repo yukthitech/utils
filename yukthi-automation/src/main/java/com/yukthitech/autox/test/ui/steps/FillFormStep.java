@@ -11,6 +11,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -30,7 +31,7 @@ public class FillFormStep extends AbstractStep
 	 * Html locator of the form or container (like DIV) enclosing the input
 	 * elements.
 	 */
-	@Param(description = "Html locator of the form or container (like DIV) enclosing the input elements")
+	@Param(description = "Html locator of the form or container (like DIV) enclosing the input elements", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 
 	/**

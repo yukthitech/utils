@@ -17,6 +17,11 @@ public enum SourceType
 	OBJECT,
 	
 	/**
+	 * Indicates param represents ui locator.
+	 */
+	UI_LOCATOR,
+	
+	/**
 	 * Indicates param is normal type.
 	 */
 	NONE;

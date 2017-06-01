@@ -1,10 +1,35 @@
 $.application.controller('docController', function($scope){
 	
 	$scope.indexedData = {
+		"general": {
+			"getStarted": {"label": "Get Started", "doc": "doc/get-started.html"},
+			"testSuiteXml": {"label": "Test Suite Xml", "doc": "doc/test-suite-xml.html"},
+			"testSuite": {"label": "Test Suite", "doc": "doc/test-suite.html"},
+			"resourceParamType": {"label": "Resource Param Type", "doc": "doc/resource.html"},
+			"uiLocators": {"label": "UI Locators", "doc": "doc/ui-locator.html"},
+			"objectParamType": {"label": "Object Param Type", "doc": "doc/object.html"}
+		},
 		"plugins": {},
 		"steps": {},
 		"validations": {}
 	};
+	
+	$scope.subpageChanged = function() {
+		var subPageId = $scope.getSubpageId();
+		console.log("Got sub page id as: " + subPageId);
+		
+		if(subPageId)
+		{
+			var tree = $('#dataTree');
+
+			tree.jstree('deselect_all', true);
+			tree.jstree('select_node', subPageId);
+		}
+	};
+	
+	$scope.$on("subpageIdChanged", function(event, args) {
+		$scope.subpageChanged();
+	});
 	
 	$scope.nodeSelected = function(event, data) {
 		console.log(data);
@@ -24,7 +49,15 @@ $.application.controller('docController', function($scope){
 		var objId = dollarIdx > 0 ? selectedId.substr(0, dollarIdx) : selectedId;
 		
 		console.log("Selected id: " + objId);
-		if(type == "step")
+		
+		$scope.selectedItem = null;
+		$scope.selectedPage = null;
+		
+		if(type == "general")
+		{
+			$scope.selectedPage = $scope.indexedData.general[selectedId];
+		}
+		else if(type == "step")
 		{
 			$scope.selectedItem = {"type": "step", "data": $scope.indexedData.steps[objId]};
 		}
@@ -44,14 +77,35 @@ $.application.controller('docController', function($scope){
 		{
 			console.log(ex);
 		}
+
+		setTimeout(function(){ 
+			$('pre code').each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		}, 500);
+
+		$scope.setSubpageId( data.selected[0] );
 	};
 	
 	$scope.load = function() {
-		var pluginsNode = {"id": "plugins", "text": "Plugins", "state": {"opened": true}, children: []};
-		var stepsNode = {"id": "steps", "text": "Steps", "state": {"opened": true}, children: []};
-		var validationsNode = {"id": "validations", "text": "Validations", "state": {"opened": true}, children: []};
+		var pluginsNode = {"id": "plugins", "text": "Plugins", "state": {"opened": false}, children: []};
 		
-		var treeData = [pluginsNode, stepsNode, validationsNode];
+		var treeData = [];
+		
+		for (var property in $scope.indexedData.general) 
+		{
+		    if (!$scope.indexedData.general.hasOwnProperty(property)) 
+		    {
+		        continue;
+		    }
+		    
+		    treeData.push({
+		    	"id": "general_" + property, 
+		    	"text": $scope.indexedData.general[property].label
+		    });
+		}
+		
+		treeData.push(pluginsNode);
 		
 		//add place holder for steps and validation within plugin
 		$scope.indexedData.plugins["<default>"] = {"name": "&lt;default&gt;", "steps": [], "validations": []};
@@ -81,9 +135,6 @@ $.application.controller('docController', function($scope){
 			{
 				$scope.indexedData.plugins["<default>"].steps.push(step);
 			}
-			
-			stepNode = {"id": "step_" + step.name, "text": step.name};
-			stepsNode.children.push(stepNode);
 		}
 		
 		//create nodes for validations
@@ -104,9 +155,6 @@ $.application.controller('docController', function($scope){
 			{
 				$scope.indexedData.plugins["<default>"].validations.push(validation);
 			}
-			
-			validationNode = {"id": "validation_" + validation.name, "text": validation.name};
-			validationsNode.children.push(validationNode);
 		}
 		
 		//create nodes for plugins
@@ -138,6 +186,10 @@ $.application.controller('docController', function($scope){
 		}
 
 		$('#dataTree').jstree({ 'core' : { 'data' : treeData} });
+		$('#dataTree').on("loaded.jstree", function(){
+			$scope.subpageChanged();
+		});
+		
 		$('#dataTree').on("select_node.jstree", $scope.nodeSelected);
 	};
 });

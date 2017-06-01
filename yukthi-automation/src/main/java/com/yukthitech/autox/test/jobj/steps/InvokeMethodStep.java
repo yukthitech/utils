@@ -14,7 +14,6 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.config.DbPlugin;
 import com.yukthitech.autox.test.ObjectCopy;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.CommonUtils;
@@ -22,7 +21,7 @@ import com.yukthitech.utils.CommonUtils;
 /**
  * Step to invoke method on target object.
  */
-@Executable(name = "invokeMethod", requiredPluginTypes = DbPlugin.class, message = "Executes specified method on specified bean.")
+@Executable(name = "invokeMethod", message = "Executes specified method on specified bean.")
 public class InvokeMethodStep extends AbstractStep
 {
 	
