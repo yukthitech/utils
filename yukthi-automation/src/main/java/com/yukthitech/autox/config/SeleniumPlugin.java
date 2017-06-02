@@ -1,16 +1,20 @@
 package com.yukthitech.autox.config;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -188,6 +192,13 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		{
 			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName());
 		}
+	}
+	
+	@Override
+	public void handleError(AutomationContext context, ErrorDetails errorDetails)
+	{
+		File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
+		errorDetails.getExecutionLogger().logImage("error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
 	}
 
 	@Override

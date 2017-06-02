@@ -103,9 +103,15 @@ public class ExecutionLogger
 	 * @param name Name of the image file for easy identification
 	 * @param message Message to be logged along with image
 	 * @param imageFile Image to be logged
+	 * @param log level to be used.
 	 */
-	public void logImage(String name, String message, File imageFile)
+	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
 	{
+		if(logLevel == null)
+		{
+			logLevel = LogLevel.DEBUG;
+		}
+		
 		int dotIdx = imageFile.getName().lastIndexOf(".");
 		String extension = "";
 		
@@ -123,7 +129,7 @@ public class ExecutionLogger
 			name = System.currentTimeMillis() + "_" + (fileIndex++) + extension;
 		}
 		
-		executionLogData.addMessage(new ExecutionLogData.ImageMessage( getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, message, new Date(), name, imageFile));
+		executionLogData.addMessage(new ExecutionLogData.ImageMessage( getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
 	}
 	
 	/**

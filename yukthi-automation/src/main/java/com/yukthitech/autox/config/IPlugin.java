@@ -22,4 +22,7 @@ public interface IPlugin<AT>
 	 * @param args Mapped command line arguments bean
 	 */
 	public void initialize(AutomationContext context, AT args);
+	
+	public default void handleError(AutomationContext context, ErrorDetails errorDetails)
+	{}
 }

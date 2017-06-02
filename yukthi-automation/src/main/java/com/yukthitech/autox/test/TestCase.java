@@ -237,7 +237,7 @@ public class TestCase implements IStepContainer, Validateable
 				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
-				TestCaseResult result = StepExecutor.handleException(this, step, exeLogger, ex, expectedException);
+				TestCaseResult result = StepExecutor.handleException(context, this, step, exeLogger, ex, expectedException);
 				
 				if(result != null)
 				{
