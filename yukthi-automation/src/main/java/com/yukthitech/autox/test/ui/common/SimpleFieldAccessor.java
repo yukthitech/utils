@@ -23,10 +23,10 @@ public class SimpleFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.selenium.WebElement, java.lang.String)
 	 */
 	@Override
-	public void setValue(WebElement element, String value)
+	public void setValue(WebElement element, Object value)
 	{
 		element.clear();
-		element.sendKeys(value);
+		element.sendKeys("" + value);
 	}
 
 	/* (non-Javadoc)

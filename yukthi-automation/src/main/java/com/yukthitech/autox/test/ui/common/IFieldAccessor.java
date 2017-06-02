@@ -22,7 +22,7 @@ public interface IFieldAccessor
 	 * @param element Element on which value needs to be set.
 	 * @param value Value to set.
 	 */
-	public void setValue(WebElement element, String value);
+	public void setValue(WebElement element, Object value);
 	
 	/**
 	 * Fetches options from specified element.

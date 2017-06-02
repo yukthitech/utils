@@ -119,7 +119,7 @@ public class UiAutomationUtils
 	 *            Value to be populated
 	 * @return True, if population was successful.
 	 */
-	public static boolean populateField(AutomationContext context, WebElement parent, String locator, String value)
+	public static boolean populateField(AutomationContext context, WebElement parent, String locator, Object value)
 	{
 		logger.trace("For field {} under parent {} setting value - {}", locator, parent, value);
 		
@@ -136,21 +136,23 @@ public class UiAutomationUtils
 			return false;
 		}
 
-		if(elements.size() == 1)
+		if(elements.size() > 1)
 		{
-			WebElement element = elements.get(0);
-			String tagName = element.getTagName().toLowerCase();
+			logger.warn("Multiple elements found for locator '{}'. Choosing the first element for population", locator);
+		}
+		
+		WebElement element = elements.get(0);
+		String tagName = element.getTagName().toLowerCase();
 
-			FormFieldType type = getFormFieldType(element);
+		FormFieldType type = getFormFieldType(element);
 
-			if(type != null)
-			{
-				type.getFieldAccessor().setValue(element, value);
-			}
-			else
-			{
-				throw new UnsupportedOperationException("Encountered unsupported input tag '{}' for data population", tagName);
-			}
+		if(type != null)
+		{
+			type.getFieldAccessor().setValue(element, value);
+		}
+		else
+		{
+			throw new UnsupportedOperationException("Encountered unsupported input tag '{}' for data population", tagName);
 		}
 
 		// find the parent element enclosing input elements

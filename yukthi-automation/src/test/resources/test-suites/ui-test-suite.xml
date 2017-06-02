@@ -15,6 +15,27 @@
 			</wrap:validations>
 		</testCase>
 
+		<testCase name="fillForm">
+			<description>Validates form filling is working</description>
+			
+			<ccg:gotoPage uri="/form.html" />
+
+			<ccg:fillForm locator="id:sampleForm">
+				<data>
+					{
+						"name": "kranthi",
+						"id:genderDropDown": "male",
+						"address": "line1\nline2",
+						"color": ["red", "green", "blue"]
+					}
+				</data>
+			</ccg:fillForm>
+			
+			<ccg:logScreenShot name="filledForm.png" />
+							
+			<ccg:validateValue locator="xpath: //input[@name='name']" value="kranthi"/>
+		</testCase>
+
 		<cleanup>
 			<ccg:quitSession/>
 		</cleanup>

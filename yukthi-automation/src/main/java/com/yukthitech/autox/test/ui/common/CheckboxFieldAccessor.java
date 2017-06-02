@@ -1,7 +1,7 @@
 package com.yukthitech.autox.test.ui.common;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 	 */
 	private List<WebElement> findGroupedElements(WebElement element)
 	{
-		WebElement parentElement = element.findElement(By.xpath("//.."));
+		WebElement parentElement = element.findElement(By.xpath(".."));
 		return parentElement.findElements(By.name(element.getAttribute("name")));
 	}
 
@@ -70,19 +70,38 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.
 	 * selenium.WebElement, java.lang.String)
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public void setValue(WebElement element, String value)
+	public void setValue(WebElement element, Object value)
 	{
-		String values[] = value.split("\\s*\\,\\s*");
-		Set<String> valueSet = new HashSet<>(Arrays.asList(values));
+		Set<String> valueSet = new HashSet<>();
+
+		if(value instanceof Collection)
+		{
+			valueSet.addAll( (Collection) value );
+		}
+		else
+		{
+			valueSet.add("" + value);
+		}
 
 		List<WebElement> webElements = findGroupedElements(element);
 
 		for(WebElement webElem : webElements)
 		{
-			if(valueSet.contains(webElem.getAttribute(VALUE)) && !webElem.isSelected())
+			if(valueSet.contains(webElem.getAttribute(VALUE)))
 			{
-				webElem.click();
+				if(!webElem.isSelected())
+				{
+					webElem.click();
+				}
+			}
+			else
+			{
+				if(webElem.isSelected())
+				{
+					webElem.click();
+				}
 			}
 		}
 	}

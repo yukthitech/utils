@@ -12,10 +12,10 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.ccg.xml.DynamicBean;
 
 /**
  * Step to fill the target form with specified data.
@@ -38,7 +38,7 @@ public class FillFormStep extends AbstractStep
 	 * Data to be filled. All the fields matching with the property names of
 	 * specified bean will be searched and populated with corresponding data.
 	 */
-	@Param(description = "Data to populate in the form")
+	@Param(description = "Data to populate in the form", sourceType = SourceType.OBJECT)
 	private Object data;
 
 	/**
@@ -49,7 +49,7 @@ public class FillFormStep extends AbstractStep
 	 * @param exeLogger
 	 *            Logger to be used.
 	 */
-	private void fillWithStandardBean(AutomationContext context, ExecutionLogger exeLogger)
+	private void fillWithStandardBean(Object data, AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
 		
@@ -82,7 +82,7 @@ public class FillFormStep extends AbstractStep
 
 			exeLogger.debug("Populating field {} with value - {}", desc.getName(), value);
 
-			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), "" + value))
+			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
@@ -98,14 +98,12 @@ public class FillFormStep extends AbstractStep
 	 * @param exeLogger
 	 *            logger
 	 */
-	private void fillWithDynamicBean(AutomationContext context, ExecutionLogger exeLogger)
+	private void fillWithMap(Map<String, Object> properties, AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
 		
 		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
-		DynamicBean dynamicBean = (DynamicBean) data;
-		Map<String, Object> properties = dynamicBean.getProperties();
 		Object value = null;
 
 		for(String name : properties.keySet())
@@ -118,9 +116,9 @@ public class FillFormStep extends AbstractStep
 				continue;
 			}
 
-			exeLogger.debug("Populating field {} with value - {}", name, value);
+			exeLogger.debug("Populating field '{}' with value - {}", name, value);
 
-			if(!UiAutomationUtils.populateField(context, parentElement, name, "" + value))
+			if(!UiAutomationUtils.populateField(context, parentElement, name, value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, value);
 				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
@@ -135,16 +133,19 @@ public class FillFormStep extends AbstractStep
 	 * @param context
 	 *            Current automation context
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		if(data instanceof DynamicBean)
+		Object resObj = IAutomationConstants.PARSE_OBJ_SOURCE(context, exeLogger, data);
+		
+		if(resObj instanceof Map)
 		{
-			fillWithDynamicBean(context, exeLogger);
+			fillWithMap((Map<String, Object>) resObj, context, exeLogger);
 		}
 		else
 		{
-			fillWithStandardBean(context, exeLogger);
+			fillWithStandardBean(resObj, context, exeLogger);
 		}
 		
 		return true;

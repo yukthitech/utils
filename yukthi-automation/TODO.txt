@@ -22,6 +22,8 @@
 	renmote log
 		fetch only on error
 		enabled/disabled
+		
+	logger should be enabled on demand, or may want to enabled only on error
 
 Exection plan
 	executing dependency test cases

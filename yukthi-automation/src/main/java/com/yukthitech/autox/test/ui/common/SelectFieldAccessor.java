@@ -66,13 +66,15 @@ public class SelectFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.selenium.WebElement, java.lang.String)
 	 */
 	@Override
-	public void setValue(WebElement element, String value)
+	public void setValue(WebElement element, Object valueObj)
 	{
 		if(element instanceof Select)
 		{
 			throw new InvalidArgumentException(INVALID_MESSAGE, element);
 		}
 
+		String value = "" + valueObj;
+		
 		Select select =  new Select(element);
 		Matcher matcher = VALUE_PATTERN.matcher(value);
 		String type = BY_VALUE;
