@@ -188,45 +188,6 @@
 			</expectedException>
 		</testCase>
 
-		<testCase name="invoke_Method_Data_Provder_Validations">
-			<description>
-				Invokes simple method on bean with data provider with
-				dynamic validations.
-			</description>
-
-			<list-data-provider name="data">
-				<map-data name="smallString" value="abc" errorCase="true"
-					errorMssg="Name should be greater than 3" />
-				<map-data name="longString" value="abcdefg" errorCase="true"
-					errorMssg="Name should be less than 6" />
-				<map-data name="correctString" value="abcd" errorCase="false"
-					errorMssg="" />
-			</list-data-provider>
-
-			<expectedException enabled="${attr.data.errorCase}"
-				type="com.yukthitech.utils.exceptions.InvalidArgumentException">
-				<property name="message" value="${attr.data.errorMssg}" />
-			</expectedException>
-
-			<wrap:steps>
-				<ccg:invokeMethod method="validate"
-					paramTypes="com.yukthitech.test.beans.NameBean" deepCloneParams="true">
-					<object ccg:beanRef="beanFromTestSuite" />
-
-					<parameter ccg:beanType="com.yukthitech.test.beans.NameBean"
-						name="${attr.data.value}">
-					</parameter>
-				</ccg:invokeMethod>
-			</wrap:steps>
-
-			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="${attr.data.value}">
-					<enabled><![CDATA[<#if attr.data.errorCase == 'true'>false<#else>true</#if>]]></enabled>
-				</ccg:validateContextParam>
-			</wrap:validations>
-		</testCase>
-
 		<testCase name="xpath_test">
 			<description>
 				Ensures xpath steps and validations works as expected.

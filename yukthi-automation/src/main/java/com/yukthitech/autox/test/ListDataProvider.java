@@ -31,16 +31,6 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	}
 	
 	/**
-	 * Adds the map bean.
-	 *
-	 * @param mapData the map bean
-	 */
-	public void addMapData(MapData mapData)
-	{
-		this.dataLst.add(new TestCaseData(mapData.getName(), mapData));
-	}
-	
-	/**
 	 * Adds new data object for this data provider.
 	 * @param data data to add
 	 */
@@ -69,10 +59,6 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 			if(obj instanceof TestCaseData)
 			{
 				addTestCaseData( (TestCaseData) obj);
-			}
-			else if(obj instanceof MapData)
-			{
-				addMapData( (MapData) obj);
 			}
 			else
 			{

@@ -5,9 +5,10 @@ $.application.controller('docController', function($scope){
 			"getStarted": {"label": "Get Started", "doc": "doc/get-started.html"},
 			"testSuiteXml": {"label": "Test Suite Xml", "doc": "doc/test-suite-xml.html"},
 			"testSuite": {"label": "Test Suite", "doc": "doc/test-suite.html"},
+			"dataProviders": {"label": "Data Providers", "doc": "doc/data-providers.html"},
 			"resourceParamType": {"label": "Resource Param Type", "doc": "doc/resource.html"},
-			"uiLocators": {"label": "UI Locators", "doc": "doc/ui-locator.html"},
-			"objectParamType": {"label": "Object Param Type", "doc": "doc/object.html"}
+			"objectParamType": {"label": "Object Param Type", "doc": "doc/object.html"},
+			"uiLocators": {"label": "UI Locators", "doc": "doc/ui-locator.html"}
 		},
 		"plugins": {},
 		"steps": {},
