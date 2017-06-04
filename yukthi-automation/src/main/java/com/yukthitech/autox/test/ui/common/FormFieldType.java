@@ -39,7 +39,7 @@ public enum FormFieldType
 	/**
 	 * Check box field.
 	 */
-	CHECK_BOX(new CheckboxFieldAccessor()),
+	CHECK_BOX(new CheckboxFieldAccessor(), true),
 	
 	/**
 	 * Radio button field. 
@@ -50,6 +50,11 @@ public enum FormFieldType
 	 * Accessor for current field type.
 	 */
 	private IFieldAccessor fieldAccessor;
+	
+	/**
+	 * Flag indicating if this type support multiple form fields for single value setting.
+	 */
+	private boolean multiFieldAccessor = false;
 
 	/**
 	 * Instantiates a new form field type.
@@ -61,6 +66,12 @@ public enum FormFieldType
 		this.fieldAccessor = fieldAccessor;
 	}
 	
+	private FormFieldType(IFieldAccessor fieldAccessor, boolean multiFieldAccessor)
+	{
+		this.fieldAccessor = fieldAccessor;
+		this.multiFieldAccessor = multiFieldAccessor;
+	}
+	
 	/**
 	 * Fetches field accessor for current type.
 	 * @return Field accessor for current type.
@@ -68,5 +79,15 @@ public enum FormFieldType
 	public IFieldAccessor getFieldAccessor()
 	{
 		return fieldAccessor;
+	}
+	
+	/**
+	 * Gets the flag indicating if this type support multiple form fields for single value setting.
+	 *
+	 * @return the flag indicating if this type support multiple form fields for single value setting
+	 */
+	public boolean isMultiFieldAccessor()
+	{
+		return multiFieldAccessor;
 	}
 }

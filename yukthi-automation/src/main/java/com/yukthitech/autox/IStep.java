@@ -22,4 +22,10 @@ public interface IStep extends Cloneable, Serializable
 	 * @return copy of current step
 	 */
 	public IStep clone();
+	
+	/**
+	 * Fetches flag indicating if logging has to be disabled for current step.
+	 * @return flag indicating if logging has to be disabled for current step.
+	 */
+	public boolean isLoggingDisabled();
 }

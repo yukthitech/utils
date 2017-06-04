@@ -13,6 +13,12 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	private static final long serialVersionUID = 1L;
 	
 	/**
+	 * Flag indicating if logging has to be disabled for current step.
+	 */
+	@Param(description = "Flag indicating if logging has to be disabled for current step. Default: false", required = false)
+	private boolean disableLogging = false;
+
+	/**
 	 * Enables/disables current validation.\nDefault: true.
 	 */
 	@Param(description = "Enables/disables current validation.\nDefault: true", required = false)
@@ -42,5 +48,21 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	public void setEnabled(String enabled)
 	{
 		this.enabled = enabled;
+	}
+	
+	/**
+	 * Sets the flag indicating if logging has to be disabled for current step.
+	 *
+	 * @param disableLogging the new flag indicating if logging has to be disabled for current step
+	 */
+	public void setDisableLogging(boolean disableLogging)
+	{
+		this.disableLogging = disableLogging;
+	}
+	
+	@Override
+	public boolean isLoggingDisabled()
+	{
+		return disableLogging;
 	}
 }

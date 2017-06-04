@@ -22,7 +22,16 @@ public interface IFieldAccessor
 	 * @param element Element on which value needs to be set.
 	 * @param value Value to set.
 	 */
-	public void setValue(WebElement element, Object value);
+	public default void setValue(WebElement element, Object value)
+	{}
+	
+	/**
+	 * Invoked on field-types which can support multiple field for single value set invocation.
+	 * @param elements elements to set value on
+	 * @param value value to set
+	 */
+	public default void setValue(List<WebElement> elements, Object value)
+	{}
 	
 	/**
 	 * Fetches options from specified element.

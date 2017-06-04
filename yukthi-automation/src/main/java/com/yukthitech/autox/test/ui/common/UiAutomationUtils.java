@@ -136,11 +136,6 @@ public class UiAutomationUtils
 			return false;
 		}
 
-		if(elements.size() > 1)
-		{
-			logger.warn("Multiple elements found for locator '{}'. Choosing the first element for population", locator);
-		}
-		
 		WebElement element = elements.get(0);
 		String tagName = element.getTagName().toLowerCase();
 
@@ -148,7 +143,19 @@ public class UiAutomationUtils
 
 		if(type != null)
 		{
-			type.getFieldAccessor().setValue(element, value);
+			if(type.isMultiFieldAccessor())
+			{
+				type.getFieldAccessor().setValue(elements, value);
+			}
+			else
+			{
+				if(elements.size() > 1)
+				{
+					logger.warn("Multiple elements found for locator '{}'. Choosing the first element for population", locator);
+				}
+				
+				type.getFieldAccessor().setValue(element, value);
+			}
 		}
 		else
 		{

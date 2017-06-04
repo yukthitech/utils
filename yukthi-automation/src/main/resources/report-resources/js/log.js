@@ -120,7 +120,7 @@ $.application.controller('testLogAppController', function($scope){
 						continue;
 					}
 					
-					if(item.message.toLowerCase().indexOf(filters[i]) >= 0)
+					if(item.message && item.message.toLowerCase().indexOf(filters[i]) >= 0)
 					{
 						res = true;
 						break;

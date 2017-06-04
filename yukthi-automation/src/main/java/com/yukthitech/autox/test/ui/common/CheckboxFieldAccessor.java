@@ -70,22 +70,23 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.
 	 * selenium.WebElement, java.lang.String)
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes"})
 	@Override
-	public void setValue(WebElement element, Object value)
+	public void setValue(List<WebElement> webElements, Object value)
 	{
 		Set<String> valueSet = new HashSet<>();
 
 		if(value instanceof Collection)
 		{
-			valueSet.addAll( (Collection) value );
+			for(Object obj : ((Collection) value))
+			{
+				valueSet.add("" + obj);
+			}
 		}
 		else
 		{
 			valueSet.add("" + value);
 		}
-
-		List<WebElement> webElements = findGroupedElements(element);
 
 		for(WebElement webElem : webElements)
 		{

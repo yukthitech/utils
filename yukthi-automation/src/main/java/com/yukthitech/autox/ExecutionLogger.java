@@ -27,10 +27,35 @@ public class ExecutionLogger
 	 * Log data information.
 	 */
 	private ExecutionLogData executionLogData;
+	
+	/**
+	 * Flag indicating if logging is disabled or not.
+	 */
+	private boolean disabled = false;
 
 	public ExecutionLogger(String executorName, String executorDescription)
 	{
 		this.executionLogData = new ExecutionLogData(executorName, executorDescription);
+	}
+	
+	/**
+	 * Sets the flag indicating if logging is disabled or not.
+	 *
+	 * @param disabled the new flag indicating if logging is disabled or not
+	 */
+	public void setDisabled(boolean disabled)
+	{
+		this.disabled = disabled;
+	}
+	
+	/**
+	 * Gets the flag indicating if logging is disabled or not.
+	 *
+	 * @return the flag indicating if logging is disabled or not
+	 */
+	public boolean isDisabled()
+	{
+		return disabled;
 	}
 	
 	private String getSource(StackTraceElement stackTrace[])
@@ -79,6 +104,11 @@ public class ExecutionLogger
 	 */
 	public void debug(String mssgTemplate, Object... args)
 	{
+		if(disabled)
+		{
+			return;
+		}
+		
 		String finalMssg = MessageFormatter.format(mssgTemplate, args);
 
 		logger.debug(finalMssg);
@@ -92,6 +122,11 @@ public class ExecutionLogger
 	 */
 	public void trace(String mssgTemplate, Object... args)
 	{
+		if(disabled)
+		{
+			return;
+		}
+		
 		String finalMssg = MessageFormatter.format(mssgTemplate, args);
 
 		logger.trace(finalMssg);
@@ -103,10 +138,15 @@ public class ExecutionLogger
 	 * @param name Name of the image file for easy identification
 	 * @param message Message to be logged along with image
 	 * @param imageFile Image to be logged
-	 * @param log level to be used.
+	 * @param logLevel level to be used.
 	 */
 	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
 	{
+		if(disabled)
+		{
+			return;
+		}
+		
 		if(logLevel == null)
 		{
 			logLevel = LogLevel.DEBUG;

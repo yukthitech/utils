@@ -16,6 +16,8 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Step to fill the target form with specified data.
@@ -40,7 +42,13 @@ public class FillFormStep extends AbstractStep
 	 */
 	@Param(description = "Data to populate in the form", sourceType = SourceType.OBJECT)
 	private Object data;
-
+	
+	/**
+	 * Delay in millis time between field to field filling. Useful in forms, in which field options are fetched based on other field values. Default: 10.
+	 */
+	@Param(description = "Delay in millis time between field to field filling. Useful in forms, in which field options are fetched based on other field values. Default: 10", required = false)
+	private int delay = 10;
+	
 	/**
 	 * Fills the form using standard bean properties.
 	 * 
@@ -87,6 +95,14 @@ public class FillFormStep extends AbstractStep
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 			}
+			
+			try
+			{
+				Thread.sleep(delay);
+			} catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while sleeping for specified time: {}", delay, ex);
+			}
 		}
 	}
 
@@ -122,6 +138,14 @@ public class FillFormStep extends AbstractStep
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, value);
 				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
+			}
+			
+			try
+			{
+				Thread.sleep(delay);
+			} catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while sleeping for specified time: {}", delay, ex);
 			}
 		}
 	}
@@ -176,6 +200,21 @@ public class FillFormStep extends AbstractStep
 	{
 		this.data = data;
 	}
+	
+	/**
+	 * Sets the delay in millis time between field to field filling. Useful in forms, in which field options are fetched based on other field values. Default: 10.
+	 *
+	 * @param delay the new delay in millis time between field to field filling
+	 */
+	public void setDelay(int delay)
+	{
+		if(delay <= 0)
+		{
+			throw new InvalidArgumentException("Delay should be greater than zero - {}", delay);
+		}
+		
+		this.delay = delay;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -190,6 +229,7 @@ public class FillFormStep extends AbstractStep
 
 		builder.append("Locator: ").append(locator);
 		builder.append(",").append("Data: ").append(data);
+		builder.append(",").append("Delay: ").append(delay);
 
 		builder.append("]");
 		return builder.toString();
