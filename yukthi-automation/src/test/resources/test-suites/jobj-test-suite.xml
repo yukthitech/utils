@@ -13,6 +13,9 @@
 			<data-bean id="beanFromTestSuite" ccg:beanType="com.yukthitech.test.beans.TestObject">
 				<name>beanFromTestSuite</name>
 			</data-bean>
+
+			<data-bean id="testUtils" ccg:beanType="com.yukthitech.test.beans.TestUtils">
+			</data-bean>
 		</wrap:data-beans>
 		
 		<testCase name="invokeMethodOnAppBean">
@@ -131,6 +134,58 @@
 				<ccg:validateContextParam expression="attr.returnValue"
 					value="beanFromTestSuite=>${attr.dataString}" />
 			</wrap:validations>
+		</testCase>
+
+		<testCase name="invoke_Method_With_Ext_Data_Provder">
+			<description>
+				Invokes simple method on bean with externalized data provider and
+				ensures data-provider working.
+			</description>
+
+			<list-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.json" />
+
+			<wrap:steps>
+				<ccg:invokeMethod method="halfOf" paramTypes="int" deepCloneParams="true">
+					<object ccg:beanRef="testUtils" />
+
+					<parameter>${attr.extDataProvider.paramValue}</parameter>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="${attr.extDataProvider.result}" />
+			</wrap:validations>
+
+			<expectedException enabled="${attr.extDataProvider.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException">
+				<property name="message" value="Value can not be less than zero: ${attr.extDataProvider.paramValue}" />
+			</expectedException>
+		</testCase>
+
+		<testCase name="invoke_Method_With_Ext_Bean_Data_Provder">
+			<description>
+				Invokes simple method on bean with externalized data provider beans and
+				ensures data-provider working.
+			</description>
+
+			<list-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.json#java.util.List &lt;com.yukthitech.test.beans.TestCaseBean&gt;" />
+
+			<wrap:steps>
+				<ccg:invokeMethod method="halfOf" paramTypes="int" deepCloneParams="true">
+					<object ccg:beanRef="testUtils" />
+
+					<parameter>${attr.extDataProvider.value.paramValue}</parameter>
+				</ccg:invokeMethod>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.returnValue"
+					value="${attr.extDataProvider.value.result}" />
+			</wrap:validations>
+
+			<expectedException enabled="${attr.extDataProvider.value.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException">
+				<property name="message" value="Value can not be less than zero: ${attr.extDataProvider.value.paramValue}" />
+			</expectedException>
 		</testCase>
 
 		<testCase name="invoke_Method_Data_Provder_Validations">

@@ -210,7 +210,7 @@ public class TestCase implements IStepContainer, Validateable
 		
 		if(testCaseData != null)
 		{
-			name += "[" + testCaseData.getName() + "]";
+			name += " [" + testCaseData.getName() + "]";
 		}
 		
 		ExpectedException expectedException = null;

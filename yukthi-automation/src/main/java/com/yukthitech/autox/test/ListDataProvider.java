@@ -3,8 +3,12 @@ package com.yukthitech.autox.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Data provider that can be configured to provide simple static data list.
@@ -44,7 +48,39 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	{
 		this.dataLst.add(data);
 	}
-
+	
+	/**
+	 * Sets the step data list to this data provider.
+	 * @param data data to be set
+	 */
+	@SuppressWarnings("rawtypes")
+	public void setStepDataList(Object data)
+	{
+		Object result = AutomationUtils.parseObjectSource(AutomationContext.getInstance(), null, data, 
+				TypeFactory.defaultInstance().constructCollectionType(List.class, TestCaseData.class));
+		
+		if(!(result instanceof List))
+		{
+			throw new InvalidArgumentException("Non list object was specified as data list - {}", result.getClass().getName());
+		}
+		
+		for(Object obj : ((List) result) )
+		{
+			if(obj instanceof TestCaseData)
+			{
+				addTestCaseData( (TestCaseData) obj);
+			}
+			else if(obj instanceof MapData)
+			{
+				addMapData( (MapData) obj);
+			}
+			else
+			{
+				addData(obj);
+			}
+		}
+	}
+	
 	@Override
 	public List<TestCaseData> getStepData()
 	{

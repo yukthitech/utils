@@ -81,22 +81,38 @@ public class ResourceFactory
 			
 			if(TYPE_FILE.equalsIgnoreCase(resType))
 			{
-				exeLogger.debug("Loading file as resource: {}", resValue);
+				if(exeLogger != null)
+				{
+					exeLogger.debug("Loading file as resource: {}", resValue);
+				}
+				
 				return new FileResource(resValue);
 			}
 			else if(TYPE_RESOURCE.equalsIgnoreCase(resType))
 			{
-				exeLogger.debug("Loading classpath resource: {}", resValue);
+				if(exeLogger != null)
+				{
+					exeLogger.debug("Loading classpath resource: {}", resValue);
+				}
+				
 				return new ClassPathResource(resValue);
 			}
 			else if(TYPE_STRING.equalsIgnoreCase(resType))
 			{
-				exeLogger.debug("Loading specified content itself as resource: {}", resValue);
+				if(exeLogger != null)
+				{
+					exeLogger.debug("Loading specified content itself as resource: {}", resValue);
+				}
+				
 				return new StringResource(resValue);
 			}
 			else if(TYPE_PROPERTY.equalsIgnoreCase(resType))
 			{
-				exeLogger.debug("Loading context-property value as resource. Property: {}", resValue);
+				if(exeLogger != null)
+				{
+					exeLogger.debug("Loading context-property value as resource. Property: {}", resValue);
+				}
+				
 				Object value = null;
 				
 				try

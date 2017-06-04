@@ -17,14 +17,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.resource.IResource;
+import com.yukthitech.autox.resource.ResourceFactory;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -34,7 +43,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class AutomationUtils
 {
 	private static Logger logger = LogManager.getLogger(AutomationUtils.class);
-	
+
+	private static final Pattern TYPE_STR_PATTERN = Pattern.compile("([\\w\\.\\$]+)\\s*\\<\\s*([\\w\\.\\$\\,\\ ]+\\s*)\\>\\s*");
 	
 	/**
 	 * Loads the xml files from specified folder. Returned set will be ordered by their relative paths.
@@ -374,5 +384,127 @@ public class AutomationUtils
 		}
 		
 		return "true".equals(res);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static JavaType parseJavaType(String typeStr)
+	{
+		typeStr = typeStr.trim();
+		
+		if(typeStr.indexOf("<") <= 0)
+		{
+			try
+			{
+				Class<?> type = Class.forName(typeStr);
+				return TypeFactory.defaultInstance().uncheckedSimpleType(type);
+			}catch(Exception ex)
+			{
+				throw new InvalidArgumentException("Invalid simple-type specified: {}", typeStr);
+			}
+		}
+		
+		Matcher matcher = TYPE_STR_PATTERN.matcher(typeStr);
+		
+		if(!matcher.matches())
+		{
+			throw new InvalidArgumentException("Invalid type string specified: {}", typeStr);
+		}
+		
+		String baseTypeStr = matcher.group(1);
+		String paramLstStr = matcher.group(2);
+		String paramTypeStr[] = paramLstStr.split("\\s*\\,\\s*");
+		
+		Class<?> baseType = null;
+		Class<?> paramTypes[] = null;
+		
+		try
+		{
+			baseType = Class.forName(baseTypeStr);
+		}catch(Exception ex)
+		{
+			throw new InvalidArgumentException("Invalid base-type '{}' specified in parameterized typ string: {}", baseTypeStr, typeStr, ex);
+		}
+		
+		paramTypes = new Class<?>[paramTypeStr.length];
+		
+		for(int i = 0; i < paramTypes.length; i++)
+		{
+			try
+			{
+				paramTypes[i] = Class.forName(paramTypeStr[i]);
+			}catch(Exception ex)
+			{
+				throw new InvalidArgumentException("Invalid param-type '{}' specified in parameterized typ string: {}", paramTypeStr[i], typeStr, ex);
+			}
+		}
+		
+		if(Collection.class.isAssignableFrom(baseType) && paramTypes.length == 1)
+		{
+			return TypeFactory.defaultInstance().constructCollectionType( (Class) baseType, paramTypes[0]);
+		}
+		
+		if(Map.class.isAssignableFrom(baseType) && paramTypes.length == 2)
+		{
+			return TypeFactory.defaultInstance().constructMapType( (Class) baseType, paramTypes[0], paramTypes[1]);
+		}
+		
+		return TypeFactory.defaultInstance().constructParametrizedType(baseType, baseType, paramTypes);
+	}
+
+	/**
+	 * Parses specified source (if string) and returns the result. If not string is specified, the 
+	 * same will be returned.
+	 * @param exeLogger Logger for logging messages
+	 * @param source source to be passed
+	 * @param defaultType Default type expected as result. Can be null.
+	 * @return parsed value
+	 */
+	public static Object parseObjectSource(AutomationContext context, ExecutionLogger exeLogger, Object source, JavaType defaultType)
+	{
+		if(!(source instanceof String))
+		{
+			return source;
+		}
+		
+		String sourceStr = (String) source;
+		sourceStr = sourceStr.trim();
+		
+		//check if string is a reference
+		Matcher matcher = IAutomationConstants.REF_PATTERN.matcher(sourceStr);
+		
+		if(matcher.matches())
+		{
+			try
+			{
+				return PropertyUtils.getProperty(context, matcher.group(1));
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while evaluating expression {} on context", matcher.group(1));
+			}
+		}
+
+		//check if string is resource
+		JavaType resultType = defaultType != null ? defaultType : TypeFactory.defaultInstance().uncheckedSimpleType(Object.class);
+		
+		if(sourceStr.indexOf("#") > 0)
+		{
+			String typeStr = sourceStr.substring(sourceStr.indexOf("#") + 1);
+			resultType = parseJavaType(typeStr);
+			
+			sourceStr = sourceStr.substring(0, sourceStr.indexOf("#")).trim();
+		}
+		
+		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger, true);
+
+		try
+		{
+			Object value = IAutomationConstants.OBJECT_MAPPER.readValue(resource.getInputStream(), resultType);
+			resource.close();
+			
+			return value;
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An exception occurred while parsing json resource: " + sourceStr, ex);
+		}
 	}
 }

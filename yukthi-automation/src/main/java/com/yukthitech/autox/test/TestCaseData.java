@@ -1,5 +1,8 @@
 package com.yukthitech.autox.test;
 
+import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.common.AutomationUtils;
+
 /**
  * Represents data for test case execution. 
  * @author akiran
@@ -71,7 +74,7 @@ public class TestCaseData
 	 */
 	public void setValue(Object value)
 	{
-		this.value = value;
+		this.value = AutomationUtils.parseObjectSource(AutomationContext.getInstance(), null, value, null);
 	}
 	
 	/* (non-Javadoc)

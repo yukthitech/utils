@@ -17,6 +17,8 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.ObjectCopy;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.ConvertUtils;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Step to invoke method on target object.
@@ -216,6 +218,14 @@ public class InvokeMethodStep extends AbstractStep
 		Object params[] = parameters.isEmpty() ? null : parameters.toArray(new Object[0]);
 		Class<?> types[] = getParameterTypes(this.paramTypes);
 		
+		if(types != null && params != null)
+		{
+			if(params.length != types.length)
+			{
+				throw new InvalidStateException("Number of parameters {} is not matching number of parameter types - {}", params.length, types.length);
+			}
+		}
+
 		Object object = this.object;
 		
 		//if object is instanceof object-copy, create copy instance
@@ -232,6 +242,11 @@ public class InvokeMethodStep extends AbstractStep
 				if(params[i] instanceof ObjectCopy)
 				{
 					params[i] = ((ObjectCopy) params[i]).createCopy();
+				}
+				
+				if(types != null)
+				{
+					params[i] = ConvertUtils.convert(params[i], types[i]);
 				}
 			}
 		}

@@ -223,7 +223,7 @@
 						{{suiteResult.message}}
 					</td>
 					<td style="width: 10%; text-align: left; padding-left: 1em;">
-						<a href="./log.html?{{result.suiteName}}_{{suiteResult.testCaseName}}" style="display: block;">System Log</a>
+						<a href="./log.html?{{suiteResult.systemLogName}}" style="display: block;">System Log</a>
 						<a  ng-repeat="(key,val) in suiteResult.monitorLogs" href="logs/{{val}}" style="color: brown; display: block;">
 							{{key}}
 						</a>

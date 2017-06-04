@@ -8,7 +8,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
-import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.ConvertUtils;
 
@@ -105,7 +105,7 @@ public class SetPropertyStep extends AbstractStep
 			}
 		}
 		
-		Object sourceValue = IAutomationConstants.PARSE_OBJ_SOURCE(context, exeLogger, source);
+		Object sourceValue = AutomationUtils.parseObjectSource(context, exeLogger, source, null);
 		
 		Object value = null;
 		

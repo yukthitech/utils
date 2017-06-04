@@ -37,6 +37,11 @@ public class TestCaseResult
 	 * Monitor logs.
 	 */
 	private Map<String, String> monitorLogs = new HashMap<>();
+	
+	/**
+	 * Name of the system log of the current test case.
+	 */
+	private String systemLogName;
 
 	/**
 	 * Instantiates a new test case result.
@@ -169,5 +174,25 @@ public class TestCaseResult
 	public void setMonitorLog(String name, String fileName)
 	{
 		monitorLogs.put(name, fileName);
+	}
+
+	/**
+	 * Gets the name of the system log of the current test case.
+	 *
+	 * @return the name of the system log of the current test case
+	 */
+	public String getSystemLogName()
+	{
+		return systemLogName;
+	}
+
+	/**
+	 * Sets the name of the system log of the current test case.
+	 *
+	 * @param systemLogName the new name of the system log of the current test case
+	 */
+	public void setSystemLogName(String systemLogName)
+	{
+		this.systemLogName = systemLogName;
 	}
 }

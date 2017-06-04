@@ -8,7 +8,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
-import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.AutomationUtils;
 
 /**
  * Validator to validate if specified value matches with specified context expression.
@@ -83,7 +83,7 @@ public class ValidateXpathValueStep extends AbstractValidation
 			exeLogger.debug("Validating context expression '{}' is: {}", valueExpression, value);
 		}
 		
-		Object sourceValue = IAutomationConstants.PARSE_OBJ_SOURCE(context, exeLogger, source);
+		Object sourceValue = AutomationUtils.parseObjectSource(context, exeLogger, source, null);
 
 		Object actualValue = JXPathContext.newContext(sourceValue).getValue(valueExpression);
 		

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -53,6 +54,8 @@ public class TestSuiteExecutor
 	 * Used to generate json files.
 	 */
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	private static AtomicInteger nextFileIndex = new AtomicInteger();
 	
 	/**
 	 * Application context to be used.
@@ -149,8 +152,10 @@ public class TestSuiteExecutor
 		
 		for(TestCaseData data : dataLst)
 		{
-			name = testCase.getName() + "[" + data.getName() + "]";
+			name = testCase.getName() + " [" + data.getName() + "]";
 			exeLogger = new ExecutionLogger(name, testCase.getDescription());
+			
+			exeLogger.debug("Executing test case '{}' with data: {}", name, data.getName());
 					
 			//set data provider data on context
 			context.setAttribute(dataProvider.getName(), data.getValue());
@@ -170,7 +175,7 @@ public class TestSuiteExecutor
 			
 			//stop monitoring logs
 			Map<String, File> monitoringLogs = context.stopLogMonitoring();
-			createLogFiles(result, testFileName + "[" + data.getName() + "]", monitoringLogs, data + "\n" + testCase.getDescription());
+			createLogFiles(result, testFileName + "_" + nextFileIndex.getAndIncrement(), monitoringLogs, data + "\n" + testCase.getDescription());
 
 			if(result.getStatus() == TestStatus.ERRORED)
 			{
@@ -185,7 +190,8 @@ public class TestSuiteExecutor
 			testCaseDatsResults.add(result);
 		}
 		
-		return new TestCaseResult(testCase.getName(), finalStatus, null, "");
+		//return new TestCaseResult(testCase.getName(), finalStatus, null, "");
+		return null;
 	}
 	
 
@@ -240,7 +246,7 @@ public class TestSuiteExecutor
 		}
 
 		TestCaseResult testCaseResult = null;
-		List<TestCaseResult> testCaseDatsResults = new ArrayList<>();
+		List<TestCaseResult> testCaseDataResults = new ArrayList<>();
 		String testFileName = null;
 
 		boolean successful = true;
@@ -304,17 +310,21 @@ public class TestSuiteExecutor
 			testFileName = testSuite.getName() + "_" + testCase.getName();
 
 			//execute actual test case
-			testCaseDatsResults.clear();
-			testCaseResult = executeTestCase(context, testCaseDatsResults, testCase, testFileName);
+			testCaseDataResults.clear();
+			testCaseResult = executeTestCase(context, testCaseDataResults, testCase, testFileName);
 			
-			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+			//test case result can be null, in case of data provider
+			if(testCaseResult != null)
 			{
-				successful = false;
+				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					successful = false;
+				}
+	
+				fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 			}
-
-			fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 			
-			for(TestCaseResult dataResult : testCaseDatsResults)
+			for(TestCaseResult dataResult : testCaseDataResults)
 			{
 				fullExecutionDetails.addTestResult(testSuite, dataResult);
 			}
@@ -404,6 +414,8 @@ public class TestSuiteExecutor
 				}
 			}
 		}
+		
+		testCaseResult.setSystemLogName(logFilePrefix);
 	}
 	
 	/**

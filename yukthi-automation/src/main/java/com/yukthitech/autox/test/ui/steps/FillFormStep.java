@@ -12,7 +12,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
-import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -161,7 +161,7 @@ public class FillFormStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		Object resObj = IAutomationConstants.PARSE_OBJ_SOURCE(context, exeLogger, data);
+		Object resObj = AutomationUtils.parseObjectSource(context, exeLogger, data, null);
 		
 		if(resObj instanceof Map)
 		{
