@@ -21,6 +21,12 @@ public interface IResource
 	public String toText();
 	
 	/**
+	 * Fetches flag indicating if this resource is raw type.
+	 * @return
+	 */
+	public boolean isRawType();
+	
+	/**
 	 * Closes the stream.
 	 */
 	public void close();

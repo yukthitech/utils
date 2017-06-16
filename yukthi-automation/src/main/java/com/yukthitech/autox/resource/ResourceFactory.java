@@ -21,7 +21,12 @@ public class ResourceFactory
 	/**
 	 * Pattern used to specify file resources.
 	 */
-	public static Pattern RESOURCE_PATTERN = Pattern.compile("(\\w+)\\:(.+)", Pattern.MULTILINE);
+	public static Pattern RESOURCE_PATTERN = Pattern.compile("([\\-\\w]+)\\:(.+)", Pattern.MULTILINE);
+	
+	/**
+	 * Prefix that will be used for raw resources.
+	 */
+	public static final String RAW_RES_PREFIX = "raw-";
 	
 	/**
 	 * value type is property.
@@ -47,7 +52,7 @@ public class ResourceFactory
 	{
 		IResource resourceObj = getResource(context, resource, exeLogger);
 		
-		if(!parseExpressions)
+		if(!parseExpressions || resourceObj.isRawType())
 		{
 			return resourceObj;
 		}
@@ -57,7 +62,7 @@ public class ResourceFactory
 			String content = IOUtils.toString(resourceObj.getInputStream(), (String) null);
 			content = AutomationUtils.replaceExpressions(context, content);
 			
-			return new StringResource(content);
+			return new StringResource(content, false);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while replacing expressions in resource: {}", resource, ex);
@@ -78,6 +83,13 @@ public class ResourceFactory
 		{
 			String resType = matcher.group(1);
 			String resValue = matcher.group(2);
+			boolean rawType = false;
+			
+			if(resType.toLowerCase().startsWith(RAW_RES_PREFIX))
+			{
+				resType = resType.substring(RAW_RES_PREFIX.length());
+				rawType = true;
+			}
 			
 			if(TYPE_FILE.equalsIgnoreCase(resType))
 			{
@@ -86,7 +98,7 @@ public class ResourceFactory
 					exeLogger.debug("Loading file as resource: {}", resValue);
 				}
 				
-				return new FileResource(resValue);
+				return new FileResource(resValue, rawType);
 			}
 			else if(TYPE_RESOURCE.equalsIgnoreCase(resType))
 			{
@@ -95,7 +107,7 @@ public class ResourceFactory
 					exeLogger.debug("Loading classpath resource: {}", resValue);
 				}
 				
-				return new ClassPathResource(resValue);
+				return new ClassPathResource(resValue, rawType);
 			}
 			else if(TYPE_STRING.equalsIgnoreCase(resType))
 			{
@@ -104,7 +116,7 @@ public class ResourceFactory
 					exeLogger.debug("Loading specified content itself as resource: {}", resValue);
 				}
 				
-				return new StringResource(resValue);
+				return new StringResource(resValue, rawType);
 			}
 			else if(TYPE_PROPERTY.equalsIgnoreCase(resType))
 			{
@@ -128,7 +140,7 @@ public class ResourceFactory
 					throw new InvalidStateException("Got property value as null. Property:  " + resValue);
 				}
 				
-				return new StringResource(value.toString());
+				return new StringResource(value.toString(), rawType);
 			}
 			else
 			{
@@ -137,7 +149,7 @@ public class ResourceFactory
 		}
 		else
 		{
-			return new StringResource(resource);
+			return new StringResource(resource, false);
 		}
 	}
 }

@@ -226,7 +226,7 @@
 			
 			<ccg:set name="checkVar" value="0" type="java.lang.Integer"/>
 			
-			<ccg:pollAndCheck checkCondition="attr.checkVar gte 5" timeOut="20000" pollingInterval="500">
+			<ccg:pollAndCheck checkCondition="attr.checkVar gte 5" timeOut="20" timeOutUnit="SECONDS" pollingInterval="500">
 				<poll>
 					<ccg:set name="checkVar" value="${attr.checkVar + 1}" type="java.lang.Integer"/>
 				</poll>

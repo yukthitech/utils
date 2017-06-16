@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.lang.steps;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
@@ -40,16 +41,28 @@ public class ValidatePollAndCheck extends AbstractValidation
 	private StepGroup poll;
 
 	/**
-	 * Polling interval duration in millis.
+	 * Polling interval duration.
 	 */
-	@Param(description = "Polling interval duration in millis.", required = true)
+	@Param(description = "Polling interval duration.", required = true)
 	private Long pollingInterval;
 	
 	/**
-	 * Timout in millis till which check condition will be tried. After this time, this validation will fail.
+	 * Polling interval time unit. Defaults to millis.
 	 */
-	@Param(description = "Timout in millis till which check condition will be tried. After this time, this validation will fail.", required = true)
+	@Param(description = "Polling interval time unit. Defaults to millis.", required = false)
+	private TimeUnit pollingIntervalUnit = TimeUnit.MILLISECONDS;
+	
+	/**
+	 * Timout till which check condition will be tried. After this time, this validation will fail.
+	 */
+	@Param(description = "Timout till which check condition will be tried. After this time, this validation will fail.", required = true)
 	private Long timeOut;
+
+	/**
+	 * Time out time unit. Defaults to millis.
+	 */
+	@Param(description = "Time out time unit. Defaults to millis.", required = false)
+	private TimeUnit timeOutUnit = TimeUnit.MILLISECONDS;
 
 	/**
 	 * Sets the freemarker condition to be evaluated.
@@ -80,6 +93,16 @@ public class ValidatePollAndCheck extends AbstractValidation
 	{
 		this.pollingInterval = pollingInterval;
 	}
+	
+	/**
+	 * Sets the polling interval time unit. Defaults to millis.
+	 *
+	 * @param pollingIntervalUnit the new polling interval time unit
+	 */
+	public void setPollingIntervalUnit(TimeUnit pollingIntervalUnit)
+	{
+		this.pollingIntervalUnit = pollingIntervalUnit;
+	}
 
 	/**
 	 * Sets the timout in millis till which check condition will be tried. After this time, this validation will fail.
@@ -89,6 +112,16 @@ public class ValidatePollAndCheck extends AbstractValidation
 	public void setTimeOut(Long timeOut)
 	{
 		this.timeOut = timeOut;
+	}
+	
+	/**
+	 * Sets the time out time unit. Defaults to millis.
+	 *
+	 * @param timeOutUnit the new time out time unit
+	 */
+	public void setTimeOutUnit(TimeUnit timeOutUnit)
+	{
+		this.timeOutUnit = timeOutUnit;
 	}
 
 	@Override
@@ -114,17 +147,17 @@ public class ValidatePollAndCheck extends AbstractValidation
 			
 			diff = System.currentTimeMillis() - startTime.getTime();
 			
-			if(diff > timeOut)
+			if(diff > timeOutUnit.toMillis(timeOut))
 			{
-				exeLogger.error("Check condition '{}' is not met till timeout of {} millis. Error Time: {}", checkCondition, timeOut, TIME_FORMAT.format(new Date()));
+				exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
 				return false;
 			}
 			
-			exeLogger.trace("Check condition was not met. Process will wait for {} millis before re-executing polling steps", pollingInterval);
+			exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
 			
 			try
 			{
-				Thread.sleep(pollingInterval);
+				Thread.sleep(pollingIntervalUnit.toMillis(pollingInterval));
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("Thread was interruped while waiting as part of polling step", ex);

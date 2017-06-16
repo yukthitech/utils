@@ -23,10 +23,16 @@ public class ClassPathResource implements IResource
 	 */
 	private InputStream is;
 	
-	public ClassPathResource(String resource)
+	/**
+	 * Flag indicating if this is raw type resource.
+	 */
+	private boolean rawType;
+	
+	public ClassPathResource(String resource, boolean rawType)
 	{
 		this.resource = resource;
 		is = ClassPathResource.class.getResourceAsStream(resource);
+		this.rawType = rawType;
 		
 		if(is == null)
 		{
@@ -65,5 +71,11 @@ public class ClassPathResource implements IResource
 		{
 			throw new InvalidArgumentException("An error occurred while closing classpath resource", ex);
 		}
+	}
+
+	@Override
+	public boolean isRawType()
+	{
+		return rawType;
 	}
 }

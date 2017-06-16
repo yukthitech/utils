@@ -23,9 +23,15 @@ public class FileResource implements IResource
 	 */
 	private FileInputStream fis;
 	
-	public FileResource(String resource)
+	/**
+	 * Flag indicating if this is raw type resource.
+	 */
+	private boolean rawType;
+	
+	public FileResource(String resource, boolean rawType)
 	{
 		this.resource = resource;
+		this.rawType = rawType;
 		
 		try
 		{
@@ -68,5 +74,11 @@ public class FileResource implements IResource
 		{
 			throw new InvalidStateException("Failed to close file resource", ex);
 		}
+	}
+
+	@Override
+	public boolean isRawType()
+	{
+		return rawType;
 	}
 }

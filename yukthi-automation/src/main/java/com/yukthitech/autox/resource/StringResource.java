@@ -14,9 +14,15 @@ public class StringResource implements IResource
 	 */
 	private String content;
 	
-	public StringResource(String content)
+	/**
+	 * Flag indicating if this is raw type resource.
+	 */
+	private boolean rawType;
+	
+	public StringResource(String content, boolean rawType)
 	{
 		this.content = content;
+		this.rawType = rawType;
 	}
 	
 	@Override
@@ -34,5 +40,11 @@ public class StringResource implements IResource
 	@Override
 	public void close()
 	{
+	}
+
+	@Override
+	public boolean isRawType()
+	{
+		return rawType;
 	}
 }
