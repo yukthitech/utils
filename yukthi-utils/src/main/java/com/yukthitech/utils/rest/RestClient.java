@@ -29,6 +29,8 @@ public class RestClient
 {
 	private static Logger logger = LogManager.getLogger(RestClient.class);
 	
+	private static final int MAX_STR_LENGTH = 500;
+	
 	static class RestResultHandler implements ResponseHandler<RestResult<String>>
 	{
 		public RestResult<String> handleResponse(HttpResponse response) throws ClientProtocolException,IOException
@@ -49,7 +51,7 @@ public class RestClient
 				value = null;
 			}
 			
-			logger.debug("Got response status as {} and body as: {}", status, value);
+			logger.debug("Got response status as {} and body as: {}", status, truncate(value));
 			
 			if(StringUtils.isBlank(value))
 			{
@@ -61,6 +63,26 @@ public class RestClient
 
 	}
 	
+	/**
+	 * On need basis truncates the long value for logging.
+	 * @param content
+	 * @return
+	 */
+	private static String truncate(String content)
+	{
+		if(content == null)
+		{
+			return null;
+		}
+		
+		if(content.length() <= MAX_STR_LENGTH)
+		{
+			return content;
+		}
+		
+		return content.substring(0, MAX_STR_LENGTH) + "...";
+	}
+
 	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	
 	/**
@@ -206,7 +228,7 @@ public class RestClient
 		{
 			try
 			{
-				logger.debug("Got response as {}", stringResult.getValue());
+				logger.debug("Got response as {}", truncate(stringResult.getValue()) );
 				//convert the response json into required object
 				resultValue = objectMapper.readValue(stringResult.getValue(), expectedResponseType);
 			}catch(Exception ex)
