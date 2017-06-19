@@ -37,6 +37,12 @@ public class BasicArguments
 	 */
 	@CliArgument(name = "rf", longName = "reports-folder", description = "Folder in which reports should be generated.", required = true)
 	private String reportsFolder;
+	
+	/**
+	 * Listener to be used for automation.
+	 */
+	@CliArgument(name = "list", longName = "automation-listener", description = "Automation listener to be configured.", required = false)
+	private String automationListener;
 
 	/**
 	 * Gets the if specified the execution will be limited only for this test suites.
@@ -146,5 +152,25 @@ public class BasicArguments
 	public void setReportsFolder(String reportsFolder)
 	{
 		this.reportsFolder = reportsFolder;
+	}
+
+	/**
+	 * Gets the listener to be used for automation.
+	 *
+	 * @return the listener to be used for automation
+	 */
+	public String getAutomationListener()
+	{
+		return automationListener;
+	}
+
+	/**
+	 * Sets the listener to be used for automation.
+	 *
+	 * @param automationListener the new listener to be used for automation
+	 */
+	public void setAutomationListener(String automationListener)
+	{
+		this.automationListener = automationListener;
 	}
 }

@@ -54,6 +54,12 @@ public class DmlQueryStep extends AbstractStep
 	private String countAttribute;
 	
 	/**
+	 * If true, calls commit at end. Default: true.
+	 */
+	@Param(description = "If true, calls commit at end. Default: true", required = false)
+	private boolean commitAtEnd = true;
+	
+	/**
 	 * Sets the name of the data source to use.
 	 *
 	 * @param dataSourceName the new name of the data source to use
@@ -93,6 +99,16 @@ public class DmlQueryStep extends AbstractStep
 		this.failOnNoUpdate = failOnNoUpdate;
 	}
 	
+	/**
+	 * Sets the if true, calls commit at end. Default: true.
+	 *
+	 * @param commitAtEnd the new if true, calls commit at end
+	 */
+	public void setCommitAtEnd(boolean commitAtEnd)
+	{
+		this.commitAtEnd = commitAtEnd;
+	}
+	
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
@@ -120,8 +136,11 @@ public class DmlQueryStep extends AbstractStep
 			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 			
 			int count = QueryUtils.executeDml(connection, processedQuery, values);
-			
-			connection.commit();
+	
+			if(commitAtEnd)
+			{
+				connection.commit();
+			}
 			
 			exeLogger.debug("Number of rows affected: {}", count);
 			

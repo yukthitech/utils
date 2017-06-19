@@ -331,17 +331,20 @@ public class FullExecutionDetails
 	 * @param status
 	 * @param statusMessage
 	 */
-	private void updateTestSuiteStatus(TestSuite testSuite, TestStatus status, String statusMessage)
+	private TestSuiteResults updateTestSuiteStatus(TestSuite testSuite, TestStatus status, String statusMessage)
 	{
 		TestSuiteResults results = suiteToResults.get(testSuite.getName());
 
 		if(results == null)
 		{
 			results = new TestSuiteResults(testSuite.getName());
+			results.setStatusMessage(statusMessage);
+			
 			suiteToResults.put(testSuite.getName(), results);
 		}
 		
 		results.setStatus(status);
+		return results;
 	}
 	
 	
@@ -349,10 +352,10 @@ public class FullExecutionDetails
 	 * Marks specified test suite as completed. 
 	 * @param testSuite Test suite to be marked
 	 */
-	public void testSuiteCompleted(TestSuite testSuite)
+	public TestSuiteResults testSuiteCompleted(TestSuite testSuite)
 	{
 		this.inProgressTestSuites.remove(testSuite);
-		updateTestSuiteStatus(testSuite, TestStatus.SUCCESSFUL, "");
+		return updateTestSuiteStatus(testSuite, TestStatus.SUCCESSFUL, "");
 	}
 	
 	/**
@@ -360,10 +363,10 @@ public class FullExecutionDetails
 	 * @param testSuite Test suite to be marked
 	 * @param statusMessage status message
 	 */
-	public void testSuiteFailed(TestSuite testSuite, String statusMessage)
+	public TestSuiteResults testSuiteFailed(TestSuite testSuite, String statusMessage)
 	{
 		this.inProgressTestSuites.remove(testSuite);
-		updateTestSuiteStatus(testSuite, TestStatus.FAILED, statusMessage);
+		return updateTestSuiteStatus(testSuite, TestStatus.FAILED, statusMessage);
 	}
 	
 	/**
@@ -371,10 +374,10 @@ public class FullExecutionDetails
 	 * @param testSuite Test suite to be marked
 	 * @param statusMessage status message
 	 */
-	public void testSuiteSkipped(TestSuite testSuite, String statusMessage)
+	public TestSuiteResults testSuiteSkipped(TestSuite testSuite, String statusMessage)
 	{
 		this.inProgressTestSuites.remove(testSuite);
-		updateTestSuiteStatus(testSuite, TestStatus.SKIPPED, statusMessage);
+		return updateTestSuiteStatus(testSuite, TestStatus.SKIPPED, statusMessage);
 	}
 	
 	/**

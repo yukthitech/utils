@@ -1,4 +1,8 @@
 ===================
+	POST step without body
+	
+	screen shot is not coming in log (though href is working) 
+
 	rest steps to use different base urls
 	
 	Test cases for ui steps/validators

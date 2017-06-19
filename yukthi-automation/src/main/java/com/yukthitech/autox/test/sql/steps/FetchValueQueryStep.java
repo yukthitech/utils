@@ -1,6 +1,7 @@
 package com.yukthitech.autox.test.sql.steps;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -22,11 +23,11 @@ import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Executes specified query and loads the result first column values as list on the context. In case of zero results empty list will be kept on context.
+ * Executes specified query and creates map out of results. And sets this map on
+ * the context.
  */
-@Executable(name = "loadQueryColumnList", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the result first column values as list on the context. "
-		+ "\nIn case of zero results empty list will be kept on context.")
-public class LoadQueryColumnListStep extends AbstractStep
+@Executable(name = "fetchValueQuery", requiredPluginTypes = DbPlugin.class, message = "Fetches single value (first row, first column value) from the results of specified query.")
+public class FetchValueQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -39,7 +40,7 @@ public class LoadQueryColumnListStep extends AbstractStep
 	/**
 	 * Context attribute to be used to load the map.
 	 */
-	@Param(description = "Name of the attribute which should be used to keep the result map on the context.")
+	@Param(description = "Name of the attribute which should be used to keep the result value.")
 	private String contextAttribute;
 
 	/**
@@ -115,13 +116,23 @@ public class LoadQueryColumnListStep extends AbstractStep
 			Object result = null;
 			Object valueArr[] = values.isEmpty() ? null : values.toArray();
 			
-			exeLogger.debug("Loading result first column as list on context attribute: {}", contextAttribute);
-			result = QueryUtils.getQueryRunner().query(connection, processedQuery, new ColumnListHandler<>(), valueArr);
+			exeLogger.debug("Loading single valued result on context attribute: {}", contextAttribute);
 			
-			if(result == null)
+			ResultSetHandler<Object> handler = new ResultSetHandler<Object>()
 			{
-				result = new ArrayList<>();
-			}
+				@Override
+				public Object handle(ResultSet rs) throws SQLException
+				{
+					if(!rs.next())
+					{
+						return null;
+					}
+					
+					return rs.getObject(1);
+				}
+			};
+			
+			result = QueryUtils.getQueryRunner().query(connection, processedQuery, handler, valueArr);
 			
 			context.setAttribute(contextAttribute, result);
 			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);

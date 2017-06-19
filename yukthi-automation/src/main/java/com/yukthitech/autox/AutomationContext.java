@@ -12,6 +12,8 @@ import org.apache.commons.io.FileUtils;
 
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.event.DummyAutomationListener;
+import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -61,6 +63,11 @@ public class AutomationContext
 	 * Name to step group mapping.
 	 */
 	private Map<String, StepGroup> nameToGroup = new HashMap<>();
+	
+	/**
+	 * Listener for automation.
+	 */
+	private IAutomationListener automationListener = new DummyAutomationListener();
 
 	/**
 	 * Constructor.
@@ -305,5 +312,30 @@ public class AutomationContext
 	public StepGroup getStepGroup(String name)
 	{
 		return nameToGroup.get(name);
+	}
+
+	/**
+	 * Gets the listener for automation.
+	 *
+	 * @return the listener for automation
+	 */
+	public IAutomationListener getAutomationListener()
+	{
+		return automationListener;
+	}
+
+	/**
+	 * Sets the listener for automation.
+	 *
+	 * @param automationListener the new listener for automation
+	 */
+	public void setAutomationListener(IAutomationListener automationListener)
+	{
+		if(automationListener == null)
+		{
+			throw new NullPointerException("Automation listener can not be null.");
+		}
+		
+		this.automationListener = automationListener;
 	}
 }

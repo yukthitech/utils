@@ -36,6 +36,11 @@ public class TestSuiteResults
 	private TestStatus status;
 	
 	/**
+	 * Flag indicates setup steps failed to execute.
+	 */
+	private boolean setupFailed = false;
+	
+	/**
 	 * Status message.
 	 */
 	private String statusMessage;
@@ -110,6 +115,26 @@ public class TestSuiteResults
 	public String getSuiteName()
 	{
 		return suiteName;
+	}
+
+	/**
+	 * Gets the flag indicates setup steps failed to execute.
+	 *
+	 * @return the flag indicates setup steps failed to execute
+	 */
+	public boolean isSetupFailed()
+	{
+		return setupFailed;
+	}
+
+	/**
+	 * Sets the flag indicates setup steps failed to execute.
+	 *
+	 * @param setupFailed the new flag indicates setup steps failed to execute
+	 */
+	public void setSetupFailed(boolean setupFailed)
+	{
+		this.setupFailed = setupFailed;
 	}
 
 	/**

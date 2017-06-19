@@ -109,6 +109,9 @@ public class MultiDmlQueryStep extends AbstractStep
 		try
 		{
 			connection = dataSource.getConnection();
+			boolean autoCommit = connection.getAutoCommit();
+			
+			connection.setAutoCommit(false);
 			
 			for (int i = 0; i < queries.size(); i++) 
 			{
@@ -135,6 +138,7 @@ public class MultiDmlQueryStep extends AbstractStep
 			}
 			
 			connection.commit();
+			connection.setAutoCommit(autoCommit);
 
 		} catch(SQLException ex)
 		{

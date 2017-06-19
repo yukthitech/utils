@@ -19,6 +19,7 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteExecutor;
@@ -303,6 +304,14 @@ public class AutomationLauncher
 		ApplicationConfiguration appConfig = loadApplicationConfiguration(appConfigurationFile, basicArguments);
 		AutomationContext context = new AutomationContext(appConfig);
 		context.setBasicArguments(basicArguments);
+		
+		if(basicArguments.getAutomationListener() != null)
+		{
+			Class<?> listenerType = Class.forName(basicArguments.getAutomationListener());
+			IAutomationListener listener = (IAutomationListener) listenerType.newInstance();
+			
+			context.setAutomationListener(listener);
+		}
 		
 		// load test suites
 		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig);

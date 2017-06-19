@@ -58,8 +58,8 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Expected response type. Default: String.
 	 */
-	@Param(description = "Expected response type. Default: String", required = false)
-	protected Class<?> expectedResponseType;
+	@Param(description = "Expected response type. Default: java.lang.Object", required = false)
+	protected Class<?> expectedResponseType = Object.class;
 	
 	/**
 	 * Context attribute name on which result object will be placed, which can be used to fetch status code. default: restResult.

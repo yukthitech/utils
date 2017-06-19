@@ -19,6 +19,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.event.AutomationEvent;
 import com.yukthitech.autox.logmon.LogMonitorContext;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
@@ -83,6 +84,11 @@ public class TestSuiteExecutor
 	private FullExecutionDetails fullExecutionDetails = new FullExecutionDetails();
 	
 	/**
+	 * At given time, this will hold value of test suite being executed.
+	 */
+	private TestSuite currentTestSuite;
+	
+	/**
 	 * Instantiates a new test suite executor.
 	 *
 	 * @param context the context
@@ -118,6 +124,8 @@ public class TestSuiteExecutor
 			ExecutionLogger exeLogger = new ExecutionLogger(testCase.getName(), testCase.getDescription());
 			TestCaseResult result = null;
 			
+			context.getAutomationListener().testCaseStarted(new AutomationEvent(currentTestSuite, testCase, null));
+			
 			//start monitoring logs
 			context.startLogMonitoring();
 
@@ -133,6 +141,8 @@ public class TestSuiteExecutor
 			//stop monitoring logs
 			Map<String, File> monitoringLogs = context.stopLogMonitoring();
 			createLogFiles(result, testFileName, monitoringLogs, testCase.getDescription());
+			
+			context.getAutomationListener().testCaseCompleted(new AutomationEvent(currentTestSuite, testCase, result));
 			
 			return result;
 		}
@@ -241,9 +251,15 @@ public class TestSuiteExecutor
 
 				depTestSuite = testSuiteGroup.getTestSuite(dependencyTestSuite);
 
-				executeTestSuite(depTestSuite);
+				if( !executeTestSuite(depTestSuite) )
+				{
+					fullExecutionDetails.testSuiteSkipped(testSuite, "Failed as the dependency test-suite '" + depTestSuite + "' failed.");
+					return false;
+				}
 			}
 		}
+		
+		this.currentTestSuite = testSuite;
 
 		TestCaseResult testCaseResult = null;
 		List<TestCaseResult> testCaseDataResults = new ArrayList<>();
@@ -263,7 +279,9 @@ public class TestSuiteExecutor
 
 		if( !executeSetup(testSuite.getName(), testSuite.getSetup()) )
 		{
-			fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
+			TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
+			results.setSetupFailed(true);
+			
 			return false;
 		}
 		

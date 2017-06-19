@@ -27,7 +27,7 @@ $.application.controller('testAutomationAppController', function($scope){
 		 {
 			 var testCaseResults = $scope.testSuiteResults[i].testCaseResults;
 
-			 if($scope.testSuiteResults[i].totalCount <= 0)
+			 if($scope.testSuiteResults[i].totalCount <= 0 && !$scope.testSuiteResults[i].setupFailed)
 			 {
 				continue; 
 			 }

@@ -107,5 +107,23 @@
 				<ccg:validateContextParam expression="attr.empNames" value="[employee1, employee2]"/>
 			</wrap:validations>
 		</testCase>
+
+		<testCase name="fetch_value_query"  dependencies="insert_query">
+			<description>Validates fetching single value from query is working as expected</description>
+
+			<wrap:steps>
+				<ccg:fetchValueQuery dataSourceName="dataSource" contextAttribute="empId">
+					<query>
+						SELECT ID
+						FROM EMPLOYEE
+						WHERE NAME = 'employee1'
+					</query>
+				</ccg:fetchValueQuery>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.empId" value="1"/>
+			</wrap:validations>
+		</testCase>
 	</testSuite>
 </testData>
