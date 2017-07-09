@@ -13,10 +13,6 @@
 	
 	<testSuite name="lang-test-suites">
 	
-		<setup>
-			<ccg:set name="testAttr" value="SimpleValue ${nonExisting}"/>
-		</setup>
-
 		<testCase name="testExpressions">
 			<description>Tests expressions are replaced in test suite files properly</description>
 			

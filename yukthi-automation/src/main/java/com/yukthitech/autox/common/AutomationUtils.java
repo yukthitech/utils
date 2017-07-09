@@ -33,6 +33,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
+import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -479,7 +480,7 @@ public class AutomationUtils
 				return PropertyUtils.getProperty(context, matcher.group(1));
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException("An error occurred while evaluating expression {} on context", matcher.group(1));
+				throw new InvalidStateException("An error occurred while evaluating expression {} on context", matcher.group(1), ex);
 			}
 		}
 
@@ -495,6 +496,26 @@ public class AutomationUtils
 		}
 		
 		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger, true);
+		String resourceName = resource.getName();
+		
+		if(resourceName != null && resourceName.toLowerCase().endsWith(".xml"))
+		{
+			Object rootBean = null;
+			
+			if(resultType != null && !Object.class.equals(resultType.getRawClass()))
+			{
+				try
+				{
+					rootBean = resultType.getRawClass().newInstance();
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("An error occurred while creating instance of {} [Raw type: {}]", resultType, resultType.getRawClass().getName(), ex);
+				}
+			}
+			
+			rootBean = XMLBeanParser.parse(resource.getInputStream(), rootBean);
+			return rootBean;
+		}
 
 		try
 		{

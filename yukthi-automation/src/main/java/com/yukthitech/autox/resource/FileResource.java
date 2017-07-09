@@ -81,4 +81,10 @@ public class FileResource implements IResource
 	{
 		return rawType;
 	}
+
+	@Override
+	public String getName()
+	{
+		return resource;
+	}
 }

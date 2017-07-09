@@ -67,7 +67,7 @@
 			<wrap:steps>
 				<ccg:multiDmlQuery dataSourceName="dataSource">
 					<query>
-						INSERT INTO EMPLOYEE VALUES (2, 'employee1')
+						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
 
 					<query>
@@ -79,7 +79,7 @@
 			<wrap:validations>
 				<ccg:validateWithSql dataSourceName="dataSource">
 					<query>
-						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 2
+						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 1
 					</query>
 
 					<expectedRow>

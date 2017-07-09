@@ -16,7 +16,7 @@
 				</ccg:invokePost>
 				
 				<ccg:setXpath valueExpression="//id" name="emp1_id">
-					<source>${attr.response}</source>
+					<source>ref: attr.response</source>
 				</ccg:setXpath>
 
 				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
@@ -32,7 +32,7 @@
 				</ccg:invokePost>
 				
 				<ccg:setXpath valueExpression="//id" name="emp2_id">
-					<source>${attr.response}</source>
+					<source>ref:attr.response</source>
 				</ccg:setXpath>
 				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
 			</wrap:steps>
@@ -45,7 +45,7 @@
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:invokeGet>
 			
-			<ccg:validateXpathValue valueExpression="//name" value="Emp2" source="${attr.response}"/>
+			<ccg:validateXpathValue valueExpression="//name" value="Emp2" source="ref: attr.response"/>
 		</testCase>
 
 		<testCase name="testDelete" dependencies="testPost">
@@ -84,7 +84,7 @@
 			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
 			
 			<ccg:setXpath valueExpression="//id" name="emp3_id">
-				<source>${attr.response}</source>
+				<source>ref: attr.response</source>
 			</ccg:setXpath>
 			
 			<ccg:invokeGetFile uri="/emp/getFile/{id}">

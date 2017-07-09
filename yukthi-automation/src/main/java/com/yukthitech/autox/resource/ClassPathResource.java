@@ -78,4 +78,10 @@ public class ClassPathResource implements IResource
 	{
 		return rawType;
 	}
+
+	@Override
+	public String getName()
+	{
+		return resource;
+	}
 }

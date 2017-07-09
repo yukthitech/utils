@@ -10,6 +10,11 @@ import java.io.InputStream;
 public class StringResource implements IResource
 {
 	/**
+	 * Name of the source resource.
+	 */
+	private String name;
+
+	/**
 	 * String input representing the resource.
 	 */
 	private String content;
@@ -18,7 +23,14 @@ public class StringResource implements IResource
 	 * Flag indicating if this is raw type resource.
 	 */
 	private boolean rawType;
-	
+
+	public StringResource(String name, String content, boolean rawType)
+	{
+		this.name = name;
+		this.content = content;
+		this.rawType = rawType;
+	}
+
 	public StringResource(String content, boolean rawType)
 	{
 		this.content = content;
@@ -46,5 +58,11 @@ public class StringResource implements IResource
 	public boolean isRawType()
 	{
 		return rawType;
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
 	}
 }

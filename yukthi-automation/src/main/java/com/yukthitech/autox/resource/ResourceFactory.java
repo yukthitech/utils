@@ -62,7 +62,7 @@ public class ResourceFactory
 			String content = IOUtils.toString(resourceObj.getInputStream(), (String) null);
 			content = AutomationUtils.replaceExpressions(context, content);
 			
-			return new StringResource(content, false);
+			return new StringResource(resourceObj.getName(), content, false);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while replacing expressions in resource: {}", resource, ex);

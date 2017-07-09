@@ -221,10 +221,16 @@
 			<wrap:steps>
 				<ccg:setProperty name="propAttr1"
 					source="file:./src/test/resources/data/data1.json" valueExpression="bean1.prop1" />
+				<ccg:setProperty name="propAttr2"
+					source="file:./src/test/resources/data/data1.xml#com.yukthitech.test.beans.SimpleComplexBean" valueExpression="name" />
+				<ccg:setProperty name="propAttr3"
+					source="file:./src/test/resources/data/data2.xml" valueExpression="size" />
 			</wrap:steps>
 
 			<wrap:validations>
 				<ccg:validateContextParam expression="attr.propAttr1" value="value1" />
+				<ccg:validateContextParam expression="attr.propAttr2" value="Test123" />
+				<ccg:validateContextParam expression="attr.propAttr3" value="234" />
 			</wrap:validations>
 		</testCase>
 

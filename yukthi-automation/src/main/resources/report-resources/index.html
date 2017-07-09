@@ -170,7 +170,7 @@
 				</tr>
 				<tr ng-repeat="result in testSuiteResults" ng-show="result.display">
 					<td class="defaultVal" style=" white-space: nowrap;">
-						<a href="#result.suiteName">{{result.suiteName}}</a>
+						<a href="#{{result.suiteName}}">{{result.suiteName}}</a>
 					</td>
 					<td ng-class="result.failureCount > 0 ? 'errorVal' : 'successVal'">
 						{{result.status}}	
@@ -199,7 +199,7 @@
 
 		<hr/>
 		
-		<div id="result.suiteName" class="resultBox" ng-repeat="result in testResultsArr" ng-show="result.display" style="border: 2px solid black;">
+		<div id="{{result.suiteName}}" class="resultBox" ng-repeat="result in testResultsArr" ng-show="result.display" style="border: 2px solid black;">
 			<table class="table table-hover table-striped table-bordered" style="width: 100%; margin-bottom: 0px;">
 				<tr>
 					<td colspan="5" style="background-color: #8585ad; font-weight: bold; color: white; font-size: 1.2em;">

@@ -9,6 +9,12 @@ import java.io.InputStream;
 public interface IResource
 {
 	/**
+	 * Fetches the name of resource if any.
+	 * @return name of the resource.
+	 */
+	public String getName();
+	
+	/**
 	 * opens the resource.
 	 * @return Input stream to read resource.
 	 */

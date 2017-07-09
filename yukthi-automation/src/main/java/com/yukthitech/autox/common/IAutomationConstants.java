@@ -18,5 +18,5 @@ public interface IAutomationConstants
 	/**
 	 * Pattern used to refer property in the source.
 	 */
-	public Pattern REF_PATTERN = Pattern.compile("ref\\:(.+)");
+	public Pattern REF_PATTERN = Pattern.compile("ref\\s*\\:\\s*(.+)");
 }
