@@ -6,37 +6,37 @@ Following is the list of the high level use case supported:
 
 1. **Simple Repository Methods**: Like spring-data repository methods are supported based on method names
 
-	public Employee findByEmployeeNo(String empNo);
-	public boolean deleteByMailId(@Condition("emailId") String mail);
+		public Employee findByEmployeeNo(String empNo);
+		public boolean deleteByMailId(@Condition("emailId") String mail);
 	
 2. **Annotation based Conditions**: Conditions can be specified on parameters using annotations
 
-	public Employee findEmpByEmailIgnoreCase(@Condition(value = "emailId", ignoreCase = true) String mail);
-	public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullable = true) String name);
+		public Employee findEmpByEmailIgnoreCase(@Condition(value = "emailId", ignoreCase = true) String mail);
+		public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullable = true) String name);
 
 3. **Non parameter Conditions**: Non-parameter based conditions can be specified by method annotations
 
-	@MethodConditions(
-			nullChecks = {
-					@NullCheck(field = "name")
-			}
-	)
-	public List<Employee> findEmpWithNoName(@Condition("phoneNo") String phoneNo);
+		@MethodConditions(
+				nullChecks = {
+						@NullCheck(field = "name")
+				}
+		)
+		public List<Employee> findEmpWithNoName(@Condition("phoneNo") String phoneNo);
 
 4. **Result Customizations**: Field to be fetched or extra specifications on results can be specified by annotations as below
 
-	@Field("emailId")
-	public String findEmailByEmployeeNo(String empNo);
+		@Field("emailId")
+		public String findEmailByEmployeeNo(String empNo);
 
-	@SearchResult
-	@OrderBy("name")
-	public List<EmpSearchResult> findResultsByNameWithOrder(@Condition(value = "name", op = Operator.LIKE) String name);
-
-	@SearchResult(mappings = {
-		@ResultMapping(entityField = "name", property = "key"),
-		@ResultMapping(entityField = "age", property = "value")
-	})
-	public List<KeyValueBean> findKeyValues(@Condition(value = "phoneNo", op = Operator.LIKE) String phone);
+		@SearchResult
+		@OrderBy("name")
+		public List<EmpSearchResult> findResultsByNameWithOrder(@Condition(value = "name", op = Operator.LIKE) String name);
+	
+		@SearchResult(mappings = {
+			@ResultMapping(entityField = "name", property = "key"),
+			@ResultMapping(entityField = "age", property = "value")
+		})
+		public List<KeyValueBean> findKeyValues(@Condition(value = "phoneNo", op = Operator.LIKE) String phone);
 
 5. **Nested field conditions**: Nested field conditions (which needs join queries) can also be specified as normal fields.
 
@@ -44,19 +44,19 @@ Following is the list of the high level use case supported:
 
 7. **Native Queries**: Native queries are also supported. The native queries themselves are defined in externalized xml files which in turn can have free marker expressions. These freemarker expressions can refer to the parameters being passed to the methods. And the columns of query result are mapped by name to the properties of result bean, allowing custom return types for native queries.
 
-	@NativeQuery(name = "insertQuery", type = NativeQueryType.INSERT)
-	public boolean addEmployee(Employee employee);
-
-	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
-	public Employee readEmployee1(EmpSearchQuery query);
+		@NativeQuery(name = "insertQuery", type = NativeQueryType.INSERT)
+		public boolean addEmployee(Employee employee);
+	
+		@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
+		public Employee readEmployee1(EmpSearchQuery query);
 
 	
 8. **Live Entities**: The entities returned by the repository methods are tied to repository like Hibernate and other JPA frameworks. But unlike them they are not tied to live transaction. That means sub orms can be accessed anytime. And also unlike other standard frameworks, updations of entity beans are not mapped to db changes.
 
 9. **Custom Constraint Exception messages**: Unlike other frameworks where weird messages are thrown when constraints fail, in this framework custom messages can be specified which should be used when a constrain fails. Example, in an entity for a field unique constrain custom message can be specified as follows (on same lines custom messaged from foreign key constraint can also be specified). And exceptions thrown also will be specific to constraint being failed like - UniqueConstraintViolationException, ForeignConstraintViolationException
 	
-	@UniqueConstraint(name = "EmailId1", message = ERROR_MESSAGE_DUPLICATE_EMAIL)
-	private String emailId;
+		@UniqueConstraint(name = "EmailId1", message = ERROR_MESSAGE_DUPLICATE_EMAIL)
+		private String emailId;
 
 10. **Custom way of persisting**: A field can be marked to be persisted in custom formats. For example, below indicates code indicate that target field should be persisted in json format
 
