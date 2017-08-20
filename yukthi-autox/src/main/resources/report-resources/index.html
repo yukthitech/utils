@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+		<title>Test Results</title>
+		
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	    <script src="js/jquery-2.2.0.js"></script>
+	    
+	    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	    <script src="js/bootstrap.min.js"></script>
+		<link href="css/common.css" rel="stylesheet">
+	    
+		<script src="js/angular.js"></script>
+	    <script src="js/angular-sanitize.min.js"></script>
+	    <script src="js/angular-app.js"></script>
+		
+		<script type="text/javascript" src="test-results.js"></script>
+		<script src="js/index.js"></script>
+
+		<style>
+			table
+			{
+				width: 100%; 
+				height: 100%;
+			}
+			
+			td
+			{
+				text-align: center;
+			}
+			
+			.errorVal
+			{
+				font-weight: bold;
+				color: red;
+			}
+			
+			.defaultVal
+			{
+				font-weight: bold;
+				color: black;
+			}
+		</style>
+	</head>
+	
+	<body ng-app="application" ng-controller="testAutomationAppController" ng-init="fetchObjects()">
+		
+		<div style="margin: 0; padding: 0; position: fixed; top: 0; width: 100%; height: 4em; background-color: rgb(2,5,14);
+				border-bottom: 2px solid grey;">
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; vertical-align: top; width: 1em; padding-left: 1em;">
+						<span style="font-size: 2em; color: white; font-weight: bold;">Auto</span><span style="font-size: 2.5em; color: red; font-weight: bold;">X</span>
+					</td>
+					
+					<td style="text-align: center; color: white; font-size: 1.6em; font-weight: bold;">
+						{{testResults.reportName}} <sub style="font-size: 0.6em;">({{testResults.executionDateStr}})</sub>
+					</td>
+					
+					<td style="text-align: right; width: 1em; white-space: nowrap;">
+						<input type="text" ng-model="searchTestSuiteName" placeholder="Test Suite Name" class="filterField"
+						ng-keyup="filterTestSuite($event)"/>
+						
+						<input type="text" ng-model="searchTestCaseName" placeholder="Test Case Name"  class="filterField"
+						ng-keyup="filterTestCase($event)"/>
+
+						<div class="btn-group" style="margin-right: 2em;">
+						
+						    <button type="button" class="btn btn-primary" style="max-width: 10em; min-width: 10em; cursor: default;">
+						    	{{status}}
+						    </button>
+						    
+						    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						      <span class="caret"></span>
+						    </button>
+						    <ul class="dropdown-menu" role="menu">
+						       <li><a href="#" ng-click="onChangeStatus('All')">All</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Success')">Success</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Error')">Error</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Failed')">Failed</a></li>
+						      <li><a href="#" ng-click="onChangeStatus('Skipped')">Skipped</a></li>
+						    </ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div class="resultBox" style="margin-top: 5em; border: 2px solid black;">
+		
+			<table style="margin-bottom: 0px;">
+				<tr>
+					<td>
+						<table class="table table-hover table-striped table-bordered"  style="margin-bottom: 0px;">
+							<tr>
+								<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: white;">
+									Test Suites
+								</td>
+							</tr>
+							<tr>
+								<th>Total Test Suites</th>
+								<th>Success Count</th>
+								<th>Failure Count</th>
+								<th>Skip Count</th>
+							</tr>
+							<tr>
+								<td class="defaultVal">{{testResults.testSuiteCount}}</td>
+								<td class="successVal">{{testResults.testSuiteSuccessCount}}</td>
+								<td class="errorVal">{{testResults.testSuiteFailureCount}}</td>
+								<td class="errorVal">{{testResults.testSuiteSkippedCount}}</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<table class="table table-hover table-striped table-bordered"  style="margin-bottom: 0px;">
+							<tr>
+								<td colspan="6" style="background-color: #8585ad; font-weight: bold; font-size: 1.1em; color: white;">
+									Test Cases
+								</td>
+							</tr>
+							<tr>
+								<th>Total Test Cases</th>
+								<th>Success Count</th>
+								<th>Failure Count</th>
+								<th>Error Count</th>
+								<th>Skip Count</th>
+							</tr>
+							<tr>
+								<td class="defaultVal">{{testResults.testCaseCount}}</td>
+								<td class="successVal">{{testResults.testCaseSuccessCount}}</td>
+								<td class="errorVal">{{testResults.testCaseFailureCount}}</td>
+								<td class="errorVal">{{testResults.testCaseErroredCount}}</td>
+								<td class="errorVal">{{testResults.testCaseSkippedCount}}</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?_global-setup" style="color: white;">Common startup Log</a>
+					</td>
+					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?_global-cleanup" style="color: white;">Common cleanup Log</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<hr/>
+		
+		<div class="resultBox"  style="border: 2px solid black;">
+			<table class="table table-hover table-striped table-bordered">
+				<tr>
+					<th style="width: 1em; white-space: nowrap;">Test Suite</th>
+					<th style="width: 1em;">Status</th>
+					<th style="width: 1em; white-space: nowrap;">Total Count</th>
+					<th style="width: 1em; white-space: nowrap;">Success Count</th>
+					<th style="width: 1em; white-space: nowrap;">Failure Count</th>
+					<th style="width: 1em; white-space: nowrap;">Error Count</th>
+					<th style="width: 1em; white-space: nowrap;">Skip Count</th>
+					<th style="">Message</th>
+				</tr>
+				<tr ng-repeat="result in testSuiteResults" ng-show="result.display">
+					<td class="defaultVal" style=" white-space: nowrap;">
+						<a href="#{{result.suiteName}}">{{result.suiteName}}</a>
+					</td>
+					<td ng-class="result.failureCount > 0 ? 'errorVal' : 'successVal'">
+						{{result.status}}	
+					</td>
+					<td class="defaultVal">
+						{{result.totalCount}}	
+					</td>
+					<td class="successVal">
+						{{result.successCount}}	
+					</td>
+					<td class="errorVal">
+						{{result.failureCount}}	
+					</td>
+					<td class="errorVal">
+						{{result.errorCount}}	
+					</td>
+					<td class="errorVal">
+						{{result.skipCount}}
+					</td>
+					<td>
+						{{replaceMessage(result.statusMessage)}}
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<hr/>
+		
+		<div id="{{result.suiteName}}" class="resultBox" ng-repeat="result in testResultsArr" ng-show="result.display" style="border: 2px solid black;">
+			<table class="table table-hover table-striped table-bordered" style="width: 100%; margin-bottom: 0px;">
+				<tr>
+					<td colspan="5" style="background-color: #8585ad; font-weight: bold; color: white; font-size: 1.2em;">
+							{{result.suiteName}}
+					</td>
+				</tr>
+				<tr>
+					<th>Test Case</th>
+					<th>Status</th>
+					<th>Message</th>
+					<th>Log</th>
+				</tr>
+				<tr ng-repeat="suiteResult in result.testCaseResults" ng-show="suiteResult.display">
+					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;">
+						{{suiteResult.testCaseName}}
+					</td>
+					<td ng-class="suiteResult.status != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 20%;">
+						{{suiteResult.status}}
+					</td>
+					<td style="width: 50%; text-align: left; padding-left: 1em;">
+						{{suiteResult.message}}
+					</td>
+					<td style="width: 10%; text-align: left; padding-left: 1em;">
+						<a href="./log.html?{{suiteResult.systemLogName}}" style="display: block;">System Log</a>
+						<a  ng-repeat="(key,val) in suiteResult.monitorLogs" href="logs/{{val}}" style="color: brown; display: block;">
+							{{key}}
+						</a>
+					</td>
+				</tr>
+			</table>
+			<table style="width: 100%; margin-bottom: 0px;">
+				<tr>
+					<th style="text-align: right; font-weight: bold; font-size: 0.9em; padding: 0.4em; color: white;">
+						Total: <span ng-bind="result.testSuiteResult.totalCount" style="margin-right: 2em;"></span>
+						Success: <span ng-bind="result.testSuiteResult.successCount" style="margin-right: 2em;"></span>
+						Failure: <span ng-bind="result.testSuiteResult.failureCount" style="margin-right: 2em;"></span>
+						Error: <span ng-bind="result.testSuiteResult.errorCount" style="margin-right: 2em;"></span>
+						Skip: <span ng-bind="result.testSuiteResult.skipCount" style="margin-right: 2em;"></span>
+					</th>
+				</tr>
+			</table>
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?{{result.suiteName}}-setup" style="color: white;">Startup Log</a>
+					</td>
+					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
+						<a href="./log.html?{{result.suiteName}}-cleanup" style="color: white;">Cleanup Log</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+	</body>
+</html>

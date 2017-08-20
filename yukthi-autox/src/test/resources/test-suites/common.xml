@@ -1,0 +1,20 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<setup>
+		<ccg:log message="Message from global setup."/>
+		
+		<ccg:ddlQuery dataSourceName="dataSource">
+			<query>
+				CREATE TABLE EMPLOYEE
+				(
+					ID		INT,
+					NAME	VARCHAR(100)
+				)
+			</query>
+		</ccg:ddlQuery>
+		
+	</setup>
+	
+	<cleanup>
+		<ccg:log message="Message from global cleanup."/>
+	</cleanup>
+</testData>
