@@ -33,7 +33,7 @@ public class FreeMarkerEngine
 	/**
 	 * Singleton configuration.
 	 */
-	private Configuration configuration = new Configuration();
+	private Configuration configuration = new Configuration(Configuration.getVersion());
 	
 	/**
 	 * Registry of free marker methods.
@@ -45,6 +45,8 @@ public class FreeMarkerEngine
 		registerDirective("trim", new TrimDirective());
 		registerDirective("indent", new IndentDirective());
 		registerDirective("initcap", new InitCapDirective());
+		
+		loadClass(DefaultMethods.class);
 	}
 
 	/**
