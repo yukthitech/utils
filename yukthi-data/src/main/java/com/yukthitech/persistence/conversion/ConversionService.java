@@ -208,7 +208,7 @@ public class ConversionService
 			}
 		}
 
-		//if in built coverters are not able to convert, use generic utils to convert
+		//if in built converters are not able to convert, use generic utils to convert
 		try
 		{
 			return ConvertUtils.convert(dbObject, targetType);

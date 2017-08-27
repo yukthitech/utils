@@ -7,6 +7,7 @@ import com.yukthitech.test.persitence.queries.DynamicEmpSearchResult;
 import com.yukthitech.test.persitence.queries.EmpSearchQuery;
 import com.yukthitech.test.persitence.queries.EmpSearchResult;
 import com.yukthitech.test.persitence.queries.KeyValueBean;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.ConditionBean;
@@ -98,7 +99,7 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	public void deleteAll();
 	
 	@NativeQuery(name = "insertQuery", type = NativeQueryType.INSERT)
-	public boolean addEmployee(Employee employee);
+	public boolean addEmployee(@Named("emp") Employee employee);
 	
 	@NativeQuery(name = "updateQuery", type = NativeQueryType.UPDATE)
 	public int updateEmployee(Map<String, Object> employeeDet);

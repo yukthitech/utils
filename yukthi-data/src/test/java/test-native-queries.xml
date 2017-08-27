@@ -3,9 +3,9 @@
 		SELECT ID, EMP_NO EMPLOYEE_NO, PHONE_NO, AGE, EMAIL_ID, ENAME NAME
 		FROM EMPLOYEE
 		WHERE 1 = 1
-		<#if name??>AND ENAME LIKE '%${name}%'</#if>
-		<#if minAge??>AND AGE >= ?{minAge}</#if>
-		<#if maxAge??>AND AGE <= ?{maxAge}</#if>
+		<#if query.name??>AND ENAME LIKE '%${query.name}%'</#if>
+		<#if query.minAge??>AND AGE >= ?{query.minAge}</#if>
+		<#if query.maxAge??>AND AGE <= ?{query.maxAge}</#if>
 		ORDER BY EMP_NO
 	]]></query>
 	
@@ -13,26 +13,26 @@
 		SELECT COUNT(*)
 		FROM EMPLOYEE
 		WHERE 1 = 1
-		<#if name??>AND ENAME LIKE '%${name}%'</#if>
-		<#if minAge??>AND AGE >= ?{minAge}</#if>
-		<#if maxAge??>AND AGE <= ?{maxAge}</#if>
+		<#if query.name??>AND ENAME LIKE '%${query.name}%'</#if>
+		<#if query.minAge??>AND AGE >= ?{query.minAge}</#if>
+		<#if query.maxAge??>AND AGE <= ?{query.maxAge}</#if>
 	]]></query>
 	
 	<query name="insertQuery"><![CDATA[
 		INSERT INTO EMPLOYEE(EMP_NO, EMAIL_ID, ENAME, PHONE_NO, AGE, UQ_ENTITY_ID)
-		VALUES(?{employeeNo}, ?{emailId}, ?{name}, ?{phoneNo}, ?{age}, ?{time})
+		VALUES(?{emp.employeeNo}, ?{emp.emailId}, ?{emp.name}, ?{emp.phoneNo}, ?{emp.age}, ?{emp.time})
 	]]></query>
 
 	<query name="updateQuery"><![CDATA[
 		UPDATE EMPLOYEE
-		SET EMAIL_ID = ?{emailId}
-		WHERE ID = ${id}
+		SET EMAIL_ID = ?{query.emailId}
+		WHERE ID = ${query.id}
 	]]></query>
 
 	<query name="deleteQuery"><![CDATA[
 		DELETE FROM EMPLOYEE
 		WHERE 1 = 1
-		<#if name??>AND ENAME LIKE '%${name}%'</#if>
+		<#if query.name??>AND ENAME LIKE '%${query.name}%'</#if>
 	]]></query>
 	
 </native-queries>

@@ -1,5 +1,6 @@
 package com.yukthitech.persistence.repository.executors;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.persistence.EntityDetails;
+import com.yukthitech.persistence.FieldDetails;
 import com.yukthitech.persistence.IDataStore;
 import com.yukthitech.persistence.Record;
 import com.yukthitech.persistence.conversion.ConversionService;
@@ -27,6 +29,7 @@ import com.yukthitech.persistence.repository.annotations.NativeQueryType;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ReflectionUtils;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -37,6 +40,16 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class NativeQueryExecutor extends QueryExecutor
 {
 	private static Logger logger = LogManager.getLogger(NativeQueryExecutor.class);
+	
+	/**
+	 * Name to be used for single parameter methods when no explicit name is provided.
+	 */
+	public static final String SINGLE_PARAM_DEF_NAME = "query";
+	
+	/**
+	 * Context parameter name for accessing parameters array of the method.
+	 */
+	public static final String PARAMS_NAME = "params";
 	
 	/**
 	 * Lock for query execution
@@ -66,6 +79,11 @@ public class NativeQueryExecutor extends QueryExecutor
 	private NativeQuery nativeQueryAnnotation;
 	
 	private Method postConstructMethod;
+	
+	/**
+	 * Mapping from parameter name to index of parameter. Which would be used in constructing native queries context.
+	 */
+	private Map<String, Integer> paramNameToIdx = new HashMap<>();
 	
 	public NativeQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
@@ -162,6 +180,42 @@ public class NativeQueryExecutor extends QueryExecutor
 			method.setAccessible(true);
 			break;
 		}
+		
+		//fetch the parameter name indexing
+		createParamNameMap(method);
+	}
+	
+	/**
+	 * Iterates through method parameter annotations. If any parameter is named explicitly then it
+	 * is loaded into {@link #paramNameToIdx} map.
+	 * @param method
+	 */
+	private void createParamNameMap(Method method)
+	{
+		Annotation paramAnnotaions[][] = method.getParameterAnnotations();
+		Named named = null;
+		
+		//loop through method param annotations
+		for(int i = 0; i < paramAnnotaions.length; i++)
+		{
+			//loop through current param annotation
+			for(int j = 0; j < paramAnnotaions[i].length; j++)
+			{
+				//if current annotation is named annotation
+				if(paramAnnotaions[i][j] instanceof Named)
+				{
+					named = (Named) paramAnnotaions[i][j];
+					this.paramNameToIdx.put(named.value(), i);
+				}
+			}
+		}
+		
+		//if no explicit names are provided and method has single parameter
+		//	then by default name that single param as query
+		if(this.paramNameToIdx.isEmpty() && method.getParameterTypes().length == 1)
+		{
+			this.paramNameToIdx.put(SINGLE_PARAM_DEF_NAME, 0);
+		}
 	}
 	
 	/**
@@ -169,7 +223,7 @@ public class NativeQueryExecutor extends QueryExecutor
 	 * @param record
 	 * @return
 	 */
-	private Object parseToReturnType(Record record)
+	private Object parseToReturnType(Record record, IDataStore dataStore)
 	{
 		if(returnTypeFields == null)
 		{
@@ -190,6 +244,9 @@ public class NativeQueryExecutor extends QueryExecutor
 		//copy values from record to result object fields
 		Field field = null;
 		String flatColumnName = null;
+		EntityDetails returnEntityType = dataStore.getEntityDetails(returnType);
+		ConversionService conversionService = dataStore.getConversionService();
+		FieldDetails fieldDetails = null;
 		
 		for(String column : record.getColumnNames())
 		{
@@ -204,11 +261,26 @@ public class NativeQueryExecutor extends QueryExecutor
 			{
 				continue;
 			}
+			
+			//if return type is entity type fetch field details
+			fieldDetails = returnEntityType != null ? returnEntityType.getFieldDetailsByField(field.getName()) : null;
 
-			//set the value from record on field (after required conversion, if any)
-			ReflectionUtils.setFieldValue(result, field.getName(), 
-					ConvertUtils.convert(record.getObject(column), field.getType())
-			);
+			//if return type is expected to be entity and field details is found
+			if(fieldDetails != null)
+			{
+				//set the value from record on field (after required conversion, if any)
+				ReflectionUtils.setFieldValue(result, field.getName(), 
+						conversionService.convertToJavaType(record.getObject(column), fieldDetails)
+				);
+			}
+			//if return type is not entity type
+			else
+			{
+				//set the value from record on field (after required conversion, if any)
+				ReflectionUtils.setFieldValue(result, field.getName(), 
+						ConvertUtils.convert(record.getObject(column), field.getType())
+				);
+			}
 		}
 		
 		if(postConstructMethod != null)
@@ -240,14 +312,27 @@ public class NativeQueryExecutor extends QueryExecutor
 		
 		queryLock.lock();
 		
-		Object context = (params.length > 0) ? params[0] : null;
+		//create context map for parsing native queries
+		Map<String, Object> contextMap = new HashMap<>();
+		
+		//add method parameters array on context
+		contextMap.put(PARAMS_NAME, params);
+		
+		//set parameters on context which are named explicitly using @Named annotation
+		Integer index = null;
+		
+		for(String paramName : this.paramNameToIdx.keySet())
+		{
+			index = this.paramNameToIdx.get(paramName);
+			contextMap.put(paramName, params[index]);
+		}
 		
 		try
 		{
 			//if native is read method
 			if(nativeQueryAnnotation.type() == NativeQueryType.READ)
 			{
-				List<Record> records = dataStore.executeNativeFinder(nativeQueryAnnotation.name(), context);
+				List<Record> records = dataStore.executeNativeFinder(nativeQueryAnnotation.name(), contextMap);
 
 				//if single object is expected
 				if(returnCollectionType == null)
@@ -257,7 +342,7 @@ public class NativeQueryExecutor extends QueryExecutor
 						return null;
 					}
 					
-					return parseToReturnType(records.get(0));
+					return parseToReturnType(records.get(0), dataStore);
 				}
 
 				//create result collection type
@@ -276,7 +361,7 @@ public class NativeQueryExecutor extends QueryExecutor
 				{
 					for(Record rec : records)
 					{
-						resCollection.add(parseToReturnType(rec));
+						resCollection.add(parseToReturnType(rec, dataStore));
 					}
 				}
 				
@@ -285,7 +370,7 @@ public class NativeQueryExecutor extends QueryExecutor
 			//if current query is DML query
 			else
 			{
-				int res = dataStore.executeNativeDml(nativeQueryAnnotation.name(), context);
+				int res = dataStore.executeNativeDml(nativeQueryAnnotation.name(), contextMap);
 				
 				if(boolean.class.equals(returnType))
 				{

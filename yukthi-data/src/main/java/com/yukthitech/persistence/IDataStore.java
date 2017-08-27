@@ -27,6 +27,14 @@ public interface IDataStore
 	public void setEntityDetailsFactory(EntityDetailsFactory entityDetailsFactory);
 	
 	/**
+	 * Fetches entity details for specified type from underlying entity details factory. Returns null 
+	 * if no matching entity is not found or if the entity is not loaded yet.
+	 * @param type type for which entity details to be fetched
+	 * @return matching entity details
+	 */
+	public EntityDetails getEntityDetails(Class<?> type);
+	
+	/**
 	 * Sets the specified native query factory for this data store
 	 * @param factory
 	 */

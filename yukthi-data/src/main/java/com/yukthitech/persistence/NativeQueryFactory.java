@@ -25,7 +25,6 @@ package com.yukthitech.persistence;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,13 +35,10 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthi.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.persistence.freemarker.TrimDirective;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 /**
  * Factory of native queries. Loads the input query resources into a map and provides
@@ -65,18 +61,12 @@ public class NativeQueryFactory
 	private Map<String, String> queryMap = new HashMap<>();
 
 	/**
-	 * Map to maintain query templates
-	 */
-	private Map<String, Template> templateMap = new HashMap<>();
-	
-	/**
 	 * Configuration for free marker
 	 */
-	private Configuration configuration = new Configuration();
+	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 	
 	public NativeQueryFactory()
 	{
-		configuration.setSharedVariable("trim", new TrimDirective());
 	}
 	
 	/**
@@ -163,46 +153,24 @@ public class NativeQueryFactory
 	 * If the query uses "param" directive, corresponding values will be collected into "paramValues".
 	 * 
 	 * @param name Name of the query to be fetched
-	 * @param paramValues Collected param values that needs to be passed to query as prepared statement params
+	 * @param outputParamValues Collected param values that needs to be passed to query as prepared statement params
 	 * @param context Context to be used to parse template into query
 	 * @return Built query
 	 */
-	public String buildQuery(String name, List<Object> paramValues, Object context)
+	public String buildQuery(String name, List<Object> outputParamValues, Object context)
 	{
-		Template template = templateMap.get(name);
+		String rawQuery = queryMap.get(name);
 		
-		//if template is not found build it from raw query
-		if(template == null)
+		//if no query found with specified name
+		if(rawQuery == null)
 		{
-			String rawQuery = queryMap.get(name);
-			
-			//if no query found with specified name
-			if(rawQuery == null)
-			{
-				throw new InvalidArgumentException("No query found with specified name - {}", name);
-			}
-			
-			//build the free marker template from raw query
-			try
-			{
-				template = new Template(name, rawQuery, configuration);
-				templateMap.put(name, template);
-			}catch(Exception ex)
-			{
-				throw new InvalidStateException(ex, "An error occurred while loading query template - {}", name);
-			}
+			throw new InvalidArgumentException("No query found with specified name - {}", name);
 		}
 		
 		try
 		{
-			//process the template into query
-			StringWriter writer = new StringWriter();
-			template.process(context, writer);
-			
-			writer.flush();
-
 			//build the final query (replacing the param expressions)
-			String query = writer.toString();
+			String query = freeMarkerEngine.processTemplate(name, rawQuery, context);
 			StringBuffer finalQuery = new StringBuffer();
 			Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
 			String property = null;
@@ -212,7 +180,7 @@ public class NativeQueryFactory
 				property = matcher.group(1);
 				matcher.appendReplacement(finalQuery, "?");
 				
-				paramValues.add(PropertyUtils.getProperty(context, property));
+				outputParamValues.add(PropertyUtils.getProperty(context, property));
 			}
 			
 			matcher.appendTail(finalQuery);

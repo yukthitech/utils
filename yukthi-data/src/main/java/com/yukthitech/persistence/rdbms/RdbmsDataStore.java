@@ -118,6 +118,12 @@ public class RdbmsDataStore implements IDataStore
 		this.entityDetailsFactory = entityDetailsFactory;
 	}
 	
+	@Override
+	public EntityDetails getEntityDetails(Class<?> type)
+	{
+		return entityDetailsFactory.getEntityDetailsFromCache(type);
+	}
+	
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
