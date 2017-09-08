@@ -19,7 +19,7 @@ public class InvokePostStep extends AbstractRestStep
 	/**
 	 * Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.
 	 */
-	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.")
+	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.", required = false)
 	private Object body;
 	
 	/**
@@ -41,7 +41,7 @@ public class InvokePostStep extends AbstractRestStep
 		{
 			postRestRequest.setBody((String) body);
 		}
-		else
+		else if(body != null)
 		{
 			postRestRequest.setJsonBody(body);
 		}
