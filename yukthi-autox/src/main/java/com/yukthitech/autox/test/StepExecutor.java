@@ -30,22 +30,37 @@ public class StepExecutor
 	 */
 	public static void executeStep(AutomationContext context, ExecutionLogger exeLogger, IStep step) throws Exception
 	{
-		//clone the step, so that expression replacement will not affect actual step
-		step = step.clone();
-		
-		AutomationUtils.replaceExpressions(context, step);
-		boolean res = step.execute(context, exeLogger);
-		
-		if(step instanceof IValidation)
+		//if step is marked not to log anything
+		if(step.isLoggingDisabled())
 		{
-			if(!res)
-			{
-				Executable executable = step.getClass().getAnnotation(Executable.class);
-				exeLogger.error("Validation failed: " + executable.name() + step);
-
-				throw new TestCaseValidationFailedException("Validation failed: " + executable.name());
-			}
+			//disable logging
+			exeLogger.setDisabled(true);
 		}
+
+		try
+		{
+			//clone the step, so that expression replacement will not affect actual step
+			step = step.clone();
+			
+			AutomationUtils.replaceExpressions(context, step);
+			boolean res = step.execute(context, exeLogger);
+			
+			if(step instanceof IValidation)
+			{
+				if(!res)
+				{
+					Executable executable = step.getClass().getAnnotation(Executable.class);
+					exeLogger.error("Validation failed: " + executable.name() + step);
+	
+					throw new TestCaseValidationFailedException("Validation failed: " + executable.name());
+				}
+			}
+		} finally
+		{
+			//re-enable logging, in case it is disabled
+			exeLogger.setDisabled(false);
+		}
+
 	}
 	
 	private static void invokeErrorHandling(AutomationContext context, Executable executable, ErrorDetails errorDetails)

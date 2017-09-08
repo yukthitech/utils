@@ -234,13 +234,6 @@ public class TestCase implements IStepContainer, Validateable
 		{
 			try
 			{
-				//if step is marked not to log anything
-				if(step.isLoggingDisabled())
-				{
-					//disable logging
-					exeLogger.setDisabled(true);
-				}
-				
 				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
@@ -253,10 +246,6 @@ public class TestCase implements IStepContainer, Validateable
 				
 				expectedExcpetionOccurred = true;
 				break;
-			} finally
-			{
-				//re-enable logging, in case it is disabled
-				exeLogger.setDisabled(false);
 			}
 		}
 		

@@ -1,6 +1,10 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 
 	<step-group name="simpleGroup">
+		<ccg:if condition="attr.returnFlag??">
+			<ccg:return/>
+		</ccg:if>
+	
 		<ccg:if condition="attr.flag == 1">
 			<then>
 				<ccg:set name="ifExec" value="if-then"/>
@@ -38,6 +42,20 @@
 				<ccg:set name="flag" value="1" type="java.lang.Integer"/>
 				<ccg:step-group-ref name="simpleGroup"/>
 				<ccg:validateContextParam expression="attr.ifExec" value="if-then" />
+			</wrap:steps>				
+		</testCase>
+
+		<testCase name="testReturn">
+			<description>Tests return step</description>
+
+			<wrap:steps>
+				<ccg:set name="returnFlag" value="true"/>
+				<ccg:set name="ifExec" value="test"/>
+				
+				<ccg:step-group-ref name="simpleGroup"/>
+				<ccg:remove name="returnFlag"/>
+
+				<ccg:validateContextParam expression="attr.ifExec" value="test" />
 			</wrap:steps>				
 		</testCase>
 

@@ -136,10 +136,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		{
 			IStepContainer stepContainer = (IStepContainer) parent;
 			
-			for(IStep step : stepGroup.getSteps())
-			{
-				stepContainer.addStep(step.clone());
-			}
+			stepContainer.addStep(stepGroup.clone());
 		}
 	}
 

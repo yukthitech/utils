@@ -35,7 +35,7 @@ public class SetPropertyStep extends AbstractStep
 	private String valueExpression;
 
 	/** The source. */
-	@Param(description = "Source on which property has to be evaluated.", sourceType = SourceType.OBJECT)
+	@Param(description = "Source on which property has to be evaluated.", sourceType = SourceType.OBJECT, required = false)
 	private Object source;
 
 	/**
@@ -105,7 +105,12 @@ public class SetPropertyStep extends AbstractStep
 			}
 		}
 		
-		Object sourceValue = AutomationUtils.parseObjectSource(context, exeLogger, source, null);
+		Object sourceValue = context;
+		
+		if(source != null)
+		{
+			sourceValue = AutomationUtils.parseObjectSource(context, exeLogger, source, null);
+		}
 		
 		Object value = null;
 		

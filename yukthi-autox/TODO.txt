@@ -1,7 +1,10 @@
 ===================
+	POST step without body
+
+	Ability to specify load order
+
 	Step to comparare collections (ordered and unordered)
 
-	POST step without body
 	
 	rest steps to use different base urls
 	
