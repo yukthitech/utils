@@ -37,9 +37,9 @@ public class TestSuiteExecutor
 	private static Logger logger = LogManager.getLogger(TestSuiteExecutor.class);
 	
 	/**
-	 * Free marker configuraton.
+	 * Free marker configuration.
 	 */
-	private static Configuration freemarkerConfiguration = new Configuration();
+	private static Configuration freemarkerConfiguration = new Configuration(Configuration.getVersion());
 	
 	/**
 	 * The log json file extension.
@@ -77,6 +77,11 @@ public class TestSuiteExecutor
 	 * Logs folder where logs should be maintained.
 	 */
 	private File logsFolder;
+	
+	/**
+	 * Used for generating reports.
+	 */
+	private ReportGenerator reportGenerator = new ReportGenerator();
 	
 	/**
 	 * Holds execution details.
@@ -541,21 +546,8 @@ public class TestSuiteExecutor
 			successful = false;
 		}
 		
-		//copy the resource files into output folder
-		ResourceManager.getInstance().copyReportResources(reportFolder);
-
 		//create final report files
-		try
-		{
-			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(fullExecutionDetails);
-			String jsContent = "var reportData = " + jsonContent;
-			
-			FileUtils.write(new File(reportFolder, "test-results.json"), jsonContent);
-			FileUtils.write(new File(reportFolder, "test-results.js"), jsContent);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while generating test result report");
-		}
+		reportGenerator.generateReports(reportFolder, fullExecutionDetails, context.getAppConfiguration());
 		
 		System.out.println(String.format(
 			"[Total Test Cases: %s, Successful: %s, Failed: %s, Errored: %s, Skipped: %s]", 

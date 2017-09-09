@@ -1,5 +1,7 @@
 package com.yukthitech.autox.config;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,9 +13,11 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.RemoteFileLogMonitor;
+import com.yukthitech.ccg.xml.XMLBeanParser;
 
 /**
  * Application configuration for applications being automated.
@@ -81,6 +85,16 @@ public class ApplicationConfiguration
 	 */
 	private Properties applicationProperties;
 	
+	/**
+	 * Defines the summary notification configuration. This is optional.
+	 */
+	private SummaryNotificationConfig summaryNotificationConfig;
+	
+	/**
+	 * Instantiates a new application configuration.
+	 *
+	 * @param applicationProperties the application properties
+	 */
 	public ApplicationConfiguration(Properties applicationProperties)
 	{
 		this.applicationProperties = applicationProperties;
@@ -95,6 +109,33 @@ public class ApplicationConfiguration
 	public static ApplicationConfiguration getInstance()
 	{
 		return applicationConfiguration;
+	}
+	
+	/**
+	 * Loads application configuration from sepcified file.
+	 * 
+	 * @param appConfigurationFile
+	 *            Application config file to load.
+	 * @return Loaded application config.
+	 */
+	public static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile, BasicArguments basicArguments) throws Exception
+	{
+		Properties appProperties = new Properties();
+		
+		if(basicArguments.getPropertiesFile() != null)
+		{
+			FileInputStream propInputStream = new FileInputStream(basicArguments.getPropertiesFile());
+			appProperties.load(propInputStream);
+		}
+		
+		FileInputStream fis = new FileInputStream(appConfigurationFile);
+		
+		ApplicationConfiguration appConfig = new ApplicationConfiguration(appProperties);
+		XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
+		
+		fis.close();
+
+		return appConfig;
 	}
 	
 	/**
@@ -192,6 +233,11 @@ public class ApplicationConfiguration
 		this.addPlugin(plugin);
 	}
 	
+	/**
+	 * Sets the rest plugin.
+	 *
+	 * @param plugin the new rest plugin
+	 */
 	public void setRestPlugin(RestPlugin plugin)
 	{
 		this.addPlugin(plugin);
@@ -372,5 +418,15 @@ public class ApplicationConfiguration
 	public void setTimeFomat(String timeFomat)
 	{
 		this.timeFomat = timeFomat;
+	}
+
+	public SummaryNotificationConfig getSummaryNotificationConfig()
+	{
+		return summaryNotificationConfig;
+	}
+
+	public void setSummaryNotificationConfig(SummaryNotificationConfig summaryNotificationConfig)
+	{
+		this.summaryNotificationConfig = summaryNotificationConfig;
 	}
 }

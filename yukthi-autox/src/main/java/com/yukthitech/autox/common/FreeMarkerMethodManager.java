@@ -12,7 +12,6 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import com.yukthi.utils.fmarker.FreeMarkerEngine;
 import com.yukthi.utils.fmarker.annotaion.FreeMarkerDirective;
 import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -93,11 +92,11 @@ public class FreeMarkerMethodManager
 
 	/**
 	 * Treats provided template as freemarker template and processes them. The result will be returned.
-	 * @param context Automation context which would be used as freemarker context for processing.
+	 * @param context context which would be used as freemarker context for processing.
 	 * @param templateStr Template in which expressions should be replaced
 	 * @return Processed string
 	 */
-	public static String replaceExpressions(AutomationContext context, String templateStr)
+	public static String replaceExpressions(Object context, String templateStr)
 	{
 		try
 		{

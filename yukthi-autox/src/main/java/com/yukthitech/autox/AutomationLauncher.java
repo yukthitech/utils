@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -16,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.event.IAutomationListener;
@@ -203,33 +201,6 @@ public class AutomationLauncher
 	}
 
 	/**
-	 * Loads application configuration from sepcified file.
-	 * 
-	 * @param appConfigurationFile
-	 *            Application config file to load.
-	 * @return Loaded application config.
-	 */
-	private static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile, BasicArguments basicArguments) throws Exception
-	{
-		Properties appProperties = new Properties();
-		
-		if(basicArguments.getPropertiesFile() != null)
-		{
-			FileInputStream propInputStream = new FileInputStream(basicArguments.getPropertiesFile());
-			appProperties.load(propInputStream);
-		}
-		
-		FileInputStream fis = new FileInputStream(appConfigurationFile);
-		
-		ApplicationConfiguration appConfig = new ApplicationConfiguration(appProperties);
-		XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
-		
-		fis.close();
-
-		return appConfig;
-	}
-
-	/**
 	 * Automation entry point.
 	 * 
 	 * @param args
@@ -301,7 +272,7 @@ public class AutomationLauncher
 		}
 
 		// load the configuration file
-		ApplicationConfiguration appConfig = loadApplicationConfiguration(appConfigurationFile, basicArguments);
+		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
 		AutomationContext context = new AutomationContext(appConfig);
 		context.setBasicArguments(basicArguments);
 		

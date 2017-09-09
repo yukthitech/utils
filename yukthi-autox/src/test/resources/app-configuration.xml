@@ -65,4 +65,9 @@
 	<wrap:logMonitors>
 		<file-log-monitor name="client-output" path="c:\automation.log"/>
 	</wrap:logMonitors>
+	
+	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kkmail">
+		<toAddressList>akiran@yodlee.com akranthikiran@gmail.com</toAddressList>
+		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
+	</summaryNotificationConfig>
 </app>
