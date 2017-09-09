@@ -2,6 +2,7 @@ package com.yukthi.utils.fmarker;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,10 +13,10 @@ import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-import freemarker.template.SimpleHash;
-import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.utility.DeepUnwrap;
 
 /**
  * Model wrapper for free marker dynamic method registration.
@@ -44,11 +45,49 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		this.freeMarkerMethod = freeMarkerMethod;
 		this.methodName = methodName;
 	}
+	
+	/**
+	 * Converts the specified argument into required type.
+	 * @param argument Argument value to be converted
+	 * @param requiredType Expected type
+	 * @return converted object value
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Object convertArgument(Object argument, Class<?> requiredType) throws TemplateModelException
+	{
+		if(argument instanceof TemplateModel)
+		{
+			argument = DeepUnwrap.unwrap((TemplateModel)argument);
+		}
+		
+		if(requiredType.isAssignableFrom(argument.getClass()))
+		{
+			return argument;
+		}
+		
+		if(argument instanceof Collection)
+		{
+			if(List.class.isAssignableFrom(argument.getClass()))
+			{
+				return new ArrayList( (Collection) argument );
+			}
+			else if(Set.class.isAssignableFrom(argument.getClass()))
+			{
+				return new HashSet( (Collection) argument );
+			}
+			else if(Collection.class.isAssignableFrom(argument.getClass()))
+			{
+				return (Collection) argument ;
+			}
+		}
+		
+		return ConvertUtils.convert(argument, requiredType);
+	}
 
 	/* (non-Javadoc)
 	 * @see freemarker.template.TemplateMethodModelEx#exec(java.util.List)
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes"})
 	@Override
 	public Object exec(List arguments) throws TemplateModelException
 	{
@@ -61,7 +100,8 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		{
 			if(argsSize != argTypes.length)
 			{
-				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected count: {}, Actual Count: {}, Arguments: {}]", methodName, argTypes.length, argsSize, arguments);
+				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected count: {}, Actual Count: {}, Arguments: {}]", 
+						methodName, argTypes.length, argsSize, arguments);
 			}
 
 			//for normal arguments, number of method arguments will be equal to actual arguments
@@ -71,7 +111,8 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		{
 			if(argsSize < argTypes.length - 1)
 			{
-				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected min count: {}, Actual Count: {}, Arguments: {}]", methodName, argTypes.length - 1, argsSize, arguments);
+				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected min count: {}, Actual Count: {}, Arguments: {}]", 
+						methodName, argTypes.length - 1, argsSize, arguments);
 			}
 			
 			//for var args number of arguments will be equal to number of declared parameters in method
@@ -85,32 +126,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 			
 			for(int i = 0; i < stdArgCount; i++)
 			{
-				if(arguments.get(i) instanceof SimpleSequence)
-				{
-					if(List.class.isAssignableFrom(argTypes[i]))
-					{
-						methodArgs[i] = ((SimpleSequence) arguments.get(i)).toList();
-						continue;
-					}
-					else if(Set.class.isAssignableFrom(argTypes[i]))
-					{
-						methodArgs[i] = new HashSet( ((SimpleSequence) arguments.get(i)).toList() );
-						continue;
-					}
-					else if(Collection.class.isAssignableFrom(argTypes[i]))
-					{
-						methodArgs[i] = ((SimpleSequence) arguments.get(i)).toList();
-						continue;
-					}
-				}
-				
-				if(arguments.get(i) instanceof SimpleHash)
-				{
-					methodArgs[i] = ((SimpleHash) arguments.get(i)).toMap();
-					continue;
-				}
-				
-				methodArgs[i] = ConvertUtils.convert(arguments.get(i), argTypes[i]);
+				methodArgs[i] = convertArgument(arguments.get(i), argTypes[i]);
 			}
 			
 			if(isVarArgs && argsSize >= argTypes.length)
@@ -120,7 +136,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 				
 				for(int i = stdArgCount, j = 0; i < argsSize; i++, j++)
 				{
-					Array.set( varArgs, j, ConvertUtils.convert(arguments.get(i), varArgType) );
+					Array.set( varArgs, j, convertArgument(arguments.get(i), varArgType) );
 				}
 				
 				methodArgs[stdArgCount] = varArgs;

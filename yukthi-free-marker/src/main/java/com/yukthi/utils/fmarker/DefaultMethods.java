@@ -18,29 +18,36 @@ public class DefaultMethods
 {
 	/**
 	 * Converts specified date to string with specified format.
+	 * @param date Date to be converted
 	 * @param format fromat to use
 	 * @return converted string
 	 */
 	@FreeMarkerMethod
-	public static String dateToStr(String format)
-	{
-		return addDays(format, 0);
-	}
-	
-	/**
-	 * Adds specified number of days to specified date and returns the same.
-	 * @param days days to add
-	 * @return result date
-	 */
-	@FreeMarkerMethod
-	public static String addDays(String format, int days)
+	public static String dateToStr(Date date, String format)
 	{
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
-		Date date = DateUtils.addDays(new Date(), days);
 		
 		return simpleDateFormat.format(date);
 	}
 	
+	/**
+	 * Adds specified number of days to specified date and returns the same.
+	 * @param date date to which days needs to be added
+	 * @param days days to add
+	 * @return result date
+	 */
+	@FreeMarkerMethod
+	public static Date addDays(Date date, int days)
+	{
+		return DateUtils.addDays(date, days);
+	}
+	
+	@FreeMarkerMethod
+	public static Date today()
+	{
+		return new Date();
+	}
+
 	/**
 	 * Converts collection of objects into string.
 	 * @param lst list of objects to be converted
