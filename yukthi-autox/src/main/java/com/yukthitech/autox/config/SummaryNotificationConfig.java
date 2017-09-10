@@ -47,6 +47,18 @@ public class SummaryNotificationConfig
 	 * Template fore creating subject line.
 	 */
 	private String subjectTemplate;
+	
+	public SummaryNotificationConfig()
+	{}
+	
+	public SummaryNotificationConfig(String smptpHost, String userName, String password, String toAddressList, String subjectTemplate)
+	{
+		this.smptpHost = smptpHost;
+		this.userName = userName;
+		this.password = password;
+		this.toAddressList = toAddressList;
+		this.subjectTemplate = subjectTemplate;
+	}
 
 	/**
 	 * Gets the smtp server host.
