@@ -55,6 +55,11 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object convertArgument(Object argument, Class<?> requiredType) throws TemplateModelException
 	{
+		if(argument == null)
+		{
+			return null;
+		}
+		
 		if(argument instanceof TemplateModel)
 		{
 			argument = DeepUnwrap.unwrap((TemplateModel)argument);

@@ -99,4 +99,23 @@ public class TFreeMarkerEngine
 	
 		Assert.assertEquals(res, "Obj is: TestBean[test]");
 	}
+	
+	/**
+	 * Ensures method invocation is not broken with null values parameters.
+	 */
+	@Test
+	public void testWithNullParam()
+	{
+		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+		
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		map.put("one", 1);
+		map.put("two", 2);
+		map.put("three", 3);
+		
+		String template = "Map is: ${ mapToString(map, '#key', '', ',', '', null) }";
+		String res = freeMarkerEngine.processTemplate("Test", template, CommonUtils.toMap("map", map));
+		
+		Assert.assertEquals(res, "Map is: one,two,three");
+	}
 }
