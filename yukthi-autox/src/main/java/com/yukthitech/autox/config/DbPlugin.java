@@ -25,11 +25,27 @@ public class DbPlugin implements IPlugin<Object>, Validateable
 	 */
 	@Param(description = "Name to data source mapping for different data sources that are available in this app automation.", required = true)
 	private Map<String, DataSource> dataSourceMap = new HashMap<>();
+	
+	/**
+	 * Name of the default data source name.
+	 */
+	@Param(description = "Name of the default data source name.", required = false)
+	private String defaultDataSource;
 
 	@Override
 	public Class<Object> getArgumentBeanType()
 	{
 		return null;
+	}
+	
+	/**
+	 * Sets the name of the default data source name.
+	 *
+	 * @param defaultDataSource the new name of the default data source name
+	 */
+	public void setDefaultDataSource(String defaultDataSource)
+	{
+		this.defaultDataSource = defaultDataSource;
 	}
 	
 	/**
@@ -60,6 +76,15 @@ public class DbPlugin implements IPlugin<Object>, Validateable
 	public DataSource getDataSource(String name)
 	{
 		return dataSourceMap.get(name);
+	}
+	
+	/**
+	 * Fetches default data source if one is configured.
+	 * @return default data source, if any.
+	 */
+	public DataSource getDefaultDataSource()
+	{
+		return dataSourceMap.get(defaultDataSource);
 	}
 
 	@Override

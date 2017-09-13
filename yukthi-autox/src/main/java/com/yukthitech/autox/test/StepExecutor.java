@@ -1,5 +1,9 @@
 package com.yukthitech.autox.test;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -91,6 +95,32 @@ public class StepExecutor
 	}
 	
 	/**
+	 * Creates executable proxy annotation for specified step-group.
+	 * @param stepGroup
+	 * @return
+	 */
+	private static Executable createExecutable(final StepGroup stepGroup)
+	{
+		Executable executable = (Executable) Proxy.newProxyInstance(null, new Class[] {Executable.class}, new InvocationHandler()
+		{
+			@Override
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+			{
+				String methodName = method.getName();
+				
+				if("name".equals(methodName) || "message".equals(methodName))
+				{
+					return "StepGroup-" + stepGroup.getName();
+				}
+				
+				return null;
+			}
+		});
+
+		return executable;
+	}
+	
+	/**
 	 * Expected to be invoked by test cases, to process the exception and get appropriate result.
 	 * @param context automation context
 	 * @param testCase Test case being tested
@@ -102,7 +132,7 @@ public class StepExecutor
 	 */
 	public static TestCaseResult handleException(AutomationContext context, TestCase testCase, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
 	{
-		Executable executable = step.getClass().getAnnotation(Executable.class);
+		Executable executable = (step instanceof StepGroup) ?  createExecutable((StepGroup) step) : step.getClass().getAnnotation(Executable.class);
 		String name = executable.name();
 		
 		String stepType = (step instanceof IValidation) ? "Validation" : "Step";

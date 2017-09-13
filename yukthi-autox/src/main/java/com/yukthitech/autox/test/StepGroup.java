@@ -9,6 +9,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -29,6 +30,7 @@ public class StepGroup implements IStepContainer, Validateable, IStep, Cloneable
 	/**
 	 * Steps for the test case.
 	 */
+	@SkipParsing
 	private List<IStep> steps = new ArrayList<>();
 
 	/**
