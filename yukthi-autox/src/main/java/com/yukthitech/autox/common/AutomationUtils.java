@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -526,6 +528,47 @@ public class AutomationUtils
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An exception occurred while parsing json resource: " + sourceStr, ex);
+		}
+	}
+	
+	/**
+	 * Tries to delete specified folder. In case of exception 5 times it will tried to delete the folder
+	 * with 2 seconds gap.
+	 * @param reportFolder
+	 * @throws IOException
+	 */
+	public static void deleteFolder(File reportFolder) throws IOException
+	{
+		if(!reportFolder.exists())
+		{
+			return;
+		}
+			
+		
+		for(int i = 0; ; i++)
+		{
+			try
+			{
+				FileUtils.forceDelete(reportFolder);
+				break;
+			}catch(IOException ex)
+			{
+				if(i < 5)
+				{
+					System.err.println("Ignored Error: " + ex);
+					
+					try
+					{
+						Thread.sleep(2000);
+					}catch(Exception ex1)
+					{}
+					
+				}
+				else
+				{
+					throw ex;
+				}
+			}
 		}
 	}
 }

@@ -9,13 +9,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -88,7 +91,7 @@ public class AutomationContext
 		
 		try
 		{
-			FileUtils.deleteDirectory(workDirectory);
+			AutomationUtils.deleteFolder(workDirectory);
 			FileUtils.forceMkdir(workDirectory);
 		}catch(Exception ex)
 		{
@@ -286,11 +289,17 @@ public class AutomationContext
 	 */
 	public void addStepGroup(StepGroup group)
 	{
+		if(StringUtils.isEmpty(group.getName()))
+		{
+			throw new InvalidArgumentException("Step group can not be added without name");
+		}
+		
 		if(nameToAttr.containsKey(group.getName()))
 		{
 			throw new InvalidStateException("Duplicate step group name encountered: {}", group.getName());
 		}
 		
+		group.markAsFunctionGroup();
 		nameToGroup.put(group.getName(), group);
 	}
 	

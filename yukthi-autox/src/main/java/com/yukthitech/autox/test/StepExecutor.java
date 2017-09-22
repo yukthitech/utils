@@ -101,7 +101,7 @@ public class StepExecutor
 	 */
 	private static Executable createExecutable(final StepGroup stepGroup)
 	{
-		Executable executable = (Executable) Proxy.newProxyInstance(null, new Class[] {Executable.class}, new InvocationHandler()
+		Executable executable = (Executable) Proxy.newProxyInstance(StepExecutor.class.getClassLoader(), new Class[] {Executable.class}, new InvocationHandler()
 		{
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable

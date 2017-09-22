@@ -2,6 +2,10 @@
 
 	<step-group name="simpleGroup">
 		<ccg:if condition="attr.returnFlag??">
+			<ccg:set name="ifExec">
+				<value>returnFlag: ${attr.returnFlag}</value>
+			</ccg:set>
+			
 			<ccg:return/>
 		</ccg:if>
 	
@@ -55,7 +59,7 @@
 				<ccg:step-group-ref name="simpleGroup"/>
 				<ccg:remove name="returnFlag"/>
 
-				<ccg:validateContextParam expression="attr.ifExec" value="test" />
+				<ccg:validateContextParam expression="attr.ifExec" value="returnFlag: true" />
 			</wrap:steps>				
 		</testCase>
 
