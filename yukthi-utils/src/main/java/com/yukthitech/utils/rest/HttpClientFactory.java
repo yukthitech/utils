@@ -3,15 +3,24 @@
  */
 package com.yukthitech.utils.rest;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -34,10 +43,9 @@ public class HttpClientFactory
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 500;
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 5;
 	private static final Pattern PROXY_PATTERN = Pattern.compile("([\\w\\.\\-]+)\\:(\\d+)");
-	
+
 	public static final String PROP_PROXY = "http.proxy";
-	
-	
+
 	private static HttpClientFactory instance;
 
 	PoolingHttpClientConnectionManager connectionManager = null;
@@ -46,7 +54,23 @@ public class HttpClientFactory
 
 	HttpClientFactory()
 	{
-		connectionManager = new PoolingHttpClientConnectionManager();
+		SSLConnectionSocketFactory sslsf = null;
+		
+		try
+		{
+			sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault(), NoopHostnameVerifier.INSTANCE);
+		} catch(NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		final Registry<ConnectionSocketFactory> registry = RegistryBuilder
+				.<ConnectionSocketFactory> create()
+				.register("http", new PlainConnectionSocketFactory())
+				.register("https", sslsf)
+				.build();
+
+		connectionManager = new PoolingHttpClientConnectionManager(registry);
 		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
 		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 
@@ -61,7 +85,7 @@ public class HttpClientFactory
 					HeaderElement he = it.nextElement();
 					String param = he.getName();
 					String value = he.getValue();
-					
+
 					if(StringUtils.isNotBlank(value) && param.equalsIgnoreCase("timeout"))
 					{
 						return Long.parseLong(value) * 1000;
@@ -90,7 +114,7 @@ public class HttpClientFactory
 			logger.debug("Using http proxy {}:{}", host, port);
 		}
 	}
-	
+
 	/**
 	 * @return the instance
 	 */
@@ -100,15 +124,15 @@ public class HttpClientFactory
 		{
 			instance = new HttpClientFactory();
 		}
-		
+
 		return instance;
 	}
-	
+
 	HttpClientBuilder newClientBuilder()
 	{
 		return HttpClients.custom();
 	}
-	
+
 	DefaultProxyRoutePlanner newDefaultProxyRoutePlanner(HttpHost host)
 	{
 		return new DefaultProxyRoutePlanner(host);
@@ -120,7 +144,7 @@ public class HttpClientFactory
 		clientBuilder.setConnectionManager(connectionManager);
 		clientBuilder.setKeepAliveStrategy(keepAliveStrategy);
 		clientBuilder.setConnectionManagerShared(true);
-		
+
 		if(proxyHost != null)
 		{
 			clientBuilder.setRoutePlanner(newDefaultProxyRoutePlanner(proxyHost));
@@ -128,14 +152,14 @@ public class HttpClientFactory
 
 		return clientBuilder.build();
 	}
-	
+
 	public static synchronized void reset()
 	{
 		if(instance == null)
 		{
 			return;
 		}
-		
+
 		instance.connectionManager.close();
 		instance = null;
 	}
