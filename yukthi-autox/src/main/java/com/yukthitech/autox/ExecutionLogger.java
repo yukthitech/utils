@@ -134,6 +134,25 @@ public class ExecutionLogger
 	}
 
 	/**
+	 * Logs the message at specified level.
+	 * @param logLevel level of log
+	 * @param mssgTemplate msg template
+	 * @param args arguments for message
+	 */
+	public void log(LogLevel logLevel, String mssgTemplate, Object... args)
+	{
+		if(disabled)
+		{
+			return;
+		}
+		
+		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+
+		logger.debug(finalMssg);
+		executionLogData.addMessage(new ExecutionLogData.Message( getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
+	}
+
+	/**
 	 * Adds the specified image file to the debug log.
 	 * @param name Name of the image file for easy identification
 	 * @param message Message to be logged along with image

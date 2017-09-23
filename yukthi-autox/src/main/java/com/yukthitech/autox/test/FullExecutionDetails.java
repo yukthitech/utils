@@ -1,8 +1,10 @@
 package com.yukthitech.autox.test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -48,6 +50,10 @@ public class FullExecutionDetails
 	 */
 	private Set<String> inProgressTestSuites = new HashSet<>();
 	
+	/**
+	 * List of summary messages.
+	 */
+	private List<String> summaryMessages = new ArrayList<String>();
 
 	/**
 	 * Gets the name of the report.
@@ -440,5 +446,24 @@ public class FullExecutionDetails
 	{
 		return inProgressTestSuites.contains(testSuite);
 	}
-	
+
+	/**
+	 * Gets the list of summary messages.
+	 *
+	 * @return the list of summary messages
+	 */
+	public List<String> getSummaryMessages()
+	{
+		return summaryMessages;
+	}
+
+	/**
+	 * Sets the list of summary messages.
+	 *
+	 * @param summaryMessages the new list of summary messages
+	 */
+	public void setSummaryMessages(List<String> summaryMessages)
+	{
+		this.summaryMessages = summaryMessages;
+	}
 }

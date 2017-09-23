@@ -6,5 +6,12 @@ package com.yukthitech.autox.test.log;
  */
 public enum LogLevel
 {
-	TRACE, DEBUG, ERROR;
+	TRACE, 
+	DEBUG, 
+	ERROR, 
+	
+	/**
+	 * Log level which would add messages to summary report.
+	 */
+	SUMMARY;
 }

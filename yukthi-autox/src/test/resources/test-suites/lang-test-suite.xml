@@ -258,5 +258,18 @@
 				</poll>
 			</ccg:pollAndCheck>
 		</testCase>
+
+		<testCase name="testTimerAndSummaryMssg">
+			<description>Tests timer step and summary message</description>
+			
+			<ccg:startTimer name="timeTaken"/>
+			
+			<ccg:sleep time="80" timeUnit="SECONDS"/>
+			
+			<ccg:stopTimer name="timeTaken"/>
+			
+			<ccg:log level="SUMMARY" message="Time taken during test was: ${attr.timeTaken}"/>
+			<ccg:validateContextParam expression="attr.timeTaken"/>
+		</testCase>
 	</testSuite>
 </testData>

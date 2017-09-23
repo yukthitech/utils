@@ -162,7 +162,7 @@ public class AutomationUtils
 			return (T) replaceExpressions(context, (String) object);
 		}
 
-		logger.debug("Processing expressions in object: {}", object);
+		logger.trace("Processing expressions in object: {}", object);
 		
 		//when executable is collection
 		if(object instanceof Collection)

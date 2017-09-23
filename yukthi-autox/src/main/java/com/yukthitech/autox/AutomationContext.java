@@ -1,6 +1,7 @@
 package com.yukthitech.autox;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,6 +72,11 @@ public class AutomationContext
 	 * Listener for automation.
 	 */
 	private IAutomationListener automationListener = new DummyAutomationListener();
+	
+	/**
+	 * List of summary messages.
+	 */
+	private List<String> summaryMessages = new ArrayList<String>();
 
 	/**
 	 * Constructor.
@@ -346,5 +352,24 @@ public class AutomationContext
 		}
 		
 		this.automationListener = automationListener;
+	}
+	
+	/**
+	 * Adds specified summary message to this context.
+	 * @param mssg message to be added
+	 */
+	public void addSumarryMessage(String mssg)
+	{
+		this.summaryMessages.add(mssg);
+	}
+	
+	/**
+	 * Gets the list of summary messages.
+	 *
+	 * @return the list of summary messages
+	 */
+	public List<String> getSummaryMessages()
+	{
+		return summaryMessages;
 	}
 }

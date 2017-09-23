@@ -547,7 +547,7 @@ public class TestSuiteExecutor
 		}
 		
 		//create final report files
-		reportGenerator.generateReports(reportFolder, fullExecutionDetails, context.getAppConfiguration());
+		reportGenerator.generateReports(reportFolder, fullExecutionDetails, context);
 		
 		System.out.println(String.format(
 			"[Total Test Cases: %s, Successful: %s, Failed: %s, Errored: %s, Skipped: %s]", 
