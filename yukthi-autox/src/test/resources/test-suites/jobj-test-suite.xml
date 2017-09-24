@@ -273,5 +273,27 @@
 				<ccg:validateContextParam expression="attr.mapStr" value="&quot;key1=Value1&quot;,&quot;key2=Value2&quot;,&quot;key3=Value3&quot;"/>
 			</wrap:validations>
 		</testCase>
+
+
+		<testCase name="testStorage">
+			<description>
+				Tests the ability to store and retrieve values.
+			</description>
+
+			<wrap:steps>
+				<ccg:store key="testStoreKey">
+					<value><![CDATA["value1"]]></value>
+				</ccg:store>
+				
+				<ccg:storeValue key="testStoreKey" attribute="ctxAttrKey"/>
+				
+				<ccg:set name="ctxAttrKey1" value="Value is ${storeValue('testStoreKey')}"/>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.ctxAttrKey" value="value1"/>
+				<ccg:validateContextParam expression="attr.ctxAttrKey1" value="Value is value1"/>
+			</wrap:validations>
+		</testCase>
 	</testSuite>
 </testData>

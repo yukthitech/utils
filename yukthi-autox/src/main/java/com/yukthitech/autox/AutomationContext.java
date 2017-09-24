@@ -18,6 +18,7 @@ import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
+import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -77,6 +78,11 @@ public class AutomationContext
 	 * List of summary messages.
 	 */
 	private List<String> summaryMessages = new ArrayList<String>();
+	
+	/**
+	 * Persistence storage to persist data across the executions.
+	 */
+	private PersistenceStorage persistenceStorage;
 
 	/**
 	 * Constructor.
@@ -105,6 +111,8 @@ public class AutomationContext
 		}
 		
 		AutomationContext.instance = this;
+		
+		this.persistenceStorage = new PersistenceStorage(appConfiguration);
 	}
 	
 	/**
@@ -371,5 +379,15 @@ public class AutomationContext
 	public List<String> getSummaryMessages()
 	{
 		return summaryMessages;
+	}
+	
+	/**
+	 * Gets the persistence storage to persist data across the executions.
+	 *
+	 * @return the persistence storage to persist data across the executions
+	 */
+	public PersistenceStorage getPersistenceStorage()
+	{
+		return persistenceStorage;
 	}
 }

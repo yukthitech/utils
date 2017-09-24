@@ -1,3 +1,11 @@
+24/09/2017
+===========
+1) In OneToMany relation generally list is supported. On same lines it would be good to have Map, where key would be one of the column
+	of the child entity and value would be entity itself. This would avoid extra code of converting list to map (generally required where
+	child entities have unique column and parent needs to refer them with this column).
+	Or might be coverter pattern can be used which helps in converting list of relations to/from the desired type (in this case Map).
+
+
 16/10/2016
 ----------
 

@@ -91,6 +91,12 @@ public class ApplicationConfiguration
 	private SummaryNotificationConfig summaryNotificationConfig;
 	
 	/**
+	 * Folder in which automation persistence storage will be done. This would be data
+	 * available across the executions.
+	 */
+	private String dataFolder = "./data";
+	
+	/**
 	 * Instantiates a new application configuration.
 	 *
 	 * @param applicationProperties the application properties
@@ -420,13 +426,43 @@ public class ApplicationConfiguration
 		this.timeFomat = timeFomat;
 	}
 
+	/**
+	 * Gets the defines the summary notification configuration. This is optional.
+	 *
+	 * @return the defines the summary notification configuration
+	 */
 	public SummaryNotificationConfig getSummaryNotificationConfig()
 	{
 		return summaryNotificationConfig;
 	}
 
+	/**
+	 * Sets the defines the summary notification configuration. This is optional.
+	 *
+	 * @param summaryNotificationConfig the new defines the summary notification configuration
+	 */
 	public void setSummaryNotificationConfig(SummaryNotificationConfig summaryNotificationConfig)
 	{
 		this.summaryNotificationConfig = summaryNotificationConfig;
+	}
+
+	/**
+	 * Gets the folder in which automation persistence storage will be done. This would be data available across the executions.
+	 *
+	 * @return the folder in which automation persistence storage will be done
+	 */
+	public String getDataFolder()
+	{
+		return dataFolder;
+	}
+
+	/**
+	 * Sets the folder in which automation persistence storage will be done. This would be data available across the executions.
+	 *
+	 * @param dataFolder the new folder in which automation persistence storage will be done
+	 */
+	public void setDataFolder(String dataFolder)
+	{
+		this.dataFolder = dataFolder;
 	}
 }
