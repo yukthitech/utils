@@ -252,12 +252,18 @@ class SAXEventHandler extends DefaultHandler
 			try
 			{
 
-				Object idValue = XMLUtil.parseAttributeObject(activeNode.getID(), idType, parserHandler.getDateFormat());
+				Object idValue = XMLUtil.parseAttributeObject( processText(activeNode.getID()), idType, parserHandler.getDateFormat());
 				Object argValue = null;
 
 				if(activeNode.isTextNode())
 				{
 					argValue = parserHandler.parseTextNodeValue(activeNode, activeNode.getAttributeMap());
+					
+					if(argValue instanceof String)
+					{
+						argValue = processText((String) argValue);
+					}
+					
 					nodeType = "ID-Based Text Node";
 				}
 				else
