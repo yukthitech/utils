@@ -105,6 +105,11 @@ public class JsonConverter implements IPersistenceConverter
 			return new String((byte[])dbObj);
 		}
 
+		if(dbObj instanceof char[])
+		{
+			return new String((char[])dbObj);
+		}
+
 		//if db object is clob
 		if(dbObj instanceof Clob)
 		{
