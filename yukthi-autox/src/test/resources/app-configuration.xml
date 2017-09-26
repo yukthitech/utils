@@ -7,6 +7,15 @@
 		Folder where test suite xmls can be found 
 	-->
 	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
+	
+	<!-- Persistence related configuration -->
+	<storage-repository-factory createTables="true">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="derby">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.apache.derby.jdbc.EmbeddedDriver">
+				<url>jdbc:derby:.\data;create=true</url>
+			</dataSource>
+		</dataStore>
+	</storage-repository-factory>
 
 	<!--
 		Specifies base packages to be scanned for steps and validators.

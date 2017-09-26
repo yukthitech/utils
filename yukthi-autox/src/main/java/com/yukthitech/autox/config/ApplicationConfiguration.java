@@ -18,6 +18,7 @@ import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.RemoteFileLogMonitor;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.persistence.repository.RepositoryFactory;
 
 /**
  * Application configuration for applications being automated.
@@ -95,6 +96,11 @@ public class ApplicationConfiguration
 	 * available across the executions.
 	 */
 	private String dataFolder = "./data";
+	
+	/**
+	 * Storage repository factory.
+	 */
+	private RepositoryFactory storageRepositoryFactory;
 	
 	/**
 	 * Instantiates a new application configuration.
@@ -464,5 +470,25 @@ public class ApplicationConfiguration
 	public void setDataFolder(String dataFolder)
 	{
 		this.dataFolder = dataFolder;
+	}
+
+	/**
+	 * Gets the storage repository factory.
+	 *
+	 * @return the storage repository factory
+	 */
+	public RepositoryFactory getStorageRepositoryFactory()
+	{
+		return storageRepositoryFactory;
+	}
+
+	/**
+	 * Sets the storage repository factory.
+	 *
+	 * @param storageRepositoryFactory the new storage repository factory
+	 */
+	public void setStorageRepositoryFactory(RepositoryFactory storageRepositoryFactory)
+	{
+		this.storageRepositoryFactory = storageRepositoryFactory;
 	}
 }
