@@ -1,5 +1,7 @@
 <configuration xmlns:ccg="/fw/ccg/XMLBeanParser" pagingSupported="false">
 	
+	<ccg:exprPattern enabled="false"/>
+	
 	<template name="#commonCode"><![CDATA[
 		
 		<#function addCondition condition conditionIndex includeTableCode>
