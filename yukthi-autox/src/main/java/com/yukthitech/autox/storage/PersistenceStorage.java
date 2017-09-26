@@ -18,11 +18,17 @@ public class PersistenceStorage
 	 */
 	private IDataTableRepository dataTableRepository;
 	
+	/**
+	 * Execution info repository.
+	 */
+	private IExecutionInfoRepository executionInfoRepository;
+	
 	public PersistenceStorage(ApplicationConfiguration config)
 	{
 		if(config.getStorageRepositoryFactory() != null)
 		{
 			this.dataTableRepository = config.getStorageRepositoryFactory().getRepository(IDataTableRepository.class);
+			this.executionInfoRepository = config.getStorageRepositoryFactory().getRepository(IExecutionInfoRepository.class);
 		}
 	}
 	
@@ -65,5 +71,51 @@ public class PersistenceStorage
 		}
 		
 		return dataTableRepository.fetchByKey(key);
+	}
+	
+	/**
+	 * To be called before starting test case execution. This will store execution details in storage.
+	 * @param testSuite Test suite being executed.
+	 * @param testCase test case being executed.
+	 * @return Id of the execution, which can be used to update result
+	 */
+	public long testCaseStarted(String testSuite, String testCase)
+	{
+		if(executionInfoRepository == null)
+		{
+			return -1;
+		}
+		
+		ExecutionInfoEntity executionInfoEntity = new ExecutionInfoEntity(testSuite, testCase);
+		boolean res = executionInfoRepository.save(executionInfoEntity);
+		
+		if(!res)
+		{
+			throw new IllegalStateException("Failed to persist execution details, please check log for more details.");
+		}
+		
+		return executionInfoEntity.getId();
+	}
+	
+	/**
+	 * Updates the execution with specified result info.
+	 * @param id id of execution to update
+	 * @param successful flag indicating if execution was successful.
+	 * @param timeTaken time taken for execution.
+	 * @param errorMessage Error message if any.
+	 */
+	public void updateExecution(long id, boolean successful, long timeTaken, String errorMessage)
+	{
+		if(executionInfoRepository == null)
+		{
+			return;
+		}
+		
+		boolean res = executionInfoRepository.updateResult(id, successful, timeTaken, errorMessage);
+
+		if(!res)
+		{
+			throw new IllegalStateException("Failed to update execution details, please check log for more details.");
+		}
 	}
 }

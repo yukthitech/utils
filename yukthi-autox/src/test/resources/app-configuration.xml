@@ -39,6 +39,9 @@
 			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>
+				<driver name="jBrowser" class-name="com.machinepublishers.jbrowserdriver.JBrowserDriver">
+					<defaultPage>https://google.co.in</defaultPage>
+				</driver>
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
 				</driver>
 				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">

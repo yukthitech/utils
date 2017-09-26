@@ -295,5 +295,34 @@
 				<ccg:validateContextParam expression="attr.ctxAttrKey1" value="Value is value1"/>
 			</wrap:validations>
 		</testCase>
+		
+		<testCase name="testSetBeanProperty">
+			<description>
+				Tests the ability to change bean property value.
+			</description>
+
+			<wrap:steps>
+				<ccg:set name="beanForTest">
+					<valueObject><![CDATA[
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					]]></valueObject>
+				</ccg:set>
+				
+				<ccg:validateContextParam expression="attr.beanForTest.key1" value="value1"/>
+				
+				<ccg:setBeanProperty beanAttr="beanForTest" property="key1">
+					<value><![CDATA["newValue1"]]></value>
+				</ccg:setBeanProperty>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.beanForTest.key1" value="newValue1"/>
+				<ccg:validateNullContextParam expression="attr.beanForTest.key3"/>
+			</wrap:validations>
+		</testCase>
+		
 	</testSuite>
 </testData>

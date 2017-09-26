@@ -22,7 +22,8 @@ public class CloseSessionStep extends AbstractStep
 		
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		
-		seleniumConfiguration.getWebDriver().close();
+		seleniumConfiguration.getWebDriver().quit();
+		//seleniumConfiguration.getWebDriver().close();
 		seleniumConfiguration.resetDriver();
 		
 		return true;

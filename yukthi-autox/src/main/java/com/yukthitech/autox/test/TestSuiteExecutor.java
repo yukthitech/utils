@@ -334,11 +334,29 @@ public class TestSuiteExecutor
 
 			//execute actual test case
 			testCaseDataResults.clear();
+			
+			long testCaseExecutionId = 0, startTime = System.currentTimeMillis();
+			
+			//add new execution to store
+			if(context.getPersistenceStorage() != null)
+			{
+				testCaseExecutionId = context.getPersistenceStorage().testCaseStarted(testSuite.getName(), testCase.getName());
+			}
+			
 			testCaseResult = executeTestCase(context, testCaseDataResults, testCase, testFileName);
 			
 			//test case result can be null, in case of data provider
 			if(testCaseResult != null)
 			{
+				//update store with execution result
+				if(context.getPersistenceStorage() != null)
+				{
+					context.getPersistenceStorage().updateExecution(testCaseExecutionId, 
+							testCaseResult.getStatus() == TestStatus.SUCCESSFUL, 
+							(System.currentTimeMillis() - startTime), 
+							testCaseResult.getMessage());
+				}
+
 				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
 				{
 					successful = false;

@@ -25,8 +25,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -45,8 +43,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class AutomationUtils
 {
-	private static Logger logger = LogManager.getLogger(AutomationUtils.class);
-
 	private static final Pattern TYPE_STR_PATTERN = Pattern.compile("([\\w\\.\\$]+)\\s*\\<\\s*([\\w\\.\\$\\,\\ ]+\\s*)\\>\\s*");
 	
 	/**
@@ -162,7 +158,7 @@ public class AutomationUtils
 			return (T) replaceExpressions(context, (String) object);
 		}
 
-		logger.trace("Processing expressions in object: {}", object);
+		//logger.trace("Processing expressions in object: {}", object);
 		
 		//when executable is collection
 		if(object instanceof Collection)

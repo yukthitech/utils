@@ -5,6 +5,8 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.utils.ConvertUtils;
 
@@ -30,6 +32,12 @@ public class SetStep extends AbstractStep
 	@Param(description = "Value of the attribute to set. Default: empty string", required = false)
 	private String value;
 	
+	/**
+	 * Value of the attribute to set in the form of Object.
+	 */
+	@Param(description = "Value of the attribute to set. Default: empty string", required = false, sourceType = SourceType.OBJECT)
+	private Object valueObject;
+
 	/**
 	 * Type of the value to set. If specified, value will be converted to this type before setting on context.\nDefault: Sets as String.
 	 */
@@ -57,6 +65,16 @@ public class SetStep extends AbstractStep
 	}
 	
 	/**
+	 * Sets the value of the attribute to set in the form of Object.
+	 *
+	 * @param valueObject the new value of the attribute to set in the form of Object
+	 */
+	public void setValueObject(Object valueObject)
+	{
+		this.valueObject = valueObject;
+	}
+	
+	/**
 	 * Sets the type of the value to set. If specified, value will be converted to this type before setting on context.\nDefault: Sets as String.
 	 *
 	 * @param type the new type of the value to set
@@ -65,14 +83,32 @@ public class SetStep extends AbstractStep
 	{
 		this.type = type;
 	}
+	
+	/**
+	 * Gets the final resultant value among 'value' and 'valueObject'.
+	 * @param context
+	 * @param exeLogger
+	 * @return
+	 */
+	private Object getValue(AutomationContext context, ExecutionLogger exeLogger)
+	{
+		if(value != null)
+		{
+			return value;
+		}
+		
+		if(valueObject != null)
+		{
+			return AutomationUtils.parseObjectSource(context, exeLogger, this.valueObject, null);
+		}
+		
+		return "";
+	}
 
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		if(value == null)
-		{
-			value = "";
-		}
+		Object value = this.getValue(context, exeLogger);
 		
 		Class<?> type = null;
 		
@@ -87,8 +123,6 @@ public class SetStep extends AbstractStep
 				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}
-		
-		Object value = this.value;
 		
 		exeLogger.debug("Setting context attribute '{}' as value: {}", name, value);
 		

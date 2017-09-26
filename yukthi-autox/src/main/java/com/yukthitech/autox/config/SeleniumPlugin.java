@@ -162,6 +162,12 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		{
 			activeDriverName = driverName;
 			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
+			
+			if(driverConfig.getDefaultPage() != null)
+			{
+				logger.debug("Taking driver to default page: " + driverConfig.getDefaultPage());
+				activeDriver.get(driverConfig.getDefaultPage());
+			}
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);

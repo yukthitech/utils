@@ -20,6 +20,18 @@
 			<version>2.53.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.machinepublishers</groupId>
+			<artifactId>jbrowserdriver</artifactId>
+			<version>0.17.9</version>
+		</dependency>
+		
 		<!-- For SQL based steps and validations, to define data sources -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

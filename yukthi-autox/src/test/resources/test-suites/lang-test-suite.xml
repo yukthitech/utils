@@ -264,7 +264,7 @@
 			
 			<ccg:startTimer name="timeTaken"/>
 			
-			<ccg:sleep time="80" timeUnit="SECONDS"/>
+			<ccg:sleep time="10" timeUnit="SECONDS"/>
 			
 			<ccg:stopTimer name="timeTaken"/>
 			

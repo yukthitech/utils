@@ -33,6 +33,12 @@ public class SeleniumDriverConfig implements Validateable
 	 * Flag indicating if this driver is the default driver.
 	 */
 	private boolean isDefault;
+	
+	/**
+	 * Default page to be opened to ensure driver is in active use. This is mainly required
+	 * by headless browser (jbrowser).
+	 */
+	private String defaultPage;
 
 	/**
 	 * Gets the name of the driver.
@@ -129,6 +135,29 @@ public class SeleniumDriverConfig implements Validateable
 		this.isDefault = isDefault;
 	}
 
+	/**
+	 * Gets the default page to be opened to ensure driver is in active use. This is mainly required by headless browser (jbrowser).
+	 *
+	 * @return the default page to be opened to ensure driver is in active use
+	 */
+	public String getDefaultPage()
+	{
+		return defaultPage;
+	}
+
+	/**
+	 * Sets the default page to be opened to ensure driver is in active use. This is mainly required by headless browser (jbrowser).
+	 *
+	 * @param defaultPage the new default page to be opened to ensure driver is in active use
+	 */
+	public void setDefaultPage(String defaultPage)
+	{
+		this.defaultPage = defaultPage;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{
