@@ -324,5 +324,68 @@
 			</wrap:validations>
 		</testCase>
 		
+		<testCase name="testToJson">
+			<description>
+				Tests the ability to covert object into json to build complex objects
+			</description>
+
+			<wrap:steps>
+				<ccg:set name="bean1">
+					<valueObject><![CDATA[
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					]]></valueObject>
+				</ccg:set>
+				
+				<ccg:set name="bean2">
+					<valueObject><![CDATA[
+						{
+							"key" : ${toJson(attr.bean1)}
+						}
+					]]></valueObject>
+				</ccg:set>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.bean2.key.key1" value="value1"/>
+			</wrap:validations>
+		</testCase>
+
+		<testCase name="testAttrReferences">
+			<description>
+				Tests the reserver attribute related to references
+			</description>
+
+			<wrap:steps>
+				<ccg:set name="bean">
+					<valueObject><![CDATA[
+						{
+							"key1" : "value1",
+							"key2" : "value2",
+							"key3" : {
+								"skey1": "svalue1",
+								"skey2": "svalue2"
+							}
+						}
+					]]></valueObject>
+				</ccg:set>
+				
+				<ccg:set name="attr1">
+					<valueObject ccg:attrRef="bean.key3.skey1"/>
+				</ccg:set>
+
+				<ccg:set name="attr2">
+					<valueObject ccg:attrXpathRef="/bean//skey2"/>
+				</ccg:set>
+			</wrap:steps>
+
+			<wrap:validations>
+				<ccg:validateContextParam expression="attr.attr1" value="svalue1"/>
+				<ccg:validateContextParam expression="attr.attr2" value="svalue2"/>
+			</wrap:validations>
+		</testCase>
+
 	</testSuite>
 </testData>

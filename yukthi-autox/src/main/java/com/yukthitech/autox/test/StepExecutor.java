@@ -166,7 +166,7 @@ public class StepExecutor
 		}
 
 		//for unhandled exceptions log on ui
-		exeLogger.error(ex, "An error occurred while executing validation: " + name);
+		exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
 		invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 		
 		return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());

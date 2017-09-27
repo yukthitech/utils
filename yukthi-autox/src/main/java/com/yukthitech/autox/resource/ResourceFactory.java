@@ -21,7 +21,7 @@ public class ResourceFactory
 	/**
 	 * Pattern used to specify file resources.
 	 */
-	public static Pattern RESOURCE_PATTERN = Pattern.compile("([\\-\\w]+)\\:(.+)", Pattern.MULTILINE);
+	public static Pattern RESOURCE_PATTERN = Pattern.compile("([\\-\\w]+)\\:(.+)", Pattern.MULTILINE | Pattern.DOTALL);
 	
 	/**
 	 * Prefix that will be used for raw resources.

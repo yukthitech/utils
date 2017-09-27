@@ -31,6 +31,8 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.XMLBeanParser;
@@ -153,6 +155,12 @@ public class AutomationUtils
 			return object;
 		}
 		
+		if(object instanceof IReference)
+		{
+			IReference ref = (IReference) object;
+			return (T) ref.getValue(context);
+		}
+		
 		if(object instanceof String)
 		{
 			return (T) replaceExpressions(context, (String) object);
@@ -225,6 +233,7 @@ public class AutomationUtils
 		
 		Object fieldValue = null;
 		Class<?> fieldType = null;
+		Param param = null;
 		
 		for(Field field : fields)
 		{
@@ -254,6 +263,14 @@ public class AutomationUtils
 				
 				//ignore null field values
 				if(fieldValue == null)
+				{
+					continue;
+				}
+				
+				param = field.getAnnotation(Param.class);
+				
+				//skip field parsing if object type parameters, as they will processed as part of step execution
+				if(param != null && param.sourceType() == SourceType.OBJECT)
 				{
 					continue;
 				}
@@ -460,6 +477,11 @@ public class AutomationUtils
 	 */
 	public static Object parseObjectSource(AutomationContext context, ExecutionLogger exeLogger, Object source, JavaType defaultType)
 	{
+		if(source instanceof IReference)
+		{
+			return ((IReference) source).getValue(context);
+		}
+		
 		if(!(source instanceof String))
 		{
 			return source;

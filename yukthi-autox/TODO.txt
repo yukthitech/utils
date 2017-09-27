@@ -1,3 +1,8 @@
+Remove raw resource types and ccg:skipExpressions for skipping expression parsing
+	this should set flag on context which should be referrd in automation utils
+	
+In SetStep and others wherever object is expected we should be able to inject value using ccg:attrRef
+
 ===================
 	Default data source should be possible
 	

@@ -5,6 +5,8 @@ import org.apache.commons.beanutils.BeanUtils;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.ref.ContextAttributeReference;
+import com.yukthitech.autox.ref.ContextAttributeXpathReference;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -20,6 +22,10 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	private static final String ATTR_BEAN_REF = "beanRef";
 	
 	private static final String ATTR_BEAN_COPY = "beanCopy";
+	
+	private static final String ATTR_CONTEXT_ATTR_REF = "attrRef";
+	
+	private static final String ATTR_CONTEXT_ATTR_XPATH_REF = "attrXpathRef";
 	
 	/**
 	 * Application configuration.
@@ -56,7 +62,24 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 			
 			return bean;
 		}
+
+		//handle attribute to set context attribute reference
+		String attrRefName = att.getReserved(ATTR_CONTEXT_ATTR_REF, null);
 		
+		if(attrRefName != null)
+		{
+			return new ContextAttributeReference(attrRefName);
+		}
+
+		//handle attribute to set context attribute reference
+		String attrRefXpath = att.getReserved(ATTR_CONTEXT_ATTR_XPATH_REF, null);
+		
+		if(attrRefXpath != null)
+		{
+			return new ContextAttributeXpathReference(attrRefXpath);
+		}
+
+		//take care of bean copy
 		String beanCopyName = att.getReserved(ATTR_BEAN_COPY, null);
 		
 		if(beanCopyName != null)
