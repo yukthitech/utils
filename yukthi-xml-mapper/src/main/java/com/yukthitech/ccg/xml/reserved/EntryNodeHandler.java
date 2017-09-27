@@ -4,6 +4,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import org.xml.sax.Locator;
+
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -19,13 +21,13 @@ public class EntryNodeHandler implements IReserveNodeHandler
 {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 		Object parent = node.getParent();
 		
 		if(!(parent instanceof Map))
 		{
-			throw new XMLLoadException("Reserve node <entry> encountered under non-map node", node);
+			throw new XMLLoadException("Reserve node <entry> encountered under non-map node", node, locator);
 		}
 		
 		Type genericType = node.getParentNode().getGenericType();
@@ -40,14 +42,14 @@ public class EntryNodeHandler implements IReserveNodeHandler
 		
 		if(!XMLUtil.isSupportedAttributeClass(keyType) && !Object.class.equals(keyType))
 		{
-			throw new XMLLoadException("<entry> reserved node does not support non-attributable key type - " + keyType.getName(), node);
+			throw new XMLLoadException("<entry> reserved node does not support non-attributable key type - " + keyType.getName(), node, locator);
 		}
 		
 		String keyStr = att.get("key", null);
 		
 		if(keyStr == null)
 		{
-			throw new XMLLoadException("No 'key' attribute specified for <entry> node", node);
+			throw new XMLLoadException("No 'key' attribute specified for <entry> node", node, locator);
 		}
 		
 		//parse the key 
@@ -58,8 +60,11 @@ public class EntryNodeHandler implements IReserveNodeHandler
 		node.setType(valueType);
 		node.setActualType(valueType);
 
-		if(XMLUtil.isSupportedAttributeClass(valueType) || Object.class.equals(valueType))
+		//if number of attributes is just key and the value type can be supported as node text
+		if(node.getAttributeMap().size() <= 1 && (XMLUtil.isSupportedAttributeClass(valueType) || Object.class.equals(valueType)) )
 		{
+			//expect the value to be provided as node text
+			
 			//set key on context so that it can be used during end node processing
 			node.setContextAttribute("key", key);
 			
@@ -75,7 +80,7 @@ public class EntryNodeHandler implements IReserveNodeHandler
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 		if(!node.isTextNode())
 		{

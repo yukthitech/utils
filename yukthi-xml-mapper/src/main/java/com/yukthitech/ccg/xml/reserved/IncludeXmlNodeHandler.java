@@ -3,6 +3,8 @@ package com.yukthitech.ccg.xml.reserved;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import org.xml.sax.Locator;
+
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -20,14 +22,14 @@ import com.yukthitech.ccg.xml.XMLLoadException;
 public class IncludeXmlNodeHandler implements IReserveNodeHandler
 {
 	@Override
-	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 		String resourcePath = att.get("resource", null);
 		String filePath = att.get("file", null);
 
 		if(resourcePath == null && filePath == null)
 		{
-			throw new XMLLoadException("Neither 'resource' nor 'file' attribute is specified for <includeXml>", node);
+			throw new XMLLoadException("Neither 'resource' nor 'file' attribute is specified for <includeXml>", node, locator);
 		}
 
 		InputStream xmlInput = null;
@@ -50,11 +52,11 @@ public class IncludeXmlNodeHandler implements IReserveNodeHandler
 		{
 			if(resourcePath != null)
 			{
-				throw new XMLLoadException("An error occurred while loading xml resource: " + resourcePath, ex, node);
+				throw new XMLLoadException("An error occurred while loading xml resource: " + resourcePath, ex, node, locator);
 			}
 			else
 			{
-				throw new XMLLoadException("An error occurred while loading xml file: " + filePath, ex, node);
+				throw new XMLLoadException("An error occurred while loading xml file: " + filePath, ex, node, locator);
 			}
 		}
 
@@ -62,7 +64,7 @@ public class IncludeXmlNodeHandler implements IReserveNodeHandler
 	}
 
 	@Override
-	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 	}
 }

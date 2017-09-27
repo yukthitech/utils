@@ -4,6 +4,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
+import org.xml.sax.Locator;
+
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -19,7 +21,7 @@ public class ElementNodeHandler implements IReserveNodeHandler
 {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 		Object parent = node.getParent();
 		
@@ -57,7 +59,7 @@ public class ElementNodeHandler implements IReserveNodeHandler
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 		if(!node.isTextNode())
 		{

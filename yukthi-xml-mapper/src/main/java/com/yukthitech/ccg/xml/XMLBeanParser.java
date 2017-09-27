@@ -158,13 +158,13 @@ public class XMLBeanParser
 			return null;
 		} catch(SAXException e)
 		{
-			throw new XMLLoadException("Error in reading XML Stream.", e);
+			throw new XMLLoadException("Error in reading XML Stream.", e, null);
 		} catch(IOException e)
 		{
-			throw new XMLLoadException("Error in reading XML Stream.", e);
+			throw new XMLLoadException("Error in reading XML Stream.", e, null);
 		} catch(ParserConfigurationException e)
 		{
-			throw new XMLLoadException("Error in reading XML Stream.", e);
+			throw new XMLLoadException("Error in reading XML Stream.", e, null);
 		} // other than the above exceptions, the exceptions thrown inside
 			// other methods should not be caught
 	}

@@ -1,5 +1,7 @@
 package com.yukthitech.ccg.xml;
 
+import org.xml.sax.Locator;
+
 /**
  * <BR>
  * <BR>
@@ -21,9 +23,9 @@ public class XMLLoadException extends RuntimeException
 	 * @param node
 	 *            Node responsible for exception.
 	 */
-	public XMLLoadException(String mssg, Throwable thr, BeanNode node)
+	public XMLLoadException(String mssg, Throwable thr, BeanNode node, Locator locator)
 	{
-		super(buildMessage(mssg, node), thr);
+		super(buildMessage(mssg, node, locator), thr);
 	}
 
 	/**
@@ -34,9 +36,9 @@ public class XMLLoadException extends RuntimeException
 	 * @param node
 	 *            Node responsible for exception.
 	 */
-	public XMLLoadException(String mssg, BeanNode node)
+	public XMLLoadException(String mssg, BeanNode node, Locator locator)
 	{
-		this(mssg, null, node);
+		this(mssg, null, node, locator);
 	}
 
 	/**
@@ -47,9 +49,9 @@ public class XMLLoadException extends RuntimeException
 	 * @param thr
 	 *            Root cause.
 	 */
-	public XMLLoadException(String mssg, Throwable thr)
+	public XMLLoadException(String mssg, Throwable thr, Locator locator)
 	{
-		this(mssg, thr, null);
+		this(mssg, thr, null, locator);
 	}
 
 	/**
@@ -63,14 +65,21 @@ public class XMLLoadException extends RuntimeException
 	 *            Path represnting XML node repsonsible for this exception.
 	 * @return String represnting the body of this exception.
 	 */
-	private static String buildMessage(String mssg, BeanNode node)
+	private static String buildMessage(String mssg, BeanNode node, Locator locator)
 	{
 		StringBuffer buff = new StringBuffer();
+		
+		if(locator != null)
+		{
+			buff.append("[Line: ").append(locator.getLineNumber()).append(", Column: ").append(locator.getColumnNumber()).append("] ");
+		}
 
 		buff.append(mssg);
 
 		if(node != null)
+		{
 			buff.append("\nPath: " + node.getNodePath());
+		}
 
 		return buff.toString();
 	}

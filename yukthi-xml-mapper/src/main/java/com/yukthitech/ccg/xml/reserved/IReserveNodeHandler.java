@@ -23,6 +23,8 @@
 
 package com.yukthitech.ccg.xml.reserved;
 
+import org.xml.sax.Locator;
+
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -44,9 +46,10 @@ public interface IReserveNodeHandler
 	 *            Custom node started
 	 * @param att
 	 *            Attributes of custom node.
+	 * @param locator Sax locator 
 	 * @return Bean representing custom node.
 	 */
-	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att);
+	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator);
 
 	/**
 	 * Called when custom node is encountered.
@@ -56,6 +59,7 @@ public interface IReserveNodeHandler
 	 *            Node ended.
 	 * @param att
 	 *            Attributes of the node.
+	 * @param locator Sax locator 
 	 */
-	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att);
+	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator);
 }

@@ -1,5 +1,7 @@
 package com.yukthitech.ccg.xml;
 
+import org.xml.sax.Locator;
+
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
@@ -31,6 +33,12 @@ public interface IParserHandler extends XMLConstants
 	 *            the new parser
 	 */
 	public void setParser(XMLBeanParser parser);
+	
+	/**
+	 * Sets the sax locator of the parser.
+	 * @param locator
+	 */
+	public void setLocator(Locator locator);
 
 	/**
 	 * This method will be called only the rootBean is specified in parse()

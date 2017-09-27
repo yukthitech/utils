@@ -53,6 +53,11 @@ class SAXEventHandler extends DefaultHandler
 
 	private Stack<String> skipModeElements = new Stack<String>();
 	private boolean stopProcessing = false;
+	
+	/**
+	 * Locator set by sax parser used to find current location in document.
+	 */
+	private Locator saxLocator;
 
 	/**
 	 * @param factory
@@ -62,7 +67,7 @@ class SAXEventHandler extends DefaultHandler
 		this.parserHandler = factory;
 		this.rootBean = rootBean;
 	}
-
+	
 	/**
 	 * @return Root bean
 	 */
@@ -110,7 +115,7 @@ class SAXEventHandler extends DefaultHandler
 			if(!activeNode.isReservedNullNode())
 			{
 				if(!whiteSpaces)
-					throw new XMLLoadException("Text found in non-null reserved node: " + activeNode, activeNode);
+					throw new XMLLoadException("Text found in non-null reserved node: " + activeNode, activeNode, saxLocator);
 				return;
 			}
 
@@ -124,7 +129,7 @@ class SAXEventHandler extends DefaultHandler
 		if(!activeNode.isTextNode())
 		{
 			if(!whiteSpaces)
-				throw new XMLLoadException("Meta-text node or text in non-text based node encountered.\n" + "Bean Type: " + activeNode.getActualBean().getClass().getName(), activeNode);
+				throw new XMLLoadException("Meta-text node or text in non-text based node encountered.\n" + "Bean Type: " + activeNode.getActualBean().getClass().getName(), activeNode, saxLocator);
 			return;
 		}
 
@@ -195,7 +200,7 @@ class SAXEventHandler extends DefaultHandler
 					parserHandler.validateBean(activeNode);
 				} catch(Exception ex)
 				{
-					throw new XMLLoadException("Error in validating reserved node bean: " + beanDesc, ex, activeNode);
+					throw new XMLLoadException("Error in validating reserved node bean: " + beanDesc, ex, activeNode, saxLocator);
 				}
 			}
 
@@ -204,7 +209,7 @@ class SAXEventHandler extends DefaultHandler
 				parserHandler.processReserveNodeEnd(activeNode, activeNode.getAttributeMap());
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Error in processing reserve node end: " + name, ex, activeNode);
+				throw new XMLLoadException("Error in processing reserve node end: " + name, ex, activeNode, saxLocator);
 			}
 			return;
 		}
@@ -216,7 +221,7 @@ class SAXEventHandler extends DefaultHandler
 				parserHandler.validateBean(activeNode);
 		} catch(Exception ex)
 		{
-			throw new XMLLoadException("Error in validating bean: " + beanDesc, ex, activeNode);
+			throw new XMLLoadException("Error in validating bean: " + beanDesc, ex, activeNode, saxLocator);
 		}
 
 		if(parentNode == null)// if the root element is reached
@@ -241,7 +246,7 @@ class SAXEventHandler extends DefaultHandler
 					acceptor.add(activeNode.getName(), nodeValue);
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Failed to set dynamic property for bean \"" + beanDesc + "\" for node: " + name, ex, activeNode);
+				throw new XMLLoadException("Failed to set dynamic property for bean \"" + beanDesc + "\" for node: " + name, ex, activeNode, saxLocator);
 			}
 			return;
 		}
@@ -276,7 +281,7 @@ class SAXEventHandler extends DefaultHandler
 
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for ID-based node: " + name, ex, activeNode);
+				throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for ID-based node: " + name, ex, activeNode, saxLocator);
 			}
 		}
 		else if(activeNode.isTextNode())
@@ -290,7 +295,7 @@ class SAXEventHandler extends DefaultHandler
 				nodeType = "Text Node";
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for text-based node: " + name, ex, activeNode);
+				throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for text-based node: " + name, ex, activeNode, saxLocator);
 			}
 		}
 		else // if normal node
@@ -307,10 +312,10 @@ class SAXEventHandler extends DefaultHandler
 			Throwable th = ex;
 			if(ex.getCause() != null)
 				th = ex.getCause();
-			throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for " + nodeType + ": " + name, th, activeNode);
+			throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for " + nodeType + ": " + name, th, activeNode, saxLocator);
 		} catch(Exception ex)
 		{
-			throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for " + nodeType + ": " + name, ex, activeNode);
+			throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for " + nodeType + ": " + name, ex, activeNode, saxLocator);
 		}
 
 	}
@@ -382,10 +387,10 @@ class SAXEventHandler extends DefaultHandler
 		if(root)
 		{
 			if(newNode.isReserved())
-				throw new XMLLoadException("Root node can not be of reserved type.", newNode);
+				throw new XMLLoadException("Root node can not be of reserved type.", newNode, saxLocator);
 
 			if(newNode.isSkipNode())
-				throw new XMLLoadException("Root node can not be skipped.", newNode);
+				throw new XMLLoadException("Root node can not be skipped.", newNode, saxLocator);
 
 			if(rootBean != null)
 			{
@@ -412,7 +417,7 @@ class SAXEventHandler extends DefaultHandler
 
 		BeanNode parentNode = newNode.getParentNode();
 		if(parentNode.isReservedNullNode())
-			throw new XMLLoadException("Subnode encountered in non-bean reserved node.", newNode);
+			throw new XMLLoadException("Subnode encountered in non-bean reserved node.", newNode, saxLocator);
 
 		/*
 		 * If the previous node is assumed to be TextBasedNode, and since
@@ -428,9 +433,9 @@ class SAXEventHandler extends DefaultHandler
 			if(parentNode.containsText())
 			{
 				if(parentNode.isIDBased())
-					throw new XMLLoadException("Encountered hybrid-text nodes (while id-based node was expected) with name: " + name, newNode);
+					throw new XMLLoadException("Encountered hybrid-text nodes (while id-based node was expected) with name: " + name, newNode, saxLocator);
 
-				throw new XMLLoadException("Encountered hybrid-text nodes with name: " + name, newNode);
+				throw new XMLLoadException("Encountered hybrid-text nodes with name: " + name, newNode, saxLocator);
 			}
 
 			Object parentBean = null;
@@ -448,7 +453,7 @@ class SAXEventHandler extends DefaultHandler
 				parentNode.setBean(parentBean);
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Error in creating beanof type: " + parentNode.getType().getName(), ex, parentNode);
+				throw new XMLLoadException("Error in creating beanof type: " + parentNode.getType().getName(), ex, parentNode, saxLocator);
 			}
 			setAttributeData(parentNode);
 		}
@@ -462,7 +467,7 @@ class SAXEventHandler extends DefaultHandler
 				nextBean = parserHandler.processReservedNode(newNode, newNode.getAttributeMap());
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Error in processing reserve node: " + name, ex, newNode);
+				throw new XMLLoadException("Error in processing reserve node: " + name, ex, newNode, saxLocator);
 			}
 			
 			if(newNode.isTextNode())
@@ -493,13 +498,13 @@ class SAXEventHandler extends DefaultHandler
 			dynType = parserHandler.getDynamicBeanType(newNode, curAttMap);
 		} catch(Exception ex)
 		{
-			throw new XMLLoadException("Error in fetching dynamic type for node: " + name, ex, newNode);
+			throw new XMLLoadException("Error in fetching dynamic type for node: " + name, ex, newNode, saxLocator);
 		}
 
 		if(typ != null && dynType != null)
 		{
 			if(!typ.isAssignableFrom(dynType))
-				throw new XMLLoadException("There was a mismatch between expected and dynamic types for node: " + name + "\n" + "Expected Type: " + typ.getName() + "\n" + "Dynamic Type: " + dynType.getName(), newNode);
+				throw new XMLLoadException("There was a mismatch between expected and dynamic types for node: " + name + "\n" + "Expected Type: " + typ.getName() + "\n" + "Dynamic Type: " + dynType.getName(), newNode, saxLocator);
 		}
 
 		if(dynType == null)
@@ -540,7 +545,7 @@ class SAXEventHandler extends DefaultHandler
 				if(beanDesc == null)
 					beanDesc = parentBean.getClass().getName();
 
-				throw new XMLLoadException("Can not find appropriate adder/setter method for sub-node \"" + name + "\" in bean type: " + beanDesc, newNode);
+				throw new XMLLoadException("Can not find appropriate adder/setter method for sub-node \"" + name + "\" in bean type: " + beanDesc, newNode, saxLocator);
 			}
 		}
 
@@ -564,11 +569,11 @@ class SAXEventHandler extends DefaultHandler
 			nextBean = parserHandler.createBean(newNode, curAttMap);
 		} catch(Exception ex)
 		{
-			throw new XMLLoadException("Error in creating bean of type: " + typ.getName(), ex, newNode);
+			throw new XMLLoadException("Error in creating bean of type: " + typ.getName(), ex, newNode, saxLocator);
 		}
 
 		if(nextBean == null)
-			throw new XMLLoadException("A null value is returned by the factory for attributed node: " + name, newNode);
+			throw new XMLLoadException("A null value is returned by the factory for attributed node: " + name, newNode, saxLocator);
 		
 		//if final bean type is found to be Object, then treat is as text node
 		// so that enclosed text can be set as value
@@ -603,11 +608,11 @@ class SAXEventHandler extends DefaultHandler
 				nextBean = parserHandler.createBean(newNode, curAttMap.getReservedMap());
 			} catch(Exception ex)
 			{
-				throw new XMLLoadException("Error in creating bean of type: " + valType.getName(), ex, newNode);
+				throw new XMLLoadException("Error in creating bean of type: " + valType.getName(), ex, newNode, saxLocator);
 			}
 
 			if(nextBean == null)
-				throw new XMLLoadException("A null value is returned by the factory for ID based bean node: " + newNode.getName(), newNode);
+				throw new XMLLoadException("A null value is returned by the factory for ID based bean node: " + newNode.getName(), newNode, saxLocator);
 			// this will take care of throwing exception when factory returns
 			// null for non-text object
 			newNode.setBean(nextBean);
@@ -708,7 +713,7 @@ class SAXEventHandler extends DefaultHandler
 					continue;
 				}
 
-				throw new XMLLoadException("Can not find appropriate setter method for attribute \"" + attName + "\" in bean type: " + beanDesc, newNode);
+				throw new XMLLoadException("Can not find appropriate setter method for attribute \"" + attName + "\" in bean type: " + beanDesc, newNode, saxLocator);
 			}
 
 			argType = met.getParameterTypes()[0];
@@ -722,7 +727,7 @@ class SAXEventHandler extends DefaultHandler
 				met.invoke(toBean, new Object[] { value });
 			} catch(Exception e)
 			{
-				throw new XMLLoadException("Failed to set attribute \"" + attName + "\" in bean of type: " + beanDesc, e, newNode);
+				throw new XMLLoadException("Failed to set attribute \"" + attName + "\" in bean of type: " + beanDesc, e, newNode, saxLocator);
 			}
 		}
 	}
@@ -855,10 +860,16 @@ class SAXEventHandler extends DefaultHandler
 		stopProcessing = false;
 	}
 
+	@Override
 	public void setDocumentLocator(Locator locator)
 	{
 		if(stopProcessing)
+		{
 			throw new InternalException();
+		}
+		
+		this.saxLocator = locator;
+		parserHandler.setLocator(saxLocator);
 	}
 
 }

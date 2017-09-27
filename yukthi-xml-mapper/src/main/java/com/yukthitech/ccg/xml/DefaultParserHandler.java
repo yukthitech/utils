@@ -12,9 +12,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.xml.sax.Locator;
 
 import com.yukthitech.ccg.xml.reserved.ElementNodeHandler;
 import com.yukthitech.ccg.xml.reserved.EntryNodeHandler;
@@ -168,6 +170,11 @@ public class DefaultParserHandler implements IParserHandler
 	 * List of reserve node handlers.
 	 */
 	private List<ReserveNodeHandlerDetails> reserveNodeHandlers = new ArrayList<ReserveNodeHandlerDetails>();
+	
+	/**
+	 * Sax locator of the parser.
+	 */
+	protected Locator saxLocator;
 
 	/**
 	 * If the root is null, then reserve attribute beanType is mandatory in root
@@ -191,6 +198,15 @@ public class DefaultParserHandler implements IParserHandler
 	{
 		this();
 		this.classLoader = classLoader;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.IParserHandler#setLocator(org.xml.sax.Locator)
+	 */
+	@Override
+	public void setLocator(Locator locator)
+	{
+		this.saxLocator = locator;
 	}
 
 	/*
@@ -600,7 +616,7 @@ public class DefaultParserHandler implements IParserHandler
 				continue;
 			}
 			
-			return reserveNodeHandler.reserveNodeHandler.createCustomNodeBean(this, node, att);
+			return reserveNodeHandler.reserveNodeHandler.createCustomNodeBean(this, node, att, saxLocator);
 		}
 
 		return null;
@@ -676,7 +692,7 @@ public class DefaultParserHandler implements IParserHandler
 				continue;
 			}
 			
-			reserveNodeHandler.reserveNodeHandler.handleCustomNodeEnd(this, node, att);
+			reserveNodeHandler.reserveNodeHandler.handleCustomNodeEnd(this, node, att, saxLocator);
 		}
 	}
 
@@ -923,9 +939,17 @@ public class DefaultParserHandler implements IParserHandler
 			{
 				type = HashSet.class;
 			}
-			else if(type.isAssignableFrom(HashMap.class))
+		}
+
+		if(Map.class.isAssignableFrom(type))
+		{
+			if(type.isAssignableFrom(HashMap.class))
 			{
 				type = HashMap.class;
+			}
+			else if(type.isAssignableFrom(TreeMap.class))
+			{
+				type = TreeMap.class;
 			}
 		}
 

@@ -1,5 +1,7 @@
 package com.yukthitech.ccg.xml.reserved;
 
+import org.xml.sax.Locator;
+
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -14,7 +16,7 @@ import com.yukthitech.ccg.xml.XMLAttributeMap;
 public class RegisterNodeHandler implements IReserveNodeHandler
 {
 	@Override
-	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 		Object nodeHandler = parserHandler.createBean(node, null);
 		IReserveNodeHandler customNodeHandler = (IReserveNodeHandler) nodeHandler;
@@ -24,7 +26,7 @@ public class RegisterNodeHandler implements IReserveNodeHandler
 	}
 
 	@Override
-	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att)
+	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
 	}
 }
