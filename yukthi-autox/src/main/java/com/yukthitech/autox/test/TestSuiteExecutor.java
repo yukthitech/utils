@@ -139,7 +139,7 @@ public class TestSuiteExecutor
 				result = testCase.execute(context, null, exeLogger);
 			}catch(Exception ex)
 			{
-				exeLogger.error(ex, "An error occurred while executing test case: {}", testCase.getName());
+				exeLogger.error(null, ex, "An error occurred while executing test case: {}", testCase.getName());
 				result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case.");
 			} 
 			
@@ -170,7 +170,7 @@ public class TestSuiteExecutor
 			name = testCase.getName() + " [" + data.getName() + "]";
 			exeLogger = new ExecutionLogger(name, testCase.getDescription());
 			
-			exeLogger.debug("Executing test case '{}' with data: {}", name, data.getName());
+			exeLogger.debug(null, "Executing test case '{}' with data: {}", name, data.getName());
 					
 			//set data provider data on context
 			context.setAttribute(dataProvider.getName(), data.getValue());
@@ -184,7 +184,7 @@ public class TestSuiteExecutor
 				result = testCase.execute(context, data, exeLogger);
 			}catch(Exception ex)
 			{
-				exeLogger.error(ex, "An error occurred while executing test case '{}' with data: {}", testCase.getName(), data);
+				exeLogger.error(null, ex, "An error occurred while executing test case '{}' with data: {}", testCase.getName(), data);
 				result = new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case with data: " + data);
 			}
 			
@@ -278,6 +278,9 @@ public class TestSuiteExecutor
 		{
 			logger.debug("Test cases are limited to - {}", restrictedTestCases);
 		}
+		
+		//set test suite as active test suite
+		context.setActiveTestSuite(testSuite);
 		
 		Set<String> dependencyTestCases = null;
 		TestCaseResult depTestCaseResult = null;

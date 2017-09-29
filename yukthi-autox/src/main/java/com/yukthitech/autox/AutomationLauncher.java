@@ -21,7 +21,6 @@ import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteExecutor;
 import com.yukthitech.autox.test.TestSuiteGroup;
-import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
@@ -51,7 +50,7 @@ public class AutomationLauncher
 	 */
 	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
 	{
-		DefaultParserHandler defaultParserHandler = new TestSuiteParserHandler(context, appConfig);
+		TestSuiteParserHandler defaultParserHandler = new TestSuiteParserHandler(context, appConfig);
 		
 		logger.debug("Loading test suites from folders - {}", appConfig.getTestSuiteFolders());
 		
@@ -82,6 +81,7 @@ public class AutomationLauncher
 		for(File xmlFile : xmlFiles)
 		{
 			testDataFile = new TestDataFile(context);
+			defaultParserHandler.setFileBeingParsed(xmlFile.getName());
 
 			try
 			{

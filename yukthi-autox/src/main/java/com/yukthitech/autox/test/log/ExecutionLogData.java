@@ -30,6 +30,11 @@ public class ExecutionLogData
 		private String source;
 		
 		/**
+		 * Java source location where logging was done.
+		 */
+		private String javaSource;
+		
+		/**
 		 * Log level at which message is logged.
 		 */
 		private LogLevel logLevel;
@@ -51,9 +56,10 @@ public class ExecutionLogData
 		 * @param message the message
 		 * @param time the time
 		 */
-		public Message(String source, LogLevel logLevel, String message, Date time)
+		public Message(String source, String javaSource, LogLevel logLevel, String message, Date time)
 		{
-			this.source = source;
+			this.source = source != null ? source : javaSource;
+			this.javaSource = javaSource;
 			this.logLevel = logLevel;
 			this.message = message;
 			this.time = time;
@@ -67,6 +73,16 @@ public class ExecutionLogData
 		public String getSource()
 		{
 			return source;
+		}
+		
+		/**
+		 * Gets the java source location where logging was done.
+		 *
+		 * @return the java source location where logging was done
+		 */
+		public String getJavaSource()
+		{
+			return javaSource;
 		}
 
 		/**
@@ -138,9 +154,9 @@ public class ExecutionLogData
 		 * @param time the time
 		 * @param imageFile the image file
 		 */
-		public ImageMessage(String source, LogLevel logLevel, String message, Date time, String name, File imageFile)
+		public ImageMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, String name, File imageFile)
 		{
-			super(source, logLevel, message, time);
+			super(source, javaSource, logLevel, message, time);
 			
 			this.name = name;
 			this.imageFile = imageFile;

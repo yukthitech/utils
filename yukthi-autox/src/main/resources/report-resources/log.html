@@ -100,6 +100,7 @@
 					</td>
 					<td ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
 						{{message.source}}
+						<br/><span style="color: rgb(128,128,128)">[{{message.javaSource}}]</span>
 					</td>
 					<td style="text-align: left;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
 						<div ng-bind-html="replaceMessage(message.message) | unsafe">

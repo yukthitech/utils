@@ -17,7 +17,7 @@ public class ContinueStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		exeLogger.debug("Contining current loop");
+		exeLogger.debug(this, "Contining current loop");
 		throw new ContinueException();
 	}
 }

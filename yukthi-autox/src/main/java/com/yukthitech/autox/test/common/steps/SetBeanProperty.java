@@ -75,11 +75,11 @@ public class SetBeanProperty extends AbstractStep
 		
 		if(bean == null)
 		{
-			exeLogger.debug("No value found on context with name '{}'. Hence no action would be taken.", this.beanAttr);
+			exeLogger.debug(this, "No value found on context with name '{}'. Hence no action would be taken.", this.beanAttr);
 			return true;
 		}
 
-		exeLogger.debug("Setting property '{}' of bean '{}' as value: {}", property, this.beanAttr, value);
+		exeLogger.debug(this, "Setting property '{}' of bean '{}' as value: {}", property, this.beanAttr, value);
 		
 		Object value = AutomationUtils.parseObjectSource(context, exeLogger, this.value, null);
 		PropertyUtils.setProperty(bean, property, value);

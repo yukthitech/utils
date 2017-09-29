@@ -100,22 +100,22 @@ public class SetXpathStep extends AbstractStep
 				type = Class.forName(this.type);
 			} catch(Exception ex)
 			{
-				exeLogger.error("Invalid type specified for value conversion. Type - {}", this.type);
+				exeLogger.error(this, "Invalid type specified for value conversion. Type - {}", this.type);
 				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}
 		
 		Object sourceValue = AutomationUtils.parseObjectSource(context, exeLogger, source, null);
 		
-		exeLogger.debug("Fetching xpath '{}' value from specified source", valueExpression);
+		exeLogger.debug(this, "Fetching xpath '{}' value from specified source", valueExpression);
 		
 		Object value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
 
-		exeLogger.debug("Setting context attribute '{}' as value: {}", name, value);
+		exeLogger.debug(this, "Setting context attribute '{}' as value: {}", name, value);
 
 		if(type != null)
 		{
-			exeLogger.debug("Converting value '{}' to type {} before setting on context", value, type.getName());
+			exeLogger.debug(this, "Converting value '{}' to type {} before setting on context", value, type.getName());
 			value = ConvertUtils.convert(value, type);
 		}
 

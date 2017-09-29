@@ -42,7 +42,7 @@ public class DragAndDropStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
-		logger.debug("Dragging element '{}' to element - {}", source, destination);
+		logger.debug(this, "Dragging element '{}' to element - {}", source, destination);
 		
 		WebElement sourceElement = UiAutomationUtils.findElement(context, null, source);
 		WebElement destinationElement = UiAutomationUtils.findElement(context, null, destination);
@@ -64,14 +64,14 @@ public class DragAndDropStep extends AbstractStep
 	{
 		if(!sourceElement.isDisplayed())
 		{
-			logger.error("Failed to find source element to be dragged. Locator: {}", source);
+			logger.error(this, "Failed to find source element to be dragged. Locator: {}", source);
 			
 			throw new TestCaseFailedException("Failed to find drag element - '{}'", source);
 		}
 
 		if(!destinationElement.isDisplayed())
 		{
-			logger.error("Failed to find targer element to be dropped. Locator: {}", destination);
+			logger.error(this, "Failed to find targer element to be dropped. Locator: {}", destination);
 			
 			throw new TestCaseFailedException("Failed to find drop area element - '{}'", destination);
 		}
@@ -95,15 +95,15 @@ public class DragAndDropStep extends AbstractStep
 			dragAndDrop.perform();
 		} catch(StaleElementReferenceException ex)
 		{
-			logger.error(ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
+			logger.error(this, ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
 			throw new TestCaseFailedException("Element with {} or {} is not attached to the page document", sourceElement, destinationElement, ex);
 		} catch(NoSuchElementException e)
 		{
-			logger.error(e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
+			logger.error(this, e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
 			throw new TestCaseFailedException("Element with {} or {} was not found in DOM ", sourceElement, destinationElement, e);
 		} catch(Exception e)
 		{
-			logger.error(e, "Error occurred while performing drag and drop operation");
+			logger.error(this, e, "Error occurred while performing drag and drop operation");
 			throw new TestCaseFailedException("Error occurred while performing drag and drop operation ", e);
 		}
 	}

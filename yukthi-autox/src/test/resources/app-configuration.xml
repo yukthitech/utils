@@ -40,7 +40,7 @@
 			
 			<wrap:drivers>
 				<driver name="jBrowser" class-name="com.machinepublishers.jbrowserdriver.JBrowserDriver">
-					<defaultPage>https://google.co.in</defaultPage>
+					<defaultPage>http://localhost:8080/</defaultPage>
 				</driver>
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
 				</driver>
@@ -77,7 +77,7 @@
 	<wrap:logMonitors>
 		<file-log-monitor name="client-output" path="c:\automation.log"/>
 	</wrap:logMonitors>
-	
+
 	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kkmail">
 		<toAddressList>akiran@yodlee.com akranthikiran@gmail.com</toAddressList>
 		<subjectTemplate>Automation test report mail!!!</subjectTemplate>

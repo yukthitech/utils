@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -36,11 +37,13 @@ public class InvokeGetFileStep extends AbstractRestStep
 	{
 		private File outFile;
 		private ExecutionLogger exeLogger;
+		private IStep step;
 		
-		public FileResultHandler(File outFile, ExecutionLogger logger)
+		public FileResultHandler(File outFile, ExecutionLogger logger, IStep step)
 		{
 			this.outFile = outFile;
 			this.exeLogger = logger;
+			this.step = step;
 		}
 
 		public RestResult<String> handleResponse(HttpResponse response) throws ClientProtocolException,IOException
@@ -65,13 +68,13 @@ public class InvokeGetFileStep extends AbstractRestStep
 			
 			if(value != null)
 			{
-				exeLogger.debug("Writing content from response to specified file: {}", outFile.getPath());
+				exeLogger.debug(step, "Writing content from response to specified file: {}", outFile.getPath());
 				FileUtils.writeByteArrayToFile(outFile, value);
 				
 				return new RestResult<String>(outFile.getAbsolutePath(), status, response);
 			}
 			
-			exeLogger.debug("No conent found to write to file");
+			exeLogger.debug(step, "No conent found to write to file");
 			return new RestResult<String>(null, status, response);
 		}
 	}
@@ -117,6 +120,6 @@ public class InvokeGetFileStep extends AbstractRestStep
 			throw new InvalidStateException("An error occurred while creating file", ex);
 		}
 		
-		return (ResponseHandler) new FileResultHandler(file, exeLogger);
+		return (ResponseHandler) new FileResultHandler(file, exeLogger, this);
 	}
 }

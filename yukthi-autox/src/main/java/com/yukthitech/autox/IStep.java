@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Represents automation step to be performed.
  * @author akiran
  */
-public interface IStep extends Cloneable, Serializable
+public interface IStep extends Cloneable, Serializable, ILocationBased
 {
 	/**
 	 * Method which should execute current step.

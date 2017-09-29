@@ -8,7 +8,6 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.TestCaseFailedException;
-import com.yukthitech.utils.ConvertUtils;
 
 /**
  * Sets the specified context attribute with specified value.
@@ -110,27 +109,20 @@ public class SetStep extends AbstractStep
 	{
 		Object value = this.getValue(context, exeLogger);
 		
-		Class<?> type = null;
-		
 		if(this.type != null)
 		{
 			try
 			{
-				type = Class.forName(this.type);
+				exeLogger.debug(this, "Converting value '{}' to type {} before setting on context", value, type);
+				value = AutomationUtils.convert(value, type);
 			}catch(Exception ex)
 			{
-				exeLogger.error("Invalid type specified for value conversion. Type - {}", this.type);
+				exeLogger.error(this, "Invalid type specified for value conversion. Type - {}", this.type);
 				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}
 		
-		exeLogger.debug("Setting context attribute '{}' as value: {}", name, value);
-		
-		if(type != null)
-		{
-			exeLogger.debug("Converting value '{}' to type {} before setting on context", value, type.getName());
-			value = ConvertUtils.convert(value, type);
-		}
+		exeLogger.debug(this, "Setting context attribute '{}' as value: {}", name, value);
 		
 		context.setAttribute(name, value);
 		return true;

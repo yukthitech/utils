@@ -134,7 +134,7 @@ public class SqlValidation extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
@@ -157,9 +157,9 @@ public class SqlValidation extends AbstractValidation
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, processedQuery, values);
+			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, processedQuery, values);
 
 			ResultSetHandler<Boolean> rsHandler = new ResultSetHandler<Boolean>()
 			{
@@ -174,7 +174,7 @@ public class SqlValidation extends AbstractValidation
 					{
 						if(expectedRows.size() <= rowIdx)
 						{
-							exeLogger.error("Actual rows are more than expected row count: {}", expectedRows.size());
+							exeLogger.error(SqlValidation.this, "Actual rows are more than expected row count: {}", expectedRows.size());
 							return false;
 						}
 
@@ -187,7 +187,7 @@ public class SqlValidation extends AbstractValidation
 
 							if(!expectedVal.equals(actualVal))
 							{
-								exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
+								exeLogger.error(SqlValidation.this, "At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
 								return false;
 							}
 						}
@@ -203,7 +203,7 @@ public class SqlValidation extends AbstractValidation
 			return res;
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
+			exeLogger.error(this, ex, "An error occurred while executing sql validation with query - {}", query);
 			throw new TestCaseFailedException("An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{

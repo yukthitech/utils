@@ -54,17 +54,17 @@ public class ValidateContextParamStep extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
 			return true;
 		}
 		
 		if(value == null)
 		{
-			exeLogger.debug("Validating context expression '{}' is present", expression);
+			exeLogger.debug(this, "Validating context expression '{}' is present", expression);
 		}
 		else
 		{
-			exeLogger.debug("Validating context expression '{}' is: {}", expression, value);
+			exeLogger.debug(this, "Validating context expression '{}' is: {}", expression, value);
 		}
 		
 		Object actualValue = null;
@@ -74,7 +74,7 @@ public class ValidateContextParamStep extends AbstractValidation
 			actualValue = PropertyUtils.getProperty(context, expression);
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while fetching property '{}' from context", expression);
+			exeLogger.error(this, ex, "An error occurred while fetching property '{}' from context", expression);
 			actualValue = null;
 			return false;
 		}
@@ -82,7 +82,7 @@ public class ValidateContextParamStep extends AbstractValidation
 		//if value is not found fail the validation
 		if(actualValue == null)
 		{
-			exeLogger.debug("Context expression '{}' is evaluated as null", expression);
+			exeLogger.debug(this, "Context expression '{}' is evaluated as null", expression);
 			return false;
 		}
 		
@@ -97,11 +97,11 @@ public class ValidateContextParamStep extends AbstractValidation
 		
 		if(res)
 		{
-			exeLogger.debug("Validation was successful");
+			exeLogger.debug(this, "Validation was successful");
 		}
 		else
 		{
-			exeLogger.error("Validation failed, found expected value and context value are different. "
+			exeLogger.error(this, "Validation failed, found expected value and context value are different. "
 					+ "\n[Value from context: {}, Expected Value: {}]", actualValue, value);
 		}
 		

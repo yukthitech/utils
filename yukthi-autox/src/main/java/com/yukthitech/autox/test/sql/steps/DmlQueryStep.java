@@ -131,9 +131,9 @@ public class DmlQueryStep extends AbstractStep
 			
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
+			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 			
 			int count = QueryUtils.executeDml(connection, processedQuery, values);
 	
@@ -142,23 +142,23 @@ public class DmlQueryStep extends AbstractStep
 				connection.commit();
 			}
 			
-			exeLogger.debug("Number of rows affected: {}", count);
+			exeLogger.debug(this, "Number of rows affected: {}", count);
 			
 			if(count <= 0 && failOnNoUpdate)
 			{
-				exeLogger.error("No records got updated by query");
+				exeLogger.error(this, "No records got updated by query");
 				throw new InvalidStateException("No records got updated by query - {}", query);
 			}
 			
 			if(countAttribute != null)
 			{
-				exeLogger.debug("Setting result count {} on context attribute: {}", count, countAttribute);
+				exeLogger.debug(this, "Setting result count {} on context attribute: {}", count, countAttribute);
 				context.setAttribute(countAttribute, count);
 			}
 
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query");
+			exeLogger.error(this, ex, "An error occurred while executing query");
 			throw new TestCaseFailedException("An erorr occurred while executing sql query - {}", query, ex);
 		} finally
 		{

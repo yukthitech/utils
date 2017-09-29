@@ -54,7 +54,7 @@ public class StepExecutor
 				if(!res)
 				{
 					Executable executable = step.getClass().getAnnotation(Executable.class);
-					exeLogger.error("Validation failed: " + executable.name() + step);
+					exeLogger.error(step, "Validation failed: " + executable.name() + step);
 	
 					throw new TestCaseValidationFailedException("Validation failed: " + executable.name());
 				}
@@ -155,18 +155,18 @@ public class StepExecutor
 			{
 				expectedException.validateMatch(ex);
 				
-				exeLogger.debug("Expected excpetion occurred: {}", ex);
+				exeLogger.debug(step, "Expected excpetion occurred: {}", ex);
 				return null;
 			}catch(InvalidArgumentException iex)
 			{
-				exeLogger.error(ex, ex.getMessage());
+				exeLogger.error(step, ex, ex.getMessage());
 				invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 				return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
 			}
 		}
 
 		//for unhandled exceptions log on ui
-		exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
+		exeLogger.error(step, ex, "An error occurred while executing " + stepType + ": " + name);
 		invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 		
 		return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());

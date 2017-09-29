@@ -24,6 +24,11 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	@Param(description = "Enables/disables current validation.\nDefault: true", required = false)
 	protected String enabled = "true";
 
+	/**
+	 * Used to maintain the location of validation.
+	 */
+	protected String location;
+
 	@Override
 	public IValidation clone()
 	{
@@ -64,5 +69,24 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	public boolean isLoggingDisabled()
 	{
 		return disableLogging;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
+	 */
+	@Override
+	public void setLocation(String location)
+	{
+		this.location = location;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getLocation()
+	 */
+	@Override
+	public String getLocation()
+	{
+		return location;
 	}
 }

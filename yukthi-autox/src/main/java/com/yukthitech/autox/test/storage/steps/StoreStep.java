@@ -52,7 +52,7 @@ public class StoreStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		exeLogger.debug("Storing key '{}' with value - {}", key, value);
+		exeLogger.debug(this, "Storing key '{}' with value - {}", key, value);
 		
 		Object sourceValue = context;
 		

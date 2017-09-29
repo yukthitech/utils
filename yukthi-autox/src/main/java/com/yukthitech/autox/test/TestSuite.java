@@ -2,11 +2,16 @@ package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -46,6 +51,11 @@ public class TestSuite implements Validateable
 	 * Cleanup steps to be executed after executing test suite.
 	 */
 	private Cleanup cleanup;
+	
+	/**
+	 * Name to step group mapping.
+	 */
+	private Map<String, StepGroup> nameToGroup = new HashMap<>();
 
 	/**
 	 * Gets the name of the test suite.
@@ -213,6 +223,37 @@ public class TestSuite implements Validateable
 		}
 		
 		this.cleanup = cleanup;
+	}
+
+	/**
+	 * Adds specified test group.
+	 * @param group group to add.
+	 */
+	public void addStepGroup(StepGroup group)
+	{
+		if(StringUtils.isEmpty(group.getName()))
+		{
+			throw new InvalidArgumentException("Step group can not be added without name");
+		}
+		
+		if(nameToGroup.containsKey(group.getName()))
+		{
+			throw new InvalidStateException("Duplicate step group name encountered: {}", group.getName());
+		}
+		
+		group.markAsFunctionGroup();
+		nameToGroup.put(group.getName(), group);
+	}
+
+	
+	/**
+	 * Fetches the step group with specified name.
+	 * @param name name of step group.
+	 * @return matching group
+	 */
+	public StepGroup getStepGroup(String name)
+	{
+		return nameToGroup.get(name);
 	}
 
 	/* (non-Javadoc)

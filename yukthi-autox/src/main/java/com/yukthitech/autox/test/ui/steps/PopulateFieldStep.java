@@ -75,17 +75,17 @@ public class PopulateFieldStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
-		logger.debug("Populating field {} with value - {}", locator, value);
+		logger.debug(this, "Populating field {} with value - {}", locator, value);
 		
 		if(!UiAutomationUtils.populateField(context, null, locator, value))
 		{
-			logger.error("Failed to fill element '{}' with value - {}", locator, value);
+			logger.error(this, "Failed to fill element '{}' with value - {}", locator, value);
 			throw new TestCaseFailedException("Failed to fill element '{}' with value - {}", locator, value);
 		}
 
 		if(pressEnterAtEnd)
 		{
-			logger.debug("User has provided enter key to be pressed");
+			logger.debug(this, "User has provided enter key to be pressed");
 
 			pressEnter(context, logger);
 		}

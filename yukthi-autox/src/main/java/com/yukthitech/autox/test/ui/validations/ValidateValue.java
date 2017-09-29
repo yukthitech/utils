@@ -47,11 +47,11 @@ public class ValidateValue extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
-		exeLogger.trace("Validating if locator '{}' has value - {}", locator, value);
+		exeLogger.trace(this, "Validating if locator '{}' has value - {}", locator, value);
 		
 		WebElement element = UiAutomationUtils.findElement(context, null, locator);
 		String actualMessage = null;
@@ -67,7 +67,7 @@ public class ValidateValue extends AbstractValidation
 
 		if(!value.equals(actualMessage))
 		{
-			exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, locator);
+			exeLogger.error(this, "Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, locator);
 			return false;
 		}
 

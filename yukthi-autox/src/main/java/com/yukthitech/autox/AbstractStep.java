@@ -10,6 +10,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public abstract class AbstractStep implements IStep, Validateable
 {
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -18,6 +20,14 @@ public abstract class AbstractStep implements IStep, Validateable
 	@Param(description = "Flag indicating if logging has to be disabled for current step. Default: false", required = false)
 	private boolean disableLogging = false;
 	
+	/**
+	 * Used to maintain the location of step.
+	 */
+	protected String location;
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
 	@Override
 	public IStep clone()
 	{
@@ -30,6 +40,9 @@ public abstract class AbstractStep implements IStep, Validateable
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{}
@@ -44,9 +57,30 @@ public abstract class AbstractStep implements IStep, Validateable
 		this.disableLogging = disableLogging;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#isLoggingDisabled()
+	 */
 	@Override
 	public boolean isLoggingDisabled()
 	{
 		return disableLogging;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
+	 */
+	@Override
+	public void setLocation(String location)
+	{
+		this.location = location;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getLocation()
+	 */
+	@Override
+	public String getLocation()
+	{
+		return location;
 	}
 }

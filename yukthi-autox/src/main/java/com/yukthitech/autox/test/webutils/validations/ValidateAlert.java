@@ -51,11 +51,11 @@ public class ValidateAlert extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
-		exeLogger.debug("Waiting for alert with message - {}", message);
+		exeLogger.debug(this, "Waiting for alert with message - {}", message);
 		
 		//wait and validate alert box is displayed
 		WaitForStep waitStep = new WaitForStep();
@@ -69,7 +69,7 @@ public class ValidateAlert extends AbstractValidation
 		
 		if(!bodyText.equals(message))
 		{
-			exeLogger.error("Expected alert message '{}' is not matching with actual value - {}", message, bodyText);
+			exeLogger.error(this, "Expected alert message '{}' is not matching with actual value - {}", message, bodyText);
 			return false;
 		}
 		

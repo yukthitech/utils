@@ -100,7 +100,7 @@ public class SetPropertyStep extends AbstractStep
 				type = Class.forName(this.type);
 			} catch(Exception ex)
 			{
-				exeLogger.error("Invalid type specified for value conversion. Type - {}", this.type);
+				exeLogger.error(this, "Invalid type specified for value conversion. Type - {}", this.type);
 				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}
@@ -116,19 +116,19 @@ public class SetPropertyStep extends AbstractStep
 		
 		try
 		{
-			exeLogger.debug("Fetching property '{}' from specified source", valueExpression);
+			exeLogger.debug(this, "Fetching property '{}' from specified source", valueExpression);
 			value = PropertyUtils.getProperty(sourceValue, valueExpression);
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while fetching property '{}' for object of type: {}", this.valueExpression, sourceValue.getClass().getName());
+			exeLogger.error(this, ex, "An error occurred while fetching property '{}' for object of type: {}", this.valueExpression, sourceValue.getClass().getName());
 			throw new TestCaseFailedException("An error occurred while fetching property '{}' for object of type: {}", this.valueExpression, sourceValue.getClass().getName(), ex);
 		}
 
-		exeLogger.debug("Setting context attribute '{}' as value: {}", name, value);
+		exeLogger.debug(this, "Setting context attribute '{}' as value: {}", name, value);
 
 		if(type != null)
 		{
-			exeLogger.debug("Converting value '{}' to type {} before setting on context", value, type.getName());
+			exeLogger.debug(this, "Converting value '{}' to type {} before setting on context", value, type.getName());
 			value = ConvertUtils.convert(value, type);
 		}
 

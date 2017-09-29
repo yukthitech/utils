@@ -18,7 +18,7 @@ public class QuitSessionStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Closing current session");
+		exeLogger.debug(this, "Closing current session");
 		
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		

@@ -55,11 +55,11 @@ public class ValidateVisibility extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
-		exeLogger.trace("Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
+		exeLogger.trace(this, "Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		UiAutomationUtils.validateWithWait(() -> {
 			WebElement element = UiAutomationUtils.findElement(context, null, locator);
@@ -79,7 +79,7 @@ public class ValidateVisibility extends AbstractValidation
 
 			if(actualMessage == null || !actualMessage.contains(message))
 			{
-				exeLogger.error("Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, locator);
+				exeLogger.error(this, "Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, locator);
 				return false;
 			}
 		}

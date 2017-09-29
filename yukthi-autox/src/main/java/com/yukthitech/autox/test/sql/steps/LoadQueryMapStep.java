@@ -145,15 +145,15 @@ public class LoadQueryMapStep extends AbstractStep
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, processedQuery, values);
+			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, processedQuery, values);
 			
 			rs = statement.executeQuery(query);
 
 			Map<Object, Object> resMap = new HashMap<>();
 
-			exeLogger.debug("Loading results as map using key-column '{}' and value-column '{}'", keyColumn, valueColumn);
+			exeLogger.debug(this, "Loading results as map using key-column '{}' and value-column '{}'", keyColumn, valueColumn);
 			
 			int rowCount = 0;
 			
@@ -164,10 +164,10 @@ public class LoadQueryMapStep extends AbstractStep
 			}
 
 			context.setAttribute(contextAttribute, resMap);
-			exeLogger.debug("Processed number of rows {} and set result map on context with attribute name '{}'. Data Map: {}", rowCount, contextAttribute, resMap);
+			exeLogger.debug(this, "Processed number of rows {} and set result map on context with attribute name '{}'. Data Map: {}", rowCount, contextAttribute, resMap);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query: {}", query);
+			exeLogger.error(this, ex, "An error occurred while executing query: {}", query);
 			
 			throw new TestCaseFailedException("An erorr occurred while executing query: {}", query, ex);
 		} finally

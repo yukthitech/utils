@@ -20,6 +20,7 @@ import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -83,6 +84,11 @@ public class AutomationContext
 	 * Persistence storage to persist data across the executions.
 	 */
 	private PersistenceStorage persistenceStorage;
+	
+	/**
+	 * Current test suite being executed.
+	 */
+	private TestSuite activeTestSuite;
 
 	/**
 	 * Constructor.
@@ -123,6 +129,16 @@ public class AutomationContext
 	public static AutomationContext getInstance()
 	{
 		return instance;
+	}
+	
+	/**
+	 * Sets the current test suite being executed.
+	 *
+	 * @param currentTestSuite the new current test suite being executed
+	 */
+	public void setActiveTestSuite(TestSuite currentTestSuite)
+	{
+		this.activeTestSuite = currentTestSuite;
 	}
 	
 	/**
@@ -308,7 +324,7 @@ public class AutomationContext
 			throw new InvalidArgumentException("Step group can not be added without name");
 		}
 		
-		if(nameToAttr.containsKey(group.getName()))
+		if(nameToGroup.containsKey(group.getName()))
 		{
 			throw new InvalidStateException("Duplicate step group name encountered: {}", group.getName());
 		}
@@ -334,6 +350,17 @@ public class AutomationContext
 	 */
 	public StepGroup getStepGroup(String name)
 	{
+		//check if current test suite has the group, if present give that higher preference
+		if(activeTestSuite != null)
+		{
+			StepGroup stepGroup = activeTestSuite.getStepGroup(name);
+			
+			if(stepGroup != null)
+			{
+				return stepGroup;
+			}
+		}
+		
 		return nameToGroup.get(name);
 	}
 

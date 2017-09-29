@@ -41,7 +41,7 @@ public class WaitForStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Waiting for element '{}' to become {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
+		exeLogger.debug(this, "Waiting for element '{}' to become {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		try
 		{
@@ -60,7 +60,7 @@ public class WaitForStep extends AbstractStep
 			
 		} catch(InvalidStateException ex)
 		{
-			exeLogger.error(ex, ex.getMessage());
+			exeLogger.error(this, ex, ex.getMessage());
 			throw new TestCaseFailedException(ex.getMessage(), ex);
 		}
 		

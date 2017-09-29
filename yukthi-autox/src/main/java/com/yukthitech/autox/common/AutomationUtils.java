@@ -36,6 +36,8 @@ import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -588,5 +590,28 @@ public class AutomationUtils
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Converts original value into specified type. 
+	 * @param originalValue value to be converted
+	 * @param strType type to be converted. If null, original value will be retained.
+	 * @return converted value
+	 */
+	public static Object convert(Object originalValue, String strType)
+	{
+		Class<?> type = null;
+		
+		if(strType != null)
+		{
+			type = CommonUtils.getClass(strType);
+		}
+
+		if(type != null)
+		{
+			return ConvertUtils.convert(originalValue, type);
+		}
+
+		return originalValue;
 	}
 }

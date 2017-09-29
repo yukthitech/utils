@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -16,7 +17,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
 /**
  * Represents list of steps that needs to be executed before executing testing unit.
  */
-public class Setup implements IStepContainer, Validateable
+public class Setup implements IStepContainer, Validateable, ILocationBased
 {
 	/**
 	 * Name for logger and other purposes.
@@ -27,6 +28,11 @@ public class Setup implements IStepContainer, Validateable
 	 * Steps for the test case.
 	 */
 	private List<IStep> steps = new ArrayList<>();
+	
+	/**
+	 * Used to maintain the location of step.
+	 */
+	protected String location;
 
 	/*
 	 * (non-Javadoc)
@@ -66,7 +72,7 @@ public class Setup implements IStepContainer, Validateable
 	public TestCaseResult execute(AutomationContext context)
 	{
 		ExecutionLogger exeLogger = new ExecutionLogger(NAME, NAME);
-		exeLogger.debug("Started setup process");
+		exeLogger.debug(this, "Started setup process");
 		
 		// execute the steps involved
 		for(IStep step : steps)
@@ -77,13 +83,13 @@ public class Setup implements IStepContainer, Validateable
 				step.execute(context, exeLogger);
 			} catch(Exception ex)
 			{
-				exeLogger.error(ex, "An error occurred while executing step - " + step);
+				exeLogger.error(this, ex, "An error occurred while executing step - " + step);
 
 				return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 			}
 		}
 
-		exeLogger.debug("Completed setup process");
+		exeLogger.debug(this, "Completed setup process");
 		return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
 
@@ -99,5 +105,23 @@ public class Setup implements IStepContainer, Validateable
 		{
 			throw new ValidateException("No steps provided for setup");
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
+	 */
+	@Override
+	public void setLocation(String location)
+	{
+		this.location = location;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getLocation()
+	 */
+	@Override
+	public String getLocation()
+	{
+		return location;
 	}
 }

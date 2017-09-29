@@ -70,17 +70,17 @@ public class ValidateXpathValueStep extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
 			return true;
 		}
 		
 		if(value == null)
 		{
-			exeLogger.debug("Validating xpath expression '{}' is present", valueExpression);
+			exeLogger.debug(this, "Validating xpath expression '{}' is present", valueExpression);
 		}
 		else
 		{
-			exeLogger.debug("Validating context expression '{}' is: {}", valueExpression, value);
+			exeLogger.debug(this, "Validating context expression '{}' is: {}", valueExpression, value);
 		}
 		
 		Object sourceValue = AutomationUtils.parseObjectSource(context, exeLogger, source, null);
@@ -90,7 +90,7 @@ public class ValidateXpathValueStep extends AbstractValidation
 		//if value is not found fail the validation
 		if(actualValue == null)
 		{
-			exeLogger.debug("Value expression '{}' is evaluated as null", valueExpression);
+			exeLogger.debug(this, "Value expression '{}' is evaluated as null", valueExpression);
 			return false;
 		}
 		
@@ -105,11 +105,11 @@ public class ValidateXpathValueStep extends AbstractValidation
 		
 		if(res)
 		{
-			exeLogger.debug("Validation was successful");
+			exeLogger.debug(this, "Validation was successful");
 		}
 		else
 		{
-			exeLogger.error("Validation failed, found expected value and actual value are different. "
+			exeLogger.error(this, "Validation failed, found expected value and actual value are different. "
 					+ "\n[Actual Value: {}, Expected Value: {}]", actualValue, value);
 		}
 		

@@ -2,6 +2,7 @@ package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
@@ -36,6 +37,22 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	 * be executed only in function groups.
 	 */
 	private boolean functionGroup = false;
+	
+	/**
+	 * Flag indicating if logging is disabled. This flag is expected to be set
+	 * by calling step-group-ref.
+	 */
+	private boolean loggingDisabled = false;
+	
+	/**
+	 * Params for step group execution. This are expected to be set by step-group-ref
+	 */
+	private Map<String, Object> params;
+	
+	/**
+	 * Used to maintain the location of step group.
+	 */
+	private String location;
 
 	/**
 	 * Sets the name of this group.
@@ -55,6 +72,21 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	public String getName()
 	{
 		return name;
+	}
+	
+	/**
+	 * Sets the flag indicating if logging is disabled. This flag is expected to be set by calling step-group-ref.
+	 *
+	 * @param loggingDisabled the new flag indicating if logging is disabled
+	 */
+	void setLoggingDisabled(boolean loggingDisabled)
+	{
+		this.loggingDisabled = loggingDisabled;
+	}
+	
+	void setParams(Map<String, Object> params)
+	{
+		this.params = params;
 	}
 	
 	public void markAsFunctionGroup()
@@ -83,6 +115,12 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	{
 		for(IStep step : this.steps)
 		{
+			/*
+			 * parameters needs to be set in loop so that in case of recursion or one step group
+			 * calling other, current group parameters will be restored before executing next step.
+			 */
+			context.setAttribute("parameters", params);
+			
 			try
 			{
 				StepExecutor.executeStep(context, logger, step);
@@ -90,7 +128,7 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 			{
 				if(functionGroup && (ex instanceof ReturnException))
 				{
-					logger.debug("Exiting from current step group");
+					logger.debug(this, "Exiting from current step group");
 					break;
 				}
 				
@@ -100,7 +138,7 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 				}
 				
 				Executable executable = step.getClass().getAnnotation(Executable.class);
-				logger.error("An error occurred while executing child-step '{}'. Error: {}", executable.name(), ex);
+				logger.error(this, "An error occurred while executing child-step '{}'. Error: {}", executable.name(), ex);
 				throw ex;
 			}
 		}
@@ -123,6 +161,25 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	@Override
 	public boolean isLoggingDisabled()
 	{
-		return false;
+		return loggingDisabled;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
+	 */
+	@Override
+	public void setLocation(String location)
+	{
+		this.location = location;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getLocation()
+	 */
+	@Override
+	public String getLocation()
+	{
+		return location;
 	}
 }

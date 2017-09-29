@@ -122,17 +122,17 @@ public class MultiDmlQueryStep extends AbstractStep
 				
 				processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 				
-				exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
+				exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 				
-				exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
+				exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 				
 				int count = QueryUtils.executeDml(connection, processedQuery, values);
 				
-				exeLogger.debug("Number of rows affected: {}", count);
+				exeLogger.debug(this, "Number of rows affected: {}", count);
 				
 				if(count <= 0 && failOnNoUpdate)
 				{
-					exeLogger.error("No records got updated by query failing test case.");
+					exeLogger.error(this, "No records got updated by query failing test case.");
 					throw new InvalidStateException("No records got updated by query: {}", query);
 				}
 			}
@@ -142,7 +142,7 @@ public class MultiDmlQueryStep extends AbstractStep
 
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query: {}", query);
+			exeLogger.error(this, ex, "An error occurred while executing query: {}", query);
 			DbUtils.rollbackAndCloseQuietly(connection);
 			
 			throw new TestCaseFailedException("An erorr occurred while executing sql query: {}", query, ex);

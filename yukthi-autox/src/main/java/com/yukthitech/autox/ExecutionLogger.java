@@ -62,27 +62,44 @@ public class ExecutionLogger
 	{
 		return stackTrace[2].getFileName() + ":" + stackTrace[2].getLineNumber();
 	}
-
+	
 	/**
-	 * Used to log error messages as part of current execution.
-	 * @param mssgTemplate Message template with params.
-	 * @param args Arguments for message template.
+	 * Fetches the location of the element.
+	 * @param locationBased
+	 * @return
 	 */
-	public void error(String mssgTemplate, Object... args)
+	private String getSourceLocation(ILocationBased locationBased)
 	{
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
-		logger.error(finalMssg);
+		if(locationBased == null)
+		{
+			return null;
+		}
 		
-		executionLogData.addMessage(new ExecutionLogData.Message( getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
+		return locationBased.getLocation();
 	}
 
 	/**
 	 * Used to log error messages as part of current execution.
+	 * @param source location from where logging is being done
+	 * @param mssgTemplate Message template with params.
+	 * @param args Arguments for message template.
+	 */
+	public void error(ILocationBased source, String mssgTemplate, Object... args)
+	{
+		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		logger.error(finalMssg);
+		
+		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
+	}
+
+	/**
+	 * Used to log error messages as part of current execution.
+	 * @param source location from where logging is being done
 	 * @param th Throwable stack trace.
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void error(Throwable th, String mssgTemplate, Object... args)
+	public void error(ILocationBased source, Throwable th, String mssgTemplate, Object... args)
 	{
 		String finalMssg = MessageFormatter.format(mssgTemplate, args);
 		logger.error(finalMssg, th);
@@ -94,15 +111,16 @@ public class ExecutionLogger
 		th.printStackTrace(printWriter);
 		printWriter.flush();
 		
-		executionLogData.addMessage(new ExecutionLogData.Message( getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, stringWriter.toString(), new Date()));
+		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, stringWriter.toString(), new Date()));
 	}
 
 	/**
 	 * Used to log debug messages as part of current execution.
+	 * @param source location from where logging is being done
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void debug(String mssgTemplate, Object... args)
+	public void debug(ILocationBased source, String mssgTemplate, Object... args)
 	{
 		if(disabled)
 		{
@@ -112,15 +130,16 @@ public class ExecutionLogger
 		String finalMssg = MessageFormatter.format(mssgTemplate, args);
 
 		logger.debug(finalMssg);
-		executionLogData.addMessage(new ExecutionLogData.Message( getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
+		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
 	}
 	
 	/**
 	 * Used to log trace messages as part of current execution.
+	 * @param source location from where logging is being done
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void trace(String mssgTemplate, Object... args)
+	public void trace(ILocationBased source, String mssgTemplate, Object... args)
 	{
 		if(disabled)
 		{
@@ -130,16 +149,17 @@ public class ExecutionLogger
 		String finalMssg = MessageFormatter.format(mssgTemplate, args);
 
 		logger.trace(finalMssg);
-		executionLogData.addMessage(new ExecutionLogData.Message( getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
+		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
 	}
 
 	/**
 	 * Logs the message at specified level.
+	 * @param source location from where logging is being done
 	 * @param logLevel level of log
 	 * @param mssgTemplate msg template
 	 * @param args arguments for message
 	 */
-	public void log(LogLevel logLevel, String mssgTemplate, Object... args)
+	public void log(ILocationBased source, LogLevel logLevel, String mssgTemplate, Object... args)
 	{
 		if(disabled)
 		{
@@ -149,17 +169,18 @@ public class ExecutionLogger
 		String finalMssg = MessageFormatter.format(mssgTemplate, args);
 
 		logger.debug(finalMssg);
-		executionLogData.addMessage(new ExecutionLogData.Message( getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
+		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
 	}
 
 	/**
 	 * Adds the specified image file to the debug log.
+	 * @param source location from where logging is being done
 	 * @param name Name of the image file for easy identification
 	 * @param message Message to be logged along with image
 	 * @param imageFile Image to be logged
 	 * @param logLevel level to be used.
 	 */
-	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
+	public void logImage(ILocationBased source, String name, String message, File imageFile, LogLevel logLevel)
 	{
 		if(disabled)
 		{
@@ -188,7 +209,7 @@ public class ExecutionLogger
 			name = System.currentTimeMillis() + "_" + (fileIndex++) + extension;
 		}
 		
-		executionLogData.addMessage(new ExecutionLogData.ImageMessage( getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
+		executionLogData.addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
 	}
 	
 	/**

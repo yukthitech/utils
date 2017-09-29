@@ -95,7 +95,7 @@ public class ResourceFactory
 			{
 				if(exeLogger != null)
 				{
-					exeLogger.debug("Loading file as resource: {}", resValue);
+					exeLogger.debug(null, "Loading file as resource: {}", resValue);
 				}
 				
 				return new FileResource(resValue, rawType);
@@ -104,7 +104,7 @@ public class ResourceFactory
 			{
 				if(exeLogger != null)
 				{
-					exeLogger.debug("Loading classpath resource: {}", resValue);
+					exeLogger.debug(null, "Loading classpath resource: {}", resValue);
 				}
 				
 				return new ClassPathResource(resValue, rawType);
@@ -113,7 +113,7 @@ public class ResourceFactory
 			{
 				if(exeLogger != null)
 				{
-					exeLogger.debug("Loading specified content itself as resource: {}", resValue);
+					exeLogger.debug(null, "Loading specified content itself as resource: {}", resValue);
 				}
 				
 				return new StringResource(resValue, rawType);
@@ -122,7 +122,7 @@ public class ResourceFactory
 			{
 				if(exeLogger != null)
 				{
-					exeLogger.debug("Loading context-property value as resource. Property: {}", resValue);
+					exeLogger.debug(null, "Loading context-property value as resource. Property: {}", resValue);
 				}
 				
 				Object value = null;

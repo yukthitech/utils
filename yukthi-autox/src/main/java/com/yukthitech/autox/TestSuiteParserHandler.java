@@ -36,14 +36,29 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	 * Value provider for providing application properties and system/env properties.
 	 */
 	private AppConfigValueProvider appConfigValueProvider;
+	
+	/**
+	 * Automation reserve node handler.
+	 */
+	private AutomationReserveNodeHandler reserveNodeHandler;
 
 	public TestSuiteParserHandler(AutomationContext context, ApplicationConfiguration appConfig)
 	{
 		this.appConfig = appConfig;
 		appConfigValueProvider = new AppConfigValueProvider(appConfig.getApplicationProperties());
 		
-		AutomationReserveNodeHandler reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
+		reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
 		super.registerReserveNodeHandler(reserveNodeHandler);
+	}
+	
+	/**
+	 * Sets the maintains the file being parsed.
+	 *
+	 * @param fileBeingParsed the new maintains the file being parsed
+	 */
+	public void setFileBeingParsed(String fileBeingParsed)
+	{
+		reserveNodeHandler.setFileBeingParsed(fileBeingParsed);
 	}
 
 	@Override

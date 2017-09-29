@@ -166,7 +166,7 @@ public class SummaryNotificationConfig
 	 */
 	public boolean isAuthEnabled()
 	{
-		return ( StringUtils.isNoneBlank(userName) && StringUtils.isNoneBlank(password) ); 
+		return ( StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password) ); 
 	}
 
 	/**

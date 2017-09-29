@@ -59,7 +59,7 @@ public class FillFormStep extends AbstractStep
 	 */
 	private void fillWithStandardBean(Object data, AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
+		exeLogger.debug(this, "Filling form '{}' with standard bean - {}", locator, data);
 		
 		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
@@ -84,15 +84,15 @@ public class FillFormStep extends AbstractStep
 				}
 			} catch(Exception ex)
 			{
-				exeLogger.error(ex, "An error occurred while setting property - " + desc.getName());
+				exeLogger.error(this, ex, "An error occurred while setting property - " + desc.getName());
 				continue;
 			}
 
-			exeLogger.debug("Populating field {} with value - {}", desc.getName(), value);
+			exeLogger.debug(this, "Populating field {} with value - {}", desc.getName(), value);
 
 			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), value))
 			{
-				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
+				exeLogger.error(this, "Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
 			}
 			
@@ -116,7 +116,7 @@ public class FillFormStep extends AbstractStep
 	 */
 	private void fillWithMap(Map<String, Object> properties, AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
+		exeLogger.debug(this, "Filling form '{}' with dynamic bean - {}", locator, data);
 		
 		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
 
@@ -132,11 +132,11 @@ public class FillFormStep extends AbstractStep
 				continue;
 			}
 
-			exeLogger.debug("Populating field '{}' with value - {}", name, value);
+			exeLogger.debug(this, "Populating field '{}' with value - {}", name, value);
 
 			if(!UiAutomationUtils.populateField(context, parentElement, name, value))
 			{
-				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, value);
+				exeLogger.error(this, "Failed to fill element '{}' under parent '{}' with value - {}", name, value);
 				throw new TestCaseFailedException("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
 			}
 			

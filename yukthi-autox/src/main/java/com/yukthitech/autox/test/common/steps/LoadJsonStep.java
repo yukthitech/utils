@@ -104,7 +104,7 @@ public class LoadJsonStep extends AbstractStep
 				resType = Class.forName(type);
 			}catch(Exception ex)
 			{
-				exeLogger.error(ex, "An error occurred while loading specified type: {}", type);
+				exeLogger.error(this, ex, "An error occurred while loading specified type: {}", type);
 				throw new TestCaseFailedException("An error occurred while loading specified type: {}", type, ex);
 			}
 		}
@@ -115,19 +115,19 @@ public class LoadJsonStep extends AbstractStep
 			
 			if(template)
 			{
-				exeLogger.debug("Replacing free marker expressions in input resource");
+				exeLogger.debug(this, "Replacing free marker expressions in input resource");
 				jsonContent = AutomationUtils.replaceExpressions(context, jsonContent);
 			}
 			else
 			{
-				exeLogger.debug("Template is marked as false. Ignoring expressions in input resource");
+				exeLogger.debug(this, "Template is marked as false. Ignoring expressions in input resource");
 			}
 			
 			value = IAutomationConstants.OBJECT_MAPPER.readValue(jsonContent, resType);
 			resObj.close();
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while loading json resource - {}.\nError: {}", resource);
+			exeLogger.error(this, ex, "An error occurred while loading json resource - {}.\nError: {}", resource);
 			throw new TestCaseFailedException("An error occurred while loading json resource - {}", resource, ex);
 		}
 		

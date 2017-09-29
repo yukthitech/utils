@@ -257,15 +257,15 @@ public class InvokeMethodStep extends AbstractStep
 			{
 				if(paramTypes != null)
 				{
-					logger.debug("On class {} invoking static method '{}' with parameter types - {}", objectType.getName(), method, paramTypes);
-					logger.debug("Params used: {}", parameters);
+					logger.debug(this, "On class {} invoking static method '{}' with parameter types - {}", objectType.getName(), method, paramTypes);
+					logger.debug(this, "Params used: {}", parameters);
 					
 					return MethodUtils.invokeExactStaticMethod(objectType, method, params, types);
 				}
 				else
 				{
-					logger.debug("On class {} invoking static method '{}' matching with specified parameters", objectType.getName(), method);
-					logger.debug("Params used: {}", parameters);
+					logger.debug(this, "On class {} invoking static method '{}' matching with specified parameters", objectType.getName(), method);
+					logger.debug(this, "Params used: {}", parameters);
 					
 					return MethodUtils.invokeStaticMethod(objectType, method, params);
 				}
@@ -273,15 +273,15 @@ public class InvokeMethodStep extends AbstractStep
 			
 			if(paramTypes != null)
 			{
-				logger.debug("On object {} invoking instance method '{}' with parameter types - {}", object, method, paramTypes);
-				logger.debug("Params used: {}", parameters);
+				logger.debug(this, "On object {} invoking instance method '{}' with parameter types - {}", object, method, paramTypes);
+				logger.debug(this, "Params used: {}", parameters);
 
 				return MethodUtils.invokeExactMethod(object, method, params, types);
 			}
 			else
 			{
-				logger.debug("On object {} invoking instance method '{}' matching with specified parameters", object, method);
-				logger.debug("Params used: {}", parameters);
+				logger.debug(this, "On object {} invoking instance method '{}' matching with specified parameters", object, method);
+				logger.debug(this, "Params used: {}", parameters);
 				
 				return MethodUtils.invokeMethod(object, method, params);
 			}
@@ -293,7 +293,7 @@ public class InvokeMethodStep extends AbstractStep
 				ex = (Exception) ex.getCause();
 			}
 
-			logger.error(ex, "An error occurred while invoking method - {}", method);
+			logger.error(this, ex, "An error occurred while invoking method - {}", method);
 			
 			throw ex;
 		} 

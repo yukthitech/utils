@@ -90,18 +90,18 @@ public class LoadPropertiesStep extends AbstractStep
 			
 			if(template)
 			{
-				exeLogger.debug("Replacing free marker expressions in input resource");
+				exeLogger.debug(this, "Replacing free marker expressions in input resource");
 				propContent = AutomationUtils.replaceExpressions(context, propContent);
 			}
 			else
 			{
-				exeLogger.debug("Template is marked as false. Ignoring expressions in input resource");
+				exeLogger.debug(this, "Template is marked as false. Ignoring expressions in input resource");
 			}
 
 			properties.load( new ByteArrayInputStream(propContent.getBytes()) );
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while loading properties resource - {}.\nError: {}", resource);
+			exeLogger.error(this, ex, "An error occurred while loading properties resource - {}.\nError: {}", resource);
 			throw new TestCaseFailedException("An error occurred while loading properties resource - {}", resource, ex);
 		}
 		

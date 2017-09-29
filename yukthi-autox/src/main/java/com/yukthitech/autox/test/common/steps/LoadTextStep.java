@@ -85,16 +85,16 @@ public class LoadTextStep extends AbstractStep
 
 			if(template)
 			{
-				exeLogger.debug("Replacing free marker expressions in input resource");
+				exeLogger.debug(this, "Replacing free marker expressions in input resource");
 				value = AutomationUtils.replaceExpressions(context, value);
 			}
 			else
 			{
-				exeLogger.debug("Template is marked as false. Ignoring expressions in input resource");
+				exeLogger.debug(this, "Template is marked as false. Ignoring expressions in input resource");
 			}
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while loading resource - {}.\nError: {}", resource);
+			exeLogger.error(this, ex, "An error occurred while loading resource - {}.\nError: {}", resource);
 			throw new TestCaseFailedException("An error occurred while loading resource - {}", resource, ex);
 		}
 		

@@ -38,11 +38,11 @@ public class ValidateNullContextParamStep extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
+			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution. Enabled: " + enabled);
 			return true;
 		}
 		
-		exeLogger.debug("Validating context expression '{}' is null", expression);
+		exeLogger.debug(this, "Validating context expression '{}' is null", expression);
 
 		Object actualValue = null;
 		
@@ -51,7 +51,7 @@ public class ValidateNullContextParamStep extends AbstractValidation
 			actualValue = PropertyUtils.getProperty(context, expression);
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while fetching property '{}' from context. So assuming value as null.", expression);
+			exeLogger.error(this, ex, "An error occurred while fetching property '{}' from context. So assuming value as null.", expression);
 			actualValue = null;
 			return true;
 		}
@@ -59,11 +59,11 @@ public class ValidateNullContextParamStep extends AbstractValidation
 		//if value is not found fail the validation
 		if(actualValue == null)
 		{
-			exeLogger.debug("Context expression '{}' is evaluated as null", expression);
+			exeLogger.debug(this, "Context expression '{}' is evaluated as null", expression);
 			return true;
 		}
 		
-		exeLogger.debug("Context expression '{}' is evaluated to non-null value - {}", expression, actualValue);
+		exeLogger.debug(this, "Context expression '{}' is evaluated to non-null value - {}", expression, actualValue);
 		return false;
 	}
 	
