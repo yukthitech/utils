@@ -39,10 +39,9 @@
 			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>
-				<driver name="jBrowser" class-name="com.machinepublishers.jbrowserdriver.JBrowserDriver">
-					<defaultPage>http://localhost:8080/</defaultPage>
-				</driver>
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
+				</driver>
+				<driver name="remoteWebDriver" class-name="org.openqa.selenium.remote.RemoteWebDriver">
 				</driver>
 				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
 					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
@@ -78,7 +77,7 @@
 		<file-log-monitor name="client-output" path="c:\automation.log"/>
 	</wrap:logMonitors>
 
-	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kkmail">
+	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kranthi@mail">
 		<toAddressList>akiran@yodlee.com akranthikiran@gmail.com</toAddressList>
 		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
 	</summaryNotificationConfig>

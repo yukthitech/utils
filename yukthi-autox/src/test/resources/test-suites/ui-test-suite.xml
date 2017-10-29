@@ -5,13 +5,22 @@
 			
 			<wrap:steps>
 				<ccg:gotoPage uri="/index.html" />
+				<ccg:isVisible locator="id: testLayer" name="visibFlag1"/>
+				
 				<ccg:click locator="id: button"/>
+				<ccg:sleep time="1000"/>
 				
 				<ccg:logScreenShot name="test.png" />
+				
+				<ccg:isVisible locator="id: testLayer" name="visibFlag2"/>
+				<ccg:getUiValue locator="xpath: //input[@name='statusFld']" name="fldValue"/>
 			</wrap:steps>
 	
 			<wrap:validations>
 				<ccg:validateValue locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
+				<ccg:validateContextParam expression="attr.visibFlag1" value="false"/>
+				<ccg:validateContextParam expression="attr.visibFlag2" value="true"/>
+				<ccg:validateContextParam expression="attr.fldValue" value="button Clicked"/>
 			</wrap:validations>
 		</testCase>
 

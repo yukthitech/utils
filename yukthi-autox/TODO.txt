@@ -1,3 +1,14 @@
+Collection/map steps
+	create new collection/map
+	add/put an entry
+	remove an entry
+	filter entries
+		filter based on free marker expression
+		result as different attr or same (defaults to same)
+	find an entry (similar to filter but results in single entry)
+	compare 2 collections for equality
+	contains all functionality
+
 Remove raw resource types and ccg:skipExpressions for skipping expression parsing
 	this should set flag on context which should be referrd in automation utils
 	
@@ -7,10 +18,6 @@ In SetStep and others wherever object is expected we should be able to inject va
 	Default data source should be possible
 	
 	
-
-	POST step without body
-	
-	Summary page + Ability to email summary report
 
 	Ability to specify load order
 

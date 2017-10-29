@@ -12,6 +12,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.test.log.LogLevel;
 
 /**
  * Takes the screen shot of the browser and adds it to the log .
@@ -35,6 +36,12 @@ public class LogScreenShotStep extends AbstractStep
 	private String message;
 
 	/**
+	 * Logging level.
+	 */
+	@Param(description = "Logging level. Default Value: DEBUG", required = false)
+	private LogLevel level = LogLevel.DEBUG;
+
+	/**
 	 * Sets the name of the file provided by the user.
 	 *
 	 * @param fileName the new name of the file provided by the user
@@ -53,6 +60,16 @@ public class LogScreenShotStep extends AbstractStep
 	{
 		this.message = message;
 	}
+	
+	/**
+	 * Sets the logging level.
+	 *
+	 * @param level the new logging level
+	 */
+	public void setLevel(LogLevel level)
+	{
+		this.level = level;
+	}
 
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
@@ -61,7 +78,7 @@ public class LogScreenShotStep extends AbstractStep
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-		exeLogger.logImage(this, name, message, file, null);
+		exeLogger.logImage(this, name, message, file, level);
 		
 		return true;
 	}

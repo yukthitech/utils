@@ -47,7 +47,16 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class AutomationUtils
 {
+	/**
+	 * Pattern to parse java type.
+	 */
 	private static final Pattern TYPE_STR_PATTERN = Pattern.compile("([\\w\\.\\$]+)\\s*\\<\\s*([\\w\\.\\$\\,\\ ]+\\s*)\\>\\s*");
+	
+	/**
+	 * Pattern used to extract type string from the ending of the source string. Note, pattern ensures 
+	 * type is considered only when defined at end of source string.
+	 */
+	private static final Pattern TYPE_EXTRACT_PATTERN = Pattern.compile("\\#(.*)$");
 	
 	/**
 	 * Loads the xml files from specified folder. Returned set will be ordered by their relative paths.
@@ -508,13 +517,14 @@ public class AutomationUtils
 
 		//check if string is resource
 		JavaType resultType = defaultType != null ? defaultType : TypeFactory.defaultInstance().uncheckedSimpleType(Object.class);
+		Matcher typeExtractMatcher = TYPE_EXTRACT_PATTERN.matcher(sourceStr);
 		
-		if(sourceStr.indexOf("#") > 0)
+		if(typeExtractMatcher.find())
 		{
-			String typeStr = sourceStr.substring(sourceStr.indexOf("#") + 1);
+			String typeStr = typeExtractMatcher.group(1);
 			resultType = parseJavaType(typeStr);
 			
-			sourceStr = sourceStr.substring(0, sourceStr.indexOf("#")).trim();
+			sourceStr = sourceStr.substring(0, typeExtractMatcher.start()).trim();
 		}
 		
 		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger, true);
