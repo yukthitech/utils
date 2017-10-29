@@ -210,6 +210,9 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				}
 				else
 				{
+					Object idValue = conversionService.convertToJavaType(idWrapper.getValue(), entityDetails.getIdField());
+					idWrapper.setValue(idValue);
+					
 					//set the id value on entity
 					entityDetails.getIdField().setValue(entity, idWrapper.getValue());
 				}

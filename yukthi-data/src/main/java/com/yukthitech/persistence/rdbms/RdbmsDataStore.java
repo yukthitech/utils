@@ -560,7 +560,7 @@ public class RdbmsDataStore implements IDataStore
 			logger.debug("Built save query as: \n\t{}", query);
 			
 			Connection connection = transaction.getTransaction().getConnection();
-			pstmt = connection.prepareStatement(query);
+			pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 			int index = 1;
 			List<Object> params = new ArrayList<>();
 			Object value = null;
