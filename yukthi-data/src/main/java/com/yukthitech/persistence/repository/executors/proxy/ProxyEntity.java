@@ -154,7 +154,7 @@ public class ProxyEntity
 	/**
 	 * Populates proxies for all relation fields.
 	 */
-	private void populateRelationFields(Map<String, Object> dataMap)
+	private void populateRelationFields(Map<String, Object> flatDataMap)
 	{
 		EntityDetails entityDetails = repository.getEntityDetails();
 		Object value = null;
@@ -215,11 +215,20 @@ public class ProxyEntity
 				//if current table owns the relation
 				if(fieldDetails.isTableOwned())
 				{
-					Object relationId = dataMap.get(fieldDetails.getName());
+					Object relationId = flatDataMap.get(fieldDetails.getName().toLowerCase());
 					
+					//if relation id is not found with field name
 					if(relationId == null)
 					{
-						continue;
+						//check if relation id can be found with column name
+						relationId = flatDataMap.get( fieldDetails.getDbColumnName().toLowerCase().replace("_", "") );
+						
+						//if relation id is not found even with column name
+						if(relationId == null)
+						{
+							//ignore current field
+							continue;
+						}
 					}
 					
 					Object relatedEntity = ProxyEntity.newProxyById(targetEntityDetails, relatedRepo, relationId);

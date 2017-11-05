@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.Table;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -20,12 +21,14 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.FieldDetails;
+import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IDataStore;
 import com.yukthitech.persistence.Record;
 import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
 import com.yukthitech.persistence.repository.annotations.NativeQuery;
 import com.yukthitech.persistence.repository.annotations.NativeQueryType;
+import com.yukthitech.persistence.repository.executors.proxy.ProxyEntity;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ReflectionUtils;
@@ -96,7 +99,7 @@ public class NativeQueryExecutor extends QueryExecutor
 		nativeQueryAnnotation = method.getAnnotation(NativeQuery.class);
 		returnType = method.getReturnType();
 		
-	//for read methods, load return type field details and set the collection type as needed.
+		//for read methods, load return type field details and set the collection type as needed.
 		if(nativeQueryAnnotation.type() == NativeQueryType.READ)
 		{
 			//set the collection type if required
@@ -239,10 +242,14 @@ public class NativeQueryExecutor extends QueryExecutor
 		ConversionService conversionService = dataStore.getConversionService();
 		FieldDetails fieldDetails = null;
 		
+		Map<String, Object> flatColumnMap = new HashMap<>();
+		
 		for(String column : record.getColumnNames())
 		{
 			//flatten the column name
 			flatColumnName = column.toLowerCase().replace("_", "");
+			
+			flatColumnMap.put(flatColumnName, record.getObject(column));
 			
 			//get the result type field with same name
 			field = returnTypeFields.get(flatColumnName);
@@ -283,6 +290,15 @@ public class NativeQueryExecutor extends QueryExecutor
 			{
 				throw new InvalidStateException(ex, "An error occurred while invoking post construct method - {}.{}", returnType.getName(), postConstructMethod.getName());
 			}
+		}
+		
+		boolean isEntityResultType = (returnType.getAnnotation(Table.class) != null);
+		
+		//if return type is target entity type, wrap result with proxy to take care of sub relations
+		if(isEntityResultType)
+		{
+			ICrudRepository<?> resultRepo = super.getCrudRepository(returnType); 
+			result = ProxyEntity.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, flatColumnMap);
 		}
 		
 		return result;
