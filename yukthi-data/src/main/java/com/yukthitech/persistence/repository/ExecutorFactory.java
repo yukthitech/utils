@@ -147,6 +147,16 @@ public class ExecutorFactory
 	}
 	
 	/**
+	 * Gets the persistence execution context.
+	 *
+	 * @return the persistence execution context
+	 */
+	public PersistenceExecutionContext getPersistenceExecutionContext()
+	{
+		return persistenceExecutionContext;
+	}
+	
+	/**
 	 * Registers default executors
 	 */
 	protected void registerDefaultExecutors()

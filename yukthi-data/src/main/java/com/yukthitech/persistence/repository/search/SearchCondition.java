@@ -76,10 +76,7 @@ public class SearchCondition
 	 */
 	public SearchCondition(String field, Operator operator, Object value, boolean nullable)
 	{
-		this.field = field;
-		this.operator = operator;
-		this.value = value;
-		this.nullable = nullable;
+		this(JoinOperator.AND, field, operator, value, nullable);
 	}
 
 	/**
@@ -92,10 +89,7 @@ public class SearchCondition
 	 */
 	public SearchCondition(JoinOperator joinOperator, String field, Operator operator, Object value)
 	{
-		this.field = field;
-		this.operator = operator;
-		this.value = value;
-		this.joinOperator = joinOperator;
+		this(joinOperator, field, operator, value, false);
 	}
 
 	/**
@@ -111,9 +105,10 @@ public class SearchCondition
 	{
 		this.field = field;
 		this.operator = operator;
-		this.value = value;
 		this.joinOperator = joinOperator;
 		this.nullable = nullable;
+		
+		this.setValue(value);
 	}
 
 	/**
@@ -164,6 +159,22 @@ public class SearchCondition
 	 */
 	public void setValue(Object value)
 	{
+		//if value is subquery
+		if(value instanceof SearchQuery)
+		{
+			SearchQuery subquery = (SearchQuery) value;
+			
+			if(subquery.getSubentityType() == null)
+			{
+				throw new IllegalArgumentException("No entity type specified for subquery");
+			}
+			
+			if(subquery.getAdditionalEntityFields() == null || subquery.getAdditionalEntityFields().size() != 1)
+			{
+				throw new IllegalArgumentException("Zero or more than one result field is configured in specified subquery");
+			}
+		}
+		
 		this.value = value;
 	}
 
@@ -246,8 +257,6 @@ public class SearchCondition
 	{
 		this.nullable = nullable;
 	}
-	
-	
 
 	/**
 	 * Checks if is indicates the condition should be case insensitive.

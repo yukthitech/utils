@@ -44,6 +44,28 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 	private static Logger logger = LogManager.getLogger(SaveQueryExecutor.class);
 	private static final String COL_UQ_ENTITY_ID = "UQ_ENTITY_ID";
 	
+	/**
+	 * Encapsulation of prechild that needs to be persisted before main entity can be persisted.
+	 * @author akiran
+	 */
+	private static class PrechildDetails
+	{
+		/**
+		 * Column param which needs to hold child id.
+		 */
+		private ColumnParam columnParam;
+		
+		/**
+		 * Child entity to be persisted.
+		 */
+		private Object childEntity;
+
+		public PrechildDetails(Object childEntity)
+		{
+			this.childEntity = childEntity;
+		}
+	}
+	
 	private Class<?> returnType;
 	
 	public SaveQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
@@ -72,9 +94,33 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		}
 	}
 	
+	/**
+	 * Checks if specified id is persisted id
+	 * @param id id to be verified
+	 * @return true if id represents persisted id
+	 */
+	private boolean isPersistedId(Object id)
+	{
+		if(id == null)
+		{
+			return false;
+		}
+		
+		//if non-number null value is encountered
+		if(!(id instanceof Number))
+		{
+			return true;
+		}
+		
+		//return true only if numeric value is non-zero positive value
+		Number number = (Number)id;
+		return number.intValue() > 0;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.persistence.repository.executors.QueryExecutor#execute(com.yukthitech.persistence.repository.executors.QueryExecutionContext, com.yukthitech.persistence.IDataStore, com.yukthitech.persistence.conversion.ConversionService, java.lang.Object[])
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
@@ -108,7 +154,11 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		
 		//keep track of the fields that needs to be added after main entity is saved
 		Map<FieldDetails, Object> tableJoinedFields = new HashMap<>();
-		Map<FieldDetails, Object> childFields = new HashMap<>();
+		Map<FieldDetails, Object> childFieldsPost = new HashMap<>();
+		
+		//keep track of the fields that needs to be added before main entity is saved
+		Map<FieldDetails, PrechildDetails> childFieldsPre = new HashMap<>();
+		PrechildDetails prechildDetails = null;
 		
 		for(FieldDetails field: entityDetails.getFieldDetails())
 		{
@@ -125,6 +175,9 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 					continue;
 				}
 			}
+			
+			//reset prechild details for current field
+			prechildDetails = null;
 			
 			//get the value of the field
 			value = field.getValue(entity);
@@ -144,7 +197,20 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				if(field.isTableOwned())
 				{
 					//fetch the value of related entity and store it in this table
-					value = foreignConstraint.getTargetEntityDetails().getIdField().getValue(value);
+					Object idValue = foreignConstraint.getTargetEntityDetails().getIdField().getValue(value);
+					
+					//if child is not persisted yet
+					if(!isPersistedId(idValue))
+					{
+						//mark it as prechild
+						prechildDetails = new PrechildDetails(value);
+						childFieldsPre.put(field, prechildDetails);
+					}
+					//if child is already persisted use its id value
+					else
+					{
+						value = idValue;
+					}
 				}
 				//if the relation is maintained by using intermediate table
 				else if(field.isTableJoined())
@@ -171,7 +237,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 						continue;
 					}
 					
-					childFields.put(field, value);
+					childFieldsPost.put(field, value);
 					continue;
 				}
 			}
@@ -179,7 +245,15 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 			//convert to db data type
 			value = conversionService.convertToDBType(value, field);
 			
-			query.addColumn(new ColumnParam(field.getDbColumnName(), value, -1));
+			ColumnParam columnParam = new ColumnParam(field.getDbColumnName(), value, -1);
+			query.addColumn(columnParam);
+			
+			//if current field represents a child that needs to be persisted before main entity
+			if(prechildDetails != null)
+			{
+				//set current column details on prechild details
+				prechildDetails.columnParam = columnParam;
+			}
 			
 			//if field is id field and value was set manually
 			if(field.isIdField())
@@ -196,7 +270,24 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
 		{
 			super.notifyEntityEvent(null, entity, EntityEventType.PRE_SAVE);
+			
+			//persist prechild entities if any
+			for(FieldDetails field : childFieldsPre.keySet())
+			{
+				prechildDetails = childFieldsPre.get(field);
+				
+				ICrudRepository repo = super.getCrudRepository(field.getField().getType());
+				
+				if(!repo.save(prechildDetails.childEntity))
+				{
+					throw new InvalidStateException("Failed to save child entity linked by field '{}'. Entity: {}", field.getName(), prechildDetails.childEntity);
+				}
+				
+				//fetch newly saved entity and set it on parent save column
+				prechildDetails.columnParam.setValue(repo.getEntityDetails().getIdField().getValue(prechildDetails.childEntity));
+			}
 
+			//persist main entity
 			int res = dataStore.save(query, entityDetails, idWrapper);
 			
 			//if insertion was successful
@@ -220,14 +311,14 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				saveExtensionFields((Long)idWrapper.getValue(), entity, entityDetails, conversionService, dataStore);
 				
 				//save child entities, if any
-				for(FieldDetails field : childFields.keySet())
+				for(FieldDetails field : childFieldsPost.keySet())
 				{
 					/*
 					 * Child fields are fields with mapped relation under current entity.
 					 * Saving child entity with inverse relation will take care of populating join 
 					 * table update, if required
 					 */
-					saveChildEntities(field, childFields.get(field), entity);
+					saveChildEntities(field, childFieldsPost.get(field), entity);
 				}
 				
 				//save join table entries if any
@@ -398,7 +489,10 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				//set inverse relation on child to parent
 				childFieldDetails.setValue(childEntity, parentEntity);
 				
-				childRepository.save(childEntity);
+				if(!childRepository.save(childEntity))
+				{
+					throw new InvalidStateException("Failed to save child entity linked by field '{}'. Entity: {}", field.getName(), childEntity);
+				}
 			}
 		}
 		else
@@ -406,7 +500,10 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 			//set inverse relation on child to parent
 			childEntityDetails.getFieldDetailsByField(foreignConstraint.getMappedBy()).setValue(value, parentEntity);
 
-			childRepository.save(value);
+			if(!childRepository.save(value))
+			{
+				throw new InvalidStateException("Failed to save child entity linked by field '{}'. Entity: {}", field.getName(), value);
+			}
 		}
 	}
 	

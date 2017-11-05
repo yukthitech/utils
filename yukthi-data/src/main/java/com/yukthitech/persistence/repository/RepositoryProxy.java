@@ -42,7 +42,14 @@ class RepositoryProxy implements InvocationHandler
 	
 	private QueryExecutionContext queryExecutionContext = new QueryExecutionContext();
 	
-	public RepositoryProxy(IDataStore dataStore, Class<? extends ICrudRepository<?>> repositoryType, EntityDetails entityDetails, ExecutorFactory executorFactory)
+	/**
+	 * Parent repository factory.
+	 */
+	private RepositoryFactory repositoryFactory;
+	
+	private ExecutorFactory executorFactory;
+	
+	public RepositoryProxy(IDataStore dataStore, Class<? extends ICrudRepository<?>> repositoryType, EntityDetails entityDetails, ExecutorFactory executorFactory, RepositoryFactory repositoryFactory)
 	{
 		defaultedMethods.put("getEntityDetails", this::getEntityDetails);
 		defaultedMethods.put("newTransaction", this::newTransaction);
@@ -51,10 +58,15 @@ class RepositoryProxy implements InvocationHandler
 		defaultedMethods.put("dropEntityTable", this::dropEntityTable);
 		defaultedMethods.put("getRepositoryType", this::getRepositoryType);
 		defaultedMethods.put("setExecutionContext", this::setExecutionContext);
+		defaultedMethods.put("getRepositoryFactory", this::getRepositoryFactory);
+		defaultedMethods.put("getDataStore", this::getDataStore);
+		defaultedMethods.put("executeQueryExecutor", this::executeQueryExecutor);
 
+		this.executorFactory = executorFactory;
 		this.dataStore = dataStore;
 		this.entityDetails = entityDetails;
 		this.repositoryType = repositoryType;
+		this.repositoryFactory = repositoryFactory;
 		
 		Method methods[] = repositoryType.getMethods();
 		String methodName = null;
@@ -215,5 +227,41 @@ class RepositoryProxy implements InvocationHandler
 	{
 		queryExecutionContext.setRepositoryExecutionContext(args[0]);
 		return null;
+	}
+	
+	/**
+	 * Fetches the parent repository factory.
+	 * @param args
+	 * @return
+	 */
+	private RepositoryFactory getRepositoryFactory(Object args[])
+	{
+		return repositoryFactory;
+	}
+
+	/**
+	 * Fetches the underlying data store.
+	 * @param args
+	 * @return
+	 */
+	private IDataStore getDataStore(Object args[])
+	{
+		return dataStore;
+	}
+
+	/**
+	 * Executes the specified query executor with specified params and returns the result.
+	 * @param queryExecutor executor to execute
+	 * @param params params to be passed for execution
+	 * @return query executor result
+	 */
+	private Object executeQueryExecutor(Object args[])
+	{
+		QueryExecutor queryExecutor = (QueryExecutor) args[0];
+		queryExecutor.setPersistenceExecutionContext(executorFactory.getPersistenceExecutionContext());
+		
+		Object params[] = (Object[]) args[1];
+		
+		return queryExecutor.execute(queryExecutionContext, dataStore, dataStore.getConversionService(), params);
 	}
 }

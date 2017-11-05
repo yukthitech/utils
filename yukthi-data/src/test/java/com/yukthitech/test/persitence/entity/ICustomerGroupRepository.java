@@ -12,4 +12,6 @@ public interface ICustomerGroupRepository extends ICrudRepository<CustomerGroup>
 	
 	@Field("customers.orders.title")
 	public List<String> findOrderTitles(@Condition("name") String groupName);
+
+	public CustomerGroup findByName(String name);
 }

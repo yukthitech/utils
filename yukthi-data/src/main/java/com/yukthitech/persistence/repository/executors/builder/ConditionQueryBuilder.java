@@ -3,7 +3,6 @@ package com.yukthitech.persistence.repository.executors.builder;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,18 +13,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.persistence.Table;
+
 import org.apache.commons.beanutils.PropertyUtils;
 
-import com.yukthitech.persistence.ConfigurationErrorException;
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.ExtendedTableDetails;
 import com.yukthitech.persistence.ExtendedTableEntity;
 import com.yukthitech.persistence.FieldDetails;
 import com.yukthitech.persistence.ForeignConstraintDetails;
+import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.InvalidMappingException;
 import com.yukthitech.persistence.JoinTableDetails;
 import com.yukthitech.persistence.Record;
-import com.yukthitech.persistence.RelationType;
 import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.query.IConditionalQuery;
 import com.yukthitech.persistence.query.IOrderedQuery;
@@ -38,10 +38,10 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
-import com.yukthitech.persistence.repository.executors.IntermediateQueryExecutor;
-import com.yukthitech.persistence.repository.executors.proxy.ProxyEntityCreator;
+import com.yukthitech.persistence.repository.executors.proxy.ProxyEntity;
 import com.yukthitech.persistence.repository.search.DynamicResultField;
 import com.yukthitech.persistence.repository.search.IDynamicSearchResult;
+import com.yukthitech.persistence.repository.search.SearchQuery;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ObjectWrapper;
@@ -221,7 +221,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @author akiran
 	 *
 	 */
-	static class InnerQuery
+	public static class InnerQuery
 	{
 		/**
 		 * Current field table to which sub query result should be compared.
@@ -248,24 +248,18 @@ public class ConditionQueryBuilder implements Cloneable
 			this.subqueryBuilder = new ConditionQueryBuilder(subqueryEntity, conditionQueryBuilder.nextTableCode(), conditionQueryBuilder.nextFieldCode(), conditionQueryBuilder.nextTableId);
 			this.joinOperator = joinOperator;
 		}
-	}
-	
-	static class IntermediateQuery
-	{
-		private String resultProperty;
 		
-		private String mappingColumnCode;
-		
-		private IntermediateQueryExecutor intermediateQueryExecutor;
-
-		public IntermediateQuery(String resultProperty, String mappingColumnCode, IntermediateQueryExecutor intermediateQueryExecutor)
+		/**
+		 * Gets the condition query builder for building sub query.
+		 *
+		 * @return the condition query builder for building sub query
+		 */
+		public ConditionQueryBuilder getSubqueryBuilder()
 		{
-			this.resultProperty = resultProperty;
-			this.mappingColumnCode = mappingColumnCode;
-			this.intermediateQueryExecutor = intermediateQueryExecutor;
+			return subqueryBuilder;
 		}
 	}
-
+	
 	/**
 	 * Result field details that is part current query
 	 * 
@@ -350,11 +344,6 @@ public class ConditionQueryBuilder implements Cloneable
 	 */
 	private Map<String, ResultField> fieldToResultField = new HashMap<>();
 	
-	/**
-	 * Mapping from result field to intermediate query required to populate field.
-	 */
-	private Map<String, IntermediateQuery> fieldToIntermediateQuery = new HashMap<>();
-
 	/**
 	 * Mapping from property name to table
 	 */
@@ -803,6 +792,78 @@ public class ConditionQueryBuilder implements Cloneable
 	}
 
 	/**
+	 * Adds subquery which is currently used to fetch multi subentities using reverse relation.
+	 * 
+	 * @param groupHead
+	 * @param entityFieldExpression
+	 * @param joinOperator
+	 * @param methodDesc
+	 * @param subquery
+	 * @param repositoryFactory
+	 * @return
+	 */
+	public InnerQuery addSubsearchQuery(Condition groupHead, String entityFieldExpression, JoinOperator joinOperator, String methodDesc, 
+			SearchQuery subquery, RepositoryFactory repositoryFactory)
+	{
+		// split the entity field expression
+		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
+		
+		if(entityFieldParts.length > 1)
+		{
+			throw new IllegalStateException("For subquery currently nested fields are not supported. Method: " + methodDesc);
+		}
+		
+		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(entityFieldParts[0]);
+		EntityDetails targetEntityDetails = repositoryFactory.getRepositoryForEntity(subquery.getSubentityType()).getEntityDetails();
+		FieldDetails subfieldDetails = targetEntityDetails.getFieldDetailsByField(subquery.getAdditionalEntityFields().iterator().next());
+
+		InnerQuery innerQuery = new InnerQuery(fieldDetails, subfieldDetails, targetEntityDetails, joinOperator, this);
+		
+		if(groupHead != null)
+		{
+			groupHead.addCondition(innerQuery);
+		}
+		else
+		{
+			conditions.add(innerQuery);
+		}
+		
+		return innerQuery;
+	}
+
+	/**
+	 * Used to add condition based on join table directly (without using field expression). This is mainly used to fetch
+	 * entities based on parent id (which in turn is mapped in join table).
+	 * @param index index at which parent id can be expected
+	 * @param groupHead parent condition if any
+	 * @param joinOperator join operator to be used
+	 * @param methodDesc method description
+	 * @param joinTableDetails join table to be used to fetch target entities
+	 * @param conditionFieldDetails field to be used in join table condition
+	 * @param fetchFieldDetails field to be fetched which in turn will be compared with id of current entity
+	 * @return newly built inner query
+	 */
+	public InnerQuery addJoinTableCondition(int index, Condition groupHead, JoinOperator joinOperator, String methodDesc, 
+			EntityDetails joinTableDetails, FieldDetails conditionFieldDetails, FieldDetails fetchFieldDetails)
+	{
+		InnerQuery innerQuery = new InnerQuery(entityDetails.getIdField(), fetchFieldDetails, joinTableDetails, joinOperator, this);
+		
+		innerQuery.subqueryBuilder.addResultField(null, Object.class, null, fetchFieldDetails.getName(), methodDesc);
+		innerQuery.subqueryBuilder.addCondition(null, Operator.EQ, index, null, conditionFieldDetails.getName(), JoinOperator.AND, methodDesc, false, false, null);
+		
+		if(groupHead != null)
+		{
+			groupHead.addCondition(innerQuery);
+		}
+		else
+		{
+			conditions.add(innerQuery);
+		}
+		
+		return innerQuery;
+	}
+
+	/**
 	 * Removes result fields matching with specified property name.
 	 * @param propertyName Property name to be removed.
 	 */
@@ -820,99 +881,6 @@ public class ConditionQueryBuilder implements Cloneable
 				fieldIt.remove();
 			}
 		}
-	}
-	
-	private boolean checkAndAddIntermediateQuery(String resultProperty, Class<?> resultPropertyType, Type resultGenericPropertyType, 
-			String entityFieldParts[], String methodDesc)
-	{
-		EntityDetails currentEntityDetails = this.entityDetails;
-		FieldDetails fieldDetails = null;
-		
-		boolean needsIntermediateQuery = false;
-		StringBuilder currentPath = new StringBuilder();
-		
-		ForeignConstraintDetails foreignConstraintDetails = null;
-		
-		String fieldName = null, mainMappingField = null;
-		Class<?> finalFieldType = null;
-		String childProperty = null;
-		EntityDetails intermediateEntityDetails = null;
-		Class<?> mappingFieldType = null;
-		
-		for(int i = 0; i < entityFieldParts.length; i++)
-		{
-			fieldName = entityFieldParts[i];
-			
-			fieldDetails = currentEntityDetails.getFieldDetailsByField(fieldName);
-			
-			//if normal field is encountered in middle
-			if(!fieldDetails.isRelationField())
-			{
-				//if intermediate query is not required
-				if(!needsIntermediateQuery)
-				{
-					return false;
-				}
-				
-				if(i != entityFieldParts.length - 1)
-				{
-					throw new ConfigurationErrorException("intermediate.query.midNonRelationField", fieldName, resultProperty);
-				}
-				
-				finalFieldType = fieldDetails.getField().getType();
-			}
-
-			foreignConstraintDetails = fieldDetails.getForeignConstraintDetails(); 
-			
-			//if MANY relation is found in path
-			if(foreignConstraintDetails.getRelationType() == RelationType.ONE_TO_MANY || foreignConstraintDetails.getRelationType() == RelationType.MANY_TO_MANY)
-			{
-				if(!Collection.class.isAssignableFrom(resultPropertyType))
-				{
-					throw new ConfigurationErrorException("intermediate.query.nonCollectionResultField", fieldName, resultProperty);
-				}
-				
-				//fetch the mapping field path in main query
-				currentPath.append(currentEntityDetails.getIdField().getField().getName());
-				mainMappingField = currentPath.toString();
-				mappingFieldType = currentEntityDetails.getIdField().getField().getType();
-				currentPath.setLength(0);
-				
-				needsIntermediateQuery = true;
-				intermediateEntityDetails = currentEntityDetails;
-			}
-			
-			currentEntityDetails = foreignConstraintDetails.getTargetEntityDetails();
-			currentPath.append(fieldName).append(".");
-		}
-		
-		//remove trailing dot
-		currentPath.deleteCharAt(currentPath.length() - 1);
-		
-		childProperty = currentPath.toString();
-
-		//if intermediate query is not required simply return false.
-		if(!needsIntermediateQuery)
-		{
-			return false;
-		}
-		
-		if(finalFieldType == null)
-		{
-			throw new ConfigurationErrorException("intermediate.query.noFinalField", resultProperty);
-		}
-		
-		String mappingFieldCode = addResultField("$" + resultProperty, mappingFieldType, mappingFieldType, mainMappingField, methodDesc);
-		
-		String interMethodDesc = methodDesc + "[Result Field: " + resultProperty + "]";
-		IntermediateQueryExecutor intermediateQueryExecutor = new IntermediateQueryExecutor(intermediateEntityDetails.getEntityType(), 
-				intermediateEntityDetails, interMethodDesc);
-		
-		intermediateQueryExecutor.setMappingField(intermediateEntityDetails.getIdField().getName(), intermediateEntityDetails.getIdField().getField().getType());
-		intermediateQueryExecutor.setResultField(childProperty, finalFieldType);
-		
-		fieldToIntermediateQuery.put(resultProperty, new IntermediateQuery(resultProperty, mappingFieldCode, intermediateQueryExecutor));
-		return true;
 	}
 	
 	/**
@@ -1066,7 +1034,12 @@ public class ConditionQueryBuilder implements Cloneable
 			query.addResultField(new QueryResultField(field.table.tableCode, field.fieldDetails.getDbColumnName(), field.code));
 		}
 
-		query.addResultField(new QueryResultField(defTableCode, codeToTable.get(defTableCode).entityDetails.getIdField().getDbColumnName(), defTableIdCol));
+		//note in subqueries where join table is used, id field can be null
+		//	so this condition would handle such conditions
+		if(codeToTable.get(defTableCode).entityDetails.getIdField() != null)
+		{
+			query.addResultField(new QueryResultField(defTableCode, codeToTable.get(defTableCode).entityDetails.getIdField().getDbColumnName(), defTableIdCol));
+		}
 
 		QueryCondition queryCondition = null;
 		
@@ -1236,11 +1209,12 @@ public class ConditionQueryBuilder implements Cloneable
 
 		T result = resultType.newInstance();
 		Object value = null;
-		ProxyEntityCreator proxyEntityCreator = null;
 		ForeignConstraintDetails foreignConstraint = null;
 		EntityDetails foreignEntityDetails = null;
 
 		RepositoryFactory repositoryFactory = persistenceExecutionContext.getRepositoryFactory();
+		
+		boolean isEntityResultType = (resultType.getAnnotation(Table.class) != null);
 
 		for(ResultField resultField : this.resultFields)
 		{
@@ -1262,8 +1236,7 @@ public class ConditionQueryBuilder implements Cloneable
 					foreignConstraint = resultField.fieldDetails.getForeignConstraintDetails();
 					foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
 
-					proxyEntityCreator = new ProxyEntityCreator(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
-					value = proxyEntityCreator.getProxyEntity();
+					value = ProxyEntity.newProxyById(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
 				}
 				//if this is extension field
 				else if(resultField.property.startsWith("@"))
@@ -1317,6 +1290,14 @@ public class ConditionQueryBuilder implements Cloneable
 			PropertyUtils.setProperty(result, resultField.property, value);
 		}
 
+		//if return type is target entity type, wrap result with proxy to take care of sub relations
+		if(isEntityResultType)
+		{
+			ICrudRepository<?> resultRepo = repositoryFactory.getRepositoryForEntity(resultType);
+			
+			result = (T) ProxyEntity.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, Collections.emptyMap());
+		}
+		
 		return result;
 	}
 

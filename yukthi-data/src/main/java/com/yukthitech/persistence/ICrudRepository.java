@@ -16,8 +16,12 @@ public interface ICrudRepository<E>
 	 */
 	public void setExecutionContext(Object context);
 	
+	/**
+	 * Fetching underlying entity details.
+	 * @return underlying entity details.
+	 */
 	public EntityDetails getEntityDetails();
-
+	
 	/**
 	 * Creates a new transaction and registers for current thread. If a transaction is already in progress
 	 * by current thread, this method will throw exception. 

@@ -625,7 +625,7 @@ public class RdbmsDataStore implements IDataStore
 				}
 			}
 			
-			logger.debug("Saved {} records into table: {}", count, saveQuery.getTableName());
+			logger.debug("Saved {} records with generated-id '{}' into table: {}", count, idGenerated.getValue(), saveQuery.getTableName());
 			
 			transaction.commit();
 			return count;
@@ -860,15 +860,23 @@ public class RdbmsDataStore implements IDataStore
 			stmt.setObject(params.size() + 1, condition.getValue());
 			params.add(condition.getValue());
 		}
-		
-		if(condition.getGroupedConditions() == null)
+
+		//add parameters for child group conditions
+		if(condition.getGroupedConditions() != null)
 		{
-			return;
+			for(QueryCondition grpCondition : condition.getGroupedConditions())
+			{
+				addParamsRecursively(grpCondition, stmt, params);
+			}
 		}
 		
-		for(QueryCondition grpCondition : condition.getGroupedConditions())
+		//add parameters for subquery if any
+		if(condition.getSubquery() != null)
 		{
-			addParamsRecursively(grpCondition, stmt, params);
+			for(QueryCondition scondition : condition.getSubquery().getConditions())
+			{
+				addParamsRecursively(scondition, stmt, params);
+			}
 		}
 	}
 

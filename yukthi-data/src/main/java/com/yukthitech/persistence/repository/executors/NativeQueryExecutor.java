@@ -96,18 +96,7 @@ public class NativeQueryExecutor extends QueryExecutor
 		nativeQueryAnnotation = method.getAnnotation(NativeQuery.class);
 		returnType = method.getReturnType();
 		
-		//validate parameters
-		Class<?> parameterTypes[] = method.getParameterTypes();
-		
-		if(parameterTypes != null && parameterTypes.length > 0)
-		{
-			if(parameterTypes.length > 1)
-			{
-				throw new InvalidRepositoryException("Multiple parameters specified for native query method - " + methodDesc);
-			}
-		}
-		
-		//for read methods, load return type field details and set the collection type as needed.
+	//for read methods, load return type field details and set the collection type as needed.
 		if(nativeQueryAnnotation.type() == NativeQueryType.READ)
 		{
 			//set the collection type if required
@@ -159,6 +148,8 @@ public class NativeQueryExecutor extends QueryExecutor
 			}
 		}
 		
+		Class<?> parameterTypes[] = method.getParameterTypes();
+
 		//find post construct method
 		for(Method rmethod : returnType.getDeclaredMethods())
 		{

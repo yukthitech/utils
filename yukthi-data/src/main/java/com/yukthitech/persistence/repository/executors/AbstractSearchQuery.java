@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.TreeSet;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -96,7 +97,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	/**
 	 * Fetches/populates entity fields as result fields
 	 */
-	private void fetchEntityResultFields()
+	protected void fetchEntityResultFields()
 	{
 		logger.trace("Started method: setFullEntityDetails");
 		
@@ -122,6 +123,38 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		this.genericReturnType = this.returnType;
 	}
 	
+	/**
+	 * Fetches the concrete collection type based on specified return type.
+	 * @param returnType Return collection type
+	 * @param methodName method name to be used in exception messages, if any
+	 * @return concrete matching collection type
+	 */
+	protected Class<?> getCollectionType(Class<?> returnType, String methodName)
+	{
+		if(returnType.isAssignableFrom(ArrayList.class))
+		{
+			return ArrayList.class;
+		}
+		else if(returnType.isAssignableFrom(HashSet.class))
+		{
+			return HashSet.class;
+		}
+		else if(returnType.isAssignableFrom(TreeSet.class))
+		{
+			return TreeSet.class;
+		}
+
+		try
+		{
+			returnType.newInstance();
+			return returnType;
+		}catch(Exception ex)
+		{
+			throw new InvalidRepositoryException("Unsupported collection return type found on finder '" 
+						+ methodName + "' of repository: " + repositoryType.getName());
+		}
+	}
+	
 	protected void fetchReturnDetails(Method method)
 	{
 		logger.trace("Started method: fetchReturnDetails");
@@ -137,26 +170,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		//TODO: Support map types
 		if(Collection.class.isAssignableFrom(returnType))
 		{
-			if(returnType.isAssignableFrom(ArrayList.class))
-			{
-				this.collectionReturnType = ArrayList.class;
-			}
-			else if(returnType.isAssignableFrom(HashSet.class))
-			{
-				this.collectionReturnType = HashSet.class;
-			}
-			else
-			{
-				try
-				{
-					returnType.newInstance();
-					this.collectionReturnType = returnType;
-				}catch(Exception ex)
-				{
-					throw new InvalidRepositoryException("Unsupported collection return type found on finder '" 
-								+ method.getName() + "' of repository: " + repositoryType.getName());
-				}
-			}
+			this.collectionReturnType = getCollectionType(returnType, method.getName());
 			
 			ParameterizedType type = (ParameterizedType)method.getGenericReturnType();
 			Type typeArgs[] = type.getActualTypeArguments();
@@ -322,4 +336,13 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		return -1;
 	}
 
+	/**
+	 * Gets the collection return type.
+	 *
+	 * @return the collection return type
+	 */
+	public Class<?> getCollectionReturnType()
+	{
+		return collectionReturnType;
+	}
 }

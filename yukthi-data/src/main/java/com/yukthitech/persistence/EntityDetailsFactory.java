@@ -415,7 +415,7 @@ public class EntityDetailsFactory
 						continue;
 					}
 
-					throw new InvalidMappingException("Failed to find column mapping for field: " + field.getName() + " in entity: " + entityDetails.getEntityType().getName());
+					throw new InvalidMappingException("Failed to find mapping-column for field '{}' in entity: {}", field.getName(), entityDetails.getEntityType().getName());
 				}
 			}
 			else

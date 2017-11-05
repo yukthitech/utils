@@ -81,10 +81,29 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		ConditionQueryBuilder.Condition builderCondition = null;
 		boolean ignoreCase = ((condition.getValue() instanceof String) && condition.isIgnoreCase());
 		
-		builderCondition = conditionQueryBuilder.addCondition(groupHead, condition.getOperator(), conditionParams.size(), null, 
-				condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable(), ignoreCase, null);
+		Object conditionValue = condition.getValue();
 		
-		conditionParams.add(condition.getValue());
+		if(conditionValue instanceof SearchQuery)
+		{
+			SearchQuery searchQuery = (SearchQuery) conditionValue;
+			
+			ConditionQueryBuilder.InnerQuery innerQuery = conditionQueryBuilder.addSubsearchQuery(groupHead, condition.getField(), condition.getJoinOperator(), 
+					methodDesc, searchQuery, super.persistenceExecutionContext.getRepositoryFactory());
+			
+			for(SearchCondition searchCondition : searchQuery.getConditions())
+			{
+				addConditionsRecursively(searchCondition, innerQuery.getSubqueryBuilder(), conditionParams, null);
+			}
+			
+			return;
+		}
+		else
+		{
+			builderCondition = conditionQueryBuilder.addCondition(groupHead, condition.getOperator(), conditionParams.size(), null, 
+					condition.getField(), condition.getJoinOperator(), methodDesc, condition.isNullable(), ignoreCase, null);
+		}
+		
+		conditionParams.add(conditionValue);
 		
 		//if no group conditions are present ignore
 		if(condition.getGroupedConditions() == null)

@@ -1,4 +1,6 @@
-<native-queries>
+<native-queries xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<ccg:exprPattern enabled="false"/>
+	
 	<query name="readQuery"><![CDATA[
 		SELECT ID, EMP_NO EMPLOYEE_NO, PHONE_NO, AGE, EMAIL_ID, ENAME NAME
 		FROM EMPLOYEE

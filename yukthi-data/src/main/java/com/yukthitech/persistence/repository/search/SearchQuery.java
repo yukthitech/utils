@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.persistence.OrderByField;
+import com.yukthitech.utils.CommonUtils;
 
 /**
  * Search query object for search methods with dynamic conditions
@@ -47,6 +48,11 @@ public class SearchQuery
 	private Set<String> excludeFields;
 	
 	/**
+	 * Used when current search query is used as subquery.
+	 */
+	private Class<?> subentityType;
+	
+	/**
 	 * Instantiates a new search query.
 	 */
 	public SearchQuery()
@@ -66,6 +72,22 @@ public class SearchQuery
 	}
 
 	/**
+	 * Builder method to build search-subquery. 
+	 * @param entityType Entity on which this subquery has to be executed
+	 * @param resultField single result field of this subquery
+	 * @param conditions conditions to be applied in subquery
+	 * @return new search subquery
+	 */
+	public static SearchQuery subquery(Class<?> entityType, String resultField, SearchCondition... conditions)
+	{
+		SearchQuery searchQuery = new SearchQuery(conditions);
+		searchQuery.subentityType = entityType;
+		searchQuery.additionalEntityFields = CommonUtils.toSet(resultField);
+		
+		return searchQuery;
+	}
+	
+	/**
 	 * Adds value to {@link #conditions conditions}
 	 *
 	 * @param condition
@@ -75,6 +97,11 @@ public class SearchQuery
 	 */
 	public SearchQuery addCondition(SearchCondition condition)
 	{
+		if(condition == null)
+		{
+			throw new NullPointerException("Condition can not be null.");
+		}
+		
 		conditions.add(condition);
 		return this;
 	}
@@ -227,6 +254,26 @@ public class SearchQuery
 		}
 		
 		this.excludeFields.add(field);
+	}
+	
+	/**
+	 * Gets the used when current search query is used as subquery.
+	 *
+	 * @return the used when current search query is used as subquery
+	 */
+	public Class<?> getSubentityType()
+	{
+		return subentityType;
+	}
+
+	/**
+	 * Sets the used when current search query is used as subquery.
+	 *
+	 * @param subentityType the new used when current search query is used as subquery
+	 */
+	public void setSubentityType(Class<?> subentityType)
+	{
+		this.subentityType = subentityType;
 	}
 
 	/* (non-Javadoc)

@@ -91,27 +91,6 @@ public class RepositoryFactory
 		this.executorFactory = executorFactory;
 	}
 	
-	private Type fetchRepositoryType(Class<?> repoType)
-	{
-		if(!ICrudRepository.class.isAssignableFrom(repoType))
-		{
-			return null;
-		}
-		
-		Type superTypes[] = repoType.getGenericInterfaces();
-		Class<?> superInterfaces[] = repoType.getInterfaces();
-		
-		for(int i = 0; i < superInterfaces.length; i++)
-		{
-			if(ICrudRepository.class.equals(superInterfaces[i]))
-			{
-				return superTypes[i];
-			}
-		}
-		
-		return null;
-	}
-	
 	@SuppressWarnings({"rawtypes"})
 	private EntityDetails fetchEntityDetails(Class<?> repositoryType)
 	{
@@ -166,7 +145,7 @@ public class RepositoryFactory
 		}
 		
 		EntityDetails entityDetails = fetchEntityDetails(repositoryType);
-		RepositoryProxy proxyImpl = new RepositoryProxy(dataStore, repositoryType, entityDetails, getExecutorFactory());
+		RepositoryProxy proxyImpl = new RepositoryProxy(dataStore, repositoryType, entityDetails, getExecutorFactory(), this);
 		
 		repo = (R)Proxy.newProxyInstance(RepositoryFactory.class.getClassLoader(), new Class<?>[] {repositoryType, IInternalRepository.class}, proxyImpl);
 		typeToRepo.put(repositoryType, repo);
@@ -186,7 +165,7 @@ public class RepositoryFactory
 		}
 
 		EntityDetails entityDetails = entityDetailsFactory.getEntityDetails((Class)entityType, dataStore, createTables);
-		RepositoryProxy proxyImpl = new RepositoryProxy(dataStore, (Class)ICrudRepository.class, entityDetails, getExecutorFactory());
+		RepositoryProxy proxyImpl = new RepositoryProxy(dataStore, (Class)ICrudRepository.class, entityDetails, getExecutorFactory(), this);
 		
 		repo = (ICrudRepository)Proxy.newProxyInstance(RepositoryFactory.class.getClassLoader(), 
 							new Class<?>[] {ICrudRepository.class, IInternalRepository.class}, proxyImpl);

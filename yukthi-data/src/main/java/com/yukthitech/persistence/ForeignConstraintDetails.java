@@ -444,7 +444,7 @@ public class ForeignConstraintDetails
 
 		if(oneToOneMapping != null)
 		{
-			return ( !StringUtils.isBlank(oneToOneMapping.mappedBy()) && joinTable == null );
+			return ( StringUtils.isBlank(oneToOneMapping.mappedBy()) && joinTable == null );
 		}
 
 		// check if the field has many to one mapping

@@ -59,7 +59,7 @@ public class TFindersWithRelations extends TestSuiteBase
 		factory.dropRepository(Customer.class);
 		factory.dropRepository(CustomerGroup.class);
 	}
-
+	
 	/**
 	 * Tests fetching entities with nested parent entity property as condition
 	 * Also validates the sub entity proxies are set properly

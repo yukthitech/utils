@@ -1,8 +1,11 @@
 package com.yukthitech.persistence.repository.executors.proxy;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.ICrudRepository;
@@ -16,7 +19,7 @@ import net.sf.cglib.proxy.InvocationHandler;
  * Represents proxy for entity class used for lazy loading
  * @author akiran
  */
-public class ProxyCollectionCreator
+public class ProxyEntityCollection
 {
 	/**
 	 * The actual entity collection which would be loaded lazily on need basis 
@@ -43,6 +46,13 @@ public class ProxyCollectionCreator
 	 */
 	private Object proxyCollection;
 	
+	@SuppressWarnings("unchecked")
+	public static Collection<Object> newProxyCollectionByCondition(EntityDetails entityDetails, ICrudRepository<?> repository, SearchCondition condition, Class<?> collectionType)
+	{
+		ProxyEntityCollection proxyEntityCollection = new ProxyEntityCollection(entityDetails, repository, condition, collectionType);
+		return (Collection<Object>) proxyEntityCollection.proxyCollection;
+	}
+	
 	/**
 	 * Creates a proxy for specified entity type
 	 * @param entityDetails
@@ -50,7 +60,8 @@ public class ProxyCollectionCreator
 	 * @param condition
 	 * @param actualCollection
 	 */
-	public ProxyCollectionCreator(EntityDetails entityDetails, ICrudRepository<?> repository, SearchCondition condition, Collection<Object> actualCollection)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private ProxyEntityCollection(EntityDetails entityDetails, ICrudRepository<?> repository, SearchCondition condition, Class<?> collectionType)
 	{
 		if(condition == null)
 		{
@@ -59,32 +70,45 @@ public class ProxyCollectionCreator
 		
 		this.repository = repository;
 		this.searchCondition = condition;
-		this.actualCollection = actualCollection;
 		
-		Class<?> entityType = entityDetails.getEntityType();
+		//if target collection is list type
+		if(collectionType.isAssignableFrom(ArrayList.class))
+		{
+			collectionType = ArrayList.class;
+		}
+		//if target collection is set type
+		else if(collectionType.isAssignableFrom(HashSet.class))
+		{
+			collectionType = HashSet.class;
+		}
+		//if target collection is sorted set type
+		else if(collectionType.isAssignableFrom(TreeSet.class))
+		{
+			collectionType = TreeSet.class;
+		}
+		
+		try
+		{
+			this.actualCollection = (Collection) collectionType.newInstance();
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);
+		}
 		
 		//create ccg lib handler which will handle method calls on proxy
 		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(entityType);
+		enhancer.setSuperclass(collectionType);
 		
 		enhancer.setCallback(new InvocationHandler()
 		{
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 			{
-				return ProxyCollectionCreator.this.invoke(proxy, method, args);
+				return ProxyEntityCollection.this.invoke(proxy, method, args);
 			}
 		});
 		
 		this.proxyCollection = enhancer.create();
-	}
-	
-	/**
-	 * @return Proxy entity
-	 */
-	public Object getProxyEntity()
-	{
-		return proxyCollection;
 	}
 	
 	/**

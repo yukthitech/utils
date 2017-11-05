@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Table(name = "CUSTOMER")
@@ -28,6 +29,10 @@ public class Customer
 
 	@OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST})
 	private List<Order> orders;
+	
+	@OneToOne
+	@Column(name = "ADDRESS_ID")
+	private CustomerAddress address;
 
 	public Customer()
 	{}
@@ -102,6 +107,14 @@ public class Customer
 	{
 		this.orders = orders;
 	}
-	
-	
+
+	public CustomerAddress getAddress()
+	{
+		return address;
+	}
+
+	public void setAddress(CustomerAddress address)
+	{
+		this.address = address;
+	}
 }

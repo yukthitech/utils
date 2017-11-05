@@ -1,7 +1,5 @@
 package com.yukthitech.persistence.repository.executors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,57 +8,63 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.persistence.EntityDetails;
+import com.yukthitech.persistence.FieldDetails;
+import com.yukthitech.persistence.ForeignConstraintDetails;
 import com.yukthitech.persistence.IDataStore;
+import com.yukthitech.persistence.JoinTableEntity;
 import com.yukthitech.persistence.Record;
-import com.yukthitech.persistence.RecordCountMistmatchException;
 import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.query.FinderQuery;
+import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
-import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
- * This is similar to finder query executor but used fetch sub fields. 
+ * Query executors to fetch child entities, whose relation is via join table.
  * @author akiran
  */
-public class IntermediateQueryExecutor extends AbstractSearchQuery
+@QueryExecutorPattern(prefixes = {"find", "fetch"})
+public class FetchJoinEntityQueryExecutor extends AbstractSearchQuery
 {
-	private static Logger logger = LogManager.getLogger(IntermediateQueryExecutor.class);
+	private static Logger logger = LogManager.getLogger(FetchJoinEntityQueryExecutor.class);
 	
 	private ReentrantLock queryLock = new ReentrantLock();
 	
-	private String mappingFieldCode;
-	
-	private String resultFieldCode;
-	
-	public IntermediateQueryExecutor(Class<?> repositoryType, EntityDetails entityDetails, String representation)
+	/**
+	 * @param entityDetails Parent entity details whose child entities has to be fetched
+	 * @param fieldName field to fetch
+	 */
+	public FetchJoinEntityQueryExecutor(EntityDetails entityDetails, String fieldName)
 	{
-		super.repositoryType = repositoryType;
-		super.entityDetails = entityDetails;
+		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(fieldName);
+		
+		//if invalid field name is specified, or if the field is not multi-valued or join tabe based
+		if(fieldDetails == null || !Collection.class.isAssignableFrom(fieldDetails.getField().getType()) || !fieldDetails.isTableJoined())
+		{
+			throw new InvalidArgumentException("Invalid field-name or non-joined field specified. [Field: '{}', Entity type: {}]", fieldName, entityDetails.getEntityType().getName());
+		}
+		
+		methodDesc = String.format("join-entity fetched '%s.%s'", entityDetails.getEntityType().getName(), fieldName);
 
+		ForeignConstraintDetails foreignConstraintDetails = fieldDetails.getForeignConstraintDetails();
+		
+		super.entityDetails = foreignConstraintDetails.getTargetEntityDetails();
+		
 		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
-		methodDesc = String.format("intermediate-finder method '%s' of repository - '%s'", representation, repositoryType.getName());
+		super.collectionReturnType = getCollectionType(fieldDetails.getField().getType(), methodDesc);
+		super.returnType = super.entityDetails.getEntityType();
+
+		//set all entity fields as result fields
+		fetchEntityResultFields();
+		
+		//add join table condition
+		EntityDetails joinTableDetails = foreignConstraintDetails.getJoinTableDetails().toEntityDetails();
+		
+		conditionQueryBuilder.addJoinTableCondition(0, null, JoinOperator.AND, methodDesc, joinTableDetails, 
+				joinTableDetails.getFieldDetailsByField(JoinTableEntity.FIELD_JOIN_COLUMN), 
+				joinTableDetails.getFieldDetailsByField(JoinTableEntity.FIELD_INV_JOIN_COLUMN));
 	}
-	
-	public void setMappingField(String field, Class<?> type)
-	{
-		this.mappingFieldCode = conditionQueryBuilder.addResultField("$MAPPING_FIELD", type, type, field, methodDesc);
-	}
-	
-	public void setResultField(String field, Class<?> type)
-	{
-		this.resultFieldCode = conditionQueryBuilder.addResultField("$RESULT_FIELD", type, type, field, methodDesc);
-	}
-	
-	void setReturnType(Class<?> returnType)
-	{
-		super.returnType = returnType;
-	}
-	
-	void setReturnCollectionType(Class<?> returnCollectionType)
-	{
-		super.collectionReturnType = returnCollectionType;
-	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.yukthitech.persistence.repository.executors.QueryExecutor#execute(com.yukthitech.persistence.repository.executors.QueryExecutionContext, com.yukthitech.persistence.IDataStore, com.yukthitech.persistence.conversion.ConversionService, java.lang.Object[])
 	 */
@@ -90,12 +94,6 @@ public class IntermediateQueryExecutor extends AbstractSearchQuery
 			//if no results found
 			if(records == null || records.isEmpty())
 			{
-				//if primitive return type is expected simply return default value
-				if(collectionReturnType == null)
-				{
-					return returnType.isPrimitive() ? CommonUtils.getDefaultValue(returnType) : null;
-				}
-
 				try
 				{
 					return collectionReturnType.newInstance();
@@ -105,19 +103,6 @@ public class IntermediateQueryExecutor extends AbstractSearchQuery
 				}
 			}
 
-			//if single element is expected as result
-			if(collectionReturnType == null)
-			{
-				if(records.size() > 1)
-				{
-					throw new RecordCountMistmatchException("Multiple records found when single record is expected.");
-				}
-				
-				ArrayList<Object> resLst = new ArrayList<>();
-				conditionQueryBuilder.parseResults(Arrays.asList(records.get(0)), (Class)returnType, resLst, conversionService, persistenceExecutionContext);
-				return resLst.get(0);
-			}
-	
 			//if collection of objects are expected as result
 			Collection<Object> lst = null;
 			
@@ -138,6 +123,4 @@ public class IntermediateQueryExecutor extends AbstractSearchQuery
 			queryLock.unlock();
 		}
 	}
-	
-	
 }
