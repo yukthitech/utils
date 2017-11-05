@@ -245,7 +245,7 @@ public class ConditionQueryBuilder implements Cloneable
 			this.currentTableField = currentTableField;
 			this.subqueryField = subqueryField;
 			
-			this.subqueryBuilder = new ConditionQueryBuilder(subqueryEntity, conditionQueryBuilder.nextTableCode(), conditionQueryBuilder.nextFieldCode(), conditionQueryBuilder.nextTableId);
+			this.subqueryBuilder = new ConditionQueryBuilder(subqueryEntity, conditionQueryBuilder.nextTableCode(subqueryEntity), conditionQueryBuilder.nextFieldCode(), conditionQueryBuilder.nextTableId);
 			this.joinOperator = joinOperator;
 		}
 		
@@ -378,7 +378,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
-		this(entityDetails, "T0", "T0_ID", new AtomicInteger(1));
+		this(entityDetails, entityDetails.getShortName() + "0", "T0_ID", new AtomicInteger(1));
 	}
 
 	private ConditionQueryBuilder(EntityDetails entityDetails, String defTableCode, String defTableIdCol, AtomicInteger nextTableId)
@@ -396,9 +396,9 @@ public class ConditionQueryBuilder implements Cloneable
 	 * 
 	 * @return
 	 */
-	private String nextTableCode()
+	private String nextTableCode(EntityDetails entityDetails)
 	{
-		return "T" + nextTableId.getAndIncrement();
+		return entityDetails.getShortName() + nextTableId.getAndIncrement();
 	}
 
 	/**
@@ -426,7 +426,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 */
 	private TableInfo newTableInfo(EntityDetails entityDetails, String tableName, String joinTableCode, String joinTableColumn, String targetColumn, String property, boolean nullable)
 	{
-		TableInfo newTableInfo = new TableInfo(nextTableCode(), tableName, entityDetails, joinTableCode, joinTableColumn, targetColumn, nullable);
+		TableInfo newTableInfo = new TableInfo(nextTableCode(entityDetails), tableName, entityDetails, joinTableCode, joinTableColumn, targetColumn, nullable);
 
 		// add new table info to maps
 
@@ -548,7 +548,7 @@ public class ConditionQueryBuilder implements Cloneable
 				else
 				{
 					// add join table info
-					joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
+					joinTableInfo = newTableInfo(joinTableDetails.toEntityDetails(), joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
 							joinTableDetails.getInverseJoinColumn(), null, fieldDetails.isNullable());
 
 					// add target table info
@@ -562,7 +562,7 @@ public class ConditionQueryBuilder implements Cloneable
 				joinTableDetails = foreignConstraint.getJoinTableDetails();
 
 				// add join table info
-				joinTableInfo = newTableInfo(null, joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
+				joinTableInfo = newTableInfo(joinTableDetails.toEntityDetails(), joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
 						joinTableDetails.getJoinColumn(), null, fieldDetails.isNullable());
 
 				// add target table info
@@ -1018,6 +1018,8 @@ public class ConditionQueryBuilder implements Cloneable
 	 */
 	public void loadConditionalQuery(Object repoExecutionContext, IConditionalQuery query, Object params[])
 	{
+		query.setDefaultTableCode(defTableCode);
+		
 		ParameterContext context = new ParameterContext(params, repoExecutionContext);
 		loadConditionalQuery(context, repoExecutionContext, query, params);
 	}

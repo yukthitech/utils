@@ -50,6 +50,11 @@ public class EntityDetails
 	 * Indicates whether table is created
 	 */
 	private boolean isTableCreated = false;
+	
+	/**
+	 * Short name to be used for this entity.
+	 */
+	private String shortName;
 
 	public EntityDetails(String tableName, Class<?> entityType)
 	{
@@ -92,6 +97,40 @@ public class EntityDetails
 			fieldDetails.setDbColumnName(column);
 			columnToDetails.put(column, fieldDetails);
 		}
+	}
+	
+	/**
+	 * Gets the short name to be used for this entity.
+	 *
+	 * @return the short name to be used for this entity
+	 */
+	public String getShortName()
+	{
+		if(shortName != null)
+		{
+			return shortName;
+		}
+		
+		String shortName = entityType.getSimpleName();
+		
+		//for join tables using table name
+		if(JoinTableEntity.class.equals(entityType))
+		{
+			shortName = tableName;
+		}
+		
+		if(shortName.toLowerCase().endsWith("entity"))
+		{
+			shortName = shortName.substring(0, shortName.length() - "entity".length());
+		}
+		
+		if(shortName.trim().length() == 0)
+		{
+			shortName = "T";
+		}
+		
+		this.shortName = shortName;
+		return shortName;
 	}
 
 	public String getTableName()

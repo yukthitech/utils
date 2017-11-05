@@ -234,7 +234,7 @@
 		SELECT <#list query.resultFields as column><@trim>
 				<#if column.tableCode??>${column.tableCode}.</#if>${column.column} <#if column.code??>${column.code}</#if><#if column_has_next>,</#if>
 			</@trim></#list>
-		FROM ${query.tableName} T0
+		FROM ${query.tableName} ${query.defaultTableCode}
 		<#list query.joinConditions as joinCondition>
 			<#if joinCondition.nullable>
 				LEFT JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}
@@ -251,8 +251,8 @@
 	]]></template>	
 
 	<template name="aggregateTemplate"><![CDATA[
-		SELECT ${query.aggregateFunction}(T0.${query.aggregateColumn})
-		FROM ${query.tableName} T0
+		SELECT ${query.aggregateFunction}(${query.defaultTableCode}.${query.aggregateColumn})
+		FROM ${query.tableName} ${query.defaultTableCode}
 		<#list query.joinConditions as joinCondition>
 			<#if joinCondition.nullable>
 				LEFT JOIN ${joinCondition.joiningTableName} ${joinCondition.joiningTableCode} ON ${joinCondition.parentTableCode}.${joinCondition.parentColumn} = ${joinCondition.joiningTableCode}.${joinCondition.joiningColumn}

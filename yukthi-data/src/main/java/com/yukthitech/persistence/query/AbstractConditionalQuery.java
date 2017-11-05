@@ -29,6 +29,11 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 	private List<QueryJoinCondition> joinConditions = new ArrayList<>();
 	
 	/**
+	 * Default table code to be used.
+	 */
+	private String defaultTableCode = "T0";
+	
+	/**
 	 * Holds tables that need to be used in query
 	 */
 	//private List<QueryTable> tables;
@@ -55,6 +60,11 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 		conditions.add(condition);
 	}
 	
+	/**
+	 * Gets the holds query conditions.
+	 *
+	 * @return the holds query conditions
+	 */
 	public List<QueryCondition> getConditions()
 	{
 		return conditions;
@@ -82,6 +92,11 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 		joinConditions.add(condition);
 	}
 	
+	/**
+	 * Gets the holds query join conditions.
+	 *
+	 * @return the holds query join conditions
+	 */
 	public List<QueryJoinCondition> getJoinConditions()
 	{
 		return joinConditions;
@@ -104,11 +119,16 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 		resultFields.add(resultField);
 	}
 	
+	/**
+	 * Gets the holds query result fields.
+	 *
+	 * @return the holds query result fields
+	 */
 	public List<QueryResultField> getResultFields()
 	{
 		return resultFields;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -138,6 +158,26 @@ public abstract class AbstractConditionalQuery extends Query implements IConditi
 	}
 	*/
 	
+	/**
+	 * Gets the default table code to be used.
+	 *
+	 * @return the default table code to be used
+	 */
+	public String getDefaultTableCode()
+	{
+		return defaultTableCode;
+	}
+
+	/**
+	 * Sets the default table code to be used.
+	 *
+	 * @param defaultTableCode the new default table code to be used
+	 */
+	public void setDefaultTableCode(String defaultTableCode)
+	{
+		this.defaultTableCode = defaultTableCode;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

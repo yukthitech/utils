@@ -25,6 +25,13 @@ public interface IConditionalQuery
 	public void addResultField(QueryResultField resultField);
 	
 	/**
+	 * Sets the default table code to be used.
+	 *
+	 * @param defaultTableCode the new default table code to be used
+	 */
+	public void setDefaultTableCode(String defaultTableCode);
+	
+	/**
 	 * Adds table name to this query 
 	 */
 	//public void addTable(QueryTable table);
