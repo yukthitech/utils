@@ -378,7 +378,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
-		this(entityDetails, entityDetails.getShortName() + "0", "T0_ID", new AtomicInteger(1));
+		this(entityDetails, "T_" + entityDetails.getShortName(), "T0_ID", new AtomicInteger(1));
 	}
 
 	private ConditionQueryBuilder(EntityDetails entityDetails, String defTableCode, String defTableIdCol, AtomicInteger nextTableId)
@@ -398,7 +398,15 @@ public class ConditionQueryBuilder implements Cloneable
 	 */
 	private String nextTableCode(EntityDetails entityDetails)
 	{
-		return entityDetails.getShortName() + nextTableId.getAndIncrement();
+		int nextId = nextTableId.getAndIncrement();
+		String name = "T_" + entityDetails.getShortName();
+		
+		if(!codeToTable.containsKey(name))
+		{
+			return name;
+		}
+		
+		return name + nextId;
 	}
 
 	/**

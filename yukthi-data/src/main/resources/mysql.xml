@@ -237,6 +237,7 @@
 		SELECT <#list query.resultFields as column><@trim>
 				<#if column.tableCode??>${column.tableCode}.</#if>${column.column} <#if column.code??>${column.code}</#if><#if column_has_next>,</#if>
 			</@trim></#list>
+		
 		FROM ${query.tableName} ${query.defaultTableCode}
 		<#list query.joinConditions as joinCondition>
 			<#if joinCondition.nullable>
