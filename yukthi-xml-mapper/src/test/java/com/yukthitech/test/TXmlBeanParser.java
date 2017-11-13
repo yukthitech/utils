@@ -24,10 +24,14 @@
 package com.yukthitech.test;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.yukthitech.ccg.xml.DynamicBean;
+import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.test.beans.DynamicTestBean;
 import com.yukthitech.test.beans.ListBean;
@@ -56,6 +60,46 @@ public class TXmlBeanParser
 		Assert.assertEquals(testDataBean.getIntVal(), 100);
 	}
 	
+	/**
+	 * Ensure xml to dynamic bean converstion is happening properly. And also ensures dynamic bean to map-of-map 
+	 * coversion is also happening properly.
+	 */
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testWithDynamicHandler()
+	{
+		DynamicBean bean = (DynamicBean) XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean-1.xml"), null, new DynamicBeanParserHandler());
+
+		System.out.println(bean.toSimpleMap());
+		
+		Assert.assertEquals(bean.get("attr1"), "val1");
+		Assert.assertEquals(bean.get("attr2"), "val2");
+		
+		Assert.assertEquals(bean.get("node1"), "node-val1");
+		Assert.assertEquals(bean.get("node2"), Arrays.asList("node-val2", "node-val3"));
+		
+		Assert.assertTrue(bean.get("node3") instanceof DynamicBean);
+		Assert.assertEquals( ((DynamicBean) bean.get("node3")).get("intVal"), "100");
+		
+		Assert.assertTrue(bean.get("node4") instanceof List);
+		Assert.assertTrue( ((List) bean.get("node4")).get(0) instanceof DynamicBean);
+		
+		//Ensure conversion of dynamic bean to map is working fine
+		Map<String, Object> map = bean.toSimpleMap();
+		
+		Assert.assertEquals(map.get("attr1"), "val1");
+		Assert.assertEquals(map.get("attr2"), "val2");
+		
+		Assert.assertEquals(map.get("node1"), "node-val1");
+		Assert.assertEquals(map.get("node2"), Arrays.asList("node-val2", "node-val3"));
+		
+		Assert.assertTrue(map.get("node3") instanceof Map);
+		Assert.assertEquals( ((Map) map.get("node3")).get("intVal"), "100");
+		
+		Assert.assertTrue(bean.get("node4") instanceof List);
+		Assert.assertTrue( ((List) map.get("node4")).get(0) instanceof Map);
+	}
+
 	/**
 	 * Tests collection loading from xml.
 	 */

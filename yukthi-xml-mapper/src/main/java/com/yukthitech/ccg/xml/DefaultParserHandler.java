@@ -219,6 +219,15 @@ public class DefaultParserHandler implements IParserHandler
 	{
 		this.parser = parser;
 	}
+	
+	/**
+	 * Enables/disables expression parsing as specified.
+	 * @param expressionEnabled
+	 */
+	public void setExpressionEnabled(boolean expressionEnabled)
+	{
+		this.expressionEnabled = expressionEnabled;
+	}
 
 	/**
 	 * Loads the date format. This method is spearated so that is can be used in
