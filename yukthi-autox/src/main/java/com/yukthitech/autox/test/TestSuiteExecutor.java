@@ -284,15 +284,8 @@ public class TestSuiteExecutor
 		
 		Set<String> dependencyTestCases = null;
 		TestCaseResult depTestCaseResult = null;
+		boolean setupExecuted = false;
 
-		if( !executeSetup(testSuite.getName(), testSuite.getSetup()) )
-		{
-			TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
-			results.setSetupFailed(true);
-			
-			return false;
-		}
-		
 		TEST_CASE_LOOP: for(TestCase testCase : testSuite.getTestCases())
 		{
 			if(restrictedTestCases != null && !restrictedTestCases.contains(testCase.getName()))
@@ -330,6 +323,21 @@ public class TestSuiteExecutor
 				}
 			}
 			
+			//Execute the setup before first test case is executed.
+			// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
+			if(!setupExecuted)
+			{
+				if( !executeSetup(testSuite.getName(), testSuite.getSetup()) )
+				{
+					TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
+					results.setSetupFailed(true);
+					
+					return false;
+				}
+				
+				setupExecuted = true;
+			}
+
 			//execute the test case
 			logger.debug("Executing test case '{}' in test suite - {}", testCase.getName(), testSuite.getName());
 
@@ -374,10 +382,15 @@ public class TestSuiteExecutor
 			}
 		}
 		
-		if( !executeCleanup(testSuite.getName(), testSuite.getCleanup()) )
+		//execute the cleanup only if setup is executed. 
+		// Note: setup will be executed only if atleast one test case is executed in current test suite
+		if(setupExecuted)
 		{
-			fullExecutionDetails.testSuiteFailed(testSuite, "Failing as cleanup of test suite is failed");
-			return false;
+			if( !executeCleanup(testSuite.getName(), testSuite.getCleanup()) )
+			{
+				fullExecutionDetails.testSuiteFailed(testSuite, "Failing as cleanup of test suite is failed");
+				return false;
+			}
 		}
 
 		if(successful)
