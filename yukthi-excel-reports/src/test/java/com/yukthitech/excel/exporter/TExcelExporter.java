@@ -33,6 +33,7 @@ import org.testng.annotations.Test;
 
 import com.yukthitech.excel.exporter.data.Cell;
 import com.yukthitech.excel.exporter.data.IExcelDataReport;
+import com.yukthitech.excel.exporter.data.SimpleExcelDataReport;
 
 /**
  * @author akiran
@@ -76,4 +77,19 @@ public class TExcelExporter
 		Desktop.getDesktop().open(tempFile);
 	}
 	
+	@Test
+	public void testWithSimpleExcelReport() throws Exception
+	{
+		SimpleExcelDataReport simpleExcelDataReport = new SimpleExcelDataReport("Test", "Heading1", "Heading2", "Heading3");
+		simpleExcelDataReport.addRow("rVal1", "rVal2", 20);
+		simpleExcelDataReport.addRow("rVal3", "rVal3", 30);
+		simpleExcelDataReport.addRow("rVal4", null, 40);
+		
+		File tempFile = File.createTempFile("Test", ".xls");
+		ExcelExporter exporter = new ExcelExporter();
+		
+		exporter.generateExcelSheet(tempFile.getPath(), simpleExcelDataReport);
+		
+		Desktop.getDesktop().open(tempFile);
+	}
 }
