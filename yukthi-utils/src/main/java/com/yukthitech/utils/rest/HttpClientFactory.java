@@ -3,11 +3,13 @@
  */
 package com.yukthitech.utils.rest;
 
-import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HeaderElement;
@@ -51,18 +53,47 @@ public class HttpClientFactory
 	PoolingHttpClientConnectionManager connectionManager = null;
 	ConnectionKeepAliveStrategy keepAliveStrategy;
 	HttpHost proxyHost;
+	
+	/**
+	 * Creates ssl context which trust any certificate.
+	 * @return
+	 */
+	private static SSLContext createSslContext()
+	{
+		try
+		{
+			/*
+		     *  fix for
+		     *    Exception in thread "main" javax.net.ssl.SSLHandshakeException:
+		     *       sun.security.validator.ValidatorException:
+		     *           PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException:
+		     *               unable to find valid certification path to requested target
+		     */
+		    TrustManager[] trustAllCerts = new TrustManager[] {
+		       new X509TrustManager() {
+		          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+		            return null;
+		          }
+	
+		          public void checkClientTrusted(X509Certificate[] certs, String authType) {  }
+	
+		          public void checkServerTrusted(X509Certificate[] certs, String authType) {  }
+	
+		       }
+		    };
+		    
+		    SSLContext sc = SSLContext.getInstance("SSL");
+		    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		    return sc;
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while initializing SSL context", ex);
+		}
+	}
 
 	HttpClientFactory()
 	{
-		SSLConnectionSocketFactory sslsf = null;
-		
-		try
-		{
-			sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault(), NoopHostnameVerifier.INSTANCE);
-		} catch(NoSuchAlgorithmException e)
-		{
-			throw new RuntimeException(e);
-		}
+		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(createSslContext(), NoopHostnameVerifier.INSTANCE);
 
 		final Registry<ConnectionSocketFactory> registry = RegistryBuilder
 				.<ConnectionSocketFactory> create()
@@ -149,7 +180,7 @@ public class HttpClientFactory
 		{
 			clientBuilder.setRoutePlanner(newDefaultProxyRoutePlanner(proxyHost));
 		}
-
+		
 		return clientBuilder.build();
 	}
 
