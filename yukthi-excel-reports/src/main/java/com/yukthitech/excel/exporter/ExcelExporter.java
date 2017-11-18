@@ -7,9 +7,12 @@ import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -32,11 +35,11 @@ public class ExcelExporter
 		HSSFWorkbook wb = internalWorkbook.getWorkbook();
 		CellStyle headingStyle = wb.createCellStyle();
 		
-		headingStyle.setFillBackgroundColor(HSSFColor.GREY_40_PERCENT.index);
-		headingStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		headingStyle.setFillBackgroundColor(HSSFColorPredefined.GREY_40_PERCENT.getIndex());
+		headingStyle.setAlignment(HorizontalAlignment.CENTER);
 
 		Font font = wb.createFont();
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 		headingStyle.setFont(font);
 
 		if(headingCustomizer != null)
@@ -46,7 +49,7 @@ public class ExcelExporter
 			if(color != null)
 			{
 				headingStyle.setFillForegroundColor(color.getIndex());
-				headingStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				headingStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			}
 			
 			if(headingCustomizer.getBorder() != null && headingCustomizer.getBorderColor() != null)
@@ -112,12 +115,22 @@ public class ExcelExporter
 			//Autosize all the columns as per data content
 			List<com.yukthitech.excel.exporter.data.Cell> row = rows.get(0);
 			int colCount = row.size();
+			int colWidth = 0;
 			
 			for(int i = 0; i < colCount; i++)
 			{
 				sheet.autoSizeColumn(i);
-				
-				sheet.setColumnWidth(i, (int)(sheet.getColumnWidth(i) * 1.5));
+				colWidth = (int)(sheet.getColumnWidth(i) * 1.5);
+
+				try
+				{
+					sheet.setColumnWidth(i, colWidth);
+				}catch(IllegalArgumentException ex)
+				{
+					//if the column length is too long, IllegalArgumentException will come 
+					// and is handled to max length
+					sheet.setColumnWidth(i, 254);
+				}
 			}
 		}
 	}

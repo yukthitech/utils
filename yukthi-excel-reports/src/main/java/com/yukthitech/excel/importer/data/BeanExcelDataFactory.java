@@ -112,6 +112,11 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 			return ColumnType.FLOAT;
 		}
 
+		if(Boolean.class.equals(javaType) || boolean.class.equals(javaType))
+		{
+			return ColumnType.BOOLEAN;
+		}
+
 		if(String.class.equals(javaType))
 		{
 			return ColumnType.STRING;

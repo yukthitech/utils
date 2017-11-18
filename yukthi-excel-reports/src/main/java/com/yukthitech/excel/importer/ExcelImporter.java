@@ -119,25 +119,25 @@ public class ExcelImporter
 
 	public String getValue(Cell cell, ColumnType columnType, String columnName)
 	{
-		switch(cell.getCellType())
+		switch(cell.getCellTypeEnum())
 		{
-			case Cell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 			{
-				if(columnType != ColumnType.BOOLEAN)
+				if(columnType != ColumnType.BOOLEAN && columnType != ColumnType.STRING)
 				{
 					throw new IllegalStateException("Boolean cell encountered for column '" + columnName + "'. Expected type: " + columnType);
 				}
 				
 				return "" + cell.getBooleanCellValue();
 			}
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 			{
 				if(columnType == ColumnType.DATE)
 				{
 					return DEFAULT_DATE_FORMAT.format(cell.getDateCellValue());
 				}
 				
-				if(columnType != ColumnType.FLOAT && columnType != ColumnType.INTEGER)
+				if(columnType != ColumnType.FLOAT && columnType != ColumnType.INTEGER && columnType != ColumnType.STRING)
 				{
 					throw new IllegalStateException("Numeric cell encountered for column '" + columnName + "'. Expected type: " + columnType);
 				}
