@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
-import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
@@ -153,8 +150,7 @@ public class AutomationLauncher
 	 * @param context context whose configurations needs to be initialized
 	 * @param extendedCommandLineArgs Extended command line arguments
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void initalizePlugins(AutomationContext context, String extendedCommandLineArgs[])
+	private static void validateCommandLineArguments(AutomationContext context, String extendedCommandLineArgs[])
 	{
 		//fetch the argument configuration types required
 		List<Class<?>> argBeanTypes = context.getPlugins().stream()
@@ -169,11 +165,10 @@ public class AutomationLauncher
 
 		//if any type is required creation command line options and parse command line arguments
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(argBeanTypes.toArray(new Class<?>[0]));
-		Map<Class<?>, Object> argBeans = null;
 		
 		try
 		{
-			argBeans = commandLineOptions.parseBeans(extendedCommandLineArgs);
+			commandLineOptions.parseBeans(extendedCommandLineArgs);
 		} catch(MissingArgumentException e)
 		{
 			System.err.println("Error: " + e.getMessage());
@@ -184,18 +179,6 @@ public class AutomationLauncher
 			ex.printStackTrace();
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
 			System.exit(-1);
-		}
-		
-		//initialize the configurations
-		Object args = null;
-		Collection<IPlugin<Object>> plugins = (Collection) context.getPlugins();
-		
-		for(IPlugin<Object> plugin : plugins)
-		{
-			logger.debug("Initializing plugin: {}", plugin.getClass().getName());
-			
-			args = argBeans.get(plugin.getArgumentBeanType());
-			plugin.initialize(context, args);
 		}
 	}
 
@@ -287,7 +270,7 @@ public class AutomationLauncher
 		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig);
 
 		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
-		initalizePlugins(context, extendedCommandLineArgs);
+		validateCommandLineArguments(context, extendedCommandLineArgs);
 		
 		//execute test suites
 		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup, reportFolder);

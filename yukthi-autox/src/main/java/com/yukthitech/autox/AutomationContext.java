@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
@@ -21,6 +25,9 @@ import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.autox.test.TestSuite;
+import com.yukthitech.utils.cli.CommandLineOptions;
+import com.yukthitech.utils.cli.MissingArgumentException;
+import com.yukthitech.utils.cli.OptionsFactory;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -30,6 +37,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class AutomationContext
 {
+	private static Logger logger = LogManager.getLogger(AutomationContext.class);
+	
 	/**
 	 * Automation context that can be accessed anywhere needed.
 	 */
@@ -54,6 +63,11 @@ public class AutomationContext
 	 * Maintains list of required plugins required by loaded test suites.
 	 */
 	private Map<Class<?>, IPlugin<?>> requiredPlugins = new HashMap<>();
+	
+	/**
+	 * Maintain list of plugins which are already initialized.
+	 */
+	private Set<Class<?>> initializedPlugins = new HashSet<>();
 	
 	/**
 	 * List of configured log monitors.
@@ -89,6 +103,12 @@ public class AutomationContext
 	 * Current test suite being executed.
 	 */
 	private TestSuite activeTestSuite;
+	
+	/**
+	 * Maintains list of extended command line argument which will be used
+	 * during plugin initialization.
+	 */
+	private String extendedCommandLineArgs[];
 
 	/**
 	 * Constructor.
@@ -129,6 +149,16 @@ public class AutomationContext
 	public static AutomationContext getInstance()
 	{
 		return instance;
+	}
+	
+	/**
+	 * Sets the maintains list of extended command line argument which will be used during plugin initialization.
+	 *
+	 * @param extendedCommandLineArgs the new maintains list of extended command line argument which will be used during plugin initialization
+	 */
+	public void setExtendedCommandLineArgs(String[] extendedCommandLineArgs)
+	{
+		this.extendedCommandLineArgs = extendedCommandLineArgs;
 	}
 	
 	/**
@@ -227,6 +257,52 @@ public class AutomationContext
 		return Collections.unmodifiableCollection(requiredPlugins.values());
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void initalizePlugin(Class<?> pluginType)
+	{
+		IPlugin<Object> plugin = (IPlugin) requiredPlugins.get(pluginType);
+		
+		if(plugin == null)
+		{
+			return;
+		}
+		
+		Class<?> pluginArgType = plugin.getArgumentBeanType();
+		
+		if(pluginArgType == null || Object.class.equals(pluginArgType))
+		{
+			initializedPlugins.add(pluginType);
+			return;
+		}
+		
+		logger.debug("Initializing plugin: {}", plugin.getClass().getName());
+		
+		List<Class<?>> argBeanTypes = new ArrayList<>();
+		argBeanTypes.add(pluginArgType);
+
+		//if any type is required creation command line options and parse command line arguments
+		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(argBeanTypes.toArray(new Class<?>[0]));
+		Map<Class<?>, Object> argBeans = null;
+		
+		try
+		{
+			argBeans = commandLineOptions.parseBeans(extendedCommandLineArgs);
+		} catch(MissingArgumentException e)
+		{
+			System.err.println("Error: " + e.getMessage());
+			System.exit(-1);
+		} catch(Exception ex)
+		{
+			ex.printStackTrace();
+			System.exit(-1);
+		}
+
+		Object args = argBeans.get(plugin.getArgumentBeanType());
+		plugin.initialize(this, args);
+		
+		initializedPlugins.add(pluginType);
+	}
+	
 	/**
 	 * Fetches the plugin of specified plugin type.
 	 * @param pluginType plugin type to fetch
@@ -235,6 +311,11 @@ public class AutomationContext
 	@SuppressWarnings("unchecked")
 	public <T extends IPlugin<?>> T getPlugin(Class<T> pluginType)
 	{
+		if(!initializedPlugins.contains(pluginType))
+		{
+			initalizePlugin(pluginType);
+		}
+		
 		return (T) requiredPlugins.get(pluginType);
 	}
 	
