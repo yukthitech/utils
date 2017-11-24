@@ -991,14 +991,16 @@ public class RdbmsDataStore implements IDataStore
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.yukthitech.persistence.IDataStore#executeNativeFinder(java.lang.String, java.lang.Object)
+	 * @see com.yukthitech.persistence.IDataStore#executeNativeFinder(java.lang.String, java.lang.Object, IFinderRecordProcessor)
 	 */
-	public List<Record> executeNativeFinder(String queryName, Object context)
+	public List<Record> executeNativeFinder(String queryName, Object context, IFinderRecordProcessor recordProcessor)
 	{
 		logger.trace("Started method: executeNativeFinder with query - {}", queryName);
 		
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		IFinderRecordProcessor.Action action = null;
+		int recNo = -1;
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
@@ -1029,6 +1031,8 @@ public class RdbmsDataStore implements IDataStore
 			
 			while(rs.next())
 			{
+				recNo++;
+				
 				//if records are available fetch columns names, so that same name objects
 				//are shared across the records
 				if(colNames == null)
@@ -1060,6 +1064,24 @@ public class RdbmsDataStore implements IDataStore
 					rec.set(i, colNames[i], cellValue);
 				}
 				
+				if(recordProcessor != null)
+				{
+					//check the action to be performed
+					action = recordProcessor.process(recNo, rec);
+					
+					if(action == Action.STOP)
+					{
+						//stop further processing
+						break;
+					}
+					
+					if(action == Action.IGNORE)
+					{
+						//ignore current record and go to next record
+						continue;
+					}
+				}
+
 				records.add(rec);
 			}
 			

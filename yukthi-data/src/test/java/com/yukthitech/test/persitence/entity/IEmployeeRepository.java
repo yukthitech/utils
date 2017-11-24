@@ -132,6 +132,9 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
 	public List<Employee> readEmployee2(EmpSearchQuery query);
 
+	@NativeQuery(name = "readQuery", type = NativeQueryType.READ)
+	public List<Employee> readEmployeeWithFilter(@Named("query") EmpSearchQuery query, IDataFilter<Employee> filter);
+
 	@SearchFunction
 	@SearchResult
 	public List<DynamicEmpSearchResult> searchByName(SearchQuery searchQuery);

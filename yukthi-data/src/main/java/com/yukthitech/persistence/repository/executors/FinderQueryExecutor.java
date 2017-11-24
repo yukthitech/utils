@@ -105,7 +105,6 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 			break;
 		}
 	}
-	
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.persistence.repository.executors.QueryExecutor#execute(com.yukthitech.persistence.repository.executors.QueryExecutionContext, com.yukthitech.persistence.IDataStore, com.yukthitech.persistence.conversion.ConversionService, java.lang.Object[])

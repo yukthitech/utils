@@ -81,9 +81,10 @@ public interface IDataStore
 	 * Used to execute native search query indicated by "queryName"
 	 * @param queryName Name of the query to execute
 	 * @param context Context to be used to inject query params
+	 * @param recordProcessor record processor to control result records.
 	 * @return List of fetched records
 	 */
-	public List<Record> executeNativeFinder(String queryName, Object context);
+	public List<Record> executeNativeFinder(String queryName, Object context, IFinderRecordProcessor recordProcessor);
 	
 	/**
 	 * Used to execute native DML queries

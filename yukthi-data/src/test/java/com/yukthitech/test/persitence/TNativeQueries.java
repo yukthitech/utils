@@ -24,6 +24,7 @@
 package com.yukthitech.test.persitence;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -31,6 +32,8 @@ import org.testng.annotations.Test;
 import com.yukthitech.test.persitence.entity.Employee;
 import com.yukthitech.test.persitence.entity.IEmployeeRepository;
 import com.yukthitech.test.persitence.queries.EmpSearchQuery;
+import com.yukthitech.persistence.FilterAction;
+import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.IDataStore;
 import com.yukthitech.persistence.NativeQueryFactory;
 import com.yukthitech.persistence.repository.RepositoryFactory;
@@ -155,5 +158,27 @@ public class TNativeQueries extends TestSuiteBase
 		Assert.assertEquals(e.getEmailId(), "user1@test.com");
 		Assert.assertEquals(e.getPhoneNo(), "1234561");
 		Assert.assertEquals(e.getAge(), 25);
+	}
+	
+	
+	@Test(dataProvider = "repositoryFactories")
+	public void testNativeSelectWithFilter(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		AtomicInteger recordCount = new AtomicInteger(0);
+		
+		List<Employee> lst = repo.readEmployeeWithFilter(new EmpSearchQuery("user", null, null, null), new IDataFilter<Employee>()
+		{
+			@Override
+			public FilterAction filter(Employee data)
+			{
+				recordCount.incrementAndGet();
+				return recordCount.get() <= 2 ? FilterAction.ACCEPT : FilterAction.REJECT_AND_STOP;
+			}
+		});
+		
+		Assert.assertEquals(lst.size(), 2);
+		Assert.assertTrue(lst.get(0).getEmailId().startsWith("user"));
+		Assert.assertTrue(lst.get(1).getEmailId().startsWith("user"));
 	}
 }

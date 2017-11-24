@@ -4,11 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,13 +16,17 @@ import javax.annotation.PostConstruct;
 import javax.persistence.Table;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.FieldDetails;
+import com.yukthitech.persistence.FilterAction;
 import com.yukthitech.persistence.ICrudRepository;
+import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.IDataStore;
+import com.yukthitech.persistence.IFinderRecordProcessor;
 import com.yukthitech.persistence.Record;
 import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
@@ -88,6 +92,11 @@ public class NativeQueryExecutor extends QueryExecutor
 	 */
 	private Map<String, Integer> paramNameToIdx = new HashMap<>();
 	
+	/**
+	 * Parameter index at which data filter can be expected.
+	 */
+	private int dataFilterIndex = -1;
+
 	public NativeQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
 		super.repositoryType = repositoryType;
@@ -151,7 +160,7 @@ public class NativeQueryExecutor extends QueryExecutor
 			}
 		}
 		
-		Class<?> parameterTypes[] = method.getParameterTypes();
+		Class<?> parameterTypes[] = null;
 
 		//find post construct method
 		for(Method rmethod : returnType.getDeclaredMethods())
@@ -177,6 +186,46 @@ public class NativeQueryExecutor extends QueryExecutor
 		
 		//fetch the parameter name indexing
 		createParamNameMap(method);
+
+		if(returnCollectionType != null)
+		{
+			checkForDataFilter(method);
+		}
+	}
+	
+	/**
+	 * Checks if data filter is specified in method arguments, if specified sets {@link #dataFilterIndex} with the parameter index
+	 * of the data filter.
+	 * @param method mehod whose paramters needs to be searched for filter
+	 */
+	private void checkForDataFilter(Method method)
+	{
+		Type paramTypes[] = method.getGenericParameterTypes();
+		ParameterizedType parameterizedType = null;
+		
+		for(int i = 0; i < paramTypes.length; i++)
+		{
+			if(!(paramTypes[i] instanceof ParameterizedType))
+			{
+				continue;
+			}
+			
+			parameterizedType = (ParameterizedType) paramTypes[i];
+			
+			if(! IDataFilter.class.isAssignableFrom((Class<?>)parameterizedType.getRawType()) )
+			{
+				continue;
+			}
+			
+			if(!TypeUtils.isAssignable(parameterizedType.getActualTypeArguments()[0], returnType))
+			{
+				throw new InvalidRepositoryException("Data-filter argument type '{}' is not matching with finder return type '{}'. [Method: {}, Repository: {}]",
+						parameterizedType.getActualTypeArguments()[0].toString(), returnType.getName(), method.getName(), repositoryType.getName());
+			}
+			
+			this.dataFilterIndex = i;
+			break;
+		}
 	}
 	
 	/**
@@ -339,17 +388,51 @@ public class NativeQueryExecutor extends QueryExecutor
 			//if native is read method
 			if(nativeQueryAnnotation.type() == NativeQueryType.READ)
 			{
-				List<Record> records = dataStore.executeNativeFinder(nativeQueryAnnotation.name(), contextMap);
+				//list that will maintain final result beans
+				final ArrayList<Object> resLst = new ArrayList<>();
+
+				//identify the data filter
+				final IDataFilter<Object> dataFilter = (dataFilterIndex < 0) ? null : (IDataFilter<Object>) params[dataFilterIndex];
+
+				dataStore.executeNativeFinder(nativeQueryAnnotation.name(), contextMap, new IFinderRecordProcessor()
+				{
+					@Override
+					public Action process(long recordNo, Record record)
+					{
+						if(returnCollectionType == null && recordNo > 2)
+						{
+							return Action.STOP;
+						}
+						
+						Object recordBean = parseToReturnType(record, dataStore);
+						
+						if(dataFilter != null)
+						{
+							FilterAction filterAction = dataFilter.filter(recordBean);
+							filterAction = (filterAction == null) ? FilterAction.ACCEPT : filterAction;
+							
+							if(filterAction.isDataAccepted())
+							{
+								resLst.add(recordBean);
+							}
+							
+							return filterAction.isStopProcessing() ? Action.STOP : Action.IGNORE; 
+						}
+						
+						resLst.add( recordBean );
+						return Action.IGNORE;
+					}
+				});
 
 				//if single object is expected
 				if(returnCollectionType == null)
 				{
-					if(CollectionUtils.isEmpty(records))
+					if(CollectionUtils.isEmpty(resLst))
 					{
 						return null;
 					}
 					
-					return parseToReturnType(records.get(0), dataStore);
+					return resLst.get(0);
 				}
 
 				//create result collection type
@@ -363,14 +446,7 @@ public class NativeQueryExecutor extends QueryExecutor
 					throw new InvalidStateException(ex, "An error occurred while creating collection instance - {}", returnCollectionType.getName());
 				}
 				
-				//convert found records into result objects
-				if(records != null)
-				{
-					for(Record rec : records)
-					{
-						resCollection.add(parseToReturnType(rec, dataStore));
-					}
-				}
+				resCollection.addAll(resLst);
 				
 				return resCollection;
 			}
