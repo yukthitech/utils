@@ -1,6 +1,7 @@
 package com.yukthitech.test.persitence;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -10,6 +11,8 @@ import com.yukthitech.test.persitence.entity.IEmployeeRepository;
 import com.yukthitech.test.persitence.queries.EmpSearchQuery;
 import com.yukthitech.test.persitence.queries.EmpSearchResult;
 import com.yukthitech.test.persitence.queries.KeyValueBean;
+import com.yukthitech.persistence.FilterAction;
+import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.RecordCountMistmatchException;
 import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
@@ -354,5 +357,51 @@ public class TFinders extends TestSuiteBase
 		
 		Assert.assertEquals(results.size(), 1);
 		Assert.assertEquals(results.get(0).getEmployeeNo() , "1236");
+	}
+	
+	@Test(dataProvider = "repositoryFactories")
+	public void testFinderWithFilter(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		//test when no records are filtered
+		List<Employee> results = repo.findByAge(0, new IDataFilter<Employee>()
+		{
+			@Override
+			public FilterAction filter(Employee data)
+			{
+				return FilterAction.ACCEPT;
+			}
+		});
+		
+		Assert.assertTrue(results.size() >= 4);
+
+		//test when certain records are rejected
+		results = repo.findByAge(20, new IDataFilter<Employee>()
+		{
+			@Override
+			public FilterAction filter(Employee data)
+			{
+				return (data.getAge() <= 25) ? FilterAction.ACCEPT : FilterAction.REJECT;
+			}
+		});
+		
+		Assert.assertEquals(results.size(), 2);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()), CommonUtils.toSet("1230", "1231"));
+
+		//test when certain records are limited by count
+		AtomicInteger recCount = new AtomicInteger(0);
+		
+		results = repo.findByAge(20, new IDataFilter<Employee>()
+		{
+			@Override
+			public FilterAction filter(Employee data)
+			{
+				recCount.incrementAndGet();
+				return recCount.get() <= 2 ? FilterAction.ACCEPT : FilterAction.REJECT_AND_STOP;
+			}
+		});
+		
+		Assert.assertEquals(results.size(), 2);
 	}
 }

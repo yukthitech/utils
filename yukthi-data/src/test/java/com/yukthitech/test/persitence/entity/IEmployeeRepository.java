@@ -9,6 +9,7 @@ import com.yukthitech.test.persitence.queries.EmpSearchResult;
 import com.yukthitech.test.persitence.queries.KeyValueBean;
 import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.persistence.ICrudRepository;
+import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.ConditionBean;
 import com.yukthitech.persistence.repository.annotations.AggregateFunction;
@@ -41,6 +42,8 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 
 	public List<Employee> findEmpByName1(@Condition(value = "name", nullable = true) String name);
 	public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullable = true) String name);
+	
+	public List<Employee> findByAge(@Condition(value = "age", op = Operator.GE) int age, IDataFilter<Employee> filter);
 	
 	@MethodConditions(
 			nullChecks = {

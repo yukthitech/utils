@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.FieldDetails;
 import com.yukthitech.persistence.ICrudRepository;
+import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.IDataStore;
 import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.listeners.EntityEventType;
@@ -178,6 +179,12 @@ public abstract class QueryExecutor
 				}
 				
 				if(!expectAllConditions)
+				{
+					continue;
+				}
+				
+				//ignore data filter parameters
+				if(IDataFilter.class.isAssignableFrom(parameters[i].getType()))
 				{
 					continue;
 				}

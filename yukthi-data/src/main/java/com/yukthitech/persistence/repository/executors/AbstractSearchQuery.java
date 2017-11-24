@@ -164,7 +164,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		
 		if(void.class.equals(this.returnType))
 		{
-			throw new InvalidRepositoryException("Found void finder method '" + method.getName() + "' in repository: " + repositoryType.getName());
+			throw new InvalidRepositoryException("Found void return type, when return type is expected. [Repository: {}, Method: {}]", repositoryType.getName(), method.getName());
 		}
 		
 		//TODO: Support map types
