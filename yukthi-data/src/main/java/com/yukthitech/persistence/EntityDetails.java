@@ -95,7 +95,7 @@ public class EntityDetails
 			}
 
 			fieldDetails.setDbColumnName(column);
-			columnToDetails.put(column, fieldDetails);
+			columnToDetails.put(column.toLowerCase(), fieldDetails);
 		}
 	}
 	
@@ -150,12 +150,14 @@ public class EntityDetails
 			logger.warn("Field '" + fieldDetails.getName() + "' is mapped multiple times");
 			//throw new InvalidMappingException("Field '" + fieldDetails.getField() + "' is mapped multiple times");
 		}
+		
+		String columnName = fieldDetails.getDbColumnName().toLowerCase();
 
-		if(columnToDetails.containsKey(fieldDetails.getDbColumnName()))
+		if(columnToDetails.containsKey(columnName))
 		{
 			throw new InvalidConfigurationException("Column '{}' is mapped by multiple fields - [{}, {}] in entity - {}", 
 					fieldDetails.getDbColumnName(), fieldDetails.getName(), 
-					columnToDetails.get(fieldDetails.getDbColumnName()).getName(), 
+					columnToDetails.get(columnName).getName(), 
 					entityType.getName() );
 		}
 
@@ -164,7 +166,7 @@ public class EntityDetails
 		//if column name is present, this might be case with non-owned relation fields
 		if(fieldDetails.getDbColumnName() != null)
 		{
-			columnToDetails.put(fieldDetails.getDbColumnName(), fieldDetails);
+			columnToDetails.put(columnName, fieldDetails);
 		}
 
 		if(fieldDetails.isIdField())
@@ -195,7 +197,7 @@ public class EntityDetails
 
 	public FieldDetails getFieldDetailsByColumn(String column)
 	{
-		return columnToDetails.get(column);
+		return columnToDetails.get(column.toLowerCase());
 	}
 
 	public Collection<FieldDetails> getFieldDetails()

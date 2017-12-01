@@ -1,3 +1,14 @@
+26/11/2017
+=========
+In order to improve performance, while mapping record data to beans, the execution plan has to be created once (how to map columns to fields)
+	and then should be executed for each record conversion.
+	
+	Currently for each record the code tries to find mapping logic and tries to map.
+	
+	Examples:
+		NativeQueryExecutor fetch method logic
+		ConditionalQueryBuilder (used by finder and search functions) may also use same logic - needs to be checked
+
 29/10/2017
 =============
 Relation based annotations should be supported limiting to relations which has mid tables

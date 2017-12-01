@@ -303,14 +303,22 @@ public class NativeQueryExecutor extends QueryExecutor
 			//get the result type field with same name
 			field = returnTypeFields.get(flatColumnName);
 			
-			//if field is not found, ignore the column
-			if(field == null)
-			{
-				continue;
-			}
-			
 			//if return type is entity type fetch field details
-			fieldDetails = returnEntityType != null ? returnEntityType.getFieldDetailsByField(field.getName()) : null;
+			if(returnEntityType != null)
+			{
+				fieldDetails = field != null ? returnEntityType.getFieldDetailsByField(field.getName()) : null;
+				
+				//if field details cannot be found by field name, try to find by column name
+				if(fieldDetails == null)
+				{
+					fieldDetails = returnEntityType.getFieldDetailsByColumn(column);
+				}
+			}
+			//if return type is not entity type
+			else
+			{
+				fieldDetails = null;
+			}
 
 			//if return type is expected to be entity and field details is found
 			if(fieldDetails != null)
@@ -321,7 +329,7 @@ public class NativeQueryExecutor extends QueryExecutor
 				);
 			}
 			//if return type is not entity type
-			else
+			else if(field != null)
 			{
 				//set the value from record on field (after required conversion, if any)
 				ReflectionUtils.setFieldValue(result, field.getName(), 
