@@ -87,7 +87,6 @@ public class ExcelImporter
 	
 	private <T> Map<String, Object> toDataMap(Row row, List<String> columnOrder, IExcelDataFactory<T> factory)
 	{
-		Iterator<Cell> cellIt = row.iterator();
 		Iterator<String> headingIt = columnOrder.iterator();
 		Cell cell = null;
 		String heading = null;
@@ -95,10 +94,12 @@ public class ExcelImporter
 		String strValue = null;
 		Column column = null;
 		
-		while(cellIt.hasNext())
+		int colCount = columnOrder.size();
+		
+		for(int i = 0; i < colCount; i++)
 		{
 			heading = headingIt.next();
-			cell = cellIt.next();
+			cell = row.getCell(i);
 			
 			column = factory.getColumn(heading);
 			
@@ -119,6 +120,11 @@ public class ExcelImporter
 
 	public String getValue(Cell cell, ColumnType columnType, String columnName)
 	{
+		if(cell == null)
+		{
+			return "";
+		}
+		
 		switch(cell.getCellTypeEnum())
 		{
 			case BOOLEAN:
