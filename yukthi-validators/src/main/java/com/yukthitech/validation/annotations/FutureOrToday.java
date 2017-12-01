@@ -43,7 +43,7 @@ import com.yukthitech.validators.FutureOrTodayValidator;
 @Documented
 public @interface FutureOrToday
 {
-	public String message() default "{com.yukthitech.validation.FutureOrToday}";
+	public String message() default "{com.yukthitech.validation.annotations.FutureOrToday}";
 
 	public Class<?>[] groups() default {};
 

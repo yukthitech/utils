@@ -49,7 +49,7 @@ public @interface Mispattern
 	 */
 	public String[] regexp();
 	
-	public String message() default "{com.yukthitech.validation.Mispattern}";
+	public String message() default "{com.yukthitech.validation.annotations.Mispattern}";
 
 	public Class<?>[] groups() default {};
 

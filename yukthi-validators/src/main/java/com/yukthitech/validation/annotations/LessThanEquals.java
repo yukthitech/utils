@@ -48,6 +48,6 @@ public @interface LessThanEquals
 	 */
 	public String field();
 	
-	public String message() default "{com.yukthitech.validation.LessThanEquals}";
+	public String message() default "{com.yukthitech.validation.annotations.LessThanEquals}";
 
 }

@@ -48,6 +48,6 @@ public @interface MandatoryOption
 	 */
 	public String[] fields();
 	
-	public String message() default "{com.yukthitech.validation.MandatoryOption}";
+	public String message() default "{com.yukthitech.validation.annotations.MandatoryOption}";
 
 }

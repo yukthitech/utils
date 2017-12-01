@@ -44,6 +44,6 @@ public @interface GreaterThanEquals
 {
 	public String field();
 	
-	public String message() default "{com.yukthitech.validation.GreaterThanEquals}";
+	public String message() default "{com.yukthitech.validation.annotations.GreaterThanEquals}";
 
 }

@@ -43,7 +43,7 @@ import com.yukthitech.validators.NotEmptyValidator;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotEmpty
 {
-	public String message() default "{com.yukthitech.validation.NotEmpty}";
+	public String message() default "{com.yukthitech.validation.annotations.NotEmpty}";
 
 	public Class<?>[] groups() default {};
 

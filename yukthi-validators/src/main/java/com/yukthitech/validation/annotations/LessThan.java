@@ -48,5 +48,5 @@ public @interface LessThan
 	 */
 	public String field();
 	
-	public String message() default "{com.yukthitech.validation.LessThan}";
+	public String message() default "{com.yukthitech.validation.annotations.LessThan}";
 }

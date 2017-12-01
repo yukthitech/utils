@@ -41,7 +41,7 @@ import com.yukthitech.validators.MinLenValidator;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MinLen
 {
-	public String message() default "{com.yukthitech.validation.MinLen}";
+	public String message() default "{com.yukthitech.validation.annotations.MinLen}";
 
 	public Class<?>[] groups() default {};
 

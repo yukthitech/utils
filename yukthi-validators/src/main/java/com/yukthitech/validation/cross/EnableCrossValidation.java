@@ -41,7 +41,7 @@ import javax.validation.Payload;
 @Documented
 public @interface EnableCrossValidation
 {
-	public String message() default "{com.yukthitech.validation.EnableCrossValidation}";
+	public String message() default "{com.yukthitech.validation.cross.EnableCrossValidation}";
 
 	public Class<?>[] groups() default {};
 

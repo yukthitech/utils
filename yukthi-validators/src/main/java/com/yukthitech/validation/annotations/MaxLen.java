@@ -41,7 +41,7 @@ import com.yukthitech.validators.MaxLenValidator;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MaxLen
 {
-	public String message() default "{com.yukthitech.validation.MaxLen}";
+	public String message() default "{com.yukthitech.validation.annotations.MaxLen}";
 
 	public Class<?>[] groups() default {};
 

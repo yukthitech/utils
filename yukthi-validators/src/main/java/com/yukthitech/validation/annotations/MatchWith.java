@@ -47,6 +47,6 @@ public @interface MatchWith
 	 */
 	public String field();
 	
-	public String message() default "{com.yukthitech.validation.MatchWith}";
+	public String message() default "{com.yukthitech.validation.annotations.MatchWith}";
 
 }

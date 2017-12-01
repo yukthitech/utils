@@ -50,7 +50,7 @@ public @interface GreaterThan
 	 */
 	public String field();
 	
-	public String message() default "{com.yukthitech.validation.GreaterThan}";
+	public String message() default "{com.yukthitech.validation.annotations.GreaterThan}";
 
 	public Class<?>[] groups() default {};
 

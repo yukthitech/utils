@@ -42,7 +42,7 @@ import com.yukthitech.validators.RequiredValidator;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Required
 {
-	public String message() default "{com.yukthitech.validation.Required}";
+	public String message() default "{com.yukthitech.validation.annotations.Required}";
 
 	public Class<?>[] groups() default {};
 

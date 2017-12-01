@@ -43,7 +43,7 @@ import com.yukthitech.validators.PastOrTodayValidator;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PastOrToday
 {
-	public String message() default "{com.yukthitech.validation.PastOrToday}";
+	public String message() default "{com.yukthitech.validation.annotations.PastOrToday}";
 
 	public Class<?>[] groups() default {};
 
