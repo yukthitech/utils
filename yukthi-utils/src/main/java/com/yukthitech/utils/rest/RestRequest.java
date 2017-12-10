@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 
 import org.apache.http.client.methods.HttpRequestBase;
 
+import com.yukthitech.utils.exceptions.InvalidStateException;
+
 /**
  * 
  * @author akiran
@@ -80,6 +82,19 @@ public abstract class RestRequest<T extends RestRequest<T>>
 	{
 		params.put(name, value);
 		return (T) this;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public T addJsonParam(String name, Object value)
+	{
+		try
+		{
+			params.put(name, RestClient.OBJECT_MAPPER.writeValueAsString(value));
+			return (T) this;
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while coverting specified object to json", ex);
+		}
 	}
 
 	/**
