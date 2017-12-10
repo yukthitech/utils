@@ -11,11 +11,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.yukthitech.excel.importer.data.Column;
 import com.yukthitech.excel.importer.data.ColumnType;
@@ -30,7 +30,7 @@ public class ExcelImporter
 		
 		try(FileInputStream fis = new FileInputStream(fileObj))
 		{
-			Workbook wb = new HSSFWorkbook(fis);
+			Workbook wb = WorkbookFactory.create(fis);
 			Sheet sheet = wb.getSheetAt(0);
 
 			List<String> headings = getHeadings(sheet);

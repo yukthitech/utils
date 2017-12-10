@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -18,7 +19,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import com.yukthitech.excel.exporter.data.IExcelDataReport;
 import com.yukthitech.excel.exporter.style.Border;
-import com.yukthitech.excel.exporter.style.BorderStyle;
 
 public class ExcelExporter
 {

@@ -23,6 +23,7 @@
 
 package com.yukthitech.excel.exporter.style;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 
 /**
@@ -161,25 +162,25 @@ public class Border
 	{
 		if(left != null)
 		{
-			cellStyle.setBorderLeft(left.getStyle());
+			cellStyle.setBorderLeft(left);
 			cellStyle.setLeftBorderColor(colorIndex);
 		}
 		
 		if(bottom != null)
 		{
-			cellStyle.setBorderBottom(bottom.getStyle());
+			cellStyle.setBorderBottom(bottom);
 			cellStyle.setBottomBorderColor(colorIndex);
 		}
 
 		if(right != null)
 		{
-			cellStyle.setBorderRight(right.getStyle());
+			cellStyle.setBorderRight(right);
 			cellStyle.setRightBorderColor(colorIndex);
 		}
 		
 		if(top != null)
 		{
-			cellStyle.setBorderTop(top.getStyle());
+			cellStyle.setBorderTop(top);
 			cellStyle.setTopBorderColor(colorIndex);
 		}
 	}
