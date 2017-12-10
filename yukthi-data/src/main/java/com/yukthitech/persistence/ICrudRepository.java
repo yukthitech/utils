@@ -89,4 +89,11 @@ public interface ICrudRepository<E>
 	 * @return Number of matching records.
 	 */
 	public long searchCount(SearchQuery searchQuery);
+	
+	/**
+	 * Fetches the current repository type.
+	 * Note: getClass() on repository object would return proxy type name.
+	 * @return current repository type.
+	 */
+	public Class<? extends ICrudRepository<?>> getType();
 }

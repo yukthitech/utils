@@ -61,6 +61,7 @@ class RepositoryProxy implements InvocationHandler
 		defaultedMethods.put("getRepositoryFactory", this::getRepositoryFactory);
 		defaultedMethods.put("getDataStore", this::getDataStore);
 		defaultedMethods.put("executeQueryExecutor", this::executeQueryExecutor);
+		defaultedMethods.put("getType", this::getType);
 
 		this.executorFactory = executorFactory;
 		this.dataStore = dataStore;
@@ -263,5 +264,14 @@ class RepositoryProxy implements InvocationHandler
 		Object params[] = (Object[]) args[1];
 		
 		return queryExecutor.execute(queryExecutionContext, dataStore, dataStore.getConversionService(), params);
+	}
+	
+	/**
+	 * Fetches current repository type.
+	 * @return current repository type
+	 */
+	private Class<? extends ICrudRepository<?>> getType(Object args[])
+	{
+		return repositoryType;
 	}
 }

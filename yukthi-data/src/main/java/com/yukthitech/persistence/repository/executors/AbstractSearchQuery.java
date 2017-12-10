@@ -65,32 +65,44 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	 */
 	private void fetchResultFieldsFromObject(Class<?> returnType)
 	{
-		java.lang.reflect.Field fields[] = returnType.getDeclaredFields();
-		Field resultField = null;
-		String name = null;
+		Class<?> curCls = returnType;
 		
-		//loop through query object type fields 
-		for(java.lang.reflect.Field objField : fields)
+		while(true)
 		{
-			resultField = objField.getAnnotation(Field.class);
-			
-			//if field is not marked as condition
-			if(resultField == null)
+			if(curCls.getName().startsWith("java"))
 			{
-				continue;
+				break;
 			}
 			
-			//fetch entity field name
-			name = resultField.value();
+			java.lang.reflect.Field fields[] = curCls.getDeclaredFields();
+			Field resultField = null;
+			String name = null;
 			
-			//if name is not specified in condition
-			if(name.trim().length() == 0)
+			//loop through query object type fields 
+			for(java.lang.reflect.Field objField : fields)
 			{
-				//use field name
-				name = objField.getName();
+				resultField = objField.getAnnotation(Field.class);
+				
+				//if field is not marked as condition
+				if(resultField == null)
+				{
+					continue;
+				}
+				
+				//fetch entity field name
+				name = resultField.value();
+				
+				//if name is not specified in condition
+				if(name.trim().length() == 0)
+				{
+					//use field name
+					name = objField.getName();
+				}
+				
+				conditionQueryBuilder.addResultField(objField.getName(), objField.getType(), objField.getGenericType(), name, methodDesc);
 			}
 			
-			conditionQueryBuilder.addResultField(objField.getName(), objField.getType(), objField.getGenericType(), name, methodDesc);
+			curCls = curCls.getSuperclass();
 		}
 	}
 	

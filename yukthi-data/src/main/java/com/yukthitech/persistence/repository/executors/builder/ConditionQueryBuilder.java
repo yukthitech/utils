@@ -477,7 +477,7 @@ public class ConditionQueryBuilder implements Cloneable
 					if(i != (maxIndex - 1))
 					{
 						throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in %s parameter '%s' of %s. "
-							+ "Extension field is used in middle/end of expression.", currentProp, paramType, conditionExpr, methodDesc));
+							+ "Extension field is used in middle/start of expression.", currentProp, paramType, conditionExpr, methodDesc));
 					}
 					
 					EntityDetails extendedEntityDetails = extendedTableDetails.toEntityDetails(currentEntityDetails);
