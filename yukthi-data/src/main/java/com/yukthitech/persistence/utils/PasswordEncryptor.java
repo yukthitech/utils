@@ -45,4 +45,10 @@ public class PasswordEncryptor
 		
 		return passwordEncryptor.checkPassword(plainPassword, encryptedPassword);
 	}
+	
+	public static void main(String[] args)
+	{
+		String password = args[0];
+		System.out.println(encryptPassword(password));
+	}
 }
