@@ -13,7 +13,8 @@ public enum DataType
 	DOUBLE(double.class, Double.class),
 	BOOLEAN(boolean.class, Boolean.class),
 	DATE, 
-	BLOB, 
+	BLOB,
+	ZIP_BLOB,
 	CLOB,
 	DATE_TIME(Date.class), 
 	UNKNOWN;

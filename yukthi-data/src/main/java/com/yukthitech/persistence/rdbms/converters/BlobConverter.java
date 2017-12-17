@@ -16,6 +16,7 @@ import com.yukthitech.persistence.LobData;
 import com.yukthitech.persistence.UnsupportedOperationException;
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
+import com.yukthitech.utils.ZipUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 
@@ -82,7 +83,7 @@ public class BlobConverter implements IPersistenceConverter
 	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
 	{
 		//if db type is not blob, don't try conversion
-		if(dbType != DataType.BLOB)
+		if(dbType != DataType.BLOB && dbType != DataType.ZIP_BLOB)
 		{
 			return null;
 		}
@@ -90,7 +91,14 @@ public class BlobConverter implements IPersistenceConverter
 		//if target java type is file type
 		if(File.class.equals(javaType))
 		{
-			return convertToFile(dbObject);
+			File file = convertToFile(dbObject);
+			
+			if(dbType == DataType.ZIP_BLOB)
+			{
+				file = ZipUtils.unzipFile(file);
+			}
+			
+			return file;
 		}
 		
 		//if db object is char[] and target is string
@@ -98,7 +106,14 @@ public class BlobConverter implements IPersistenceConverter
 		{
 			try
 			{
-				return readObject(new ByteArrayInputStream((byte[])dbObject));
+				byte data[] = (byte[])dbObject;
+				
+				if(dbType == DataType.ZIP_BLOB)
+				{
+					data = ZipUtils.unzipBytes(data);
+				}
+				
+				return readObject(new ByteArrayInputStream(data));
 			}catch(Exception ex)
 			{
 				throw new IllegalStateException("An error occurred while reading object from blob", ex);
@@ -112,6 +127,13 @@ public class BlobConverter implements IPersistenceConverter
 			
 			try
 			{
+				byte data[] = IOUtils.toByteArray(blob.getBinaryStream());
+				
+				if(dbType == DataType.ZIP_BLOB)
+				{
+					data = ZipUtils.unzipBytes(data);
+				}
+				
 				return readObject(blob.getBinaryStream());
 			}catch(Exception ex)
 			{
@@ -129,7 +151,7 @@ public class BlobConverter implements IPersistenceConverter
 	public Object convertToDBType(Object javaObject, DataType dbType)
 	{
 		//if not blob field, ignore
-		if(dbType != DataType.BLOB)
+		if(dbType != DataType.BLOB && dbType != DataType.ZIP_BLOB)
 		{
 			return null;
 		}
@@ -137,16 +159,40 @@ public class BlobConverter implements IPersistenceConverter
 		//if java object instance of file, return lob data
 		if(javaObject instanceof File)
 		{
-			return new LobData((File)javaObject, false);
+			File file = (File) javaObject;
+			
+			if(dbType == DataType.ZIP_BLOB)
+			{
+				file = ZipUtils.zipFile(file);
+			}
+			
+			return new LobData(file, false);
 		}
 			
 		//convert java object into byte[]
+		byte dataBytes[] = toBytes(javaObject);
+		
+		if(dbType == DataType.ZIP_BLOB)
+		{
+			dataBytes = ZipUtils.zipBytes(dataBytes);
+		}
+		
+		return dataBytes;
+	}
+	
+	/**
+	 * Converts object into bytes.
+	 * @param object object to be converted.
+	 * @return converted bytes.
+	 */
+	private byte[] toBytes(Object object)
+	{
 		try
 		{
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			
-			oos.writeObject(javaObject);
+			oos.writeObject(object);
 			oos.flush();
 			
 			oos.close();
@@ -155,8 +201,7 @@ public class BlobConverter implements IPersistenceConverter
 			return bos.toByteArray();
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("An error occurred while converting specified java object into BLOB - " + javaObject, ex);
+			throw new IllegalStateException("An error occurred while converting specified java object into BLOB - " + object, ex);
 		}
 	}
-
 }
