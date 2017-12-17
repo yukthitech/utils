@@ -186,7 +186,7 @@ public class BeanProperty
 	{
 		if(readMethod == null)
 		{
-			throw new InvalidStateException("Read in invoked on write only property - {}", name);
+			throw new InvalidStateException("Read is invoked on write only property - {}", name);
 		}
 		
 		try
@@ -195,6 +195,27 @@ public class BeanProperty
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while fetching bean property '{}' on bean - {}", name, bean);
+		}
+	}
+	
+	/**
+	 * Sets the current property on specified bean with specified value.
+	 * @param bean bean on which property needs to be set
+	 * @param value value needs to be set
+	 */
+	public void setValue(Object bean, Object value)
+	{
+		if(writeMethod == null)
+		{
+			throw new InvalidStateException("Read is invoked on write only property - {}", name);
+		}
+		
+		try
+		{
+			writeMethod.invoke(bean, value);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException(ex, "An error occurred while setting bean property '{}' on bean '{}' with value - {}", name, bean, value);
 		}
 	}
 	
