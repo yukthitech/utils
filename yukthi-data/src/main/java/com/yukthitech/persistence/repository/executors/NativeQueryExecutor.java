@@ -141,13 +141,7 @@ public class NativeQueryExecutor extends QueryExecutor
 			if(!returnType.isPrimitive() && !CommonUtils.isWrapperClass(returnType))
 			{
 				returnTypeFields = new HashMap<>();
-				
-				Field fields[] = returnType.getDeclaredFields();
-				
-				for(Field field : fields)
-				{
-					returnTypeFields.put(field.getName().toLowerCase(), field);
-				}
+				fetchReturnFieldDetails(returnType);
 			}
 		}
 		else
@@ -191,6 +185,27 @@ public class NativeQueryExecutor extends QueryExecutor
 		{
 			checkForDataFilter(method);
 		}
+	}
+	
+	/**
+	 * Fetches return fields from specified type.
+	 * @param type type from which fields needs to be fetched.
+	 */
+	private void fetchReturnFieldDetails(Class<?> type)
+	{
+		if(type.getName().startsWith("java"))
+		{
+			return;
+		}
+		
+		Field fields[] = type.getDeclaredFields();
+		
+		for(Field field : fields)
+		{
+			returnTypeFields.put(field.getName().toLowerCase(), field);
+		}
+		
+		fetchReturnFieldDetails(type.getSuperclass());
 	}
 	
 	/**
@@ -324,7 +339,7 @@ public class NativeQueryExecutor extends QueryExecutor
 			if(fieldDetails != null)
 			{
 				//set the value from record on field (after required conversion, if any)
-				ReflectionUtils.setFieldValue(result, field.getName(), 
+				ReflectionUtils.setFieldValue(result, field, 
 						conversionService.convertToJavaType(record.getObject(column), fieldDetails)
 				);
 			}
@@ -332,7 +347,7 @@ public class NativeQueryExecutor extends QueryExecutor
 			else if(field != null)
 			{
 				//set the value from record on field (after required conversion, if any)
-				ReflectionUtils.setFieldValue(result, field.getName(), 
+				ReflectionUtils.setFieldValue(result, field, 
 						ConvertUtils.convert(record.getObject(column), field.getType())
 				);
 			}

@@ -99,6 +99,28 @@ public class ReflectionUtils
 	}
 
 	/**
+	 * Used to set value of specified field irrespective of the field modifier
+	 * 
+	 * @param bean
+	 *            Bean from which field value needs to be set
+	 * @param field
+	 *            field from which value needs to be set
+	 * @param value
+	 *            Value to be set
+	 */
+	public static void setFieldValue(Object bean, Field field, Object value)
+	{
+		try
+		{
+			field.setAccessible(true);
+			field.set(bean, value);
+		} catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while seting field value - " + field.getName(), ex);
+		}
+	}
+
+	/**
 	 * Used to fetch the field value of specified bean.
 	 * 
 	 * @param bean

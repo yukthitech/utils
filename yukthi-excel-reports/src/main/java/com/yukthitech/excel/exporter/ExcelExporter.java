@@ -70,6 +70,8 @@ public class ExcelExporter
 		Cell cell = null;
 		int rowIndex = 0;
 		
+		int headingWidths[] = new int[headings.length];
+		
 		if(headings != null)
 		{
 			CellStyle headingStyle = createHeadingCell(internalWorkbook, headingCustomizer);
@@ -82,6 +84,7 @@ public class ExcelExporter
 				cell.setCellValue(heading);
 				cell.setCellStyle(headingStyle);
 				
+				headingWidths[headingIndex] = heading.length();
 				headingIndex++;
 			}
 			
@@ -94,6 +97,7 @@ public class ExcelExporter
 		{
 			Row currentRow = null;
 			int cellIndex = 0;
+			String cellValue = null;
 			
 			for(List<com.yukthitech.excel.exporter.data.Cell> row: rows)
 			{
@@ -103,9 +107,16 @@ public class ExcelExporter
 				for(com.yukthitech.excel.exporter.data.Cell dataCell: row)
 				{
 					cell = currentRow.createCell(cellIndex);
-					cell.setCellValue(dataCell.getValue());
+					cellValue = dataCell.getValue();
+					
+					cell.setCellValue(cellValue);
 					//sheet.autoSizeColumn(cellIndex);
 				
+					if(cellValue != null && headingWidths[cellIndex] < cellValue.length())
+					{
+						headingWidths[cellIndex] = cellValue.length();
+					}
+					
 					cellIndex++;
 				}
 				
@@ -115,21 +126,16 @@ public class ExcelExporter
 			//Autosize all the columns as per data content
 			List<com.yukthitech.excel.exporter.data.Cell> row = rows.get(0);
 			int colCount = row.size();
-			int colWidth = 0;
 			
 			for(int i = 0; i < colCount; i++)
 			{
-				sheet.autoSizeColumn(i);
-				colWidth = (int)(sheet.getColumnWidth(i) * 1.5);
-
-				try
+				if(headingWidths[i] > 150)
 				{
-					sheet.setColumnWidth(i, colWidth);
-				}catch(IllegalArgumentException ex)
+					sheet.setColumnWidth(i, 150 * 256);
+				}
+				else
 				{
-					//if the column length is too long, IllegalArgumentException will come 
-					// and is handled to max length
-					sheet.setColumnWidth(i, 254);
+					sheet.autoSizeColumn(i);
 				}
 			}
 		}

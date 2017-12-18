@@ -8,10 +8,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
+
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Utility methods related to zipping and unzipping.
@@ -156,6 +161,43 @@ public class ZipUtils
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while creating zip of input bytes", ex);
+		}
+	}
+	
+	/**
+	 * Creates a zip file of the specified file and returns the same. Input map should have expected file name as 
+	 * key and the file as value (from which content will be fetched).
+	 * @param files mapping from expected file name to file
+	 * @return temp resultant zip file.
+	 */
+	public static File zipFiles(Map<String, File> files)
+	{
+		try
+		{
+			File tempFile = File.createTempFile("temp", ".zip");
+			
+			FileOutputStream fos = new FileOutputStream(tempFile);
+			ZipOutputStream zos = new ZipOutputStream(fos);
+			
+			for(String fileName : files.keySet())
+			{
+				ZipEntry zipEntry = new ZipEntry(fileName);
+				zos.putNextEntry(zipEntry);
+				
+				FileInputStream input = new FileInputStream(files.get(fileName));
+				IOUtils.copy(input, zos);
+				
+				zos.closeEntry();
+				input.close();
+			}
+			
+			zos.close();
+			fos.close();
+			
+			return tempFile;
+		} catch(IOException ex)
+		{
+			throw new InvalidStateException("An exception occurred while zipping specified files", ex);
 		}
 	}
 }
