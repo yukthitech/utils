@@ -25,4 +25,12 @@ public interface IPlugin<AT>
 	
 	public default void handleError(AutomationContext context, ErrorDetails errorDetails)
 	{}
+	
+	/**
+	 * Called when close is called on context. Which generally happens before destroying
+	 * current context.
+	 */
+	public default void close()
+	{
+	}
 }

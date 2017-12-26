@@ -19,7 +19,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-import com.yukthitech.autox.ide.engine.IdeContext;
+import com.yukthitech.autox.ide.engine.IdeEngine;
 import com.yukthitech.autox.ide.engine.StepDetails;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -34,7 +34,7 @@ public class IdeInputPanel extends JPanel
 	private final RTextScrollPane textScrollPane = new RTextScrollPane();
 	private final RSyntaxTextArea fldStepInput = new RSyntaxTextArea();
 
-	private IdeContext ideContext = new IdeContext();
+	private IdeEngine ideContext = new IdeEngine();
 
 	/**
 	 * Create the panel.
@@ -92,7 +92,7 @@ public class IdeInputPanel extends JPanel
 		fldStepInput.setCodeFoldingEnabled(true);
 	}
 
-	public void setIdeContext(IdeContext ideContext)
+	public void setIdeEngine(IdeEngine ideContext)
 	{
 		this.ideContext = ideContext;
 	}
@@ -115,9 +115,11 @@ public class IdeInputPanel extends JPanel
 			String rtfText = IOUtils.toString(bis);
 
 			StepDetails stepDetails = new StepDetails(text, rtfText);
-			ideContext.executeStep(stepDetails);
-
-			System.out.println("RTF: " + rtfText);
+			
+			if(!ideContext.executeStep(stepDetails))
+			{
+				return;
+			}
 			
 			fldStepInput.setText("");
 		} catch(Exception ex)

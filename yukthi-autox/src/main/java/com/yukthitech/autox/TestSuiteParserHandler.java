@@ -42,9 +42,9 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	 */
 	private AutomationReserveNodeHandler reserveNodeHandler;
 
-	public TestSuiteParserHandler(AutomationContext context, ApplicationConfiguration appConfig)
+	public TestSuiteParserHandler(AutomationContext context)
 	{
-		this.appConfig = appConfig;
+		this.appConfig = context.getAppConfiguration();
 		appConfigValueProvider = new AppConfigValueProvider(appConfig.getApplicationProperties());
 		
 		reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);

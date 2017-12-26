@@ -220,4 +220,10 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			throw new ValidateException("No base url is specified.");
 		}
 	}
+	
+	@Override
+	public void close()
+	{
+		activeDriver.close();
+	}
 }

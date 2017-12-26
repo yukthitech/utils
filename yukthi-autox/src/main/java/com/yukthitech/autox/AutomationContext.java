@@ -37,6 +37,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class AutomationContext
 {
+	
+	/** The logger. */
 	private static Logger logger = LogManager.getLogger(AutomationContext.class);
 	
 	/**
@@ -109,6 +111,11 @@ public class AutomationContext
 	 * during plugin initialization.
 	 */
 	private String extendedCommandLineArgs[];
+	
+	/**
+	 * Report folder where reports should be generated.
+	 */
+	private File reportFolder;
 
 	/**
 	 * Constructor.
@@ -257,6 +264,11 @@ public class AutomationContext
 		return Collections.unmodifiableCollection(requiredPlugins.values());
 	}
 	
+	/**
+	 * Initalize plugin.
+	 *
+	 * @param pluginType the plugin type
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initalizePlugin(Class<?> pluginType)
 	{
@@ -497,5 +509,41 @@ public class AutomationContext
 	public PersistenceStorage getPersistenceStorage()
 	{
 		return persistenceStorage;
+	}
+
+	/**
+	 * Gets the report folder where reports should be generated.
+	 *
+	 * @return the report folder where reports should be generated
+	 */
+	public File getReportFolder()
+	{
+		return reportFolder;
+	}
+
+	/**
+	 * Sets the report folder where reports should be generated.
+	 *
+	 * @param reportFolder the new report folder where reports should be generated
+	 */
+	public void setReportFolder(File reportFolder)
+	{
+		this.reportFolder = reportFolder;
+	}
+	
+	/**
+	 * Closes all the plugins initialized in this context. Generally this method
+	 * should be called before destroying this context.
+	 */
+	public void close()
+	{
+		for(IPlugin<?> plugin : this.requiredPlugins.values())
+		{
+			if(initializedPlugins.contains(plugin))
+			{
+				logger.debug("Closing plugin: " + plugin.getClass().getName());
+				plugin.close();
+			}
+		}
 	}
 }

@@ -98,13 +98,12 @@ public class TestSuiteExecutor
 	 *
 	 * @param context the context
 	 * @param testSuiteGroup the test suite map
-	 * @param reportFolder the report folder
 	 */
-	public TestSuiteExecutor(AutomationContext context, TestSuiteGroup testSuiteGroup, File reportFolder)
+	public TestSuiteExecutor(AutomationContext context, TestSuiteGroup testSuiteGroup)
 	{
 		this.context = context;
 		this.testSuiteGroup = testSuiteGroup;
-		this.reportFolder = reportFolder;
+		this.reportFolder = context.getReportFolder();
 
 		// create logs folder
 		logsFolder = new File(reportFolder, "logs");

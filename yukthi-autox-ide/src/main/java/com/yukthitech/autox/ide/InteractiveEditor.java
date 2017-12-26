@@ -8,21 +8,47 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.border.EtchedBorder;
+
+import com.yukthitech.autox.ide.engine.IdeEngine;
+import com.yukthitech.autox.ide.engine.IdeEngineListener;
+import com.yukthitech.autox.ide.model.ExecutedStep;
+import com.yukthitech.autox.ide.model.IdeState;
+
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import java.awt.FlowLayout;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class InteractiveEditor extends JFrame
 {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private final JPanel panel = new JPanel();
-	private final JButton btnNewButton = new JButton("New button");
+	private final JButton btnSave = new JButton("Save");
 	private final JSplitPane splitPane = new JSplitPane();
 	private final JSplitPane splitPane_1 = new JSplitPane();
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
 	private final IdeInputPanel ideInputPanel = new IdeInputPanel();
 	private final StepLogPanel stepLogPanel = new StepLogPanel();
+	private final FinalStepPanel finalStepPanel = new FinalStepPanel();
+
+	private IdeEngine ideEngine = new IdeEngine();
+
+	private IdeState ideState = IdeState.load();
+
+	private SettingsDialog settingsDialog;
+	private final ContextAttributePanel contextAttributePanel = new ContextAttributePanel();
+	private final JMenuBar menuBar = new JMenuBar();
+	private final JMenu mnFile = new JMenu("File");
+	private final JMenuItem mntmSave = new JMenuItem("Save");
 
 	/**
 	 * Launch the application.
@@ -36,7 +62,7 @@ public class InteractiveEditor extends JFrame
 				try
 				{
 					InteractiveEditor frame = new InteractiveEditor();
-					frame.setVisible(true);
+					frame.display();
 				} catch(Exception e)
 				{
 					e.printStackTrace();
@@ -53,30 +79,107 @@ public class InteractiveEditor extends JFrame
 		setTitle("AutoX Interactive Editor");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 940, 606);
+
+		setJMenuBar(menuBar);
+
+		menuBar.add(mnFile);
+		mntmSave.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				saveState();
+			}
+		});
+		mntmSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+
+		mnFile.add(mntmSave);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		
+
 		contentPane.add(panel, BorderLayout.NORTH);
-		
-		panel.add(btnNewButton);
-		splitPane.setResizeWeight(0.8);
-		
+		btnSave.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				saveState();
+			}
+		});
+
+		panel.add(btnSave);
+		splitPane.setResizeWeight(0.9);
+
 		contentPane.add(splitPane, BorderLayout.CENTER);
 		splitPane_1.setResizeWeight(0.8);
 		splitPane_1.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		
+
 		splitPane.setLeftComponent(splitPane_1);
-		
+
 		splitPane_1.setLeftComponent(tabbedPane);
-		
+
 		tabbedPane.addTab("Step Logs", null, stepLogPanel, null);
-		
+
 		splitPane_1.setRightComponent(ideInputPanel);
-		
+
 		splitPane.setRightComponent(tabbedPane_1);
+
+		tabbedPane_1.addTab("Steps", null, finalStepPanel, null);
+
+		tabbedPane_1.addTab("Context Attr", null, contextAttributePanel, null);
+
+		init();
+
+		settingsDialog = new SettingsDialog(this);
 	}
 
+	private void init()
+	{
+		ideInputPanel.setIdeEngine(ideEngine);
+		stepLogPanel.setIdeEngine(ideEngine);
+		finalStepPanel.setIdeEngine(ideEngine);
+		contextAttributePanel.setIdeEngine(ideEngine);
+		
+		ideEngine.addIdeEngineListener(new IdeEngineListener()
+		{
+			@Override
+			public void stepExecuted(ExecutedStep step)
+			{
+				setSaveEnabled(true);
+			}
+
+			@Override
+			public void stepRemoved(ExecutedStep step)
+			{
+				setSaveEnabled(true);
+			}
+		});
+	}
+	
+	private void setSaveEnabled(boolean enabled)
+	{
+		btnSave.setEnabled(enabled);
+		mntmSave.setEnabled(enabled);
+	}
+
+	private void display()
+	{
+		if(ideState == null)
+		{
+			ideState = new IdeState();
+			settingsDialog.display(ideState);
+		}
+
+		ideEngine.init(ideState);
+		setVisible(true);
+	}
+
+	private void saveState()
+	{
+		ideEngine.getState().save();
+		setSaveEnabled(false);
+	}
 }

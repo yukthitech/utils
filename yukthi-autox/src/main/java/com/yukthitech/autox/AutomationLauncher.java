@@ -47,7 +47,7 @@ public class AutomationLauncher
 	 */
 	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
 	{
-		TestSuiteParserHandler defaultParserHandler = new TestSuiteParserHandler(context, appConfig);
+		TestSuiteParserHandler defaultParserHandler = new TestSuiteParserHandler(context);
 		
 		logger.debug("Loading test suites from folders - {}", appConfig.getTestSuiteFolders());
 		
@@ -181,6 +181,56 @@ public class AutomationLauncher
 			System.exit(-1);
 		}
 	}
+	
+	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[]) throws Exception
+	{
+		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
+		BasicArguments basicArguments = null;
+		
+		try
+		{
+			basicArguments = (BasicArguments) commandLineOptions.parseBean(extendedCommandLineArgs);
+		}catch(MissingArgumentException ex)
+		{
+			System.err.println("Error: " + ex.getMessage());
+			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
+			System.exit(-1);
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+
+			System.err.println("Error: " + ex.getMessage());
+			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
+			
+			System.exit(-1);
+		}
+
+		File reportFolder = new File(basicArguments.getReportsFolder());
+
+		// force delete report folder, on error try for 5 times
+		if(reportFolder.exists())
+		{
+			AutomationUtils.deleteFolder(reportFolder);
+		}
+		
+		// load the configuration file
+		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
+		
+		AutomationContext context = new AutomationContext(appConfig);
+		context.setBasicArguments(basicArguments);
+		context.setReportFolder(reportFolder);
+		
+		if(basicArguments.getAutomationListener() != null)
+		{
+			Class<?> listenerType = Class.forName(basicArguments.getAutomationListener());
+			IAutomationListener listener = (IAutomationListener) listenerType.newInstance();
+			
+			context.setAutomationListener(listener);
+		}
+		
+		return context;
+	}
 
 	/**
 	 * Automation entry point.
@@ -222,63 +272,24 @@ public class AutomationLauncher
 		{
 			extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
 		}
-
-		BasicArguments basicArguments = null;
 		
-		try
-		{
-			basicArguments = (BasicArguments) commandLineOptions.parseBean(extendedCommandLineArgs);
-		}catch(MissingArgumentException ex)
-		{
-			System.err.println("Error: " + ex.getMessage());
-			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
-			
-			System.exit(-1);
-		}catch(Exception ex)
-		{
-			ex.printStackTrace();
-
-			System.err.println("Error: " + ex.getMessage());
-			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
-			
-			System.exit(-1);
-		}
-
-		File reportFolder = new File(basicArguments.getReportsFolder());
-
-		// force delete report folder, on error try for 5 times
-		if(reportFolder.exists())
-		{
-			AutomationUtils.deleteFolder(reportFolder);
-			reportFolder.mkdirs();
-		}
-
-		// load the configuration file
-		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
-		AutomationContext context = new AutomationContext(appConfig);
-		context.setBasicArguments(basicArguments);
+		//load automation context
+		AutomationContext context = loadAutomationContext(appConfigurationFile, extendedCommandLineArgs);
+		ApplicationConfiguration appConfig = context.getAppConfiguration();
 		
-		if(basicArguments.getAutomationListener() != null)
-		{
-			Class<?> listenerType = Class.forName(basicArguments.getAutomationListener());
-			IAutomationListener listener = (IAutomationListener) listenerType.newInstance();
-			
-			context.setAutomationListener(listener);
-		}
+		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
+		validateCommandLineArguments(context, extendedCommandLineArgs);
 		
 		// load test suites
 		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig);
 
-		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
-		validateCommandLineArguments(context, extendedCommandLineArgs);
-		
 		//execute test suites
-		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup, reportFolder);
+		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup);
 		boolean res = testSuiteExecutor.executeTestSuites();
 
 		try
 		{
-			Desktop.getDesktop().open(new File(reportFolder, "index.html"));
+			Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
 		}catch(Exception ex)
 		{
 			logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
