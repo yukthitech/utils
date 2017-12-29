@@ -1,5 +1,8 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractStep;
@@ -17,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = "waitFor", requiredPluginTypes = SeleniumPlugin.class, message = "Waits for specified element to become visible/hidden")
+@Executable(name = {"ui_waitFor", "waitFor"}, requiredPluginTypes = SeleniumPlugin.class, message = "Waits for (atlease one )specified element to become visible/hidden")
 public class WaitForStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
@@ -25,8 +28,8 @@ public class WaitForStep extends AbstractStep
 	/**
 	 * locator to wait for.
 	 */
-	@Param(description = "Locator of the element to be waited for", sourceType = SourceType.UI_LOCATOR)
-	private String locator;
+	@Param(description = "Locator(s) of the element to be waited for", sourceType = SourceType.UI_LOCATOR)
+	private List<String> locators;
 	
 	/**
 	 * If true, this step waits for element with specified locator gets removed or hidden.
@@ -41,22 +44,29 @@ public class WaitForStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Waiting for element '{}' to become {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
+		exeLogger.debug(this, "Waiting for element '{}' to become {}", locators, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		try
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
-				WebElement element = UiAutomationUtils.findElement(context, null, locator);
-				
-				if("true".equals(hidden))
+				for(String locator : this.locators)
 				{
-					return (element == null || !element.isDisplayed());
+					WebElement element = UiAutomationUtils.findElement(context, null, locator);
+					
+					if("true".equals(hidden))
+					{
+						return (element == null || !element.isDisplayed());
+					}
+					else if(element != null && element.isDisplayed())
+					{
+						return true;
+					}
 				}
 				
-				return (element != null && element.isDisplayed());
-			}, UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + locator, 
-				new InvalidStateException("Failed to find element - " + locator));
+				return false;
+			}, UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + locators, 
+				new InvalidStateException("Failed to find element - " + locators));
 			
 		} catch(InvalidStateException ex)
 		{
@@ -72,9 +82,9 @@ public class WaitForStep extends AbstractStep
 	 *
 	 * @return the locator to wait for
 	 */
-	public String getLocator()
+	public List<String> getLocators()
 	{
-		return locator;
+		return locators;
 	}
 	
 	/**
@@ -82,9 +92,14 @@ public class WaitForStep extends AbstractStep
 	 *
 	 * @param locator the new locator to wait for
 	 */
-	public void setLocator(String locator)
+	public void addLocator(String locator)
 	{
-		this.locator = locator;
+		if(this.locators == null)
+		{
+			this.locators = new ArrayList<>();
+		}
+		
+		this.locators.add(locator);
 	}
 	
 	/**
@@ -106,7 +121,7 @@ public class WaitForStep extends AbstractStep
 		StringBuilder builder = new StringBuilder(super.toString());
 		builder.append("[");
 
-		builder.append("Locator: ").append(locator);
+		builder.append("Locators: ").append(locators);
 		builder.append(",").append("Hidden: ").append(hidden);
 
 		builder.append("]");

@@ -22,7 +22,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author Pritam.
  */
-@Executable(name = "dragAndDrop", requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
+@Executable(name = {"ui_dragAndDrop", "dragAndDrop"}, requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
 public class DragAndDropStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

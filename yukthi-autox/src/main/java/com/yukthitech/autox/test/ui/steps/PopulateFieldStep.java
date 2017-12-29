@@ -20,7 +20,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author Pritam.
  */
-@Executable(name = "populateField", requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
+@Executable(name = {"ui_populateField", "populateField"}, requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
 public class PopulateFieldStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

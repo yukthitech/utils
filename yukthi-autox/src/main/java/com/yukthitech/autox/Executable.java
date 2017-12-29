@@ -19,7 +19,7 @@ public @interface Executable
 	 * Provides name of executable.
 	 * @return Executable name.
 	 */
-	public String name();
+	public String[] name();
 	
 	/**
 	 * Message representing the target.

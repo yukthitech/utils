@@ -17,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "validateVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
+@Executable(name = {"ui_validateVisibility", "validateVisibility"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
 public class ValidateVisibility extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

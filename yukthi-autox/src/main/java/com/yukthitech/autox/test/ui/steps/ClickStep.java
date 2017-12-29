@@ -18,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "click", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
+@Executable(name = {"ui_click", "click"}, requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
 public class ClickStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

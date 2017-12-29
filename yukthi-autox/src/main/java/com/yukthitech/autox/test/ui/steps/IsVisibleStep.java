@@ -1,7 +1,5 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import org.openqa.selenium.WebElement;
-
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
@@ -9,13 +7,13 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
-import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
+import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
 
 /**
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = "isVisible", requiredPluginTypes = SeleniumPlugin.class, message = "Fetches flag indicating if target element is visible or not")
+@Executable(name = {"ui_isVisible", "isVisible"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches flag indicating if target element is visible or not")
 public class IsVisibleStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
@@ -60,9 +58,8 @@ public class IsVisibleStep extends AbstractStep
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace(this, "Fetching visibility flag for element '{}'", locator);
-		
-		WebElement element = UiAutomationUtils.findElement(context, null, locator);
-		boolean visible = (element != null && element.isDisplayed());
+
+		boolean visible = UiFreeMarkerMethods.isVisible(locator);
 		
 		exeLogger.debug(this, "Element '{}' visibility flag ({}) is being set as context attribute: {}", locator, visible, name);
 		context.setAttribute(name, visible);

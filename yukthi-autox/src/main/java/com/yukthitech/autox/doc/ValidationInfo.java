@@ -2,8 +2,10 @@ package com.yukthitech.autox.doc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IValidation;
@@ -48,7 +50,7 @@ public class ValidationInfo implements Comparable<ValidationInfo>
 	 */
 	public ValidationInfo(Class<? extends IValidation> validationClass, Executable executablAnnot)
 	{
-		this.name = executablAnnot.name();
+		this.name = Arrays.asList( executablAnnot.name() ).stream().collect(Collectors.joining(","));
 		this.description = executablAnnot.message();
 		this.javaType = validationClass.getName();
 		

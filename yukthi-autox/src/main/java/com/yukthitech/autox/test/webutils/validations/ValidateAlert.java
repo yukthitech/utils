@@ -59,7 +59,7 @@ public class ValidateAlert extends AbstractValidation
 		
 		//wait and validate alert box is displayed
 		WaitForStep waitStep = new WaitForStep();
-		waitStep.setLocator("//div[@id='webutilsAlertDialog']");
+		waitStep.addLocator("//div[@id='webutilsAlertDialog']");
 		waitStep.execute(context, exeLogger);
 		
 		//ensure alert has required message

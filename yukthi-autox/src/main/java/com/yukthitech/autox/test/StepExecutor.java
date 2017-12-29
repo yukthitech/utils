@@ -133,7 +133,7 @@ public class StepExecutor
 	public static TestCaseResult handleException(AutomationContext context, TestCase testCase, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
 	{
 		Executable executable = (step instanceof StepGroup) ?  createExecutable((StepGroup) step) : step.getClass().getAnnotation(Executable.class);
-		String name = executable.name();
+		String name = executable.name()[0];
 		
 		String stepType = (step instanceof IValidation) ? "Validation" : "Step";
 		

@@ -11,7 +11,7 @@ import com.yukthitech.autox.Param;
  * 
  * @author akiran
  */
-@Executable(name = "storeValue", message = "Fetches value from store for specified key.")
+@Executable(name = {"store_get", "storeValue"}, message = "Fetches value from store for specified key.")
 public class StoreValueStep extends AbstractStep
 {
 	
