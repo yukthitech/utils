@@ -41,13 +41,23 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	 * Automation reserve node handler.
 	 */
 	private AutomationReserveNodeHandler reserveNodeHandler;
-
+	
 	public TestSuiteParserHandler(AutomationContext context)
+	{
+		this(context, null);
+	}
+
+	public TestSuiteParserHandler(AutomationContext context, AutomationReserveNodeHandler reserveNodeHandler)
 	{
 		this.appConfig = context.getAppConfiguration();
 		appConfigValueProvider = new AppConfigValueProvider(appConfig.getApplicationProperties());
 		
-		reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
+		if(reserveNodeHandler == null)
+		{
+			reserveNodeHandler = new AutomationReserveNodeHandler(context, appConfig);
+		}
+		
+		this.reserveNodeHandler = reserveNodeHandler;
 		super.registerReserveNodeHandler(reserveNodeHandler);
 	}
 	

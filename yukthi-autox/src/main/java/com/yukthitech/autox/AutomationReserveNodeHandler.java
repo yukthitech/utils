@@ -6,9 +6,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ConfigurationBuilder;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.common.AutomationUtils;
@@ -29,6 +32,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @NodeName(namePattern = ".*")
 public class AutomationReserveNodeHandler implements IReserveNodeHandler
 {
+	private static Logger logger = LogManager.getLogger(AutomationReserveNodeHandler.class);
+	
 	/**
 	 * Mapping from step name to type.
 	 */
@@ -48,6 +53,11 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	 * Maintains the file being parsed.
 	 */
 	private String fileBeingParsed;
+	
+	/**
+	 * Base packages to be used for loading.
+	 */
+	private Set<String> basePackages;
 
 	/**
 	 * Instantiates a new executable factory.
@@ -68,8 +78,10 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		}
 
 		basePackages.add("com.yukthitech");
+		
+		this.basePackages = new HashSet<>(basePackages);
 
-		loadStepTypes(basePackages);
+		loadStepTypes(null);
 	}
 
 	/**
@@ -85,18 +97,24 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	/**
 	 * Loads all step types found in specified base packages.
 	 * 
-	 * @param basePackages
-	 *            Base packages to be scanned
+	 * @param  customLoader Custom class loader to be used to load step classes.
 	 */
-	private void loadStepTypes(Set<String> basePackages)
+	protected void loadStepTypes(ClassLoader customLoader)
 	{
 		Reflections reflections = null;
 		Set<Class<? extends IStep>> stepTypes = null;
 		Executable executable = null;
-
+		
+		if(customLoader == null)
+		{
+			customLoader = AutomationReserveNodeHandler.class.getClassLoader();
+		}
+		
 		for(String pack : basePackages)
 		{
-			reflections = new Reflections(pack, new TypeAnnotationsScanner(), new SubTypesScanner());
+			reflections = new Reflections(
+					ConfigurationBuilder.build(pack, new TypeAnnotationsScanner(), new SubTypesScanner(), customLoader)
+				);
 
 			stepTypes = reflections.getSubTypesOf(IStep.class);
 
@@ -117,6 +135,8 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 				nameToStepType.put(executable.name(), stepType);
 			}
 		}
+		
+		logger.debug("Steps loaded: {}", nameToStepType.keySet());
 	}
 
 	/* (non-Javadoc)
@@ -209,9 +229,20 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			context.addRequirePlugin(plugin);
 		}
 
+		return createStepInstance(stepType);
+	}
+	
+	/**
+	 * Creates step instance of specified type. Child classes can override this method
+	 * to customize instance creation or created instance.
+	 * @param stepType
+	 * @return
+	 */
+	protected IStep createStepInstance(Class<?> stepType)
+	{
 		try
 		{
-			return stepType.newInstance();
+			return (IStep) stepType.newInstance();
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while creating step of type - {}", stepType.getName());

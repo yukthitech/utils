@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.util.ConfigurationBuilder;
 
 import com.yukthi.utils.fmarker.FreeMarkerEngine;
 import com.yukthi.utils.fmarker.annotaion.FreeMarkerDirective;
@@ -36,11 +37,22 @@ public class FreeMarkerMethodManager
 			throw new InvalidStateException("An error occurred while init freemarker context", ex);
 		}
 		
-		loadFreeMarkerMethods();
+		loadFreeMarkerMethods(null);
 	}
 	
-	private static void loadFreeMarkerMethods()
+	public static void reload(ClassLoader classLoader)
 	{
+		freeMarkerEngine.reset();
+		loadFreeMarkerMethods(classLoader);
+	}
+	
+	private static void loadFreeMarkerMethods(ClassLoader classLoader)
+	{
+		if(classLoader == null)
+		{
+			classLoader = FreeMarkerMethodManager.class.getClassLoader();
+		}
+		
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
 		Set<String> basePackages = applicationConfiguration.getBasePackages();
 
@@ -59,7 +71,9 @@ public class FreeMarkerMethodManager
 		for(String pack : basePackages)
 		{
 			logger.debug("Scanning for free marker methods in package - {}", pack);
-			reflections = new Reflections(pack, new MethodAnnotationsScanner());
+			reflections = new Reflections(
+					ConfigurationBuilder.build(pack, new MethodAnnotationsScanner(), classLoader)
+				);
 
 			freeMarkerMethods = reflections.getMethodsAnnotatedWith(FreeMarkerMethod.class);
 			freeMarkerDirectiveMethods = reflections.getMethodsAnnotatedWith(FreeMarkerDirective.class);
