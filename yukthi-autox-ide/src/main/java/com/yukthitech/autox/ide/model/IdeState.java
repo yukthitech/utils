@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -193,6 +194,22 @@ public class IdeState implements Serializable
 			try
 			{
 				state.validate();
+				
+				if(CollectionUtils.isNotEmpty(state.getSteps()))
+				{
+					int maxId = 1;
+					
+					for(ExecutedStep step : state.getSteps())
+					{
+						if(step.getId() > maxId)
+						{
+							maxId = step.getId();
+						}
+					}
+					
+					ExecutedStep.setTrackerId(maxId + 1);
+				}
+				
 				return state;
 			}catch(Exception ex)
 			{

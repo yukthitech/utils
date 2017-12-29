@@ -23,7 +23,7 @@ import com.yukthitech.autox.ide.engine.IdeEngine;
 import com.yukthitech.autox.ide.engine.IdeEngineListener;
 import com.yukthitech.autox.ide.engine.StepDetails;
 
-public class StepLogPanel extends JPanel
+public class LogPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private final JPanel panel = new JPanel();
@@ -41,7 +41,7 @@ public class StepLogPanel extends JPanel
 	/**
 	 * Create the panel.
 	 */
-	public StepLogPanel()
+	public LogPanel()
 	{
 		setLayout(new BorderLayout(0, 0));
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -78,7 +78,6 @@ public class StepLogPanel extends JPanel
 		textPane.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		textPane.setEditable(false);
 		textPane.setEditorKit(rtfEditorKit);
-		textPane.setFont(new Font(Font.DIALOG, Font.BOLD, 14));
 		
 		try
 		{
@@ -89,7 +88,8 @@ public class StepLogPanel extends JPanel
 			JOptionPane.showMessageDialog(this, "An error occurred while displaying step text: " + ex);
 			return;
 		}
-		
+
+		textPane.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
 		mainLogPanel.add(textPane);
 		
 		mainLogPanel.updateUI();

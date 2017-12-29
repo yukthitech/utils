@@ -17,6 +17,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
 import com.yukthitech.autox.ide.engine.IdeEngine;
@@ -38,12 +41,12 @@ public class ExecutedStepPanel extends JPanel
 	
 	private IdeEngine ideEngine;
 	
-	private FinalStepPanel finalStepPanel;
+	private ActionStepPanel finalStepPanel;
 	
 	/**
 	 * Create the panel.
 	 */
-	public ExecutedStepPanel(ExecutedStep step, IdeEngine ideEngine, FinalStepPanel finalStepPanel)
+	public ExecutedStepPanel(ExecutedStep step, IdeEngine ideEngine, ActionStepPanel finalStepPanel)
 	{
 		this.step = step;
 		this.ideEngine = ideEngine;
@@ -90,7 +93,6 @@ public class ExecutedStepPanel extends JPanel
 
 		add(scrollPane, BorderLayout.CENTER);
 		textPane.setEditable(false);
-		textPane.setFont(new Font(Font.DIALOG, Font.BOLD, 14));
 
 		scrollPane.setViewportView(textPane);
 		init();
@@ -99,6 +101,12 @@ public class ExecutedStepPanel extends JPanel
 	private void init()
 	{
 		textPane.setEditorKit(rtfEditorKit);
+
+		//set font style
+		StyledDocument doc = (StyledDocument) textPane.getDocument();
+		Style style = doc.addStyle("StyleName", null);
+		StyleConstants.setFontSize(style, 30);
+		doc.addStyle("StyleName", style);
 
 		try
 		{
@@ -110,6 +118,7 @@ public class ExecutedStepPanel extends JPanel
 			return;
 		}
 		
+
 		lblTitle.setText("Step: " + step.getId());
 	}
 

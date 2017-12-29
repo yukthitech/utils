@@ -20,7 +20,7 @@ import com.yukthitech.autox.ide.engine.IdeEngine;
 import com.yukthitech.autox.ide.engine.IdeEngineListener;
 import com.yukthitech.autox.ide.model.ExecutedStep;
 
-public class FinalStepPanel extends JPanel
+public class ActionStepPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 
@@ -37,7 +37,7 @@ public class FinalStepPanel extends JPanel
 	/**
 	 * Create the panel.
 	 */
-	public FinalStepPanel()
+	public ActionStepPanel()
 	{
 		setLayout(new BorderLayout(0, 0));
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -54,12 +54,14 @@ public class FinalStepPanel extends JPanel
 		});
 
 		panel.add(btnClear);
-		btnReexecute.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		btnReexecute.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
 				reexecute();
 			}
 		});
-		
+
 		panel.add(btnReexecute);
 
 		add(scrollPane, BorderLayout.CENTER);
@@ -75,10 +77,10 @@ public class FinalStepPanel extends JPanel
 	{
 		ExecutedStepPanel stepPanel = new ExecutedStepPanel(step, ideEngine, this);
 		mainLogPanel.add(stepPanel);
-		
+
 		refreshUi();
 	}
-	
+
 	void refreshUi()
 	{
 		mainLogPanel.updateUI();
@@ -95,6 +97,22 @@ public class FinalStepPanel extends JPanel
 			public void stepExecuted(ExecutedStep step)
 			{
 				addNewStep(step);
+			}
+
+			@Override
+			public void stateLoaded()
+			{
+				mainLogPanel.removeAll();
+				
+				if(CollectionUtils.isEmpty(ideEngine.getSteps()))
+				{
+					return;
+				}
+				
+				for(ExecutedStep step : ideEngine.getSteps())
+				{
+					addNewStep(step);
+				}
 			}
 		});
 	}
@@ -125,17 +143,16 @@ public class FinalStepPanel extends JPanel
 			JOptionPane.showMessageDialog(this, "An error occurred while export action xml. Error: " + ex);
 		}
 	}
-	
+
 	private void reexecute()
 	{
-		int res = JOptionPane.showConfirmDialog(this, "Are you sure you want to re-execute from begining?\n"
-				+ "This will recreate a new context.", "Re-execute", JOptionPane.YES_NO_OPTION);
-		
+		int res = JOptionPane.showConfirmDialog(this, "Are you sure you want to re-execute from begining?\n" + "This will recreate a new context.", "Re-execute", JOptionPane.YES_NO_OPTION);
+
 		if(res == JOptionPane.NO_OPTION)
 		{
 			return;
 		}
-		
+
 		ideEngine.reexecute();
 	}
 }

@@ -16,6 +16,7 @@ import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.TestSuiteParserHandler;
+import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.ide.model.ExecutedStep;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.test.StepExecutor;
@@ -67,6 +68,14 @@ public class IdeEngine
 	 */
 	private TestSuiteParserHandler testSuiteParserHandler;
 	
+	/**
+	 * Ide specific reserve node handling.
+	 */
+	private IdeReserveNodeHandler ideReserveNodeHandler;
+	
+	/**
+	 * Free marker engine to parse html templates.
+	 */
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 	
 	/**
@@ -86,8 +95,7 @@ public class IdeEngine
 			}
 			else
 			{
-				context = AutomationLauncher.loadAutomationContext( new File(state.getApplicationConfigFile()), state.getCommandLineArguments());
-				testSuiteParserHandler = new TestSuiteParserHandler(context);
+				initContext();
 			}
 		} catch(Exception ex)
 		{
@@ -166,11 +174,11 @@ public class IdeEngine
 		
 		if(error)
 		{
-			finalHtml.append("<div style=\"color: red\">");
+			finalHtml.append("<div style=\"color: red; padding-left: 50px;\">");
 		}
 		else
 		{
-			finalHtml.append("<div>");
+			finalHtml.append("<div style=\"padding-left: 50px;\">");
 		}
 		
 		finalHtml.append(output);
@@ -280,6 +288,24 @@ public class IdeEngine
 	}
 	
 	/**
+	 * Initializes context.
+	 */
+	private void initContext()
+	{
+		try
+		{
+			logger.debug("Re-initializing ide engine..");
+			context = AutomationLauncher.loadAutomationContext( new File(state.getApplicationConfigFile()), state.getCommandLineArguments());
+			
+			ideReserveNodeHandler = new IdeReserveNodeHandler(context, context.getAppConfiguration());
+			testSuiteParserHandler = new TestSuiteParserHandler(context, ideReserveNodeHandler);
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while re-initializing the context", ex);
+		}
+	}
+	
+	/**
 	 * Destroys current context and re-executes all the steps present in current state.
 	 */
 	public void reexecute()
@@ -289,15 +315,7 @@ public class IdeEngine
 			context.close();
 		}
 
-		try
-		{
-			logger.debug("Re-initializing ide engine..");
-			context = AutomationLauncher.loadAutomationContext( new File(state.getApplicationConfigFile()), state.getCommandLineArguments());
-			testSuiteParserHandler = new TestSuiteParserHandler(context);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while re-initializing the context", ex);
-		}
+		initContext();
 		
 		if(CollectionUtils.isEmpty(state.getSteps()))
 		{
@@ -311,5 +329,14 @@ public class IdeEngine
 		}
 		
 		listenerManager.get().stateLoaded();
+	}
+	
+	/**
+	 * Reloads all the steps and freemarker methods dynamically.
+	 */
+	public void reload()
+	{
+		ideReserveNodeHandler.reload();
+		FreeMarkerMethodManager.reload(ideReserveNodeHandler.getIdeEngineClassLoader());
 	}
 }

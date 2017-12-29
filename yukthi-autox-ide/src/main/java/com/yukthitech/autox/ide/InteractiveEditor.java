@@ -36,9 +36,9 @@ public class InteractiveEditor extends JFrame
 	private final JSplitPane splitPane_1 = new JSplitPane();
 	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 	private final JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
-	private final IdeInputPanel ideInputPanel = new IdeInputPanel();
-	private final StepLogPanel stepLogPanel = new StepLogPanel();
-	private final FinalStepPanel finalStepPanel = new FinalStepPanel();
+	private final InputPanel ideInputPanel = new InputPanel();
+	private final LogPanel stepLogPanel = new LogPanel();
+	private final ActionStepPanel finalStepPanel = new ActionStepPanel();
 
 	private IdeEngine ideEngine = new IdeEngine();
 
@@ -49,6 +49,8 @@ public class InteractiveEditor extends JFrame
 	private final JMenuBar menuBar = new JMenuBar();
 	private final JMenu mnFile = new JMenu("File");
 	private final JMenuItem mntmSave = new JMenuItem("Save");
+	private final JButton btnSettings = new JButton("Settings");
+	private final JButton btnReload = new JButton("Reload");
 
 	/**
 	 * Launch the application.
@@ -111,6 +113,24 @@ public class InteractiveEditor extends JFrame
 		});
 
 		panel.add(btnSave);
+		btnSettings.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				displaySettings();
+			}
+		});
+
+		panel.add(btnSettings);
+		btnReload.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				reload();
+			}
+		});
+
+		panel.add(btnReload);
 		splitPane.setResizeWeight(0.9);
 
 		contentPane.add(splitPane, BorderLayout.CENTER);
@@ -142,7 +162,7 @@ public class InteractiveEditor extends JFrame
 		stepLogPanel.setIdeEngine(ideEngine);
 		finalStepPanel.setIdeEngine(ideEngine);
 		contextAttributePanel.setIdeEngine(ideEngine);
-		
+
 		ideEngine.addIdeEngineListener(new IdeEngineListener()
 		{
 			@Override
@@ -158,7 +178,7 @@ public class InteractiveEditor extends JFrame
 			}
 		});
 	}
-	
+
 	private void setSaveEnabled(boolean enabled)
 	{
 		btnSave.setEnabled(enabled);
@@ -181,5 +201,15 @@ public class InteractiveEditor extends JFrame
 	{
 		ideEngine.getState().save();
 		setSaveEnabled(false);
+	}
+
+	private void displaySettings()
+	{
+		settingsDialog.display(ideState);
+	}
+
+	private void reload()
+	{
+		ideEngine.reload();
 	}
 }

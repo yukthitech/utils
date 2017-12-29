@@ -29,6 +29,11 @@ public class ExecutedStep implements Serializable
 	 * Rtf text.
 	 */
 	private String rtfText;
+	
+	public static void setTrackerId(int id)
+	{
+		ID_TRACKER = id;
+	}
 
 	public ExecutedStep(String text, String rtfText)
 	{

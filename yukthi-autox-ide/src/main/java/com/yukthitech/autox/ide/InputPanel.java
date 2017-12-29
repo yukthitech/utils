@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
@@ -23,7 +24,7 @@ import com.yukthitech.autox.ide.engine.IdeEngine;
 import com.yukthitech.autox.ide.engine.StepDetails;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class IdeInputPanel extends JPanel
+public class InputPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -39,7 +40,7 @@ public class IdeInputPanel extends JPanel
 	/**
 	 * Create the panel.
 	 */
-	public IdeInputPanel()
+	public InputPanel()
 	{
 		try
 		{
@@ -90,6 +91,7 @@ public class IdeInputPanel extends JPanel
 		textScrollPane.setViewportView(fldStepInput);
 		fldStepInput.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
 		fldStepInput.setCodeFoldingEnabled(true);
+		fldStepInput.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
 	}
 
 	public void setIdeEngine(IdeEngine ideContext)

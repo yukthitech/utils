@@ -60,7 +60,7 @@ public class ContextAttributePanel extends JPanel
 			}
 			
 			super.setText(strValue);
-			return null;
+			return this;
 		}
 	}
 
