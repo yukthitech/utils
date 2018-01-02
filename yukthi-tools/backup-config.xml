@@ -1,0 +1,6 @@
+<config>
+	<durationMins>2</durationMins>
+	
+	<file name="LICENSE.txt" path="./LICENSE.txt"/>
+	<preExecuteCommand>java -version</preExecuteCommand>
+</config>

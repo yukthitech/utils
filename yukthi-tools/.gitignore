@@ -1,0 +1,5 @@
+/target/
+/test-output/
+/client_secret.json
+/credentials/
+/logs/
