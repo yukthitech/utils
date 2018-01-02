@@ -52,6 +52,12 @@ public class ExecutedStep implements Serializable
 		return text;
 	}
 	
+	public void setText(String text, String rtfText)
+	{
+		this.text = text;
+		this.rtfText = rtfText;
+	}
+	
 	/**
 	 * Gets the rtf text.
 	 *

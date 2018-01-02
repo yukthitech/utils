@@ -54,12 +54,18 @@ public class WaitForStep extends AbstractStep
 				{
 					WebElement element = UiAutomationUtils.findElement(context, null, locator);
 					
+					//if element needs to be checked for invisibility
 					if("true".equals(hidden))
 					{
-						return (element == null || !element.isDisplayed());
+						if(element == null || !element.isDisplayed())
+						{
+							exeLogger.debug(this, "Found locator '{}' to be hidden", locator);
+						}
 					}
+					//if element needs to be checked for visibility
 					else if(element != null && element.isDisplayed())
 					{
+						exeLogger.debug(this, "Found locator '{}' to be visible.", locator);
 						return true;
 					}
 				}

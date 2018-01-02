@@ -23,6 +23,7 @@ import com.yukthitech.autox.test.StepExecutor;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -136,12 +137,13 @@ public class IdeEngine
 	 * @param steps
 	 * @return
 	 */
-	private String executeSteps(List<IStep> steps)
+	private String executeSteps(List<IStep> steps, ObjectWrapper<Boolean> result)
 	{
 		ExecutionLogger exeLogger = new ExecutionLogger("Ide", "Ide");
 		
 		TestCase dummy = new TestCase();
 		dummy.setName("dummy");
+		result.setValue(true);
 		
 		for(IStep step : steps)
 		{
@@ -150,6 +152,7 @@ public class IdeEngine
 				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
+				result.setValue(false);
 				StepExecutor.handleException(context, dummy, step, exeLogger, ex, null);
 				break;
 			}
@@ -164,6 +167,7 @@ public class IdeEngine
 				);
 		}catch(Exception ex)
 		{
+			result.setValue(false);
 			throw new InvalidStateException("An error occurred while generating output log html", ex);
 		}
 	}
@@ -214,10 +218,12 @@ public class IdeEngine
 		//execute the extracted steps
 		try
 		{
-			String output = executeSteps(stepHolder.getSteps());
+			ObjectWrapper<Boolean> result = new ObjectWrapper<>();
+			
+			String output = executeSteps(stepHolder.getSteps(), result);
 			sendOutput(output, false);
 			
-			return true;
+			return result.getValue();
 		} catch(Exception ex)
 		{
 			logger.error("An error occurred while executing specified steps.", ex);
@@ -297,7 +303,7 @@ public class IdeEngine
 			logger.debug("Re-initializing ide engine..");
 			context = AutomationLauncher.loadAutomationContext( new File(state.getApplicationConfigFile()), state.getCommandLineArguments());
 			
-			ideReserveNodeHandler = new IdeReserveNodeHandler(context, context.getAppConfiguration());
+			ideReserveNodeHandler = new IdeReserveNodeHandler(context, context.getAppConfiguration(), this);
 			testSuiteParserHandler = new TestSuiteParserHandler(context, ideReserveNodeHandler);
 		} catch(Exception ex)
 		{

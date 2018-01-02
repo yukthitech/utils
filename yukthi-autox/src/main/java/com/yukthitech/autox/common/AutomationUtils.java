@@ -426,7 +426,7 @@ public class AutomationUtils
 				return TypeFactory.defaultInstance().uncheckedSimpleType(type);
 			}catch(Exception ex)
 			{
-				throw new InvalidArgumentException("Invalid simple-type specified: {}", typeStr);
+				throw new InvalidArgumentException("Invalid simple-type specified: {}", typeStr, ex);
 			}
 		}
 		

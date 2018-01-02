@@ -6,8 +6,10 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +22,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class IdeState implements Serializable
 {
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -46,6 +50,11 @@ public class IdeState implements Serializable
 	 * List of steps executed successfully.
 	 */
 	private List<ExecutedStep> steps = new LinkedList<>();
+	
+	/**
+	 * Packages monitored for dynamic changes.
+	 */
+	private Set<String> monitoredPackages = new HashSet<>();
 
 	/**
 	 * Gets the application prop file for the application.
@@ -119,6 +128,12 @@ public class IdeState implements Serializable
 		return newStep;
 	}
 	
+	/**
+	 * Removes the step.
+	 *
+	 * @param step the step
+	 * @return true, if successful
+	 */
 	public boolean removeStep(ExecutedStep step)
 	{
 		return this.steps.remove(step);
@@ -218,6 +233,44 @@ public class IdeState implements Serializable
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while loading state from state file: {}\nError: {}", STATE_FILE, ex);
+		}
+	}
+
+	/**
+	 * Gets the packages monitored for dynamic changes.
+	 *
+	 * @return the packages monitored for dynamic changes
+	 */
+	public Set<String> getMonitoredPackages()
+	{
+		return monitoredPackages;
+	}
+
+	/**
+	 * Sets the packages monitored for dynamic changes.
+	 *
+	 * @param monitoredPackages the new packages monitored for dynamic changes
+	 */
+	public void setMonitoredPackages(Set<String> monitoredPackages)
+	{
+		this.monitoredPackages = monitoredPackages;
+	}
+	
+	public int indexOf(ExecutedStep step)
+	{
+		return steps.indexOf(step);
+	}
+	
+	public int getStepCount()
+	{
+		return steps.size();
+	}
+	
+	public void moveStep(ExecutedStep step, int newIdx)
+	{
+		if(steps.remove(step))
+		{
+			steps.add(newIdx, step);
 		}
 	}
 }

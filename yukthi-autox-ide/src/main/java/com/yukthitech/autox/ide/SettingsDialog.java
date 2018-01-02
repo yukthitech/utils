@@ -20,6 +20,7 @@ import javax.swing.JTextField;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.awt.event.ActionEvent;
 
@@ -34,6 +35,8 @@ public class SettingsDialog extends JDialog
 	private final JTextField fldCmdLineArgs = new JTextField();
 
 	private IdeState ideState;
+	private final JLabel lblMonitoredPackages = new JLabel("Monitored Packages: ");
+	private final JTextField fldMonitoredPacks = new JTextField();
 	
 	/**
 	 * Create the dialog.
@@ -41,6 +44,7 @@ public class SettingsDialog extends JDialog
 	public SettingsDialog(Frame frame)
 	{
 		super(frame, ModalityType.APPLICATION_MODAL);
+		fldMonitoredPacks.setColumns(10);
 		
 		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		setResizable(false);
@@ -53,9 +57,9 @@ public class SettingsDialog extends JDialog
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
 		gbl_contentPanel.columnWidths = new int[]{0, 0, 0};
-		gbl_contentPanel.rowHeights = new int[]{0, 0, 0};
+		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 0};
 		gbl_contentPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		contentPanel.setLayout(gbl_contentPanel);
 		
 		GridBagConstraints gbc_lblAppConfigurationFile = new GridBagConstraints();
@@ -74,16 +78,30 @@ public class SettingsDialog extends JDialog
 		
 		GridBagConstraints gbc_lblCommandLineArgs = new GridBagConstraints();
 		gbc_lblCommandLineArgs.anchor = GridBagConstraints.EAST;
-		gbc_lblCommandLineArgs.insets = new Insets(0, 0, 0, 5);
+		gbc_lblCommandLineArgs.insets = new Insets(0, 0, 5, 5);
 		gbc_lblCommandLineArgs.gridx = 0;
 		gbc_lblCommandLineArgs.gridy = 1;
 		contentPanel.add(lblCommandLineArgs, gbc_lblCommandLineArgs);
 		
 		GridBagConstraints gbc_fldCmdLineArgs = new GridBagConstraints();
+		gbc_fldCmdLineArgs.insets = new Insets(0, 0, 5, 0);
 		gbc_fldCmdLineArgs.fill = GridBagConstraints.HORIZONTAL;
 		gbc_fldCmdLineArgs.gridx = 1;
 		gbc_fldCmdLineArgs.gridy = 1;
 		contentPanel.add(fldCmdLineArgs, gbc_fldCmdLineArgs);
+		
+		GridBagConstraints gbc_lblMonitoredPackages = new GridBagConstraints();
+		gbc_lblMonitoredPackages.anchor = GridBagConstraints.EAST;
+		gbc_lblMonitoredPackages.insets = new Insets(0, 0, 0, 5);
+		gbc_lblMonitoredPackages.gridx = 0;
+		gbc_lblMonitoredPackages.gridy = 2;
+		contentPanel.add(lblMonitoredPackages, gbc_lblMonitoredPackages);
+		
+		GridBagConstraints gbc_fldMonitoredPacks = new GridBagConstraints();
+		gbc_fldMonitoredPacks.fill = GridBagConstraints.HORIZONTAL;
+		gbc_fldMonitoredPacks.gridx = 1;
+		gbc_fldMonitoredPacks.gridy = 2;
+		contentPanel.add(fldMonitoredPacks, gbc_fldMonitoredPacks);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -125,6 +143,7 @@ public class SettingsDialog extends JDialog
 	{
 		String configFile = fldConfigFile.getText();
 		String cmdLineArgs = fldCmdLineArgs.getText();
+		String monitoredPacksStr = fldMonitoredPacks.getText().trim();
 		
 		IdeState ideState = new IdeState();
 		
@@ -147,6 +166,12 @@ public class SettingsDialog extends JDialog
 		
 		this.ideState.setApplicationConfigFile(configFile);
 		this.ideState.setCommandLineArguments(ideState.getCommandLineArguments());
+		
+		if(monitoredPacksStr.length() > 0)
+		{
+			String packs[] = monitoredPacksStr.split("\\s*\\,\\s*");
+			this.ideState.setMonitoredPackages(new HashSet<>(Arrays.asList(packs)));
+		}
 		
 		try
 		{

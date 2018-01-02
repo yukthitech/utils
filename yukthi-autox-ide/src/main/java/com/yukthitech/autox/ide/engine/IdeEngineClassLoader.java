@@ -5,6 +5,8 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.yukthitech.autox.ide.model.IdeState;
+
 public class IdeEngineClassLoader extends ClassLoader
 {
 	private class DynamicClassLoader extends URLClassLoader
@@ -35,9 +37,14 @@ public class IdeEngineClassLoader extends ClassLoader
 	
 	private Set<String> monitoredPacks = new HashSet<>();
 	
-	public IdeEngineClassLoader()
+	public IdeEngineClassLoader(IdeState ideState)
 	{
 		monitoredPacks.add("com.yukthitech.autox.ide");
+		
+		if(ideState.getMonitoredPackages() != null)
+		{
+			monitoredPacks.addAll(ideState.getMonitoredPackages());
+		}
 	}
 	
 	private boolean isMonitoredType(String name)

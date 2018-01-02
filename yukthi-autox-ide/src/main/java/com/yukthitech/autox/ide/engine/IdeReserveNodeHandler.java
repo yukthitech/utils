@@ -13,11 +13,19 @@ import com.yukthitech.ccg.xml.reserved.NodeName;
 @NodeName(namePattern = ".*")
 public class IdeReserveNodeHandler extends AutomationReserveNodeHandler
 {
-	private IdeEngineClassLoader ideEngineClassLoader = new IdeEngineClassLoader();
+	/**
+	 * Ide engine to be used.
+	 */
+	private IdeEngine ideEngine;
 	
-	public IdeReserveNodeHandler(AutomationContext context, ApplicationConfiguration appConfiguraion)
+	private IdeEngineClassLoader ideEngineClassLoader;
+	
+	public IdeReserveNodeHandler(AutomationContext context, ApplicationConfiguration appConfiguraion, IdeEngine ideEngine)
 	{
 		super(context, appConfiguraion);
+		this.ideEngine = ideEngine;
+		
+		ideEngineClassLoader = new IdeEngineClassLoader(ideEngine.getState());
 	}
 	
 	public IdeEngineClassLoader getIdeEngineClassLoader()
@@ -30,7 +38,7 @@ public class IdeReserveNodeHandler extends AutomationReserveNodeHandler
 	 */
 	public void reload()
 	{
-		ideEngineClassLoader = new IdeEngineClassLoader();
+		ideEngineClassLoader = new IdeEngineClassLoader(ideEngine.getState());
 		super.loadStepTypes(ideEngineClassLoader);
 	}
 }
