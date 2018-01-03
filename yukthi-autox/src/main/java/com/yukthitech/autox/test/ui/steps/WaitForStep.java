@@ -20,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = {"ui_waitFor", "waitFor"}, requiredPluginTypes = SeleniumPlugin.class, message = "Waits for (atlease one )specified element to become visible/hidden")
+@Executable(name = {"uiWaitFor", "waitFor"}, requiredPluginTypes = SeleniumPlugin.class, message = "Waits for (atlease one )specified element to become visible/hidden")
 public class WaitForStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

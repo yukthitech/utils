@@ -15,7 +15,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * 
  * @author akiran
  */
-@Executable(name = {"ui_switchWindow", "switchWindow"}, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching between windows")
+@Executable(name = {"uiSwitchWindow", "switchWindow"}, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching between windows")
 public class SwitchWindow extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

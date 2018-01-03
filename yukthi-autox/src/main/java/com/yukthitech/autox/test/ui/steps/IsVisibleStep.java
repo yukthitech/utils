@@ -13,7 +13,7 @@ import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = {"ui_isVisible", "isVisible"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches flag indicating if target element is visible or not")
+@Executable(name = {"uiIsVisible", "isVisible"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches flag indicating if target element is visible or not")
 public class IsVisibleStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

@@ -22,7 +22,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 /**
  * Validates specified form has specified fields with specified field details.
  */
-@Executable(name = {"ui_validateFormFields", "validateFormFields"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
+@Executable(name = {"uiValidateFormFields", "validateFormFields"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
 public class ValidateFormFields extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

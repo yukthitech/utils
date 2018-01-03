@@ -12,7 +12,7 @@ import com.yukthitech.autox.common.AutomationUtils;
  * Stores specified key value into persistence storage. Which can be used across the executions.
  * @author akiran
  */
-@Executable(name = {"store_set", "store"}, message = "Stores specified key value into persistence storage. Which can be used across the executions.")
+@Executable(name = {"storeSet", "store"}, message = "Stores specified key value into persistence storage. Which can be used across the executions.")
 public class StoreStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

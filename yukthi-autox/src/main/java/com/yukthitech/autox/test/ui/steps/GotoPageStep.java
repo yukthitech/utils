@@ -13,7 +13,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * Goes to the specified page url.
  * @author akiran
  */
-@Executable(name = {"ui_gotoPage", "gotoPage"}, requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified uri")
+@Executable(name = {"uiGotoPage", "gotoPage"}, requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified uri")
 public class GotoPageStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
