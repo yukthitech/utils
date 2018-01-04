@@ -25,7 +25,11 @@ package com.yukthitech.utils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -347,5 +351,47 @@ public class ReflectionUtils
 		}
 		
 		return res.append(")").toString();
+	}
+	
+	/**
+	 * Creates proxy instance of specified annotation.
+	 * @param annotationType annotation type whose proxy instance to be created
+	 * @param values values to be reflected
+	 * @return annotation proxy instance
+	 */
+	@SuppressWarnings("unchecked")
+	public static <A extends Annotation> A createProxyAnnotation(Class<A> annotationType, Map<String, Object> values)
+	{
+		final Map<String, Object> finalValues = new HashMap<String, Object>(values);
+		
+		Method methods[] = annotationType.getMethods();
+		Object value = null;
+		
+		for(Method method : methods)
+		{
+			if(finalValues.get(method.getName()) != null)
+			{
+				continue;
+			}
+			
+			value = method.getDefaultValue();
+			
+			if(value != null)
+			{
+				finalValues.put(method.getName(), value);
+			}
+		}
+		
+		InvocationHandler handler = new InvocationHandler()
+		{
+			@Override
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+			{
+				return finalValues.get(method.getName());
+			}
+		};
+		
+		A newInstance = (A) Proxy.newProxyInstance(ReflectionUtils.class.getClassLoader(), new Class[] {annotationType}, handler);
+		return newInstance;
 	}
 }
