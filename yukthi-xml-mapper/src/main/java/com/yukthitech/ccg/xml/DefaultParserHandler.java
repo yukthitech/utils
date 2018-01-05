@@ -13,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.xml.sax.Locator;
 
+import com.yukthitech.ccg.xml.reserved.BeanNodeHandler;
 import com.yukthitech.ccg.xml.reserved.ElementNodeHandler;
 import com.yukthitech.ccg.xml.reserved.EntryNodeHandler;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
@@ -37,6 +39,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class DefaultParserHandler implements IParserHandler
 {
+	/**
+	 * Pattern used by values to refer to other beans.
+	 */
+	private static final Pattern REF_VALUE_PATTERN = Pattern.compile("\\s*ref\\s*\\:\\s*(\\w+)\\s*");
+	
 	/** The Constant ATTR_PATH. */
 	public static final String ATTR_PATH = "path";
 
@@ -186,6 +193,7 @@ public class DefaultParserHandler implements IParserHandler
 		registerReserveNodeHandler(new EntryNodeHandler());
 		registerReserveNodeHandler(new IncludeXmlNodeHandler());
 		registerReserveNodeHandler(new RegisterNodeHandler());
+		registerReserveNodeHandler(new BeanNodeHandler());
 	}
 
 	/**
@@ -296,7 +304,7 @@ public class DefaultParserHandler implements IParserHandler
 				throw new IllegalStateException("Root bean is not specified.Attribute " + ATTR_BEAN_TYPE + " is mandatory");
 			String params = (String) att.getReserved(ATTR_PARAMTERS);
 			String paramTypes = (String) att.getReserved(ATTR_PARAMTER_TYPES);
-			root = createBean(null, beanType, paramTypes, params, dateFormat, classLoader);
+			root = createBean(null, beanType, paramTypes, params, dateFormat, classLoader, objIdToObj);
 		}
 
 		loadHandlerConfigurationData(att);
@@ -474,7 +482,7 @@ public class DefaultParserHandler implements IParserHandler
 		if(expr != null)
 			bean = getExpressionObject(expr);
 		else
-			bean = createBean(node.getType(), beanType, paramTypes, params, dateFormat, loader);
+			bean = createBean(node.getType(), beanType, paramTypes, params, dateFormat, loader, objIdToObj);
 
 		if(beanId != null)
 		{
@@ -483,7 +491,7 @@ public class DefaultParserHandler implements IParserHandler
 
 		return bean;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -782,7 +790,7 @@ public class DefaultParserHandler implements IParserHandler
 	 *            the loader
 	 * @return the object
 	 */
-	public static Object createBean(BeanNode node, ClassLoader loader)
+	public static Object createBean(BeanNode node, ClassLoader loader, Map<String, Object> refBeans)
 	{
 		XMLAttributeMap att = node.getAttributeMap();
 		String beanType = att.getReserved(ATTR_BEAN_TYPE, null);
@@ -797,39 +805,7 @@ public class DefaultParserHandler implements IParserHandler
 		// if expression is specified ignore bean type
 		if(expr != null)
 			return getExpressionObject(expr);
-		return createBean(node.getType(), beanType, paramTypes, params, null, loader);
-	}
-
-	/**
-	 * Creates a bean using specified type. If preferredType is specified and if
-	 * it is assignable to type then the preferredType is used to create the
-	 * object. If preferredType not assignable to type then
-	 * UnsupportedDataTypeException is thrown. <BR>
-	 * 
-	 * If paramTypes and paramValues are specified, then appropriate constructor
-	 * is called. paramTypes should comma separated types and these types should
-	 * be XMLBeanParser supported attributed types. paramValues should be comma
-	 * separated values.
-	 * 
-	 * @param type
-	 *            The type of Object which needs to be constructed.
-	 * @param preferredType
-	 *            Fully specified class name which is preferred type of the
-	 *            object. This should be assignable to type (if type is
-	 *            specified).
-	 * @param paramTypes
-	 *            Comma separated parameter types.
-	 * @param paramValues
-	 *            Parameters that needs to be passed to the constructor.
-	 * @param dateFormat
-	 *            The format to be used to convert specified paramter string
-	 *            into java.util.Date.
-	 * 
-	 * @return The constructed object.
-	 */
-	public static Object createBean(Class<?> type, String preferredType, String paramTypes, String paramValues, String dateFormat)
-	{
-		return createBean(type, preferredType, paramTypes, paramValues, dateFormat, null);
+		return createBean(node.getType(), beanType, paramTypes, params, null, loader, refBeans);
 	}
 
 	/**
@@ -849,7 +825,7 @@ public class DefaultParserHandler implements IParserHandler
 	 *            the loader
 	 * @return the object
 	 */
-	public static Object createBean(Class<?> type, String preferredType, String paramTypes, String paramValues, String dateFormat, ClassLoader loader)
+	public static Object createBean(Class<?> type, String preferredType, String paramTypes, String paramValues, String dateFormat, ClassLoader loader, Map<String, Object> refBeans)
 	{
 		if(preferredType != null)
 		{
@@ -901,9 +877,6 @@ public class DefaultParserHandler implements IParserHandler
 				for(i = 0; i < paramTypeCls.length; i++)
 				{
 					paramTypeCls[i] = CommonUtils.getClass(types[i]);
-
-					if(!XMLUtil.isSupportedAttributeClass(paramTypeCls[i]))
-						throw new UnsupportedOperationException("Specified type is not suported as attribute type: " + paramTypeCls[i].getName());
 				}
 			} catch(UnsupportedOperationException ex)
 			{
@@ -923,8 +896,18 @@ public class DefaultParserHandler implements IParserHandler
 			if(cons == null)
 				throw new IllegalStateException("No constructor found in class \"" + type.getName() + "\" with arguments: " + paramTypes);
 
+			Matcher matcher = null;
+			
 			for(i = 0; i < values.length; i++)
 			{
+				matcher = REF_VALUE_PATTERN.matcher((String) values[i]);
+				
+				if(matcher.matches())
+				{
+					actValues[i] = refBeans.get(matcher.group(1));
+					continue;
+				}
+				
 				actValues[i] = XMLUtil.parseAttributeObject((String) values[i], paramTypeCls[i], dateFormat);
 			}
 
