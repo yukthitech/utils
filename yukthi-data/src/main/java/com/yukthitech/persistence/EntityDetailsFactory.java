@@ -117,7 +117,7 @@ public class EntityDetailsFactory
 		checkFieldValidity(entityDetails, fields, UniqueConstraint.class.getSimpleName(), uniqueConstraint.name(), entityDetails.getEntityType().getName());
 		
 		UniqueConstraintDetails constraint = new UniqueConstraintDetails(entityDetails, uniqueConstraint.name(), fields, 
-				uniqueConstraint.message(), uniqueConstraint.validate());
+				uniqueConstraint.message(), uniqueConstraint.validate(), uniqueConstraint.finalName());
 		entityDetails.addUniqueKeyConstraint(constraint);
 		
 		logger.trace("Added unique-constraint {} to entity: {}", uniqueConstraint, entityDetails);

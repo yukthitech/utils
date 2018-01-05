@@ -98,7 +98,9 @@ public class SqlExceptionHandler
 			
 			if(message == null)
 			{
-				message = "Unique constraint violated - " + word;
+				String fields = uniqueConstraintDetails.getFields().toString();
+				
+				message = "Duplicate value specified for field(s) - " + fields;
 			}
 			
 			throw new UniqueConstraintViolationException(uniqueConstraintDetails.getEntityDetails().getEntityType(), 

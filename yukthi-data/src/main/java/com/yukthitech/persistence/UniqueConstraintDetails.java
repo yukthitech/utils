@@ -14,8 +14,14 @@ public class UniqueConstraintDetails
 	private List<String> fields = new ArrayList<>();
 	private String message;
 	private boolean validate;
+	
+	/**
+	 * Indicates that specified constraint name is final name. And framework 
+	 * should not prefix or suffix with anything else.
+	 */
+	private boolean finalName;
 
-	public UniqueConstraintDetails(EntityDetails entityDetails, String name, String fields[], String message, boolean validate)
+	public UniqueConstraintDetails(EntityDetails entityDetails, String name, String fields[], String message, boolean validate, boolean finalName)
 	{
 		if(name == null || name.trim().length() == 0)
 		{
@@ -31,6 +37,7 @@ public class UniqueConstraintDetails
 		this.name = name;
 		this.message = (message == null || message.trim().length() == 0) ? null : message.trim();
 		this.validate = validate;
+		this.finalName = finalName;
 		
 		this.fields.addAll(Arrays.asList(fields));
 	}
@@ -50,6 +57,11 @@ public class UniqueConstraintDetails
 	
 	public String getConstraintName()
 	{
+		if(finalName)
+		{
+			return name;
+		}
+		
 		return  UNIQUE_CONSTRAINT_PREFIX + entityDetails.getEntityType().getSimpleName().toUpperCase() + "_" + name.toUpperCase();
 	}
 	

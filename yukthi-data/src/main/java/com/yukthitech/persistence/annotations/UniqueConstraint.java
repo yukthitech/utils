@@ -37,4 +37,11 @@ public @interface UniqueConstraint
 	 * @return
 	 */
 	public boolean validate() default true;
+	
+	/**
+	 * Indicates that specified constraint name is final name. And framework 
+	 * should not prefix or suffix with anything else. Default: false.
+	 * @return true if specified name is final one.
+	 */
+	public boolean finalName() default false;
 }

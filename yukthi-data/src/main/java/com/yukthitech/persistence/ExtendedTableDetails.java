@@ -251,7 +251,7 @@ public class ExtendedTableDetails
 		//add unique constraint on entity id field.
 		UniqueConstraintDetails uniqueConstraintDetails = new UniqueConstraintDetails(entityDetails, 
 			actualEntityDetails.getTableName() + "_ENTITY_ID", 
-			new String[]{ExtendedTableEntity.FIELD_ENTITY_ID}, null, false);
+			new String[]{ExtendedTableEntity.FIELD_ENTITY_ID}, null, false, false);
 		
 		entityDetails.addUniqueKeyConstraint(uniqueConstraintDetails);
 		
