@@ -1,10 +1,13 @@
 package com.yukthitech.autox.config;
 
+import java.io.File;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Selenium driver configuration.
@@ -170,7 +173,15 @@ public class SeleniumDriverConfig implements Validateable
 	 */
 	public void setDownloadFolder(String downloadFolder)
 	{
-		this.downloadFolder = downloadFolder;
+		File file = new File(downloadFolder);
+		
+		try
+		{
+			this.downloadFolder = file.getCanonicalPath();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while getting cannoical path of download folder: {}", downloadFolder);
+		}
 	}
 
 	/* (non-Javadoc)

@@ -40,8 +40,17 @@
 			
 			<wrap:drivers>
 				<ccg:bean beanType="com.yukthitech.autox.config.selenium.AutoxFirefoxProfile" beanId="firefoxProfile">
-					<stringPreference key="browser.download.dir">./downloads</stringPreference>
 					<intPreference key="browser.download.folderList">2</intPreference>
+					<booleanPreference key="browser.download.manager.showWhenStarting">false</booleanPreference>
+					<stringPreference key="browser.download.dir">C:\\Users\\akiran\\git\\utils\\yukthi-autox\\downloads</stringPreference>
+					<stringPreference key="browser.helperApps.neverAsk.openFile">text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml</stringPreference>
+					<stringPreference key="browser.helperApps.neverAsk.saveToDisk">text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml</stringPreference>
+					<booleanPreference key="browser.helperApps.alwaysAsk.force">false</booleanPreference>
+					<booleanPreference key="browser.download.manager.alertOnEXEOpen">false</booleanPreference>
+					<booleanPreference key="browser.download.manager.focusWhenStarting">false</booleanPreference>
+					<booleanPreference key="browser.download.manager.useWindow">false</booleanPreference>
+					<booleanPreference key="browser.download.manager.showAlertOnComplete">false</booleanPreference>
+					<booleanPreference key="browser.download.manager.closeWhenDone">false</booleanPreference>
 				</ccg:bean>
 			
 				<ccg:bean beanType="org.openqa.selenium.firefox.FirefoxOptions" beanId="firefoxOptions">
