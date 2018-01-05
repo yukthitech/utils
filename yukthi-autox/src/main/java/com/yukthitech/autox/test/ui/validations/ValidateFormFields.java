@@ -242,7 +242,7 @@ public class ValidateFormFields extends AbstractValidation
 		
 		exeLogger.debug(this, "Validating form  - {}", locator);
 		
-		WebElement formElement = UiAutomationUtils.findElement(context, null, locator);
+		WebElement formElement = UiAutomationUtils.findElement(context, (WebElement) null, locator);
 		List<WebElement> fieldElements = null;
 		FormFieldType fieldType = null;
 

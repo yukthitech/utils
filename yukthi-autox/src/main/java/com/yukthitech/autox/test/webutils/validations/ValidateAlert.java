@@ -63,7 +63,7 @@ public class ValidateAlert extends AbstractValidation
 		waitStep.execute(context, exeLogger);
 		
 		//ensure alert has required message
-		WebElement alertBox = UiAutomationUtils.findElement(context, null, "id: webutilsAlertDialog");
+		WebElement alertBox = UiAutomationUtils.findElement(context, (WebElement) null, "id: webutilsAlertDialog");
 		WebElement bodyElement = UiAutomationUtils.findElement(context, alertBox, "xpath: .//div[@class='modal-body']");
 		String bodyText = bodyElement.getAttribute("innerHTML");
 		

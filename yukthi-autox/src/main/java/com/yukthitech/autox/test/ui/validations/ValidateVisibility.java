@@ -2,7 +2,6 @@ package com.yukthitech.autox.test.ui.validations;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -18,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = {"uiValidateVisibility", "validateVisibility"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
-public class ValidateVisibility extends AbstractValidation
+public class ValidateVisibility extends AbstractUiValidation
 {
 	private static final long serialVersionUID = 1L;
 
@@ -62,7 +61,7 @@ public class ValidateVisibility extends AbstractValidation
 		exeLogger.trace(this, "Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		UiAutomationUtils.validateWithWait(() -> {
-			WebElement element = UiAutomationUtils.findElement(context, null, locator);
+			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
 
 			if("true".equals(hidden))
 			{
@@ -70,16 +69,17 @@ public class ValidateVisibility extends AbstractValidation
 			}
 
 			return (element != null && element.isDisplayed());
-		} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + locator, new InvalidStateException("Failed to find element - " + locator));
+		} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + getLocatorWithParent(locator), 
+				new InvalidStateException("Failed to find element - " + getLocatorWithParent(locator)));
 
 		if(message != null)
 		{
-			WebElement element = UiAutomationUtils.findElement(context, null, locator);
+			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
 			String actualMessage = element.getText().trim();
 
 			if(actualMessage == null || !actualMessage.contains(message))
 			{
-				exeLogger.error(this, "Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, locator);
+				exeLogger.error(this, "Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, getLocatorWithParent(locator));
 				return false;
 			}
 		}

@@ -1,6 +1,5 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -14,7 +13,7 @@ import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
  * @author akiran
  */
 @Executable(name = {"uiIsVisible", "isVisible"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches flag indicating if target element is visible or not")
-public class IsVisibleStep extends AbstractStep
+public class IsVisibleStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -57,11 +56,11 @@ public class IsVisibleStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Fetching visibility flag for element '{}'", locator);
+		exeLogger.trace(this, "Fetching visibility flag for element '{}'", getLocatorWithParent(locator));
 
-		boolean visible = UiFreeMarkerMethods.isVisible(locator);
+		boolean visible = UiFreeMarkerMethods.isVisible(locator, parentElement);
 		
-		exeLogger.debug(this, "Element '{}' visibility flag ({}) is being set as context attribute: {}", locator, visible, name);
+		exeLogger.debug(this, "Element '{}' visibility flag ({}) is being set as context attribute: {}", getLocatorWithParent(locator), visible, name);
 		context.setAttribute(name, visible);
 		
 		return true;

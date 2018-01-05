@@ -44,8 +44,8 @@ public class DragAndDropStep extends AbstractStep
 	{
 		logger.debug(this, "Dragging element '{}' to element - {}", source, destination);
 		
-		WebElement sourceElement = UiAutomationUtils.findElement(context, null, source);
-		WebElement destinationElement = UiAutomationUtils.findElement(context, null, destination);
+		WebElement sourceElement = UiAutomationUtils.findElement(context, (WebElement) null, source);
+		WebElement destinationElement = UiAutomationUtils.findElement(context, (WebElement) null, destination);
 
 		dragAndDrop(context, sourceElement, destinationElement, logger);
 		

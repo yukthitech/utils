@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -21,7 +20,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * @author Pritam.
  */
 @Executable(name = {"uiPopulateField", "populateField"}, requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
-public class PopulateFieldStep extends AbstractStep
+public class PopulateFieldStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -59,7 +58,7 @@ public class PopulateFieldStep extends AbstractStep
 	 */
 	private void pressEnter(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		WebElement webElement = UiAutomationUtils.findElement(context, null, locator);
+		WebElement webElement = UiAutomationUtils.findElement(context, parentElement, locator);
 		webElement.sendKeys(Keys.ENTER);
 
 		logger.debug("Successfully enter key is pressed");
@@ -75,12 +74,12 @@ public class PopulateFieldStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
-		logger.debug(this, "Populating field {} with value - {}", locator, value);
+		logger.debug(this, "Populating field {} with value - {}", getLocatorWithParent(locator), value);
 		
-		if(!UiAutomationUtils.populateField(context, null, locator, value))
+		if(!UiAutomationUtils.populateField(context, parentElement, locator, value))
 		{
-			logger.error(this, "Failed to fill element '{}' with value - {}", locator, value);
-			throw new TestCaseFailedException("Failed to fill element '{}' with value - {}", locator, value);
+			logger.error(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
+			throw new TestCaseFailedException("Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 		}
 
 		if(pressEnterAtEnd)

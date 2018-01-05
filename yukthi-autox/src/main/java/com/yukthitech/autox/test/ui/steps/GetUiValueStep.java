@@ -1,6 +1,5 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -14,7 +13,7 @@ import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
  * @author akiran
  */
 @Executable(name = {"uiGetUiValue", "getUiValue"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
-public class GetUiValueStep extends AbstractStep
+public class GetUiValueStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -57,11 +56,11 @@ public class GetUiValueStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Fetching ui element value for locator - {}", locator);
+		exeLogger.trace(this, "Fetching ui element value for locator - {}", getLocatorWithParent(locator));
 		
-		String elementValue = UiFreeMarkerMethods.getValue(locator);
+		String elementValue = UiFreeMarkerMethods.getValue(locator, parentElement);
 		
-		exeLogger.debug(this, "Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, locator, elementValue);
+		exeLogger.debug(this, "Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
 		context.setAttribute(name, elementValue);
 		
 		return true;

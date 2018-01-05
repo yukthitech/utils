@@ -61,7 +61,7 @@ public class FillFormStep extends AbstractStep
 	{
 		exeLogger.debug(this, "Filling form '{}' with standard bean - {}", locator, data);
 		
-		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
+		WebElement parentElement = UiAutomationUtils.findElement(context, (WebElement) null, locator);
 
 		PropertyDescriptor propDescLst[] = PropertyUtils.getPropertyDescriptors(data.getClass());
 		Object value = null;
@@ -118,7 +118,7 @@ public class FillFormStep extends AbstractStep
 	{
 		exeLogger.debug(this, "Filling form '{}' with dynamic bean - {}", locator, data);
 		
-		WebElement parentElement = UiAutomationUtils.findElement(context, null, locator);
+		WebElement parentElement = UiAutomationUtils.findElement(context, (WebElement) null, locator);
 
 		Object value = null;
 

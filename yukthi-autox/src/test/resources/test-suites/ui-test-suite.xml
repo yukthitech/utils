@@ -45,6 +45,49 @@
 			<ccg:validateValue locator="xpath: //input[@name='name']" value="kranthi"/>
 		</testCase>
 
+		<testCase name="uiGetElements">
+			<description>Validates get elements is working</description>
+			
+			<ccg:gotoPage uri="/form.html" />
+			
+			<ccg:ui-get-elements locator="xpath: //input[@type='checkbox']" name="checkBoxes"/>
+			
+			<ccg:set name="values" value=""/>
+			
+			<ccg:forEach expression="attr.checkBoxes" loopVar="cbox">
+				<ccg:set name="values" value="${attr.values},${uiElemAttr('cbox', 'value')}"/>
+			</ccg:forEach>
+
+			<ccg:validateContextParam expression="attr.values" value=",red,green,blue,yellow,orange"/>
+		</testCase>
+
+		<testCase name="uiMethods">
+			<description>Validates functionality of free marker methods</description>
+			
+			<ccg:gotoPage uri="/form.html" />
+			
+			<ccg:set name="result" value="false"/>
+			<ccg:set name="locator" value="xpath: //input[@type='checkbox']"/>
+			
+			<ccg:if condition="uiIsVisible(attr.locator, null)">
+				<then>
+					<ccg:set name="result" value="true"/>
+				</then>
+			</ccg:if>
+			
+			<ccg:validateContextParam expression="attr.result" value="true"/>
+		</testCase>
+
+		<testCase name="testDownload">
+			<description>Validates download functionality</description>
+			
+			<ccg:gotoPage uri="/form.html" />
+			
+			<ccg:ui-clickAndDownload locator="id: downloadLink" pathName="filePath"/>
+						
+			<ccg:validateFileExists path="${attr.filePath}"/>
+		</testCase>
+
 		<cleanup>
 			<ccg:quitSession/>
 		</cleanup>

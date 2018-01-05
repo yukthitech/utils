@@ -1,9 +1,7 @@
 package com.yukthitech.autox.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -25,11 +23,6 @@ public class SeleniumDriverConfig implements Validateable
 	private String className;
 	
 	/**
-	 * System properties to be added to use this driver.
-	 */
-	private Map<String, String> systemProperties = new HashMap<>();
-	
-	/**
 	 * Flag indicating if this driver is the default driver.
 	 */
 	private boolean isDefault;
@@ -39,6 +32,16 @@ public class SeleniumDriverConfig implements Validateable
 	 * by headless browser (jbrowser).
 	 */
 	private String defaultPage;
+	
+	/**
+	 * Direct driver.
+	 */
+	private WebDriver driver;
+
+	/**
+	 * Folder in which downloaded files can be expected.
+	 */
+	private String downloadFolder;
 
 	/**
 	 * Gets the name of the driver.
@@ -81,38 +84,13 @@ public class SeleniumDriverConfig implements Validateable
 	}
 
 	/**
-	 * Gets the system properties to be added to use this driver.
-	 *
-	 * @return the system properties to be added to use this driver
-	 */
-	public Map<String, String> getSystemProperties()
-	{
-		return systemProperties;
-	}
-
-	/**
-	 * Sets the system properties to be added to use this driver.
-	 *
-	 * @param systemProperties the new system properties to be added to use this driver
-	 */
-	public void setSystemProperties(Map<String, String> systemProperties)
-	{
-		if(systemProperties == null)
-		{
-			throw new NullPointerException("System properties can not be null");
-		}
-		
-		this.systemProperties = systemProperties;
-	}
-	
-	/**
 	 * Adds specified system property for this driver.
 	 * @param name Name of the property.
 	 * @param value value of the property.
 	 */
 	public void setSystemProperty(String name, String value)
 	{
-		this.systemProperties.put(name, value);
+		System.setProperty(name, value);
 	}
 
 	/**
@@ -155,6 +133,46 @@ public class SeleniumDriverConfig implements Validateable
 		this.defaultPage = defaultPage;
 	}
 
+	/**
+	 * Gets the direct driver.
+	 *
+	 * @return the direct driver
+	 */
+	public WebDriver getDriver()
+	{
+		return driver;
+	}
+
+	/**
+	 * Sets the direct driver.
+	 *
+	 * @param driver the new direct driver
+	 */
+	public void setDriver(WebDriver driver)
+	{
+		this.driver = driver;
+	}
+	
+	/**
+	 * Gets the folder in which downloaded files can be expected.
+	 *
+	 * @return the folder in which downloaded files can be expected
+	 */
+	public String getDownloadFolder()
+	{
+		return downloadFolder;
+	}
+
+	/**
+	 * Sets the folder in which downloaded files can be expected.
+	 *
+	 * @param downloadFolder the new folder in which downloaded files can be expected
+	 */
+	public void setDownloadFolder(String downloadFolder)
+	{
+		this.downloadFolder = downloadFolder;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
 	 */
@@ -166,9 +184,9 @@ public class SeleniumDriverConfig implements Validateable
 			throw new ValidateException("Name can not be null or empty.");
 		}
 		
-		if(StringUtils.isBlank(className))
+		if(StringUtils.isBlank(className) && driver == null)
 		{
-			throw new ValidateException("Class-name can not be null or empty.");
+			throw new ValidateException("Class-name can not be null or empty when driver is not specified.");
 		}
 	}
 }

@@ -2,7 +2,6 @@ package com.yukthitech.autox.test.ui.steps;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -19,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = {"uiClick", "click"}, requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
-public class ClickStep extends AbstractStep
+public class ClickStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -34,12 +33,12 @@ public class ClickStep extends AbstractStep
 	{
 		exeLogger.trace(this, "Clicking the element specified by locator: {}", locator);
 
-		WebElement webElement = UiAutomationUtils.findElement(context, null, locator);
+		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 		if(webElement == null)
 		{
-			exeLogger.error(this, "Failed to find element with locator: {}", locator);
-			throw new NullPointerException("Failed to find element with locator: " + locator);
+			exeLogger.error(this, "Failed to find element with locator: {}", getLocatorWithParent(locator));
+			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
 		try
@@ -59,11 +58,13 @@ public class ClickStep extends AbstractStep
 	
 					throw ex;
 				}
-			} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element to be clickable: " + locator, new InvalidStateException("Failed to click element - " + locator));
+			} , UiAutomationUtils.FIVE_SECONDS, 
+					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
+					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(this, ex, "Failed to click element - {}", locator);
-			throw new TestCaseFailedException("Failed to click element - {}", locator, ex);
+			exeLogger.error(this, ex, "Failed to click element - {}", getLocatorWithParent(locator));
+			throw new TestCaseFailedException("Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
 		
 		return true;

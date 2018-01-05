@@ -2,7 +2,6 @@ package com.yukthitech.autox.test.ui.validations;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -17,7 +16,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * @author akiran
  */
 @Executable(name = {"uiValidateValue", "validateValue"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
-public class ValidateValue extends AbstractValidation
+public class ValidateValue extends AbstractUiValidation
 {
 	private static final long serialVersionUID = 1L;
 
@@ -51,9 +50,9 @@ public class ValidateValue extends AbstractValidation
 			return true;
 		}
 		
-		exeLogger.trace(this, "Validating if locator '{}' has value - {}", locator, value);
+		exeLogger.trace(this, "Validating if locator '{}' has value - {}", getLocatorWithParent(locator), value);
 		
-		WebElement element = UiAutomationUtils.findElement(context, null, locator);
+		WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
 		String actualMessage = null;
 		
 		if("input".equals(element.getTagName().toLowerCase()))
@@ -67,7 +66,7 @@ public class ValidateValue extends AbstractValidation
 
 		if(!value.equals(actualMessage))
 		{
-			exeLogger.error(this, "Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, locator);
+			exeLogger.error(this, "Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, getLocatorWithParent(locator));
 			return false;
 		}
 

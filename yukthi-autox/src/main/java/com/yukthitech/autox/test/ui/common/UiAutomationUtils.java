@@ -111,6 +111,25 @@ public class UiAutomationUtils
 	 * 
 	 * @param context
 	 *            Automation context
+	 * @param parentName
+	 *            Parent attribute name under which target element can be found
+	 * @param locator
+	 *            Locator of the target field. If locator pattern is not used, this will be assumed as name.
+	 * @param value
+	 *            Value to be populated
+	 * @return True, if population was successful.
+	 */
+	public static boolean populateField(AutomationContext context, String parentName, String locator, Object value)
+	{
+		WebElement parent = getParentElement(context, parentName);
+		return populateField(context, parent, locator, value);
+	}
+	
+	/**
+	 * Populates specified field with specified value.
+	 * 
+	 * @param context
+	 *            Automation context
 	 * @param parent
 	 *            Parent under which target element can be found
 	 * @param locator
@@ -171,6 +190,29 @@ public class UiAutomationUtils
 	 * 
 	 * @param context
 	 *            Context to be used
+	 * @param parentName
+	 *            Parent attribute name under which element need to be searched
+	 * @param locator
+	 *            Locator to be used for searching
+	 * @return Matching element
+	 */
+	public static WebElement findElement(AutomationContext context, String parentName, String locator)
+	{
+		List<WebElement> elements = findElements(context, parentName, locator);
+
+		if(elements == null || elements.size() == 0)
+		{
+			return null;
+		}
+
+		return elements.get(0);
+	}
+
+	/**
+	 * Fetches the element with specified locator.
+	 * 
+	 * @param context
+	 *            Context to be used
 	 * @param parent
 	 *            Parent under which element need to be searched
 	 * @param locator
@@ -188,7 +230,55 @@ public class UiAutomationUtils
 
 		return elements.get(0);
 	}
+	
+	/**
+	 * Fetches parent element from context with specified name.
+	 * @param context
+	 * @param parentName
+	 * @return
+	 */
+	private static WebElement getParentElement(AutomationContext context, String parentName)
+	{
+		WebElement parent = null;
+		
+		if(parentName != null)
+		{
+			Object parentObj = context.getAttribute(parentName);
+			
+			if(parentObj == null)
+			{
+				throw new InvalidArgumentException("Failed to find parent element with name: {}", parentName);
+			}
+			
+			if(parentObj instanceof WebElement)
+			{
+				throw new InvalidArgumentException("Non web-element found as parent with name: {}", parentName);
+			}
+			
+			parent = (WebElement) parentObj;
+		}
+		
+		return parent;
+	}
 
+	/**
+	 * Fetches the elements with specified locator.
+	 * 
+	 * @param context
+	 *            Context to be used
+	 * @param parentName
+	 *            Parent attributed name under which elements need to be searched
+	 * @param locator
+	 *            Locator to be used for searching
+	 * @return Matching elements
+	 */
+	public static List<WebElement> findElements(AutomationContext context, String parentName, String locator)
+	{
+		WebElement parent = getParentElement(context, parentName);
+		
+		return findElements(context, parent, locator);
+	}
+	
 	/**
 	 * Fetches the elements with specified locator.
 	 * 

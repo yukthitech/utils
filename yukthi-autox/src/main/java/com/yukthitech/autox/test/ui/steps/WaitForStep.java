@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -21,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = {"uiWaitFor", "waitFor"}, requiredPluginTypes = SeleniumPlugin.class, message = "Waits for (atlease one )specified element to become visible/hidden")
-public class WaitForStep extends AbstractStep
+public class WaitForStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -52,20 +51,20 @@ public class WaitForStep extends AbstractStep
 			{
 				for(String locator : this.locators)
 				{
-					WebElement element = UiAutomationUtils.findElement(context, null, locator);
+					WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
 					
 					//if element needs to be checked for invisibility
 					if("true".equals(hidden))
 					{
 						if(element == null || !element.isDisplayed())
 						{
-							exeLogger.debug(this, "Found locator '{}' to be hidden", locator);
+							exeLogger.debug(this, "Found locator '{}' to be hidden", getLocatorWithParent(locator));
 						}
 					}
 					//if element needs to be checked for visibility
 					else if(element != null && element.isDisplayed())
 					{
-						exeLogger.debug(this, "Found locator '{}' to be visible.", locator);
+						exeLogger.debug(this, "Found locator '{}' to be visible.", getLocatorWithParent(locator));
 						return true;
 					}
 				}

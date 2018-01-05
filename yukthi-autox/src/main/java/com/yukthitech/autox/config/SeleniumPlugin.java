@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +27,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "SeleniumPlugin", message = "Plugin needed by selenium/ui-automation based steps or validators.")
 public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 {
+	
+	/** The logger. */
 	private static Logger logger = LogManager.getLogger(SeleniumPlugin.class);
 	
 	/**
@@ -50,6 +53,9 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	@Param(description = "Base url to be used for ui automation", required = true)
 	private String baseUrl;
 	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.config.IPlugin#getArgumentBeanType()
+	 */
 	@Override
 	public Class<SeleniumPluginArgs> getArgumentBeanType()
 	{
@@ -114,6 +120,12 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		return baseUrl;
 	}
 	
+	/**
+	 * Gets the resource url.
+	 *
+	 * @param resource the resource
+	 * @return the resource url
+	 */
 	public String getResourceUrl(String resource)
 	{
 		if(!resource.startsWith("/"))
@@ -150,18 +162,18 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			throw new InvalidStateException("No web driver is defined with name - {}", driverName);
 		}
 		
-		Map<String, String> sysProp = driverConfig.getSystemProperties();
-		logger.debug("Loading system properties for driver '{}' as - {}", driverName, sysProp);
-		
-		for(String name : sysProp.keySet())
-		{
-			System.setProperty(name, sysProp.get(name));
-		}
-		
 		try
 		{
 			activeDriverName = driverName;
-			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
+			
+			if(driverConfig.getDriver() != null)
+			{
+				activeDriver = driverConfig.getDriver();
+			}
+			else
+			{
+				activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
+			}
 			
 			if(driverConfig.getDefaultPage() != null)
 			{
@@ -191,6 +203,12 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	{
 		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
 		
+		if(driverConfig.getDriver() != null)
+		{
+			activeDriver = driverConfig.getDriver();
+			return;
+		}
+		
 		try
 		{
 			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
@@ -200,6 +218,58 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		}
 	}
 	
+	/**
+	 * Returns true if downloads are supported by current driver.
+	 * @return true if download automation is supported.
+	 */
+	public boolean isDownloadsSupported()
+	{
+		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
+		return (driverConfig.getDownloadFolder() != null);
+	}
+	
+	/**
+	 * Fetches folder path when downloaded files can be expected.
+	 * @return
+	 */
+	public String getDownloadFolder()
+	{
+		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
+		return driverConfig.getDownloadFolder(); 
+	}
+	
+	/**
+	 * Cleans the download folder.
+	 */
+	public void cleanDownloadFolder()
+	{
+		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
+		String downloadFolder = driverConfig.getDownloadFolder(); 
+				
+		if(downloadFolder == null)
+		{
+			return;
+		}
+		
+		try
+		{
+			File folder = new File(downloadFolder);
+			
+			if(folder.exists())
+			{
+				FileUtils.forceDelete(folder);
+			}
+			
+			FileUtils.forceMkdir(folder);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to clean download folder: {}", downloadFolder, ex);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.config.IPlugin#handleError(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.config.ErrorDetails)
+	 */
 	@Override
 	public void handleError(AutomationContext context, ErrorDetails errorDetails)
 	{
@@ -207,6 +277,9 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		errorDetails.getExecutionLogger().logImage(null, "error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{
@@ -221,6 +294,9 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.config.IPlugin#close()
+	 */
 	@Override
 	public void close()
 	{
