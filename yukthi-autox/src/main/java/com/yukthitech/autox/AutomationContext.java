@@ -209,6 +209,14 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Clears all context attributes.
+	 */
+	public void clearAttributes()
+	{
+		nameToAttr.clear();
+	}
+	
+	/**
 	 * Fetches the attribute value with specified name.
 	 * @param name Name of attribute to fetch
 	 * @return Attribute value

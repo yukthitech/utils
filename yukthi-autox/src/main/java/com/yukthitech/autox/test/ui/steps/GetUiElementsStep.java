@@ -72,7 +72,8 @@ public class GetUiElementsStep extends AbstractUiStep
 			throw new InvalidArgumentException("No webelements found with locator: {}", getLocatorWithParent(locator));
 		}
 		
-		exeLogger.debug(this, "Setting context attribute '{}' with webelements matching locator: {}", getLocatorWithParent(locator));
+		exeLogger.debug(this, "Setting context attribute '{}' with webelements [count: {}] matching locator: {}", 
+				name, webElements.size(), getLocatorWithParent(locator));
 		context.setAttribute(name, webElements);
 		
 		return true;

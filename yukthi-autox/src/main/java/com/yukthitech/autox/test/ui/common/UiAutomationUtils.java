@@ -250,7 +250,7 @@ public class UiAutomationUtils
 				throw new InvalidArgumentException("Failed to find parent element with name: {}", parentName);
 			}
 			
-			if(parentObj instanceof WebElement)
+			if(!(parentObj instanceof WebElement))
 			{
 				throw new InvalidArgumentException("Non web-element found as parent with name: {}", parentName);
 			}
