@@ -310,6 +310,8 @@ public class IdeEngine
 			
 			ideReserveNodeHandler = new IdeReserveNodeHandler(context, context.getAppConfiguration(), this);
 			testSuiteParserHandler = new TestSuiteParserHandler(context, ideReserveNodeHandler);
+			
+			testSuiteParserHandler.setFileBeingParsed("input");
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while re-initializing the context", ex);
