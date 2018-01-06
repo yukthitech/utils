@@ -92,7 +92,7 @@ public class IdeEngine
 
 			if(CollectionUtils.isNotEmpty(ideState.getSteps()))
 			{
-				reexecute();
+				reexecute(true);
 			}
 			else
 			{
@@ -190,6 +190,11 @@ public class IdeEngine
 		finalHtml.append("</div></body></html>");
 		
 		listenerManager.get().sendOutput(finalHtml.toString());
+	}
+	
+	public boolean executeOnly(ExecutedStep step)
+	{
+		return executeOnly(new StepDetails(step.getText(), step.getRtfText()));
 	}
 	
 	private boolean executeOnly(StepDetails step)
@@ -311,10 +316,15 @@ public class IdeEngine
 		}
 	}
 	
+	public void reexecute()
+	{
+		reexecute(false);
+	}
+	
 	/**
 	 * Destroys current context and re-executes all the steps present in current state.
 	 */
-	public void reexecute()
+	public void reexecute(boolean skipExec)
 	{
 		if(context != null)
 		{
@@ -329,9 +339,12 @@ public class IdeEngine
 			return;
 		}
 		
-		for(ExecutedStep step : state.getSteps())
+		if(!skipExec)
 		{
-			executeOnly(new StepDetails(step.getText(), step.getRtfText()));
+			for(ExecutedStep step : state.getSteps())
+			{
+				executeOnly(step);
+			}
 		}
 		
 		listenerManager.get().stateLoaded();

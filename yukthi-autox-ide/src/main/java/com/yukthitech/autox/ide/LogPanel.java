@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
@@ -94,6 +95,8 @@ public class LogPanel extends JPanel
 		
 		mainLogPanel.updateUI();
 		scrollPane.updateUI();
+		
+		scrollPane.getViewport().setViewPosition(new Point(0, Integer.MAX_VALUE));
 	}
 	
 	private void addLog(String output)
@@ -118,6 +121,8 @@ public class LogPanel extends JPanel
 		//mainLogPanel.setPreferredSize( new Dimension( scrollPane.getSize().width - 10, mainLogPanel.getPreferredSize().height ) );
 		mainLogPanel.updateUI();
 		scrollPane.updateUI();
+		
+		scrollPane.getViewport().setViewPosition(new Point(0, Integer.MAX_VALUE));
 	}
 	
 	public void setIdeEngine(IdeEngine ideEngine)

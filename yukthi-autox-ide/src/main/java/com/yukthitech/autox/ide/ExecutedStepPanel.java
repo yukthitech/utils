@@ -42,8 +42,8 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	private static final long serialVersionUID = 1L;
 
 	private static RTFEditorKit rtfEditorKit = new RTFEditorKit();
-	
-	private static EditStepDialog editStepDialog; 
+
+	private static EditStepDialog editStepDialog;
 
 	private final JPanel panel = new JPanel();
 	private final JLabel lblTitle = new JLabel("Id: ");
@@ -55,7 +55,7 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 
 	private IdeEngine ideEngine;
 
-	private ActionStepPanel finalStepPanel;
+	private FinalStepPanel finalStepPanel;
 	private final JPopupMenu popupMenu = new JPopupMenu();
 	private final JMenuItem menuItem = new JMenuItem("Edit");
 	private final JMenuItem menuItem_1 = new JMenuItem("Move Up");
@@ -65,11 +65,12 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	private final JMenuItem menuItem_5 = new JMenuItem("Remove");
 
 	private boolean active = false;
+	private final JMenuItem mntmExecute = new JMenuItem("Execute");
 
 	/**
 	 * Create the panel.
 	 */
-	public ExecutedStepPanel(ExecutedStep step, IdeEngine ideEngine, ActionStepPanel finalStepPanel)
+	public ExecutedStepPanel(ExecutedStep step, IdeEngine ideEngine, FinalStepPanel finalStepPanel)
 	{
 		this.step = step;
 		this.ideEngine = ideEngine;
@@ -126,26 +127,33 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 				}
 			}
 		});
+
 		textPane.addFocusListener(new FocusAdapter()
 		{
 			@Override
 			public void focusGained(FocusEvent e)
 			{
+				if(finalStepPanel.getActivePanel() != null)
+				{
+					finalStepPanel.getActivePanel().clearActive();
+				}
+				
 				active = true;
 				textPane.setBackground(Color.yellow);
-			}
-
-			@Override
-			public void focusLost(FocusEvent e)
-			{
-				active = false;
-				textPane.setBackground(Color.white);
+				finalStepPanel.setActivePanel(ExecutedStepPanel.this);
 			}
 		});
+
 		textPane.setEditable(false);
 
 		scrollPane.setViewportView(textPane);
 		init();
+	}
+	
+	private void clearActive()
+	{
+		active = false;
+		textPane.setBackground(Color.white);
 	}
 
 	private void init()
@@ -160,7 +168,7 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 				edit();
 			}
 		});
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
 
 		popupMenu.add(menuItem);
 
@@ -214,6 +222,16 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 				delete();
 			}
 		});
+		mntmExecute.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				executeStep();
+			}
+		});
+		mntmExecute.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
+
+		popupMenu.add(mntmExecute);
 		menuItem_5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_MASK));
 
 		popupMenu.add(menuItem_5);
@@ -298,11 +316,11 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 		{
 			editStepDialog = new EditStepDialog();
 		}
-		
+
 		if(editStepDialog.display(step))
 		{
 			textPane.setText("");
-			
+
 			try
 			{
 				rtfEditorKit.read(new ByteArrayInputStream(step.getRtfText().getBytes()), textPane.getDocument(), 0);
@@ -314,8 +332,8 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 			}
 		}
 	}
-	
-	private void requestActiveFocus()
+
+	public void requestActiveFocus()
 	{
 		IdeUtils.invokeAfter(100, () -> {
 			textPane.requestFocus();
@@ -325,12 +343,12 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	private void moveUp()
 	{
 		int idx = ideEngine.getState().indexOf(step);
-		
+
 		if(idx <= 0)
 		{
 			return;
 		}
-		
+
 		ideEngine.getState().moveStep(step, idx - 1);
 		finalStepPanel.reorderSteps();
 		requestActiveFocus();
@@ -340,12 +358,12 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	{
 		int idx = ideEngine.getState().indexOf(step);
 		int maxIdx = ideEngine.getState().getStepCount() - 1;
-		
+
 		if(idx >= maxIdx)
 		{
 			return;
 		}
-		
+
 		ideEngine.getState().moveStep(step, idx + 1);
 		finalStepPanel.reorderSteps();
 		requestActiveFocus();
@@ -354,12 +372,12 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	private void moveToTop()
 	{
 		int idx = ideEngine.getState().indexOf(step);
-		
+
 		if(idx <= 0)
 		{
 			return;
 		}
-		
+
 		ideEngine.getState().moveStep(step, 0);
 		finalStepPanel.reorderSteps();
 		requestActiveFocus();
@@ -369,22 +387,22 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	{
 		int idx = ideEngine.getState().indexOf(step);
 		int maxIdx = ideEngine.getState().getStepCount() - 1;
-		
+
 		if(idx >= maxIdx)
 		{
 			return;
 		}
-		
+
 		ideEngine.getState().moveStep(step, maxIdx);
 		finalStepPanel.reorderSteps();
 		requestActiveFocus();
 	}
-	
+
 	private void moveFocus(int val)
 	{
 		Component components[] = super.getParent().getComponents();
 		int index = -1;
-		
+
 		for(int i = 0; i < components.length; i++)
 		{
 			if(components[i] == this)
@@ -393,14 +411,14 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 				break;
 			}
 		}
-		
+
 		index += val;
-		
+
 		if(index < 0 || index >= components.length)
 		{
 			return;
 		}
-		
+
 		((ExecutedStepPanel) components[index]).requestActiveFocus();
 	}
 
@@ -408,6 +426,12 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	{
 		if(!e.isControlDown())
 		{
+			if(e.getKeyCode() == KeyEvent.VK_F2)
+			{
+				edit();
+				return;
+			}
+
 			if(e.getKeyCode() == KeyEvent.VK_UP)
 			{
 				moveFocus(-1);
@@ -434,25 +458,25 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 			moveDown();
 			return;
 		}
-		
+
 		if(e.getKeyCode() == KeyEvent.VK_PAGE_UP)
 		{
 			moveToTop();
 			return;
 		}
-		
+
 		if(e.getKeyCode() == KeyEvent.VK_PAGE_DOWN)
 		{
 			moveToBottom();
 			return;
 		}
-		
+
 		if(e.getKeyCode() == KeyEvent.VK_ENTER)
 		{
-			edit();
+			executeStep();
 			return;
 		}
-		
+
 		if(e.getKeyCode() == KeyEvent.VK_DELETE)
 		{
 			delete();
@@ -464,5 +488,16 @@ public class ExecutedStepPanel extends JPanel implements Comparable<ExecutedStep
 	public int compareTo(ExecutedStepPanel o)
 	{
 		return ideEngine.getState().indexOf(step) - ideEngine.getState().indexOf(o.step);
+	}
+
+	public ExecutedStep getStep()
+	{
+		return step;
+	}
+
+	private void executeStep()
+	{
+		ideEngine.executeOnly(step);
+		moveFocus(1);
 	}
 }

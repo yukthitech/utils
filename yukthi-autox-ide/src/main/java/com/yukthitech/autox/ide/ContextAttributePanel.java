@@ -17,17 +17,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.ide.engine.IdeEngine;
 import com.yukthitech.autox.ide.engine.IdeEngineListener;
 import com.yukthitech.autox.ide.model.ExecutedStep;
+import javax.swing.JButton;
+import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class ContextAttributePanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static ObjectMapper objectMapper = new ObjectMapper();
-	
+
 	private static class JsonCellRenderer extends RSyntaxTextArea implements TableCellRenderer
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		public JsonCellRenderer()
 		{
 			setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
@@ -38,7 +42,7 @@ public class ContextAttributePanel extends JPanel
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 		{
 			String strValue = null;
-			
+
 			if(value == null)
 			{
 				strValue = "";
@@ -53,12 +57,12 @@ public class ContextAttributePanel extends JPanel
 					strValue = value.toString();
 				}
 			}
-			
+
 			if(strValue.length() > 200)
 			{
 				strValue = strValue.substring(0, 200) + "...";
 			}
-			
+
 			super.setText(strValue);
 			return this;
 		}
@@ -70,7 +74,9 @@ public class ContextAttributePanel extends JPanel
 	private DefaultTableModel defaultTableModel = new DefaultTableModel(new String[] { "Name", "Value" }, 1);
 
 	private IdeEngine ideEngine;
-	
+	private final JPanel panel = new JPanel();
+	private final JButton btnRefresh = new JButton("Refresh");
+
 	/**
 	 * Create the panel.
 	 */
@@ -81,18 +87,31 @@ public class ContextAttributePanel extends JPanel
 		add(scrollPane, BorderLayout.CENTER);
 
 		table.setModel(defaultTableModel);
-		
+
 		table.getColumnModel().getColumn(0).setPreferredWidth(150);
-		
+
 		table.getColumnModel().getColumn(1).setCellRenderer(new JsonCellRenderer());
 
 		scrollPane.setViewportView(table);
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+
+		add(panel, BorderLayout.NORTH);
+		btnRefresh.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				refreshContextAttributes();
+			}
+		});
+
+		panel.add(btnRefresh);
 	}
-	
+
 	public void setIdeEngine(IdeEngine ideEngine)
 	{
 		this.ideEngine = ideEngine;
-		
+
 		this.ideEngine.addIdeEngineListener(new IdeEngineListener()
 		{
 			@Override
@@ -100,7 +119,7 @@ public class ContextAttributePanel extends JPanel
 			{
 				refreshContextAttributes();
 			}
-			
+
 			@Override
 			public void stateLoaded()
 			{
@@ -108,21 +127,21 @@ public class ContextAttributePanel extends JPanel
 			}
 		});
 	}
-	
+
 	private void refreshContextAttributes()
 	{
-		//clean current rows
+		// clean current rows
 		while(defaultTableModel.getRowCount() > 0)
 		{
 			defaultTableModel.removeRow(0);
 		}
-		
-		//add new ones
+
+		// add new ones
 		TreeMap<String, Object> attr = new TreeMap<>(ideEngine.getContext().getAttr());
-		
+
 		for(String name : attr.keySet())
 		{
-			defaultTableModel.addRow(new Object[] { name, attr.get(name) } );
+			defaultTableModel.addRow(new Object[] { name, attr.get(name) });
 		}
 	}
 

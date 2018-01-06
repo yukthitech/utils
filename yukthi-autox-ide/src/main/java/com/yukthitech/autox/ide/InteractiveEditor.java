@@ -38,7 +38,7 @@ public class InteractiveEditor extends JFrame
 	private final JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
 	private final InputPanel ideInputPanel = new InputPanel();
 	private final LogPanel stepLogPanel = new LogPanel();
-	private final ActionStepPanel finalStepPanel = new ActionStepPanel();
+	private final FinalStepPanel finalStepPanel = new FinalStepPanel();
 
 	private IdeEngine ideEngine = new IdeEngine();
 
