@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -145,10 +146,16 @@ public class ActionPlanExecutor
 	 */
 	public boolean executeActionPlan(InputStream is, Map<String, Object> initContextParams)
 	{
+		//clean current context
+		context.clearStepGroups();
+		context.clearAttributes();
+		
 		//load the action plan
-		ActionPlan actionPlan = new ActionPlan();
-		XMLBeanParser.parse(is, actionPlan, testSuiteParserHandler);
+		ActionPlanFile actionPlanFile = new ActionPlanFile(context);
+		XMLBeanParser.parse(is, actionPlanFile, testSuiteParserHandler);
 
+		ActionPlan actionPlan = actionPlanFile.getActionPlan();
+		
 		//create object required for execution
 		ExecutionLogger exeLogger = new ExecutionLogger("Ide", "Ide");
 		TestCase dummy = new TestCase();
@@ -159,8 +166,6 @@ public class ActionPlanExecutor
 		testSuite.addTestCase(dummy);
 		
 		//populate init context params
-		context.clearAttributes();
-		
 		for(String name : initContextParams.keySet())
 		{
 			context.setAttribute(name, initContextParams.get(name));
@@ -197,6 +202,17 @@ public class ActionPlanExecutor
 		FullExecutionDetails fullExecutionDetails = new FullExecutionDetails();
 		fullExecutionDetails.setReportName(context.getAppConfiguration().getReportName());
 		fullExecutionDetails.addTestResult(testSuite, testCaseResult);
+		
+		if(result)
+		{
+			fullExecutionDetails.testSuiteCompleted(testSuite);
+		}
+		else
+		{
+			fullExecutionDetails.testSuiteFailed(testSuite, "Failed");
+		}
+		
+		reportGenerator.createLogFiles(context, testCaseResult, "action-plan", Collections.emptyMap(), "Action output");
 
 		reportGenerator.generateReports(new File(outputFolderPath), fullExecutionDetails, context);
 		return result;

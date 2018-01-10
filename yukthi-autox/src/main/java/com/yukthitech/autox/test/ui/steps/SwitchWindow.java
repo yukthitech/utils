@@ -37,7 +37,7 @@ public class SwitchWindow extends AbstractStep
 		if(StringUtils.isBlank(locator))
 		{
 			exeLogger.trace(this, "As no locator is specified switching to main window");
-			locator = driver.getWindowHandle();
+			locator = seleniumConfiguration.getMainWindowHandle();
 		}
 
 		driver.switchTo().window(locator);

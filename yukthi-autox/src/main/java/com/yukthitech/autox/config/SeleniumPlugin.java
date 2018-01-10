@@ -53,6 +53,11 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	@Param(description = "Base url to be used for ui automation", required = true)
 	private String baseUrl;
 	
+	/**
+	 * Main window handler.
+	 */
+	private String mainWindowHandle;
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.config.IPlugin#getArgumentBeanType()
 	 */
@@ -180,10 +185,27 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 				logger.debug("Taking driver to default page: " + driverConfig.getDefaultPage());
 				activeDriver.get(driverConfig.getDefaultPage());
 			}
+			
+			if(activeDriver.getWindowHandle() != null)
+			{
+				mainWindowHandle = activeDriver.getWindowHandle();
+			}
+			
+			logger.debug("Got main handle as: {}", mainWindowHandle);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
 		}
+	}
+	
+	/**
+	 * Gets the main window handler.
+	 *
+	 * @return the main window handler
+	 */
+	public String getMainWindowHandle()
+	{
+		return mainWindowHandle;
 	}
 	
 	/**

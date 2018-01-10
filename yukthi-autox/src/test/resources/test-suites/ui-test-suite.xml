@@ -88,6 +88,29 @@
 			<ccg:validateFileExists path="${attr.filePath}"/>
 		</testCase>
 
+		<testCase name="testOpenWindow">
+			<description>Validates download functionality</description>
+			
+			<ccg:gotoPage uri="/form.html" />
+			<ccg:ui-open-window url="/index.html" name="Index"/>
+			<ccg:isVisible locator="id: button" name="visibFlag1"/>
+			
+			<ccg:sleep time="5000"/>
+			
+			<!-- Ensure switch windows is working fine -->
+			<ccg:ui-switch-window />
+			<ccg:isVisible locator="id: downloadLink" name="visibFlag1"/>
+			<ccg:validateContextParam expression="attr.visibFlag1" value="true"/>
+			<ccg:sleep time="5000"/>
+			
+			<ccg:ui-switch-window locator="Index"/>
+			<ccg:isVisible locator="id: button" name="visibFlag1"/>
+			<ccg:ui-close-window />
+			<ccg:sleep time="5000"/>
+						
+			<ccg:validateContextParam expression="attr.visibFlag1" value="true"/>
+		</testCase>
+
 		<cleanup>
 			<ccg:quitSession/>
 		</cleanup>

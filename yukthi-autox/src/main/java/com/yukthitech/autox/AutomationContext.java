@@ -435,6 +435,14 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Clears step groups.
+	 */
+	public void clearStepGroups()
+	{
+		nameToGroup.clear();
+	}
+	
+	/**
 	 * Adds the specified step groups.
 	 *
 	 * @param stepGroups step groups to add

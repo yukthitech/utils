@@ -9,6 +9,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.utils.ConvertUtils;
 
 /**
  * Changes the property value of specified context bean with specified value.
@@ -37,6 +38,12 @@ public class SetBeanProperty extends AbstractStep
 	 */
 	@Param(description = "Value of the property to set. Default: null", required = false, sourceType = SourceType.OBJECT)
 	private Object value;
+	
+	/**
+	 * String value of the property to set. Default: null.
+	 */
+	@Param(description = "String value of the property to set. Default: null", required = false)
+	private String valueStr;
 
 	/**
 	 * Sets the name of attribute to set.
@@ -67,6 +74,16 @@ public class SetBeanProperty extends AbstractStep
 	{
 		this.value = valueObject;
 	}
+	
+	/**
+	 * Sets the string value of the property to set. Default: null.
+	 *
+	 * @param valueStr the new string value of the property to set
+	 */
+	public void setValueStr(String valueStr)
+	{
+		this.valueStr = valueStr;
+	}
 
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
@@ -81,8 +98,19 @@ public class SetBeanProperty extends AbstractStep
 
 		exeLogger.debug(this, "Setting property '{}' of bean '{}' as value: {}", property, this.beanAttr, value);
 		
-		Object value = AutomationUtils.parseObjectSource(context, exeLogger, this.value, null);
-		PropertyUtils.setProperty(bean, property, value);
+		if(this.value == null)
+		{
+			Object value = AutomationUtils.parseObjectSource(context, exeLogger, this.value, null);
+			PropertyUtils.setProperty(bean, property, value);
+		}
+		
+		if(this.valueStr == null)
+		{
+			Class<?> valueType = PropertyUtils.getPropertyType(bean, property);
+			Object value = ConvertUtils.convert(valueStr, valueType);
+			
+			PropertyUtils.setProperty(bean, property, value);
+		}
 		
 		return true;
 	}

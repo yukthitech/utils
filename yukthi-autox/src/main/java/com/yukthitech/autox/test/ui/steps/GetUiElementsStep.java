@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.WebElement;
@@ -68,8 +69,10 @@ public class GetUiElementsStep extends AbstractUiStep
 		
 		if(webElements == null || webElements.isEmpty())
 		{
-			exeLogger.error(this, "No webelements found with locator: {}", getLocatorWithParent(locator));
-			throw new InvalidArgumentException("No webelements found with locator: {}", getLocatorWithParent(locator));
+			exeLogger.debug(this, "No webelements found with locator: {}", getLocatorWithParent(locator));
+			context.setAttribute(name, new ArrayList<>());
+			
+			return true;
 		}
 		
 		exeLogger.debug(this, "Setting context attribute '{}' with webelements [count: {}] matching locator: {}", 

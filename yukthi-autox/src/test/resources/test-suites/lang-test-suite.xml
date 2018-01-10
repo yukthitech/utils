@@ -295,5 +295,18 @@
 
 			<ccg:validateContextParam expression="attr.result" value="24"/>
 		</testCase>
+		
+		<testCase name="testExecute">
+			<description>Tests execute step</description>
+			
+			<ccg:set name="checkVar" value="1" type="java.lang.Integer"/>
+			
+			<ccg:step-group-ref name="factorialGroup1">
+				<parameter name="value" value="4" type="int"/>
+			</ccg:step-group-ref>
+
+			<ccg:validateContextParam expression="attr.result" value="24"/>
+		</testCase>
+		
 	</testSuite>
 </testData>
