@@ -96,16 +96,18 @@ public class SetBeanProperty extends AbstractStep
 			return true;
 		}
 
-		exeLogger.debug(this, "Setting property '{}' of bean '{}' as value: {}", property, this.beanAttr, value);
-		
-		if(this.value == null)
+		if(this.value != null)
 		{
+			exeLogger.debug(this, "Setting property '{}' of bean '{}' as value: {}", property, this.beanAttr, value);
 			Object value = AutomationUtils.parseObjectSource(context, exeLogger, this.value, null);
 			PropertyUtils.setProperty(bean, property, value);
+			return true;
 		}
 		
-		if(this.valueStr == null)
+		if(this.valueStr != null)
 		{
+			exeLogger.debug(this, "Setting property '{}' of bean '{}' as value: {}", property, this.beanAttr, valueStr);
+
 			Class<?> valueType = PropertyUtils.getPropertyType(bean, property);
 			Object value = ConvertUtils.convert(valueStr, valueType);
 			

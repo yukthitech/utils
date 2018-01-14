@@ -88,6 +88,35 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		
 		return ConvertUtils.convert(argument, requiredType);
 	}
+	
+	/**
+	 * Fetches the types of objects specified.
+	 * @param obj objects whose types needs to be fetched
+	 * @return types of specified objects
+	 */
+	private Class<?>[] getTypes(Object obj[])
+	{
+		if(obj == null || obj.length == 0)
+		{
+			return new Class<?>[0];
+		}
+		
+		Class<?> types[] = new Class<?>[obj.length];
+		
+		
+		for(int i = 0; i < obj.length; i++)
+		{
+			if(obj[i] == null)
+			{
+				types[i] = null;
+				continue;
+			}
+			
+			types[i] = obj[i].getClass();
+		}
+		
+		return types;
+	}
 
 	/* (non-Javadoc)
 	 * @see freemarker.template.TemplateMethodModelEx#exec(java.util.List)
@@ -153,8 +182,11 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 			return freeMarkerMethod.invoke(null, methodArgs);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while invoking method '{}'. Arguments used: {}", 
-					freeMarkerMethod.getName(), Arrays.toString( methodArgs ), ex);
+			throw new InvalidStateException("An error occurred while invoking method '{}'. "
+					+ "\nJava Method: {}"
+					+ "\nArguments used: {}"
+					+ "\nArguments type: {}",
+					freeMarkerMethod.getName(), freeMarkerMethod, Arrays.toString( methodArgs ), Arrays.toString( getTypes(methodArgs) ), ex);
 		}
 	}
 }

@@ -124,8 +124,8 @@ public class DefaultMethods
 	 * @param value value to covert
 	 * @return result string.
 	 */
-	@FreeMarkerMethod
-	public static String toString(Object value)
+	@FreeMarkerMethod("toText")
+	public static String toText(Object value)
 	{
 		if(value == null)
 		{

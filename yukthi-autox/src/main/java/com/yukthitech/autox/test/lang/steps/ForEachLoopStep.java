@@ -52,6 +52,12 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	 */
 	@Param(description = "Loop variable that will be used to set loop iteration object on context. Default: loopVar", required = false)
 	private String loopVar = "loopVar";
+	
+	/**
+	 * Loop index variable that will be used to set loop iteration index on context. Default: loopIdxVar.
+	 */
+	@Param(description = "Loop index variable that will be used to set loop iteration index on context. Default: loopIdxVar", required = false)
+	private String loopIdxVar = "loopIdxVar";
 
 	/**
 	 * Sets the expression which will be evaluated to collection or map or String.
@@ -95,6 +101,16 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	public void setLoopVar(String loopVar)
 	{
 		this.loopVar = loopVar;
+	}
+	
+	/**
+	 * Sets the loop index variable that will be used to set loop iteration index on context. Default: loopIdxVar.
+	 *
+	 * @param loopIdxVar the new loop index variable that will be used to set loop iteration index on context
+	 */
+	public void setLoopIdxVar(String loopIdxVar)
+	{
+		this.loopIdxVar = loopIdxVar;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -140,9 +156,12 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			throw new InvalidStateException("Expression {} evaluated to non-string, non-collection, non-map. Value: {}", expression, exprValue);
 		}
 		
+		int idx = 0;
+		
 		for(Object val : collection)
 		{
 			context.setAttribute(loopVar, val);
+			context.setAttribute(loopIdxVar, idx);
 			
 			try
 			{
@@ -154,6 +173,8 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			{
 				continue;
 			}
+			
+			idx++;
 		}
 		
 		return true;

@@ -38,6 +38,12 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	private String pathName;
 	
 	/**
+	 * Time to wait for download to complete in millis. Default: 20000.
+	 */
+	@Param(description = "Time to wait for download to complete in millis. Default: 30000")
+	private long downloadWaitTime = 30000;
+	
+	/**
 	 * Sets the attribute name which would be set with the downloaded file path.
 	 *
 	 * @param pathName the new attribute name which would be set with the downloaded file path
@@ -45,6 +51,16 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	public void setPathName(String pathName)
 	{
 		this.pathName = pathName;
+	}
+	
+	/**
+	 * Sets the time to wait for download to complete in millis. Default: 20000.
+	 *
+	 * @param downloadWaitTime the new time to wait for download to complete in millis
+	 */
+	public void setDownloadWaitTime(long downloadWaitTime)
+	{
+		this.downloadWaitTime = downloadWaitTime;
 	}
 	
 	@Override
@@ -59,7 +75,7 @@ public class ClickAndDownloadStep extends AbstractUiStep
 		
 		plugin.cleanDownloadFolder();
 		
-		exeLogger.trace(this, "Clicking the element specified by locator: {}", getLocatorWithParent(locator));
+		exeLogger.trace(this, "For download clicking the element specified by locator: {}", getLocatorWithParent(locator));
 
 		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
@@ -90,6 +106,12 @@ public class ClickAndDownloadStep extends AbstractUiStep
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 			
+			try
+			{
+				Thread.sleep(downloadWaitTime);
+			}catch(Exception ex)
+			{}
+			
 			File downloadFolder = new File(plugin.getDownloadFolder());
 			File files[] = downloadFolder.listFiles();
 			
@@ -105,7 +127,10 @@ public class ClickAndDownloadStep extends AbstractUiStep
 			
 			try
 			{
-				context.setAttribute(pathName, files[0].getCanonicalPath());
+				String path = files[0].getCanonicalPath();
+				exeLogger.trace(this, "Setting downloaded file path '{}' on context with name: {}", path, pathName);
+				
+				context.setAttribute(pathName, path);
 			}catch(IOException ex)
 			{
 				throw new InvalidStateException("An error occurred while fetching cannoical path of downloaded file: " + files[0].getPath(), ex);
