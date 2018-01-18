@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -109,6 +110,25 @@ public class ActionPlanExecutor
 		}
 	}
 	
+	private String getName(String path)
+	{
+		int slashIdx = path.lastIndexOf("/");
+		
+		if(slashIdx >= 0)
+		{
+			path = path.substring(slashIdx + 1);
+		}
+		
+		int dotIdx = path.lastIndexOf(".");
+		
+		if(dotIdx > 0)
+		{
+			path = path.substring(0, dotIdx);
+		}
+		
+		return path;
+	}
+	
 	/**
 	 * Executes specified action plan xml file.
 	 * @param actionFile
@@ -118,7 +138,7 @@ public class ActionPlanExecutor
 	public boolean executeActionPlan(File actionFile, Map<String, Object> initContextParams) throws IOException
 	{
 		FileInputStream fis = new FileInputStream(actionFile);
-		boolean res = executeActionPlan(fis, initContextParams);
+		boolean res = executeActionPlan(getName(actionFile.getName()), fis, initContextParams);
 		fis.close();
 		
 		return res;
@@ -126,14 +146,14 @@ public class ActionPlanExecutor
 
 	/**
 	 * Executes specified action plan resource file.
-	 * @param reosurce action resource to execute
+	 * @param resource action resource to execute
 	 * @param initContextParams Initial context params to be populated on context.
 	 * @throws IOException
 	 */
-	public boolean executeActionPlanResource(String reosurce, Map<String, Object> initContextParams) throws IOException
+	public boolean executeActionPlanResource(String resource, Map<String, Object> initContextParams) throws IOException
 	{
-		InputStream is = ActionPlanExecutor.class.getResourceAsStream(reosurce);
-		boolean res = executeActionPlan(is, initContextParams);
+		InputStream is = ActionPlanExecutor.class.getResourceAsStream(resource);
+		boolean res = executeActionPlan(getName(resource), is, initContextParams);
 		is.close();
 		
 		return res;
@@ -141,11 +161,24 @@ public class ActionPlanExecutor
 
 	/**
 	 * Executes specified action plan (obtained from specified input stream).
+	 * @param planName under which reports would be generated
 	 * @param is action input stream to execute.
 	 * @param initContextParams Initial context params to be populated on context.
 	 */
-	public boolean executeActionPlan(InputStream is, Map<String, Object> initContextParams)
+	public boolean executeActionPlan(String planName, InputStream is, Map<String, Object> initContextParams)
 	{
+		File reportFolder = new File(outputFolderPath, planName);
+		
+		try
+		{
+			FileUtils.forceMkdir(reportFolder);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to create report folder: {}", reportFolder.getPath());
+		}
+		
+		context.setReportFolder(reportFolder);
+		
 		//clean current context
 		context.clearStepGroups();
 		context.clearAttributes();
@@ -214,7 +247,7 @@ public class ActionPlanExecutor
 		
 		reportGenerator.createLogFiles(context, testCaseResult, "action-plan", Collections.emptyMap(), "Action output");
 
-		reportGenerator.generateReports(new File(outputFolderPath), fullExecutionDetails, context);
+		reportGenerator.generateReports(reportFolder, fullExecutionDetails, context);
 		return result;
 	}
 }
