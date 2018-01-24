@@ -81,7 +81,13 @@ public class LoadCookiesStep extends AbstractUiStep
 
 		for(Cookie cookie : cookies)
 		{
-			driver.manage().addCookie(cookie);
+			try
+			{
+				driver.manage().addCookie(cookie);
+			}catch(Exception ex)
+			{
+				exeLogger.debug(this, "Failed to load cookie - {}\nError: {}", cookie, "" + ex);
+			}
 		}
 		
 		return true;

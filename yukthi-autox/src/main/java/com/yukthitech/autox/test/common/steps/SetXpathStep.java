@@ -1,6 +1,7 @@
 package com.yukthitech.autox.test.common.steps;
 
 import org.apache.commons.jxpath.JXPathContext;
+import org.apache.commons.jxpath.JXPathNotFoundException;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -109,7 +110,16 @@ public class SetXpathStep extends AbstractStep
 		
 		exeLogger.debug(this, "Fetching xpath '{}' value from specified source", valueExpression);
 		
-		Object value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
+		Object value = null;
+		
+		try
+		{
+			value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
+		}catch(JXPathNotFoundException ex)
+		{
+			//if specified xpath is not found
+			value = null;
+		}
 
 		exeLogger.debug(this, "Setting context attribute '{}' as value: {}", name, value);
 

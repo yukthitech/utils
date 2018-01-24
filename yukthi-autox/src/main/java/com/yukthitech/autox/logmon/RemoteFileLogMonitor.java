@@ -9,11 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpProgressMonitor;
-import com.jcraft.jsch.UserInfo;
+import com.yukthitech.autox.test.ssh.steps.RemoteSession;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -27,99 +24,17 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	/** The logger. */
 	private static Logger logger = LogManager.getLogger(RemoteFileLogMonitor.class);
 	
-	private class RemoteUserInfo implements UserInfo
-	{
-		@Override
-		public String getPassphrase()
-		{
-			return null;
-		}
-
-		@Override
-		public String getPassword()
-		{
-			return password;
-		}
-
-		@Override
-		public boolean promptPassphrase(String arg0)
-		{
-			return true;
-		}
-
-		@Override
-		public boolean promptPassword(String arg0)
-		{
-			return true;
-		}
-
-		@Override
-		public boolean promptYesNo(String arg0)
-		{
-			return true;
-		}
-
-		@Override
-		public void showMessage(String arg0)
-		{
-		}
-		
-	}
-	
-	static
-	{
-		JSch.setConfig("StrictHostKeyChecking", "no");
-	}
-	
 	/**
 	 * Path of file to monitor.
 	 */
 	private String remoteFilePath;
 	
 	/**
-	 * Host on which remote file is located.
-	 */
-	private String host;
-	
-	/**
-	 * SSH port, defaults to 22.
-	 */
-	private int port = 22;
-	
-	/**
-	 * User name to be used.
-	 */
-	private String user;
-	
-	/**
-	 * Password to be used. Either of password or privateKeyPath is mandatory.
-	 */
-	private String password;
-	
-	/**
-	 * Private key path. Either of password or privateKeyPath is mandatory.
-	 */
-	private String privateKeyPath;
-	
-	/**
 	 * Internal field to track start position at start of monitoring.
 	 */
 	private long startPosition = -1;
 	
-	/**
-	 * Jsch interaction instance.
-	 */
-	private JSch jsch=new JSch();
-	
-	/**
-	 * Internal variable, used to maintain sftp connection.
-	 */
-	private ChannelSftp sftp;
-	
-	/**
-	 * Internal variable, used to maintain session.
-	 */
-	private Session session;
+	private RemoteSession remoteSession = new RemoteSession();
 	
 	public RemoteFileLogMonitor()
 	{
@@ -142,7 +57,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setHost(String host)
 	{
-		this.host = host;
+		remoteSession.setHost(host);;
 	}
 
 	/**
@@ -152,7 +67,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setPort(int port)
 	{
-		this.port = port;
+		remoteSession.setPort(port);
 	}
 
 	/**
@@ -162,7 +77,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setUser(String user)
 	{
-		this.user = user;
+		remoteSession.setUser(user);
 	}
 
 	/**
@@ -172,7 +87,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setPassword(String password)
 	{
-		this.password = password;
+		remoteSession.setPassword(password);
 	}
 
 	/**
@@ -182,63 +97,8 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setPrivateKeyPath(String privateKeyPath)
 	{
-		this.privateKeyPath = privateKeyPath;
+		remoteSession.setPrivateKeyPath(privateKeyPath);
 	}
-	
-	/**
-	 * Creates new session.
-	 * @return new session
-	 */
-	private Session getSession() throws JSchException
-	{
-		if(session != null && session.isConnected())
-		{
-			return session;
-		}
-		
-		if(StringUtils.isNoneBlank(password))
-		{
-			logger.debug("Starting ssh session with remote host using password - {}:{}", host, port);
-			
-			session = jsch.getSession(user, host, port);
-			session.setUserInfo(new RemoteUserInfo());
-		}
-		else
-		{
-			logger.debug("Starting ssh session with remote host using private key - {}:{}", host, port);
-			
-			jsch.addIdentity(privateKeyPath);
-			session = jsch.getSession(user, host, port);
-		}
-		
-		session.connect();
-		return session;
-	}
-	
-	/**
-	 * Opens a sftp channel and returns the same. If connection was already open, this 
-	 * method returns old connection.
-	 * @return sftp channel
-	 * @throws JSchException 
-	 */
-	private ChannelSftp getChannel() throws JSchException
-	{
-		if(sftp != null && sftp.isConnected())
-		{
-			return sftp;
-		}
-		
-		Session session = getSession();
-		
-		logger.debug("Establishing sftp connection to remote host: {}", host);
-
-		ChannelSftp sftp = (ChannelSftp ) session.openChannel("sftp");
-		sftp.connect();
-		
-		this.sftp = sftp;
-		return sftp;
-	}
-	
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.automation.logmon.ILogMonitor#startMonitoring()
@@ -249,7 +109,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	{
 		try
 		{
-			ChannelSftp sftp = getChannel();
+			ChannelSftp sftp = remoteSession.getChannelSftp();
 			
 			logger.debug("Getting position of remote file: {}", remoteFilePath);
 			
@@ -279,7 +139,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	{
 		try
 		{
-			ChannelSftp sftp = getChannel();
+			ChannelSftp sftp = remoteSession.getChannelSftp();
 			
 			logger.debug("Getting content from remote file: {}", remoteFilePath);
 			
@@ -368,26 +228,11 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	public void validate() throws ValidateException
 	{
 		super.validate();
-		
-		if(StringUtils.isBlank(host))
-		{
-			throw new ValidateException("Host can not be null or empty");
-		}
-		
-		if(StringUtils.isBlank(user))
-		{
-			throw new ValidateException("User can not be null or empty");
-		}
+		remoteSession.validate();
 		
 		if(StringUtils.isBlank(remoteFilePath))
 		{
 			throw new ValidateException("Remote file path can not be null or empty");
 		}
-		
-		if(StringUtils.isBlank(password) && StringUtils.isBlank(privateKeyPath))
-		{
-			throw new ValidateException("Either of password or privateKeyPath is mandatory");
-		}
 	}
-
 }

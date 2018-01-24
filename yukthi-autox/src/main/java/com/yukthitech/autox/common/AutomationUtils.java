@@ -557,7 +557,7 @@ public class AutomationUtils
 			return value;
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("An exception occurred while parsing json resource: " + sourceStr, ex);
+			throw new IllegalStateException("An exception occurred while parsing json resource: " + resource.toText(), ex);
 		}
 	}
 	

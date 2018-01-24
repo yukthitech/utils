@@ -2,8 +2,10 @@ package com.yukthitech.autox.test.ui.common;
 
 import org.openqa.selenium.WebElement;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Free marker methdos related to ui functionality.
@@ -11,6 +13,11 @@ import com.yukthitech.autox.AutomationContext;
  */
 public class UiFreeMarkerMethods
 {
+	/**
+	 * Used to convert strings into json strings.
+	 */
+	private static ObjectMapper objectMapper = new ObjectMapper();
+	
 	/**
 	 * Fetches value of specified locator.
 	 * @param locator locator whose value needs to be fetched
@@ -91,5 +98,17 @@ public class UiFreeMarkerMethods
 
 		WebElement element = UiAutomationUtils.findElement(context, parent, locator);
 		return (element != null);
+	}
+
+	@FreeMarkerMethod("jsonStr")
+	public static String getValue(String str)
+	{
+		try
+		{
+			return objectMapper.writeValueAsString(str);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while converting intput string into json string: {}", str);
+		}
 	}
 }
