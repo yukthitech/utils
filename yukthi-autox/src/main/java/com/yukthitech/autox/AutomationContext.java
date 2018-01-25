@@ -116,6 +116,8 @@ public class AutomationContext
 	 * Report folder where reports should be generated.
 	 */
 	private File reportFolder;
+	
+	private Map<String, Object> internalContextAtt = new HashMap<>();
 
 	/**
 	 * Constructor.
@@ -209,11 +211,22 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Sets internal context attribute which will be accessible within the java code.
+	 * @param name name of the attribute
+	 * @param value value to set
+	 */
+	public void setInternalAttribute(String name, Object value)
+	{
+		internalContextAtt.put(name, value);
+	}
+	
+	/**
 	 * Clears all context attributes.
 	 */
 	public void clearAttributes()
 	{
 		nameToAttr.clear();
+		internalContextAtt.clear();
 	}
 	
 	/**
@@ -224,6 +237,16 @@ public class AutomationContext
 	public Object getAttribute(String name)
 	{
 		return nameToAttr.get(name);
+	}
+	
+	/**
+	 * Fetches internal attribute value with specified name.
+	 * @param name Name of attribute to fetch
+	 * @return Attribute value
+	 */
+	public Object getInternalAttribute(String name)
+	{
+		return internalContextAtt.get(name);
 	}
 	
 	/**

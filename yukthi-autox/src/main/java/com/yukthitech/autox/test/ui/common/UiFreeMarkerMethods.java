@@ -103,6 +103,30 @@ public class UiFreeMarkerMethods
 	@FreeMarkerMethod("jsonStr")
 	public static String getValue(String str)
 	{
+		if(str == null)
+		{
+			return "null";
+		}
+		
+		//remove special charaters if any
+		char chArr[] = str.toCharArray();
+		
+		for(int i = 0; i < chArr.length; i++)
+		{
+			if(Character.isWhitespace(chArr[i]))
+			{
+				continue;
+			}
+			
+			if(chArr[i] >= 33 && chArr[i] <= 126)
+			{
+				chArr[i] = ' ';
+			}
+		}
+		
+		str = new String(chArr);
+		str = str.replaceAll("\\ +", " ");
+		
 		try
 		{
 			return objectMapper.writeValueAsString(str);

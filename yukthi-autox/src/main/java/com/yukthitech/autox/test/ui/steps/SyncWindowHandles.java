@@ -25,12 +25,13 @@ public class SyncWindowHandles extends AbstractStep
 	{
 		exeLogger.trace(this, "Synchronizig window handles");
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPlugin seleniumPlugin = context.getPlugin(SeleniumPlugin.class);
+		WebDriver driver = seleniumPlugin.getWebDriver();
 
 		Set<String> windowHandles = driver.getWindowHandles();
 		
-		exeLogger.debug(this, "Got window handles as: ", windowHandles);
+		exeLogger.debug(this, "Got window handles as: {}", windowHandles);
+		seleniumPlugin.setWindowHandles(windowHandles);
 		
 		return true;
 	}
