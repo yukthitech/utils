@@ -2,6 +2,7 @@ package com.yukthitech.test.persitence.entity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.yukthitech.test.persitence.queries.DynamicEmpSearchResult;
 import com.yukthitech.test.persitence.queries.EmpSearchQuery;
@@ -37,6 +38,8 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	public Employee findEmpByEmail(@Condition("emailId") String mail);
 
 	public Employee findEmpByEmailIgnoreCase(@Condition(value = "emailId", ignoreCase = true) String mail);
+	
+	public List<Employee> findEmpWithEmails(@Condition(value = "emailId", ignoreCase = true, op = Operator.IN) Set<String> mails);
 	
 	public Employee findByEmailPattern(@Condition(value = "emailId", ignoreCase = true, op = Operator.LIKE) String mail);
 

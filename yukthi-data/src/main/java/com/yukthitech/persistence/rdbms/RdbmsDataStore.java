@@ -336,6 +336,45 @@ public class RdbmsDataStore implements IDataStore
 			closeResources(null, statement);
 		}
 	}
+	
+	/**
+	 * Adds the parameters from specified condition to specified prepared statement and params.
+	 * @param conditions conditions whose params needs to be added
+	 * @param params collection to collect params set on statement.
+	 * @param pstmt statement to be executed
+	 * @param index starting index to be used
+	 * @return end index that can be used to add more params
+	 */
+	private int addConditionsParams(List<QueryCondition> conditions, List<Object> params, PreparedStatement pstmt, int index) throws SQLException
+	{
+		if(conditions == null)
+		{
+			return index;
+		}
+		
+		for(QueryCondition condition: conditions)
+		{
+			if(condition.isMultiValued())
+			{
+				for(Object value : condition.getMultiValues())
+				{
+					pstmt.setObject(index, value);
+					params.add(value);
+					
+					index++;
+				}
+				
+				continue;
+			}
+			
+			pstmt.setObject(index, condition.getValue());
+			params.add(condition.getValue());
+			
+			index++;
+		}
+		
+		return index;
+	}
 
 	@Override
 	public Double fetchAggregateValue(AggregateQuery countQuery, EntityDetails entityDetails)
@@ -364,19 +403,9 @@ public class RdbmsDataStore implements IDataStore
 			
 			Connection connection = transaction.getTransaction().getConnection();
 			pstmt = connection.prepareStatement(query);
-			int index = 1;
 			List<Object> params = new ArrayList<>();
 			
-			if(conditions != null)
-			{
-				for(QueryCondition condition: conditions)
-				{
-					pstmt.setObject(index, condition.getValue());
-					params.add(condition.getValue());
-					
-					index++;
-				}
-			}
+			addConditionsParams(conditions, params, pstmt, 1);
 			
 			logger.debug("Executing using params: {}", params);
 			
@@ -426,28 +455,9 @@ public class RdbmsDataStore implements IDataStore
 			int index = 1;
 			List<Object> params = new ArrayList<>();
 			
-			if(childrenExistenceQuery.getParentConditions() != null)
-			{
-				for(QueryCondition condition: childrenExistenceQuery.getParentConditions())
-				{
-					pstmt.setObject(index, condition.getValue());
-					params.add(condition.getValue());
-					
-					index++;
-				}
-			}
-
-			if(childrenExistenceQuery.getChildConditions() != null)
-			{
-				for(QueryCondition condition: childrenExistenceQuery.getChildConditions())
-				{
-					pstmt.setObject(index, condition.getValue());
-					params.add(condition.getValue());
-					
-					index++;
-				}
-			}
-
+			index = addConditionsParams(childrenExistenceQuery.getParentConditions(), params, pstmt, index);
+			addConditionsParams(childrenExistenceQuery.getChildConditions(), params, pstmt, index);
+			
 			logger.debug("Executing using params: " + params);
 			
 			rs = pstmt.executeQuery();
@@ -495,27 +505,8 @@ public class RdbmsDataStore implements IDataStore
 			int index = 1;
 			List<Object> params = new ArrayList<>();
 			
-			if(fetchChildrenIdsQuery.getParentConditions() != null)
-			{
-				for(QueryCondition condition: fetchChildrenIdsQuery.getParentConditions())
-				{
-					pstmt.setObject(index, condition.getValue());
-					params.add(condition.getValue());
-					
-					index++;
-				}
-			}
-
-			if(fetchChildrenIdsQuery.getChildConditions() != null)
-			{
-				for(QueryCondition condition: fetchChildrenIdsQuery.getChildConditions())
-				{
-					pstmt.setObject(index, condition.getValue());
-					params.add(condition.getValue());
-					
-					index++;
-				}
-			}
+			index = addConditionsParams(fetchChildrenIdsQuery.getParentConditions(), params, pstmt, index);
+			addConditionsParams(fetchChildrenIdsQuery.getChildConditions(), params, pstmt, index);
 
 			logger.debug("Executing using params: " + params);
 			
@@ -857,8 +848,19 @@ public class RdbmsDataStore implements IDataStore
 		//for null based conditions templates should take care of nulls
 		if(condition.getValue() != null)
 		{
-			stmt.setObject(params.size() + 1, condition.getValue());
-			params.add(condition.getValue());
+			if(condition.isMultiValued())
+			{
+				for(Object value : condition.getMultiValues())
+				{
+					stmt.setObject(params.size() + 1, value);
+					params.add(value);
+				}
+			}
+			else
+			{
+				stmt.setObject(params.size() + 1, condition.getValue());
+				params.add(condition.getValue());
+			}
 		}
 
 		//add parameters for child group conditions

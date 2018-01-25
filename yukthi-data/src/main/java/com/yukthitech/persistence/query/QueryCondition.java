@@ -1,10 +1,13 @@
 package com.yukthitech.persistence.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Represents a condition in condition based query
@@ -261,6 +264,40 @@ public class QueryCondition implements Cloneable
 		{
 			params.add(value);
 		}
+	}
+	
+	/**
+	 * Returns true if the operator is IN.
+	 * @return true if operator is multi valued
+	 */
+	public boolean isMultiValued()
+	{
+		return ((operator == Operator.IN || operator == Operator.NOT_IN) && (value != null));
+	}
+	
+	/**
+	 * Converts the value into list.
+	 * @return value as multi values.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public List<Object> getMultiValues()
+	{
+		if(operator != Operator.IN)
+		{
+			throw new InvalidStateException("Invoked multi value fetch on non IN operator condition");
+		}
+		
+		if(value instanceof Collection)
+		{
+			return new ArrayList<>((Collection) value);
+		}
+		
+		if(value == null)
+		{
+			return null;
+		}
+		
+		return Arrays.asList(value);
 	}
 
 	/*

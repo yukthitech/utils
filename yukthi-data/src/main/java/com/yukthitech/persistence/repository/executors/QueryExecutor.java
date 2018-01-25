@@ -206,7 +206,7 @@ public abstract class QueryExecutor
 						+ method.getName() + "' of repository: " + repositoryType.getName());
 			}
 
-			ignoreCase = (String.class.equals(parameters[i].getType()) && condition.ignoreCase());
+			ignoreCase = condition.ignoreCase();
 			
 			if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 			{

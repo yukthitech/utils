@@ -1,7 +1,9 @@
 package com.yukthitech.test.persitence;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -47,6 +49,20 @@ public class TFinders extends TestSuiteBase
 		factory.dropRepository(Employee.class);
 	}
 	
+	@Test(dataProvider = "repositoryFactories")
+	public void testWithIn(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+
+		//ensure case is not ignored by default
+		List<Employee> empLst = repo.findEmpWithEmails(CommonUtils.toSet("user0@test.com", "useR1@test.com"));
+		Assert.assertEquals(empLst.size(), 2);
+		
+		Set<String> empNos = empLst.stream().map(emp -> emp.getEmployeeNo()).collect(Collectors.toSet());
+
+		Assert.assertEquals(empNos, CommonUtils.toSet("1230", "1231"));
+	}
+
 	@Test(dataProvider = "repositoryFactories")
 	public void testWithIgnoreCase(RepositoryFactory factory)
 	{

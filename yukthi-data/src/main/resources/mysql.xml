@@ -2,7 +2,32 @@
 	<ccg:exprPattern enabled="false"/>
 	
 	<template name="#commonCode"><![CDATA[
-		
+		<#function conditionToStr condition tableCode>
+			<#if condition.value??>
+				<#if condition.ignoreCase>
+					<#if condition.multiValued>
+						<#assign conditionStrRes> LOWER(${tableCode}${condition.column}) ${condition.operator} (<#list condition.multiValues as item>LOWER(?)<#sep>,</#sep></#list>)</#assign>
+					<#else>
+						<#assign conditionStrRes> LOWER(${tableCode}${condition.column}) ${condition.operator} LOWER(?)</#assign>
+					</#if>
+				<#else>
+					<#if condition.multiValued>
+						<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} (<#list condition.multiValues as item>?<#sep>,</#sep></#list>)</#assign>
+					<#else>
+						<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
+					</#if>
+				</#if>
+			<#else>
+				<#if condition.operator.operator == '='>
+					<#assign conditionStrRes> ${tableCode}${condition.column} IS NULL</#assign>
+				<#else>
+					<#assign conditionStrRes> ${tableCode}${condition.column} IS NOT NULL</#assign>
+				</#if>
+			</#if>
+
+			<#return conditionStrRes>
+		</#function>
+				
 		<#function addCondition condition conditionIndex includeTableCode>
 			<#assign joinOp="AND">
 			
@@ -29,20 +54,8 @@
 				<#return res>
 			</#if>
 		
-			<#if condition.value??>
-				<#if condition.ignoreCase>
-					<#assign res> ${res} LOWER(${tableCode}${condition.column}) ${condition.operator} ?</#assign>
-				<#else>
-					<#assign res> ${res} ${tableCode}${condition.column} ${condition.operator} ?</#assign>
-				</#if>
-			<#else>
-				<#if condition.operator.operator == '='>
-					<#assign res> ${res} ${tableCode}${condition.column} IS NULL</#assign>
-				<#else>
-					<#assign res> ${res} ${tableCode}${condition.column} IS NOT NULL</#assign>
-				</#if>
-			</#if>
-			
+			<#assign res> ${res} ${conditionToStr(condition, tableCode)} </#assign>
+						
 			<#if condition.groupedConditions??>
 				<#list condition.groupedConditions as grpCondition>
 					<#assign res> ${res} 

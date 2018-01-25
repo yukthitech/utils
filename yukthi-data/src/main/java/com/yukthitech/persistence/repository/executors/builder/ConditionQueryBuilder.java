@@ -458,6 +458,9 @@ public class ConditionQueryBuilder implements Cloneable
 		int maxIndex = entityFieldPath.length - 1;
 		ForeignConstraintDetails foreignConstraint = null, targetConstraint = null;
 		JoinTableDetails joinTableDetails = null;
+		
+		//flag indicating if the relation is became nullable in middle
+		boolean nullableRelation = false;
 
 		// loop through field parts and find the required table joins
 		for(int i = 0; i < entityFieldPath.length; i++)
@@ -537,6 +540,12 @@ public class ConditionQueryBuilder implements Cloneable
 
 			foreignConstraint = fieldDetails.getForeignConstraintDetails();
 			targetEntityDetails = foreignConstraint.getTargetEntityDetails();
+			
+			//in the path if any field becomes nullable, all the joins thereafter should become nullable
+			if(fieldDetails.isNullable())
+			{
+				nullableRelation = true;
+			}
 
 			// if this is mapped relation
 			if(foreignConstraint.isMappedRelation())
@@ -550,18 +559,18 @@ public class ConditionQueryBuilder implements Cloneable
 				{
 					// add target table info
 					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
-							currentEntityDetails.getIdField().getDbColumnName(), targetFieldDetails.getDbColumnName(), currentProp, fieldDetails.isNullable());
+							currentEntityDetails.getIdField().getDbColumnName(), targetFieldDetails.getDbColumnName(), currentProp, nullableRelation);
 				}
 				// if table was joined via join talbe
 				else
 				{
 					// add join table info
 					joinTableInfo = newTableInfo(joinTableDetails.toEntityDetails(), joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
-							joinTableDetails.getInverseJoinColumn(), null, fieldDetails.isNullable());
+							joinTableDetails.getInverseJoinColumn(), null, nullableRelation);
 
 					// add target table info
 					newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
-							joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, fieldDetails.isNullable());
+							joinTableDetails.getJoinColumn(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, nullableRelation);
 				}
 			}
 			// if the relation is via join table
@@ -571,17 +580,17 @@ public class ConditionQueryBuilder implements Cloneable
 
 				// add join table info
 				joinTableInfo = newTableInfo(joinTableDetails.toEntityDetails(), joinTableDetails.getTableName(), currentTableInfo.tableCode, currentEntityDetails.getIdField().getDbColumnName(), 
-						joinTableDetails.getJoinColumn(), null, fieldDetails.isNullable());
+						joinTableDetails.getJoinColumn(), null, nullableRelation);
 
 				// add target table info
 				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), joinTableInfo.tableCode, 
-						joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, fieldDetails.isNullable());
+						joinTableDetails.getInverseJoinColumn(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, nullableRelation);
 			}
 			// if the relation is simple relation
 			else
 			{
 				newTableInfo = newTableInfo(targetEntityDetails, targetEntityDetails.getTableName(), currentTableInfo.tableCode, 
-						fieldDetails.getDbColumnName(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, fieldDetails.isNullable());
+						fieldDetails.getDbColumnName(), targetEntityDetails.getIdField().getDbColumnName(), currentProp, nullableRelation);
 			}
 
 			currentTableInfo = newTableInfo;
