@@ -2,7 +2,6 @@ package com.yukthitech.persistence.repository;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -120,12 +119,11 @@ class RepositoryProxy implements InvocationHandler
 				
 		if(defaultedMethods.containsKey(methodName))
 		{
-			logger.debug("Executing default-method '" + method.getName() + "' with arguments: " + Arrays.toString(args));
-			
+			//logger.debug("Executing default-method '" + method.getName() + "' with arguments: " + Arrays.toString(args));
 			return defaultedMethods.get(methodName).apply(args);
 		}
 		
-		logger.debug("Executing method '" + method.getName() + "' with arguments: " + Arrays.toString(args));
+		//logger.debug("Executing method '" + method.getName() + "' with arguments: " + Arrays.toString(args));
 		
 		try
 		{
