@@ -43,6 +43,8 @@ public class StepExecutor
 
 		try
 		{
+			context.setExecutionLogger(exeLogger);
+			
 			//clone the step, so that expression replacement will not affect actual step
 			step = step.clone();
 			
@@ -63,6 +65,7 @@ public class StepExecutor
 		{
 			//re-enable logging, in case it is disabled
 			exeLogger.setDisabled(false);
+			context.setExecutionLogger(null);
 		}
 
 	}

@@ -117,7 +117,13 @@ public class AutomationContext
 	 */
 	private File reportFolder;
 	
+	/** The internal context att. */
 	private Map<String, Object> internalContextAtt = new HashMap<>();
+	
+	/**
+	 * Current execution logger. Can be null.
+	 */
+	private ExecutionLogger executionLogger;
 
 	/**
 	 * Constructor.
@@ -570,6 +576,26 @@ public class AutomationContext
 		this.reportFolder = reportFolder;
 	}
 	
+	/**
+	 * Gets the current execution logger. Can be null.
+	 *
+	 * @return the current execution logger
+	 */
+	public ExecutionLogger getExecutionLogger()
+	{
+		return executionLogger;
+	}
+
+	/**
+	 * Sets the current execution logger. Can be null.
+	 *
+	 * @param executionLogger the new current execution logger
+	 */
+	public void setExecutionLogger(ExecutionLogger executionLogger)
+	{
+		this.executionLogger = executionLogger;
+	}
+
 	/**
 	 * Closes all the plugins initialized in this context. Generally this method
 	 * should be called before destroying this context.

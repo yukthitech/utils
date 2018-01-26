@@ -10,7 +10,6 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
-import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -79,8 +78,7 @@ public class Cleanup implements IStepContainer, Validateable, ILocationBased
 		{
 			try
 			{
-				AutomationUtils.replaceExpressions(context, step);
-				step.execute(context, exeLogger);
+				StepExecutor.executeStep(context, exeLogger, step);
 			} catch(Exception ex)
 			{
 				exeLogger.error(this, ex, "An error occurred while executing step - " + step);
