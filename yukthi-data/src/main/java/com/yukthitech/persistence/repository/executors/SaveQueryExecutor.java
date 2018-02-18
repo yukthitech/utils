@@ -35,6 +35,7 @@ import com.yukthitech.persistence.query.SaveQuery;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
+import com.yukthitech.persistence.repository.executors.proxy.IProxyEntity;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -197,7 +198,16 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				if(field.isTableOwned())
 				{
 					//fetch the value of related entity and store it in this table
-					Object idValue = foreignConstraint.getTargetEntityDetails().getIdField().getValue(value);
+					Object idValue = null;
+					
+					if(value instanceof IProxyEntity)
+					{
+						idValue = ((IProxyEntity) value).$getProxyEntityId();
+					}
+					else
+					{
+						idValue = foreignConstraint.getTargetEntityDetails().getIdField().getValue(value);
+					}
 					
 					//if child is not persisted yet
 					if(!isPersistedId(idValue))

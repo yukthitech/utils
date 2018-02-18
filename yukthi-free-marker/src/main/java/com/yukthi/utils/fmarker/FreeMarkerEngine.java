@@ -51,6 +51,8 @@ public class FreeMarkerEngine
 	public void reset()
 	{
 		configuration = new Configuration(Configuration.getVersion());
+		configuration.setNumberFormat("#");
+		
 		freeMarkerMethodRegistry = new HashMap<String, Method>();
 		
 		registerDirective("trim", new TrimDirective());

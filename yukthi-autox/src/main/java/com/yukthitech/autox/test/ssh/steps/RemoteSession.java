@@ -229,7 +229,7 @@ public class RemoteSession
 	 * Creates new session.
 	 * @return new session
 	 */
-	private Session getSession() throws JSchException
+	public Session getSession() throws JSchException
 	{
 		if(session != null && session.isConnected())
 		{
@@ -277,6 +277,21 @@ public class RemoteSession
 		
 		this.sftp = sftp;
 		return sftp;
+	}
+	
+	public void close()
+	{
+		if(sftp != null)
+		{
+			sftp.disconnect();
+			sftp = null;
+		}
+		
+		if(session != null)
+		{
+			session.disconnect();
+			session = null;
+		}
 	}
 
 	public void validate() throws ValidateException

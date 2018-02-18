@@ -105,7 +105,7 @@ public class ZipUtils
 	{
 		try
 		{
-			File tempFile = File.createTempFile(file.getName(), ".zip");
+			File tempFile = File.createTempFile(file.getName(), ".tmp");
 			
 			FileInputStream fis = new FileInputStream(file);
 			FileOutputStream fos = new FileOutputStream(tempFile);

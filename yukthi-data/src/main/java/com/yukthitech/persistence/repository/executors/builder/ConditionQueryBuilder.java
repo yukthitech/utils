@@ -38,7 +38,7 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
-import com.yukthitech.persistence.repository.executors.proxy.ProxyEntity;
+import com.yukthitech.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthitech.persistence.repository.search.DynamicResultField;
 import com.yukthitech.persistence.repository.search.IDynamicSearchResult;
 import com.yukthitech.persistence.repository.search.SearchQuery;
@@ -1123,6 +1123,11 @@ public class ConditionQueryBuilder implements Cloneable
 			throw new IllegalStateException("An error occurred while fetching condition value for expression -" + condition.getConditionExpression(), ex);
 		}
 		
+		if(value instanceof Enum)
+		{
+			value = "" + value;
+		}
+		
 		QueryCondition groupHead = null;
 
 		// if value is not provided, ignore current condition
@@ -1255,7 +1260,7 @@ public class ConditionQueryBuilder implements Cloneable
 					foreignConstraint = resultField.fieldDetails.getForeignConstraintDetails();
 					foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
 
-					value = ProxyEntity.newProxyById(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
+					value = ProxyEntityCreator.newProxyById(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
 				}
 				//if this is extension field
 				else if(resultField.property.startsWith("@"))
@@ -1314,7 +1319,7 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			ICrudRepository<?> resultRepo = repositoryFactory.getRepositoryForEntity(resultType);
 			
-			result = (T) ProxyEntity.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, Collections.emptyMap());
+			result = (T) ProxyEntityCreator.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, Collections.emptyMap());
 		}
 		
 		return result;

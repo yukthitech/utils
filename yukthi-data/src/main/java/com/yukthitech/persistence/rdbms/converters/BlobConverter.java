@@ -95,7 +95,9 @@ public class BlobConverter implements IPersistenceConverter
 			
 			if(dbType == DataType.ZIP_BLOB)
 			{
+				File oldFile = file;
 				file = ZipUtils.unzipFile(file);
+				oldFile.delete();
 			}
 			
 			return file;

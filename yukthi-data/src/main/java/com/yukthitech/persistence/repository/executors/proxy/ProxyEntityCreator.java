@@ -18,6 +18,7 @@ import com.yukthitech.persistence.NoSuchEntityException;
 import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.search.SearchCondition;
 import com.yukthitech.persistence.repository.search.SearchQuery;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import net.sf.cglib.proxy.Enhancer;
@@ -27,7 +28,7 @@ import net.sf.cglib.proxy.InvocationHandler;
  * Represents proxy for entity class used for lazy loading
  * @author akiran
  */
-public class ProxyEntity
+public class ProxyEntityCreator
 {
 	/**
 	 * The actual entity which would be loaded lazily on need basis 
@@ -43,6 +44,11 @@ public class ProxyEntity
 	 * CRUD repository for the entity
 	 */
 	private ICrudRepository<?> repository;
+	
+	/**
+	 * Entity details of the current entity.
+	 */
+	private EntityDetails entityDetails;
 	
 	/**
 	 * Id of the entity
@@ -71,7 +77,7 @@ public class ProxyEntity
 			throw new NullPointerException("Entity id can not be null");
 		}
 		
-		ProxyEntity creator = new ProxyEntity(entityDetails, repository, entityId, null);
+		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, entityId, null);
 		return creator.proxyEntity;
 	}
 
@@ -82,7 +88,7 @@ public class ProxyEntity
 			throw new NullPointerException("Condition can not be null");
 		}
 		
-		ProxyEntity creator = new ProxyEntity(entityDetails, repository, null, condition);
+		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, null, condition);
 		return creator.proxyEntity;
 	}
 
@@ -93,7 +99,7 @@ public class ProxyEntity
 			throw new InvalidArgumentException("Specified entity type '{}' is not matching with specified entity: {}", entityDetails.getEntityType().getName(), entity);
 		}
 		
-		ProxyEntity creator = new ProxyEntity(entityDetails, repository, null, null);
+		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, null, null);
 		creator.actualEntity = entity;
 		creator.populateRelationFields(dataMap);
 		
@@ -106,24 +112,26 @@ public class ProxyEntity
 	 * @param repository
 	 * @param entityType
 	 */
-	private ProxyEntity(EntityDetails entityDetails, ICrudRepository<?> repository, Object entityId, SearchCondition condition)
+	private ProxyEntityCreator(EntityDetails entityDetails, ICrudRepository<?> repository, Object entityId, SearchCondition condition)
 	{
 		this.repository = repository;
 		this.entityId = entityId;
 		this.searchCondition = condition;
+		this.entityDetails = entityDetails;
 		
 		Class<?> entityType = entityDetails.getEntityType();
 		
 		//create ccg lib handler which will handle method calls on proxy
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(entityType);
+		enhancer.setInterfaces(new Class[] { IProxyEntity.class } );
 		
 		enhancer.setCallback(new InvocationHandler()
 		{
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 			{
-				return ProxyEntity.this.invoke(proxy, method, args);
+				return ProxyEntityCreator.this.invoke(proxy, method, args);
 			}
 		});
 		
@@ -231,7 +239,7 @@ public class ProxyEntity
 						}
 					}
 					
-					Object relatedEntity = ProxyEntity.newProxyById(targetEntityDetails, relatedRepo, relationId);
+					Object relatedEntity = ProxyEntityCreator.newProxyById(targetEntityDetails, relatedRepo, relationId);
 					
 					fieldDetails.setValue(actualEntity, relatedEntity);
 					continue;
@@ -247,12 +255,39 @@ public class ProxyEntity
 				}
 				
 				SearchCondition relationCondition = new SearchCondition(foreignConstraintDetails.getMappedBy(), Operator.EQ, entityId);
-				Object relatedEntity = ProxyEntity.newProxyByCondition(targetEntityDetails, relatedRepo, relationCondition);
+				Object relatedEntity = ProxyEntityCreator.newProxyByCondition(targetEntityDetails, relatedRepo, relationCondition);
 				fieldDetails.setValue(actualEntity, relatedEntity);
 			}
 		}
+	}
+	
+	/**
+	 * Handles proxy method invocation if it is proxy method.
+	 * @param method Method being invoked
+	 * @param returnValue return value of method invocation
+	 * @return true if method is handled.
+	 */
+	private boolean handlProxyMethodInvocation(Method method, ObjectWrapper<Object> returnValue)
+	{
+		if(!"$getProxyEntityId".equals(method.getName()))
+		{
+			return false;
+		}
 		
+		if(entityId != null)
+		{
+			returnValue.setValue(entityId);
+			return true;
+		}
 		
+		if(actualEntity == null)
+		{
+			return false;
+		}
+		
+		entityId = entityDetails.getIdField().getValue(actualEntity);
+		returnValue.setValue(entityId);
+		return true;
 	}
 	
 	/**
@@ -269,6 +304,14 @@ public class ProxyEntity
 		if(idGetter != null && idGetter.equals(method))
 		{
 			return entityId;
+		}
+		
+		//handle proxy entity method
+		ObjectWrapper<Object> proxyMethodValue = new ObjectWrapper<Object>();
+		
+		if(handlProxyMethodInvocation(method, proxyMethodValue))
+		{
+			return proxyMethodValue.getValue();
 		}
 
 		synchronized(this)
@@ -305,6 +348,12 @@ public class ProxyEntity
 				throw new NoSuchEntityException();
 			}
 			
+			//handle proxy entity method, post actual entity is loaded
+			if(handlProxyMethodInvocation(method, proxyMethodValue))
+			{
+				return proxyMethodValue.getValue();
+			}
+
 			return method.invoke(actualEntity, args);
 		}
 	}

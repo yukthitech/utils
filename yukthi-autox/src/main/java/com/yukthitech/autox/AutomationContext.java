@@ -266,6 +266,16 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Removes internal attribute with specified name.
+	 * @param name Name of internal attribute to remove.
+	 * @return value of internal attribute being removed
+	 */
+	public Object removeInternalAttribute(String name)
+	{
+		return internalContextAtt.get(name);
+	}
+	
+	/**
 	 * Fetches the attributes on the context as map.
 	 * @return Context attributes.
 	 */

@@ -15,6 +15,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -749,8 +750,8 @@ public class RdbmsDataStore implements IDataStore
 				pstmt.setObject(index, param);
 				index++;
 			}
-			
-			logger.debug("Executing using params: {}", params);
+
+			logParams(params);
 			
 			int deleteCount = pstmt.executeUpdate();
 			
@@ -881,6 +882,43 @@ public class RdbmsDataStore implements IDataStore
 			}
 		}
 	}
+	
+	/**
+	 * Logs params of the query.
+	 * @param params params of query
+	 */
+	private void logParams(List<Object> params)
+	{
+		if(!logger.isDebugEnabled())
+		{
+			return;
+		}
+		
+		logger.debug("Executing using params: {}", params);
+		
+		StringBuilder builder = new StringBuilder("[");
+		
+		for(Object param : params)
+		{
+			if(builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			
+			if(param != null)
+			{
+				builder.append(param.getClass().getName());
+			}
+			else
+			{
+				builder.append("null");
+			}
+		}
+		
+		builder.append("]");
+		
+		logger.debug("Parameter types: {}", builder);
+	}
 
 	@Override
 	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails, IFinderRecordProcessor recordProcessor)
@@ -905,8 +943,8 @@ public class RdbmsDataStore implements IDataStore
 			{
 				addParamsRecursively(condition, pstmt, params);
 			}
-			
-			logger.debug("Executing using params: {}", params);
+
+			logParams(params);
 			
 			rs = pstmt.executeQuery();
 			
@@ -949,6 +987,10 @@ public class RdbmsDataStore implements IDataStore
 					else if(cellValue instanceof Blob)
 					{
 						cellValue = convertBlob((Blob)cellValue);
+					}
+					else if(cellValue instanceof Date)
+					{
+						cellValue = new Date( ((Date) cellValue).getTime() );
 					}
 					
 					rec.set(i, colNames[i], cellValue);

@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>yukthi-utils</artifactId>
+	<artifactId>yukthi-utils-android</artifactId>
 	<packaging>jar</packaging>
 
 	<name>yukthi-utils</name>
@@ -12,6 +12,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<log4j.version>2.1</log4j.version>
 		<jackson.version>2.5.0</jackson.version>
+
+		<httpclient.version>4.4</httpclient.version>
 
 		<mockito.version>1.9.5</mockito.version>
 	</properties>
@@ -47,12 +49,12 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.4</version>
+			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
-			<version>4.4</version>
+			<version>${httpclient.version}</version>
 		</dependency>
 
 		<dependency>
@@ -91,6 +93,31 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>jarjar-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jarjar</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>org.apache.httpcomponents:httpclient</include>
+								<include>org.apache.httpcomponents:httpcore</include>
+							</includes>
+							<rules>
+								<rule>
+									<pattern>org.apache.http.**</pattern>
+									<result>yukthi.org.apache.http.@1</result>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

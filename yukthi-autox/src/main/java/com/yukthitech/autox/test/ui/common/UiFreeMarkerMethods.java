@@ -115,10 +115,11 @@ public class UiFreeMarkerMethods
 		{
 			if(Character.isWhitespace(chArr[i]))
 			{
+				chArr[i] = ' ';
 				continue;
 			}
 			
-			if(chArr[i] >= 33 && chArr[i] <= 126)
+			if(chArr[i] < 33 || chArr[i] > 126)
 			{
 				chArr[i] = ' ';
 			}

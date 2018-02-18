@@ -262,7 +262,14 @@ public class QueryCondition implements Cloneable
 		}
 		else
 		{
-			params.add(value);
+			if(!isMultiValued())
+			{
+				params.add(value);
+			}
+			else
+			{
+				params.addAll(getMultiValues());
+			}
 		}
 	}
 	

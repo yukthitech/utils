@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.persistence.EntityDetails;
-import com.yukthitech.persistence.FieldDetails;
 import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.IDataStore;
@@ -80,7 +79,6 @@ public abstract class QueryExecutor
 	{
 		Field fields[] = queryobjType.getDeclaredFields();
 		Condition condition = null;
-		FieldDetails fieldDetails = null;
 		String fieldName = null;
 		boolean found = false;
 		boolean ignoreCase = false;
@@ -111,6 +109,7 @@ public abstract class QueryExecutor
 				throw new InvalidRepositoryException("Nested expression '{}' when plain properties are expected in {}", fieldName, methodDesc);
 			}
 
+			/*
 			//fetch corresponding field details
 			fieldDetails = this.entityDetails.getFieldDetailsByField(fieldName);
 			
@@ -119,6 +118,7 @@ public abstract class QueryExecutor
 				throw new InvalidRepositoryException("Invalid @Condition field '{}'[{}] is specified for finder method '{}' of repository: {}", 
 						fieldName, queryobjType.getName(), methodName, repositoryType.getName());
 			}
+			*/
 			
 			ignoreCase = (String.class.equals(field.getType()) && condition.ignoreCase());
 			

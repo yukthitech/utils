@@ -180,7 +180,7 @@ public class SeleniumDriverConfig implements Validateable
 			this.downloadFolder = file.getCanonicalPath();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while getting cannoical path of download folder: {}", downloadFolder);
+			throw new InvalidStateException("An error occurred while getting cannoical path of download folder: {}", downloadFolder, ex);
 		}
 	}
 

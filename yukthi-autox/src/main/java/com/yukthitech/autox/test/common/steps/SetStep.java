@@ -98,6 +98,7 @@ public class SetStep extends AbstractStep
 		
 		if(valueObject != null)
 		{
+			exeLogger.debug(this, "Parsing value object: {}", this.valueObject);
 			return AutomationUtils.parseObjectSource(context, exeLogger, this.valueObject, null);
 		}
 		
