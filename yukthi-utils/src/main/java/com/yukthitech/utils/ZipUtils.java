@@ -8,12 +8,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -198,6 +203,50 @@ public class ZipUtils
 		} catch(IOException ex)
 		{
 			throw new InvalidStateException("An exception occurred while zipping specified files", ex);
+		}
+	}
+	
+	/**
+	 * Unzips the specified zip file to specified root folder.
+	 * @param zipFile file to unzip file.
+	 * @param rootFolder folder to which unzip should be done.
+	 * @return Retuns the list of files unzipped.
+	 */
+	public static List<File> unzip(File zipFile, File rootFolder)
+	{
+		try
+		{
+			ZipFile zfile = new ZipFile(zipFile);
+			Enumeration<? extends ZipEntry> it = zfile.entries();
+			
+			ZipEntry zipEntry = null;
+			List<File> unzipFiles = new LinkedList<File>();
+			
+			while(it.hasMoreElements())
+			{
+				zipEntry = it.nextElement();
+				File entryFile = new File(rootFolder, zipEntry.getName().replace("/", File.separator));
+				
+				if(zipEntry.isDirectory())
+				{
+					FileUtils.forceMkdir(entryFile);
+					continue;
+				}
+				
+				FileUtils.forceMkdir(entryFile.getParentFile());
+				
+				InputStream entryStream = zfile.getInputStream(zipEntry);
+				FileUtils.copyInputStreamToFile(entryStream, entryFile);
+				entryStream.close();
+				
+				unzipFiles.add(entryFile);
+			}
+
+			zfile.close();
+			return unzipFiles;
+		} catch(IOException ex)
+		{
+			throw new InvalidStateException("An exception occurred while unzipping specified file: " + zipFile, ex);
 		}
 	}
 }
