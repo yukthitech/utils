@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -204,6 +203,8 @@ public class ActionPlanExecutor
 			context.setAttribute(name, initContextParams.get(name));
 		}
 		
+		context.startLogMonitoring();
+		
 		boolean result = true;
 		
 		//execute action plan steps
@@ -245,7 +246,10 @@ public class ActionPlanExecutor
 			fullExecutionDetails.testSuiteFailed(testSuite, "Failed");
 		}
 		
-		reportGenerator.createLogFiles(context, testCaseResult, "action-plan", Collections.emptyMap(), "Action output");
+		//stop monitoring logs
+		Map<String, File> monitoringLogs = context.stopLogMonitoring();
+
+		reportGenerator.createLogFiles(context, testCaseResult, "action-plan", monitoringLogs, "Action output");
 
 		reportGenerator.generateReports(reportFolder, fullExecutionDetails, context);
 		return result;
