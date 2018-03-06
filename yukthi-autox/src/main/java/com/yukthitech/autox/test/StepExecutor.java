@@ -3,6 +3,7 @@ package com.yukthitech.autox.test;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +59,7 @@ public class StepExecutor
 					Executable executable = step.getClass().getAnnotation(Executable.class);
 					exeLogger.error(step, "Validation failed: " + executable.name() + step);
 	
-					throw new TestCaseValidationFailedException("Validation failed: " + executable.name());
+					throw new TestCaseValidationFailedException(step, "Validation failed: " + executable.name());
 				}
 			}
 		} finally
@@ -72,12 +73,13 @@ public class StepExecutor
 	
 	private static void invokeErrorHandling(AutomationContext context, Executable executable, ErrorDetails errorDetails)
 	{
-		logger.debug("Invoking plugin error handling...");
+		logger.debug( "Invoking plugin error handling for executable: {}", Arrays.toString(executable.name()) );
 		
 		Class<? extends IPlugin<?>> pluginTypes[] = executable.requiredPluginTypes();
 		
 		if(pluginTypes == null || pluginTypes.length == 0)
 		{
+			logger.debug( "No associated plugins gound for executable: {}", Arrays.toString(executable.name()) );
 			return;
 		}
 		
@@ -135,6 +137,20 @@ public class StepExecutor
 	 */
 	public static TestCaseResult handleException(AutomationContext context, TestCase testCase, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
 	{
+		//from exception, try to find the step which caused the problem
+		//	so that approp plugin handlers can be called.
+		if(ex instanceof AutoxException)
+		{
+			AutoxException autoxException = (AutoxException) ex;
+			IStep srcStep = autoxException.getSourceStep();
+			
+			if(srcStep != null)
+			{
+				logger.info("As the exception '{}' is caused by step '{}', considerting this step instead of input step: {}", ex, srcStep, step);
+				step = srcStep;
+			}
+		}
+		
 		Executable executable = (step instanceof StepGroup) ?  createExecutable((StepGroup) step) : step.getClass().getAnnotation(Executable.class);
 		String name = executable.name()[0];
 		

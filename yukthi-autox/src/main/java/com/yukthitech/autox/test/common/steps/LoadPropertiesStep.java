@@ -102,7 +102,7 @@ public class LoadPropertiesStep extends AbstractStep
 		}catch(Exception ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while loading properties resource - {}.\nError: {}", resource);
-			throw new TestCaseFailedException("An error occurred while loading properties resource - {}", resource, ex);
+			throw new TestCaseFailedException(this, "An error occurred while loading properties resource - {}", resource, ex);
 		}
 		
 		resObj.close();

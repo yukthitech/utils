@@ -105,7 +105,7 @@ public class LoadJsonStep extends AbstractStep
 			}catch(Exception ex)
 			{
 				exeLogger.error(this, ex, "An error occurred while loading specified type: {}", type);
-				throw new TestCaseFailedException("An error occurred while loading specified type: {}", type, ex);
+				throw new TestCaseFailedException(this, "An error occurred while loading specified type: {}", type, ex);
 			}
 		}
 		
@@ -128,7 +128,7 @@ public class LoadJsonStep extends AbstractStep
 		}catch(Exception ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while loading json resource - {}.\nError: {}", resource);
-			throw new TestCaseFailedException("An error occurred while loading json resource - {}", resource, ex);
+			throw new TestCaseFailedException(this, "An error occurred while loading json resource - {}", resource, ex);
 		}
 		
 		context.setAttribute(contextAttribute, value);

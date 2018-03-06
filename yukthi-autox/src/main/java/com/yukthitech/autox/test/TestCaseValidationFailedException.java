@@ -1,17 +1,17 @@
 package com.yukthitech.autox.test;
 
-import com.yukthitech.utils.exceptions.UtilsException;
+import com.yukthitech.autox.IStep;
 
 /**
  * Exception to be thrown when validation fails.
  * @author akiran
  */
-public class TestCaseValidationFailedException extends UtilsException
+public class TestCaseValidationFailedException extends AutoxException
 {
 	private static final long serialVersionUID = 1L;
 
-	public TestCaseValidationFailedException(String message, Object... args)
+	public TestCaseValidationFailedException(IStep step, String message, Object... args)
 	{
-		super(message, args);
+		super(step, message, args);
 	}
 }

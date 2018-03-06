@@ -7,6 +7,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -58,13 +59,13 @@ public class ClickStep extends AbstractUiStep
 	
 					throw ex;
 				}
-			} , UiAutomationUtils.FIVE_SECONDS, 
+			} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
 		{
 			exeLogger.error(this, ex, "Failed to click element - {}", getLocatorWithParent(locator));
-			throw new TestCaseFailedException("Failed to click element - {}", getLocatorWithParent(locator), ex);
+			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
 		
 		return true;

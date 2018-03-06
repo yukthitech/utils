@@ -159,7 +159,7 @@ public class DmlQueryStep extends AbstractStep
 		} catch(SQLException ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while executing query");
-			throw new TestCaseFailedException("An erorr occurred while executing sql query - {}", query, ex);
+			throw new TestCaseFailedException(this, "An erorr occurred while executing sql query - {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

@@ -95,7 +95,7 @@ public class LoadTextStep extends AbstractStep
 		}catch(Exception ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while loading resource - {}.\nError: {}", resource);
-			throw new TestCaseFailedException("An error occurred while loading resource - {}", resource, ex);
+			throw new TestCaseFailedException(this, "An error occurred while loading resource - {}", resource, ex);
 		}
 		
 		context.setAttribute(contextAttribute, value);

@@ -7,6 +7,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -69,7 +70,8 @@ public class ValidateVisibility extends AbstractUiValidation
 			}
 
 			return (element != null && element.isDisplayed());
-		} , UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + getLocatorWithParent(locator), 
+		} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND, 
+				"Waiting for element: " + getLocatorWithParent(locator), 
 				new InvalidStateException("Failed to find element - " + getLocatorWithParent(locator)));
 
 		if(message != null)

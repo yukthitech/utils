@@ -73,7 +73,7 @@ public class MkDirStep extends AbstractStep
 		}catch(Exception ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while creating directory - {}", path);
-			throw new TestCaseFailedException("An error occurred while creating directory - {}", path, ex);
+			throw new TestCaseFailedException(this, "An error occurred while creating directory - {}", path, ex);
 		}
 		
 		return true;

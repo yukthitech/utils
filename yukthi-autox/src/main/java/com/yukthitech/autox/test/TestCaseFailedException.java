@@ -1,13 +1,13 @@
 package com.yukthitech.autox.test;
 
-import com.yukthitech.utils.exceptions.UtilsException;
+import com.yukthitech.autox.IStep;
 
-public class TestCaseFailedException extends UtilsException
+public class TestCaseFailedException extends AutoxException
 {
 	private static final long serialVersionUID = 1L;
 
-	public TestCaseFailedException(String message, Object... args)
+	public TestCaseFailedException(IStep step, String message, Object... args)
 	{
-		super(message, args);
+		super(step, message, args);
 	}
 }

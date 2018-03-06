@@ -161,7 +161,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 		{
 			exeLogger.error(this, ex, "An error occurred while executing query: {}", query);
 			
-			throw new TestCaseFailedException("An erorr occurred while executing query: {}", query, ex);
+			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

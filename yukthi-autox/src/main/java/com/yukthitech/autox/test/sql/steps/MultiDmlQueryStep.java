@@ -145,7 +145,7 @@ public class MultiDmlQueryStep extends AbstractStep
 			exeLogger.error(this, ex, "An error occurred while executing query: {}", query);
 			DbUtils.rollbackAndCloseQuietly(connection);
 			
-			throw new TestCaseFailedException("An erorr occurred while executing sql query: {}", query, ex);
+			throw new TestCaseFailedException(this, "An erorr occurred while executing sql query: {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

@@ -19,4 +19,14 @@ public interface IAutomationConstants
 	 * Pattern used to refer property in the source.
 	 */
 	public Pattern REF_PATTERN = Pattern.compile("ref\\s*\\:\\s*(.+)");
+
+	/**
+	 * Five seconds.
+	 */
+	public int FIVE_SECONDS = 5;
+
+	/**
+	 * One seconds.
+	 */
+	public int ONE_SECOND = 1;
 }

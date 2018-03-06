@@ -204,7 +204,7 @@ public class SqlValidation extends AbstractValidation
 		} catch(SQLException ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while executing sql validation with query - {}", query);
-			throw new TestCaseFailedException("An erorr occurred while executing sql validation with query - {}", query, ex);
+			throw new TestCaseFailedException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

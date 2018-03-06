@@ -61,7 +61,7 @@ public class SleepStep extends AbstractStep
 		} catch(InterruptedException ex)
 		{
 			exeLogger.error(this, "Sleep step is interrupted", ex);
-			throw new TestCaseFailedException("Sleep step is interrupted", ex);
+			throw new TestCaseFailedException(this, "Sleep step is interrupted", ex);
 		}
 		
 		return true;

@@ -5,9 +5,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -16,6 +21,8 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  */
 public class SelectFieldAccessor implements IFieldAccessor
 {
+	private static Logger logger = LogManager.getLogger(SelectFieldAccessor.class);
+	
 	/**
 	 * Pattern to find how to populate the value.
 	 */
@@ -93,9 +100,31 @@ public class SelectFieldAccessor implements IFieldAccessor
 		{
 			select.selectByVisibleText(value);
 		}
-		else
+		else if(BY_VALUE.equals(type))
 		{
 			select.selectByValue(value);
+		}
+		else
+		{
+			AutomationContext automationContext = AutomationContext.getInstance();
+			ExecutionLogger exeLogger = automationContext.getExecutionLogger();
+			
+			try
+			{
+				select.selectByValue(value);
+			}catch(NoSuchElementException ex)
+			{
+				if(exeLogger != null)
+				{
+					exeLogger.debug(null, "As no select option is found with value '{}' trying to select option using label with this value.", value);
+				}
+				else
+				{
+					logger.debug("As no select option is found with value '{}' trying to select option using label with this value.", value);
+				}
+				
+				select.selectByVisibleText(value);
+			}
 		}
 	}
 

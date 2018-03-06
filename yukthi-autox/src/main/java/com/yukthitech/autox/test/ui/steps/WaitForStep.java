@@ -10,6 +10,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -35,6 +36,18 @@ public class WaitForStep extends AbstractUiStep
 	 */
 	@Param(description = "If true, this step waits for element with specified locator gets removed or hidden.\nDefault: false", required = false)
 	private String hidden = "false";
+	
+	/**
+	 * Total wait time in seconds for element to become visible or hidden. Default: 5 sec.
+	 */
+	@Param(description = "Total wait time in seconds for element to become visible or hidden. Default: 5 sec", required = false)
+	private int waitTime = IAutomationConstants.FIVE_SECONDS;
+	
+	/**
+	 * Gap time in seconds to wait for between each check. Default: 1 sec.
+	 */
+	@Param(description = "Gap time in seconds to wait for between each check. Default: 1 sec", required = false)
+	private int gapTime = IAutomationConstants.ONE_SECOND; 
 
 	/**
 	 * Simulates the click event on the specified button.
@@ -70,13 +83,13 @@ public class WaitForStep extends AbstractUiStep
 				}
 				
 				return false;
-			}, UiAutomationUtils.FIVE_SECONDS, "Waiting for element: " + locators, 
+			}, waitTime, gapTime, "Waiting for element: " + locators, 
 				new InvalidStateException("Failed to find element - " + locators));
 			
 		} catch(InvalidStateException ex)
 		{
 			exeLogger.error(this, ex, ex.getMessage());
-			throw new TestCaseFailedException(ex.getMessage(), ex);
+			throw new TestCaseFailedException(this, ex.getMessage(), ex);
 		}
 		
 		return true;
@@ -116,6 +129,26 @@ public class WaitForStep extends AbstractUiStep
 	{
 		this.hidden = hidden;
 	}
+	
+	/**
+	 * Sets the total wait time in seconds for element to become visible or hidden. Default: 5 sec.
+	 *
+	 * @param waitTime the new total wait time in seconds for element to become visible or hidden
+	 */
+	public void setWaitTime(int waitTime)
+	{
+		this.waitTime = waitTime;
+	}
+
+	/**
+	 * Sets the gap time in seconds to wait for between each check. Default: 1 sec.
+	 *
+	 * @param gapTime the new gap time in seconds to wait for between each check
+	 */
+	public void setGapTime(int gapTime)
+	{
+		this.gapTime = gapTime;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -128,6 +161,8 @@ public class WaitForStep extends AbstractUiStep
 
 		builder.append("Locators: ").append(locators);
 		builder.append(",").append("Hidden: ").append(hidden);
+		builder.append(",").append("Wait Time: ").append(waitTime);
+		builder.append(",").append("Gap Time: ").append(gapTime);
 
 		builder.append("]");
 		return builder.toString();

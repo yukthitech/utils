@@ -30,17 +30,7 @@ import com.yukthitech.utils.exceptions.UnsupportedOperationException;
  */
 public class UiAutomationUtils
 {
-	/**
-	 * Five seconds.
-	 */
-	public static final int FIVE_SECONDS = 5;
-
 	private static Logger logger = LogManager.getLogger(UiAutomationUtils.class);
-
-	/**
-	 * Min wait duration.
-	 */
-	private static final long DURATION_HUNDRED_MILLIS = 100;
 
 	/**
 	 * Millis per second.
@@ -410,15 +400,18 @@ public class UiAutomationUtils
 	 * @param checkFunction
 	 *            Function to check
 	 * @param waitTime
-	 *            Time in seconds to wait for
+	 *            Total time in seconds to wait for
+	 * @param gapTime
+	 *            Gap time in seconds to wait between each check.
 	 * @param waitMessage
 	 *            Wait message to be logged during waiting.
 	 * @param ex
 	 *            Exception to be thrown if all tries fail.
 	 */
-	public static void validateWithWait(Supplier<Boolean> checkFunction, int waitTime, String waitMessage, RuntimeException ex)
+	public static void validateWithWait(Supplier<Boolean> checkFunction, int waitTime, int gapTime, String waitMessage, RuntimeException ex)
 	{
-		long iterationCount = (waitTime * MILLIS_PER_SEC) / DURATION_HUNDRED_MILLIS;
+		long gapTimeInMillis = gapTime * MILLIS_PER_SEC;
+		long iterationCount = waitTime / gapTime;
 
 		for(int i = 0; i < iterationCount; i++)
 		{
@@ -428,7 +421,7 @@ public class UiAutomationUtils
 			}
 
 			logger.trace(waitMessage);
-			waitFor(DURATION_HUNDRED_MILLIS);
+			waitFor(gapTimeInMillis);
 		}
 
 		throw ex;

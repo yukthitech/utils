@@ -119,7 +119,7 @@ public class SetStep extends AbstractStep
 			}catch(Exception ex)
 			{
 				exeLogger.error(this, "Invalid type specified for value conversion. Type - {}", this.type);
-				throw new TestCaseFailedException("Invalid type specified for value conversion. Type - {}", this.type);
+				throw new TestCaseFailedException(this, "Invalid type specified for value conversion. Type - {}", this.type);
 			}
 		}
 		

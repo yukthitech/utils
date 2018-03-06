@@ -66,14 +66,14 @@ public class DragAndDropStep extends AbstractStep
 		{
 			logger.error(this, "Failed to find source element to be dragged. Locator: {}", source);
 			
-			throw new TestCaseFailedException("Failed to find drag element - '{}'", source);
+			throw new TestCaseFailedException(this, "Failed to find drag element - '{}'", source);
 		}
 
 		if(!destinationElement.isDisplayed())
 		{
 			logger.error(this, "Failed to find targer element to be dropped. Locator: {}", destination);
 			
-			throw new TestCaseFailedException("Failed to find drop area element - '{}'", destination);
+			throw new TestCaseFailedException(this, "Failed to find drop area element - '{}'", destination);
 		}
 
 		try
@@ -96,15 +96,15 @@ public class DragAndDropStep extends AbstractStep
 		} catch(StaleElementReferenceException ex)
 		{
 			logger.error(this, ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
-			throw new TestCaseFailedException("Element with {} or {} is not attached to the page document", sourceElement, destinationElement, ex);
+			throw new TestCaseFailedException(this, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement, ex);
 		} catch(NoSuchElementException e)
 		{
 			logger.error(this, e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
-			throw new TestCaseFailedException("Element with {} or {} was not found in DOM ", sourceElement, destinationElement, e);
+			throw new TestCaseFailedException(this, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement, e);
 		} catch(Exception e)
 		{
 			logger.error(this, e, "Error occurred while performing drag and drop operation");
-			throw new TestCaseFailedException("Error occurred while performing drag and drop operation ", e);
+			throw new TestCaseFailedException(this, "Error occurred while performing drag and drop operation ", e);
 		}
 	}
 

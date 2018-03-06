@@ -79,7 +79,7 @@ public class PopulateFieldStep extends AbstractUiStep
 		if(!UiAutomationUtils.populateField(context, parentElement, locator, value))
 		{
 			logger.error(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
-			throw new TestCaseFailedException("Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
+			throw new TestCaseFailedException(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 		}
 
 		if(pressEnterAtEnd)
