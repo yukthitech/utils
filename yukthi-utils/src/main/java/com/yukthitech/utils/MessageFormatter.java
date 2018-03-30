@@ -26,8 +26,6 @@ package com.yukthitech.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * Utility to format strings in log4j 2 way.
  * 
@@ -83,7 +81,7 @@ public class MessageFormatter
 		while(matcher.find())
 		{
 			//if index is mentioned in pattern
-			if(StringUtils.isNotBlank(matcher.group(1)))
+			if(org.apache.commons.lang3.StringUtils.isNotBlank(matcher.group(1)))
 			{
 				argIndex = Integer.parseInt(matcher.group(1));
 			}

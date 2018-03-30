@@ -27,7 +27,7 @@ package com.yukthitech.utils.beans;
  * Information about a property
  * @author akiran
  */
-class PropertyInfo
+public class PropertyInfo
 {
 	/**
 	 * Actual property

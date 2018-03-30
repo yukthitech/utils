@@ -386,7 +386,7 @@ public class RecursiveAnnotationFactory
 			return null;
 		}
 		
-		logger.trace("Trying to find annotation '{}' on annotation - {}", targetAnnotationType.getName(), parentAnnotation.annotationType().getName());
+		//logger.trace("Trying to find annotation '{}' on annotation - {}", targetAnnotationType.getName(), parentAnnotation.annotationType().getName());
 		
 		//check if annotation is defined directly.
 		A targetAnnotation = parentAnnotation.annotationType().getAnnotation(targetAnnotationType);

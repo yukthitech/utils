@@ -35,7 +35,7 @@ import java.util.Set;
  * 
  * @author akiran
  */
-class BeanInfo
+public class BeanInfo
 {
 	/**
 	 * Bean type for which this info is being defined

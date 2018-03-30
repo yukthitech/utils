@@ -12,6 +12,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.utils.CommonUtils;
+
 /**
  * Manager for managing listeners.
  * @author akiran
@@ -22,6 +24,67 @@ public class EventListenerManager<L>
 	private static Logger logger = LogManager.getLogger(EventListenerManager.class);
 	
 	/**
+	 * Data that can be used to filter listeners before invocation.
+	 * @author akiran
+	 * @param <L> listener type
+	 */
+	public static interface ListenerFilter<L>
+	{
+		/**
+		 * Invoked to determine the filter to be invoked or not.
+		 * @param listener listener to be filtered
+		 * @param data data associated with filter.
+		 * @param listenerMethod method being invoked.
+		 * @param params method parameters with which method is being invoked.
+		 * @return true if listener method should be invoked
+		 */
+		public boolean filter(L listener, Object data, Method listenerMethod, Object... params);
+	}
+	
+	/**
+	 * Used when result from listeners needs to be processed.
+	 * @author akiran
+	 * @param <L> listener type
+	 */
+	public static interface ResultProcessor<L>
+	{
+		
+		/**
+		 * Invoked with result from listener.
+		 *
+		 * @param result the result
+		 * @param listener the listener
+		 * @param data the data
+		 * @param listenerMethod the listener method
+		 * @param params the params
+		 */
+		public void processResult(Object result, L listener, Object data, Method listenerMethod, Object... params);
+	}
+	
+	/**
+	 * Listener with data.
+	 * @author akiran
+	 */
+	private class ListenerWithData
+	{
+		/**
+		 * Listener to be invoked.
+		 */
+		private L listener;
+		
+		/**
+		 * Data associated with listener.
+		 */
+		private Object data;
+
+		public ListenerWithData(L listener, Object data)
+		{
+			this.listener = listener;
+			this.data = data;
+		}
+	}
+	
+	/**
 	 * Event listener proxy object.
 	 */
 	private L proxy;
@@ -29,21 +92,54 @@ public class EventListenerManager<L>
 	/**
 	 * Listeners list.
 	 */
-	private List<L> listeners = new ArrayList<L>();
+	private List<ListenerWithData> listeners = new ArrayList<ListenerWithData>();
 	
 	/**
 	 * Thread pool for executing listeners.
 	 */
 	private ScheduledExecutorService threadPool;
 	
+	/**
+	 * Flag indicating if listeners should be invoked sequentially or parallelly.
+	 */
 	private boolean parallel;
 	
-	private EventListenerManager(boolean parallel)
+	/**
+	 * Filter to be invoked to filter listeners.
+	 */
+	private ListenerFilter<L> filter;
+	
+	/**
+	 * Result processor for listeners.
+	 */
+	private ResultProcessor<L> resultProcessor;
+	
+	private EventListenerManager(boolean parallel, int poolSize)
 	{
 		if(parallel)
 		{
-			threadPool = Executors.newScheduledThreadPool(10);
+			threadPool = Executors.newScheduledThreadPool(poolSize);
 		}
+	}
+	
+	/**
+	 * Sets the filter to be invoked to filter listeners.
+	 *
+	 * @param filter the new filter to be invoked to filter listeners
+	 */
+	public void setFilter(ListenerFilter<L> filter)
+	{
+		this.filter = filter;
+	}
+	
+	/**
+	 * Sets the result processor for listeners.
+	 *
+	 * @param resultProcessor the new result processor for listeners
+	 */
+	public void setResultProcessor(ResultProcessor<L> resultProcessor)
+	{
+		this.resultProcessor = resultProcessor;
 	}
 
 	/**
@@ -71,12 +167,22 @@ public class EventListenerManager<L>
 	 */
 	public void addListener(L listener)
 	{
+		addListener(listener, null);
+	}
+	
+	/**
+	 * Adds the specified listener.
+	 * @param listener listener to add.
+	 * @param data data for listener, which can be used for filtering.
+	 */
+	public void addListener(L listener, Object data)
+	{
 		if(listener == null)
 		{
 			throw new NullPointerException("Listener can not be null.");
 		}
 		
-		listeners.add(listener);
+		listeners.add(new ListenerWithData(listener, data));
 	}
 	
 	/**
@@ -95,7 +201,14 @@ public class EventListenerManager<L>
 	 */
 	public Collection<L> getListeners()
 	{
-		return new ArrayList<L>(listeners);
+		List<L> listeners = new ArrayList<L>();
+		
+		for(ListenerWithData ldata : this.listeners)
+		{
+			listeners.add(ldata.listener);
+		}
+		
+		return listeners;
 	}
 	
 	/**
@@ -104,14 +217,26 @@ public class EventListenerManager<L>
 	 * @param method method to be invoked
 	 * @param params params to be passed
 	 */
-	private void invokeListener(L listener, Method method, Object... params)
+	private void invokeListener(ListenerWithData listener, Method method, Object... params)
 	{
+		if(filter != null && !filter.filter(listener.listener, listener.data, method, params))
+		{
+			return;
+		}
+		
+		Object result = null;
+		
 		try
 		{
-			method.invoke(listener, params);
+			result = method.invoke(listener.listener, params);
+
+			if(resultProcessor != null)
+			{
+				resultProcessor.processResult(result, listener.listener, listener.data, method, params);
+			}
 		}catch(Exception ex)
 		{
-			logger.error("An error occurred while while invoking listener - {}", listener, ex);
+			logger.error("An error occurred while while invoking listener or result processing - {}", listener, ex);
 		}
 	}
 	
@@ -124,7 +249,7 @@ public class EventListenerManager<L>
 	 */
 	private synchronized void invokeMethod(final Method method, final Object... params)
 	{
-		for(L listener : listeners)
+		for(ListenerWithData listener : listeners)
 		{
 			if(!parallel)
 			{
@@ -132,7 +257,7 @@ public class EventListenerManager<L>
 				continue;
 			}
 			
-			final L finalListener = listener;
+			final ListenerWithData finalListener = listener;
 			
 			threadPool.execute(new Runnable()
 			{
@@ -150,10 +275,24 @@ public class EventListenerManager<L>
 	 * @param listenerType
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static <L> EventListenerManager<L> newEventListenerManager(Class<L> listenerType, boolean parallel)
 	{
-		final EventListenerManager<L> manager = new EventListenerManager<L>(parallel);
+		return newEventListenerManager(listenerType, parallel, 10);
+	}
+	
+	/**
+	 * Factory method to create event listener manager.
+	 *
+	 * @param <L> the generic type
+	 * @param listenerType the listener type
+	 * @param parallel the parallel
+	 * @param threadPoolSize the thread pool size
+	 * @return the event listener manager
+	 */
+	@SuppressWarnings("unchecked")
+	public static <L> EventListenerManager<L> newEventListenerManager(Class<L> listenerType, boolean parallel, int threadPoolSize)
+	{
+		final EventListenerManager<L> manager = new EventListenerManager<L>(parallel, threadPoolSize);
 		
 		L proxy = (L) Proxy.newProxyInstance(EventListenerManager.class.getClassLoader(), new Class[] { listenerType }, new InvocationHandler()
 		{
@@ -161,7 +300,7 @@ public class EventListenerManager<L>
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 			{
 				manager.invokeMethod(method, args);
-				return null;
+				return CommonUtils.getDefaultValue(method.getReturnType());
 			}
 		});
 		
