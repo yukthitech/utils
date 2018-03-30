@@ -137,6 +137,15 @@ public class NativeQueryFactory
 			addFile(file);
 		}
 	}
+	
+	/**
+	 * Loads the free marker methods from specified class.
+	 * @param clazz
+	 */
+	public void setFreeMarkerClass(Class<?> clazz)
+	{
+		freeMarkerEngine.loadClass(clazz);
+	}
 
 	/**
 	 * Adder method to add raw query string with free marker template and expressions

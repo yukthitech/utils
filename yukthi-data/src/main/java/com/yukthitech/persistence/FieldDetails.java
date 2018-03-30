@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.NotUpdateable;
+import com.yukthitech.persistence.repository.executors.proxy.IProxyEntity;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -296,7 +297,14 @@ public class FieldDetails
 	{
 		try
 		{
-			return field.get(bean);
+			if(bean instanceof IProxyEntity)
+			{
+				return ((IProxyEntity) bean).$getProxyEntityId();
+			}
+			else
+			{
+				return field.get(bean);
+			}
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("Failed to fetch value from field: " + field.getName(), ex);

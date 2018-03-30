@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -55,6 +56,11 @@ public class QueryCondition implements Cloneable
 	 * Subquery to be used as part of this condition.
 	 */
 	private Subquery subquery;
+	
+	/**
+	 * Data type of underlying field.
+	 */
+	private DataType dataType = DataType.UNKNOWN;
 
 	/**
 	 * Instantiates a new query condition.
@@ -305,6 +311,36 @@ public class QueryCondition implements Cloneable
 		}
 		
 		return Arrays.asList(value);
+	}
+	
+	/**
+	 * Gets the data type of underlying field.
+	 *
+	 * @return the data type of underlying field
+	 */
+	public DataType getDataType()
+	{
+		return dataType;
+	}
+
+	/**
+	 * Sets the data type of underlying field.
+	 *
+	 * @param dataType the new data type of underlying field
+	 */
+	public void setDataType(DataType dataType)
+	{
+		this.dataType = dataType;
+	}
+	
+	/**
+	 * Gets the data type name.
+	 *
+	 * @return the data type name
+	 */
+	public String getDataTypeName()
+	{
+		return dataType.name();
 	}
 
 	/*

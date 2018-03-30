@@ -102,6 +102,7 @@ public class ProxyEntityCreator
 		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, null, null);
 		creator.actualEntity = entity;
 		creator.populateRelationFields(dataMap);
+		creator.actualEntityLoaded = true;
 		
 		return creator.proxyEntity;
 	}
@@ -300,6 +301,21 @@ public class ProxyEntityCreator
 	 */
 	private Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 	{
+		if( Object.class.equals( method.getDeclaringClass()) )
+		{
+			if("hashCode".equals(method.getName()))
+			{
+				return entityDetails.getEntityType().hashCode() + entityId.hashCode();
+			}
+			
+			if("equals".equals(method.getName()))
+			{
+				return proxy == args[0];
+			}
+			
+			return null;
+		}
+		
 		//if the method being invoked is same as id getter simply return the value
 		if(idGetter != null && idGetter.equals(method))
 		{

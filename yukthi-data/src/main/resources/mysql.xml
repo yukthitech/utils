@@ -14,7 +14,11 @@
 					<#if condition.multiValued>
 						<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} (<#list condition.multiValues as item>?<#sep>,</#sep></#list>)</#assign>
 					<#else>
-						<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
+						<#if condition.dataTypeName == 'DATE'>
+							<#assign conditionStrRes> DATE(${tableCode}${condition.column}) ${condition.operator} DATE(?)</#assign>
+						<#else>
+							<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
+						</#if>
 					</#if>
 				</#if>
 			<#else>

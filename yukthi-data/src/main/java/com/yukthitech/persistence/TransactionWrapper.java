@@ -25,7 +25,7 @@ public class TransactionWrapper<T extends ITransaction> implements ITransaction
 		
 		if(existingTransaction)
 		{
-			logger.debug("Commit is called on existing transaction. Ignoring commit call: {}", this);
+			logger.warn("Commit is called on existing transaction. Ignoring commit call: {}", this);
 			return;
 		}
 		

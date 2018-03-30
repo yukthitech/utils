@@ -43,7 +43,7 @@ public class RdbmsTransaction implements ITransaction
 		{
 			if(!committed)
 			{
-				logger.debug("Closed is called on unclosed transaction, rolling back transaction");
+				logger.warn("Close is called on uncommitted transaction, rolling back transaction");
 				rollback();
 				return;
 			}

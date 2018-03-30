@@ -1137,6 +1137,7 @@ public class ConditionQueryBuilder implements Cloneable
 			addTables(query, condition.table.tableCode, includedTables);
 			
 			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getDbColumnName(), condition.operator, value, condition.joinOperator, condition.ignoreCase);
+			groupHead.setDataType(condition.fieldDetails.getDbDataType());
 		}
 
 		//if no group conditions are present on this query
