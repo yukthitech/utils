@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
 
