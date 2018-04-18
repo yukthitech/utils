@@ -70,6 +70,12 @@ public class TransactionWrapper<T extends ITransaction> implements ITransaction
 		return transaction;
 	}
 	
+	@Override
+	public boolean isClosed()
+	{
+		return transaction.isClosed();
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

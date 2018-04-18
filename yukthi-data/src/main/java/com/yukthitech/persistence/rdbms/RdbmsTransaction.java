@@ -115,4 +115,10 @@ public class RdbmsTransaction implements ITransaction
 	{
 		return connection;
 	}
+	
+	@Override
+	public boolean isClosed()
+	{
+		return closed;
+	}
 }
