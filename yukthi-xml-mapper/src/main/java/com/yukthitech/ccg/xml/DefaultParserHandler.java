@@ -59,7 +59,12 @@ public class DefaultParserHandler implements IParserHandler
 	/** The Constant ATTR_PARAMTERS. */
 	public static final String ATTR_PARAMTERS = "params";
 
-	/** The Constant ATTR_BEAN_EXPRESSION. */
+	/**
+	 * Can be used to refer to a constant by using expressions like
+	 * 		<fully qualified class name>.<field name>
+	 * 
+	 * In same way (using dot as delimiter) it can refer to nested public methods or fields.
+	 */
 	public static final String ATTR_BEAN_EXPRESSION = "beanExpr";
 
 	/** The Constant ATTR_TRIM_LINES. */
