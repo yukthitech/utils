@@ -43,6 +43,12 @@ public class BasicArguments
 	 */
 	@CliArgument(name = "list", longName = "automation-listener", description = "Automation listener to be configured.", required = false)
 	private String automationListener;
+	
+	/**
+	 * Flag to indicate report opening.
+	 */
+	@CliArgument(name = "rod", longName = "report-opening-disabled", description = "Boolean value to disable report opening at end. Which is not desired in CI/CD.", required = false)
+	private boolean reportOpeningDisalbed;
 
 	/**
 	 * Gets the if specified the execution will be limited only for this test suites.
@@ -172,5 +178,25 @@ public class BasicArguments
 	public void setAutomationListener(String automationListener)
 	{
 		this.automationListener = automationListener;
+	}
+
+	/**
+	 * Gets the flag to indicate report opening.
+	 *
+	 * @return the flag to indicate report opening
+	 */
+	public boolean isReportOpeningDisalbed()
+	{
+		return reportOpeningDisalbed;
+	}
+
+	/**
+	 * Sets the flag to indicate report opening.
+	 *
+	 * @param reportOpeningDisalbed the new flag to indicate report opening
+	 */
+	public void setReportOpeningDisalbed(boolean reportOpeningDisalbed)
+	{
+		this.reportOpeningDisalbed = reportOpeningDisalbed;
 	}
 }

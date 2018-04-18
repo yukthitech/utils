@@ -355,6 +355,18 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	@Override
 	public void close()
 	{
-		activeDriver.close();
+		if(activeDriver == null)
+		{
+			return;
+		}
+		
+		try
+		{
+			activeDriver.close();
+			activeDriver.quit();
+		}catch(Exception ex)
+		{
+			logger.warn("Ignored error during selenium plugin closing", ex);
+		}
 	}
 }

@@ -286,13 +286,18 @@ public class AutomationLauncher
 		//execute test suites
 		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup);
 		boolean res = testSuiteExecutor.executeTestSuites();
+		
+		context.close();
 
-		try
+		if(!context.getBasicArguments().isReportOpeningDisalbed())
 		{
-			Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
-		}catch(Exception ex)
-		{
-			logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
+			try
+			{
+				Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
+			}catch(Exception ex)
+			{
+				logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
+			}
 		}
 		
 		System.exit( res ? 0 : -1 );
