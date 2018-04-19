@@ -7,6 +7,23 @@ package com.yukthitech.utils;
 public class BitHelper
 {
 	/**
+	 * Sets the flag bit with specified falg value.
+	 * @param flags flags in which bit needs to be set
+	 * @param flag flag bit to set
+	 * @param value value to set
+	 * @return resultant flags
+	 */
+	public static int setFlagValue(int flags, int flag, boolean value)
+	{
+		if(value)
+		{
+			return setFlag(flags, flag);
+		}
+		
+		return unsetFlag(flags, flag);
+	}
+	
+	/**
 	 * Sets the flag in the flags.
 	 * @param flags full flags integer
 	 * @param flag flag to set
