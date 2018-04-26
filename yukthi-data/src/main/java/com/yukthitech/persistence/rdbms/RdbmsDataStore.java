@@ -1017,7 +1017,7 @@ public class RdbmsDataStore implements IDataStore
 				records.add(rec);
 			}
 			
-			logger.debug("Found " + records.size() + " records found from table: " + findQuery.getTableName());
+			logger.debug("Processed " + (recordNo + 1) + " records from db from table: " + findQuery.getTableName());
 			
 			transaction.commit();
 			return records;

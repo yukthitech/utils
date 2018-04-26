@@ -191,6 +191,8 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 				}
 			});
 			
+			logger.debug("Finder query processing resulted in {} records", resLst.size());
+			
 			
 			//if no results found
 			if(resLst.isEmpty())

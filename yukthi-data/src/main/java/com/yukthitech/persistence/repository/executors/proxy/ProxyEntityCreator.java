@@ -313,6 +313,11 @@ public class ProxyEntityCreator
 				return proxy == args[0];
 			}
 			
+			if("toString".equals(method.getName()))
+			{
+				return entityDetails.getEntityType().getName() + "[" + entityId + "]";
+			}
+			
 			return null;
 		}
 		
