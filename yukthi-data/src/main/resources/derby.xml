@@ -121,6 +121,8 @@
 					<#assign dataType="DATE">
 				<#elseif columnType == "BOOLEAN">
 					<#assign dataType="BOOLEAN">
+				<#elseif columnType == "ZIP_BLOB">
+					<#assign dataType="BLOB">
 				<#else>
 					<#assign dataType>${column.typeName}</#assign>
 				</#if>

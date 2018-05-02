@@ -116,6 +116,8 @@
 					<#assign dataType="LONGTEXT">
 				<#elseif columnType == "BLOB">
 					<#assign dataType="LONGBLOB">
+				<#elseif columnType == "ZIP_BLOB">
+					<#assign dataType="LONGBLOB">
 				<#else>
 					<#assign dataType>${column.typeName}</#assign>
 				</#if>

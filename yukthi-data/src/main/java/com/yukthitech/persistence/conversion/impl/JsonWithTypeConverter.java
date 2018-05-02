@@ -62,6 +62,12 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 	@Override
 	public Object convertToDBType(Object javaObject, DataType dbType)
 	{
+		if(javaObject instanceof Enum)
+		{
+			Enum<?> en = (Enum<?>) javaObject;
+			return String.format("[\"%s\", \"%s\"]", en.getClass().getSigners(), en.name());
+		}
+		
 		try
 		{
 			return objectMapper.writeValueAsString(javaObject);
