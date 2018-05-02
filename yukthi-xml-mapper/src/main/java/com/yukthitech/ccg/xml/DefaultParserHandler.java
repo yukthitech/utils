@@ -24,6 +24,7 @@ import com.yukthitech.ccg.xml.reserved.ElementNodeHandler;
 import com.yukthitech.ccg.xml.reserved.EntryNodeHandler;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.reserved.IncludeXmlNodeHandler;
+import com.yukthitech.ccg.xml.reserved.JsonNodeHandler;
 import com.yukthitech.ccg.xml.reserved.NodeName;
 import com.yukthitech.ccg.xml.reserved.RegisterNodeHandler;
 import com.yukthitech.ccg.xml.util.StringUtil;
@@ -61,7 +62,7 @@ public class DefaultParserHandler implements IParserHandler
 
 	/**
 	 * Can be used to refer to a constant by using expressions like
-	 * 		<fully qualified class name>.<field name>
+	 * 		fully qualified class name.field name
 	 * 
 	 * In same way (using dot as delimiter) it can refer to nested public methods or fields.
 	 */
@@ -199,6 +200,7 @@ public class DefaultParserHandler implements IParserHandler
 		registerReserveNodeHandler(new IncludeXmlNodeHandler());
 		registerReserveNodeHandler(new RegisterNodeHandler());
 		registerReserveNodeHandler(new BeanNodeHandler());
+		registerReserveNodeHandler(new JsonNodeHandler());
 	}
 
 	/**
