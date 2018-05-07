@@ -18,6 +18,11 @@ import com.yukthitech.ccg.xml.XMLLoadException;
 public class JsonNodeHandler implements IReserveNodeHandler
 {
 	/**
+	 * Attribute to fetch property name.
+	 */
+	private static final String ATTR_PROPERTY = "property";
+	
+	/**
 	 * Used to parse json.
 	 */
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -25,7 +30,7 @@ public class JsonNodeHandler implements IReserveNodeHandler
 	@Override
 	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
-		String name = att.get("property", null);
+		String name = att.get(ATTR_PROPERTY, null);
 		
 		if(StringUtils.isBlank(name))
 		{
@@ -68,7 +73,7 @@ public class JsonNodeHandler implements IReserveNodeHandler
 		}
 		
 		Object parent = node.getParent();
-		String name = att.get("name", null);
+		String name = att.get(ATTR_PROPERTY, null);
 		
 		try
 		{
