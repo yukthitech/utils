@@ -181,7 +181,7 @@ public class RestClient
 	 */
 	public <T> RestResult<T> invokeJsonRequest(RestRequest<?> request, Class<T> expectedResponseType)
 	{
-		return invokeJsonRequest(request, TypeFactory.defaultInstance().uncheckedSimpleType(expectedResponseType));
+		return invokeJsonRequest(request, TypeFactory.defaultInstance().constructType(expectedResponseType));
 	}
 
 	/**
@@ -206,7 +206,7 @@ public class RestClient
 	 */
 	public <T, W> RestResult<W> invokeJsonRequest(RestRequest<?> request, Class<W> wrapperType, Class<T> expectedResponseType)
 	{
-		JavaType wrapperJavaType = TypeFactory.defaultInstance().constructParametrizedType(wrapperType, wrapperType, expectedResponseType);
+		JavaType wrapperJavaType = TypeFactory.defaultInstance().constructParametricType(wrapperType, expectedResponseType);
 		return invokeJsonRequest(request, wrapperJavaType);
 	}
 
