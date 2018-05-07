@@ -81,9 +81,57 @@ public class QueryCondition implements Cloneable
 		this.tableCode = tableCode;
 		this.column = column;
 		this.operator = operator;
-		this.value = value;
+		this.value = checkForEnum( value );
 		this.joinOperator = joinOperator;
 		this.ignoreCase = ignoreCase;
+	}
+	
+	/**
+	 * If specified value is enum, converts enum to string and returns the same. 
+	 * @param value value to check
+	 * @return converted value.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object checkForEnum(Object value)
+	{
+		//if value is enum
+		if(value instanceof Enum)
+		{
+			return value.toString();
+		}
+		
+		//if value is collection
+		if(value instanceof Collection)
+		{
+			Collection<Object> newCol = new ArrayList<>();
+			Collection<Object> oldCol = (Collection) value;
+			boolean enumFound = false;
+			
+			//check through elements of collection
+			for(Object elem : oldCol)
+			{
+				if(elem instanceof Enum)
+				{
+					newCol.add(elem.toString());
+					enumFound = true;
+				}
+				else
+				{
+					newCol.add(elem);
+				}
+			}
+			
+			//if atleast one enum is found, return converted collection
+			if(enumFound)
+			{
+				return newCol;
+			}
+			
+			//if no enum is found, return actual collection.
+			return oldCol;
+		}
+		
+		return value;
 	}
 
 	/**
