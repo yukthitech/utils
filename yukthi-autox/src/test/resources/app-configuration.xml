@@ -100,8 +100,10 @@
 		<file-log-monitor name="client-output" path="c:\automation.log"/>
 	</wrap:logMonitors>
 
+	<!-- 
 	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kranthi@mail">
 		<toAddressList>akranthikiran@gmail.com</toAddressList>
 		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
 	</summaryNotificationConfig>
+	 -->
 </app>

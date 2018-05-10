@@ -85,7 +85,7 @@ public class AutomationLauncher
 				filePath = xmlFile.getPath();
 				fis = new FileInputStream(xmlFile);
 
-				logger.debug("Loading test data file: {}", filePath);
+				logger.debug("Loading test suite file: {}", filePath);
 				
 				XMLBeanParser.parse(fis, testDataFile, defaultParserHandler);
 				fis.close();
@@ -103,6 +103,11 @@ public class AutomationLauncher
 						throw new InvalidStateException("Duplicate global setups specified. Files: [{}, {}]", setupFile.getPath(), xmlFile.getPath());
 					}
 					
+					if(testDataFile.getSetup().getLocation() == null)
+					{
+						testDataFile.getSetup().setLocation(filePath);
+					}
+					
 					testSuiteGroup.setSetup(testDataFile.getSetup());
 					setupFile = xmlFile;
 				}
@@ -112,6 +117,11 @@ public class AutomationLauncher
 					if(cleanupFile != null)
 					{
 						throw new InvalidStateException("Duplicate global cleaups specified. Files: [{}, {}]", cleanupFile.getPath(), xmlFile.getPath());
+					}
+					
+					if(testDataFile.getCleanup().getLocation() == null)
+					{
+						testDataFile.getCleanup().setLocation(filePath);
 					}
 					
 					testSuiteGroup.setCleanup(testDataFile.getCleanup());

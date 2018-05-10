@@ -58,6 +58,13 @@ public class TestCase implements IStepContainer, Validateable
 	 * Data provider to be used for this test case.
 	 */
 	private IDataProvider dataProvider;
+	
+	/**
+	 * List of failure actions to be invoked when test case is failed.
+	 * This should include diagnosis of different components playing role
+	 * in this test case.
+	 */
+	private List<TestCaseFailureAction> failureActions;
 
 	/**
 	 * Gets the name of the test case.
@@ -256,7 +263,47 @@ public class TestCase implements IStepContainer, Validateable
 
 		return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
+
+	/**
+	 * Adds the failure action.
+	 *
+	 * @param action the action to be executed on failure.
+	 */
+	public void addFailureAction(TestCaseFailureAction action)
+	{
+		if(action == null)
+		{
+			throw new NullPointerException("Action can not be null.");
+		}
+		
+		if(this.failureActions == null)
+		{
+			failureActions = new ArrayList<>();
+		}
+		
+		failureActions.add(action);
+	}
 	
+	/**
+	 * Gets the list of failure actions to be invoked when test case is failed. This should include diagnosis of different components playing role in this test case.
+	 *
+	 * @return the list of failure actions to be invoked when test case is failed
+	 */
+	public List<TestCaseFailureAction> getFailureActions()
+	{
+		return failureActions;
+	}
+
+	/**
+	 * Sets the list of failure actions to be invoked when test case is failed. This should include diagnosis of different components playing role in this test case.
+	 *
+	 * @param failureActions the new list of failure actions to be invoked when test case is failed
+	 */
+	public void setFailureActions(List<TestCaseFailureAction> failureActions)
+	{
+		this.failureActions = failureActions;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

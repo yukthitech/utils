@@ -29,6 +29,13 @@ public interface IDataTableRepository extends ICrudRepository<DataTableEntity>
 	public boolean updateValue(@Condition("key") String key, @Field("value") Object value);
 	
 	/**
+	 * Deletes the entry with specified key.
+	 * @param key key to be deleted
+	 * @return true if deleted.
+	 */
+	public boolean deleteByKey(@Condition("key") String key);
+	
+	/**
 	 * Fetches value with specified key.
 	 * @param key
 	 * @return

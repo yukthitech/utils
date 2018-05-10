@@ -74,6 +74,21 @@ public class PersistenceStorage
 	}
 	
 	/**
+	 * Deletes entry with specified key.
+	 * @param key key to be delete.
+	 * @return true if deleted.
+	 */
+	public boolean remove(String key)
+	{
+		if(dataTableRepository == null)
+		{
+			throw new IllegalStateException("No storage repository specified for storage.");
+		}
+		
+		return dataTableRepository.deleteByKey(key);
+	}
+	
+	/**
 	 * To be called before starting test case execution. This will store execution details in storage.
 	 * @param testSuite Test suite being executed.
 	 * @param testCase test case being executed.

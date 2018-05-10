@@ -72,6 +72,7 @@ public class WaitForStep extends AbstractUiStep
 						if(element == null || !element.isDisplayed())
 						{
 							exeLogger.debug(this, "Found locator '{}' to be hidden", getLocatorWithParent(locator));
+							return true;
 						}
 					}
 					//if element needs to be checked for visibility

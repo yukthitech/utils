@@ -70,7 +70,7 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	{
 		reserveNodeHandler.setFileBeingParsed(fileBeingParsed);
 	}
-
+	
 	@Override
 	public Object createBean(BeanNode node, XMLAttributeMap att, ClassLoader loader)
 	{

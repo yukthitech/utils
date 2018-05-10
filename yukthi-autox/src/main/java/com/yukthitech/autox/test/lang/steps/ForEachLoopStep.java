@@ -58,6 +58,12 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	 */
 	@Param(description = "Loop index variable that will be used to set loop iteration index on context. Default: loopIdxVar", required = false)
 	private String loopIdxVar = "loopIdxVar";
+	
+	/**
+	 * Ignores error during iteration and continues to next iteration.
+	 */
+	@Param(description = "Ignores error during iteration and continues to next iteration.", required = false)
+	private boolean ignoreError = false;
 
 	/**
 	 * Sets the expression which will be evaluated to collection or map or String.
@@ -111,6 +117,16 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	public void setLoopIdxVar(String loopIdxVar)
 	{
 		this.loopIdxVar = loopIdxVar;
+	}
+	
+	/**
+	 * Sets the ignores error during iteration and continues to next iteration.
+	 *
+	 * @param ignoreError the new ignores error during iteration and continues to next iteration
+	 */
+	public void setIgnoreError(boolean ignoreError)
+	{
+		this.ignoreError = ignoreError;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -172,6 +188,14 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			} catch(ContinueException ex)
 			{
 				continue;
+			} catch(RuntimeException ex)
+			{
+				if(ignoreError)
+				{
+					exeLogger.error(ForEachLoopStep.this, "Iteration resulted in error, which is being ignore.", ex);
+				}
+				
+				throw ex;
 			}
 			
 			idx++;

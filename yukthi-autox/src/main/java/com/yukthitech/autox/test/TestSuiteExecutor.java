@@ -377,7 +377,7 @@ public class TestSuiteExecutor
 			return true;
 		}
 		
-		logger.debug("Executing {} setup steps...", prefix);
+		logger.debug("Executing {} setup steps specified at location: {}", prefix, setup.getLocation());
 		
 		TestCaseResult testCaseResult = setup.execute(context);
 		reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");

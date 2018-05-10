@@ -4,6 +4,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
@@ -80,9 +81,31 @@ public class MoveToStep extends AbstractUiStep
 				//before performing move-to ensure the target element is in view port of browser
 				((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(" + alignToTop + ");", webElement);
 				
-				Actions actions = new Actions(driver);
-				actions.moveToElement(webElement);
-				actions.build().perform();
+				for(int retry = 0; ; retry++)
+				{
+					try
+					{
+						Actions actions = new Actions(driver);
+						actions.moveToElement(webElement);
+						actions.build().perform();
+						break;
+					}catch(MoveTargetOutOfBoundsException ex)
+					{
+						if(retry > 2)
+						{
+							break;
+						}
+						
+						exeLogger.debug(MoveToStep.this, "As the target is out of bounds waiting for 1.5 sec before retry!");
+
+						//sleep for sometime before move, so that scrolling is completed
+						try
+						{
+							Thread.sleep(1500);
+						}catch(Exception iex)
+						{}
+}
+				}
 				
 				return true;
 			} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND,
