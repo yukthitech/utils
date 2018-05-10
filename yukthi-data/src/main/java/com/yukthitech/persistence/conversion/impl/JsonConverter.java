@@ -7,9 +7,7 @@ import java.sql.Clob;
 
 import org.apache.commons.io.IOUtils;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.DataTypeMapping;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
@@ -27,11 +25,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class JsonConverter implements IPersistenceConverter
 {
 	private static ObjectMapper objectMapper = new ObjectMapper();
-	
-	static
-	{
-		objectMapper.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
-	}
 	
 	/* (non-Javadoc)
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToJavaType(java.lang.Object, com.fw.persistence.annotations.DataType, java.lang.Class)

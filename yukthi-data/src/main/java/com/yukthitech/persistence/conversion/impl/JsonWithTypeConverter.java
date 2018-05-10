@@ -59,13 +59,14 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 	/* (non-Javadoc)
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToDBType(java.lang.Object, com.fw.persistence.annotations.DataType)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object convertToDBType(Object javaObject, DataType dbType)
 	{
 		if(javaObject instanceof Enum)
 		{
 			Enum<?> en = (Enum<?>) javaObject;
-			return String.format("[\"%s\", \"%s\"]", en.getClass().getSigners(), en.name());
+			return String.format("[\"%s\", \"%s\"]", ((Enum) javaObject).getDeclaringClass().getName(), en.name());
 		}
 		
 		try

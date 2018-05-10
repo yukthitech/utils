@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.GenerationType;
 
+import org.apache.commons.beanutils.PropertyUtils;
+
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.NotUpdateable;
 import com.yukthitech.persistence.repository.executors.proxy.IProxyEntity;
@@ -299,7 +301,14 @@ public class FieldDetails
 		{
 			if(bean instanceof IProxyEntity)
 			{
-				return ((IProxyEntity) bean).$getProxyEntityId();
+				if(isIdField())
+				{
+					return ((IProxyEntity) bean).$getProxyEntityId();
+				}
+				else
+				{
+					return PropertyUtils.getProperty(bean, field.getName());
+				}
 			}
 			else
 			{
