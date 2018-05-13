@@ -39,7 +39,7 @@ public class JsonConverter implements IPersistenceConverter
 		
 		try
 		{
-			return objectMapper.readValue((String) dbObject, Object.class);
+			return objectMapper.readValue((String) dbObject, javaType);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while parsing json string", ex);

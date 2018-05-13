@@ -45,7 +45,7 @@ public class IncludeXmlNodeHandler implements IReserveNodeHandler
 				xmlInput = new FileInputStream(filePath);
 			}
 			
-			XMLBeanParser.parse(xmlInput, parserHandler.getRootBean());
+			XMLBeanParser.parse(xmlInput, parserHandler.getRootBean(), parserHandler);
 			
 			xmlInput.close();
 		}catch(Exception ex)
