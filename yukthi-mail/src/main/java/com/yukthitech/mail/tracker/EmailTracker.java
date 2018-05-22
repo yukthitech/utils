@@ -421,7 +421,17 @@ public class EmailTracker
 			// process the mail
 			MailProcessingContext mailProcessingContext = new MailProcessingContext(message, mailFolder);
 			
-			if(!mailProcessor.process(mailProcessingContext, mailMessage))
+			boolean isMailProcessed = false;
+			
+			try
+			{
+				isMailProcessed = mailProcessor.process(mailProcessingContext, mailMessage);
+			}catch(Exception ex)
+			{
+				logger.error("An error occurred while processing mail with subject: {}", mailMessage.getSubject(), ex);
+			}
+			
+			if(!isMailProcessed)
 			{
 				if(!mailProcessingContext.processed)
 				{
@@ -430,17 +440,18 @@ public class EmailTracker
 			}
 		}
 
-		lastReadTime = new Date();
+		lastReadTime = mailProcessor.setLastReadTime( new Date() );
+		
+		if(lastReadTime == null)
+		{
+			lastReadTime = new Date();
+		}
+		
 		mailFolder.close(false);
 	}
 
 	/**
 	 * Reads the mails from the email server specified by settings.
-	 * 
-	 * @param settings
-	 *            Mail server settings from which mails has to be read.
-	 * @param mailProcessor
-	 *            Processor to process read mails.
 	 */
 	public void readMails()
 	{

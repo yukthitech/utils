@@ -1,5 +1,7 @@
 package com.yukthitech.mail.tracker;
 
+import java.util.Date;
+
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +31,12 @@ public class TFEmailTracker
 			}
 			
 			return false;
+		}
+
+		@Override
+		public Date setLastReadTime(Date time)
+		{
+			return time;
 		}
 	}
 	
