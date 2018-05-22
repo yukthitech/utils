@@ -362,7 +362,7 @@ public class DefaultParserHandler implements IParserHandler
 
 		return btype;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

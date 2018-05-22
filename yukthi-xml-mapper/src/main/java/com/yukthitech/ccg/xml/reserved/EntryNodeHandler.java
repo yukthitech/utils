@@ -7,10 +7,12 @@ import java.util.Map;
 import org.xml.sax.Locator;
 
 import com.yukthitech.ccg.xml.BeanNode;
+import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.XMLLoadException;
 import com.yukthitech.ccg.xml.XMLUtil;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Reserve node handler to load entries into parent map.
@@ -57,6 +59,19 @@ public class EntryNodeHandler implements IReserveNodeHandler
 		att.remove("key");
 		node.getAttributeMap().removeAttribute("key");
 		
+		if(att.containsReservedKey(DefaultParserHandler.ATTR_BEAN_TYPE))
+		{
+			String beanType = att.getReserved(DefaultParserHandler.ATTR_BEAN_TYPE, null);
+			
+			try
+			{
+				valueType = Class.forName(beanType);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("Invalid bean type specified: {}", beanType);
+			}
+		}
+
 		node.setType(valueType);
 		node.setActualType(valueType);
 

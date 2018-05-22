@@ -60,7 +60,7 @@ public class XMLUtil
 		if(type == null)
 			throw new NullPointerException("Type can not be null.");
 
-		if(type.isPrimitive())
+		if(type.isPrimitive() || type.isEnum())
 			return true;
 
 		return (supportedAttrTypes.contains(type));

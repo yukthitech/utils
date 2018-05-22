@@ -100,7 +100,7 @@ public interface IParserHandler extends XMLConstants
 	 * @return
 	 */
 	public Class<?> getDynamicBeanType(BeanNode node, XMLAttributeMap att);
-
+	
 	/**
 	 * Parses the text node value.
 	 *

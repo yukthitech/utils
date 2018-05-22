@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.xml.sax.Locator;
 
 import com.yukthitech.ccg.xml.BeanNode;
+import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.XMLUtil;
@@ -40,6 +41,19 @@ public class ElementNodeHandler implements IReserveNodeHandler
 		else
 		{
 			elementType = (Class<?>)((ParameterizedType)genericType).getActualTypeArguments()[0];			
+		}
+		
+		if(att.containsReservedKey(DefaultParserHandler.ATTR_BEAN_TYPE))
+		{
+			String beanType = att.getReserved(DefaultParserHandler.ATTR_BEAN_TYPE, null);
+			
+			try
+			{
+				elementType = Class.forName(beanType);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("Invalid bean type specified: {}", beanType);
+			}
 		}
 		
 		node.setType(elementType);

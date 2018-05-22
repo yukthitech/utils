@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.yukthitech.utils.CommonUtils;
+
 public class ListBean
 {
 	private List<String> strList;
@@ -52,5 +54,38 @@ public class ListBean
 	public void setObjectList(LinkedList<Object> objectList)
 	{
 		this.objectList = objectList;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj == this)
+		{
+			return true;
+		}
+
+		if(!(obj instanceof ListBean))
+		{
+			return false;
+		}
+
+		ListBean other = (ListBean) obj;
+		return CommonUtils.isEqual(strList, other.strList)
+				&& CommonUtils.isEqual(intSet, other.intSet)
+				&& CommonUtils.isEqual(this.beanList, other.beanList)
+				&& CommonUtils.isEqual(this.objectList, other.objectList)
+				;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashcode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		return 1;
 	}
 }

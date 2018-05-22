@@ -3,6 +3,8 @@ package com.yukthitech.test.beans;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.yukthitech.utils.CommonUtils;
+
 public class MapBean
 {
 	private Map<String, String> strMap;
@@ -51,5 +53,38 @@ public class MapBean
 	public void setObjectMap(TreeMap<String, Object> objectMap)
 	{
 		this.objectMap = objectMap;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj == this)
+		{
+			return true;
+		}
+
+		if(!(obj instanceof MapBean))
+		{
+			return false;
+		}
+
+		MapBean other = (MapBean) obj;
+		return CommonUtils.isEqual(intMap, other.intMap)
+				&& CommonUtils.isEqual(this.strMap, other.strMap)
+				&& CommonUtils.isEqual(this.beanMap, other.beanMap)
+				&& CommonUtils.isEqual(this.objectMap, other.objectMap)
+				;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashcode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		return 1;
 	}
 }

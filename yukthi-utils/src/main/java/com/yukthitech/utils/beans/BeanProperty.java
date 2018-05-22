@@ -1,13 +1,14 @@
 package com.yukthitech.utils.beans;
 
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.beanutils.PropertyUtils;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -17,6 +18,21 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class BeanProperty
 {
+	/**
+	 * Setter method pattern.
+	 */
+	private static final Pattern SETTER_PATTERN = Pattern.compile("set([\\w\\$]+)");
+	
+	/**
+	 * Getter method pattern.
+	 */
+	private static final Pattern GETTER_PATTERN = Pattern.compile("get([\\w\\$]+)");
+	
+	/**
+	 * Is method pattern.
+	 */
+	private static final Pattern IS_PATTERN = Pattern.compile("is([\\w\\$]+)");
+	
 	/**
 	 * Name of the property.
 	 */
@@ -57,6 +73,16 @@ public class BeanProperty
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.field = field;
+	}
+	
+	/**
+	 * Instantiates a new bean property.
+	 *
+	 * @param name the name
+	 */
+	private BeanProperty(String name)
+	{
+		this.name = name;
 	}
 	
 	/**
@@ -228,12 +254,10 @@ public class BeanProperty
 	 */
 	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable)
 	{
-		PropertyDescriptor propertyDescriptors[] = PropertyUtils.getPropertyDescriptors(beanType);
+		List<BeanProperty> propLst = fetchProperties(beanType);
+		List<BeanProperty> resLst = new ArrayList<BeanProperty>(propLst.size());
 		
-		List<BeanProperty> beanProperties = new ArrayList<BeanProperty>(propertyDescriptors.length);
-		Field field = null;
-		
-		for(PropertyDescriptor prop : propertyDescriptors)
+		for(BeanProperty prop : propLst)
 		{
 			//ignore getClass method
 			if(prop.getReadMethod() != null && "getClass".equals(prop.getReadMethod().getName()))
@@ -252,18 +276,122 @@ public class BeanProperty
 			{
 				continue;
 			}
+
+			resLst.add(prop);
+		}
+		
+		return resLst;
+	}
+	
+	/**
+	 * Parses the method name and checks if setter or getter and populated bean property map approp.
+	 * @param method method to be inspected
+	 * @param propMap prop map to be populated
+	 */
+	private static void fetchPropertyDetails(Method method, Map<String, BeanProperty> propMap)
+	{
+		boolean setter = true;
+		Matcher matcher = SETTER_PATTERN.matcher(method.getName());
+		Class<?> type = null;
+		
+		//if not setter method
+		if(!matcher.matches())
+		{
+			//before checking for getter pattern, ensure zero params
+			if(method.getParameterTypes().length > 0 || void.class.equals(method.getReturnType()))
+			{
+				return;
+			}
+			
+			setter = false;
+			
+			//check if getter
+			matcher = GETTER_PATTERN.matcher(method.getName());
+
+			if(!matcher.matches())
+			{
+				if(!boolean.class.equals(method.getReturnType()))
+				{
+					return;
+				}
+				
+				matcher = IS_PATTERN.matcher(method.getName());
+				
+				if(!matcher.matches())
+				{
+					return;
+				}
+			}
+			
+			type = method.getReturnType();
+		}
+		//if setter ensure single param
+		else 
+		{
+			if(method.getParameterTypes().length != 1)
+			{
+				return;
+			}
+			
+			type = method.getParameterTypes()[0];
+		}
+
+		String propName = matcher.group(1);
+		//make first char of prop name to lower
+		propName = propName.substring(0, 1).toLowerCase() + propName.substring(1);
+		
+		BeanProperty beanProperty = propMap.get(propName);
+		
+		if(beanProperty == null)
+		{
+			beanProperty = new BeanProperty(propName);
+			beanProperty.type = type;
 			
 			try
 			{
-				field = beanType.getDeclaredField(prop.getName());
+				Field field = method.getDeclaringClass().getDeclaredField(propName);
+				beanProperty.field = field;
 			}catch(NoSuchFieldException ex)
 			{
-				field = null;
+				//ignore
 			}
 			
-			beanProperties.add(new BeanProperty(prop.getName(), prop.getPropertyType(), prop.getReadMethod(), prop.getWriteMethod(), field));
+			propMap.put(propName, beanProperty);
+		}
+		//for existing property ensure type is matching
+		else
+		{
+			if(!type.equals(beanProperty.type))
+			{
+				return;
+			}
 		}
 		
-		return beanProperties;
+		if(setter)
+		{
+			beanProperty.writeMethod = method;
+		}
+		else
+		{
+			beanProperty.readMethod = method;
+		}
+	}
+	
+	/**
+	 * Fetches properties for given type.
+	 * @param beanType type for which properties needs to be fetched.
+	 * @return properties
+	 */
+	private static List<BeanProperty> fetchProperties(Class<?> beanType)
+	{
+		Method methods[] = beanType.getMethods();
+		Map<String, BeanProperty> propMap = new TreeMap<String, BeanProperty>();
+		
+		for(Method method : methods)
+		{
+			fetchPropertyDetails(method, propMap);
+		}
+		
+		return new ArrayList<BeanProperty>(propMap.values());
 	}
 }

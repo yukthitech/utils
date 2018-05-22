@@ -6,10 +6,13 @@ package com.yukthitech.utils;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -471,4 +474,87 @@ public class CommonUtils
 		}
 	}
 	
+	/**
+	 * Checks if is specified 2 collections are equal. Two collections are considered equal only if
+	 * both has equal objects (according to equals() method) in same sequence. Two null values both at collection
+	 * or element level  is considered to be equal.
+	 *
+	 * @param collection1 the collection1
+	 * @param collection2 the collection2
+	 * @return true, if both collections are equal
+	 */
+	public static boolean isEqual(Collection<? extends Object> collection1, Collection<? extends Object> collection2)
+	{
+		if(collection1 == null)
+		{
+			return (collection2 == null);
+		}
+		
+		if(collection2 == null)
+		{
+			return (collection1 == null);
+		}
+		
+		if(collection1.size() != collection2.size())
+		{
+			return false;
+		}
+		
+		Iterator<? extends Object> it1 = collection1.iterator();
+		Iterator<? extends Object> it2 = collection2.iterator();
+		
+		while(it1.hasNext())
+		{
+			Object o1 = it1.next();
+			Object o2 = it2.next();
+			
+			if(!Objects.equals(o1, o2))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if is specified 2 maps are equal. Two maps are considered equal only if
+	 * both has equal entries (according to equals() method). Two null values both at collection
+	 * or element level  is considered to be equal.
+	 *
+	 * @param map1 the map1
+	 * @param map2 the map2
+	 * @return true, if both maps are equal
+	 */
+	public static boolean isEqual(Map<? extends Object, ? extends Object> map1, Map<? extends Object, ? extends Object> map2)
+	{
+		if(map1 == null)
+		{
+			return (map2 == null);
+		}
+		
+		if(map2 == null)
+		{
+			return (map1 == null);
+		}
+		
+		if(map1.size() != map2.size())
+		{
+			return false;
+		}
+		
+		Iterator<? extends Object> it1 = map1.keySet().iterator();
+		
+		while(it1.hasNext())
+		{
+			Object key = it1.next();
+			
+			if(!Objects.equals(map1.get(key), map2.get(key)))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }
