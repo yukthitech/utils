@@ -98,7 +98,7 @@ class BeanToDocPopulator
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void populateCollectionNode(Document document, Element lstElem, Object value, Type genericType)
+	private static void populateCollectionNode(Document document, Element lstElem, Object value, Type genericType, XmlWriterConfig writerConfig)
 	{
 		//fetch element type
 		Type elementType = null;
@@ -123,13 +123,13 @@ class BeanToDocPopulator
 			}
 			else
 			{
-				populateElement(document, elemElem, elemBean, elementType);
+				populateElement(document, elemElem, elemBean, elementType, writerConfig);
 			}
 		}
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void populateMapNode(Document document, Element mapElem, Object value, Type genericType)
+	private static void populateMapNode(Document document, Element mapElem, Object value, Type genericType, XmlWriterConfig writerConfig)
 	{
 		//fetch element type
 		Type valueType = Object.class;
@@ -158,7 +158,7 @@ class BeanToDocPopulator
 			}
 			else
 			{
-				populateElement(document, entryElem, mapValue, valueType);
+				populateElement(document, entryElem, mapValue, valueType, writerConfig);
 			}
 		}
 	}
@@ -170,7 +170,7 @@ class BeanToDocPopulator
 	 * @param value
 	 * @param prop
 	 */
-	private static void createSubnode(Document document, Element parentElem, Object value, BeanProperty prop)
+	private static void createSubnode(Document document, Element parentElem, Object value, BeanProperty prop, XmlWriterConfig writerConfig)
 	{
 		XmlElement elem = prop.getAnnotation(XmlElement.class);
 		String name = ( elem == null || StringUtils.isBlank(elem.name()) ) ? prop.getName() : elem.name();
@@ -178,7 +178,7 @@ class BeanToDocPopulator
 		Element newElem = document.createElement(name);
 		parentElem.appendChild(newElem);
 		
-		populateElement(document, newElem, value, prop.getReadMethod().getGenericReturnType());
+		populateElement(document, newElem, value, prop.getReadMethod().getGenericReturnType(), writerConfig);
 	}
 	
 	/**
@@ -187,7 +187,7 @@ class BeanToDocPopulator
 	 * @param element
 	 * @param bean
 	 */
-	public static void populateElement(Document document, Element element, Object bean, Type declaredType)
+	public static void populateElement(Document document, Element element, Object bean, Type declaredType, XmlWriterConfig writerConfig)
 	{
 		Class<?> rawDeclaredType = null;
 		
@@ -210,13 +210,13 @@ class BeanToDocPopulator
 		
 		if(bean instanceof Collection)
 		{
-			populateCollectionNode(document, element, bean, declaredType);
+			populateCollectionNode(document, element, bean, declaredType, writerConfig);
 			return;
 		}
 		
 		if(bean instanceof Map)
 		{
-			populateMapNode(document, element, bean, declaredType);
+			populateMapNode(document, element, bean, declaredType, writerConfig);
 			return;
 		}
 		
@@ -226,7 +226,7 @@ class BeanToDocPopulator
 			return;
 		}
 
-		List<BeanProperty> properties = XmlBeanWriter.getReadProperties(bean.getClass());
+		List<BeanProperty> properties = XmlBeanWriter.getReadProperties(bean.getClass(), writerConfig);
 		Object value = null;
 		
 		for(BeanProperty prop : properties)
@@ -250,7 +250,7 @@ class BeanToDocPopulator
 				continue;
 			}
 			
-			createSubnode(document, element, value, prop);
+			createSubnode(document, element, value, prop, writerConfig);
 		}
 	}
 }

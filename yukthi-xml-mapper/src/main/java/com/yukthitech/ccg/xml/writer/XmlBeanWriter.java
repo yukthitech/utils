@@ -40,11 +40,16 @@ public class XmlBeanWriter
 	public static final String CCG_PREFIX = "ccg:";
 	
 	/**
+	 * Default xml writer configuration.
+	 */
+	private static XmlWriterConfig DEF_WRITER_CONFIG = new XmlWriterConfig();
+	
+	/**
 	 * Fetches properties for specified type.
 	 * @param type type for which properties needs to be fetched
 	 * @return properties
 	 */
-	synchronized static List<BeanProperty> getReadProperties(Class<?> type)
+	synchronized static List<BeanProperty> getReadProperties(Class<?> type, XmlWriterConfig writerConfig)
 	{
 		List<BeanProperty> properties = typeToProperties.get(type);
 		
@@ -53,7 +58,8 @@ public class XmlBeanWriter
 			return properties;
 		}
 		
-		properties = BeanProperty.loadProperties(type, true, false);
+		boolean readCompatible = writerConfig.isReadCompatible();
+		properties = BeanProperty.loadProperties(type, true, readCompatible);
 		typeToProperties.put(type, properties);
 		
 		return properties;
@@ -73,10 +79,24 @@ public class XmlBeanWriter
 	public static String writeToString(String rootName, Object bean)
 	{
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        writeTo(rootName, bean, bos);
+        writeTo(rootName, bean, bos, null);
         return new String(bos.toByteArray());
 	}
 	
+	/**
+	 * Creates the xml out of the bean specified.
+	 * @param rootName root element of the output xml document.
+	 * @param bean bean to be converted
+	 * @param config Configuration for writer.
+	 * @return converted xml.
+	 */
+	public static String writeToString(String rootName, Object bean, XmlWriterConfig config)
+	{
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        writeTo(rootName, bean, bos, config);
+        return new String(bos.toByteArray());
+	}
+
 	/**
 	 * Creates the xml out of the bean specified.
 	 * @param rootName root element of the output xml document.
@@ -87,7 +107,27 @@ public class XmlBeanWriter
 		try
 		{
 	        FileOutputStream fos = new FileOutputStream(file);
-	        writeTo(rootName, bean, fos);
+	        writeTo(rootName, bean, fos, null);
+	
+	        fos.close();
+		}catch(IOException ex)
+		{
+			throw new XmlWriteException("An error occurred while wrting xml content to file: {}", file.getPath(), ex);
+		}
+	}
+
+	/**
+	 * Creates the xml out of the bean specified.
+	 * @param rootName root element of the output xml document.
+	 * @param bean bean to be converted
+	 * @param config Configuration for writer.
+	 */
+	public static void writeTo(String rootName, Object bean, File file, XmlWriterConfig config)
+	{
+		try
+		{
+	        FileOutputStream fos = new FileOutputStream(file);
+	        writeTo(rootName, bean, fos, config);
 	
 	        fos.close();
 		}catch(IOException ex)
@@ -104,8 +144,22 @@ public class XmlBeanWriter
 	 */
 	public static void writeTo(String rootName, Object bean, OutputStream os)
 	{
+		writeTo(rootName, bean, os, null);
+	}
+	
+	/**
+	 * Converts specified bean to xml and writes it to specified output stream.
+	 * @param rootName root element of the output xml document.
+	 * @param bean bean to be converted
+	 * @param os output stream to which xml should be written
+	 * @param writerConfig Configuration for writer.
+	 */
+	public static void writeTo(String rootName, Object bean, OutputStream os, XmlWriterConfig writerConfig)
+	{
 		try
 		{
+			writerConfig = (writerConfig == null) ? DEF_WRITER_CONFIG : writerConfig;
+			
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.newDocument();
@@ -118,13 +172,27 @@ public class XmlBeanWriter
 			rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", XMLConstants.CCG_WRAP_URI);
 			
 			rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_DATE_FORMAT, DEF_DATE_FORMAT_STR);
+			rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_BEAN_TYPE, bean.getClass().getName());
 			
-			BeanToDocPopulator.populateElement(doc, rootElement, bean, null);
+			if(writerConfig.isEscapeExpressions())
+			{
+				Element exprElement = doc.createElement(CCG_PREFIX + DefaultParserHandler.RNODE_EXPR_PATTERN);
+				exprElement.setAttribute(DefaultParserHandler.ATTR_ENABLED, "false");
+				
+				rootElement.appendChild(exprElement);
+			}
+			
+			BeanToDocPopulator.populateElement(doc, rootElement, bean, null, writerConfig);
 			
 			//generate the xml from document
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	        Transformer transformer = transformerFactory.newTransformer();
-	        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	        
+	        if(writerConfig.isIndentXml())
+	        {
+	        	transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	        }
+	        
 	        DOMSource source = new DOMSource(doc);
 	
 	        //write to console or file
