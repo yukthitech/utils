@@ -32,6 +32,11 @@ import java.io.File;
 public class FileInfo
 {
 	/**
+	 * Name of the attchment file to set.
+	 */
+	private String name;
+	
+	/**
 	 * File to upload
 	 */
 	private File file;
@@ -50,13 +55,35 @@ public class FileInfo
 	/**
 	 * Instantiates a new file info.
 	 *
+	 * @param name the name
 	 * @param file the file
 	 * @param contentType the content type
 	 */
-	public FileInfo(File file, String contentType)
+	public FileInfo(String name, File file, String contentType)
 	{
+		this.name = name;
 		this.file = file;
 		this.contentType = contentType;
+	}
+	
+	/**
+	 * Gets the name of the attchment file to set.
+	 *
+	 * @return the name of the attchment file to set
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+	/**
+	 * Sets the name of the attchment file to set.
+	 *
+	 * @param name the new name of the attchment file to set
+	 */
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	/**

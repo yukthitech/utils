@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -250,14 +251,30 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 */
 	public void addAttachment(String field, File file, String contentType)
 	{
+		addAttachment(field, null, file, contentType);
+	}
+	
+	/**
+	 * Adds file param to the request
+	 * 
+	 * @param field
+	 *            Name of the field
+	 * @param file
+	 *            File to be attached
+	 * @param contentType File content mime type
+	 */
+	public void addAttachment(String field, String name, File file, String contentType)
+	{
 		if(!multipartRequest)
 		{
 			throw new IllegalStateException("Attachments can be added only to multi part request");
 		}
+		
+		name = StringUtils.isBlank(name) ? file.getName() : name;
 
-		this.multiparts.add(new RequestPart(field, new FileInfo(file, contentType), null));
+		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null));
 	}
-	
+
 	/**
 	 * Adds the specified object as json part to this multipart request
 	 * @param partName Name of the request part
@@ -346,7 +363,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 					
 					if(fileInfo.getContentType() != null)
 					{
-						builder.addPart(part.name, new FileBody(fileInfo.getFile(), ContentType.create(fileInfo.getContentType())));
+						builder.addPart(part.name, new FileBody(fileInfo.getFile(), ContentType.create(fileInfo.getContentType()), fileInfo.getName()));
 					}
 					else
 					{
