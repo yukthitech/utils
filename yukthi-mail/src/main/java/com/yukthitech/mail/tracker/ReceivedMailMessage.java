@@ -91,6 +91,11 @@ public class ReceivedMailMessage
 	}
 	
 	/**
+	 * Name extracted from mail id.
+	 */
+	private String fromName;
+	
+	/**
 	 * Mail id from which mail is received.
 	 */
 	private String fromMailId;
@@ -127,15 +132,37 @@ public class ReceivedMailMessage
 	{}
 
 	/**
-	 * Instantiates a new mail message.
+	 * Instantiates a new received mail message.
 	 *
+	 * @param fromName the from name
 	 * @param fromMailId the from mail id
 	 * @param subject the subject
 	 */
-	public ReceivedMailMessage(String fromMailId, String subject)
+	public ReceivedMailMessage(String fromName, String fromMailId, String subject)
 	{
+		this.fromName = fromName;
 		this.fromMailId = fromMailId;
 		this.subject = subject;
+	}
+	
+	/**
+	 * Gets the name extracted from mail id.
+	 *
+	 * @return the name extracted from mail id
+	 */
+	public String getFromName()
+	{
+		return fromName;
+	}
+
+	/**
+	 * Sets the name extracted from mail id.
+	 *
+	 * @param fromName the new name extracted from mail id
+	 */
+	public void setFromName(String fromName)
+	{
+		this.fromName = fromName;
 	}
 
 	/**

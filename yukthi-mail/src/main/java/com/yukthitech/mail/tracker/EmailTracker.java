@@ -409,13 +409,22 @@ public class EmailTracker
 
 			String nameMailId = message.getFrom()[0].toString();
 			String frmMailId = nameMailId;
+			String fromName = null;
 			
 			if(nameMailId.contains("<"))
 			{
+				fromName = nameMailId.substring(0, nameMailId.indexOf("<")).trim();
 				frmMailId = nameMailId.substring(nameMailId.indexOf("<") + 1, nameMailId.indexOf(">")).trim();
 			}
+			else
+			{
+				fromName = nameMailId.substring(0, nameMailId.indexOf("@")).trim();
+				
+				//remove non alpha characters
+				fromName = fromName.replaceAll("[^a-zA-Z]", " ").replaceAll("\\s+", " ").trim();
+			}
 
-			ReceivedMailMessage mailMessage = new ReceivedMailMessage(frmMailId, subject);
+			ReceivedMailMessage mailMessage = new ReceivedMailMessage(fromName, frmMailId, subject);
 			extractMailContent(mailMessage, message.getContent(), message.getContentType());
 
 			// process the mail
@@ -440,11 +449,12 @@ public class EmailTracker
 			}
 		}
 
-		lastReadTime = mailProcessor.setLastReadTime( new Date() );
+		Date now = new Date();
+		lastReadTime = mailProcessor.setLastReadTime(now);
 		
 		if(lastReadTime == null)
 		{
-			lastReadTime = new Date();
+			lastReadTime = now;
 		}
 		
 		mailFolder.close(false);
