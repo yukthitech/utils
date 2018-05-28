@@ -5,10 +5,15 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -169,7 +174,12 @@ public class EmailTracker
 	/**
 	 * Time when last read was done.
 	 */
-	private Date lastReadTime = new Date();
+	private Date lastReadTime = null;
+	
+	/**
+	 * Thread pool to process mails parallel.
+	 */
+	private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
 	
 	/**
 	 * Instantiates a new email tracker.
@@ -219,7 +229,7 @@ public class EmailTracker
 		{
 			public void run()
 			{
-				logger.debug("Starting reading the mails..");
+				logger.debug("Starting reading the mails. Using Timezone: {}", TimeZone.getDefault().getID());
 				
 				while(!stopTracking)
 				{
@@ -377,18 +387,26 @@ public class EmailTracker
 	 */
 	private void readMailsFromFolder(String folderName) throws MessagingException, IOException
 	{
-		logger.debug("Reading mails from folder: {}", folderName);
+		logger.debug("Reading mails from folder: {}. Last read time: {}", folderName, lastReadTime);
 		
 		Folder mailFolder = store.getFolder(folderName);
-		
 		mailFolder.open(Folder.READ_WRITE);
+
+		Message newMessages[] = null;
 		
-		Date earlyMorning = DateUtils.truncate(new Date(), Calendar.DATE);
-		earlyMorning = DateUtils.addSeconds(earlyMorning, -1);
-		
-		SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, earlyMorning);
-		
-		Message newMessages[] = mailFolder.search(newerThan);
+		if(lastReadTime != null)
+		{
+			Date earlyMorning = DateUtils.truncate(lastReadTime, Calendar.DATE);
+			earlyMorning = DateUtils.addSeconds(earlyMorning, -1);
+			
+			SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, earlyMorning);
+			
+			newMessages = mailFolder.search(newerThan);
+		}
+		else
+		{
+			newMessages = mailFolder.getMessages();
+		}
 		
 		if(newMessages.length <= 0)
 		{
@@ -396,57 +414,100 @@ public class EmailTracker
 			return;
 		}
 		
-		for(int i = 0; i < newMessages.length; i++)
+		int count = newMessages.length;
+		final AtomicInteger processedCount = new AtomicInteger(0);
+		
+		for(int i = 0; i < count; i++)
 		{
-			Message message = newMessages[i];
+			final Message message = newMessages[i];
 			
-			if(lastReadTime.after(message.getReceivedDate()))
+			scheduledExecutorService.execute(new Runnable()
 			{
-				continue;
+				public void run()
+				{
+					try
+					{
+						if(lastReadTime != null && lastReadTime.after(message.getReceivedDate()))
+						{
+							return;
+						}
+
+						boolean isReadEarlier = message.isSet(Flag.SEEN);
+						
+						String subject = message.getSubject();
+	
+						String nameMailId = message.getFrom()[0].toString();
+						String frmMailId = nameMailId;
+						String fromName = null;
+						
+						if(nameMailId.contains("<"))
+						{
+							fromName = nameMailId.substring(0, nameMailId.indexOf("<")).trim();
+							frmMailId = nameMailId.substring(nameMailId.indexOf("<") + 1, nameMailId.indexOf(">")).trim();
+						}
+						else
+						{
+							fromName = nameMailId.substring(0, nameMailId.indexOf("@")).trim();
+							
+							//remove non alpha characters
+							fromName = fromName.replaceAll("[^a-zA-Z]", " ").replaceAll("\\s+", " ").trim();
+						}
+	
+						ReceivedMailMessage mailMessage = new ReceivedMailMessage(fromName, frmMailId, subject);
+						extractMailContent(mailMessage, message.getContent(), message.getContentType());
+	
+						// process the mail
+						MailProcessingContext mailProcessingContext = new MailProcessingContext(message, mailFolder);
+						
+						boolean isMailProcessed = false;
+						
+						try
+						{
+							isMailProcessed = mailProcessor.process(mailProcessingContext, mailMessage);
+						}catch(Exception ex)
+						{
+							logger.error("An error occurred while processing mail with subject: {}", mailMessage.getSubject(), ex);
+						}
+						
+						if(!isMailProcessed)
+						{
+							if(!mailProcessingContext.processed && !isReadEarlier)
+							{
+								message.setFlags(READ_FLAGS, false);
+							}
+						}
+					}catch(Exception ex)
+					{
+						throw new InvalidStateException("An error occurred while processing mail: {}", message, ex);
+					} finally
+					{
+						processedCount.incrementAndGet();
+					}
+				}
+			});
+		}
+		
+		//wait for all messages are processed
+		while(true)
+		{
+			int pcount = processedCount.get();
+			
+			if(pcount % 10 == 0 || pcount < 10)
+			{
+				logger.debug("Processed {} number of messages out of {}", pcount, count);
 			}
 			
-			String subject = message.getSubject();
-
-			String nameMailId = message.getFrom()[0].toString();
-			String frmMailId = nameMailId;
-			String fromName = null;
-			
-			if(nameMailId.contains("<"))
+			if(pcount >= count)
 			{
-				fromName = nameMailId.substring(0, nameMailId.indexOf("<")).trim();
-				frmMailId = nameMailId.substring(nameMailId.indexOf("<") + 1, nameMailId.indexOf(">")).trim();
+				logger.debug("Processed {} number of messages out of {}", pcount, count);
+				break;
 			}
-			else
-			{
-				fromName = nameMailId.substring(0, nameMailId.indexOf("@")).trim();
-				
-				//remove non alpha characters
-				fromName = fromName.replaceAll("[^a-zA-Z]", " ").replaceAll("\\s+", " ").trim();
-			}
-
-			ReceivedMailMessage mailMessage = new ReceivedMailMessage(fromName, frmMailId, subject);
-			extractMailContent(mailMessage, message.getContent(), message.getContentType());
-
-			// process the mail
-			MailProcessingContext mailProcessingContext = new MailProcessingContext(message, mailFolder);
-			
-			boolean isMailProcessed = false;
 			
 			try
 			{
-				isMailProcessed = mailProcessor.process(mailProcessingContext, mailMessage);
+				Thread.sleep(5 * 1000);
 			}catch(Exception ex)
-			{
-				logger.error("An error occurred while processing mail with subject: {}", mailMessage.getSubject(), ex);
-			}
-			
-			if(!isMailProcessed)
-			{
-				if(!mailProcessingContext.processed)
-				{
-					message.setFlags(READ_FLAGS, false);
-				}
-			}
+			{}
 		}
 
 		Date now = new Date();
