@@ -1,4 +1,4 @@
-package com.yukthi.utils.fmarker;
+package com.yukthitech.utils.fmarker;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -8,9 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerDirective;
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 import freemarker.template.TemplateDirectiveModel;
 

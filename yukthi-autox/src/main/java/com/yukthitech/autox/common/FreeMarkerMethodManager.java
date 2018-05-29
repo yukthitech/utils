@@ -10,11 +10,11 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 
-import com.yukthi.utils.fmarker.FreeMarkerEngine;
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerDirective;
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 import freemarker.template.TemplateException;
 

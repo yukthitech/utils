@@ -1,4 +1,4 @@
-package com.yukthi.utils.fmarker.directives;
+package com.yukthitech.utils.fmarker.directives;
 
 import java.io.IOException;
 import java.io.StringWriter;

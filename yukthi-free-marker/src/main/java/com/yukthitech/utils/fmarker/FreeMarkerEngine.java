@@ -1,4 +1,4 @@
-package com.yukthi.utils.fmarker;
+package com.yukthitech.utils.fmarker;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -10,10 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthi.utils.fmarker.directives.IndentDirective;
-import com.yukthi.utils.fmarker.directives.InitCapDirective;
-import com.yukthi.utils.fmarker.directives.TrimDirective;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.directives.IndentDirective;
+import com.yukthitech.utils.fmarker.directives.InitCapDirective;
+import com.yukthitech.utils.fmarker.directives.TrimDirective;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;

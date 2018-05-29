@@ -1,4 +1,4 @@
-package com.yukthi.utils.fmarker;
+package com.yukthitech.utils.fmarker;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.DateUtils;
 
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 /**
  * Default free marker methods.

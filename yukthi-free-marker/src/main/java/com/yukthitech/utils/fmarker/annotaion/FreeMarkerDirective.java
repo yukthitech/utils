@@ -1,4 +1,4 @@
-package com.yukthi.utils.fmarker.annotaion;
+package com.yukthitech.utils.fmarker.annotaion;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

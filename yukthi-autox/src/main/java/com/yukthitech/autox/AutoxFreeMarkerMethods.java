@@ -1,7 +1,7 @@
 package com.yukthitech.autox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 /**
  * Freemarker methods specific to autox.

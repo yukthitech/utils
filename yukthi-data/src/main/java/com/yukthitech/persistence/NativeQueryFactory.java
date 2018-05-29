@@ -35,10 +35,10 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthi.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 /**
  * Factory of native queries. Loads the input query resources into a map and provides

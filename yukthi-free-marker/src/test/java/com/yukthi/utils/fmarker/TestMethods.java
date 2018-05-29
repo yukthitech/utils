@@ -1,6 +1,6 @@
 package com.yukthi.utils.fmarker;
 
-import com.yukthi.utils.fmarker.annotaion.FreeMarkerMethod;
+import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 public class TestMethods
 {
