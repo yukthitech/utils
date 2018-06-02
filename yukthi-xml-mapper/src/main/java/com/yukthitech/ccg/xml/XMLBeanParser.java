@@ -146,7 +146,7 @@ public class XMLBeanParser
 			if(schema != null)
 				saxFactory.setSchema(schema);
 			else
-				saxFactory.setValidating(true);
+				saxFactory.setValidating(false);
 
 			saxFactory.setNamespaceAware(true);
 			handler.setParser(this);
