@@ -100,9 +100,19 @@ public class FreeMarkerEngine
 		{
 			Method duplicateMethod = freeMarkerMethodRegistry.get(name);
 			
+			String method1 = duplicateMethod.getDeclaringClass().getName() + "." + duplicateMethod.getName();
+			String method2 = method.getDeclaringClass().getName() + "." + method.getName();
+			
+			//if duplicate method and current methods are same, ignore
+			//	this can happen when same class is loaded multiple times
+			if(method1.equals(method2))
+			{
+				logger.debug("Ignoring duplicate registration of method: {}()", method1);
+				return;
+			}
+			
 			throw new InvalidStateException("Multiple free marker methods are found with same name - [{}.{}(), {}.{}()]", 
-					duplicateMethod.getDeclaringClass().getName(), duplicateMethod.getName(),
-					method.getDeclaringClass().getName(), method.getName());
+					method1, method2);
 		}
 		
 		configuration.setSharedVariable(name, new FreeMarkerMethodModel(method, name));
