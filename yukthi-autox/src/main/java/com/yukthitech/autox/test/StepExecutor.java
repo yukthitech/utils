@@ -57,9 +57,11 @@ public class StepExecutor
 				if(!res)
 				{
 					Executable executable = step.getClass().getAnnotation(Executable.class);
-					exeLogger.error(step, "Validation failed: " + executable.name() + step);
-	
-					throw new TestCaseValidationFailedException(step, "Validation failed: " + executable.name());
+					
+					String message = String.format("Validation %s failed. Validation Details: %s", executable.name()[0], step);
+					
+					exeLogger.error(step, message);
+					throw new TestCaseValidationFailedException(step, message);
 				}
 			}
 		} finally
