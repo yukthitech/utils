@@ -1129,7 +1129,7 @@ public class RdbmsDataStore implements IDataStore
 				records.add(rec);
 			}
 			
-			logger.debug("Found " + records.size() + " records found from table");
+			logger.debug("Found {} records. Out of which {} records are filtered by custom filter.", (recNo + 1), records.size());
 			
 			transaction.commit();
 			return records;
