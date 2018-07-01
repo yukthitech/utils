@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 /**
@@ -16,6 +18,11 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class DefaultMethods
 {
+	/**
+	 * Object mapper to convert object into json.
+	 */
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	
 	/**
 	 * Converts specified date to string with specified format.
 	 * @param date Date to be converted
@@ -133,5 +140,22 @@ public class DefaultMethods
 		}
 		
 		return value.toString();
+	}
+	
+	/**
+	 * Converts specified object into json.
+	 * @param value value to be converted.
+	 * @return coverted json
+	 */
+	@FreeMarkerMethod("toJson")
+	public static String toJson(Object value)
+	{
+		try
+		{
+			return OBJECT_MAPPER.writeValueAsString(value);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while converting value to json", ex);
+		}
 	}
 }

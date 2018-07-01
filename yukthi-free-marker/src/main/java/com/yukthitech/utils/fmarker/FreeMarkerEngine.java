@@ -111,7 +111,7 @@ public class FreeMarkerEngine
 				return;
 			}
 			
-			throw new InvalidStateException("Multiple free marker methods are found with same name - [{}.{}(), {}.{}()]", 
+			throw new InvalidStateException("Multiple free marker methods are found with same name - [{}(), {}()]", 
 					method1, method2);
 		}
 		
