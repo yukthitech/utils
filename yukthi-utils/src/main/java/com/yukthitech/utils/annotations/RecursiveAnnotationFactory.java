@@ -423,7 +423,7 @@ public class RecursiveAnnotationFactory
 		//if direct annotation is found, return the same
 		if(targetAnnotation != null)
 		{
-			logger.debug("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
+			logger.trace("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
 			return targetAnnotation;
 		}
 		
@@ -503,7 +503,7 @@ public class RecursiveAnnotationFactory
 		//if direct annotation is found, return the same
 		if(targetAnnotation != null)
 		{
-			logger.debug("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
+			logger.trace("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
 			matchingAnnot.add(targetAnnotation);
 		}
 
