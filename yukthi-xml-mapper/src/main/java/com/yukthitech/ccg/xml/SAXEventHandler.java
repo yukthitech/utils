@@ -3,6 +3,7 @@ package com.yukthitech.ccg.xml;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -307,15 +308,18 @@ class SAXEventHandler extends DefaultHandler
 		try
 		{
 			met.invoke(parentNode.getActualBean(), parameters);
-		} catch(InvocationTargetException ex)
-		{
-			Throwable th = ex;
-			if(ex.getCause() != null)
-				th = ex.getCause();
-			throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for " + nodeType + ": " + name, th, activeNode, saxLocator);
 		} catch(Exception ex)
 		{
-			throw new XMLLoadException("Failed to invoke method \"" + ReflectionUtils.toString(met) + "\" in bean \"" + beanDesc + "\" for " + nodeType + ": " + name, ex, activeNode, saxLocator);
+			if( (ex instanceof InvocationTargetException) && ex.getCause() != null)
+			{
+				ex = (Exception) ex.getCause();
+			}
+
+			String mssg = String.format("Failed to invoke method '%s' on bean '%s' with args %s. [Node: %s:%s]", ReflectionUtils.toString(met), beanDesc, Arrays.toString(parameters), nodeType, name); 
+			
+			throw new XMLLoadException(
+					mssg, 
+					ex, activeNode, saxLocator);
 		}
 
 	}
