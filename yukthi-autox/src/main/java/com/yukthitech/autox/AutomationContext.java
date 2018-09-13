@@ -22,6 +22,7 @@ import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
+import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.autox.test.TestSuite;
@@ -419,7 +420,24 @@ public class AutomationContext
 		
 		for(Map.Entry<String, ILogMonitor> entry : this.logMonitors.entrySet())
 		{
-			logFiles.put(entry.getKey(), entry.getValue().stopMonitoring());
+			List<LogFile> monitorLogFiles = entry.getValue().stopMonitoring();
+			
+			if(monitorLogFiles == null)
+			{
+				continue;
+			}
+			
+			for(LogFile logFile : monitorLogFiles)
+			{
+				String key = entry.getKey();
+				
+				if(!key.equals(logFile.getName()))
+				{
+					key = key + "[" + logFile.getName() + "]";
+				}
+				
+				logFiles.put(key, logFile.getFile());
+			}
 		}
 		
 		return logFiles;

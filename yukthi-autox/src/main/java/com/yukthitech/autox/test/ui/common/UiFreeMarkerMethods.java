@@ -37,7 +37,7 @@ public class UiFreeMarkerMethods
 		{
 			elementValue = null;
 		}
-		else if("input".equals(element.getTagName().toLowerCase()))
+		else if("input".equals(element.getTagName().toLowerCase()) || "textarea".equals(element.getTagName().toLowerCase()))
 		{
 			elementValue = element.getAttribute("value").trim();
 		}

@@ -2,7 +2,13 @@ package com.yukthitech.autox.logmon;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -21,53 +27,57 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validateable
 {
-	/** The logger. */
 	private static Logger logger = LogManager.getLogger(RemoteFileLogMonitor.class);
 	
-	/**
-	 * Path of file to monitor.
-	 */
-	private String remoteFilePath;
+	private static final Pattern REMOTE_FILE_PATTERN = Pattern.compile("(?<path>.*)\\@(?<host>.*)\\:(?<port>\\d+)");
+	
+	private static class RemoteSessionWithPosition extends RemoteSession
+	{
+		private long position;
+		
+		public RemoteSessionWithPosition(String host, int port, String user, String password, String privateKeyPath)
+		{
+			super(host, port, user, password, privateKeyPath);
+		}
+	}
 	
 	/**
-	 * Internal field to track start position at start of monitoring.
+	 * List of remote file paths in format
+	 * 		filePath@host:port, filePath@host:port
 	 */
-	private long startPosition = -1;
+	private String remoteFilePaths;
 	
-	private RemoteSession remoteSession = new RemoteSession();
+	/**
+	 * User to be used for authentication.
+	 */
+	private String user;
+	
+	/**
+	 * Password for authentication.
+	 */
+	private String password;
+	
+	/**
+	 * Private key path to be used instead of password.
+	 */
+	private String privateKeyPath;
+	
+	/**
+	 * Host to session mapping.8o
+	 */
+	private Map<String, RemoteSessionWithPosition> pathToSession = new HashMap<>();
 	
 	public RemoteFileLogMonitor()
 	{
 	}
-
+	
 	/**
-	 * Sets the path of file to monitor.
-	 *
-	 * @param remoteFilePath the new path of file to monitor
+	 * Adds remote file path.
+	 * @param remoteFilePath path to be added.
 	 */
-	public void setRemoteFilePath(String remoteFilePath)
+	public void addRemoteFilePaths(String remoteFilePaths)
 	{
-		this.remoteFilePath = remoteFilePath;
-	}
-
-	/**
-	 * Sets the host on which remote file is located.
-	 *
-	 * @param host the new host on which remote file is located
-	 */
-	public void setHost(String host)
-	{
-		remoteSession.setHost(host);;
-	}
-
-	/**
-	 * Sets the sSH port, defaults to 22.
-	 *
-	 * @param port the new sSH port, defaults to 22
-	 */
-	public void setPort(int port)
-	{
-		remoteSession.setPort(port);
+		this.remoteFilePaths = remoteFilePaths;
 	}
 
 	/**
@@ -77,7 +87,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setUser(String user)
 	{
-		remoteSession.setUser(user);
+		this.user = user;
 	}
 
 	/**
@@ -87,7 +97,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setPassword(String password)
 	{
-		remoteSession.setPassword(password);
+		this.password = password;
 	}
 
 	/**
@@ -97,7 +107,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	public void setPrivateKeyPath(String privateKeyPath)
 	{
-		remoteSession.setPrivateKeyPath(privateKeyPath);
+		this.privateKeyPath = privateKeyPath;
 	}
 
 	/* (non-Javadoc)
@@ -107,35 +117,68 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public void startMonitoring()
 	{
-		try
+		String paths[] = this.remoteFilePaths.split("\\s*\\,\\s*");
+		
+		for(String remotePath : paths)
 		{
-			ChannelSftp sftp = remoteSession.getChannelSftp();
-			
-			logger.debug("Getting position of remote file: {}", remoteFilePath);
-			
-			Vector<ChannelSftp.LsEntry> lsEntries = sftp.ls(remoteFilePath);
-			
-			if(lsEntries.size() == 0)
+			try
 			{
-				logger.warn("No remote file found under specified path at start of monitoring. Assuming the file will be created. Path: " + remoteFilePath);
-				startPosition = 0;
-				return;
+				Matcher matcher = REMOTE_FILE_PATTERN.matcher(remotePath);
+				
+				RemoteSessionWithPosition remoteSession = new RemoteSessionWithPosition(matcher.group("host"), Integer.parseInt(matcher.group("port")), user, password, privateKeyPath);
+				String remoteFilePath = matcher.group("path");
+				ChannelSftp sftp = remoteSession.getChannelSftp();
+				
+				logger.debug("Getting position of remote file: {}", remoteFilePath);
+				
+				Vector<ChannelSftp.LsEntry> lsEntries = sftp.ls(remoteFilePath);
+				
+				pathToSession.put(remoteFilePath, remoteSession);
+				
+				if(lsEntries.size() == 0)
+				{
+					logger.warn("No remote file found under specified path at start of monitoring. Assuming the file will be created. Path: " + remoteFilePath);
+					return;
+				}
+				
+				ChannelSftp.LsEntry lsEntry = lsEntries.get(0);
+				remoteSession.position = lsEntry.getAttrs().getSize();
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remotePath);
 			}
-			
-			ChannelSftp.LsEntry lsEntry = lsEntries.get(0);
-			startPosition = lsEntry.getAttrs().getSize();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remoteFilePath);
 		}
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see com.yukthitech.automation.logmon.ILogMonitor#stopMonitoring()
+	 * @see com.yukthitech.autox.logmon.ILogMonitor#stopMonitoring()
+	 */
+	@Override
+	public List<LogFile> stopMonitoring()
+	{
+		List<LogFile> logFiles = new ArrayList<>(pathToSession.size());
+		
+		for(String remotePath : pathToSession.keySet())
+		{
+			RemoteSessionWithPosition remoteSession = pathToSession.get(remotePath);
+			LogFile logFile = stopMonitoringSession(remotePath, remoteSession);
+			
+			if(logFile != null)
+			{
+				logFiles.add(logFile);
+			}
+		}
+		
+		return logFiles;
+	}
+
+	/**
+	 * Stops monitoring remote session and fetches corresponding log file.
+	 * @param remoteSession remote session to stop monitoring
+	 * @return corresponding log file
 	 */
 	@SuppressWarnings("unchecked")
-	@Override
-	public File stopMonitoring()
+	private LogFile stopMonitoringSession(String remoteFilePath, RemoteSessionWithPosition remoteSession)
 	{
 		try
 		{
@@ -167,18 +210,18 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			//if there is no content simply return empty file.
 			if(currentSize == 0)
 			{
-				return tempFile;
+				return new LogFile(remoteFilePath + "@" + remoteSession.getHost(), tempFile);
 			}
 
 			//if current size is less than start size
 			//	which can happen in rolling logs, read the current file from starting
-			if(currentSize < startPosition)
+			if(currentSize < remoteSession.position)
 			{
-				startPosition = 0;
+				remoteSession.position = 0;
 			}
 
 			//calculate amount of log to be read
-			final long dataToRead = currentSize - startPosition;
+			final long dataToRead = currentSize - remoteSession.position;
 			
 			try
 			{
@@ -205,7 +248,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				
 				FileOutputStream fos = new FileOutputStream(tempFile);
 				
-				sftp.get(remoteFilePath, fos, progressMonitor, ChannelSftp.RESUME, startPosition);
+				sftp.get(remoteFilePath, fos, progressMonitor, ChannelSftp.RESUME, remoteSession.position);
 				
 				fos.close();
 			}catch(Exception ex)
@@ -213,7 +256,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				throw new InvalidStateException("An error occurred while creating monitoring log.", ex);
 			}
 			
-			return tempFile;
+			return new LogFile(remoteFilePath + "@" + remoteSession.getHost(), tempFile);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remoteFilePath);
@@ -228,11 +271,30 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	public void validate() throws ValidateException
 	{
 		super.validate();
-		remoteSession.validate();
 		
-		if(StringUtils.isBlank(remoteFilePath))
+		if(StringUtils.isEmpty(remoteFilePaths))
 		{
-			throw new ValidateException("Remote file path can not be null or empty");
+			throw new ValidateException("No remote file path specified");
+		}
+		
+		String paths[] = remoteFilePaths.split("\\s*\\,\\s*");
+		
+		for(String path : paths)
+		{
+			if(!REMOTE_FILE_PATTERN.matcher(path).matches())
+			{
+				throw new ValidateException("Invalid remote file path specified: " + path);
+			}
+		}
+		
+		if(StringUtils.isBlank(user))
+		{
+			throw new ValidateException("No user name is specified");
+		}
+		
+		if(StringUtils.isBlank(password) && StringUtils.isBlank(privateKeyPath))
+		{
+			throw new ValidateException("Either of password or private-key-path is mandatory.");
 		}
 	}
 }

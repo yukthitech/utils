@@ -210,6 +210,10 @@
 				<ccg:validateXpathValue valueExpression="//bean1/subbean1/sprop2"
 					value="value3" source="ref:attr.xpathObj">
 				</ccg:validateXpathValue>
+
+				<ccg:validateXpathValue valueExpression="//bean1/arrProp[1]/key1"
+					value="val1-1" source="res:/data/data1.json">
+				</ccg:validateXpathValue>
 			</wrap:validations>
 		</testCase>
 		

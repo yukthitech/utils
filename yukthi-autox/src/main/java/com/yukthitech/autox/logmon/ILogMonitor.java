@@ -1,6 +1,6 @@
 package com.yukthitech.autox.logmon;
 
-import java.io.File;
+import java.util.List;
 
 /**
  * Interface representing log monitors. Used to fetch logs from different sources for test cases.
@@ -27,7 +27,7 @@ public interface ILogMonitor
 	/**
 	 * After test case execution is completed {@link #stopMonitoring()} method would be invoked which should fetch the log from start location 
 	 * till current point.
-	 * @return Log content from start location till current point.
+	 * @return Log files content from start location till current point.
 	 */
-	public File stopMonitoring();
+	public List<LogFile> stopMonitoring();
 }

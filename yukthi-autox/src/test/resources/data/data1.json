@@ -5,6 +5,11 @@
 		"subbean1" : {
 			"sprop1": "value2",
 			"sprop2": "value3"
-		}
+		},
+		
+		"arrProp" : [
+			{"key1": "val1-1", "key2": "val1-2"},
+			{"key2": "val2-1", "key2": "val2-2"}
+		]
 	}
 }

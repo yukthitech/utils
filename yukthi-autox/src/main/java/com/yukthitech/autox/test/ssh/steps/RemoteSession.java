@@ -124,6 +124,18 @@ public class RemoteSession
 	 * Internal variable, used to maintain session.
 	 */
 	private Session session;
+	
+	public RemoteSession()
+	{}
+	
+	public RemoteSession(String host, int port, String user, String password, String privateKeyPath)
+	{
+		this.host = host;
+		this.port = port;
+		this.user = user;
+		this.password = password;
+		this.privateKeyPath = privateKeyPath;
+	}
 
 	/**
 	 * Gets the host on which remote file is located.
@@ -236,7 +248,7 @@ public class RemoteSession
 			return session;
 		}
 		
-		if(StringUtils.isNoneBlank(password))
+		if(StringUtils.isNotBlank(password))
 		{
 			logger.debug("Starting ssh session with remote host using password - {}:{}", host, port);
 			

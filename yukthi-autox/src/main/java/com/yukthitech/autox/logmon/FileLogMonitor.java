@@ -3,6 +3,8 @@ package com.yukthitech.autox.logmon;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +58,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 	}
 
 	@Override
-	public File stopMonitoring()
+	public List<LogFile> stopMonitoring()
 	{
 		File file = new File(path);
 		
@@ -81,7 +83,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 		//if there is no content simply return empty file.
 		if(currentSize == 0)
 		{
-			return tempFile;
+			return Arrays.asList(new LogFile(tempFile.getName(), tempFile));
 		}
 		
 		//if current size is less than start size
@@ -124,7 +126,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 			throw new InvalidStateException(ex, "An error occurred while creating monitoring log.");
 		}
 		
-		return tempFile;
+		return Arrays.asList(new LogFile(super.getName(), tempFile));
 	}
 
 	@Override
