@@ -55,7 +55,7 @@
 			<ccg:set name="values" value=""/>
 			
 			<ccg:forEach expression="attr.checkBoxes" loopVar="cbox">
-				<ccg:set name="values" value="${attr.values},${uiElemAttr('cbox', 'value')}"/>
+				<ccg:set name="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
 			</ccg:forEach>
 
 			<ccg:validateContextParam expression="attr.values" value=",red,green,blue,yellow,orange"/>

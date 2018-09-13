@@ -138,7 +138,7 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 				}
 				
 				Executable executable = step.getClass().getAnnotation(Executable.class);
-				logger.error(this, "An error occurred while executing child-step '{}'. Error: {}", executable.name(), ex);
+				logger.error(this, "An error occurred while executing child-step '{}'. Error: {}", executable.name()[0], ex);
 				throw ex;
 			}
 		}

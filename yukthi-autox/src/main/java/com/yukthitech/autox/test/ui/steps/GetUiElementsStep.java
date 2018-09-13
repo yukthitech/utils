@@ -12,7 +12,6 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Waits for locator to be part of the page and is visible.

@@ -19,18 +19,44 @@ public class UiFreeMarkerMethods
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	/**
+	 * Fetches the element based on specified locator. This methods
+	 * helps other method to accept locator or element directly.
+	 * @param locator
+	 * @param parent
+	 * @return
+	 */
+	private static WebElement getElementByLocator(Object locator, String parent)
+	{
+		AutomationContext context = AutomationContext.getInstance();
+		WebElement webElement = null;
+		
+		if(locator instanceof WebElement)
+		{
+			webElement = (WebElement) locator;
+		}
+		else if(locator instanceof String)
+		{
+			webElement =  UiAutomationUtils.findElement(context, parent, (String)locator);
+		}
+		else
+		{
+			throw new InvalidStateException("Invalid locator/element type specified. Specified locator: {}", locator);
+		}
+		
+		return webElement;
+	}
+	
+	
+	/**
 	 * Fetches value of specified locator.
 	 * @param locator locator whose value needs to be fetched
 	 * @param parent parent under which locator should be searched
 	 * @return locator value
 	 */
 	@FreeMarkerMethod("uiValue")
-	public static String getValue(String locator, String parent)
+	public static String getValue(Object locator, String parent)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		
-		WebElement element = UiAutomationUtils.findElement(context, parent, locator);
-		
+		WebElement element = getElementByLocator(locator, parent);
 		String elementValue = null;
 
 		if(element == null)
@@ -52,15 +78,14 @@ public class UiFreeMarkerMethods
 	/**
 	 * Fetches the specified attribute value of specified element.
 	 * @param attrName name of attribute to fetch
-	 * @param locator element locator whose attribute needs to be fetched
+	 * @param locator element locator or web-element whose attribute needs to be fetched
 	 * @param parent Parent name under which locator needs to be fetched
 	 * @return attribute value, if any. Otherwise null
 	 */
 	@FreeMarkerMethod("uiElemAttr")
-	public static String getElemAttr(String attrName, String locator, String parent)
+	public static String getElemAttr(String attrName, Object locator, String parent)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		WebElement webElement = UiAutomationUtils.findElement(context, parent, locator);
+		WebElement webElement = getElementByLocator(locator, parent);
 		
 		if(webElement == null)
 		{
@@ -77,11 +102,9 @@ public class UiFreeMarkerMethods
 	 * @return true if available and visible
 	 */
 	@FreeMarkerMethod("uiIsVisible")
-	public static boolean isVisible(String locator, String parent)
+	public static boolean isVisible(Object locator, String parent)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-
-		WebElement element = UiAutomationUtils.findElement(context, parent, locator);
+		WebElement element = getElementByLocator(locator, parent);
 		return (element != null && element.isDisplayed());
 	}
 
@@ -94,9 +117,7 @@ public class UiFreeMarkerMethods
 	@FreeMarkerMethod("uiIsPresent")
 	public static boolean isPresent(String locator, String parent)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-
-		WebElement element = UiAutomationUtils.findElement(context, parent, locator);
+		WebElement element = getElementByLocator(locator, parent);
 		return (element != null);
 	}
 
