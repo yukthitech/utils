@@ -1,0 +1,13 @@
+<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<test-suite name="">
+		<test-case name="">
+			<description></description>
+
+			<wrap:steps>
+			</wrap:steps>
+
+			<wrap:validations>
+			</wrap:validations>
+		</test-case>
+	</test-suite>
+</test-file>

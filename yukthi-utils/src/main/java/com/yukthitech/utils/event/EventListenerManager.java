@@ -249,6 +249,8 @@ public class EventListenerManager<L>
 	 */
 	private synchronized void invokeMethod(final Method method, final Object... params)
 	{
+		List<ListenerWithData> listeners = new ArrayList<ListenerWithData>( this.listeners );
+		
 		for(ListenerWithData listener : listeners)
 		{
 			if(!parallel)
