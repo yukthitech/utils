@@ -1,5 +1,8 @@
 package com.yukthitech.autox;
 
+import com.yukthitech.autox.test.IDataProvider;
+import com.yukthitech.autox.test.ListDataProvider;
+import com.yukthitech.autox.test.RangeDataProvider;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -24,6 +27,11 @@ public abstract class AbstractStep implements IStep, Validateable
 	 * Used to maintain the location of step.
 	 */
 	protected String location;
+	
+	/**
+	 * Optional data provider for the step.
+	 */
+	private IDataProvider dataProvider;
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
@@ -82,5 +90,41 @@ public abstract class AbstractStep implements IStep, Validateable
 	public String getLocation()
 	{
 		return location;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getDataProvider()
+	 */
+	public IDataProvider getDataProvider()
+	{
+		return dataProvider;
+	}
+
+	/**
+	 * Sets the optional data provider for the step.
+	 *
+	 * @param dataProvider the new optional data provider for the step
+	 */
+	public void setDataProvider(IDataProvider dataProvider)
+	{
+		this.dataProvider = dataProvider;
+	}
+
+	/**
+	 * Sets the specified list data provider as data-provider for this test case.
+	 * @param dataProvider data provider to set
+	 */
+	public void setListDataProvider(ListDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
+	}
+	
+	/**
+	 * Sets the specified range data provider as data-provider for this test case.
+	 * @param dataProvider data provider to set
+	 */
+	public void setRangeDataProvider(RangeDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
 	}
 }

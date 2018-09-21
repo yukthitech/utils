@@ -182,4 +182,10 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	{
 		return location;
 	}
+	
+	@Override
+	public IDataProvider getDataProvider()
+	{
+		return null;
+	}
 }

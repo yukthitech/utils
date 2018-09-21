@@ -65,6 +65,16 @@ public class TestCase implements IStepContainer, Validateable
 	 * in this test case.
 	 */
 	private List<TestCaseFailureAction> failureActions;
+	
+	/**
+	 * Steps for setup for this test case.
+	 */
+	private Setup setup;
+	
+	/**
+	 * Steps for cleanup for this test case.
+	 */
+	private Cleanup cleanup;
 
 	/**
 	 * Gets the name of the test case.
@@ -180,6 +190,26 @@ public class TestCase implements IStepContainer, Validateable
 	{
 		this.description = description;
 	}
+	
+	/**
+	 * Sets the steps for setup for this test case.
+	 *
+	 * @param setup the new steps for setup for this test case
+	 */
+	public void setSetup(Setup setup)
+	{
+		this.setup = setup;
+	}
+	
+	/**
+	 * Sets the steps for cleanup for this test case.
+	 *
+	 * @param cleanup the new steps for cleanup for this test case
+	 */
+	public void setCleanup(Cleanup cleanup)
+	{
+		this.cleanup = cleanup;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -236,32 +266,54 @@ public class TestCase implements IStepContainer, Validateable
 		
 		boolean expectedExcpetionOccurred = false;
 		
-		// execute the steps involved
-		for(IStep step : steps)
+		if(setup != null)
 		{
-			try
+			logger.debug("Executing setup steps for test case: {}", name);
+			TestCaseResult result = setup.execute(context, exeLogger);
+			
+			if(result.getStatus() != TestStatus.SUCCESSFUL)
 			{
-				StepExecutor.executeStep(context, exeLogger, step);
-			} catch(Exception ex)
-			{
-				TestCaseResult result = StepExecutor.handleException(context, this, step, exeLogger, ex, expectedException);
-				
-				if(result != null)
-				{
-					return result;
-				}
-				
-				expectedExcpetionOccurred = true;
-				break;
+				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Setup execution failed.");
 			}
 		}
 		
-		if(expectedException != null && !expectedExcpetionOccurred)
+		try
 		{
-			return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
-		}
+			// execute the steps involved
+			for(IStep step : steps)
+			{
+				try
+				{
+					StepExecutor.executeStep(context, exeLogger, step);
+				} catch(Exception ex)
+				{
+					TestCaseResult result = StepExecutor.handleException(context, this, step, exeLogger, ex, expectedException);
+					
+					if(result != null)
+					{
+						return result;
+					}
+					
+					expectedExcpetionOccurred = true;
+					break;
+				}
+			}
 
-		return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			if(expectedException != null && !expectedExcpetionOccurred)
+			{
+				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
+			}
+
+			return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+		}finally
+		{
+			if(cleanup != null)
+			{
+				logger.debug("Executing cleanup steps for test case: {}", name);
+				cleanup.execute(context, exeLogger);
+			}
+		}
+		
 	}
 
 	/**

@@ -32,10 +32,33 @@ public class ExecutionLogger
 	 * Flag indicating if logging is disabled or not.
 	 */
 	private boolean disabled = false;
+	
+	/**
+	 * Mode to be prepended for every log message.
+	 */
+	private String mode;
 
 	public ExecutionLogger(String executorName, String executorDescription)
 	{
 		this.executionLogData = new ExecutionLogData(executorName, executorDescription);
+	}
+	
+	/**
+	 * Sets the mode to be prepended for every log message.
+	 *
+	 * @param mode the new mode to be prepended for every log message
+	 */
+	public void setMode(String mode)
+	{
+		this.mode = mode;
+	}
+	
+	/**
+	 * Clears the mode from the logger.
+	 */
+	public void clearMode()
+	{
+		this.mode = null;
 	}
 	
 	/**
@@ -77,6 +100,18 @@ public class ExecutionLogger
 		
 		return locationBased.getLocation();
 	}
+	
+	private String buildMessage(String mssgTemplate, Object... args)
+	{
+		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		
+		if(mode != null)
+		{
+			finalMssg = "<b>[" + mode + "]</b> " + finalMssg;
+		}
+		
+		return finalMssg;
+	}
 
 	/**
 	 * Used to log error messages as part of current execution.
@@ -86,7 +121,7 @@ public class ExecutionLogger
 	 */
 	public void error(ILocationBased source, String mssgTemplate, Object... args)
 	{
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		String finalMssg = buildMessage(mssgTemplate, args);
 		logger.error(finalMssg);
 		
 		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
@@ -101,7 +136,7 @@ public class ExecutionLogger
 	 */
 	public void error(ILocationBased source, Throwable th, String mssgTemplate, Object... args)
 	{
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		String finalMssg = buildMessage(mssgTemplate, args);
 		logger.error(finalMssg, th);
 		
 		StringWriter stringWriter = new StringWriter();
@@ -127,7 +162,7 @@ public class ExecutionLogger
 			return;
 		}
 		
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.debug(finalMssg);
 		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
@@ -146,7 +181,7 @@ public class ExecutionLogger
 			return;
 		}
 		
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.trace(finalMssg);
 		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
@@ -166,7 +201,7 @@ public class ExecutionLogger
 			return;
 		}
 		
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.debug(finalMssg);
 		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
@@ -190,6 +225,12 @@ public class ExecutionLogger
 		if(logLevel == null)
 		{
 			logLevel = LogLevel.DEBUG;
+		}
+		
+		if(mode != null)
+		{
+			message = (message != null) ? "" : message;
+			message = "<b>[" + mode + "]</b> " + message;
 		}
 		
 		int dotIdx = imageFile.getName().lastIndexOf(".");

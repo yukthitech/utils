@@ -70,26 +70,38 @@ public class Cleanup implements IStepContainer, Validateable, ILocationBased
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		ExecutionLogger exeLogger = new ExecutionLogger(NAME, NAME);
-		exeLogger.debug(this, "Starting cleanup process");
+		return execute(context, new ExecutionLogger(NAME, NAME));
+	}
+
+	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
+	{
+		exeLogger.setMode("cleanup");
 		
-		// execute the steps involved
-		for(IStep step : steps)
+		try
 		{
-			try
+			exeLogger.debug(this, "Starting cleanup process");
+			
+			// execute the steps involved
+			for(IStep step : steps)
 			{
-				StepExecutor.executeStep(context, exeLogger, step);
-			} catch(Exception ex)
-			{
-				exeLogger.error(this, ex, "An error occurred while executing step - " + step);
-
-				return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+				try
+				{
+					StepExecutor.executeStep(context, exeLogger, step);
+				} catch(Exception ex)
+				{
+					exeLogger.error(this, ex, "An error occurred while executing step - " + step);
+	
+					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+				}
 			}
+			
+			exeLogger.debug(this, "Completed cleanup process");
+	
+			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+		}finally
+		{
+			exeLogger.clearMode();
 		}
-		
-		exeLogger.debug(this, "Completed cleanup process");
-
-		return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
 
 	/*

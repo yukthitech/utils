@@ -308,5 +308,31 @@
 			<ccg:validateContextParam expression="attr.result" value="24"/>
 		</testCase>
 		
+		
+		<testCase name="testCaseSetupCleanup">
+			<description>Ensures test case setup/cleanup is getting executed as expected.</description>
+			
+			<setup>
+				<ccg:set name="setupVar" value="1" type="java.lang.Integer"/>
+			</setup>
+			
+			<wrap:steps>
+				<ccg:set name="setupVar" value="${attr.setupVar + 1}" type="java.lang.Integer"/>
+				<ccg:validateContextParam expression="attr.setupVar" value="2"/>
+			</wrap:steps>
+
+			<cleanup>
+				<ccg:set name="setupVar" value="10" type="java.lang.Integer"/>
+			</cleanup>
+		</testCase>
+		
+		<testCase name="testCaseSetupCleanup_cleanupCheck" dependencies="testCaseSetupCleanup">
+			<description>Ensures cleanup is executed at end of testCaseSetupCleanup</description>
+
+			<wrap:steps>
+				<ccg:validateContextParam expression="attr.setupVar" value="10"/>
+			</wrap:steps>
+		</testCase>
 	</testSuite>
+
 </testData>

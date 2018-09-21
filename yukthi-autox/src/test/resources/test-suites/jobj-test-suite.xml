@@ -136,6 +136,24 @@
 			</wrap:validations>
 		</testCase>
 
+		<testCase name="testStepDataProvider">
+			<description>Tests data provider usage at step level</description>
+			
+			<wrap:steps>
+				<ccg:set name="res" value=""/>
+			
+				<ccg:set name="res" value="${attr.res}|${attr.number}">
+					<list-data-provider name="number">
+						<data>1</data>
+						<data>2</data>
+						<data>3</data>
+					</list-data-provider>
+				</ccg:set>
+
+				<ccg:validateContextParam expression="attr.res" value="|1|2|3" />
+			</wrap:steps>				
+		</testCase>
+
 		<testCase name="invoke_Method_With_Ext_Data_Provder">
 			<description>
 				Invokes simple method on bean with externalized data provider and

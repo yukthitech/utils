@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,11 +47,49 @@ public class StepExecutor
 		{
 			context.setExecutionLogger(exeLogger);
 			
-			//clone the step, so that expression replacement will not affect actual step
-			step = step.clone();
+			boolean res = true;
 			
-			AutomationUtils.replaceExpressions(context, step);
-			boolean res = step.execute(context, exeLogger);
+			if(step.getDataProvider() == null)
+			{
+				//clone the step, so that expression replacement will not affect actual step
+				step = step.clone();
+				AutomationUtils.replaceExpressions(context, step);
+
+				res = step.execute(context, exeLogger);
+			}
+			else
+			{
+				exeLogger.debug(step, "Executing the step with data provider.");
+				IDataProvider dataProvider = step.getDataProvider();
+				List<TestCaseData> dataLst = dataProvider.getStepData();
+				
+				if(dataLst == null)
+				{
+					exeLogger.debug(step, "Data provider resulted in empty data list.");
+				}
+				else
+				{
+					for(TestCaseData data : dataLst)
+					{
+						if(dataProvider.isParsingEnabled())
+						{
+							AutomationUtils.replaceExpressions(context, data);
+						}
+						
+						exeLogger.debug(step, "Executing the step with [Data provider: %s, Data: %s]", dataProvider.getName(), data.getName());
+						context.setAttribute(dataProvider.getName(), data.getValue());
+						
+						//clone the step, so that expression replacement will not affect actual step
+						IStep dataStep = step.clone();
+						AutomationUtils.replaceExpressions(context, dataStep);
+
+						if(!dataStep.execute(context, exeLogger))
+						{
+							res = false;
+						}
+					}
+				}
+			}
 			
 			if(step instanceof IValidation)
 			{

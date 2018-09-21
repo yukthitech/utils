@@ -20,4 +20,13 @@ public interface IDataProvider
 	 * @return list of step data.
 	 */
 	public List<TestCaseData> getStepData();
+	
+	/**
+	 * If enabled, expressions will be parsed before test-case/step execution at data level.
+	 * @return true if parsing should be avoided.
+	 */
+	public default boolean isParsingEnabled()
+	{
+		return false;
+	}
 }

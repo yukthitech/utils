@@ -70,25 +70,37 @@ public class Setup implements IStepContainer, Validateable, ILocationBased
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		ExecutionLogger exeLogger = new ExecutionLogger(NAME, NAME);
-		exeLogger.debug(this, "Started setup process");
+		return this.execute(context, new ExecutionLogger(NAME, NAME));
+	}
+
+	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
+	{
+		exeLogger.setMode("setup");
 		
-		// execute the steps involved
-		for(IStep step : steps)
+		try
 		{
-			try
+			exeLogger.debug(this, "Started setup process");
+			
+			// execute the steps involved
+			for(IStep step : steps)
 			{
-				StepExecutor.executeStep(context, exeLogger, step);
-			} catch(Exception ex)
-			{
-				exeLogger.error(this, ex, "An error occurred while executing step - " + step);
-
-				return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+				try
+				{
+					StepExecutor.executeStep(context, exeLogger, step);
+				} catch(Exception ex)
+				{
+					exeLogger.error(this, ex, "An error occurred while executing step - " + step);
+	
+					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+				}
 			}
+	
+			exeLogger.debug(this, "Completed setup process");
+			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+		}finally
+		{
+			exeLogger.clearMode();
 		}
-
-		exeLogger.debug(this, "Completed setup process");
-		return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 	}
 
 	/*

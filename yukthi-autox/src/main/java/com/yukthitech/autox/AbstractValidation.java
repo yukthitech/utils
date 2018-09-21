@@ -1,5 +1,6 @@
 package com.yukthitech.autox;
 
+import com.yukthitech.autox.test.IDataProvider;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -28,6 +29,11 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	 * Used to maintain the location of validation.
 	 */
 	protected String location;
+	
+	/**
+	 * Optional data provider for the step.
+	 */
+	private IDataProvider dataProvider;
 
 	@Override
 	public IValidation clone()
@@ -88,5 +94,24 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	public String getLocation()
 	{
 		return location;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getDataProvider()
+	 */
+	public IDataProvider getDataProvider()
+	{
+		return dataProvider;
+	}
+
+	/**
+	 * Sets the optional data provider for the step.
+	 *
+	 * @param dataProvider the new optional data provider for the step
+	 */
+	public void setDataProvider(IDataProvider dataProvider)
+	{
+		this.dataProvider = dataProvider;
 	}
 }

@@ -2,12 +2,21 @@ package com.yukthitech.autox;
 
 import java.io.Serializable;
 
+import com.yukthitech.autox.test.IDataProvider;
+
 /**
  * Represents automation step to be performed.
  * @author akiran
  */
 public interface IStep extends Cloneable, Serializable, ILocationBased
 {
+	
+	/**
+	 * Data provider to be used for this step. If specified, step will be executed for each data
+	 * element provided by data provider.
+	 */
+	public IDataProvider getDataProvider();
+
 	/**
 	 * Method which should execute current step.
 	 * @param context Current automation context
