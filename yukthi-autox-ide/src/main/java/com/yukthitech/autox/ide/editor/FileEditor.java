@@ -1,12 +1,16 @@
 package com.yukthitech.autox.ide.editor;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -14,12 +18,18 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.xmlfile.Attribute;
+import com.yukthitech.autox.ide.xmlfile.Element;
+import com.yukthitech.autox.ide.xmlfile.XmlFile;
 
 public class FileEditor extends RTextScrollPane 
 {
 	private static final long serialVersionUID = 1L;
 	
 	private static Logger logger = LogManager.getLogger(FileEditor.class);
+	
+	private Project project;
 	
 	private File file;
 	
@@ -28,9 +38,11 @@ public class FileEditor extends RTextScrollPane
 	@Autowired
 	private IdeContext ideContext;
 	
-	public FileEditor(File file) 
+	public FileEditor(Project project, File file) 
 	{
 		super(new RSyntaxTextArea());
+		
+		this.project = project;
 		this.syntaxTextArea = (RSyntaxTextArea) super.getViewport().getView();
 		super.setLineNumbersEnabled(true);
 		
@@ -67,6 +79,15 @@ public class FileEditor extends RTextScrollPane
 				fileContentChanged();
 			}
 		});
+		
+		syntaxTextArea.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				handleKeyRelease(e);
+			}
+		});
 	}
 	
 	private void setSyntaxStyle()
@@ -99,6 +120,11 @@ public class FileEditor extends RTextScrollPane
 		setSyntaxStyle();
 	}
 	
+	public Project getProject()
+	{
+		return project;
+	}
+	
 	public void saveFile()
 	{
 		try
@@ -125,5 +151,57 @@ public class FileEditor extends RTextScrollPane
 	public void setCaretPosition(int position)
 	{
 		syntaxTextArea.setCaretPosition(position);
+	}
+	
+	private void handleKeyRelease(KeyEvent e)
+	{
+		Document doc = syntaxTextArea.getDocument();
+		int caretPos = syntaxTextArea.getCaretPosition();
+		
+	}
+	
+	private XmlFile getXmlFile()
+	{
+		if(!file.getName().toLowerCase().endsWith(".xml"))
+		{
+			return null;
+		}
+		
+		try
+		{
+			XmlFile xmlFile = XmlFile.parse(syntaxTextArea.getText());
+			return xmlFile;
+		}catch(Exception ex)
+		{
+			logger.trace("Failed to parse xml file: " + file.getName() + " Error: " + ex);
+			return null;
+		}
+	}
+	
+	public String getCurrentTestSuite()
+	{
+		XmlFile xmlFile = getXmlFile();
+		
+		if(xmlFile == null)
+		{
+			return null;
+		}
+		
+		int curLineNo = syntaxTextArea.getCaretLineNumber();
+		Element testSuiteElement = xmlFile.getElement("testsuite", curLineNo);
+		
+		if(testSuiteElement == null)
+		{
+			return null;
+		}
+		
+		Attribute attr = testSuiteElement.getAttribute("name");
+		
+		if(attr == null || StringUtils.isBlank(attr.getValue()))
+		{
+			return null;
+		}
+		
+		return attr.getValue();
 	}
 }

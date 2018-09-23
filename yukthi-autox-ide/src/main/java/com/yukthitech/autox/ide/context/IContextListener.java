@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.context;
 
 import java.io.File;
 
+import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.model.IdeState;
 
 /**
@@ -37,5 +38,34 @@ public interface IContextListener
 	 * @param state state to be loaded
 	 */
 	public default void loadState(IdeState state)
+	{}
+	
+	/**
+	 * Invoked when new environment is started.
+	 * @param environment
+	 */
+	public default void newEnvironmentStarted(ExecutionEnvironment environment)
+	{}
+	
+	/**
+	 * Invoked when environment is changed.
+	 * @param activeEnvironment new active environment. Can be null.
+	 */
+	public default void environmentChanged(ExecutionEnvironment activeEnvironment)
+	{}
+	
+	/**
+	 * Invoked when environment console value is changed.
+	 * @param environment
+	 * @param newContent
+	 */
+	public default void environmentConsoleChanged(ExecutionEnvironment environment, String newContent)
+	{}
+	
+	/**
+	 * Invoked when environment is terminated.
+	 * @param environment
+	 */
+	public default void environmentTerminated(ExecutionEnvironment environment)
 	{}
 }

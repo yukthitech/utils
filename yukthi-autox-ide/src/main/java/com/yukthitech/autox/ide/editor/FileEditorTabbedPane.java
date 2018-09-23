@@ -152,7 +152,7 @@ public class FileEditorTabbedPane extends JTabbedPane
 		
 		int nextTabIndex = super.getTabCount();
 		
-		fileEditor = new FileEditor(file);
+		fileEditor = new FileEditor(project, file);
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(fileEditor);
 		applicationContext.getAutowireCapableBeanFactory().initializeBean(fileEditor, UUID.randomUUID().toString());
 		
@@ -167,6 +167,11 @@ public class FileEditorTabbedPane extends JTabbedPane
 		
 		super.setSelectedComponent(fileEditor);
 		return fileEditor;
+	}
+	
+	public FileEditor getCurrentFileEditor()
+	{
+		return (FileEditor) super.getSelectedComponent();
 	}
 	
 	@Action

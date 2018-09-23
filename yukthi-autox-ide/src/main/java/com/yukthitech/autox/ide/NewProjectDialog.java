@@ -317,7 +317,7 @@ public class NewProjectDialog extends JDialog
 		}
 		
 		project.setName(projectName.getText());
-		project.setAppConfigFilePath(new File(baseFolderPath.getText(), Project.PROJECT_FILE_NAME).getPath());
+		project.setProjectFilePath(new File(baseFolderPath.getText(), Project.PROJECT_FILE_NAME).getPath());
 		project.setAppConfigFilePath(appConfigPath.getText());
 		project.setAppPropertyFilePath(appPropertyPath.getText());
 		project.setTestsuiteFolderPath(testSuiteFolderPath.getText());
@@ -346,7 +346,7 @@ public class NewProjectDialog extends JDialog
 		
 		if(res == JFileChooser.APPROVE_OPTION)
 		{
-			File baseFolderFile = new File(project.getBaseFolderPath());
+			File baseFolderFile = fileChooser.getSelectedFile();
 			String projectName = this.projectName.getText();
 			
 			if(!baseFolderFile.getName().equals(projectName))

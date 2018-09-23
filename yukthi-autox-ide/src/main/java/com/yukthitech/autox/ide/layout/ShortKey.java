@@ -1,8 +1,11 @@
 package com.yukthitech.autox.ide.layout;
 
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
+
+import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -29,9 +32,9 @@ public class ShortKey implements Validateable
 	private boolean shift;
 	
 	/**
-	 * Character to be used.
+	 * Key to be used.
 	 */
-	private char ch;
+	private String key;
 
 	/**
 	 * Gets the true if control should be down.
@@ -94,37 +97,45 @@ public class ShortKey implements Validateable
 	}
 
 	/**
-	 * Gets the character to be used.
+	 * Gets the key to be used.
 	 *
-	 * @return the character to be used
+	 * @return the key to be used
 	 */
-	public char getCh()
+	public String getKey()
 	{
-		return ch;
+		return key;
 	}
 
 	/**
-	 * Sets the character to be used.
+	 * Sets the key to be used.
 	 *
-	 * @param ch the new character to be used
+	 * @param key the new key to be used
 	 */
-	public void setCh(char ch)
+	public void setKey(String key)
 	{
-		this.ch = ch;
+		this.key = key;
 	}
 	
+	private int getKeyCode()
+	{
+		String fieldName = "VK_" + key.toUpperCase();
+		
+		try
+		{
+			return KeyEvent.class.getField(fieldName).getInt(null);
+		}catch(NoSuchFieldException | IllegalAccessException ex)
+		{
+			throw new InvalidArgumentException("Invalid key code specified: " + key);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{
-		if(!ctrl && !alt)
-		{
-			throw new ValidateException("Both CTRL and ALT are not set. One of this key is mandatory.");
-		}
-		
-		if(ch <= 0)
-		{
-			throw new ValidateException("No character key specified.");
-		}
+		getKeyCode();
 	}
 	
 	/**
@@ -150,7 +161,7 @@ public class ShortKey implements Validateable
 			modifiers |= InputEvent.SHIFT_DOWN_MASK;
 		}
 		
-		KeyStroke stroke = KeyStroke.getKeyStroke(ch, modifiers);
+		KeyStroke stroke = KeyStroke.getKeyStroke(getKeyCode(), modifiers);
 		return stroke;
 	}
 }

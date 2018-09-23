@@ -42,14 +42,14 @@ public abstract class AbstractDataProvider implements IDataProvider
 	{
 		return parsingEnabled;
 	}
-
+	
 	/**
-	 * Sets the flag to disable expression parsing in data.
+	 * Sets the flag to enable expression parsing in data.
 	 *
-	 * @param parsingDisabled the new flag to disable expression parsing in data
+	 * @param parsingEnabled the new flag to enable expression parsing in data
 	 */
-	public void setParsingDisabled(boolean parsingDisabled)
+	public void setParsingEnabled(boolean parsingEnabled)
 	{
-		this.parsingEnabled = parsingDisabled;
+		this.parsingEnabled = parsingEnabled;
 	}
 }

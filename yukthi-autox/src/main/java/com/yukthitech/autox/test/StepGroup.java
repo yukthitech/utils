@@ -17,6 +17,7 @@ import com.yukthitech.autox.test.lang.steps.ReturnException;
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
+@Executable(name = "stepGroup", message = "Can be used to group multiple steps into single step")
 public class StepGroup implements IStepContainer, IStep, Cloneable
 {
 	private static final long serialVersionUID = 1L;
@@ -53,6 +54,11 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	 * Used to maintain the location of step group.
 	 */
 	private String location;
+
+	/**
+	 * Optional data provider for the step.
+	 */
+	private IDataProvider dataProvider;
 
 	/**
 	 * Sets the name of this group.
@@ -182,10 +188,40 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	{
 		return location;
 	}
-	
-	@Override
+
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.IStep#getDataProvider()
+	 */
 	public IDataProvider getDataProvider()
 	{
-		return null;
+		return dataProvider;
+	}
+
+	/**
+	 * Sets the optional data provider for the step.
+	 *
+	 * @param dataProvider the new optional data provider for the step
+	 */
+	public void setDataProvider(IDataProvider dataProvider)
+	{
+		this.dataProvider = dataProvider;
+	}
+
+	/**
+	 * Sets the specified list data provider as data-provider for this test case.
+	 * @param dataProvider data provider to set
+	 */
+	public void setListDataProvider(ListDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
+	}
+	
+	/**
+	 * Sets the specified range data provider as data-provider for this test case.
+	 * @param dataProvider data provider to set
+	 */
+	public void setRangeDataProvider(RangeDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
 	}
 }

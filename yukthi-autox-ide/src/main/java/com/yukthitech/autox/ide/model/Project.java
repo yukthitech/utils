@@ -68,6 +68,11 @@ public class Project
 	@JsonIgnore
 	public String getBaseFolderPath()
 	{
+		if(projectFilePath == null)
+		{
+			return null;
+		}
+		
 		return new File(projectFilePath).getParentFile().getPath();
 	}
 

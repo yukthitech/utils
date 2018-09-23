@@ -73,7 +73,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	
 	/**
 	 * Adds remote file path.
-	 * @param remoteFilePath path to be added.
+	 * @param remoteFilePaths path to be added.
 	 */
 	public void addRemoteFilePaths(String remoteFilePaths)
 	{

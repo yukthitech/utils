@@ -27,6 +27,7 @@ import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
+import com.yukthitech.autox.ide.views.ConsolePanel;
 
 @ActionHolder
 @SpringBootApplication
@@ -53,6 +54,17 @@ public class AutoxIDE extends JFrame
 	 */
 	@Autowired
 	private IdeContext ideContext;
+	
+	@Autowired
+	private ExeEnvironmentPanel exeEnvironmentPanel;
+	
+	@Autowired
+	private ConsolePanel consolePanel;
+	
+	/**
+	 * Top panel to hold tool bar and env panel.
+	 */
+	private JPanel topPanel = new JPanel();
 	
 	/**
 	 * Launch the application.
@@ -121,14 +133,14 @@ public class AutoxIDE extends JFrame
 		// editor = new JTabbedPane(JTabbedPane.TOP);
 		rightSplitPane.setLeftComponent(fileEditorTabbedPane);
 
-		JTabbedPane consoleTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		rightSplitPane.setRightComponent(consoleTabbedPane);
+		JTabbedPane bottomTabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		rightSplitPane.setRightComponent(bottomTabbedPane);
 
 		Report report = new Report();
-		consoleTabbedPane.addTab("Report", null, report, null);
+		bottomTabbedPane.addTab("Report", null, report, null);
 
-		Console console = new Console();
-		consoleTabbedPane.addTab("Console", null, console, null);
+		bottomTabbedPane.addTab("Console", null, consolePanel, null);
+		consolePanel.setParent(bottomTabbedPane);
 
 		JPanel panel = new JPanel();
 		contentPane.add(panel, BorderLayout.SOUTH);
@@ -136,6 +148,10 @@ public class AutoxIDE extends JFrame
 
 		JLabel lblNewLabel = new JLabel("AutoxIDE successfully open");
 		panel.add(lblNewLabel);
+		
+		topPanel.setLayout(new BorderLayout());
+		topPanel.add(exeEnvironmentPanel, BorderLayout.EAST);
+		contentPane.add(topPanel, BorderLayout.NORTH);
 		
 		loadLayout();
 	}
@@ -146,7 +162,7 @@ public class AutoxIDE extends JFrame
 		super.setJMenuBar(menuBar);
 		
 		JToolBar toolBar = uiLayout.getToolBar().toJToolBar(actionCollection);
-		contentPane.add(toolBar, BorderLayout.NORTH);
+		topPanel.add(toolBar, BorderLayout.CENTER);
 	}
 	
 	@Action

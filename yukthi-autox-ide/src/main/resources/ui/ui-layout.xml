@@ -2,19 +2,19 @@
 	<menuBar>
 		<menu label="File" mnemonic="F">
 			<item label="New Project" mnemonic="N" icon="/ui/icons/new.png" action="newProject">
-				<short-key ctrl="true" ch="N"/>
+				<short-key ctrl="true" key="N"/>
 			</item>
 			<item label="Open Project" mnemonic="O" icon="/ui/icons/open.png" action="openProject">
-				<short-key ctrl="true" ch="O"/>
+				<short-key ctrl="true" key="O"/>
 			</item>
 			
 			<item label="-"/>
 			
 			<item label="Open File" mnemonic="F">
-				<short-key ctrl="true" shift="true" ch="R"/>
+				<short-key ctrl="true" shift="true" key="R"/>
 			</item>
 			<item label="Save" mnemonic="S" icon="/ui/icons/save.png" action="saveFile">
-				<short-key ctrl="true" ch="S"/>
+				<short-key ctrl="true" key="S"/>
 			</item>
 			
 			<item label="-"/>
@@ -22,6 +22,18 @@
 			<item label="Exit" mnemonic="x" action="closeIde">
 			</item>
 			
+		</menu>
+
+		<menu label="Run" mnemonic="R">
+			<item label="Run Test Suite" mnemonic="S" action="runTestSuite">
+				<short-key ctrl="true" key="F9"/>
+			</item>
+			<item label="Run Test Case" mnemonic="C" action="runTestCase">
+				<short-key ctrl="true" shift="true" key="F9"/>
+			</item>
+			<item label="Run Selected Step" action="runSelectedStep">
+				<short-key ctrl="true" key="ENTER"/>
+			</item>
 		</menu>
 	</menuBar>
 	
