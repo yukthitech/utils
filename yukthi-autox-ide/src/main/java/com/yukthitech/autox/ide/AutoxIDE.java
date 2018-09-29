@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -12,7 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
@@ -34,6 +34,10 @@ import com.yukthitech.autox.ide.views.ConsolePanel;
 public class AutoxIDE extends JFrame
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static final String PANEL_MAIN = "mainPanel";
+	
+	private static final String PANEL_MAXIMIZED = "maximizedPanel";
 	
 	private JPanel contentPane;
 	
@@ -65,6 +69,31 @@ public class AutoxIDE extends JFrame
 	 * Top panel to hold tool bar and env panel.
 	 */
 	private JPanel topPanel = new JPanel();
+	
+	/**
+	 * Container to be used for maximized panes.
+	 */
+	private JPanel maximizedPanel = new JPanel();
+	
+	private JSplitPane verticalSplitPane;
+	
+	private JSplitPane horizontalSplitPane;
+	
+	private MaximizableTabbedPane leftTabbedPane;
+	
+	private MaximizableTabbedPane rightBottomTabbedPane;
+	
+	/**
+	 * Status indicating if any tab is currently maximized.
+	 */
+	private boolean maximized = false;
+	
+	private CardLayout cardLayoutForMaximization;
+	
+	/**
+	 * Panel containing the main tabbed panels and maximized panels as cards.
+	 */
+	private JPanel cardedMainPanel;
 	
 	/**
 	 * Launch the application.
@@ -116,31 +145,8 @@ public class AutoxIDE extends JFrame
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setResizeWeight(0.2);
-		contentPane.add(splitPane, BorderLayout.CENTER);
-
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		splitPane.setLeftComponent(tabbedPane);
-
-		tabbedPane.addTab("ProjectExplorer", null, projectExplorer, null);
-
-		JSplitPane rightSplitPane = new JSplitPane();
-		rightSplitPane.setResizeWeight(0.8);
-		rightSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		splitPane.setRightComponent(rightSplitPane);
-
-		// editor = new JTabbedPane(JTabbedPane.TOP);
-		rightSplitPane.setLeftComponent(fileEditorTabbedPane);
-
-		JTabbedPane bottomTabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		rightSplitPane.setRightComponent(bottomTabbedPane);
-
-		Report report = new Report();
-		bottomTabbedPane.addTab("Report", null, report, null);
-
-		bottomTabbedPane.addTab("Console", null, consolePanel, null);
-		consolePanel.setParent(bottomTabbedPane);
+		JPanel mainPanel = createMainPanel();
+		contentPane.add(mainPanel, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
 		contentPane.add(panel, BorderLayout.SOUTH);
@@ -154,6 +160,70 @@ public class AutoxIDE extends JFrame
 		contentPane.add(topPanel, BorderLayout.NORTH);
 		
 		loadLayout();
+	}
+	
+	private JPanel createMainPanel()
+	{
+		cardedMainPanel = new JPanel();
+		
+		cardLayoutForMaximization = new CardLayout();
+		cardedMainPanel.setLayout(cardLayoutForMaximization);
+
+		cardedMainPanel.add(createSplitPanes(), PANEL_MAIN);
+		
+		//create and maximized panel
+		maximizedPanel.setLayout(new BorderLayout());
+		cardedMainPanel.add(maximizedPanel, PANEL_MAXIMIZED);
+		
+		return cardedMainPanel;
+	}
+	
+	private JSplitPane createSplitPanes()
+	{
+		IMaximizationListener maximizeListener = new IMaximizationListener()
+		{
+			@Override
+			public void minimize(MaximizableTabbedPane tabPane)
+			{
+				minimizeTabPane(tabPane);
+			}
+			
+			@Override
+			public void flipMaximizationStatus(MaximizableTabbedPane tabPane)
+			{
+				flipMaximize(tabPane);
+			}
+		};
+		
+		verticalSplitPane = new JSplitPane();
+		verticalSplitPane.setResizeWeight(0.2);
+
+		leftTabbedPane = new MaximizableTabbedPane();
+		verticalSplitPane.setLeftComponent(leftTabbedPane);
+		leftTabbedPane.setParentDetails(maximizeListener, verticalSplitPane, true);
+
+		leftTabbedPane.addTab("ProjectExplorer", null, projectExplorer, null);
+
+		horizontalSplitPane = new JSplitPane();
+		horizontalSplitPane.setResizeWeight(0.8);
+		horizontalSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		verticalSplitPane.setRightComponent(horizontalSplitPane);
+
+		// editor = new JTabbedPane(JTabbedPane.TOP);
+		horizontalSplitPane.setLeftComponent(fileEditorTabbedPane);
+		fileEditorTabbedPane.setParentDetails(maximizeListener, horizontalSplitPane, true);
+
+		rightBottomTabbedPane = new MaximizableTabbedPane();
+		horizontalSplitPane.setRightComponent(rightBottomTabbedPane);
+		rightBottomTabbedPane.setParentDetails(maximizeListener, horizontalSplitPane, false);
+
+		Report report = new Report();
+		rightBottomTabbedPane.addTab("Report", null, report, null);
+
+		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
+		consolePanel.setParent(rightBottomTabbedPane);
+		
+		return verticalSplitPane;
 	}
 	
 	private void loadLayout()
@@ -185,5 +255,41 @@ public class AutoxIDE extends JFrame
 		}
 		
 		ideContext.getProxy().loadState(ideState);
+	}
+	
+	private synchronized void minimizeTabPane(MaximizableTabbedPane tabPane)
+	{
+		if(!maximized)
+		{
+			return;
+		}
+
+		if(tabPane.isLeftComponent())
+		{
+			tabPane.getParentSplitPane().setLeftComponent(tabPane);
+		}
+		else
+		{
+			tabPane.getParentSplitPane().setRightComponent(tabPane);
+		}
+		
+		cardLayoutForMaximization.show(cardedMainPanel, PANEL_MAIN);
+		
+		maximized = false;
+	}
+	
+	private synchronized void flipMaximize(MaximizableTabbedPane tabPane)
+	{
+		if(maximized)
+		{
+			minimizeTabPane(tabPane);
+		}
+		else
+		{
+			maximizedPanel.add(tabPane, BorderLayout.CENTER);
+			cardLayoutForMaximization.show(cardedMainPanel, PANEL_MAXIMIZED);
+			
+			maximized = true;
+		}
 	}
 }

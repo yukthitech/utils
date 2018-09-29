@@ -12,6 +12,9 @@ import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 
@@ -43,6 +46,11 @@ public class IdeUtils
 	 * Extension to icon cache map.
 	 */
 	private static Map<String, ImageIcon> extensionToIcon = new HashMap<>();
+	
+	/**
+	 * Thread pools for scheduled jobs.
+	 */
+	private static ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(10);
 	
 	/**
 	 * Saves the specified object into specified file.
@@ -204,5 +212,15 @@ public class IdeUtils
 	public static Window getCurrentWindow()
 	{
 		return KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow();
+	}
+	
+	/**
+	 * Executes specified runnable task after specified delay.
+	 * @param runnable
+	 * @param delay
+	 */
+	public static void execute(Runnable runnable, long delay)
+	{
+		threadPool.schedule(runnable, delay, TimeUnit.MILLISECONDS);
 	}
 }

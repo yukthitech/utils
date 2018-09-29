@@ -1,13 +1,10 @@
 package com.yukthitech.autox.ide.editor;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +14,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.Attribute;
@@ -79,15 +77,6 @@ public class FileEditor extends RTextScrollPane
 				fileContentChanged();
 			}
 		});
-		
-		syntaxTextArea.addKeyListener(new KeyAdapter()
-		{
-			@Override
-			public void keyReleased(KeyEvent e)
-			{
-				handleKeyRelease(e);
-			}
-		});
 	}
 	
 	private void setSyntaxStyle()
@@ -129,6 +118,21 @@ public class FileEditor extends RTextScrollPane
 	{
 		try
 		{
+			if(!file.canWrite())
+			{
+				int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
+						"Current file '" + file.getName() + "' is read-only file. Do you still want to overwite the file?", 
+						"Save File", 
+						JOptionPane.YES_NO_OPTION);
+				
+				if(res == JOptionPane.NO_OPTION)
+				{
+					return;
+				}
+				
+				file.setWritable(true);
+			}
+			
 			FileUtils.write(file, syntaxTextArea.getText());
 			ideContext.getProxy().fileSaved(file);
 		}catch(Exception ex)
@@ -153,13 +157,6 @@ public class FileEditor extends RTextScrollPane
 		syntaxTextArea.setCaretPosition(position);
 	}
 	
-	private void handleKeyRelease(KeyEvent e)
-	{
-		Document doc = syntaxTextArea.getDocument();
-		int caretPos = syntaxTextArea.getCaretPosition();
-		
-	}
-	
 	private XmlFile getXmlFile()
 	{
 		if(!file.getName().toLowerCase().endsWith(".xml"))
@@ -178,7 +175,7 @@ public class FileEditor extends RTextScrollPane
 		}
 	}
 	
-	public String getCurrentTestSuite()
+	public String getCurrentElementName(String nodeName)
 	{
 		XmlFile xmlFile = getXmlFile();
 		
@@ -188,7 +185,7 @@ public class FileEditor extends RTextScrollPane
 		}
 		
 		int curLineNo = syntaxTextArea.getCaretLineNumber();
-		Element testSuiteElement = xmlFile.getElement("testsuite", curLineNo);
+		Element testSuiteElement = xmlFile.getElement(nodeName, curLineNo);
 		
 		if(testSuiteElement == null)
 		{

@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.IdeFileUtils;
+import com.yukthitech.autox.ide.MaximizableTabbedPane;
 import com.yukthitech.autox.ide.actions.ProjectActions;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -35,7 +35,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
 @Component
-public class FileEditorTabbedPane extends JTabbedPane
+public class FileEditorTabbedPane extends MaximizableTabbedPane
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -156,7 +156,7 @@ public class FileEditorTabbedPane extends JTabbedPane
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(fileEditor);
 		applicationContext.getAutowireCapableBeanFactory().initializeBean(fileEditor, UUID.randomUUID().toString());
 		
-		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor);
+		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(fileEditorTab);
 		applicationContext.getAutowireCapableBeanFactory().initializeBean(fileEditorTab, UUID.randomUUID().toString());
 		

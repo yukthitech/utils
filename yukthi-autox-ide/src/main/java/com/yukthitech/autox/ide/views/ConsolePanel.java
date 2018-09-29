@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.views;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -151,9 +152,11 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		{
 			htmlDoc.insertBeforeEnd(element, content);
 			
-			//move scroll pane to the end
-			JScrollBar vertical = scrollPane.getVerticalScrollBar();
-			vertical.setValue( vertical.getMaximum() );
+			EventQueue.invokeLater(() -> {
+				//move scroll pane to the end
+				JScrollBar vertical = scrollPane.getVerticalScrollBar();
+				vertical.setValue( vertical.getMaximum() );
+			});
 			
 			if(parentTabbedPane != null)
 			{

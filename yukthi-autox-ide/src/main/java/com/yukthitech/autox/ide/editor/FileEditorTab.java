@@ -1,24 +1,15 @@
 package com.yukthitech.autox.ide.editor;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.annotation.PostConstruct;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.border.EmptyBorder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.IMaximizationListener;
+import com.yukthitech.autox.ide.MaximizableTabbedPaneTab;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.ActionCollection;
@@ -29,34 +20,9 @@ import com.yukthitech.autox.ide.model.Project;
  * Tab component used by file editor.
  * @author akiran
  */
-public class FileEditorTab extends JPanel
+public class FileEditorTab extends MaximizableTabbedPaneTab
 {
 	private static final long serialVersionUID = 1L;
-	
-	private static final Color INACTIVE_COLOR = new Color(128, 128, 128);
-	
-	private static final Color ACTIVE_COLOR = Color.red;
-	
-	private static MouseListener CLOSE_BUTTON_MOUSE_LIST = new MouseAdapter()
-	{
-		public void mouseEntered(MouseEvent e) 
-		{
-			JButton button = (JButton) e.getComponent();
-			button.setForeground(ACTIVE_COLOR);
-		}
-		
-		public void mouseExited(MouseEvent e) 
-		{
-			JButton button = (JButton) e.getComponent();
-			button.setForeground(INACTIVE_COLOR);
-		}
-	};
-
-	private JLabel changeLabel = new JLabel();
-	
-	private JLabel label = new JLabel();
-	
-	private JButton closeButton = new JButton("\u2718");
 	
 	@Autowired
 	private UiLayout uiLayout;
@@ -75,32 +41,13 @@ public class FileEditorTab extends JPanel
 	
 	private FileEditor fileEditor;
 	
-	public FileEditorTab(Project project, File file, FileEditor fileEditor)
+	public FileEditorTab(Project project, File file, FileEditor fileEditor, FileEditorTabbedPane fileTabPane, IMaximizationListener maximizationListener)
 	{
+		super(file.getName(), fileTabPane, fileEditor, maximizationListener);
+		
 		this.project = project;
 		this.file = file;
 		this.fileEditor = fileEditor;
-		
-		super.setOpaque(false);
-		
-		label.setText(file.getName());
-		label.setBackground(null);
-		
-		closeButton.setBorder(new EmptyBorder(5, 5, 5, 5));
-		closeButton.setBackground(null);
-		closeButton.setContentAreaFilled(false);
-		closeButton.setFocusable(false);
-		closeButton.setBorderPainted(false);
-		closeButton.setRolloverEnabled(true);
-		closeButton.setForeground(INACTIVE_COLOR);
-		closeButton.setFont(new Font(Font.DIALOG, Font.BOLD, 14));
-		closeButton.addMouseListener(CLOSE_BUTTON_MOUSE_LIST);
-		closeButton.setToolTipText("Close");
-
-		super.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		super.add(changeLabel);
-		super.add(label);
-		super.add(closeButton);
 	}
 	
 	@PostConstruct
@@ -120,39 +67,36 @@ public class FileEditorTab extends JPanel
 				fileContentSaved(file);
 			}
 		});
+	}
+
+	@Override
+	protected void closeTab()
+	{
+		ideContext.setActiveDetails(project, file);
+		actionCollection.invokeAction("closeFile");
 		
-		closeButton.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				ideContext.setActiveDetails(project, file);
-				actionCollection.invokeAction("closeFile");
-			}
-		});
-		
-		super.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mousePressed(MouseEvent e)
-			{
-				ideContext.setActiveDetails(project, file);
-				actionCollection.invokeAction("openFile");
-			}
-			
-			@Override
-			public void mouseReleased(MouseEvent e)
-			{
-				if(!e.isPopupTrigger())
-				{
-					return;
-				}
-				
-				displayPopup(e);
-			}
-		});
+		super.checkForMaximizationStatus();
 	}
 	
+	@Override
+	protected void activateTab()
+	{
+		ideContext.setActiveDetails(project, file);
+		actionCollection.invokeAction("openFile");
+	}
+	
+	@Override
+	protected void displayPopup(MouseEvent e)
+	{
+		if(popupMenu == null)
+		{
+			 popupMenu = uiLayout.getPopupMenu("fileTabPopup").toPopupMenu(actionCollection);
+		}
+		
+		ideContext.setActiveDetails(project, file);
+		popupMenu.show(this, e.getX(), e.getY());
+	}
+
 	public File getFile()
 	{
 		return file;
@@ -192,17 +136,6 @@ public class FileEditorTab extends JPanel
 		}
 		
 		changeLabel.setText("");
-	}
-	
-	private void displayPopup(MouseEvent e)
-	{
-		if(popupMenu == null)
-		{
-			 popupMenu = uiLayout.getPopupMenu("fileTabPopup").toPopupMenu(actionCollection);
-		}
-		
-		ideContext.setActiveDetails(project, file);
-		popupMenu.show(this, e.getX(), e.getY());
 	}
 	
 	public boolean isFileChanged()

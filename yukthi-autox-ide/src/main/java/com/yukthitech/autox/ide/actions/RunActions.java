@@ -17,6 +17,10 @@ import com.yukthitech.autox.ide.model.Project;
 @ActionHolder
 public class RunActions
 {
+	public static final String NODE_TEST_SUITE = "testsuite";
+	
+	public static final String NODE_TEST_CASE = "testcase";
+	
 	@Autowired
 	private IdeContext ideContext;
 	
@@ -41,11 +45,11 @@ public class RunActions
 			return;
 		}
 		
-		String testSuite = fileEditor.getCurrentTestSuite();
+		String testSuite = fileEditor.getCurrentElementName(NODE_TEST_SUITE);
 		
 		if(testSuite == null)
 		{
-			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-suite file for execution.");
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-suite found at cusrsor position.");
 			return;
 		}
 		
@@ -55,6 +59,24 @@ public class RunActions
 	@Action
 	public void runTestCase()
 	{
+		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
+		Project project = fileEditor.getProject();
+		
+		if(project == null || fileEditor == null)
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-suite file for execution.");
+			return;
+		}
+		
+		String testCase = fileEditor.getCurrentElementName(NODE_TEST_CASE);
+		
+		if(testCase == null)
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-case found at cursor position.");
+			return;
+		}
+		
+		executionEnvironmentManager.executeTestCase(project, testCase);
 	}
 	
 	@Action

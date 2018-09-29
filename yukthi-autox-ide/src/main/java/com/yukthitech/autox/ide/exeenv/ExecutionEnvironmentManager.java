@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.exeenv;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,19 +29,21 @@ public class ExecutionEnvironmentManager
 	@Autowired
 	private IdeContext ideContext;
 	
-	public ExecutionEnvironment executeTestSuite(Project project, String testSuite)
+	private ExecutionEnvironment startAutoxEnvironment(String envName, Project project, String... extraArgs)
 	{
 		String classpath = System.getProperty("java.class.path");
 		String javaCmd = "java";
 		String outputDir = "autox-report";
 		
-		List<String> command = Arrays.asList(
+		List<String> command = new ArrayList<>( Arrays.asList(
 			javaCmd, "-classpath", classpath, AutomationLauncher.class.getName(),
 			project.getAppConfigFilePath(),
 			"-rf", new File(project.getBaseFolderPath(), outputDir).getPath(),
-			"-ts", testSuite,
 			"--report-opening-disabled", "true"
-		);
+		) );
+		
+		command.addAll(Arrays.asList(extraArgs));
+		
 		
 		logger.debug("Executing command: {}", command.stream().collect(Collectors.joining(" ")));
 		
@@ -49,7 +52,7 @@ public class ExecutionEnvironmentManager
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(project.getName() + "-ts-" + testSuite, builder.start(), ideContext.getProxy());
+			ExecutionEnvironment env = new ExecutionEnvironment(envName, builder.start(), ideContext.getProxy());
 			ideContext.getProxy().newEnvironmentStarted(env);
 			
 			return env;
@@ -58,5 +61,14 @@ public class ExecutionEnvironmentManager
 			throw new InvalidStateException("An error occurred while starting autox process", ex);
 		}
 	}
-
+	
+	public ExecutionEnvironment executeTestSuite(Project project, String testSuite)
+	{
+		return startAutoxEnvironment("ts-" + testSuite, project, "-ts", testSuite);
+	}
+	
+	public ExecutionEnvironment executeTestCase(Project project, String testCase)
+	{
+		return startAutoxEnvironment("tc-" + testCase, project, "-tc", testCase);
+	}
 }
