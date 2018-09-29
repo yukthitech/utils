@@ -91,7 +91,7 @@ public class LoadPropertiesStep extends AbstractStep
 			if(template)
 			{
 				exeLogger.debug(this, "Replacing free marker expressions in input resource");
-				propContent = AutomationUtils.replaceExpressions(context, propContent);
+				propContent = AutomationUtils.replaceExpressionsInString("propContent", context, propContent);
 			}
 			else
 			{

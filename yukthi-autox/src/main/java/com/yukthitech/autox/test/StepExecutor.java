@@ -53,7 +53,7 @@ public class StepExecutor
 			{
 				//clone the step, so that expression replacement will not affect actual step
 				step = step.clone();
-				AutomationUtils.replaceExpressions(context, step);
+				AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 
 				res = step.execute(context, exeLogger);
 			}
@@ -73,15 +73,15 @@ public class StepExecutor
 					{
 						if(dataProvider.isParsingEnabled())
 						{
-							AutomationUtils.replaceExpressions(context, data);
+							AutomationUtils.replaceExpressions("testCaseData", context, data);
 						}
 						
-						exeLogger.debug(step, "Executing the step with [Data provider: %s, Data: %s]", dataProvider.getName(), data.getName());
+						exeLogger.debug(step, "Executing the step with [Data provider: {}, Data: {}]", dataProvider.getName(), data.getName());
 						context.setAttribute(dataProvider.getName(), data.getValue());
 						
 						//clone the step, so that expression replacement will not affect actual step
 						IStep dataStep = step.clone();
-						AutomationUtils.replaceExpressions(context, dataStep);
+						AutomationUtils.replaceExpressions("step-" + dataStep.getClass().getName(), context, dataStep);
 
 						if(!dataStep.execute(context, exeLogger))
 						{

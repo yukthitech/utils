@@ -16,5 +16,10 @@
 	
 	<cleanup>
 		<ccg:log message="Message from global cleanup."/>
+		<ccg:ddlQuery dataSourceName="dataSource">
+			<query>
+				DROP TABLE EMPLOYEE
+			</query>
+		</ccg:ddlQuery>
 	</cleanup>
 </testData>

@@ -188,7 +188,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		if(!defaultHeaders.isEmpty())
 		{
 			//replace the expressions if any
-			defaultHeaders = AutomationUtils.replaceExpressions(context, defaultHeaders);
+			defaultHeaders = AutomationUtils.replaceExpressions("defaultHeaders", context, defaultHeaders);
 			
 			for(String name : defaultHeaders.keySet())
 			{

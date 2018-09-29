@@ -106,15 +106,16 @@ public class FreeMarkerMethodManager
 
 	/**
 	 * Treats provided template as freemarker template and processes them. The result will be returned.
+	 * @param templateName Name of template to be processed
 	 * @param context context which would be used as freemarker context for processing.
 	 * @param templateStr Template in which expressions should be replaced
 	 * @return Processed string
 	 */
-	public static String replaceExpressions(Object context, String templateStr)
+	public static String replaceExpressions(String templateName, Object context, String templateStr)
 	{
 		try
 		{
-			return freeMarkerEngine.processTemplate("template", templateStr, context);
+			return freeMarkerEngine.processTemplate(templateName, templateStr, context);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while processing template:\n" + templateStr, ex);

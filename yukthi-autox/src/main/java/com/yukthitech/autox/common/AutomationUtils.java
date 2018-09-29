@@ -117,9 +117,9 @@ public class AutomationUtils
 	 * @param templateStr Template in which expressions should be replaced
 	 * @return Processed string
 	 */
-	public static String replaceExpressions(AutomationContext context, String templateStr)
+	public static String replaceExpressionsInString(String templateName, AutomationContext context, String templateStr)
 	{
-		return FreeMarkerMethodManager.replaceExpressions(context, templateStr);
+		return FreeMarkerMethodManager.replaceExpressions(templateName, context, templateStr);
 	}
 	
 	/**
@@ -152,7 +152,7 @@ public class AutomationUtils
 	 * @param object Object in which expressions has to be replaced
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T replaceExpressions(AutomationContext context, T object)
+	public static <T> T replaceExpressions(String templateName, AutomationContext context, T object)
 	{
 		if(object == null)
 		{
@@ -174,7 +174,7 @@ public class AutomationUtils
 		
 		if(object instanceof String)
 		{
-			return (T) replaceExpressions(context, (String) object);
+			return (T) replaceExpressionsInString(templateName, context, (String) object);
 		}
 
 		//logger.trace("Processing expressions in object: {}", object);
@@ -199,9 +199,12 @@ public class AutomationUtils
 				throw new InvalidStateException("An error occurred while parsing expressions", ex);
 			}
 			
+			int index = 0;
+			
 			for(Object element : collection)
 			{
-				resCollection.add( replaceExpressions(context, element) );
+				resCollection.add( replaceExpressions(templateName + "["  + index + "]" ,context, element) );
+				index++;
 			}
 			
 			return (T) resCollection;
@@ -229,7 +232,7 @@ public class AutomationUtils
 			
 			for(Map.Entry<Object, Object> entry : map.entrySet())
 			{
-				resMap.put( entry.getKey(), replaceExpressions(context, entry.getValue()) ) ;
+				resMap.put( entry.getKey(), replaceExpressions(templateName + "{" + entry.getKey() + "}", context, entry.getValue()) ) ;
 			}
 			
 			return (T) resMap;
@@ -286,7 +289,7 @@ public class AutomationUtils
 					continue;
 				}
 				
-				fieldValue = replaceExpressions(context, fieldValue);
+				fieldValue = replaceExpressions(templateName + "." + field.getName(), context, fieldValue);
 				field.set(object, fieldValue);
 				
 			} catch(InvalidStateException ex)
@@ -404,7 +407,7 @@ public class AutomationUtils
 		
 		try
 		{
-			res = AutomationUtils.replaceExpressions(context, ifCondition);
+			res = AutomationUtils.replaceExpressionsInString("condition", context, ifCondition);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while evaluating condition: {}", condition, ex);

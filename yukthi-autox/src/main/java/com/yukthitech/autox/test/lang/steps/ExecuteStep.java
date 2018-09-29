@@ -45,7 +45,7 @@ public class ExecuteStep extends AbstractStep
 		
 		exeLogger.debug(this, "Executing expression: {}", finalExpr);
 		
-		String output = AutomationUtils.replaceExpressions(context, finalExpr);
+		String output = AutomationUtils.replaceExpressionsInString("finalExpr", context, finalExpr);
 		exeLogger.debug(this, "Output of expression execution: {}", output);
 		
 		return true;

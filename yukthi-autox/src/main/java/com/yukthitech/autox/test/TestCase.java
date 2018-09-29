@@ -255,7 +255,7 @@ public class TestCase implements IStepContainer, Validateable
 		if(this.expectedException != null)
 		{
 			expectedException = this.expectedException.clone();
-			AutomationUtils.replaceExpressions(context, expectedException);
+			AutomationUtils.replaceExpressions("expectedException", context, expectedException);
 			
 			//if expected exception is disabled, ignore the expected exception
 			if(!"true".equals(expectedException.getEnabled()))

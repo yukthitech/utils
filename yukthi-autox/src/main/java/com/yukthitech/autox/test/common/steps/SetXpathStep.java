@@ -45,6 +45,12 @@ public class SetXpathStep extends AbstractStep
 	 */
 	@Param(description = "Type of the value to set. If specified, value will be converted to this type before setting on context.\nDefault: Sets as String", required = false)
 	private String type;
+	
+	/**
+	 * If true, the result will be a list with all matching values. Default: false.
+	 */
+	@Param(description = "If true, the result will be a list with all matching values. Default: false", required = false)
+	private boolean multiValued = false;
 
 	/**
 	 * Sets the name of attribute to set.
@@ -85,6 +91,16 @@ public class SetXpathStep extends AbstractStep
 	{
 		this.type = type;
 	}
+	
+	/**
+	 * Sets the if true, the result will be a list with all matching values. Default: false.
+	 *
+	 * @param multiValued the new if true, the result will be a list with all matching values
+	 */
+	public void setMultiValued(boolean multiValued)
+	{
+		this.multiValued = multiValued;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.automation.IStep#execute(com.yukthitech.automation.AutomationContext, com.yukthitech.automation.ExecutionLogger)
@@ -114,7 +130,14 @@ public class SetXpathStep extends AbstractStep
 		
 		try
 		{
-			value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
+			if(!multiValued)
+			{
+				value = JXPathContext.newContext(sourceValue).getValue(valueExpression);
+			}
+			else
+			{
+				value = JXPathContext.newContext(sourceValue).selectNodes(valueExpression);
+			}
 		}catch(JXPathNotFoundException ex)
 		{
 			//if specified xpath is not found

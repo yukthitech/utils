@@ -86,7 +86,7 @@ public class LoadTextStep extends AbstractStep
 			if(template)
 			{
 				exeLogger.debug(this, "Replacing free marker expressions in input resource");
-				value = AutomationUtils.replaceExpressions(context, value);
+				value = AutomationUtils.replaceExpressionsInString("textContent", context, value);
 			}
 			else
 			{

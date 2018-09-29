@@ -158,4 +158,56 @@ public class DefaultMethods
 			throw new InvalidStateException("An error occurred while converting value to json", ex);
 		}
 	}
+
+	/**
+	 * Checks if "nullCheck" is null, then this method return first object, if not second object will be 
+	 * returned.
+	 * @param nullCheck object to be checked for null
+	 * @param ifNull object to be returned if null
+	 * @param ifNotNull object to be returned if not null
+	 * @return ifNull or ifNotNull based on nullCheck
+	 */
+	@FreeMarkerMethod("ifNull")
+	public static Object ifNull(Object nullCheck, Object ifNull, Object ifNotNull)
+	{
+		return (nullCheck == null) ? ifNull : ifNotNull;
+	}
+	
+	/**
+	 * Fetches the size of object based on below logic
+	 * 	If null, returns 0
+	 *  If string, length of string
+	 *  If collection, size of collection
+	 *  If map, size of map
+	 *  otherwise 1
+	 *  
+	 * @param value value to be checked
+	 * @return size of value
+	 */
+	@FreeMarkerMethod("sizeOf")
+	@SuppressWarnings("rawtypes")
+	public static int sizeOf(Object value)
+	{
+		if(value == null)
+		{
+			return 0;
+		}
+		
+		if(value instanceof String)
+		{
+			return ((String) value).length();
+		}
+		
+		if(value instanceof Collection)
+		{
+			return ((Collection) value).size();
+		}
+		
+		if(value instanceof Map)
+		{
+			return ((Map) value).size();
+		}
+		
+		return 1;
+	}
 }

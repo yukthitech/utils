@@ -5,14 +5,15 @@
 
 	<!-- 
 		Folder where test suite xmls can be found 
+		<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
 	-->
-	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
+	<testSuiteFolder>./test-suites</testSuiteFolder>
 	
 	<!-- Persistence related configuration -->
 	<storage-repository-factory createTables="true">
 		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="derby">
 			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.apache.derby.jdbc.EmbeddedDriver">
-				<url>jdbc:derby:.\data;create=true</url>
+				<url>jdbc:derby:.\derby-data;create=true</url>
 			</dataSource>
 		</dataStore>
 	</storage-repository-factory>
@@ -39,35 +40,12 @@
 			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>
-				<ccg:bean beanType="com.yukthitech.autox.config.selenium.AutoxFirefoxProfile" beanId="firefoxProfile">
-					<intPreference key="browser.download.folderList">2</intPreference>
-					<booleanPreference key="browser.download.manager.showWhenStarting">false</booleanPreference>
-					<stringPreference key="browser.download.dir">C:\\Users\\akiran\\git\\utils\\yukthi-autox\\downloads</stringPreference>
-					<stringPreference key="browser.helperApps.neverAsk.openFile">text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml</stringPreference>
-					<stringPreference key="browser.helperApps.neverAsk.saveToDisk">text/csv,application/x-msexcel,application/excel,application/x-excel,application/vnd.ms-excel,image/png,image/jpeg,text/html,text/plain,application/msword,application/xml</stringPreference>
-					<booleanPreference key="browser.helperApps.alwaysAsk.force">false</booleanPreference>
-					<booleanPreference key="browser.download.manager.alertOnEXEOpen">false</booleanPreference>
-					<booleanPreference key="browser.download.manager.focusWhenStarting">false</booleanPreference>
-					<booleanPreference key="browser.download.manager.useWindow">false</booleanPreference>
-					<booleanPreference key="browser.download.manager.showAlertOnComplete">false</booleanPreference>
-					<booleanPreference key="browser.download.manager.closeWhenDone">false</booleanPreference>
-				</ccg:bean>
-			
-				<ccg:bean beanType="org.openqa.selenium.firefox.FirefoxOptions" beanId="firefoxOptions">
-					<profile ccg:beanRef="firefoxProfile"/>
-				</ccg:bean>
-
-				<driver name="firefox">
-					<system-property name="webdriver.gecko.driver">./drivers/geckodriver.exe</system-property>
-
-					<driver ccg:beanType="org.openqa.selenium.firefox.FirefoxDriver" ccg:paramTypes="org.openqa.selenium.firefox.FirefoxOptions" ccg:params="ref:firefoxOptions">
-					</driver>
-					
-					<downloadFolder>./downloads</downloadFolder>
-				</driver>
+				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
+					<system-property name="webdriver.gecko.driver">../drivers/geckodriver.exe</system-property>
+				</driver>
 				
 				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
-					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+					<system-property name="webdriver.chrome.driver">../drivers/chromedriver.exe</system-property>
 				</driver>
 			</wrap:drivers>
 		</selenium-plugin>

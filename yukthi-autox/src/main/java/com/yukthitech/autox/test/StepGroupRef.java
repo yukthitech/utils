@@ -76,7 +76,7 @@ public class StepGroupRef extends AbstractStep
 		if(this.params != null)
 		{
 			params = new HashMap<>(this.params);
-			params = AutomationUtils.replaceExpressions(context, params);
+			params = AutomationUtils.replaceExpressions("params", context, params);
 
 			paramValues = new HashMap<>();
 			

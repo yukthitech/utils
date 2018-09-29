@@ -58,6 +58,7 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	/**
 	 * Optional data provider for the step.
 	 */
+	@SkipParsing
 	private IDataProvider dataProvider;
 
 	/**

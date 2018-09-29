@@ -1,5 +1,6 @@
 package com.yukthitech.autox;
 
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.IDataProvider;
 import com.yukthitech.autox.test.ListDataProvider;
 import com.yukthitech.autox.test.RangeDataProvider;
@@ -31,6 +32,7 @@ public abstract class AbstractStep implements IStep, Validateable
 	/**
 	 * Optional data provider for the step.
 	 */
+	@SkipParsing
 	private IDataProvider dataProvider;
 	
 	/* (non-Javadoc)

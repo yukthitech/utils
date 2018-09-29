@@ -60,7 +60,7 @@ public class ResourceFactory
 		try
 		{
 			String content = IOUtils.toString(resourceObj.getInputStream(), (String) null);
-			content = AutomationUtils.replaceExpressions(context, content);
+			content = AutomationUtils.replaceExpressionsInString("content", context, content);
 			
 			return new StringResource(resourceObj.getName(), content, false);
 		}catch(Exception ex)

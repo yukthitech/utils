@@ -106,7 +106,7 @@ public class ReportGenerator
 			context.put("report", fullExecutionDetails);
 
 			String reportTemplate = IOUtils.toString(ReportGenerator.class.getResourceAsStream(SUMMARY_REPORT_TEMPLATE));
-			String summaryResult = FreeMarkerMethodManager.replaceExpressions(context, reportTemplate);
+			String summaryResult = FreeMarkerMethodManager.replaceExpressions("reportTemplate", context, reportTemplate);
 
 			File summaryHtml = new File(reportFolder, "summary-report.html");
 			FileUtils.write(summaryHtml, summaryResult);
@@ -160,7 +160,7 @@ public class ReportGenerator
 
 		msg.setFrom(new InternetAddress(notificationConfig.getFromAddress()));
 		msg.setReplyTo(InternetAddress.parse(notificationConfig.getToAddressList(), false));
-		msg.setSubject(FreeMarkerMethodManager.replaceExpressions(freeMarkerContext, notificationConfig.getSubjectTemplate()), "UTF-8");
+		msg.setSubject(FreeMarkerMethodManager.replaceExpressions("notificaton-subject", freeMarkerContext, notificationConfig.getSubjectTemplate()), "UTF-8");
 		msg.setSentDate(new Date());
 
 		// create multi part message

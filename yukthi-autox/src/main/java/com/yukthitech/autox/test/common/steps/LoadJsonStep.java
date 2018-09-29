@@ -116,7 +116,7 @@ public class LoadJsonStep extends AbstractStep
 			if(template)
 			{
 				exeLogger.debug(this, "Replacing free marker expressions in input resource");
-				jsonContent = AutomationUtils.replaceExpressions(context, jsonContent);
+				jsonContent = AutomationUtils.replaceExpressionsInString("jsonContent", context, jsonContent);
 			}
 			else
 			{
