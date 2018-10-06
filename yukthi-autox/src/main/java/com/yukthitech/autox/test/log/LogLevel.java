@@ -6,12 +6,32 @@ package com.yukthitech.autox.test.log;
  */
 public enum LogLevel
 {
-	TRACE, 
-	DEBUG, 
-	ERROR, 
+	TRACE("  TRACE"), 
+	DEBUG("  DEBUG"), 
+	ERROR("  ERROR"), 
 	
 	/**
 	 * Log level which would add messages to summary report.
 	 */
-	SUMMARY;
+	SUMMARY("SUMMARY");
+	
+	/**
+	 * Padding string for this level.
+	 */
+	private String paddedString;
+
+	private LogLevel(String paddedString)
+	{
+		this.paddedString = paddedString;
+	}
+	
+	/**
+	 * Gets the padding string for this level.
+	 *
+	 * @return the padding string for this level
+	 */
+	public String getPaddedString()
+	{
+		return paddedString;
+	}
 }

@@ -8,6 +8,7 @@ import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.monitor.MonitorLogMessage;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.MessageFormatter;
@@ -24,6 +25,11 @@ public class ExecutionLogger
 	private static int fileIndex = 1;
 	
 	/**
+	 * Context as part of which this logger is created.
+	 */
+	private AutomationContext automationContext;
+	
+	/**
 	 * Log data information.
 	 */
 	private ExecutionLogData executionLogData;
@@ -38,8 +44,9 @@ public class ExecutionLogger
 	 */
 	private String mode;
 
-	public ExecutionLogger(String executorName, String executorDescription)
+	public ExecutionLogger(AutomationContext automationContext, String executorName, String executorDescription)
 	{
+		this.automationContext = automationContext;
 		this.executionLogData = new ExecutionLogData(executorName, executorDescription);
 	}
 	
@@ -112,6 +119,20 @@ public class ExecutionLogger
 		
 		return finalMssg;
 	}
+	
+	private void addMessage(ExecutionLogData.Message mssg)
+	{
+		executionLogData.addMessage(mssg);
+		
+		automationContext.sendAsyncMonitorMessage(new MonitorLogMessage(
+				automationContext.getActiveTestSuite() != null ? automationContext.getActiveTestSuite().getName() : null, 
+				automationContext.getActiveTestCase() != null ? automationContext.getActiveTestCase().getName() : null, 
+				automationContext.getActiveTestCaseData() != null ? automationContext.getActiveTestCaseData().getName() : null, 
+				mssg, 
+				automationContext.isSetupExecution(),
+				automationContext.isCleanupExecution())
+		);
+	}
 
 	/**
 	 * Used to log error messages as part of current execution.
@@ -124,7 +145,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 		logger.error(finalMssg);
 		
-		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
 	}
 
 	/**
@@ -146,7 +167,7 @@ public class ExecutionLogger
 		th.printStackTrace(printWriter);
 		printWriter.flush();
 		
-		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, stringWriter.toString(), new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, stringWriter.toString(), new Date()));
 	}
 
 	/**
@@ -165,7 +186,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.debug(finalMssg);
-		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
 	}
 	
 	/**
@@ -184,7 +205,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.trace(finalMssg);
-		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
 	}
 
 	/**
@@ -204,7 +225,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.debug(finalMssg);
-		executionLogData.addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
 	}
 
 	/**
@@ -250,7 +271,7 @@ public class ExecutionLogger
 			name = System.currentTimeMillis() + "_" + (fileIndex++) + extension;
 		}
 		
-		executionLogData.addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
+		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
 	}
 	
 	/**

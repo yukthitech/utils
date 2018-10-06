@@ -25,6 +25,11 @@ public class MonitorServer
 	private static Logger logger = LogManager.getLogger(MonitorServer.class);
 	
 	/**
+	 * System property usng which monitoring will be enabled on specified port.
+	 */
+	public static final String SYS_PROP_MONITOR_PORT = "autox.monitor.port";
+	
+	/**
 	 * Port on which monitoring manager should run.
 	 */
 	private int serverPort;

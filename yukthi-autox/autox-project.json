@@ -1,0 +1,6 @@
+{
+	"name":"Autox",
+	"appConfigFilePath":"src/test/resources/app-configuration.xml",
+	"appPropertyFilePath":"src/test/resources/app.properties",
+	"testsuiteFolderPath":"src/test/resources/test-suites"
+}

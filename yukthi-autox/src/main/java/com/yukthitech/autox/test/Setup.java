@@ -70,7 +70,7 @@ public class Setup implements IStepContainer, Validateable, ILocationBased
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		return this.execute(context, new ExecutionLogger(NAME, NAME));
+		return this.execute(context, new ExecutionLogger(context, NAME, NAME));
 	}
 
 	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
@@ -80,6 +80,7 @@ public class Setup implements IStepContainer, Validateable, ILocationBased
 		try
 		{
 			exeLogger.debug(this, "Started setup process");
+			context.setSetupExecution(true);
 			
 			// execute the steps involved
 			for(IStep step : steps)
@@ -99,6 +100,7 @@ public class Setup implements IStepContainer, Validateable, ILocationBased
 			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
+			context.setSetupExecution(false);
 			exeLogger.clearMode();
 		}
 	}

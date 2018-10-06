@@ -105,6 +105,13 @@ public class MonitorClient
 			}catch(Exception ex)
 			{
 				logger.error("An error occurred while fetching data from server", ex);
+				
+				//as the exception might be because of client close. So wait for second and check again
+				try
+				{
+					Thread.sleep(1000);
+				}catch(Exception e1)
+				{}
 			}
 		}
 	}
@@ -201,5 +208,23 @@ public class MonitorClient
 		client.start();
 		
 		return client;
+	}
+	
+	public void close()
+	{
+		if(clientSocket == null)
+		{
+			return;
+		}
+		
+		try
+		{
+			clientSocket.close();
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while closing monitoring client. Exception: " + ex);
+		}
+		
+		clientSocket = null;
 	}
 }

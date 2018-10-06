@@ -1,6 +1,7 @@
 package com.yukthitech.autox.test.log;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,8 +23,10 @@ public class ExecutionLogData
 	/**
 	 * Represent log message information.
 	 */
-	public static class Message
+	public static class Message implements Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Source location from where logging was done.
 		 */
@@ -136,6 +139,8 @@ public class ExecutionLogData
 	
 	public static class ImageMessage extends Message
 	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Name of the image.
 		 */

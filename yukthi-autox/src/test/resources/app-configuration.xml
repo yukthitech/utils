@@ -7,7 +7,7 @@
 		Folder where test suite xmls can be found 
 		<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
 	-->
-	<testSuiteFolder>./test-suites</testSuiteFolder>
+	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
 	
 	<!-- Persistence related configuration -->
 	<storage-repository-factory createTables="true">

@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.context;
 
 import java.io.File;
 
+import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.model.IdeState;
 
@@ -51,15 +52,14 @@ public interface IContextListener
 	 * Invoked when environment is changed.
 	 * @param activeEnvironment new active environment. Can be null.
 	 */
-	public default void environmentChanged(ExecutionEnvironment activeEnvironment)
+	public default void activeEnvironmentChanged(ExecutionEnvironment activeEnvironment)
 	{}
 	
 	/**
-	 * Invoked when environment console value is changed.
-	 * @param environment
-	 * @param newContent
+	 * Invoked when environment is changed.
+	 * @param event Event indicating the change and value of change.
 	 */
-	public default void environmentConsoleChanged(ExecutionEnvironment environment, String newContent)
+	public default void environmentChanged(EnvironmentEvent event)
 	{}
 	
 	/**

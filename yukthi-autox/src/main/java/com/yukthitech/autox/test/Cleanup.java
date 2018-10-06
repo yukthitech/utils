@@ -70,12 +70,13 @@ public class Cleanup implements IStepContainer, Validateable, ILocationBased
 	 */
 	public TestCaseResult execute(AutomationContext context)
 	{
-		return execute(context, new ExecutionLogger(NAME, NAME));
+		return execute(context, new ExecutionLogger(context, NAME, NAME));
 	}
 
 	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.setMode("cleanup");
+		context.setCleanupExecution(true);
 		
 		try
 		{
@@ -100,6 +101,7 @@ public class Cleanup implements IStepContainer, Validateable, ILocationBased
 			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
+			context.setCleanupExecution(false);
 			exeLogger.clearMode();
 		}
 	}

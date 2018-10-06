@@ -1,6 +1,7 @@
 package com.yukthitech.autox;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,8 +24,11 @@ import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
+import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.TestCase;
+import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
@@ -108,6 +112,16 @@ public class AutomationContext
 	private TestSuite activeTestSuite;
 	
 	/**
+	 * Current test case being executed.
+	 */
+	private TestCase activeTestCase;
+	
+	/**
+	 * Current test case data for which test case being executed, if any.
+	 */
+	private TestCaseData activeTestCaseData;
+	
+	/**
 	 * Maintains list of extended command line argument which will be used
 	 * during plugin initialization.
 	 */
@@ -125,6 +139,21 @@ public class AutomationContext
 	 * Current execution logger. Can be null.
 	 */
 	private ExecutionLogger executionLogger;
+	
+	/**
+	 * Used to send monitor messages to connected client.
+	 */
+	private MonitorServer monitorServer;
+	
+	/**
+	 * Flag indicating if setup execution is currently going on.
+	 */
+	private boolean setupExecution;
+	
+	/**
+	 * Flag indicating if cleanup execution is currently going on.
+	 */
+	private boolean cleanupExecution;
 
 	/**
 	 * Constructor.
@@ -158,6 +187,16 @@ public class AutomationContext
 	}
 	
 	/**
+	 * Sets the used to send monitor messages to connected client.
+	 *
+	 * @param monitorServer the new used to send monitor messages to connected client
+	 */
+	public void setMonitorServer(MonitorServer monitorServer)
+	{
+		this.monitorServer = monitorServer;
+	}
+	
+	/**
 	 * Gets the automation context that can be accessed anywhere needed.
 	 *
 	 * @return the automation context that can be accessed anywhere needed
@@ -185,6 +224,104 @@ public class AutomationContext
 	public void setActiveTestSuite(TestSuite currentTestSuite)
 	{
 		this.activeTestSuite = currentTestSuite;
+	}
+	
+	/**
+	 * Gets the current test suite being executed.
+	 *
+	 * @return the current test suite being executed
+	 */
+	public TestSuite getActiveTestSuite()
+	{
+		return activeTestSuite;
+	}
+	
+	/**
+	 * Clears active test suite name.
+	 */
+	public void clearActiveTestSuite()
+	{
+		this.activeTestSuite = null;
+	}
+	
+	/**
+	 * Tests active test case and data for which execution is going on.
+	 * @param testCase active test case
+	 * @param testCaseData active test case data, if any
+	 */
+	public void setActiveTestCase(TestCase testCase, TestCaseData testCaseData)
+	{
+		this.activeTestCase = testCase;
+		this.activeTestCaseData = testCaseData;
+	}
+	
+	/**
+	 * Clear active test case.
+	 */
+	public void clearActiveTestCase()
+	{
+		this.activeTestCase = null;
+		this.activeTestCaseData = null;
+	}
+	
+	/**
+	 * Gets the flag indicating if setup execution is currently going on.
+	 *
+	 * @return the flag indicating if setup execution is currently going on
+	 */
+	public boolean isSetupExecution()
+	{
+		return setupExecution;
+	}
+
+	/**
+	 * Sets the flag indicating if setup execution is currently going on.
+	 *
+	 * @param setupExecution the new flag indicating if setup execution is currently going on
+	 */
+	public void setSetupExecution(boolean setupExecution)
+	{
+		this.setupExecution = setupExecution;
+	}
+
+	/**
+	 * Gets the flag indicating if cleanup execution is currently going on.
+	 *
+	 * @return the flag indicating if cleanup execution is currently going on
+	 */
+	public boolean isCleanupExecution()
+	{
+		return cleanupExecution;
+	}
+
+	/**
+	 * Sets the flag indicating if cleanup execution is currently going on.
+	 *
+	 * @param cleanupExecution the new flag indicating if cleanup execution is currently going on
+	 */
+	public void setCleanupExecution(boolean cleanupExecution)
+	{
+		this.cleanupExecution = cleanupExecution;
+	}
+
+	/**
+	 * Gets the current test case being executed.
+	 *
+	 * @return the current test case being executed
+	 */
+	public TestCase getActiveTestCase()
+	{
+		return activeTestCase;
+	}
+	
+	/**
+	 * Gets the current test case data for which test case being executed, if any.
+	 *
+	 * @return the current test case data for which test case being executed, if any
+	 */
+	public TestCaseData getActiveTestCaseData()
+	{
+		return activeTestCaseData;
 	}
 	
 	/**
@@ -622,6 +759,18 @@ public class AutomationContext
 	public void setExecutionLogger(ExecutionLogger executionLogger)
 	{
 		this.executionLogger = executionLogger;
+	}
+	
+	/**
+	 * Sends async monitor message to the connected client if any.
+	 * @param mssg message to be sent.
+	 */
+	public void sendAsyncMonitorMessage(Serializable mssg)
+	{
+		if(monitorServer != null)
+		{
+			monitorServer.sendAsync(mssg);
+		}
 	}
 
 	/**

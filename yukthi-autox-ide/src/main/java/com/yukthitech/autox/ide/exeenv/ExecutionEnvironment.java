@@ -3,12 +3,23 @@ package com.yukthitech.autox.ide.exeenv;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
+import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
+import com.yukthitech.autox.monitor.MonitorClient;
+import com.yukthitech.autox.monitor.MonitorLogMessage;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class ExecutionEnvironment
 {
+	private static Logger logger = LogManager.getLogger(ExecutionEnvironment.class);
+	
 	private String name;
 	
 	private Process process;
@@ -19,7 +30,11 @@ public class ExecutionEnvironment
 	
 	private boolean terminated = false;
 	
-	ExecutionEnvironment(String name, Process process, IContextListener proxyListener)
+	private MonitorClient monitorClient;
+	
+	private List<MonitorLogMessage> reportMessages = new LinkedList<>();
+	
+	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort)
 	{
 		this.name = name;
 		this.process = process;
@@ -44,6 +59,24 @@ public class ExecutionEnvironment
 		};
 		
 		errThread.start();
+		
+		IdeUtils.execute(() -> 
+		{
+			monitorClient = MonitorClient.startClient("localhost", monitoringPort);
+			addListeners();
+		}, 1);
+	}
+	
+	private void addListeners()
+	{
+		ReportMessageDataHandler logHandler = new ReportMessageDataHandler(this);
+		monitorClient.addAsyncClientDataHandler(logHandler);
+	}
+	
+	private synchronized void appenConsoleHtml(String html)
+	{
+		consoleHtml.append(html);
+		proxyListener.environmentChanged(EnvironmentEvent.newConsoleChangedEvent(this, html));
 	}
 	
 	private void readConsoleStream(InputStream input, boolean error)
@@ -57,6 +90,15 @@ public class ExecutionEnvironment
 		{
 			while((line = reader.readLine()) != null)
 			{
+				if(error)
+				{
+					logger.error(">>[{}] {}", name, line);
+				}
+				else
+				{
+					logger.debug(">>[{}] {}", name, line);
+				}
+				
 				line = line.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 				
 				if(error)
@@ -68,12 +110,15 @@ public class ExecutionEnvironment
 					lineHtml = "<div>" + line + "</div>";
 				}
 				
-				proxyListener.environmentConsoleChanged(this, lineHtml);
+				appenConsoleHtml(lineHtml);
 			}
 			
 			reader.close();
 			
-			process.waitFor();
+			int code = process.waitFor();
+			monitorClient.close();
+			
+			appenConsoleHtml("<div>Process exited with code: " + code + "</div>");
 			
 			synchronized(this)
 			{
@@ -87,6 +132,12 @@ public class ExecutionEnvironment
 		{
 			throw new InvalidStateException("An error occurred while reading console stream", ex);
 		}
+	}
+	
+	public void addReportMessage(MonitorLogMessage mssg)
+	{
+		this.reportMessages.add(mssg);
+		proxyListener.environmentChanged(EnvironmentEvent.newReportLogEvent(this, mssg));
 	}
 	
 	public String getName()
@@ -107,6 +158,11 @@ public class ExecutionEnvironment
 	public boolean isTerminated()
 	{
 		return terminated;
+	}
+	
+	public List<MonitorLogMessage> getReportMessages()
+	{
+		return reportMessages;
 	}
 	
 	@Override

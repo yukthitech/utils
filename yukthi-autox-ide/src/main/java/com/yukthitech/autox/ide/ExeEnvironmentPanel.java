@@ -124,7 +124,7 @@ public class ExeEnvironmentPanel extends JPanel
 	private void changeEnvironment()
 	{
 		ExecutionEnvironment env = (ExecutionEnvironment) envComboBox.getSelectedItem();
-		ideContext.getProxy().environmentChanged(env);
+		ideContext.getProxy().activeEnvironmentChanged(env);
 	}
 	
 	private void newEnvironmentAdded(ExecutionEnvironment environment)
@@ -132,6 +132,6 @@ public class ExeEnvironmentPanel extends JPanel
 		envComboBox.addItem(environment);
 		envComboBox.setSelectedItem(environment);
 		
-		ideContext.getProxy().environmentChanged(environment);
+		ideContext.getProxy().activeEnvironmentChanged(environment);
 	}
 }

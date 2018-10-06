@@ -26,6 +26,8 @@ import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
+import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 
 @Component
@@ -97,7 +99,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		ideContext.addContextListener(new IContextListener()
 		{
 			@Override
-			public void environmentChanged(ExecutionEnvironment activeEnvironment)
+			public void activeEnvironmentChanged(ExecutionEnvironment activeEnvironment)
 			{
 				if(activeEnvironment != null)
 				{
@@ -114,14 +116,14 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			}
 			
 			@Override
-			public void environmentConsoleChanged(ExecutionEnvironment environment, String newContent)
+			public void environmentChanged(EnvironmentEvent event)
 			{
-				if(activeEnvironment != environment)
+				if(activeEnvironment != event.getEnvironment() || event.getEventType() != EnvironmentEventType.CONSOLE_CHANGED)
 				{
 					return;
 				}
 				
-				appendNewContent(newContent);
+				appendNewContent(event.getNewMessage());
 			}
 		});
 	}

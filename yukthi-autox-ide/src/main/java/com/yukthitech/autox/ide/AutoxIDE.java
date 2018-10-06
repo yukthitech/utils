@@ -28,6 +28,7 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.views.ConsolePanel;
+import com.yukthitech.autox.ide.views.report.ReportPanel;
 
 @ActionHolder
 @SpringBootApplication
@@ -64,6 +65,9 @@ public class AutoxIDE extends JFrame
 	
 	@Autowired
 	private ConsolePanel consolePanel;
+	
+	@Autowired
+	private ReportPanel reportPanel;
 	
 	/**
 	 * Top panel to hold tool bar and env panel.
@@ -217,8 +221,7 @@ public class AutoxIDE extends JFrame
 		horizontalSplitPane.setRightComponent(rightBottomTabbedPane);
 		rightBottomTabbedPane.setParentDetails(maximizeListener, horizontalSplitPane, false);
 
-		Report report = new Report();
-		rightBottomTabbedPane.addTab("Report", null, report, null);
+		rightBottomTabbedPane.addTab("Report", null, reportPanel, null);
 
 		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);

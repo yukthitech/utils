@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.event.IAutomationListener;
+import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteExecutor;
@@ -192,6 +193,35 @@ public class AutomationLauncher
 		}
 	}
 	
+	/**
+	 * Fetches the monitoring port from system property if one is specified.
+	 * @return
+	 */
+	private static Integer getMonitoringPort()
+	{
+		String portNumStr = System.getProperty(MonitorServer.SYS_PROP_MONITOR_PORT);
+		
+		if(portNumStr == null)
+		{
+			return null;
+		}
+		
+		try
+		{
+			int port = Integer.parseInt(portNumStr);
+			
+			if(port <= 0)
+			{
+				throw new InvalidStateException("Invalid monitoring port is configured: {}", portNumStr);
+			}
+			
+			return port;
+		}catch(NumberFormatException ex)
+		{
+			throw new InvalidStateException("Invalid monitoring port is configured: {}", portNumStr);
+		}
+	}
+	
 	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[]) throws Exception
 	{
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
@@ -226,8 +256,17 @@ public class AutomationLauncher
 		
 		// load the configuration file
 		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
-		
 		AutomationContext context = new AutomationContext(appConfig);
+
+		//set monitoring port info
+		Integer monitorPort = getMonitoringPort();
+		
+		if(monitorPort != null)
+		{
+			MonitorServer server = MonitorServer.startManager(monitorPort);
+			context.setMonitorServer(server);
+		}
+		
 		context.setBasicArguments(basicArguments);
 		context.setReportFolder(reportFolder);
 		

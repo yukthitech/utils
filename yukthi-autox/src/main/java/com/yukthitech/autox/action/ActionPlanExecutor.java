@@ -189,7 +189,7 @@ public class ActionPlanExecutor
 		ActionPlan actionPlan = actionPlanFile.getActionPlan();
 		
 		//create object required for execution
-		ExecutionLogger exeLogger = new ExecutionLogger("Ide", "Ide");
+		ExecutionLogger exeLogger = new ExecutionLogger(context, "Ide", "Ide");
 		TestCase dummy = new TestCase();
 		dummy.setName("action-plan");
 		
