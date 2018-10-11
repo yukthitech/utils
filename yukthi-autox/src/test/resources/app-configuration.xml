@@ -41,11 +41,11 @@
 			
 			<wrap:drivers>
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
-					<system-property name="webdriver.gecko.driver">../drivers/geckodriver.exe</system-property>
+					<system-property name="webdriver.gecko.driver">./drivers/geckodriver.exe</system-property>
 				</driver>
 				
 				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
-					<system-property name="webdriver.chrome.driver">../drivers/chromedriver.exe</system-property>
+					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
 				</driver>
 			</wrap:drivers>
 		</selenium-plugin>

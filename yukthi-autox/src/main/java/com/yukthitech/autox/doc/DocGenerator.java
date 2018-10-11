@@ -106,6 +106,31 @@ public class DocGenerator
 			docInformation.addPlugin(new PluginInfo((Class) pluginType, executableAnnot));
 		}
 	}
+	
+	public static DocInformation buildDocInformation(String basePackages[])throws Exception
+	{
+		DocInformation docInformation = new DocInformation();
+		
+		Reflections reflections = null;
+		
+		for(String pack : basePackages)
+		{
+			reflections = new Reflections(pack, new SubTypesScanner());
+			
+			loadSteps(docInformation, (Set) reflections.getSubTypesOf(IStep.class) );
+
+			loadValidations(docInformation, (Set) reflections.getSubTypesOf(IValidation.class) );
+			
+			loadPlugins(docInformation, (Set) reflections.getSubTypesOf(IPlugin.class) );
+		}
+		
+		//convert data into json
+		ObjectMapper objectMapper = new ObjectMapper();
+		String json = objectMapper.writeValueAsString(docInformation);
+		
+		return docInformation;
+		
+	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void main(String[] args) throws Exception
