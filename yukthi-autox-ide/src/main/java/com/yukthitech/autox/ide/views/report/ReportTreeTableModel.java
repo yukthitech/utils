@@ -1,6 +1,5 @@
 package com.yukthitech.autox.ide.views.report;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,17 +7,16 @@ import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.monitor.MonitorLogMessage;
-import com.yukthitech.autox.test.log.LogLevel;
 
 public class ReportTreeTableModel extends AbstractTableModel
 {
 	private static final long serialVersionUID = 1L;
 
 	private final static String[] columnNames = { "", "Message"};
-	
-	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("hh:mm:ss aa");
 	
 	private static final String GLOBAL_SETUP = "_global_setup";
 	
@@ -30,24 +28,10 @@ public class ReportTreeTableModel extends AbstractTableModel
 
 	private List<Object> rows = new ArrayList<>();
 
-	/*
-	public void addTestSuiteReport(TestSuiteRow report)
+	public synchronized void reload(ExecutionEnvironment newEnv)
 	{
-		testSuiteLst.add(report);
-		
-		int start = rows.size();
-		report.populateChildRows(object ->
-		{
-			rows.add(object);
-		});
-		
-		super.fireTableRowsInserted(start, rows.size() - 1);
-	}
-	*/
-	
-	public void reload(ExecutionEnvironment newEnv)
-	{
-		rows.clear();
+		testSuiteLst.clear();
+		testSuiteMap.clear();
 		
 		for(MonitorLogMessage log : newEnv.getReportMessages())
 		{
@@ -87,9 +71,21 @@ public class ReportTreeTableModel extends AbstractTableModel
 			}
 		}
 		
+		if(StringUtils.isBlank(testCaseName))
+		{
+			if(log.isSetup())
+			{
+				testCaseName = "_setup";
+			}
+			else if(log.isCleanup())
+			{
+				testCaseName = "_cleanup";
+			}
+		}
+		
 		if(dataName != null)
 		{
-			testCaseName = testCaseName + "[" + dataName + "]";
+			testCaseName = testCaseName + " [" + dataName + "]";
 		}
 		
 		TestSuiteRow testSuiteRow = testSuiteMap.get(testSuiteName);
@@ -136,8 +132,6 @@ public class ReportTreeTableModel extends AbstractTableModel
 		this.rows.clear();
 		this.rows = newRows;
 		
-		System.out.println(">>>>>>>>>>>>>>>>>>Refreshing rows with size: " + this.rows.size());
-		
 		super.fireTableDataChanged();
 	}
 	
@@ -168,43 +162,14 @@ public class ReportTreeTableModel extends AbstractTableModel
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		Object row = rows.get(rowIndex);
-
-		if(row instanceof TestSuiteRow)
+		
+		if(!(row instanceof IReportRow))
 		{
-			TestSuiteRow tsr = (TestSuiteRow) row;
-			return (columnIndex == 0) ? tsr.getName() : "";
-		}
-		else if(row instanceof TestCaseRow)
-		{
-			TestCaseRow tcr = (TestCaseRow) row;
-			return (columnIndex == 0) ? tcr.getName() : "";
-		}
-		else
-		{
-			LogReportRow log = (LogReportRow) row;
-			
-			switch (columnIndex)
-			{
-				case 0:
-				{
-					String style = (log.getLogLevel() == LogLevel.ERROR) ? "color:red;" : "";
-					
-					String str = String.format(
-							"<span style='%s'>%s</span> %s [%s]", 
-							style, 
-							log.getLogLevel().getPaddedString(), 
-							TIME_FORMAT.format(log.getTime()), 
-							log.getSource(), 
-							log.getSource());
-					
-					return str.replace("'", "\"");
-				}
-				case 1:
-					return log.getMessage();
-			}
+			return "";
 		}
 		
-		return "";
+		IReportRow reportRow = (IReportRow) row;
+		return reportRow.getValueAt(columnIndex);
 	}
 
 }

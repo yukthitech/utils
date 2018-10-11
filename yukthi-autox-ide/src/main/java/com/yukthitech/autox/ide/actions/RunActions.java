@@ -5,8 +5,6 @@ import javax.swing.JOptionPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.ProjectExplorer;
-import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironmentManager;
@@ -20,12 +18,6 @@ public class RunActions
 	public static final String NODE_TEST_SUITE = "testsuite";
 	
 	public static final String NODE_TEST_CASE = "testcase";
-	
-	@Autowired
-	private IdeContext ideContext;
-	
-	@Autowired
-	private ProjectExplorer projectExplorer;
 	
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;

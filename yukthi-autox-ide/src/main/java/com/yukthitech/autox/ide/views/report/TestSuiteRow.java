@@ -9,7 +9,7 @@ import com.yukthitech.autox.test.log.ExecutionLogData;
  * Represents a test suite row.
  * @author akiran
  */
-public class TestSuiteRow extends MinimizableRow<TestCaseRow>
+public class TestSuiteRow extends MinimizableRow<TestCaseRow> implements IReportRow
 {
 	private String name;
 	
@@ -43,5 +43,11 @@ public class TestSuiteRow extends MinimizableRow<TestCaseRow>
 		}
 		
 		testCaseRow.addLogEntry(message);
+	}
+	
+	@Override
+	public Object getValueAt(int col)
+	{
+		return (col == 0) ? name : "";
 	}
 }

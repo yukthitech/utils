@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.exeenv;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
@@ -34,11 +35,14 @@ public class ExecutionEnvironment
 	
 	private List<MonitorLogMessage> reportMessages = new LinkedList<>();
 	
-	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort)
+	private File reportFolder;
+	
+	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder)
 	{
 		this.name = name;
 		this.process = process;
 		this.proxyListener = proxyListener;
+		this.reportFolder = reportFolder;
 		
 		Thread outputThread = new Thread() 
 		{
@@ -163,6 +167,11 @@ public class ExecutionEnvironment
 	public List<MonitorLogMessage> getReportMessages()
 	{
 		return reportMessages;
+	}
+	
+	public File getReportFolder()
+	{
+		return reportFolder;
 	}
 	
 	@Override

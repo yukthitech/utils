@@ -11,7 +11,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import com.yukthitech.autox.ide.IdeUtils;
 
-public class TreeCellRenderer extends DefaultTableCellRenderer
+public class TreeCellRenderer extends DefaultTableCellRenderer implements IReportConstants
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -29,6 +29,11 @@ public class TreeCellRenderer extends DefaultTableCellRenderer
 		JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		label.setFont(new Font(Font.DIALOG, Font.BOLD, 12));
 		label.setBorder(DEF_BORDER);
+		
+		if(!isSelected)
+		{
+			setDefaultStyle(rowBean, isSelected, label);
+		}
 		
 		if(rowBean instanceof MinimizableRow)
 		{

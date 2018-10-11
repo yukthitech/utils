@@ -24,6 +24,12 @@
 			
 		</menu>
 
+		<menu label="Edit" mnemonic="E">
+			<item label="Format Code" mnemonic="F" action="formatCode">
+				<short-key ctrl="true" key="F"/>
+			</item>
+		</menu>
+
 		<menu label="Run" mnemonic="R">
 			<item label="Run Test Suite" mnemonic="S" action="runTestSuite">
 				<short-key ctrl="true" key="F9"/>

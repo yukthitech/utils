@@ -3,7 +3,6 @@ package com.yukthitech.autox.ide.views.report;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Date;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JPanel;
@@ -23,7 +22,6 @@ import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.views.IViewPanel;
 import com.yukthitech.autox.monitor.MonitorLogMessage;
-import com.yukthitech.autox.test.log.LogLevel;
 
 @Component
 public class ReportPanel extends JPanel implements IViewPanel
@@ -41,6 +39,8 @@ public class ReportPanel extends JPanel implements IViewPanel
 	private ExecutionEnvironment activeEnvironment;
 	
 	private JTabbedPane parentTabbedPane;
+	
+	private HtmlCellRenderer htmlCellRenderer = new HtmlCellRenderer(false);
 	
 	/**
 	 * Create the panel.
@@ -60,6 +60,8 @@ public class ReportPanel extends JPanel implements IViewPanel
 			public void activeEnvironmentChanged(ExecutionEnvironment activeEnvironment)
 			{
 				ReportPanel.this.activeEnvironment = activeEnvironment;
+				htmlCellRenderer.setActiveEnvironment(activeEnvironment);
+				
 				refreshReportLogs();
 			}
 			
@@ -75,40 +77,19 @@ public class ReportPanel extends JPanel implements IViewPanel
 			}
 		});
 	}
-	
-	private TestSuiteRow createRow(int index)
-	{
-		TestSuiteRow testSuiteRow = new TestSuiteRow("Test Suite1");
-		
-		TestCaseRow testCase1 = new TestCaseRow("Test Case1");
-		testSuiteRow.addChild(testCase1);
-		testCase1.addChild(new LogReportRow(LogLevel.DEBUG, "source", "<h1 style=\"color:blue;\">This is a Heading</h1>\r\n<p>This is a paragraph.</p>", new Date()));
-		testCase1.addChild(new LogReportRow(LogLevel.TRACE, "source", "<h1 style=\"color:blue;\">This is a Heading</h1>\r\n<p>This is a paragraph.</p>", new Date()));
-		testCase1.addChild(new LogReportRow(LogLevel.ERROR, "source", "<h1 style=\"color:blue;\">This is a Heading</h1>\r\n<p>This is a paragraph.</p>", new Date()));
-		
-		TestCaseRow testCase2 = new TestCaseRow("Test Case2");
-		testSuiteRow.addChild(testCase2);
-		testCase2.addChild(new LogReportRow(LogLevel.DEBUG, "source", "<h1 style=\"color:blue;\">This is a Heading</h1>\r\n<p>This is a paragraph.</p>", new Date()));
-		testCase2.addChild(new LogReportRow(LogLevel.DEBUG, "source", "<h1 style=\"color:blue;\">This is a Heading</h1>\r\n<p>This is a paragraph.</p>", new Date()));
-		testCase2.addChild(new LogReportRow(LogLevel.SUMMARY, "source", "<h1 style=\"color:blue;\">This is a Heading</h1>\r\n<p>This is a paragraph.</p>", new Date()));
-		
-		return testSuiteRow;
-	}
 
 	private JTable getJxTreeTable()
 	{
 		if(jxTreeTable == null)
 		{
 			model = new ReportTreeTableModel();
-			//model.addTestSuiteReport(createRow(1));
-			//model.addTestSuiteReport(createRow(2));
 			
 			jxTreeTable = new JTable(model);
 			MatteBorder border = new MatteBorder(1, 1, 1, 1, UIManager.getColor("Table.gridColor"));
 			jxTreeTable.setBorder(border);
 
 			jxTreeTable.getColumnModel().getColumn(0).setCellRenderer(new TreeCellRenderer());
-			jxTreeTable.getColumnModel().getColumn(1).setCellRenderer(new HtmlCellRenderer(false));
+			jxTreeTable.getColumnModel().getColumn(1).setCellRenderer(htmlCellRenderer);
 			jxTreeTable.getColumnModel().getColumn(0).setPreferredWidth(200);
 			jxTreeTable.getColumnModel().getColumn(1).setPreferredWidth(800);
 			
@@ -168,7 +149,6 @@ public class ReportPanel extends JPanel implements IViewPanel
 	
 	private void addNewReportLog(MonitorLogMessage logMsg)
 	{
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>Adding log report: " + logMsg);
 		model.addLog(logMsg, true);
 	}
 }

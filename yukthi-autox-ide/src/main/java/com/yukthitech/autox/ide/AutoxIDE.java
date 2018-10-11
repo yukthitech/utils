@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
+import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.ActionHolder;
@@ -68,6 +69,9 @@ public class AutoxIDE extends JFrame
 	
 	@Autowired
 	private ReportPanel reportPanel;
+	
+	@Autowired
+	private HelpPanel helpPanel;
 	
 	/**
 	 * Top panel to hold tool bar and env panel.
@@ -224,6 +228,9 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane.addTab("Report", null, reportPanel, null);
 
 		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
+		consolePanel.setParent(rightBottomTabbedPane);
+		
+		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
 		return verticalSplitPane;

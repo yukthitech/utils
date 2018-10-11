@@ -55,6 +55,7 @@ public class ExecutionEnvironmentManager
 		String classpath = System.getProperty("java.class.path");
 		String javaCmd = "java";
 		String outputDir = "autox-report";
+		File reportFolder = new File(project.getBaseFolderPath(), outputDir);
 		
 		int monitorPort = fetchNextAvailablePort();
 		
@@ -64,7 +65,8 @@ public class ExecutionEnvironmentManager
 			"-D" + MonitorServer.SYS_PROP_MONITOR_PORT + "=" + monitorPort,
 			AutomationLauncher.class.getName(),
 			project.getAppConfigFilePath(),
-			"-rf", new File(project.getBaseFolderPath(), outputDir).getPath(),
+			"-prop", project.getAppPropertyFilePath(), 
+			"-rf", reportFolder.getPath(),
 			"--report-opening-disabled", "true"
 		) );
 		
@@ -78,7 +80,7 @@ public class ExecutionEnvironmentManager
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(envName, builder.start(), ideContext.getProxy(), monitorPort);
+			ExecutionEnvironment env = new ExecutionEnvironment(envName, builder.start(), ideContext.getProxy(), monitorPort, reportFolder);
 			ideContext.getProxy().newEnvironmentStarted(env);
 			
 			return env;

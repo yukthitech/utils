@@ -201,4 +201,9 @@ public class FileEditor extends RTextScrollPane
 		
 		return attr.getValue();
 	}
+	
+	public File getFile()
+	{
+		return file;
+	}
 }

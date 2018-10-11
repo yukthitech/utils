@@ -138,7 +138,7 @@ public class Element
 				return elem.getElement(withName, curLineNo);
 			}
 			
-			if(curLineNo > elem.getEndLineNo())
+			if(curLineNo <= elem.getEndLineNo())
 			{
 				break;
 			}
