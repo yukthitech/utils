@@ -37,7 +37,7 @@ public class TObjectLockManager
 			try
 			{
 				objectLockManager.lockObject(forLock);
-			}catch(InterruptedException e)
+			}catch(Exception e)
 			{
 				lockError = true;
 				return;

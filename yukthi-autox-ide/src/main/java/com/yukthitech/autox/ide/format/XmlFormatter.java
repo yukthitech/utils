@@ -34,8 +34,6 @@ public class XmlFormatter
 	
 	static
 	{
-		rules.add(new FormattingRule("\\{$", IndentAction.POST_INCR_INDENT));
-		rules.add(new FormattingRule("\\}$", IndentAction.PRE_DECR_INDENT));
 		rules.add(new FormattingRule("\\<\\#if", IndentAction.POST_INCR_INDENT, "\\<\\/\\#if\\>"));
 		rules.add(new FormattingRule("\\<\\/\\#if\\>", IndentAction.PRE_DECR_INDENT));
 	}
@@ -191,6 +189,7 @@ public class XmlFormatter
 			StringBuilder builder = new StringBuilder();
 			String line = null;
 			String extraIndent = "";
+			int bracketCount = 0;
 			
 			FormattingRule matchedRule = null;
 			
@@ -220,6 +219,36 @@ public class XmlFormatter
 				if(matchedRule != null)
 				{
 					extraIndent = matchedRule.getIndentAction().alterIndet(false, extraIndent);
+				}
+				else
+				{
+					char chArr[] = line.toCharArray();
+					bracketCount = 0;
+					
+					for(int i = 0; i < chArr.length; i++)
+					{
+						if(chArr[i] == '(' || chArr[i] == '{' || chArr[i] == '[')
+						{
+							bracketCount++;
+						}
+						
+						if(chArr[i] == ')' || chArr[i] == '}' || chArr[i] == ']')
+						{
+							bracketCount--;
+						}
+					}
+					
+					if(bracketCount > 0)
+					{
+						extraIndent += "\t";
+					}
+					else if(bracketCount < 0)
+					{
+						if(extraIndent.length() > 0)
+						{
+							extraIndent = extraIndent.substring(1);
+						}
+					}
 				}
 			}
 			

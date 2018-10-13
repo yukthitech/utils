@@ -18,9 +18,10 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.PluginInfo;
 import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.views.IViewPanel;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
@@ -42,15 +44,19 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private JSplitPane splitPane;
 	private JScrollPane scrollPane;
 	private JTree tree;
-	private JScrollPane scrollPane_1;
+	private JScrollPane editorScrollPane;
 	private JEditorPane editorPane;
 	private JPanel panel;
-	private JTextField textField;
+	private JTextField searchField;
 	private JButton btnNewButton;
 	
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 	
 	private String documentTemplate = null;
+	
+	private String currentSearchText = "";
+	
+	private HelpNodeData rootNodeData = new HelpNodeData("Autox Documentation", null);
 
 	/**
 	 * Create the panel.
@@ -77,7 +83,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 		
 		try
 		{
-			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.ftl"));
+			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"));
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
@@ -92,8 +98,14 @@ public class HelpPanel extends JPanel implements IViewPanel
 		try
 		{
 			DocInformation docInformation = DocGenerator.buildDocInformation(basepackage);
-			HelpTreeModel model = new HelpTreeModel(docInformation);
-			// model.addPlugins(docInformation.getPlugins());
+			rootNodeData.addHelpNode(new HelpNodeData("Default Plugins", docInformation));
+
+			for(PluginInfo pluginInfo : docInformation.getPlugins())
+			{
+				rootNodeData.addHelpNode(new HelpNodeData(pluginInfo, docInformation));
+			}
+			
+			HelpTreeModel model = new HelpTreeModel(rootNodeData);
 			tree.setModel(model);
 		} catch(Exception e)
 		{
@@ -136,60 +148,10 @@ public class HelpPanel extends JPanel implements IViewPanel
 			tree = new JTree();
 			tree.addTreeSelectionListener(new TreeSelectionListener()
 			{
-
 				@Override
 				public void valueChanged(TreeSelectionEvent e)
 				{
-					DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-					if(node == null)
-					{
-						return;
-					}
-					else
-					{
-						Map<String, Object> input = new HashMap<>();
-						
-						try
-						{
-							if(node instanceof PluginInfoTreeNode)
-							{
-								PluginInfoTreeNode pnode = (PluginInfoTreeNode) node;
-								PluginInfo plugin = pnode.getPluginInfo();
-								
-								if(plugin != null)
-								{
-									input.put("type", "plugin");
-									input.put("node", plugin);
-									
-									String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
-									editorPane.setText(output);
-								}
-								else
-								{
-									editorPane.setText("");
-								}
-							}
-							else if(node instanceof StepInforTreeNode)
-							{
-								StepInforTreeNode snode = (StepInforTreeNode) node;
-								StepInfo step = snode.getStepInfo();
-								input.put("type", "step");
-								input.put("node", step);
-								
-								String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
-								editorPane.setText(output);
-							}
-							else
-							{
-								editorPane.setText(" ");
-							}
-						} catch(Exception e1)
-						{
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-
-					}
+					displayNodeContent();
 				}
 			});
 		}
@@ -198,12 +160,12 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 	private JScrollPane getScrollPane_1()
 	{
-		if(scrollPane_1 == null)
+		if(editorScrollPane == null)
 		{
-			scrollPane_1 = new JScrollPane();
-			scrollPane_1.setViewportView(getEditorPane());
+			editorScrollPane = new JScrollPane();
+			editorScrollPane.setViewportView(getEditorPane());
 		}
-		return scrollPane_1;
+		return editorScrollPane;
 	}
 
 	private JEditorPane getEditorPane()
@@ -244,12 +206,43 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 	private JTextField getTextField()
 	{
-		if(textField == null)
+		if(searchField == null)
 		{
-			textField = new JTextField();
-			textField.setColumns(10);
+			searchField = new JTextField();
+			searchField.setColumns(10);
+			
+			final Runnable applyFilterRunnable = new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					applyFilter();
+				}
+			};
+			
+			searchField.getDocument().addDocumentListener(new DocumentListener()
+			{
+				@Override
+				public void removeUpdate(DocumentEvent e)
+				{
+					IdeUtils.executeConsolidatedJob("applyFilter", applyFilterRunnable, 1000);
+				}
+				
+				@Override
+				public void insertUpdate(DocumentEvent e)
+				{
+					IdeUtils.executeConsolidatedJob("applyFilter", applyFilterRunnable, 1000);
+				}
+				
+				@Override
+				public void changedUpdate(DocumentEvent e)
+				{
+					IdeUtils.executeConsolidatedJob("applyFilter", applyFilterRunnable, 1000);
+				}
+			});
 		}
-		return textField;
+		
+		return searchField;
 	}
 
 	private JButton getBtnNewButton()
@@ -259,5 +252,76 @@ public class HelpPanel extends JPanel implements IViewPanel
 			btnNewButton = new JButton("Search");
 		}
 		return btnNewButton;
+	}
+	
+	private void applyFilter()
+	{
+		String newText = searchField.getText().trim();
+		
+		if(newText.equals(currentSearchText))
+		{
+			return;
+		}
+		
+		currentSearchText = newText;
+		rootNodeData.filter(newText);
+		
+		HelpTreeModel model = new HelpTreeModel(rootNodeData);
+		tree.setModel(model);
+	}
+	
+	private void displayNodeContent()
+	{
+		Object treeNode = tree.getLastSelectedPathComponent();
+		
+		if(!(treeNode instanceof HelpTreeNode))
+		{
+			return;
+		}
+		
+		HelpTreeNode node = (HelpTreeNode) tree.getLastSelectedPathComponent();
+
+		if(node == null)
+		{
+			return;
+		}
+		
+		Map<String, Object> input = new HashMap<>();
+		Object nodeValue = node.getHelpNodeData().getNodeValue();
+		
+		try
+		{
+			if(nodeValue instanceof PluginInfo)
+			{
+				PluginInfo plugin = (PluginInfo) nodeValue;
+				
+				input.put("type", "plugin");
+				input.put("node", plugin);
+				
+				String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
+				editorPane.setText(output);
+			}
+			else if(nodeValue instanceof StepInfo)
+			{
+				StepInfo step = (StepInfo) nodeValue;
+				input.put("type", "step");
+				input.put("node", step);
+				
+				String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
+				editorPane.setText(output);
+			}
+			else
+			{
+				editorPane.setText(" ");
+			}
+
+			IdeUtils.executeUiTask(()->
+			{
+				editorScrollPane.getVerticalScrollBar().setValue(0);
+			});
+		} catch(Exception e1)
+		{
+			e1.printStackTrace();
+		}
 	}
 }

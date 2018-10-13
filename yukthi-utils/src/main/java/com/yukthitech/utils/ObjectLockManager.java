@@ -59,9 +59,8 @@ public class ObjectLockManager
 	 * Locks the specified "object" till {@link #releaseObject(Object)} is called with same object. Other threads
 	 * which tries to obtain lock on same object, will wait till lock is obtained
 	 * @param object
-	 * @throws InterruptedException 
 	 */
-	public void lockObject(Object object) throws InterruptedException
+	public void lockObject(Object object)
 	{
 		lock.lock();
 		
@@ -76,7 +75,13 @@ public class ObjectLockManager
 				// based on the number of threads running parallely on same object
 				logger.debug("Waiting for lock on object - {}", object);
 					
-				condition.await();
+				try
+				{
+					condition.await();
+				} catch(InterruptedException ex)
+				{
+					throw new RuntimeInterruptedException(ex);
+				}
 				
 				condition = objectToConditions.get(object);
 			}

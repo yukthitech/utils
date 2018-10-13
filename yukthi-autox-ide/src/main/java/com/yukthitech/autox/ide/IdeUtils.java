@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
@@ -19,8 +20,11 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.utils.ObjectLockManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -29,6 +33,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class IdeUtils
 {
+	private static Logger logger = LogManager.getLogger(IdeUtils.class);
+	
 	/**
 	 * Used to serialize and deserialize the objects.
 	 */
@@ -36,6 +42,80 @@ public class IdeUtils
 	
 	private static final int BORDER_SIZE = 8;
 	private static final int HALF_BORDER_SIZE = BORDER_SIZE / 2;
+	
+	private static ObjectLockManager jobNameLocker = new ObjectLockManager();
+	
+	/**
+	 * Job whose multiple invocation has to be consolidated and executed only once.
+	 * @author akiran
+	 */
+	private static class ConsolidatedJob implements Runnable
+	{
+		private String name;
+		
+		/**
+		 * Job to be executed.
+		 */
+		private Runnable runnable;
+		
+		/**
+		 * Time at which this job should be executed.
+		 */
+		private long scheduledAt;
+
+		public ConsolidatedJob(String name, Runnable runnable, long delay)
+		{
+			this.name = name;
+			this.runnable = runnable;
+			this.scheduledAt = System.currentTimeMillis() + delay;
+		}
+		
+		/**
+		 * To be invoked when already existing job is rescheduled.
+		 * @param runnable
+		 * @param delay
+		 */
+		public void scheduleAfter(Runnable runnable, long delay)
+		{
+			this.runnable = runnable;
+			scheduledAt = System.currentTimeMillis() + delay;
+		}
+		
+		/**
+		 * Tells how much time is left for execution.
+		 * @return
+		 */
+		public long getTimeLeft()
+		{
+			return scheduledAt - System.currentTimeMillis();
+		}
+		
+		@Override
+		public void run()
+		{
+			jobNameLocker.lockObject(name);
+			
+			try
+			{
+				long timeLeft = getTimeLeft();
+				
+				if(timeLeft > 0)
+				{
+					threadPool.schedule(this, timeLeft, TimeUnit.MILLISECONDS);
+					return;
+				}
+				
+				consolidatedJobs.remove(name);
+				runnable.run();
+			} catch(Exception ex)
+			{
+				logger.error("An error occurred while executing consolidated task: {}", name, ex);
+			} finally
+			{
+				jobNameLocker.releaseObject(name);
+			}
+		}
+	}
 	
 	/**
 	 * Size of file icon.
@@ -51,6 +131,8 @@ public class IdeUtils
 	 * Thread pools for scheduled jobs.
 	 */
 	private static ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(10);
+	
+	private static Map<String, ConsolidatedJob> consolidatedJobs = new HashMap<>();
 	
 	/**
 	 * Saves the specified object into specified file.
@@ -222,5 +304,32 @@ public class IdeUtils
 	public static void execute(Runnable runnable, long delay)
 	{
 		threadPool.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+	}
+	
+	public static synchronized void executeConsolidatedJob(String name, Runnable runnable, long delay)
+	{
+		jobNameLocker.lockObject(name);
+		
+		try
+		{
+			ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
+			
+			if(consolidatedJob != null)
+			{
+				consolidatedJob.scheduleAfter(runnable, delay);
+				return;
+			}
+			
+			consolidatedJob = new ConsolidatedJob(name, runnable, delay);
+			threadPool.schedule(consolidatedJob, delay, TimeUnit.MILLISECONDS);
+		}finally
+		{
+			jobNameLocker.releaseObject(name);
+		}
+	}
+	
+	public static void executeUiTask(Runnable runnable)
+	{
+		EventQueue.invokeLater(runnable);
 	}
 }
