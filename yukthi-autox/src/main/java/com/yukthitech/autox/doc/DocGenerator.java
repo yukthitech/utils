@@ -2,6 +2,9 @@ package com.yukthitech.autox.doc;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -12,7 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
+import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 /**
  * Tool to generate documentation for all plugins, steps and validations.
@@ -107,7 +112,8 @@ public class DocGenerator
 		}
 	}
 	
-	public static DocInformation buildDocInformation(String basePackages[])throws Exception
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static DocInformation buildDocInformation(String basePackages[]) throws Exception
 	{
 		DocInformation docInformation = new DocInformation();
 		
@@ -124,15 +130,15 @@ public class DocGenerator
 			loadPlugins(docInformation, (Set) reflections.getSubTypesOf(IPlugin.class) );
 		}
 		
+		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)));
+		Collection<FreeMarkerMethodDoc> methodDocs = FreeMarkerMethodManager.getRegisterMethodDocuments();
+
+		docInformation.setFreeMarkerMethods(new HashSet<>(methodDocs));
+		
 		//convert data into json
-		ObjectMapper objectMapper = new ObjectMapper();
-		String json = objectMapper.writeValueAsString(docInformation);
-		
 		return docInformation;
-		
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void main(String[] args) throws Exception
 	{
 		if(args.length != 2)
@@ -146,22 +152,8 @@ public class DocGenerator
 		
 		String basePackages[] = packStr.split("\\s*\\,\\s*");
 		
-		Reflections reflections = null;
-		
-		DocInformation docInformation = new DocInformation();
+		DocInformation docInformation = buildDocInformation(basePackages);
 
-		for(String pack : basePackages)
-		{
-			System.out.println("Scanning package - " + pack);
-			reflections = new Reflections(pack, new SubTypesScanner());
-			
-			loadSteps(docInformation, (Set) reflections.getSubTypesOf(IStep.class) );
-
-			loadValidations(docInformation, (Set) reflections.getSubTypesOf(IValidation.class) );
-			
-			loadPlugins(docInformation, (Set) reflections.getSubTypesOf(IPlugin.class) );
-		}
-		
 		//convert data into json
 		ObjectMapper objectMapper = new ObjectMapper();
 		String json = objectMapper.writeValueAsString(docInformation);

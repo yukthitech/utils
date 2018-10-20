@@ -58,7 +58,7 @@ public class IsVisibleStep extends AbstractUiStep
 	{
 		exeLogger.trace(this, "Fetching visibility flag for element '{}'", getLocatorWithParent(locator));
 
-		boolean visible = UiFreeMarkerMethods.isVisible(locator, parentElement);
+		boolean visible = UiFreeMarkerMethods.uiIsVisible(locator, parentElement);
 		
 		exeLogger.debug(this, "Element '{}' visibility flag ({}) is being set as context attribute: {}", getLocatorWithParent(locator), visible, name);
 		context.setAttribute(name, visible);

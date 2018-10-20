@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.NewProjectDialog;
-import com.yukthitech.autox.ide.ProjectExplorer;
+import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.projpropdialog.ProjectPropertiesDialog;
 
 @ActionHolder
 public class ProjectActions
@@ -21,9 +23,14 @@ public class ProjectActions
 	private JFileChooser projectChooser = new JFileChooser();
 	
 	@Autowired
+	private IdeContext ideContext;
+	
+	@Autowired
 	private ProjectExplorer projectExplorer;
 	
 	private NewProjectDialog newProjDialog;
+	
+	private ProjectPropertiesDialog projtPropertiesDialog;
 	
 	@PostConstruct
 	private void init()
@@ -80,5 +87,14 @@ public class ProjectActions
 	public void refreshProject()
 	{
 		projectExplorer.reloadActiveNode();
+	}
+	
+	@Action
+	public void projectProperties()
+	{
+		if(projtPropertiesDialog==null)
+			projtPropertiesDialog = new ProjectPropertiesDialog(IdeUtils.getCurrentWindow());
+		
+		Project project = projtPropertiesDialog.display(ideContext);
 	}
 }

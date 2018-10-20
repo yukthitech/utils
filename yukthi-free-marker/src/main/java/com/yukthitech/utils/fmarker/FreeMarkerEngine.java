@@ -3,8 +3,11 @@ package com.yukthitech.utils.fmarker;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +42,11 @@ public class FreeMarkerEngine
 	 * Registry of free marker methods.
 	 */
 	private Map<String, Method> freeMarkerMethodRegistry;
+	
+	/**
+	 * Registry of free marker method documentations.
+	 */
+	private Map<String, FreeMarkerMethodDoc> freeMarkerMethodDocRegistry = new TreeMap<String, FreeMarkerMethodDoc>();
 	
 	public FreeMarkerEngine()
 	{
@@ -117,6 +125,7 @@ public class FreeMarkerEngine
 		
 		configuration.setSharedVariable(name, new FreeMarkerMethodModel(method, name));
 		freeMarkerMethodRegistry.put(name, method);
+		freeMarkerMethodDocRegistry.put(name, new FreeMarkerMethodDoc(method));
 	}
 	
 	/**
@@ -171,4 +180,13 @@ public class FreeMarkerEngine
 		}
 	}
 
+	public Collection<Method> getRegisteredMethods()
+	{
+		return Collections.unmodifiableCollection( freeMarkerMethodRegistry.values() );
+	}
+	
+	public Collection<FreeMarkerMethodDoc> getRegisterMethodDocuments()
+	{
+		return Collections.unmodifiableCollection( freeMarkerMethodDocRegistry.values() );
+	}
 }

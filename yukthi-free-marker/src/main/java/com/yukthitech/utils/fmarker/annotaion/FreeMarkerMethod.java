@@ -19,4 +19,22 @@ public @interface FreeMarkerMethod
 	 * @return
 	 */
 	public String value() default "";
+	
+	/**
+	 * Description about the method.
+	 * @return description.
+	 */
+	public String description() default "";
+	
+	/**
+	 * Return value description.
+	 * @return Return value description.
+	 */
+	public String returnDescription() default "";
+	
+	/**
+	 * Used to document example for the method.
+	 * @return example doc
+	 */
+	public ExampleDoc[] examples() default {};
 }

@@ -58,7 +58,7 @@ public class GetUiValueStep extends AbstractUiStep
 	{
 		exeLogger.trace(this, "Fetching ui element value for locator - {}", getLocatorWithParent(locator));
 		
-		String elementValue = UiFreeMarkerMethods.getValue(locator, parentElement);
+		String elementValue = UiFreeMarkerMethods.uiValue(locator, parentElement);
 		
 		exeLogger.debug(this, "Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
 		context.setAttribute(name, elementValue);

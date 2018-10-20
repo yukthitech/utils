@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.help;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.PluginInfo;
 import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 public class HelpNodeData
 {
@@ -47,10 +49,9 @@ public class HelpNodeData
 				childNodes.add( new HelpNodeData(step, docInformation) );
 			}
 		}
-		if(nodeValue instanceof String)
+		else if(nodeValue instanceof String)
 		{
 			this.label = (String) nodeValue;
-			
 			childNodes = new ArrayList<>();
 			
 			for(StepInfo step : docInformation.getSteps())
@@ -67,6 +68,23 @@ public class HelpNodeData
 		{
 			StepInfo info = (StepInfo) nodeValue;
 			this.label = info.getName();
+		}
+		else if(nodeValue instanceof Set)
+		{
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			Set<FreeMarkerMethodDoc> freeMarkerMethods = (Set) nodeValue;
+			this.label = "Methods";
+			childNodes = new ArrayList<>();
+			
+			for(FreeMarkerMethodDoc met : freeMarkerMethods)
+			{
+				childNodes.add( new HelpNodeData(met, docInformation) );
+			}
+		}
+		else if(nodeValue instanceof FreeMarkerMethodDoc)
+		{
+			FreeMarkerMethodDoc metDoc = (FreeMarkerMethodDoc) nodeValue;
+			this.label = metDoc.getName();
 		}
 	}
 

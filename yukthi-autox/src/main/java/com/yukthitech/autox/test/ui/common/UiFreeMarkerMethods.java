@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 /**
@@ -53,8 +54,13 @@ public class UiFreeMarkerMethods
 	 * @param parent parent under which locator should be searched
 	 * @return locator value
 	 */
-	@FreeMarkerMethod("uiValue")
-	public static String getValue(Object locator, String parent)
+	@FreeMarkerMethod(
+			description = "Fetches value of specified locator. If element is text/textarea, its ui value will be fetched.",
+			returnDescription = "Value of the ui element"
+			)
+	public static String uiValue(
+			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
 		WebElement element = getElementByLocator(locator, parent);
 		String elementValue = null;
@@ -82,8 +88,14 @@ public class UiFreeMarkerMethods
 	 * @param parent Parent name under which locator needs to be fetched
 	 * @return attribute value, if any. Otherwise null
 	 */
-	@FreeMarkerMethod("uiElemAttr")
-	public static String getElemAttr(String attrName, Object locator, String parent)
+	@FreeMarkerMethod(
+			description = "Fetches attribute value of specified locator.",
+			returnDescription = "Value of the ui element attribute"
+			)
+	public static String uiElemAttr(
+			@FmParam(name = "attrName", description = "Name of the attribute whose value to be fetched.") String attrName, 
+			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
 		WebElement webElement = getElementByLocator(locator, parent);
 		
@@ -101,8 +113,13 @@ public class UiFreeMarkerMethods
 	 * @param parent parent under which locator should be searched
 	 * @return true if available and visible
 	 */
-	@FreeMarkerMethod("uiIsVisible")
-	public static boolean isVisible(Object locator, String parent)
+	@FreeMarkerMethod(
+			description = "Checks if specified element is visible or not.",
+			returnDescription = "True if element is visible"
+			)
+	public static boolean uiIsVisible(
+			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
 		WebElement element = getElementByLocator(locator, parent);
 		return (element != null && element.isDisplayed());
@@ -114,15 +131,24 @@ public class UiFreeMarkerMethods
 	 * @param parent parent under which locator should be searched
 	 * @return true if available (need not be visible)
 	 */
-	@FreeMarkerMethod("uiIsPresent")
-	public static boolean isPresent(String locator, String parent)
+	@FreeMarkerMethod(
+			description = "Checks if specified element is present or not (need not be visible).",
+			returnDescription = "True if element is available (need not be visible)"
+			)
+	public static boolean uiIsPresent(
+			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") String locator, 
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
 		WebElement element = getElementByLocator(locator, parent);
 		return (element != null);
 	}
 
-	@FreeMarkerMethod("jsonStr")
-	public static String getValue(String str)
+	@FreeMarkerMethod(
+			description = "Removes special characters and coverts result into json string (enclosed in double quotes)",
+			returnDescription = "Converted string"
+			)
+	public static String getValue(
+			@FmParam(name = "str", description = "String to be converted") String str)
 	{
 		if(str == null)
 		{

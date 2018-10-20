@@ -1,6 +1,7 @@
 package com.yukthitech.autox.common;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import org.reflections.util.ConfigurationBuilder;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -37,24 +39,13 @@ public class FreeMarkerMethodManager
 			throw new InvalidStateException("An error occurred while init freemarker context", ex);
 		}
 		
-		loadFreeMarkerMethods(null);
+		reload(null);
 	}
 	
 	public static void reload(ClassLoader classLoader)
 	{
-		freeMarkerEngine.reset();
-		loadFreeMarkerMethods(classLoader);
-	}
-	
-	private static void loadFreeMarkerMethods(ClassLoader classLoader)
-	{
-		if(classLoader == null)
-		{
-			classLoader = FreeMarkerMethodManager.class.getClassLoader();
-		}
-		
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
-		Set<String> basePackages = applicationConfiguration.getBasePackages();
+		Set<String> basePackages = applicationConfiguration != null ? applicationConfiguration.getBasePackages() : null;
 
 		if(basePackages == null)
 		{
@@ -62,6 +53,21 @@ public class FreeMarkerMethodManager
 		}
 
 		basePackages.add("com.yukthitech");
+		reload(classLoader, basePackages);
+	}
+	
+	public static void reload(ClassLoader classLoader, Set<String> basePackages)
+	{
+		freeMarkerEngine.reset();
+		loadFreeMarkerMethods(classLoader, basePackages);
+	}
+	
+	private static void loadFreeMarkerMethods(ClassLoader classLoader, Set<String> basePackages)
+	{
+		if(classLoader == null)
+		{
+			classLoader = FreeMarkerMethodManager.class.getClassLoader();
+		}
 
 		Reflections reflections = null;
 		Set<Method> freeMarkerMethods = null, freeMarkerDirectiveMethods = null;
@@ -120,5 +126,14 @@ public class FreeMarkerMethodManager
 		{
 			throw new InvalidStateException("An error occurred while processing template:\n" + templateStr, ex);
 		}
+	}
+
+	/**
+	 * Fetches method documentations of free marker methods.
+	 * @return available free marker methods
+	 */
+	public static Collection<FreeMarkerMethodDoc> getRegisterMethodDocuments()
+	{
+		return freeMarkerEngine.getRegisterMethodDocuments();
 	}
 }

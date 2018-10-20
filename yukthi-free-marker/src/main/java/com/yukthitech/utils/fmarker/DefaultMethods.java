@@ -10,6 +10,8 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
+import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 /**
@@ -26,11 +28,18 @@ public class DefaultMethods
 	/**
 	 * Converts specified date to string with specified format.
 	 * @param date Date to be converted
-	 * @param format fromat to use
+	 * @param format format to use
 	 * @return converted string
 	 */
-	@FreeMarkerMethod
-	public static String dateToStr(Date date, String format)
+	@FreeMarkerMethod(
+			description = "Converts specified date into string in specified format.",
+			returnDescription = "Fromated date string.",
+			examples = {
+				@ExampleDoc(usage = "dateToStr(date, 'MM/dd/yyy')", result = "20/20/2018")
+			})
+	public static String dateToStr(
+			@FmParam(name = "date", description = "Date to be converted") Date date, 
+			@FmParam(name = "format", description = "Date format to which date should be converted") String format)
 	{
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
 		
@@ -43,13 +52,19 @@ public class DefaultMethods
 	 * @param days days to add
 	 * @return result date
 	 */
-	@FreeMarkerMethod
-	public static Date addDays(Date date, int days)
+	@FreeMarkerMethod(
+			description = "Adds specified number of days to specified date",
+			returnDescription = "Resultant date after addition of specified days")
+	public static Date addDays(
+			@FmParam(name = "date", description = "Date to which days should be added") Date date, 
+			@FmParam(name = "days", description = "Days to be added.") int days)
 	{
 		return DateUtils.addDays(date, days);
 	}
 	
-	@FreeMarkerMethod
+	@FreeMarkerMethod(
+			description = "Returns the current date object",
+			returnDescription = "Current date")
 	public static Date today()
 	{
 		return new Date();
@@ -64,8 +79,19 @@ public class DefaultMethods
 	 * @param emptyString String that will be returned if input list is null or empty.
 	 * @return result string.
 	 */
-	@FreeMarkerMethod
-	public static String collectionToString(Collection<Object> lst, String prefix, String delimiter, String suffix, String emptyString)
+	@FreeMarkerMethod(
+			description = "Converts collection of objects into string.",
+			returnDescription = "Converted string",
+			examples = {
+				@ExampleDoc(usage = "collectionToString(lst, '[', ' | ', ']', '')", result = "[a | b | c]"),
+				@ExampleDoc(usage = "collectionToString(null, '[', ' | ', ']', '<empty>')", result = "<empty>")
+			})
+	public static String collectionToString(
+			@FmParam(name = "lst", description = "Collection to be converted") Collection<Object> lst, 
+			@FmParam(name = "prefix", description = "Prefix to be used at start of coverted string") String prefix, 
+			@FmParam(name = "delimiter", description = "Delimiter to be used between the collection elements") String delimiter, 
+			@FmParam(name = "suffix", description = "Suffix to be used at end of converted string") String suffix, 
+			@FmParam(name = "emptyString", description = "String to be used when input list is null or empty") String emptyString)
 	{
 		if(lst == null || lst.isEmpty())
 		{
@@ -100,8 +126,21 @@ public class DefaultMethods
 	 * @param emptyString String that will be returned if input list is null or empty.
 	 * @return result string.
 	 */
-	@FreeMarkerMethod
-	public static String mapToString(Map<Object, Object> map, String template, String prefix, String delimiter, String suffix, String emptyString)
+	@FreeMarkerMethod(
+			description = "Converts map of objects into string.",
+			returnDescription = "Converted string",
+			examples = {
+				@ExampleDoc(usage = "mapToString(map, '#key=#value', '[', ' | ', ']', '')", result = "[a=1 | b=2 | c=3]"),
+				@ExampleDoc(usage = "mapToString(null, '#key=#value', '[', ' | ', ']', '<empty>')", result = "<empty>")
+			})
+	public static String mapToString(
+			@FmParam(name = "map", description = "Prefix to be used at start of coverted string") Map<Object, Object> map, 
+			@FmParam(name = "template", description = "Template representing how key and value should be converted "
+					+ "into string (the string can have #key and #value which will act as place holders)") String template, 
+			@FmParam(name = "prefix", description = "Prefix to be used at start of coverted string") String prefix, 
+			@FmParam(name = "delimiter", description = "Delimiter to be used between elements.") String delimiter, 
+			@FmParam(name = "suffix", description = "Suffix to be used at end of string.") String suffix, 
+			@FmParam(name = "emptyString", description = "String that will be returned if input map is null or empty.") String emptyString)
 	{
 		if(map == null || map.isEmpty())
 		{
@@ -131,8 +170,12 @@ public class DefaultMethods
 	 * @param value value to covert
 	 * @return result string.
 	 */
-	@FreeMarkerMethod("toText")
-	public static String toText(Object value)
+	@FreeMarkerMethod(
+			value = "toText", 
+			description = "Used to convert specified object into string. toString() will be invoked on input object to convert",
+			returnDescription = "Converted string. If null, 'null' will be returned.")
+	public static String toText(
+			@FmParam(name = "value", description = "Value to be converted into string.") Object value)
 	{
 		if(value == null)
 		{
@@ -145,10 +188,14 @@ public class DefaultMethods
 	/**
 	 * Converts specified object into json.
 	 * @param value value to be converted.
-	 * @return coverted json
+	 * @return converted json
 	 */
-	@FreeMarkerMethod("toJson")
-	public static String toJson(Object value)
+	@FreeMarkerMethod(
+			value = "toJson", 
+			description = "Used to convert specified object into json string.",
+			returnDescription = "Converted json string.")
+	public static String toJson(
+			@FmParam(name = "value", description = "Value to be converted into json string.") Object value)
 	{
 		try
 		{
@@ -167,8 +214,14 @@ public class DefaultMethods
 	 * @param ifNotNull object to be returned if not null
 	 * @return ifNull or ifNotNull based on nullCheck
 	 */
-	@FreeMarkerMethod("ifNull")
-	public static Object ifNull(Object nullCheck, Object ifNull, Object ifNotNull)
+	@FreeMarkerMethod(
+			value = "ifNull", 
+			description = "If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.",
+			returnDescription = "ifNull or ifNotNull based on nullCheck.")
+	public static Object ifNull(
+			@FmParam(name = "nullCheck", description = "object to be checked for null") Object nullCheck, 
+			@FmParam(name = "ifNull", description = "object to be returned if null") Object ifNull, 
+			@FmParam(name = "ifNotNull", description = "object to be returned if not null") Object ifNotNull)
 	{
 		return (nullCheck == null) ? ifNull : ifNotNull;
 	}
@@ -184,9 +237,17 @@ public class DefaultMethods
 	 * @param value value to be checked
 	 * @return size of value
 	 */
-	@FreeMarkerMethod("sizeOf")
+	@FreeMarkerMethod(
+			value = "sizeOf", 
+			description = "Used to fetch size of specified value. "
+					+ "If string length of string is returned, "
+					+ "if collection size of collection is returned, "
+					+ "if null zero will be returned. "
+					+ "Otherwise 1 will be returned.",
+			returnDescription = "Size of specified object.")
 	@SuppressWarnings("rawtypes")
-	public static int sizeOf(Object value)
+	public static int sizeOf(
+			@FmParam(name = "value", description = "Value whose size to be determined") Object value)
 	{
 		if(value == null)
 		{

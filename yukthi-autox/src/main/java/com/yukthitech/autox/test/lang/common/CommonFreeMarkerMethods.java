@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 /**
@@ -20,8 +22,12 @@ public class CommonFreeMarkerMethods
 	 * @param path path to convert.
 	 * @return converted path.
 	 */
-	@FreeMarkerMethod("fullPath")
-	public static String fullPath(String path)
+	@FreeMarkerMethod(
+			description = "Converts input file path (Can be relative, partial path) to full canonical path.",
+			returnDescription = "Canonical path of the specified path"
+			)
+	public static String fullPath(
+			@FmParam(name = "path", description = "Path to be converted") String path)
 	{
 		try
 		{
@@ -38,8 +44,13 @@ public class CommonFreeMarkerMethods
 	 * @param xpath xpath to be executed.
 	 * @return matching value
 	 */
-	@FreeMarkerMethod("getValueByXpath")
-	public static Object getValueByXpath(Object source, String xpath)
+	@FreeMarkerMethod(
+			description = "Fetches the value for specified xpath from specified source object.",
+			returnDescription = "Value of specified xpath"
+			)
+	public static Object getValueByXpath(
+			@FmParam(name = "source", description = "Source object on which xpath needs to be evaluated") Object source, 
+			@FmParam(name = "xpath", description = "Xpath to be evaluated") String xpath)
 	{
 		return JXPathContext.newContext(source).getValue(xpath);
 	}
@@ -51,8 +62,13 @@ public class CommonFreeMarkerMethods
 	 * @return matching values.
 	 */
 	@SuppressWarnings("unchecked")
-	@FreeMarkerMethod("getValuesByXpath")
-	public static List<Object> getValuesByXpath(Object source, String xpath)
+	@FreeMarkerMethod(
+			description = "Fetches the value(s) list for specified xpath from specified source object.",
+			returnDescription = "Value of specified xpath"
+			)
+	public static List<Object> getValuesByXpath(
+			@FmParam(name = "source", description = "Source object on which xpath needs to be evaluated") Object source, 
+			@FmParam(name = "xpath", description = "Xpath to be evaluated") String xpath)
 	{
 		return JXPathContext.newContext(source).selectNodes(xpath);
 	}
@@ -64,8 +80,13 @@ public class CommonFreeMarkerMethods
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	@FreeMarkerMethod("countOfXpath")
-	public static int countOfXpath(Object source, String xpath)
+	@FreeMarkerMethod(
+			description = "Fetches the count of values matching with specified xpath from specified source object.",
+			returnDescription = "Number of values matching with specified xpath"
+			)
+	public static int countOfXpath(
+			@FmParam(name = "source", description = "Source object on which xpath should be evaluated") Object source, 
+			@FmParam(name = "xpath", description = "Xpath to be evaluated") String xpath)
 	{
 		try
 		{
@@ -81,5 +102,20 @@ public class CommonFreeMarkerMethods
 		{
 			return 0;
 		}
+	}
+
+	/**
+	 * Fetches value from story with specified key.
+	 * @param key key to be fetched
+	 * @return matching value from store
+	 */
+	@FreeMarkerMethod(
+			description = "Fetches the value of specified key from the store.",
+			returnDescription = "Matched value"
+			)
+	public static Object storeValue(
+			@FmParam(name = "key", description = "Key of value to be fetched") String key)
+	{
+		return AutomationContext.getInstance().getPersistenceStorage().get(key);
 	}
 }

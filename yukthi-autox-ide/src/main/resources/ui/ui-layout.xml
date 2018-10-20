@@ -1,27 +1,30 @@
 <layout xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<menuBar>
 		<menu label="File" mnemonic="F">
-			<item label="New Project" mnemonic="N" icon="/ui/icons/new.png" action="newProject">
-				<short-key ctrl="true" key="N"/>
+			<item label="New Project" mnemonic="N" icon="/ui/icons/new.png"
+				action="newProject">
+				<short-key ctrl="true" key="N" />
 			</item>
-			<item label="Open Project" mnemonic="O" icon="/ui/icons/open.png" action="openProject">
-				<short-key ctrl="true" key="O"/>
+			<item label="Open Project" mnemonic="O" icon="/ui/icons/open.png"
+				action="openProject">
+				<short-key ctrl="true" key="O" />
 			</item>
-			
-			<item label="-"/>
-			
+
+			<item label="-" />
+
 			<item label="Open File" mnemonic="F">
-				<short-key ctrl="true" shift="true" key="R"/>
+				<short-key ctrl="true" shift="true" key="R" />
 			</item>
-			<item label="Save" mnemonic="S" icon="/ui/icons/save.png" action="saveFile">
-				<short-key ctrl="true" key="S"/>
+			<item label="Save" mnemonic="S" icon="/ui/icons/save.png"
+				action="saveFile">
+				<short-key ctrl="true" key="S" />
 			</item>
-			
-			<item label="-"/>
-			
+
+			<item label="-" />
+
 			<item label="Exit" mnemonic="x" action="closeIde">
 			</item>
-			
+
 		</menu>
 
 		<menu label="Edit" mnemonic="E">
@@ -32,68 +35,78 @@
 
 		<menu label="Run" mnemonic="R">
 			<item label="Run Test Suite" mnemonic="S" action="runTestSuite">
-				<short-key ctrl="true" key="F9"/>
+				<short-key ctrl="true" key="F9" />
 			</item>
 			<item label="Run Test Case" mnemonic="C" action="runTestCase">
-				<short-key ctrl="true" shift="true" key="F9"/>
+				<short-key ctrl="true" shift="true" key="F9" />
 			</item>
 			<item label="Run Selected Step" action="runSelectedStep">
-				<short-key ctrl="true" key="ENTER"/>
+				<short-key ctrl="true" key="ENTER" />
+			</item>
+		</menu>
+
+		<menu label="Help" mnemonic="H">
+			<item label="Help Contents" mnemonic="F" icon="/ui/icons/new.png" action="help">
+				<short-key key="F1" />
 			</item>
 		</menu>
 	</menuBar>
-	
+
 	<toolBar>
-		<item icon="/ui/icons/new.png" tooltip="New Project" action="newProject"/>
-		<item icon="/ui/icons/open.png" tooltip="Open Project" action="openProject"/>
-		
-		<item icon="-"/>
-		
-		<item icon="/ui/icons/save.png" tooltip="Save File" action="saveFile"/>
+		<item icon="/ui/icons/new.png" tooltip="New Project" action="newProject" />
+		<item icon="/ui/icons/open.png" tooltip="Open Project" action="openProject" />
+
+		<item icon="-" />
+
+		<item icon="/ui/icons/save.png" tooltip="Save File" action="saveFile" />
 	</toolBar>
-	
+
 	<popup-menu label="folderPopup">
 		<menu label="New">
-			<item label="Folder" action="newFolder"/>
-			<item label="Test File" action="newTestFile"/>
-			<item label="File" action="newFile"/>
+			<item label="Folder" action="newFolder" />
+			<item label="Test File" action="newTestFile" />
+			<item label="File" action="newFile" />
 		</menu>
-		
-		<item label="Refresh" action="refreshFolder"/>
-		
-		<item label="-"/>
 
-		<item label="Rename" action="renameFolder"/>
-		<item label="Delete" action="deleteFolder"/>
+		<item label="Refresh" action="refreshFolder" />
+
+		<item label="-" />
+		<item label="Copy" action="copyFile" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFolder" />
+		<item label="Delete" action="deleteFolder" />
 	</popup-menu>
 
 	<popup-menu label="filePopup">
-		<item label="Open" action="openFile"/>
-		<item label="Rename" action="renameFile"/>
-		<item label="Delete" action="deleteFile"/>
+		<item label="Open" action="openFile" />
+		<item label="Copy" action="copyFile" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
 	</popup-menu>
 
 	<popup-menu label="projectExplorerPopup">
-		<item icon="/ui/icons/new.png" label="New Project" action="newProject"/>
-		<item icon="/ui/icons/open.png" label="Open Project" action="openProject"/>
+		<item icon="/ui/icons/new.png" label="New Project" action="newProject" />
+		<item icon="/ui/icons/open.png" label="Open Project" action="openProject" />
 	</popup-menu>
 
 	<popup-menu label="projectPopup">
-		<item label="Delete Project" action="deleteProject"/>
-		<item label="Refresh" action="refreshProject"/>
+		<item label="Delete Project" action="deleteProject" />
+		<item label="Refresh" action="refreshProject" />
+		<item label="Properties" action="projectProperties"></item>
 	</popup-menu>
 
 	<popup-menu label="fileTabPopup">
-		<item label="Close" action="closeFile"/>
-		<item label="Close All" action="closeAllFiles"/>
-		<item label="Close All But This" action="closeAllButThis"/>
-		
-		<item label="-"/>
-		
-		<item label="Copy File Path" action="copyFilePath"/>
-		<item label="Copy File Name" action="copyFileName"/>
-		<item label="Copy Dir Path" action="copyDirPath"/>
-		
+		<item label="Close" action="closeFile" />
+		<item label="Close All" action="closeAllFiles" />
+		<item label="Close All But This" action="closeAllButThis" />
+
+		<item label="-" />
+
+		<item label="Copy File Path" action="copyFilePath" />
+		<item label="Copy File Name" action="copyFileName" />
+		<item label="Copy Dir Path" action="copyDirPath" />
+
 	</popup-menu>
 
 </layout>

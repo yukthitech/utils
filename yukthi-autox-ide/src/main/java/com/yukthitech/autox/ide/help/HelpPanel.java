@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.help;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -10,14 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.swing.JButton;
 import javax.swing.JEditorPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -33,6 +35,7 @@ import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.views.IViewPanel;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 @Component
 public class HelpPanel extends JPanel implements IViewPanel
@@ -48,15 +51,17 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private JEditorPane editorPane;
 	private JPanel panel;
 	private JTextField searchField;
-	private JButton btnNewButton;
 	
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 	
 	private String documentTemplate = null;
 	
+	private String fmMethodDocTemplate = null;
+	
 	private String currentSearchText = "";
 	
 	private HelpNodeData rootNodeData = new HelpNodeData("Autox Documentation", null);
+	private final JLabel lblSearch = new JLabel("Search: ");
 
 	/**
 	 * Create the panel.
@@ -77,6 +82,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 				System.out.println("key pressed" + e.getKeyCode());
 			}
 		});
+		
 		setLayout(new BorderLayout(0, 0));
 		add(getPanel(), BorderLayout.NORTH);
 		add(getSplitPane());
@@ -84,6 +90,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 		try
 		{
 			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"));
+			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/fm-method-doc.html"));
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
@@ -95,6 +102,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private void display()
 	{
 		String[] basepackage = { "com.yukthitech" };
+		
 		try
 		{
 			DocInformation docInformation = DocGenerator.buildDocInformation(basepackage);
@@ -104,6 +112,8 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				rootNodeData.addHelpNode(new HelpNodeData(pluginInfo, docInformation));
 			}
+			
+			rootNodeData.addHelpNode( new HelpNodeData(docInformation.getFreeMarkerMethods(), docInformation) );
 			
 			HelpTreeModel model = new HelpTreeModel(rootNodeData);
 			tree.setModel(model);
@@ -183,23 +193,27 @@ public class HelpPanel extends JPanel implements IViewPanel
 		if(panel == null)
 		{
 			panel = new JPanel();
+			panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			GridBagLayout gbl_panel = new GridBagLayout();
-			gbl_panel.columnWidths = new int[] { 364, 89, 0 };
+			gbl_panel.columnWidths = new int[] {0, 0};
 			gbl_panel.rowHeights = new int[] { 23, 0 };
-			gbl_panel.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+			gbl_panel.columnWeights = new double[] { 0.0, 1.0 };
 			gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
 			panel.setLayout(gbl_panel);
+			
+			GridBagConstraints gbc_lblSearch = new GridBagConstraints();
+			gbc_lblSearch.insets = new Insets(0, 0, 0, 5);
+			gbc_lblSearch.anchor = GridBagConstraints.EAST;
+			gbc_lblSearch.gridx = 0;
+			gbc_lblSearch.gridy = 0;
+			lblSearch.setFont(new Font("Tahoma", Font.BOLD, 12));
+			panel.add(lblSearch, gbc_lblSearch);
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.insets = new Insets(0, 0, 0, 5);
-			gbc_textField.gridx = 0;
+			gbc_textField.gridx = 1;
 			gbc_textField.gridy = 0;
 			panel.add(getTextField(), gbc_textField);
-			GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-			gbc_btnNewButton.anchor = GridBagConstraints.NORTHWEST;
-			gbc_btnNewButton.gridx = 1;
-			gbc_btnNewButton.gridy = 0;
-			panel.add(getBtnNewButton(), gbc_btnNewButton);
 		}
 		return panel;
 	}
@@ -243,15 +257,6 @@ public class HelpPanel extends JPanel implements IViewPanel
 		}
 		
 		return searchField;
-	}
-
-	private JButton getBtnNewButton()
-	{
-		if(btnNewButton == null)
-		{
-			btnNewButton = new JButton("Search");
-		}
-		return btnNewButton;
 	}
 	
 	private void applyFilter()
@@ -307,7 +312,16 @@ public class HelpPanel extends JPanel implements IViewPanel
 				input.put("type", "step");
 				input.put("node", step);
 				
-				String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
+				String output = freeMarkerEngine.processTemplate("documentation.html", documentTemplate, input);
+				editorPane.setText(output);
+			}
+			else if(nodeValue instanceof FreeMarkerMethodDoc)
+			{
+				FreeMarkerMethodDoc method = (FreeMarkerMethodDoc) nodeValue;
+				input.put("type", "method");
+				input.put("node", method);
+				
+				String output = freeMarkerEngine.processTemplate("fm-method-doc.html", fmMethodDocTemplate, input);
 				editorPane.setText(output);
 			}
 			else
@@ -323,5 +337,11 @@ public class HelpPanel extends JPanel implements IViewPanel
 		{
 			e1.printStackTrace();
 		}
+	}
+	
+	public void activatePanel()
+	{
+		parentTabbedPane.setSelectedComponent(this);
+		searchField.requestFocus();
 	}
 }

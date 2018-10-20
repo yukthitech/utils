@@ -2,6 +2,8 @@ package com.yukthitech.autox.ide.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,12 +14,18 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Represents project and its details.
+ * 
  * @author akiran
  */
-public class Project
+public class Project implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private static Logger logger = LogManager.getLogger(Project.class);
-	
+
 	/**
 	 * Name of the project file.
 	 */
@@ -28,13 +36,15 @@ public class Project
 	private String appConfigFilePath;
 	private String appPropertyFilePath;
 	private String testsuiteFolderPath;
+	private Set<String> testSuitesFoldersList;
+	private Set<String> classPathEntriesList;
 
 	public Project()
 	{
 		name = "";
 		appConfigFilePath = "appConfig.xml";
 		appPropertyFilePath = "app.properties";
-		testsuiteFolderPath = "testsuites";
+		testsuiteFolderPath = "src/testsuites";
 	}
 
 	public String getName()
@@ -46,12 +56,12 @@ public class Project
 	{
 		this.name = projectName;
 	}
-	
+
 	@JsonIgnore
 	public void setProjectFilePath(String projectFilePath)
 	{
 		File projectFile = new File(projectFilePath);
-		
+
 		if(!projectFile.getName().equals(PROJECT_FILE_NAME))
 		{
 			throw new InvalidArgumentException("Invalid project file specified: " + projectFilePath);
@@ -59,7 +69,7 @@ public class Project
 
 		this.projectFilePath = projectFilePath;
 	}
-	
+
 	public String getProjectFilePath()
 	{
 		return projectFilePath;
@@ -72,7 +82,7 @@ public class Project
 		{
 			return null;
 		}
-		
+
 		return new File(projectFilePath).getParentFile().getPath();
 	}
 
@@ -106,77 +116,100 @@ public class Project
 		this.testsuiteFolderPath = testsuiteFolderPath;
 	}
 
+	public Set<String> getTestSuitesFoldersList()
+	{
+		return testSuitesFoldersList;
+	}
+
+	public void setTestSuitesFolders(Set<String> testSuitesFoldersList)
+	{
+		this.testSuitesFoldersList = testSuitesFoldersList;
+	}
+
+	public Set<String> getClassPathEntriesList()
+	{
+		return classPathEntriesList;
+	}
+
+	public void setClassPathEntries(Set<String> classPathEntriesList)
+	{
+		this.classPathEntriesList = classPathEntriesList;
+	}
+
 	/**
 	 * Creates all the folder structure and files required by current project.
+	 * 
 	 * @throws IOException
 	 */
 	public void createProject() throws IOException
 	{
 		File projFile = new File(projectFilePath);
 		File baseFolder = projFile.getParentFile();
-		
+
 		if(!baseFolder.exists())
-		{	
+		{
 			baseFolder.mkdirs();
 		}
 
-		logger.trace("Creating project with path: {}",testsuiteFolderPath );
-		String testsuitePath=testsuiteFolderPath.replace("./", baseFolder.getPath()+"/");
-		
+		logger.trace("Creating project with path: {}", testsuiteFolderPath);
+		String testsuitePath = testsuiteFolderPath.replace("./", baseFolder.getPath() + "/");
+
 		File testSuiteFolder = new File(testsuitePath);
-				
+
 		if(!testSuiteFolder.exists())
 		{
 			testSuiteFolder.mkdirs();
 
 		}
-		
+
 		String appPropPath = appPropertyFilePath.replace("./", baseFolder.getPath() + "/");
-		
+
 		File appProp = new File(appPropPath);
-		
+
 		if(!appProp.exists())
 		{
 			appProp.createNewFile();
 		}
-		
-		String appConfFilePath = appConfigFilePath.replace("./", baseFolder.getPath()+"/");
-		
+
+		String appConfFilePath = appConfigFilePath.replace("./", baseFolder.getPath() + "/");
+
 		File appConfig = new File(appConfFilePath);
-		
+
 		if(!appConfig.exists())
 		{
 			appConfig.createNewFile();
 		}
-		
+
 		save();
 	}
-	
+
 	/**
 	 * Loads the project from specified base folder path.
-	 * @param path base folder path from which project needs to be loaded.
+	 * 
+	 * @param path
+	 *            base folder path from which project needs to be loaded.
 	 * @return loaded project
 	 */
 	public static Project load(String path)
 	{
 		File projectFile = new File(path);
-		
+
 		if(!projectFile.getName().equals(PROJECT_FILE_NAME))
 		{
 			throw new InvalidArgumentException("Invalid project file specified: " + path);
 		}
-		
-		Project proj =  IdeUtils.load(projectFile, Project.class);
-		
+
+		Project proj = IdeUtils.load(projectFile, Project.class);
+
 		if(proj == null)
 		{
 			return null;
 		}
-		
+
 		proj.setProjectFilePath(path);
 		return proj;
 	}
-	
+
 	/**
 	 * Saves the current project and its state.
 	 */
@@ -184,8 +217,10 @@ public class Project
 	{
 		IdeUtils.save(this, new File(projectFilePath));
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -205,7 +240,9 @@ public class Project
 		return name.equals(other.name);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashcode()
 	 */
 	@Override

@@ -1,4 +1,4 @@
-package com.yukthitech.autox.doc;
+package com.yukthitech.utils.fmarker.annotaion;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @author akiran
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.PARAMETER)
 public @interface FmParam
 {
 	/**

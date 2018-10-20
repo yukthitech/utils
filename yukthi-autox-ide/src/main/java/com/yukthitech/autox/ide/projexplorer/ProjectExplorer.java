@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide;
+package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
@@ -27,10 +27,6 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
-import com.yukthitech.autox.ide.ui.FileTreeNode;
-import com.yukthitech.autox.ide.ui.FolderTreeNode;
-import com.yukthitech.autox.ide.ui.ProjectTreeNode;
-import com.yukthitech.autox.ide.ui.ProjectsTreeModel;
 
 @Component
 public class ProjectExplorer extends JPanel
@@ -44,6 +40,12 @@ public class ProjectExplorer extends JPanel
 
 	@Autowired
 	private IdeContext ideContext;
+	
+	@Autowired
+	private TreeDragSource source;
+	
+	@Autowired
+	private TreeDropTarget target;
 	
 	private JPopupMenu filePopup;
 	
@@ -103,7 +105,11 @@ public class ProjectExplorer extends JPanel
 		tree.setCellRenderer(new BaseTreeNodeRenderer());
 
 		setLayout(new BorderLayout(0, 0));
+		tree.setShowsRootHandles(true);
 		tree.addMouseListener(listener);
+		source.setSourceTree(tree);
+		target.setTargetTree(tree);
+		target.setTarget(getDropTarget());
 		
 		super.add(tree);
 		

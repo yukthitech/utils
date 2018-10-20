@@ -28,6 +28,7 @@ import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
+import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.views.ConsolePanel;
 import com.yukthitech.autox.ide.views.report.ReportPanel;
 
@@ -231,7 +232,7 @@ public class AutoxIDE extends JFrame
 		consolePanel.setParent(rightBottomTabbedPane);
 		
 		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);
-		consolePanel.setParent(rightBottomTabbedPane);
+		helpPanel.setParent(rightBottomTabbedPane);
 		
 		return verticalSplitPane;
 	}
