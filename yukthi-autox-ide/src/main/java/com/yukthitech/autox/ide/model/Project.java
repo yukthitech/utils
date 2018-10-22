@@ -3,6 +3,7 @@ package com.yukthitech.autox.ide.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -35,7 +37,6 @@ public class Project implements Serializable
 	private String projectFilePath;
 	private String appConfigFilePath;
 	private String appPropertyFilePath;
-	private String testsuiteFolderPath;
 	private Set<String> testSuitesFoldersList;
 	private Set<String> classPathEntriesList;
 
@@ -44,7 +45,7 @@ public class Project implements Serializable
 		name = "";
 		appConfigFilePath = "appConfig.xml";
 		appPropertyFilePath = "app.properties";
-		testsuiteFolderPath = "src/testsuites";
+		testSuitesFoldersList = CommonUtils.toSet("src/testsuites");
 	}
 
 	public String getName()
@@ -106,16 +107,6 @@ public class Project implements Serializable
 		this.appPropertyFilePath = appPropertyFilePath;
 	}
 
-	public String getTestsuiteFolderPath()
-	{
-		return testsuiteFolderPath;
-	}
-
-	public void setTestsuiteFolderPath(String testsuiteFolderPath)
-	{
-		this.testsuiteFolderPath = testsuiteFolderPath;
-	}
-
 	public Set<String> getTestSuitesFoldersList()
 	{
 		return testSuitesFoldersList;
@@ -124,6 +115,16 @@ public class Project implements Serializable
 	public void setTestSuitesFolders(Set<String> testSuitesFoldersList)
 	{
 		this.testSuitesFoldersList = testSuitesFoldersList;
+	}
+	
+	public void addTestSuiteFolder(String folder)
+	{
+		if(this.testSuitesFoldersList == null)
+		{
+			this.testSuitesFoldersList = new HashSet<>();
+		}
+		
+		this.testSuitesFoldersList.add(folder);
 	}
 
 	public Set<String> getClassPathEntriesList()
@@ -151,15 +152,18 @@ public class Project implements Serializable
 			baseFolder.mkdirs();
 		}
 
-		logger.trace("Creating project with path: {}", testsuiteFolderPath);
-		String testsuitePath = testsuiteFolderPath.replace("./", baseFolder.getPath() + "/");
-
-		File testSuiteFolder = new File(testsuitePath);
-
-		if(!testSuiteFolder.exists())
+		logger.trace("Creating project with path: {}", testSuitesFoldersList);
+		
+		for(String testsuiteFolderPath : testSuitesFoldersList)
 		{
-			testSuiteFolder.mkdirs();
-
+			String testsuitePath = testsuiteFolderPath.replace("./", baseFolder.getPath() + "/");
+	
+			File testSuiteFolder = new File(testsuitePath);
+	
+			if(!testSuiteFolder.exists())
+			{
+				testSuiteFolder.mkdirs();
+			}
 		}
 
 		String appPropPath = appPropertyFilePath.replace("./", baseFolder.getPath() + "/");

@@ -17,6 +17,12 @@ public enum SourceType
 	OBJECT,
 	
 	/**
+	 * Indicates param is expression type. And will be processed by framework before
+	 * step execution.
+	 */
+	EXPRESSION,
+	
+	/**
 	 * Indicates param represents ui locator.
 	 */
 	UI_LOCATOR,

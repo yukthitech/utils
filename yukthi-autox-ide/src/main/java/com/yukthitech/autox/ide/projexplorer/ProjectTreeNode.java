@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.projexplorer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
@@ -19,31 +20,42 @@ public class ProjectTreeNode extends BaseTreeNode
 		super(IdeUtils.loadIcon("/ui/icons/project.png", 20), project.getName());
 
 		this.project = project;
-		File file = new File(project.getBaseFolderPath(), project.getTestsuiteFolderPath());
-		String testsuite = project.getTestsuiteFolderPath();
-		String s = testsuite.replace(project.getBaseFolderPath(), " ");
-		super.addChild("testSuitesFolder", new TestSuiteFolderTreeNode(project, s, file));
+
+		Set<String> testSuitesFolders = project.getTestSuitesFoldersList();
+		
+		if(testSuitesFolders != null)
+		{
+			for(String tsf : testSuitesFolders)
+			{
+				File file = new File(project.getBaseFolderPath(), tsf);
+				super.addChild("testSuite" + tsf, new TestSuiteFolderTreeNode(project, tsf, file));
+			}
+		}
+		
 		File[] files = null;
+
 		try
 		{
 			files = new File(project.getBaseFolderPath()).getCanonicalFile().listFiles();
-		} catch(IOException e)
+		} catch(IOException ex)
 		{
-			e.printStackTrace();
+			throw new IllegalStateException("An error occurred while fetching cannnoical base folder path", ex);
 		}
-		// load all the files and folder of the prject directory
+		
+		// load all the files and folder of the project directory
 		for(File f : files)
 		{
-			if(f.isDirectory()&&!(f.getName().startsWith(".")))
+			if(f.isDirectory() && !(f.getName().startsWith(".")))
 			{
 				super.addChild(f.getName(), new FolderTreeNode(project, f.getName(), f));
 			}
 		}
+		
 		for(File f : files)
 		{
-			if(!f.isDirectory() && !(f.getName().startsWith("."))&& !(f.getName().equals("autox-project.json")))
+			if(!f.isDirectory() && !(f.getName().startsWith(".")) && !(f.getName().equals("autox-project.json")))
 			{
-					super.addChild(f.getName(), new FileTreeNode(project, f.getName(), f, null));
+				super.addChild(f.getName(), new FileTreeNode(project, f.getName(), f, null));
 			}
 		}
 

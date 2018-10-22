@@ -56,7 +56,12 @@ public class ResourceFactory
 		{
 			return resourceObj;
 		}
-		
+
+		return parseExpressions(context, resourceObj);
+	}
+	
+	public static IResource parseExpressions(AutomationContext context, IResource resourceObj)
+	{
 		try
 		{
 			String content = IOUtils.toString(resourceObj.getInputStream(), (String) null);
@@ -65,7 +70,79 @@ public class ResourceFactory
 			return new StringResource(resourceObj.getName(), content, false);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while replacing expressions in resource: {}", resource, ex);
+			throw new InvalidStateException("An error occurred while replacing expressions in resource: {}", resourceObj, ex);
+		}
+	}
+	
+	public static IResource getResource(AutomationContext context, ExecutionLogger exeLogger, String resType, String resValue)
+	{
+		if(resType == null)
+		{
+			return new StringResource(resValue, false);
+		}
+		
+		boolean rawType = false;
+		
+		if(resType.toLowerCase().startsWith(RAW_RES_PREFIX))
+		{
+			resType = resType.substring(RAW_RES_PREFIX.length());
+			rawType = true;
+		}
+		
+		if(TYPE_FILE.equalsIgnoreCase(resType))
+		{
+			if(exeLogger != null)
+			{
+				exeLogger.debug(null, "Loading file as resource: {}", resValue);
+			}
+			
+			return new FileResource(resValue, rawType);
+		}
+		else if(TYPE_RESOURCE.equalsIgnoreCase(resType))
+		{
+			if(exeLogger != null)
+			{
+				exeLogger.debug(null, "Loading classpath resource: {}", resValue);
+			}
+			
+			return new ClassPathResource(resValue, rawType);
+		}
+		else if(TYPE_STRING.equalsIgnoreCase(resType))
+		{
+			if(exeLogger != null)
+			{
+				exeLogger.debug(null, "Loading specified content itself as resource: {}", resValue);
+			}
+			
+			return new StringResource(resValue, rawType);
+		}
+		else if(TYPE_PROPERTY.equalsIgnoreCase(resType))
+		{
+			if(exeLogger != null)
+			{
+				exeLogger.debug(null, "Loading context-property value as resource. Property: {}", resValue);
+			}
+			
+			Object value = null;
+			
+			try
+			{
+				value = PropertyUtils.getProperty(context, resValue);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while fetching context property: {}", resValue, ex);
+			}
+			
+			if(value == null)
+			{
+				throw new InvalidStateException("Got property value as null. Property:  " + resValue);
+			}
+			
+			return new StringResource(value.toString(), rawType);
+		}
+		else
+		{
+			throw new InvalidArgumentException("Invalid resource type specified: {}", resType);
 		}
 	}
 	
@@ -83,73 +160,10 @@ public class ResourceFactory
 		{
 			String resType = matcher.group(1);
 			String resValue = matcher.group(2);
-			boolean rawType = false;
-			
-			if(resType.toLowerCase().startsWith(RAW_RES_PREFIX))
-			{
-				resType = resType.substring(RAW_RES_PREFIX.length());
-				rawType = true;
-			}
-			
-			if(TYPE_FILE.equalsIgnoreCase(resType))
-			{
-				if(exeLogger != null)
-				{
-					exeLogger.debug(null, "Loading file as resource: {}", resValue);
-				}
-				
-				return new FileResource(resValue, rawType);
-			}
-			else if(TYPE_RESOURCE.equalsIgnoreCase(resType))
-			{
-				if(exeLogger != null)
-				{
-					exeLogger.debug(null, "Loading classpath resource: {}", resValue);
-				}
-				
-				return new ClassPathResource(resValue, rawType);
-			}
-			else if(TYPE_STRING.equalsIgnoreCase(resType))
-			{
-				if(exeLogger != null)
-				{
-					exeLogger.debug(null, "Loading specified content itself as resource: {}", resValue);
-				}
-				
-				return new StringResource(resValue, rawType);
-			}
-			else if(TYPE_PROPERTY.equalsIgnoreCase(resType))
-			{
-				if(exeLogger != null)
-				{
-					exeLogger.debug(null, "Loading context-property value as resource. Property: {}", resValue);
-				}
-				
-				Object value = null;
-				
-				try
-				{
-					value = PropertyUtils.getProperty(context, resValue);
-				}catch(Exception ex)
-				{
-					throw new InvalidStateException("An error occurred while fetching context property: {}", resValue, ex);
-				}
-				
-				if(value == null)
-				{
-					throw new InvalidStateException("Got property value as null. Property:  " + resValue);
-				}
-				
-				return new StringResource(value.toString(), rawType);
-			}
-			else
-			{
-				throw new InvalidArgumentException("Invalid resource type specified: {}", resource);
-			}
+		
+			return getResource(context, exeLogger, resType, resValue);
 		}
-		else
-		{
-			return new StringResource(resource, false);
-		}
+		
+		return new StringResource(resource, false);
 	}
 }

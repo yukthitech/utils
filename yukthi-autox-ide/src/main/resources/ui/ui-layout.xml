@@ -109,4 +109,19 @@
 
 	</popup-menu>
 
+	<popup-menu label="testStuitePopup">
+		<menu label="New">
+			<item label="Folder" action="newFolder" />
+			<item label="Test File" action="newTestFile" />
+			<item label="File" action="newFile" />
+		</menu>
+
+		<item label="Refresh" action="refreshFolder" />
+
+		<item label="-" />
+		<item label="Copy" action="copyFile" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFolder" />
+		<item label="Delete" action="deleteFolder" />
+	</popup-menu>
 </layout>

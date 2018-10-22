@@ -75,4 +75,9 @@ public class RunActions
 	public void runSelectedStep()
 	{
 	}
+	
+	@Action
+	public void execute() 
+	{
+	}
 }

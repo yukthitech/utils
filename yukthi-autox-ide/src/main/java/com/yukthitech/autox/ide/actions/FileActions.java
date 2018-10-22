@@ -291,18 +291,8 @@ public class FileActions
 		copyFile(activeFile);
 	}
 
-	public void pasteFile(File activeFolder) throws UnsupportedFlavorException, IOException, InterruptedException
+	public void pasteFile(File activeFolder, List<File> list) throws IOException, InterruptedException
 	{
-		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
-		
-		if(!clip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor))
-		{
-			return;
-		}
-		
-		@SuppressWarnings("unchecked")
-		List<File> list = (List<File>) clip.getData(DataFlavor.javaFileListFlavor);
-
 		for(File srcFile : list)
 		{
 			String fname = srcFile.getName();
@@ -330,7 +320,7 @@ public class FileActions
 				
 				int res = 0;
 				
-				if(destFile.isDirectory())
+				if(!destFile.isDirectory())
 				{
 					res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
 							String.format("A file with name '%s' already exist. Do you want to overwrite?", destFile.getName()), 
@@ -370,6 +360,20 @@ public class FileActions
 		projectExplorer.reloadActiveNodeParent();
 	}
 
+	public void pasteFile(File activeFolder) throws UnsupportedFlavorException, IOException, InterruptedException
+	{
+		Clipboard clip = (Clipboard) Toolkit.getDefaultToolkit().getSystemClipboard();
+		
+		if(!clip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor))
+		{
+			return;
+		}
+		
+		@SuppressWarnings("unchecked")
+		List<File> list = (List<File>) clip.getData(DataFlavor.javaFileListFlavor);
+		pasteFile(activeFolder, list);
+	}
+
 	@Action
 	public void pasteFile() throws UnsupportedFlavorException, IOException, InterruptedException
 	{
@@ -390,7 +394,6 @@ public class FileActions
 
 		projectExplorer.reloadActiveNodeParent();
 		fileEditorTabbedPane.filePathChanged(activeFile, activeFile);
-
 	}
 
 	@Action
@@ -413,17 +416,8 @@ public class FileActions
 		{
 			return;
 		}
-
-		try
-		{
-			FileUtils.forceDelete(activeFile);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while deleting file: {}", activeFile.getPath(), ex);
-		}
-
-		projectExplorer.reloadActiveNodeParent();
-		fileEditorTabbedPane.filePathChanged(activeFile, activeFile);
+		
+		deleteFile(activeFile);
 	}
 
 	@Action

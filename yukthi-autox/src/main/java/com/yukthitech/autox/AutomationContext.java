@@ -174,7 +174,11 @@ public class AutomationContext
 		
 		try
 		{
-			AutomationUtils.deleteFolder(workDirectory);
+			if(workDirectory.exists())
+			{
+				AutomationUtils.deleteFolder(workDirectory);
+			}
+			
 			FileUtils.forceMkdir(workDirectory);
 		}catch(Exception ex)
 		{

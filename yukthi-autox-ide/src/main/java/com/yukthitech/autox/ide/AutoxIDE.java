@@ -73,7 +73,6 @@ public class AutoxIDE extends JFrame
 	
 	@Autowired
 	private HelpPanel helpPanel;
-	
 	/**
 	 * Top panel to hold tool bar and env panel.
 	 */
@@ -211,7 +210,7 @@ public class AutoxIDE extends JFrame
 		verticalSplitPane.setLeftComponent(leftTabbedPane);
 		leftTabbedPane.setParentDetails(maximizeListener, verticalSplitPane, true);
 
-		leftTabbedPane.addTab("ProjectExplorer", null, projectExplorer, null);
+		leftTabbedPane.addTab("Project Explorer", null, projectExplorer, null);
 
 		horizontalSplitPane = new JSplitPane();
 		horizontalSplitPane.setResizeWeight(0.8);

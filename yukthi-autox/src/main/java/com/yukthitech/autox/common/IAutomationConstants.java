@@ -19,6 +19,10 @@ public interface IAutomationConstants
 	 * Pattern used to refer property in the source.
 	 */
 	public Pattern REF_PATTERN = Pattern.compile("ref\\s*\\:\\s*(.+)");
+	
+	public Pattern EXPRESSION_PATTERN = Pattern.compile("^\\s*(?<exprType>\\w+)\\s*\\:\\s*");
+	
+	public Pattern EXPRESSION_WITH_TYPE_PATTERN = Pattern.compile("^\\s*(?<exprType>\\w+)\\s*\\(\\s*(?<type>[\\w\\.\\<\\>\\,\\ ]+)\\s*\\)\\s*\\:\\s*");
 
 	/**
 	 * Five seconds.

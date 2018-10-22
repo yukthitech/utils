@@ -21,7 +21,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,12 +50,6 @@ public class AutomationUtils
 	 * Pattern to parse java type.
 	 */
 	private static final Pattern TYPE_STR_PATTERN = Pattern.compile("([\\w\\.\\$]+)\\s*\\<\\s*([\\w\\.\\$\\,\\ ]+\\s*)\\>\\s*");
-	
-	/**
-	 * Pattern used to extract type string from the ending of the source string. Note, pattern ensures 
-	 * type is considered only when defined at end of source string.
-	 */
-	private static final Pattern TYPE_EXTRACT_PATTERN = Pattern.compile("\\#(.*)$");
 	
 	/**
 	 * Loads the xml files from specified folder. Returned set will be ordered by their relative paths.
@@ -289,6 +282,12 @@ public class AutomationUtils
 					continue;
 				}
 				
+				if(param != null && param.sourceType() == SourceType.EXPRESSION)
+				{
+					field.set(object, AutomationUtils.parseObjectSource(context, context.getExecutionLogger(), field.get(object), null));
+					continue;
+				}
+
 				fieldValue = replaceExpressions(templateName + "." + field.getName(), context, fieldValue);
 				field.set(object, fieldValue);
 				
@@ -426,7 +425,7 @@ public class AutomationUtils
 			try
 			{
 				Class<?> type = Class.forName(typeStr);
-				return TypeFactory.defaultInstance().uncheckedSimpleType(type);
+				return TypeFactory.defaultInstance().constructSimpleType(type, null);
 			}catch(Exception ex)
 			{
 				throw new InvalidArgumentException("Invalid simple-type specified: {}", typeStr, ex);
@@ -478,7 +477,7 @@ public class AutomationUtils
 			return TypeFactory.defaultInstance().constructMapType( (Class) baseType, paramTypes[0], paramTypes[1]);
 		}
 		
-		return TypeFactory.defaultInstance().constructParametrizedType(baseType, baseType, paramTypes);
+		return TypeFactory.defaultInstance().constructParametricType(baseType, paramTypes);
 	}
 
 	/**
@@ -505,32 +504,41 @@ public class AutomationUtils
 		sourceStr = sourceStr.trim();
 		
 		//check if string is a reference
-		Matcher matcher = IAutomationConstants.REF_PATTERN.matcher(sourceStr);
+		String exprType = null;
+		JavaType resultType = defaultType != null ? defaultType : TypeFactory.defaultInstance().constructSimpleType(Object.class, null);
 		
-		if(matcher.matches())
+		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(sourceStr);
+		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_TYPE_PATTERN.matcher(sourceStr);
+		
+		if(matcher.find())
 		{
+			exprType = matcher.group("exprType");
+			sourceStr = sourceStr.substring(matcher.end()).trim();
+		}
+		else if(matcherWithType.find())
+		{
+			exprType = matcherWithType.group("exprType");
+			resultType = parseJavaType( matcherWithType.group("type") );
+			sourceStr = sourceStr.substring(matcherWithType.end()).trim();
+		}
+		
+		if(exprType != null)
+		{
+			ExpressionType type = null;
+			
 			try
 			{
-				return PropertyUtils.getProperty(context, matcher.group(1));
+				type = ExpressionType.valueOf(exprType.trim().toUpperCase());
+				return type.parse(context, sourceStr, resultType);
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException("An error occurred while evaluating expression {} on context", matcher.group(1), ex);
+				//assume if type is not expression type, it is resource type and ignore current exception
 			}
 		}
 
-		//check if string is resource
-		JavaType resultType = defaultType != null ? defaultType : TypeFactory.defaultInstance().uncheckedSimpleType(Object.class);
-		Matcher typeExtractMatcher = TYPE_EXTRACT_PATTERN.matcher(sourceStr);
+		IResource resource = ResourceFactory.getResource(context, exeLogger, exprType, sourceStr);
+		resource = ResourceFactory.parseExpressions(context, resource);
 		
-		if(typeExtractMatcher.find())
-		{
-			String typeStr = typeExtractMatcher.group(1);
-			resultType = parseJavaType(typeStr);
-			
-			sourceStr = sourceStr.substring(0, typeExtractMatcher.start()).trim();
-		}
-		
-		IResource resource = ResourceFactory.getResource(context, sourceStr, exeLogger, true);
 		String resourceName = resource.getName();
 		
 		if(resourceName != null && resourceName.toLowerCase().endsWith(".xml"))

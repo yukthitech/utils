@@ -222,7 +222,7 @@ public class NewProjectDialog extends JDialog
 			}
 		});
 
-		testSuiteFolderPath = new JTextField(project.getTestsuiteFolderPath());
+		testSuiteFolderPath = new JTextField("src/testsuites");
 		testSuiteFolderPath.setColumns(10);
 		GridBagConstraints gbc_testSuiteFolderPath = new GridBagConstraints();
 		gbc_testSuiteFolderPath.fill = GridBagConstraints.HORIZONTAL;
@@ -320,7 +320,7 @@ public class NewProjectDialog extends JDialog
 		project.setProjectFilePath(new File(baseFolderPath.getText(), Project.PROJECT_FILE_NAME).getPath());
 		project.setAppConfigFilePath(appConfigPath.getText());
 		project.setAppPropertyFilePath(appPropertyPath.getText());
-		project.setTestsuiteFolderPath(testSuiteFolderPath.getText());
+		project.addTestSuiteFolder(testSuiteFolderPath.getText());
 		
 		try
 		{

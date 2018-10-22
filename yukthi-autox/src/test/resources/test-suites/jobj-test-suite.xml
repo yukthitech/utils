@@ -186,7 +186,7 @@
 				ensures data-provider working.
 			</description>
 
-			<list-data-provider name="extDataProvider" stepDataList="res:/data/ext-data-provider.json#java.util.List &lt;com.yukthitech.test.beans.TestCaseBean&gt;" />
+			<list-data-provider name="extDataProvider" stepDataList="res(java.util.List &lt;com.yukthitech.test.beans.TestCaseBean&gt;):/data/ext-data-provider.json" />
 
 			<wrap:steps>
 				<ccg:invokeMethod method="halfOf" paramTypes="int" deepCloneParams="true">
@@ -244,7 +244,7 @@
 				<ccg:setProperty name="propAttr1"
 					source="file:./src/test/resources/data/data1.json" valueExpression="bean1.prop1" />
 				<ccg:setProperty name="propAttr2"
-					source="file:./src/test/resources/data/data1.xml#com.yukthitech.test.beans.SimpleComplexBean" valueExpression="name" />
+					source="file(com.yukthitech.test.beans.SimpleComplexBean):./src/test/resources/data/data1.xml" valueExpression="name" />
 				<ccg:setProperty name="propAttr3"
 					source="file:./src/test/resources/data/data2.xml" valueExpression="size" />
 			</wrap:steps>

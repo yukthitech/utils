@@ -27,6 +27,7 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
+import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
 
 @Component
 public class ProjectExplorer extends JPanel
@@ -54,6 +55,8 @@ public class ProjectExplorer extends JPanel
 	private JPopupMenu projectExplorerPopup;
 	
 	private JPopupMenu projectPopup;
+	
+	private JPopupMenu testSuitePopup;
 	
 	@Autowired
 	private UiLayout uiLayout;
@@ -109,7 +112,6 @@ public class ProjectExplorer extends JPanel
 		tree.addMouseListener(listener);
 		source.setSourceTree(tree);
 		target.setTargetTree(tree);
-		target.setTarget(getDropTarget());
 		
 		super.add(tree);
 		
@@ -135,6 +137,11 @@ public class ProjectExplorer extends JPanel
 		});
 	}
 	
+	public void setActiveTreeNode(BaseTreeNode activeTreeNode)
+	{
+		this.activeTreeNode = activeTreeNode;
+	}
+
 	/**
 	 * Opens the project from specified base folder path.
 	 * @param path base folder path of project to open
@@ -183,6 +190,7 @@ public class ProjectExplorer extends JPanel
 		folderPopup = uiLayout.getPopupMenu("folderPopup").toPopupMenu(actionCollection);
 		projectPopup = uiLayout.getPopupMenu("projectPopup").toPopupMenu(actionCollection);
 		projectExplorerPopup = uiLayout.getPopupMenu("projectExplorerPopup").toPopupMenu(actionCollection);
+		testSuitePopup = uiLayout.getPopupMenu("testStuitePopup").toPopupMenu(actionCollection);
 	}
 	
 	private void handleMouseClick(MouseEvent e)
@@ -218,7 +226,7 @@ public class ProjectExplorer extends JPanel
 		{
 			FolderTreeNode folderTreeNode = (FolderTreeNode) clickedItem;
 			ideContext.setActiveDetails(folderTreeNode.getProject(), folderTreeNode.getFolder());
-			
+	
 			folderPopup.show(tree, e.getX(), e.getY());
 		}
 		else if(clickedItem instanceof ProjectTreeNode)
@@ -228,7 +236,12 @@ public class ProjectExplorer extends JPanel
 			
 			projectPopup.show(tree, e.getX(), e.getY());
 		}
-		
+		else if(clickedItem instanceof TestSuiteFolderTreeNode) 
+		{
+			TestSuiteFolderTreeNode testSuiteFolderTreeNode = (TestSuiteFolderTreeNode) clickedItem;
+			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), null);
+			testSuitePopup.show(tree, e.getX(), e.getY());
+		}
 	}
 	
 	private void handleOpenEvent(MouseEvent e)
@@ -247,7 +260,6 @@ public class ProjectExplorer extends JPanel
 		{
 			FileTreeNode fileTreeNode = (FileTreeNode) clickedItem;
 			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile());
-			
 			actionCollection.invokeAction("openFile");
 		}
 	}
@@ -256,9 +268,10 @@ public class ProjectExplorer extends JPanel
 	{
 		if(activeTreeNode == null)
 		{
+			logger.debug("No active node found for reload.");
 			return;
 		}
-		
+
 		activeTreeNode.reload();
 		treeModel.reload(activeTreeNode);
 	}

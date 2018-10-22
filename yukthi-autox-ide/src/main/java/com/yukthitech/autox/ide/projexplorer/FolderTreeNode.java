@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
@@ -12,6 +15,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class FolderTreeNode extends BaseTreeNode
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(FolderTreeNode.class);
 
 	private File folder;
 
@@ -54,6 +59,8 @@ public class FolderTreeNode extends BaseTreeNode
 	@Override
 	public synchronized void reload()
 	{
+		logger.debug("Reloading folder: {}", folder.getPath() );
+		
 		removeNonExistingNodes();
 
 		File[] files = null;
