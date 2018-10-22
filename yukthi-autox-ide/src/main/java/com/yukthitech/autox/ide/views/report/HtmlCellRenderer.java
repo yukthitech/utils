@@ -58,7 +58,10 @@ public class HtmlCellRenderer extends DefaultTableCellRenderer implements IRepor
 		
 		try
 		{
-			((HTMLDocument)editorPane.getDocument()).setBase(activeEnvironment.getReportFolder().toURI().toURL());
+			if(activeEnvironment != null)
+			{
+				((HTMLDocument)editorPane.getDocument()).setBase(activeEnvironment.getReportFolder().toURI().toURL());
+			}
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while setting base folder", ex);

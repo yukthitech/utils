@@ -38,11 +38,11 @@ public class FileTreeNode extends BaseTreeNode
 		super.setIcon(IdeUtils.getFileIcon(file));
 		this.file=file;
 		
-		reload();
+		reload(false);
 	}
 	
 	@Override
-	public synchronized void reload()
+	public synchronized void reload(boolean childReload)
 	{
 		if(fileReloadOp == null)
 		{

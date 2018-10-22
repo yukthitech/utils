@@ -21,7 +21,8 @@ import javax.swing.border.EmptyBorder;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
 
-public class ProjectPropertiesDialog extends JDialog {
+public class ProjectPropertiesDialog extends JDialog
+{
 
 	/**
 	 * 
@@ -32,13 +33,15 @@ public class ProjectPropertiesDialog extends JDialog {
 
 	private ProjectPropertiesTestSuiteFolders projectPropertiesTestSuiteFolders;
 	private ProjectPropertiesClassPath projectPropertiesClassPath;
+
 	/**
 	 * Create the dialog.
 	 */
-	public ProjectPropertiesDialog(Window window) {
-		
+	public ProjectPropertiesDialog(Window window)
+	{
+
 		super(window, ModalityType.APPLICATION_MODAL);
-		
+
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -62,8 +65,10 @@ public class ProjectPropertiesDialog extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("Apply & close");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+				okButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
 						saveProjectProperties();
 						dispose();
 					}
@@ -74,8 +79,10 @@ public class ProjectPropertiesDialog extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Close");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+				cancelButton.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
 						dispose();
 					}
 				});
@@ -84,38 +91,43 @@ public class ProjectPropertiesDialog extends JDialog {
 			}
 		}
 	}
+
 	@Override
 	protected JRootPane createRootPane()
 	{
 		JRootPane rootPane = new JRootPane();
-	    KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
-	    Action actionListener = new AbstractAction() { 
-	      /**
+		KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
+		Action actionListener = new AbstractAction()
+		{
+			/**
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
 
-		public void actionPerformed(ActionEvent actionEvent) { 
-	        setVisible(false);
-	      } 
-	    } ;
-	    InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-	    inputMap.put(stroke, "ESCAPE");
-	    rootPane.getActionMap().put("ESCAPE", actionListener);
+			public void actionPerformed(ActionEvent actionEvent)
+			{
+				setVisible(false);
+			}
+		};
+		InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		inputMap.put(stroke, "ESCAPE");
+		rootPane.getActionMap().put("ESCAPE", actionListener);
 
-	    return rootPane;
+		return rootPane;
 	}
 
-	public Project display(IdeContext ideContext) {
+	public Project display(IdeContext ideContext)
+	{
 		// TODO Auto-generated method stub
-		this.project=null;
+		this.project = null;
 		this.project = ideContext.getActiveProject();
 		projectPropertiesClassPath.setProject(project);
 		projectPropertiesTestSuiteFolders.setProject(project);
-		setTitle(project.getName()+ " Properties");
-		super.setVisible(true);		
+		setTitle(project.getName() + " Properties");
+		super.setVisible(true);
 		return project;
 	}
+
 	protected void saveProjectProperties()
 	{
 		project.setTestSuitesFolders(projectPropertiesTestSuiteFolders.saveChanges());

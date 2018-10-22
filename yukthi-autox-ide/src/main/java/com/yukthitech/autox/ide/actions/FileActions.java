@@ -178,30 +178,6 @@ public class FileActions
 		}
 	}
 
-	@Action
-	public void renameFolder()
-	{
-		File activeFolder = ideContext.getActiveFile();
-
-		if(activeFolder == null)
-		{
-			return;
-		}
-
-		String newName = JOptionPane.showInputDialog("Please provide new name for folder?", activeFolder.getName());
-
-		if(newName == null || newName.equals(activeFolder.getName()))
-		{
-			return;
-		}
-
-		File newNameFile = new File(activeFolder.getParentFile(), newName);
-		activeFolder.renameTo(newNameFile);
-
-		projectExplorer.reloadActiveNodeParent();
-		fileEditorTabbedPane.filePathChanged(activeFolder, newNameFile);
-	}
-
 	public void deleteFolder(File activeFolder)
 	{
 
@@ -218,16 +194,8 @@ public class FileActions
 
 	}
 
-	@Action
-	public void deleteFolder()
+	private void deleteActiveFolder(File activeFolder)
 	{
-		File activeFolder = ideContext.getActiveFile();
-
-		if(activeFolder == null)
-		{
-			return;
-		}
-
 		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
 				"Are you sure you want to delete folder '" + activeFolder.getName() 
 					+ "' and it's sub folders and files?", 
@@ -250,9 +218,39 @@ public class FileActions
 		projectExplorer.reloadActiveNodeParent();
 		fileEditorTabbedPane.filePathChanged(activeFolder, activeFolder);
 	}
+	
+	public void deleteFile(File activeFile)
+	{
+		try
+		{
+			FileUtils.forceDelete(activeFile);
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while deleting file: {}", activeFile.getPath(), ex);
+		}
+
+		projectExplorer.reloadActiveNodeParent();
+		fileEditorTabbedPane.filePathChanged(activeFile, activeFile);
+	}
+	
+	private void deleteActiveFile(File activeFile)
+	{
+		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
+				"Are you sure you want to delete file '" + activeFile.getName() + "' ?",
+				"Delete File",
+				JOptionPane.YES_NO_OPTION
+				);
+		
+		if(res == JOptionPane.NO_OPTION)
+		{
+			return;
+		}
+		
+		deleteFile(activeFile);
+	}
 
 	@Action
-	public void renameFile()
+	public void deleteFile()
 	{
 		File activeFile = ideContext.getActiveFile();
 
@@ -261,6 +259,18 @@ public class FileActions
 			return;
 		}
 
+		if(activeFile.isDirectory())
+		{
+			deleteActiveFolder(activeFile);
+		}
+		else
+		{
+			deleteActiveFile(activeFile);
+		}
+	}
+
+	private void renameFile(File activeFile)
+	{
 		String newName = JOptionPane.showInputDialog("Please provide new name for file?", activeFile.getName());
 
 		if(newName == null || newName.equals(activeFile.getName()))
@@ -273,6 +283,42 @@ public class FileActions
 
 		projectExplorer.reloadActiveNodeParent();
 		fileEditorTabbedPane.filePathChanged(activeFile, newNameFile);
+	}
+
+	private void renameFolder(File activeFolder)
+	{
+		String newName = JOptionPane.showInputDialog("Please provide new name for folder?", activeFolder.getName());
+
+		if(newName == null || newName.equals(activeFolder.getName()))
+		{
+			return;
+		}
+
+		File newNameFile = new File(activeFolder.getParentFile(), newName);
+		activeFolder.renameTo(newNameFile);
+
+		projectExplorer.reloadActiveNodeParent();
+		fileEditorTabbedPane.filePathChanged(activeFolder, newNameFile);
+	}
+
+	@Action
+	public void renameFile()
+	{
+		File activeFile = ideContext.getActiveFile();
+
+		if(activeFile == null)
+		{
+			return;
+		}
+
+		if(activeFile.isDirectory())
+		{
+			renameFolder(activeFile);
+		}
+		else
+		{
+			renameFile(activeFile);
+		}
 	}
 
 	public void copyFile(File activeFile) throws UnsupportedFlavorException, IOException
@@ -357,7 +403,7 @@ public class FileActions
 			}
 		}
 
-		projectExplorer.reloadActiveNodeParent();
+		projectExplorer.reloadActiveNode();
 	}
 
 	public void pasteFile(File activeFolder) throws UnsupportedFlavorException, IOException, InterruptedException
@@ -379,45 +425,6 @@ public class FileActions
 	{
 		File activeFolder = ideContext.getActiveFile();
 		pasteFile(activeFolder);
-	}
-
-	public void deleteFile(File activeFile)
-	{
-
-		try
-		{
-			FileUtils.forceDelete(activeFile);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while deleting file: {}", activeFile.getPath(), ex);
-		}
-
-		projectExplorer.reloadActiveNodeParent();
-		fileEditorTabbedPane.filePathChanged(activeFile, activeFile);
-	}
-
-	@Action
-	public void deleteFile()
-	{
-		File activeFile = ideContext.getActiveFile();
-
-		if(activeFile == null)
-		{
-			return;
-		}
-
-		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
-				"Are you sure you want to delete file '" + activeFile.getName() + "' ?",
-				"Delete File",
-				JOptionPane.YES_NO_OPTION
-				);
-		
-		if(res == JOptionPane.NO_OPTION)
-		{
-			return;
-		}
-		
-		deleteFile(activeFile);
 	}
 
 	@Action

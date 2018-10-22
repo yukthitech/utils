@@ -28,6 +28,21 @@
 		</menu>
 
 		<menu label="Edit" mnemonic="E">
+			<item label="Copy" mnemonic="C" action="copyFile">
+				<short-key ctrl="true" key="C"/>
+			</item>
+			<item label="Paste" mnemonic="P" action="pasteFile">
+				<short-key ctrl="true" key="V"/>
+			</item>
+			<item label="Rename" mnemonic="R" action="renameFile">
+				<short-key key="F2"/>
+			</item>
+			<item label="Delete" mnemonic="D" action="deleteFile">
+				<short-key key="DELETE"/>
+			</item>
+
+			<item label="-" />
+			
 			<item label="Format Code" mnemonic="F" action="formatCode">
 				<short-key ctrl="true" key="F"/>
 			</item>
@@ -73,8 +88,8 @@
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
 		<item label="Paste" action="pasteFile" />
-		<item label="Rename" action="renameFolder" />
-		<item label="Delete" action="deleteFolder" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
 	</popup-menu>
 
 	<popup-menu label="filePopup">
@@ -116,12 +131,12 @@
 			<item label="File" action="newFile" />
 		</menu>
 
-		<item label="Refresh" action="refreshFolder" />
+		<item label="Refresh" action="refreshFolder"/>
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
 		<item label="Paste" action="pasteFile" />
-		<item label="Rename" action="renameFolder" />
-		<item label="Delete" action="deleteFolder" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
 	</popup-menu>
 </layout>

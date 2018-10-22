@@ -71,6 +71,16 @@ public class ExecutionEnvironment
 		}, 1);
 	}
 	
+	public void terminate()
+	{
+		if(!process.isAlive())
+		{
+			return;
+		}
+		
+		process.destroyForcibly();
+	}
+	
 	private void addListeners()
 	{
 		ReportMessageDataHandler logHandler = new ReportMessageDataHandler(this);

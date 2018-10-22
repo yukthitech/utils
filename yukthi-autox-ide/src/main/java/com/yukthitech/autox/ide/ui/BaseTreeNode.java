@@ -135,6 +135,6 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		}
 	}
 	
-	public void reload()
+	public void reload(boolean childReload)
 	{}
 }

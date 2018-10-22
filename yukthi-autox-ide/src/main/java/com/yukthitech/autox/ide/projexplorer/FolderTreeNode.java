@@ -28,7 +28,7 @@ public class FolderTreeNode extends BaseTreeNode
 
 		this.project = project;
 		this.folder = folder;
-		reload();
+		reload(false);
 	}
 
 	private void removeNonExistingNodes()
@@ -57,7 +57,7 @@ public class FolderTreeNode extends BaseTreeNode
 	}
 
 	@Override
-	public synchronized void reload()
+	public synchronized void reload(boolean childReload)
 	{
 		logger.debug("Reloading folder: {}", folder.getPath() );
 		
@@ -86,7 +86,11 @@ public class FolderTreeNode extends BaseTreeNode
 
 			if(existingNode != null)
 			{
-				existingNode.reload();
+				if(childReload)
+				{
+					existingNode.reload(true);
+				}
+				
 				continue;
 			}
 
@@ -94,16 +98,15 @@ public class FolderTreeNode extends BaseTreeNode
 			{
 				FolderTreeNode folderTreeNode = new FolderTreeNode(project, file.getName(), file);
 				super.addChild(file.getPath(), folderTreeNode);
-
 			}
 		}
+		
 		for(File file : files)
 		{
 			existingNode = super.getChild(file.getPath());
 
 			if(existingNode != null)
 			{
-				existingNode.reload();
 				continue;
 			}
 

@@ -14,6 +14,6 @@ public class TestSuiteFolderTreeNode extends FolderTreeNode
 	{
 		super(project, name, testSuiteFolder);
 		super.setIcon(IdeUtils.loadIcon("/ui/icons/settings.png", 20));
-		reload();
+		reload(false);
 	}
 }

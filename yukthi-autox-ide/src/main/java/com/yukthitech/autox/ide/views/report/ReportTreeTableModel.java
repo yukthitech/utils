@@ -33,9 +33,12 @@ public class ReportTreeTableModel extends AbstractTableModel
 		testSuiteLst.clear();
 		testSuiteMap.clear();
 		
-		for(MonitorLogMessage log : newEnv.getReportMessages())
+		if(newEnv != null)
 		{
-			addLog(log, false);
+			for(MonitorLogMessage log : newEnv.getReportMessages())
+			{
+				addLog(log, false);
+			}
 		}
 		
 		refreshRows();

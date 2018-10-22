@@ -32,6 +32,14 @@ public class ProjectTreeNode extends BaseTreeNode
 			}
 		}
 		
+		// add app config file
+		File appConfigFile = new File(project.getBaseFolderPath(), project.getAppConfigFilePath());
+		super.addChild("appConfig", new FileTreeNode(project, "App Configuration", appConfigFile, null));
+
+		// add app prop file
+		File appPropFile = new File(project.getBaseFolderPath(), project.getAppPropertyFilePath());
+		super.addChild("appProp", new FileTreeNode(project, "App Properties", appPropFile, null));
+
 		File[] files = null;
 
 		try
@@ -58,22 +66,17 @@ public class ProjectTreeNode extends BaseTreeNode
 				super.addChild(f.getName(), new FileTreeNode(project, f.getName(), f, null));
 			}
 		}
-
-		// add app config file
-		File appConfigFile = new File(project.getBaseFolderPath(), project.getAppConfigFilePath());
-		super.addChild("appConfig", new FileTreeNode(project, "App Configuration", appConfigFile, null));
-
-		// add app prop file
-		File appPropFile = new File(project.getBaseFolderPath(), project.getAppPropertyFilePath());
-		super.addChild("appProp", new FileTreeNode(project, "App Properties", appPropFile, null));
 	}
 
 	@Override
-	public void reload()
+	public void reload(boolean childReload)
 	{
 		for(BaseTreeNode child : super.getChildNodes())
 		{
-			child.reload();
+			if(childReload)
+			{
+				child.reload(true);
+			}
 		}
 	}
 

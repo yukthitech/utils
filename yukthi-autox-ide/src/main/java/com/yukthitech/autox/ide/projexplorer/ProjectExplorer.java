@@ -11,6 +11,10 @@ import javax.annotation.PostConstruct;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import org.apache.logging.log4j.LogManager;
@@ -112,6 +116,32 @@ public class ProjectExplorer extends JPanel
 		tree.addMouseListener(listener);
 		source.setSourceTree(tree);
 		target.setTargetTree(tree);
+		
+		tree.getInputMap().put(KeyStroke.getKeyStroke("ctrl C"), "dummy");
+		tree.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), "dummy");
+		tree.getInputMap().put(KeyStroke.getKeyStroke("ctrl X"), "dummy");
+		tree.getInputMap().put(KeyStroke.getKeyStroke("F2"), "dummy");
+		
+		tree.addTreeSelectionListener(new TreeSelectionListener()
+		{
+			@Override
+			public void valueChanged(TreeSelectionEvent e)
+			{
+				TreePath path = e.getPath();
+				DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+				
+				if(treeNode instanceof FileTreeNode)
+				{
+					FileTreeNode fileNode = (FileTreeNode) treeNode;
+					ideContext.setActiveDetails(fileNode.getProject(), fileNode.getFile());
+				}
+				else if(treeNode instanceof FolderTreeNode)
+				{
+					FolderTreeNode folderNode = (FolderTreeNode) treeNode;
+					ideContext.setActiveDetails(folderNode.getProject(), folderNode.getFolder());
+				}
+			}
+		});
 		
 		super.add(tree);
 		
@@ -272,7 +302,7 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 
-		activeTreeNode.reload();
+		activeTreeNode.reload(true);
 		treeModel.reload(activeTreeNode);
 	}
 
@@ -291,7 +321,7 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		parentNode.reload();
+		parentNode.reload(true);
 		treeModel.reload(parentNode);
 	}
 }

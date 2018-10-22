@@ -74,7 +74,6 @@ public class TreeDropTarget implements DropTargetListener
 		{
 			TreePath path = targetTree.getPathForLocation(dtde.getLocation().x, dtde.getLocation().y);
 
-			System.out.println("Expanding path: " + path);
 			targetTree.expandPath(path);
 			dtde.acceptDrag(dtde.getDropAction());
 		}
@@ -93,7 +92,6 @@ public class TreeDropTarget implements DropTargetListener
 		{
 			TreePath path = targetTree.getPathForLocation(dtde.getLocation().x, dtde.getLocation().y);
 
-			System.out.println("Expanding path: " + path);
 			targetTree.expandPath(path);
 			dtde.acceptDrag(dtde.getDropAction());
 		}
