@@ -21,9 +21,6 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  */
 public class Project implements Serializable
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private static Logger logger = LogManager.getLogger(Project.class);
@@ -39,6 +36,8 @@ public class Project implements Serializable
 	private String appPropertyFilePath;
 	private Set<String> testSuitesFoldersList;
 	private Set<String> classPathEntriesList;
+	
+	private transient ProjectClassLoader projectClassLoader;
 
 	public Project()
 	{
@@ -220,6 +219,16 @@ public class Project implements Serializable
 	public void save()
 	{
 		IdeUtils.save(this, new File(projectFilePath));
+	}
+	
+	public ProjectClassLoader getProjectClassLoader()
+	{
+		if(projectClassLoader == null)
+		{
+			projectClassLoader = new ProjectClassLoader(this);
+		}
+		
+		return projectClassLoader;
 	}
 
 	/*

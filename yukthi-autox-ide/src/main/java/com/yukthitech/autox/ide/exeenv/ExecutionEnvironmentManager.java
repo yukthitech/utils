@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +32,11 @@ public class ExecutionEnvironmentManager
 	
 	@Autowired
 	private IdeContext ideContext;
+	
+	/**
+	 * Mapping from project to execution environment.
+	 */
+	private Map<String, ExecutionEnvironment> interactiveEnvironments = new HashMap<>();
 	
 	/**
 	 * Fetches next available socket.
@@ -98,5 +105,36 @@ public class ExecutionEnvironmentManager
 	public ExecutionEnvironment executeTestCase(Project project, String testCase)
 	{
 		return startAutoxEnvironment("tc-" + testCase, project, "-tc", testCase);
+	}
+	
+	public synchronized ExecutionEnvironment getInteractiveEnvironment(Project project)
+	{
+		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());
+		
+		if(env != null && !env.isTerminated())
+		{
+			return env;
+		}
+		
+		return null;
+	}
+
+	public synchronized ExecutionEnvironment startInteractiveEnvironment(Project project, boolean executeGlobalSetup)
+	{
+		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());
+		
+		if(env != null && !env.isTerminated())
+		{
+			throw new InvalidStateException("For project '{}' interactive environment is already running", project.getName());
+		}
+		
+		env = startAutoxEnvironment("*Interactive-" + project.getName(), project, 
+				"--interactive-environment", "true", 
+				"--interactive-execution-global", "" + executeGlobalSetup);
+		
+		env.setInteractive(true);
+		interactiveEnvironments.put(project.getProjectFilePath(), env);
+		
+		return env;
 	}
 }

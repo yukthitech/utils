@@ -56,6 +56,14 @@ public class TestSuite implements Validateable
 	 * Name to step group mapping.
 	 */
 	private Map<String, StepGroup> nameToGroup = new HashMap<>();
+	
+	public TestSuite()
+	{}
+	
+	public TestSuite(String name)
+	{
+		this.name = name;
+	}
 
 	/**
 	 * Gets the name of the test suite.

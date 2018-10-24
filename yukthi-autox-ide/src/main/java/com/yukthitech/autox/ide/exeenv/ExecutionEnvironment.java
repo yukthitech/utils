@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
+import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
 import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
 import com.yukthitech.autox.monitor.MonitorClient;
 import com.yukthitech.autox.monitor.MonitorLogMessage;
@@ -36,6 +38,10 @@ public class ExecutionEnvironment
 	private List<MonitorLogMessage> reportMessages = new LinkedList<>();
 	
 	private File reportFolder;
+	
+	private boolean interactive;
+	
+	private boolean readyToInteract = false;
 	
 	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder)
 	{
@@ -83,8 +89,8 @@ public class ExecutionEnvironment
 	
 	private void addListeners()
 	{
-		ReportMessageDataHandler logHandler = new ReportMessageDataHandler(this);
-		monitorClient.addAsyncClientDataHandler(logHandler);
+		monitorClient.addAsyncClientDataHandler( new ReportMessageDataHandler(this) );
+		monitorClient.addAsyncClientDataHandler( new InteractiveServerReadyHandler(this) );
 	}
 	
 	private synchronized void appenConsoleHtml(String html)
@@ -182,6 +188,36 @@ public class ExecutionEnvironment
 	public File getReportFolder()
 	{
 		return reportFolder;
+	}
+	
+	void setInteractive(boolean interactive)
+	{
+		this.interactive = interactive;
+	}
+	
+	public boolean isInteractive()
+	{
+		return interactive;
+	}
+	
+	public void setReadyToInteract(boolean readyToInteract)
+	{
+		this.readyToInteract = readyToInteract;
+	}
+	
+	public boolean isReadyToInteract()
+	{
+		return readyToInteract;
+	}
+	
+	public void sendDataToServer(Serializable data)
+	{
+		if(!readyToInteract)
+		{
+			throw new InvalidStateException("This environment is not an interactive environment or not ready to interact. [Is Interactive: {}]", interactive);
+		}
+		
+		monitorClient.sendDataToServer(data);
 	}
 	
 	@Override

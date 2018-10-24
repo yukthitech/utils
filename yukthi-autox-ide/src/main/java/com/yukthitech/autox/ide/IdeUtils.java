@@ -1,10 +1,13 @@
 package com.yukthitech.autox.ide;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -331,5 +334,16 @@ public class IdeUtils
 	public static void executeUiTask(Runnable runnable)
 	{
 		EventQueue.invokeLater(runnable);
+	}
+	
+	public static void centerOnScreen(Component c)
+	{
+		final int width = c.getWidth();
+		final int height = c.getHeight();
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screenSize.width / 2) - (width / 2);
+		int y = (screenSize.height / 2) - (height / 2);
+
+		c.setLocation(x, y);
 	}
 }

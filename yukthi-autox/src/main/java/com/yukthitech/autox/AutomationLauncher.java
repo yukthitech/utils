@@ -49,6 +49,7 @@ public class AutomationLauncher
 	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
 	{
 		TestSuiteParserHandler defaultParserHandler = new TestSuiteParserHandler(context);
+		context.setTestSuiteParserHandler(defaultParserHandler);
 		
 		logger.debug("Loading test suites from folders - {}", appConfig.getTestSuiteFolders());
 		
@@ -334,6 +335,26 @@ public class AutomationLauncher
 
 		//execute test suites
 		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup);
+		
+		if(context.getBasicArguments().isInteractiveEnvironment())
+		{
+			if(!context.isMonitoringEnabled())
+			{
+				System.err.println("Tried to start interactive environment without monitoring.");
+				System.exit(-1);
+			}
+			
+			if(context.getBasicArguments().isInteractiveExecuteGlobal())
+			{
+				logger.debug("As part of interactive environment, executing global setup...");
+				testSuiteExecutor.executeGlobalSetup();
+			}
+			
+			logger.debug("Skipping actual test suite execution, as this is interactive environment exection.");
+			context.sendReadyToInteract();
+			return;
+		}
+		
 		boolean res = testSuiteExecutor.executeTestSuites();
 		
 		context.close();

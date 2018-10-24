@@ -75,6 +75,14 @@ public class TestCase implements IStepContainer, Validateable
 	 * Steps for cleanup for this test case.
 	 */
 	private Cleanup cleanup;
+	
+	public TestCase()
+	{}
+	
+	public TestCase(String name)
+	{
+		this.name = name;
+	}
 
 	/**
 	 * Gets the name of the test case.

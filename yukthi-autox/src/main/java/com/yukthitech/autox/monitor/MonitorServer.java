@@ -1,5 +1,6 @@
 package com.yukthitech.autox.monitor;
 
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -14,6 +15,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.InvalidArgumentException;
 
+import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.monitor.ienv.InteractiveStepHandler;
+import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -50,6 +54,11 @@ public class MonitorServer
 	private ObjectOutputStream clientStream;
 	
 	/**
+	 * Client stream to read objects from client.
+	 */
+	private ObjectInputStream clientInputStream;
+	
+	/**
 	 * lock to be used to sync writing on client stream.
 	 */
 	private ReentrantLock clientStreamLock = new ReentrantLock();
@@ -69,11 +78,33 @@ public class MonitorServer
 	 */
 	private Thread writeThread;
 	
+	/**
+	 * Thread to read data from client.
+	 */
+	private Thread readThread;
+	
+	/**
+	 * Manager to manage listeners.
+	 */
+	private EventListenerManager<IAsyncServerDataHandler> listenerManager = EventListenerManager.newEventListenerManager(IAsyncServerDataHandler.class, true);
+	
 	private MonitorServer(int serverPort)
 	{
 		this.serverPort = serverPort;
 		
 		writeThread = new Thread(this::sendDataToClient, "Monitor Writer");
+		readThread = new Thread(this::readDataFromClient, "Monitor Reader");
+		
+		addAsyncServerDataHandler(new InteractiveStepHandler(AutomationContext.getInstance()));
+	}
+	
+	/**
+	 * Adds the listener to the server.
+	 * @param handler handler to add
+	 */
+	public void addAsyncServerDataHandler(IAsyncServerDataHandler handler)
+	{
+		this.listenerManager.addListener(handler);
 	}
 	
 	private void sendDataToClient()
@@ -115,6 +146,32 @@ public class MonitorServer
 	}
 	
 	/**
+	 * Reads data from client.
+	 */
+	private void readDataFromClient()
+	{
+		//wait till client socket is closed
+		while(clientSocket != null && !clientSocket.isClosed())
+		{
+			try
+			{
+				Serializable object = (Serializable) clientInputStream.readObject();
+				listenerManager.get().processData(object);
+			}catch(Exception ex)
+			{
+				logger.error("An error occurred while fetching data from client", ex);
+				
+				//as the exception might be because of client close. So wait for second and check again
+				try
+				{
+					Thread.sleep(1000);
+				}catch(Exception e1)
+				{}
+			}
+		}
+	}
+	
+	/**
 	 * Starts the manager and waits for clients to get connected.
 	 */
 	private void start()
@@ -126,10 +183,13 @@ public class MonitorServer
 			
 			clientSocket = serverSocket.accept();
 			OutputStream outputStream = clientSocket.getOutputStream();
+			
 			clientStream = new ObjectOutputStream(outputStream);
+			clientInputStream = new ObjectInputStream(clientSocket.getInputStream());
 	
 			logger.debug("Client got connected...");
 			writeThread.start();
+			readThread.start();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while waiting for client to connect.", ex);

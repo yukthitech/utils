@@ -36,6 +36,8 @@ public class ExeEnvironmentPanel extends JPanel
 	
 	private static Icon INACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/gray-dot.png", 16);
 	
+	private static Icon INTERACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/interactive.png", 16);
+	
 	private static class ExeEnvLabel extends DefaultListCellRenderer
 	{
 		private static final long serialVersionUID = 1L;
@@ -58,7 +60,14 @@ public class ExeEnvironmentPanel extends JPanel
 			}
 			else
 			{
-				label.setIcon(ACTIVE_ICON);
+				if(exeEnv.isInteractive())
+				{
+					label.setIcon(INTERACTIVE_ICON);
+				}
+				else
+				{
+					label.setIcon(ACTIVE_ICON);
+				}
 			}
 			
 			return label;

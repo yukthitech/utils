@@ -25,6 +25,7 @@ import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.monitor.MonitorServer;
+import com.yukthitech.autox.monitor.ienv.InteractiveServerReady;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.autox.test.TestCase;
@@ -154,6 +155,13 @@ public class AutomationContext
 	 * Flag indicating if cleanup execution is currently going on.
 	 */
 	private boolean cleanupExecution;
+	
+	/**
+	 * Flag indicating if this context ready for client interaction.
+	 */
+	private boolean readyToInteract;
+	
+	private TestSuiteParserHandler testSuiteParserHandler;
 
 	/**
 	 * Constructor.
@@ -775,6 +783,52 @@ public class AutomationContext
 		{
 			monitorServer.sendAsync(mssg);
 		}
+	}
+	
+	public void sendReadyToInteract()
+	{
+		readyToInteract = true;
+		sendAsyncMonitorMessage(new InteractiveServerReady());
+	}
+	
+	/**
+	 * Gets the flag indicating if this context ready for client interaction.
+	 *
+	 * @return the flag indicating if this context ready for client interaction
+	 */
+	public boolean isReadyToInteract()
+	{
+		return readyToInteract;
+	}
+	
+	/**
+	 * Checks if is monitoring enabled.
+	 *
+	 * @return true, if is monitoring enabled
+	 */
+	public boolean isMonitoringEnabled()
+	{
+		return (monitorServer != null);
+	}
+	
+	/**
+	 * Gets the test suite parser handler.
+	 *
+	 * @return the test suite parser handler
+	 */
+	public TestSuiteParserHandler getTestSuiteParserHandler()
+	{
+		return testSuiteParserHandler;
+	}
+
+	/**
+	 * Sets the test suite parser handler.
+	 *
+	 * @param testSuiteParserHandler the new test suite parser handler
+	 */
+	public void setTestSuiteParserHandler(TestSuiteParserHandler testSuiteParserHandler)
+	{
+		this.testSuiteParserHandler = testSuiteParserHandler;
 	}
 
 	/**

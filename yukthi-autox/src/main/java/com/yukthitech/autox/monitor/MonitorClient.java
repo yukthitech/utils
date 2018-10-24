@@ -2,6 +2,7 @@ package com.yukthitech.autox.monitor;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -54,11 +55,16 @@ public class MonitorClient
 	 * Thread to read data from server.
 	 */
 	private Thread readerThread;
-	
+
 	/**
 	 * Stream for which server data can be read.
 	 */
 	private ObjectInputStream readerStream;
+	
+	/**
+	 * Stream to write data to server.
+	 */
+	private ObjectOutputStream writerStream;
 	
 	/**
 	 * Buffer to maintain read data. Till it is sent to listeners.
@@ -176,6 +182,7 @@ public class MonitorClient
 				
 				InputStream is = clientSocket.getInputStream();
 				this.readerStream = new ObjectInputStream(is);
+				this.writerStream = new ObjectOutputStream(clientSocket.getOutputStream());
 				break;
 			}catch(Exception ex)
 			{
@@ -208,6 +215,23 @@ public class MonitorClient
 		client.start();
 		
 		return client;
+	}
+	
+	public void sendDataToServer(Serializable data)
+	{
+		if(clientSocket == null)
+		{
+			throw new InvalidStateException("Client process is disconnected");
+		}
+		
+		try
+		{
+			this.writerStream.writeObject(data);
+			this.writerStream.flush();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while sending data to server.", ex);
+		}
 	}
 	
 	public void close()

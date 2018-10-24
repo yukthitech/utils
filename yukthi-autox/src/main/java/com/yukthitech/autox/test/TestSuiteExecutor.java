@@ -417,6 +417,15 @@ public class TestSuiteExecutor
 		
 		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
 	}
+	
+	/**
+	 * Executes global setups.
+	 * @return true if successfully executed.
+	 */
+	public boolean executeGlobalSetup()
+	{
+		return executeSetup("_global", testSuiteGroup.getSetup());
+	}
 
 	/**
 	 * Executes test suites with specified context.
@@ -426,7 +435,7 @@ public class TestSuiteExecutor
 	{
 		boolean successful = true;
 		
-		if(! executeSetup("_global", testSuiteGroup.getSetup()) )
+		if(! executeGlobalSetup() )
 		{
 			logger.error("Skipping all test suite execution as global setup failed.");
 			fullExecutionDetails.setSetupSuccessful(false);

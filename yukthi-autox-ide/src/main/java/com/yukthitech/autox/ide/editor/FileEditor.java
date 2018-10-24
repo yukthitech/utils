@@ -1,11 +1,10 @@
 package com.yukthitech.autox.ide.editor;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -17,7 +16,6 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.GutterIconInfo;
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -32,8 +30,6 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.Attribute;
 import com.yukthitech.autox.ide.xmlfile.Element;
 import com.yukthitech.autox.ide.xmlfile.XmlFile;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class FileEditor extends RTextScrollPane
 {
@@ -102,6 +98,9 @@ public class FileEditor extends RTextScrollPane
 				fileContentChanged();
 			}
 		});
+		
+		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
+
 		CompletionProvider provider = getStepsProvider();
 		AutoCompletion ac = new AutoCompletion(provider);
 		// show documentation dialog box
@@ -227,6 +226,18 @@ public class FileEditor extends RTextScrollPane
 		}
 
 		return attr.getValue();
+	}
+	
+	public String getSelectedText()
+	{
+		String selectedText = syntaxTextArea.getSelectedText();
+		
+		if(StringUtils.isNotBlank(selectedText))
+		{
+			return selectedText;
+		}
+		
+		return null;
 	}
 
 	public File getFile()

@@ -1,6 +1,7 @@
 package com.yukthitech.autox.common;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.jxpath.JXPathContext;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.yukthitech.autox.AutomationContext;
@@ -16,6 +17,21 @@ public enum ExpressionType
 			try
 			{
 				return PropertyUtils.getProperty(context, value);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while evaluating bean-property '{}' on context", value, ex);
+			}
+		}
+	},
+	
+	XPATH
+	{
+		@Override
+		public Object parse(AutomationContext context, String value, JavaType resultType)
+		{
+			try
+			{
+				return JXPathContext.newContext(context).getValue(value);
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while evaluating bean-property '{}' on context", value, ex);
