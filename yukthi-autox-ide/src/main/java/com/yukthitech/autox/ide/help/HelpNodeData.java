@@ -21,6 +21,8 @@ public class HelpNodeData
 	private List<HelpNodeData> childNodes;
 	
 	private boolean filtered = true;
+	
+	public HelpNodeData filterNode;
 
 	public HelpNodeData(Object nodeValue, DocInformation docInformation)
 	{
@@ -128,6 +130,7 @@ public class HelpNodeData
 			{
 				if(child.filter(text))
 				{
+					filterNode = child;
 					res = true;
 				}
 			}

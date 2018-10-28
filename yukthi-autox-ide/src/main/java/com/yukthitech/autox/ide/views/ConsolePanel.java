@@ -24,33 +24,36 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 @Component
 public class ConsolePanel extends JPanel implements IViewPanel
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static Logger logger = LogManager.getLogger(ConsolePanel.class);
-	
+
 	private final JPanel panel = new JPanel();
 	private final JLabel lblEnvironment = new JLabel("Environment: ");
 	private final JScrollPane scrollPane = new JScrollPane();
 	private final JPanel panel_1 = new JPanel();
-	private final JButton btnClear = new JButton("Clear");
+	private final JButton btnClear = new JButton("");
 	private final JTextPane consoleDisplayArea = new JTextPane();
 
 	@Autowired
 	private IdeContext ideContext;
-	
+
 	private JTabbedPane parentTabbedPane;
-	
+
 	private ExecutionEnvironment activeEnvironment;
-	
+
 	/**
 	 * Create the panel.
 	 */
@@ -73,6 +76,15 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		gbc_panel_1.gridx = 0;
 		gbc_panel_1.gridy = 0;
 		panel.add(panel_1, gbc_panel_1);
+		btnClear.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				clearConsole();
+			}
+		});
+		btnClear.setToolTipText("Clear");
+		btnClear.setIcon(IdeUtils.loadIcon("/ui/icons/clear-console.png", 16));
 
 		panel_1.add(btnClear);
 		lblEnvironment.setBorder(new EmptyBorder(3, 3, 3, 3));
@@ -92,7 +104,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 		scrollPane.setViewportView(consoleDisplayArea);
 	}
-	
+
 	@PostConstruct
 	private void init()
 	{
@@ -114,7 +126,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				ConsolePanel.this.activeEnvironment = activeEnvironment;
 				refreshConsoleText();
 			}
-			
+
 			@Override
 			public void environmentChanged(EnvironmentEvent event)
 			{
@@ -122,18 +134,18 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				{
 					return;
 				}
-				
+
 				appendNewContent(event.getNewMessage());
 			}
 		});
 	}
-	
+
 	@Override
 	public void setParent(JTabbedPane parentTabPane)
 	{
 		this.parentTabbedPane = parentTabPane;
 	}
-	
+
 	private void refreshConsoleText()
 	{
 		if(activeEnvironment == null)
@@ -141,32 +153,43 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			consoleDisplayArea.setText("");
 			return;
 		}
-		
+
 		consoleDisplayArea.setText("<html><body id=\"body\">" + activeEnvironment.getConsoleHtml() + "</body></html>");
 	}
-	
+
 	private void appendNewContent(String content)
 	{
 		HTMLDocument htmlDoc = (HTMLDocument) consoleDisplayArea.getDocument();
 		Element element = htmlDoc.getElement("body");
-		
+
 		try
 		{
 			htmlDoc.insertBeforeEnd(element, content);
-			
+
 			EventQueue.invokeLater(() -> {
-				//move scroll pane to the end
+				// move scroll pane to the end
 				JScrollBar vertical = scrollPane.getVerticalScrollBar();
-				vertical.setValue( vertical.getMaximum() );
+				vertical.setValue(vertical.getMaximum());
 			});
-			
+
 			if(parentTabbedPane != null)
 			{
 				parentTabbedPane.setSelectedComponent(this);
 			}
-		}catch(Exception ex)
+		} catch(Exception ex)
 		{
 			logger.error("An error occurred while adding html content", ex);
 		}
+	}
+	
+	private void clearConsole()
+	{
+		if(activeEnvironment == null)
+		{
+			return;
+		}
+		
+		activeEnvironment.clearConsole();
+		refreshConsoleText();
 	}
 }

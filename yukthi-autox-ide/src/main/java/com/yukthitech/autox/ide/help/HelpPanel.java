@@ -24,6 +24,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
@@ -41,9 +44,9 @@ import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 public class HelpPanel extends JPanel implements IViewPanel
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	private JTabbedPane parentTabbedPane;
-	
+
 	private JSplitPane splitPane;
 	private JScrollPane scrollPane;
 	private JTree tree;
@@ -51,15 +54,15 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private JEditorPane editorPane;
 	private JPanel panel;
 	private JTextField searchField;
-	
+
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
-	
+
 	private String documentTemplate = null;
-	
+
 	private String fmMethodDocTemplate = null;
-	
+
 	private String currentSearchText = "";
-	
+
 	private HelpNodeData rootNodeData = new HelpNodeData("Autox Documentation", null);
 	private final JLabel lblSearch = new JLabel("Search: ");
 
@@ -82,16 +85,16 @@ public class HelpPanel extends JPanel implements IViewPanel
 				System.out.println("key pressed" + e.getKeyCode());
 			}
 		});
-		
+
 		setLayout(new BorderLayout(0, 0));
 		add(getPanel(), BorderLayout.NORTH);
 		add(getSplitPane());
-		
+
 		try
 		{
 			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"));
 			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/fm-method-doc.html"));
-		}catch(Exception ex)
+		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
 		}
@@ -102,7 +105,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private void display()
 	{
 		String[] basepackage = { "com.yukthitech" };
-		
+
 		try
 		{
 			DocInformation docInformation = DocGenerator.buildDocInformation(basepackage);
@@ -112,9 +115,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				rootNodeData.addHelpNode(new HelpNodeData(pluginInfo, docInformation));
 			}
-			
-			rootNodeData.addHelpNode( new HelpNodeData(docInformation.getFreeMarkerMethods(), docInformation) );
-			
+
+			rootNodeData.addHelpNode(new HelpNodeData(docInformation.getFreeMarkerMethods(), docInformation));
+
 			HelpTreeModel model = new HelpTreeModel(rootNodeData);
 			tree.setModel(model);
 		} catch(Exception e)
@@ -195,12 +198,12 @@ public class HelpPanel extends JPanel implements IViewPanel
 			panel = new JPanel();
 			panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			GridBagLayout gbl_panel = new GridBagLayout();
-			gbl_panel.columnWidths = new int[] {0, 0};
+			gbl_panel.columnWidths = new int[] { 0, 0 };
 			gbl_panel.rowHeights = new int[] { 23, 0 };
 			gbl_panel.columnWeights = new double[] { 0.0, 1.0 };
 			gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
 			panel.setLayout(gbl_panel);
-			
+
 			GridBagConstraints gbc_lblSearch = new GridBagConstraints();
 			gbc_lblSearch.insets = new Insets(0, 0, 0, 5);
 			gbc_lblSearch.anchor = GridBagConstraints.EAST;
@@ -223,8 +226,26 @@ public class HelpPanel extends JPanel implements IViewPanel
 		if(searchField == null)
 		{
 			searchField = new JTextField();
+			searchField.addKeyListener(new KeyAdapter()
+			{
+				@SuppressWarnings("deprecation")
+				@Override
+				public void keyPressed(KeyEvent e)
+				{
+					if(e.getKeyCode() == KeyEvent.VK_UP)
+					{
+						setNextFocusableComponent(tree);
+						transferFocus();
+					}
+					if(e.getKeyCode() == KeyEvent.VK_DOWN)
+					{
+						setNextFocusableComponent(tree);
+						transferFocus();
+					}
+				}
+			});
 			searchField.setColumns(10);
-			
+
 			final Runnable applyFilterRunnable = new Runnable()
 			{
 				@Override
@@ -233,7 +254,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 					applyFilter();
 				}
 			};
-			
+
 			searchField.getDocument().addDocumentListener(new DocumentListener()
 			{
 				@Override
@@ -241,13 +262,13 @@ public class HelpPanel extends JPanel implements IViewPanel
 				{
 					IdeUtils.executeConsolidatedJob("applyFilter", applyFilterRunnable, 1000);
 				}
-				
+
 				@Override
 				public void insertUpdate(DocumentEvent e)
 				{
 					IdeUtils.executeConsolidatedJob("applyFilter", applyFilterRunnable, 1000);
 				}
-				
+
 				@Override
 				public void changedUpdate(DocumentEvent e)
 				{
@@ -255,54 +276,70 @@ public class HelpPanel extends JPanel implements IViewPanel
 				}
 			});
 		}
-		
+
 		return searchField;
 	}
-	
+
 	private void applyFilter()
 	{
 		String newText = searchField.getText().trim();
-		
+
 		if(newText.equals(currentSearchText))
 		{
 			return;
 		}
-		
+
 		currentSearchText = newText;
 		rootNodeData.filter(newText);
-		
 		HelpTreeModel model = new HelpTreeModel(rootNodeData);
 		tree.setModel(model);
+		selectNode((HelpTreeNode) model.getRoot());
 	}
-	
+
+	private void selectNode(HelpTreeNode select)
+	{
+		if(select.getChildCount() > 0)
+		{
+			select = (HelpTreeNode) select.getFirstChild();
+			selectNode(select);
+		}
+		else
+		{
+			TreeNode[] treeNodes = ((DefaultTreeModel) tree.getModel()).getPathToRoot((TreeNode) select);
+			TreePath path = new TreePath(treeNodes);
+			tree.scrollPathToVisible(path);
+			tree.setSelectionPath(path);
+		}
+	}
+
 	private void displayNodeContent()
 	{
 		Object treeNode = tree.getLastSelectedPathComponent();
-		
+
 		if(!(treeNode instanceof HelpTreeNode))
 		{
 			return;
 		}
-		
+
 		HelpTreeNode node = (HelpTreeNode) tree.getLastSelectedPathComponent();
 
 		if(node == null)
 		{
 			return;
 		}
-		
+
 		Map<String, Object> input = new HashMap<>();
 		Object nodeValue = node.getHelpNodeData().getNodeValue();
-		
+
 		try
 		{
 			if(nodeValue instanceof PluginInfo)
 			{
 				PluginInfo plugin = (PluginInfo) nodeValue;
-				
+
 				input.put("type", "plugin");
 				input.put("node", plugin);
-				
+
 				String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
 				editorPane.setText(output);
 			}
@@ -311,7 +348,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 				StepInfo step = (StepInfo) nodeValue;
 				input.put("type", "step");
 				input.put("node", step);
-				
+
 				String output = freeMarkerEngine.processTemplate("documentation.html", documentTemplate, input);
 				editorPane.setText(output);
 			}
@@ -320,7 +357,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 				FreeMarkerMethodDoc method = (FreeMarkerMethodDoc) nodeValue;
 				input.put("type", "method");
 				input.put("node", method);
-				
+
 				String output = freeMarkerEngine.processTemplate("fm-method-doc.html", fmMethodDocTemplate, input);
 				editorPane.setText(output);
 			}
@@ -329,8 +366,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 				editorPane.setText(" ");
 			}
 
-			IdeUtils.executeUiTask(()->
-			{
+			IdeUtils.executeUiTask(() -> {
 				editorScrollPane.getVerticalScrollBar().setValue(0);
 			});
 		} catch(Exception e1)
@@ -338,7 +374,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 			e1.printStackTrace();
 		}
 	}
-	
+
 	public void activatePanel()
 	{
 		parentTabbedPane.setSelectedComponent(this);

@@ -164,6 +164,12 @@ public class ProjectExplorer extends JPanel
 					openProject(project.getPath());
 				}
 			}
+			
+			@Override
+			public void projectStateChanged(Project project)
+			{
+				reloadProjectNode(project);
+			}
 		});
 	}
 	
@@ -245,7 +251,20 @@ public class ProjectExplorer extends JPanel
 		
 		activeTreeNode = (BaseTreeNode) clickedItem;
 		
-		if(clickedItem instanceof FileTreeNode)
+		if(clickedItem instanceof ProjectTreeNode)
+		{
+			ProjectTreeNode projTreeNode = (ProjectTreeNode) clickedItem;
+			ideContext.setActiveDetails(projTreeNode.getProject(), null);
+			
+			projectPopup.show(tree, e.getX(), e.getY());
+		}
+		else if(clickedItem instanceof TestSuiteFolderTreeNode) 
+		{
+			TestSuiteFolderTreeNode testSuiteFolderTreeNode = (TestSuiteFolderTreeNode) clickedItem;
+			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), null);
+			testSuitePopup.show(tree, e.getX(), e.getY());
+		}
+		else if(clickedItem instanceof FileTreeNode)
 		{
 			FileTreeNode fileTreeNode = (FileTreeNode) clickedItem;
 			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile());
@@ -258,19 +277,6 @@ public class ProjectExplorer extends JPanel
 			ideContext.setActiveDetails(folderTreeNode.getProject(), folderTreeNode.getFolder());
 	
 			folderPopup.show(tree, e.getX(), e.getY());
-		}
-		else if(clickedItem instanceof ProjectTreeNode)
-		{
-			ProjectTreeNode projTreeNode = (ProjectTreeNode) clickedItem;
-			ideContext.setActiveDetails(projTreeNode.getProject(), null);
-			
-			projectPopup.show(tree, e.getX(), e.getY());
-		}
-		else if(clickedItem instanceof TestSuiteFolderTreeNode) 
-		{
-			TestSuiteFolderTreeNode testSuiteFolderTreeNode = (TestSuiteFolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), null);
-			testSuitePopup.show(tree, e.getX(), e.getY());
 		}
 	}
 	
@@ -292,6 +298,19 @@ public class ProjectExplorer extends JPanel
 			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile());
 			actionCollection.invokeAction("openFile");
 		}
+	}
+	
+	public void reloadProjectNode(Project project)
+	{
+		ProjectTreeNode node = treeModel.getProjectNode(project);
+		
+		if(node == null)
+		{
+			return;
+		}
+		
+		node.reload(true);
+		treeModel.reload(node);
 	}
 	
 	public void reloadActiveNode()

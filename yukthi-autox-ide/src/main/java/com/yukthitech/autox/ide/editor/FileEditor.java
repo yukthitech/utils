@@ -1,10 +1,14 @@
 package com.yukthitech.autox.ide.editor;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.lang.reflect.Field;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -18,6 +22,7 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rtextarea.GutterIconInfo;
+import org.fife.ui.rtextarea.IconRowHeader;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,6 +35,7 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.Attribute;
 import com.yukthitech.autox.ide.xmlfile.Element;
 import com.yukthitech.autox.ide.xmlfile.XmlFile;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class FileEditor extends RTextScrollPane
 {
@@ -43,23 +49,40 @@ public class FileEditor extends RTextScrollPane
 
 	private RSyntaxTextArea syntaxTextArea = new RSyntaxTextArea("");
 
+	private IconRowHeader iconArea;
+
 	@Autowired
 	private IdeContext ideContext;
 
 	public FileEditor(Project project, File file)
 	{
 		super(new RSyntaxTextArea());
+		getGutter().setBookmarkIcon(IdeUtils.loadIcon("/ui/icons/bullet.png", 7));
+		getGutter().setBookmarkingEnabled(true);
+
+		try
+		{
+			Field iconAreaFld = getGutter().getClass().getDeclaredField("iconArea");
+			iconAreaFld.setAccessible(true);
+			iconArea = (IconRowHeader) iconAreaFld.get(getGutter());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while fetching icon area", ex);
+		}
 		
-		/*
-		getGutter().addMouseListener(new MouseAdapter()
+		iconArea.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mouseClicked(MouseEvent e)
 			{
-
+				if(SwingUtilities.isRightMouseButton(e))
+				{
+					GutterPopup popup = new GutterPopup();
+					iconArea.add(popup);
+					popup.show(e.getComponent(), e.getX(), e.getY());
+				}
 			}
 		});
-		*/
 
 		this.project = project;
 		this.syntaxTextArea = (RSyntaxTextArea) super.getViewport().getView();
@@ -98,7 +121,7 @@ public class FileEditor extends RTextScrollPane
 				fileContentChanged();
 			}
 		});
-		
+
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
 
 		CompletionProvider provider = getStepsProvider();
@@ -227,16 +250,16 @@ public class FileEditor extends RTextScrollPane
 
 		return attr.getValue();
 	}
-	
+
 	public String getSelectedText()
 	{
 		String selectedText = syntaxTextArea.getSelectedText();
-		
+
 		if(StringUtils.isNotBlank(selectedText))
 		{
 			return selectedText;
 		}
-		
+
 		return null;
 	}
 
@@ -258,7 +281,7 @@ public class FileEditor extends RTextScrollPane
 		{
 			throw new IllegalStateException("An error occured while loading document Information", e);
 		}
-		
+
 		for(StepInfo step : docInformation.getSteps())
 		{
 			stepProvider.addCompletion((new BasicCompletion(stepProvider, step.getName(), "short discription", step.getDescription())));

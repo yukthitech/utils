@@ -221,6 +221,7 @@ public class Project implements Serializable
 		IdeUtils.save(this, new File(projectFilePath));
 	}
 	
+	@JsonIgnore
 	public ProjectClassLoader getProjectClassLoader()
 	{
 		if(projectClassLoader == null)

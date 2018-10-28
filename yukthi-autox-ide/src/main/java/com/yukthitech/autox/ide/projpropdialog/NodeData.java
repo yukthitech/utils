@@ -3,17 +3,17 @@ package com.yukthitech.autox.ide.projpropdialog;
 public class NodeData
 {
 
-	protected final String value;
+	protected String label;
 	protected boolean checked;
 
 	public NodeData(String quest)
 	{
-		value = quest;
+		label = quest;
 	}
 
-	public String getValue()
+	public String getLable()
 	{
-		return value;
+		return label;
 	}
 
 	public boolean isChecked()
@@ -28,6 +28,6 @@ public class NodeData
 
 	public String toString()
 	{
-		return value + " = " + checked;
+		return label + " = " + checked;
 	}
 }

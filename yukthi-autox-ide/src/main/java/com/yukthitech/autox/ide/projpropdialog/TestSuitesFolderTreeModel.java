@@ -1,55 +1,53 @@
 package com.yukthitech.autox.ide.projpropdialog;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.tree.DefaultTreeModel;
 
+import com.yukthitech.autox.ide.model.Project;
+
 public class TestSuitesFolderTreeModel extends DefaultTreeModel
 {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	TestSuitesFolderTreeNode rootNode;
+	
+	private TestSuitesFolderTreeNode rootNode;
+	private Project project;
 
-	public TestSuitesFolderTreeModel(File file)
+	public TestSuitesFolderTreeModel(File file, Project project)
 	{
-		// TODO Auto-generated constructor stub
 		super(new TestSuitesFolderTreeNode(file.getName(), file));
-		rootNode = (TestSuitesFolderTreeNode) super.getRoot();
-		// reload(file);
+		this.rootNode = (TestSuitesFolderTreeNode) super.getRoot();
+		this.project = project;
 
 	}
 
 	public Set<File> getSelectedFolders()
 	{
 		Set<File> res = new HashSet<File>();
-		rootNode.getSelectedFolders(res);
+		rootNode.getSelectedFolders(res, project, null);
+		
 		return res;
 	}
 
-	public void setSelectedFolders(Set<String> testSuitesFoldersList)
+	public void setSelectedFolders(Set<File> testSuitesFoldersList)
 	{
-		// TODO Auto-generated method stub
-		traverse(rootNode, testSuitesFoldersList);
+		traverse(rootNode, testSuitesFoldersList, new File(project.getBaseFolderPath()));
 	}
 
-	public void traverse(TestSuitesFolderTreeNode node, Set<String> testSuitesFolderList)
+	public void traverse(TestSuitesFolderTreeNode node, Set<File> testSuitesFolderList, File projectFolder)
 	{
 		if(testSuitesFolderList != null)
 		{
-			if(testSuitesFolderList.contains(node.getFolder().getAbsolutePath()))
+			if(testSuitesFolderList.contains(node.getFolder()))
 			{
 				node.setSelectedFolder();
 			}
+			
 			for(int i = 0; i < node.getChildCount(); i++)
 			{
-				traverse((TestSuitesFolderTreeNode) node.getChildAt(i), testSuitesFolderList);
+				traverse((TestSuitesFolderTreeNode) node.getChildAt(i), testSuitesFolderList, projectFolder);
 			}
 		}
 	}

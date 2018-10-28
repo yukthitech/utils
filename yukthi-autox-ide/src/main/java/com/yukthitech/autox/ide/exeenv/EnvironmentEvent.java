@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.exeenv;
 
 import com.yukthitech.autox.monitor.MonitorLogMessage;
+import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 
 /**
  * Used to send environment status change information.
@@ -27,6 +28,8 @@ public class EnvironmentEvent
 	 * Available for {@link EnvironmentEventType#REPORT_LOG_ADDED} event. 
 	 */
 	private MonitorLogMessage newReportLog;
+	
+	private ContextAttributeDetails newContextAttribute;
 
 	/**
 	 * Instantiates a new environment event.
@@ -66,6 +69,14 @@ public class EnvironmentEvent
 	{
 		EnvironmentEvent event = new EnvironmentEvent(env, EnvironmentEventType.REPORT_LOG_ADDED);
 		event.newReportLog = mssg;
+		
+		return event;
+	}
+	
+	public static EnvironmentEvent newContextAttributeEvent(ExecutionEnvironment env, ContextAttributeDetails ctx)
+	{
+		EnvironmentEvent event = new EnvironmentEvent(env, EnvironmentEventType.CONTEXT_ATTRIBUTE_ADDED);
+		event.newContextAttribute = ctx;
 		
 		return event;
 	}
@@ -109,4 +120,10 @@ public class EnvironmentEvent
 	{
 		return newReportLog;
 	}
+
+	public ContextAttributeDetails getNewContextAttribute()
+	{
+		return newContextAttribute;
+	}
+	
 }

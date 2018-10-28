@@ -1,15 +1,15 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
 
-public class ProjectTreeNode extends BaseTreeNode
+public class ProjectTreeNode extends FolderTreeNode
 {
 	private static final long serialVersionUID = 1L;
 
@@ -17,66 +17,94 @@ public class ProjectTreeNode extends BaseTreeNode
 
 	public ProjectTreeNode(Project project)
 	{
-		super(IdeUtils.loadIcon("/ui/icons/project.png", 20), project.getName());
+		super(IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
 
 		this.project = project;
-
-		Set<String> testSuitesFolders = project.getTestSuitesFoldersList();
-		
-		if(testSuitesFolders != null)
+		reload(false);
+	}
+	
+	@Override
+	protected boolean checkForRemoval(BaseTreeNode child)
+	{
+		if( super.checkForRemoval(child) )
 		{
-			for(String tsf : testSuitesFolders)
+			return true;
+		}
+		
+		if(child instanceof TestSuiteFolderTreeNode)
+		{
+			TestSuiteFolderTreeNode tsNode = (TestSuiteFolderTreeNode) child;
+			
+			if(project.getTestSuitesFoldersList() == null || !project.getTestSuitesFoldersList().contains(tsNode.getLabel()))
 			{
-				File file = new File(project.getBaseFolderPath(), tsf);
-				super.addChild("testSuite" + tsf, new TestSuiteFolderTreeNode(project, tsf, file));
+				return true;
 			}
 		}
 		
-		// add app config file
-		File appConfigFile = new File(project.getBaseFolderPath(), project.getAppConfigFilePath());
-		super.addChild("appConfig", new FileTreeNode(project, "App Configuration", appConfigFile, null));
-
-		// add app prop file
-		File appPropFile = new File(project.getBaseFolderPath(), project.getAppPropertyFilePath());
-		super.addChild("appProp", new FileTreeNode(project, "App Properties", appPropFile, null));
-
-		File[] files = null;
-
-		try
-		{
-			files = new File(project.getBaseFolderPath()).getCanonicalFile().listFiles();
-		} catch(IOException ex)
-		{
-			throw new IllegalStateException("An error occurred while fetching cannnoical base folder path", ex);
-		}
-		
-		// load all the files and folder of the project directory
-		for(File f : files)
-		{
-			if(f.isDirectory() && !(f.getName().startsWith(".")))
-			{
-				super.addChild(f.getName(), new FolderTreeNode(project, f.getName(), f));
-			}
-		}
-		
-		for(File f : files)
-		{
-			if(!f.isDirectory() && !(f.getName().startsWith(".")) && !(f.getName().equals("autox-project.json")))
-			{
-				super.addChild(f.getName(), new FileTreeNode(project, f.getName(), f, null));
-			}
-		}
+		return false;
 	}
 
 	@Override
 	public void reload(boolean childReload)
 	{
+		//project will be null, when reload is called by folder-tree-node constructor
+		if(project == null)
+		{
+			return;
+		}
+		
+		super.reload(childReload);
+		
 		for(BaseTreeNode child : super.getChildNodes())
 		{
 			if(childReload)
 			{
 				child.reload(true);
 			}
+		}
+
+		int index = 0;
+		Set<String> testSuitesFolders = project.getTestSuitesFoldersList();
+		
+		if(testSuitesFolders != null)
+		{
+			testSuitesFolders = new TreeSet<>( project.getTestSuitesFoldersList() );
+			
+			BaseTreeNode existingNode = null;
+			
+			for(String tsf : testSuitesFolders)
+			{
+				File file = new File(project.getBaseFolderPath(), tsf);
+				String id = ":testSuite:" + tsf;
+				existingNode = super.getChild(id);
+				
+				if(existingNode != null)
+				{
+					existingNode.reload(childReload);
+				}
+				else
+				{
+					super.insert(id, new TestSuiteFolderTreeNode(project, tsf, file), index);
+				}
+				
+				index++;
+			}
+		}
+		
+		// add app config file
+		if(super.getChild(":appConfig") == null)
+		{
+			File appConfigFile = new File(project.getBaseFolderPath(), project.getAppConfigFilePath());
+			super.insert(":appConfig", new FileTreeNode(project, "App Configuration", appConfigFile, null), index);
+		}
+
+		index++;
+
+		// add app prop file
+		if(super.getChild(":appProp") == null)
+		{
+			File appPropFile = new File(project.getBaseFolderPath(), project.getAppPropertyFilePath());
+			super.insert(":appProp", new FileTreeNode(project, "App Properties", appPropFile, null), index);
 		}
 	}
 

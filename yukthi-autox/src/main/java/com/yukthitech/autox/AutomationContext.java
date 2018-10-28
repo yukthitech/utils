@@ -25,6 +25,7 @@ import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.monitor.MonitorServer;
+import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.autox.monitor.ienv.InteractiveServerReady;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.StepGroup;
@@ -364,6 +365,7 @@ public class AutomationContext
 	public void setAttribute(String name, Object value)
 	{
 		nameToAttr.put(name, value);
+		monitorServer.sendAsync(new ContextAttributeDetails(name, value));
 	}
 	
 	/**

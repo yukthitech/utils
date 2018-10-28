@@ -1,118 +1,132 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<testSuite name="dml-test-suites">
-
 		<testCase name="insert_query">
-			<description>Validates for inserting record in a table</description>
-
+			<description>
+				Validates for inserting record in a table
+			</description>
+		
+			<!--
+				This comment is to test formatting
+			-->
 			<wrap:steps>
-				<ccg:dmlQuery dataSourceName="dataSource" failOnNoUpdate="true">
+				<ccg:dmlQuery countAttribute="countAttr" dataSourceName="dataSource" failOnNoUpdate="true">
 					<query>
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:validateWithSql dataSourceName="dataSource">
 					<query>
 						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>
-
+				
 					<expectedRow>
 						<column name="NAME">employee1</column>
 					</expectedRow>
 				</ccg:validateWithSql>
 			</wrap:validations>
 		</testCase>
-
-		<testCase name="update_query" dependencies="insert_query">
-			<description>Validates for updating record in a table</description>
-
+	
+		<testCase dependencies="insert_query" name="update_query">
+			<description>
+				Validates for updating record in a table
+			</description>
+		
 			<wrap:steps>
 				<ccg:set name="empId" value="1"/>
-				
-				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="updateCount">
+			
+				<ccg:dmlQuery countAttribute="updateCount" dataSourceName="dataSource">
 					<query>
 						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:validateContextParam expression="attr.updateCount" value="1"/>
 			</wrap:validations>
 		</testCase>
-
-		<testCase name="delete_query" dependencies="insert_query">
-			<description>Validates for deleting record in a table</description>
-
+	
+		<testCase dependencies="insert_query" name="delete_query">
+			<description>
+				Validates for deleting record in a table
+			</description>
+		
 			<wrap:steps>
-				<ccg:set name="empId" value="1" type="java.lang.Integer"/>
-				
-				<ccg:dmlQuery dataSourceName="dataSource" countAttribute="deleteCount">
+				<ccg:set name="empId" type="java.lang.Integer" value="1"/>
+			
+				<ccg:dmlQuery countAttribute="deleteCount" dataSourceName="dataSource">
 					<query>
 						DELETE FROM EMPLOYEE WHERE ID = ?{attr.empId}
 					</query>
 				</ccg:dmlQuery>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:validateContextParam expression="attr.deleteCount" value="1"/>
 			</wrap:validations>
 		</testCase>
-
+	
 		<testCase name="multiple_query">
-			<description>Validates for executing multiple query in table</description>
-
+			<description>
+				Validates for executing multiple query in table
+			</description>
+		
 			<wrap:steps>
 				<ccg:multiDmlQuery dataSourceName="dataSource">
 					<query>
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
-
+				
 					<query>
 						INSERT INTO EMPLOYEE VALUES (3, 'employee2')
 					</query>
 				</ccg:multiDmlQuery>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:validateWithSql dataSourceName="dataSource">
 					<query>
 						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 1
 					</query>
-
+				
 					<expectedRow>
 						<column name="COUNT">2</column>
 					</expectedRow>
 				</ccg:validateWithSql>
 			</wrap:validations>
 		</testCase>
-
-		<testCase name="column_list_query" dependencies="multiple_query">
-			<description>Validates for executing column-list query</description>
-
+	
+		<testCase dependencies="multiple_query" name="column_list_query">
+			<description>
+				Validates for executing column-list query
+			</description>
+		
 			<wrap:steps>
-				<ccg:loadQueryColumnList dataSourceName="dataSource" contextAttribute="empNames">
+				<ccg:loadQueryColumnList contextAttribute="empNames" dataSourceName="dataSource">
 					<query>
-						SELECT NAME 
+						SELECT NAME
 						FROM EMPLOYEE
 						WHERE NAME IN ('employee1', 'employee2')
 						ORDER BY NAME
 					</query>
 				</ccg:loadQueryColumnList>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:validateContextParam expression="attr.empNames" value="[employee1, employee2]"/>
 			</wrap:validations>
 		</testCase>
-
-		<testCase name="fetch_value_query"  dependencies="insert_query">
-			<description>Validates fetching single value from query is working as expected</description>
-
+	
+		<testCase dependencies="insert_query" name="fetch_value_query">
+			<description>
+				Validates fetching single value from query is working as expected
+			</description>
+		
 			<wrap:steps>
-				<ccg:fetchValueQuery dataSourceName="dataSource" contextAttribute="empId">
+				<ccg:fetchValueQuery contextAttribute="empId" dataSourceName="dataSource">
 					<query>
 						SELECT ID
 						FROM EMPLOYEE
@@ -120,7 +134,7 @@
 					</query>
 				</ccg:fetchValueQuery>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:validateContextParam expression="attr.empId" value="1"/>
 			</wrap:validations>

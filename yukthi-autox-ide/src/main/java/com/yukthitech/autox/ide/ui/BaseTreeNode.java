@@ -108,6 +108,18 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		super.add(node);
 	}
 	
+	public void insert(String id, BaseTreeNode node, int index)
+	{
+		if(childNodes.containsKey(id))
+		{
+			throw new InvalidStateException("A node with specified id already exist: {}", id);
+		}
+		
+		node.id = id;
+		childNodes.put(id, node);
+		super.insert(node, index);
+	}
+
 	public BaseTreeNode getChild(String id)
 	{
 		return childNodes.get(id);

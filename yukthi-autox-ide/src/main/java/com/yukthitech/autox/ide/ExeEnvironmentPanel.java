@@ -20,6 +20,8 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,8 @@ import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 public class ExeEnvironmentPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(ExeEnvironmentPanel.class);
 	
 	private static Icon ACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/green-dot.png", 16);
 	
@@ -164,6 +168,23 @@ public class ExeEnvironmentPanel extends JPanel
 					envComboBox.revalidate();
 					envComboBox.getParent().revalidate();
 				}, 200);
+			}
+		});
+		
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+			@Override
+			public void run()
+			{
+				logger.debug("As ide is shutting down, stopping all executing environments...");
+				
+				int count = envComboBox.getItemCount();
+				
+				for(int i = 0; i < count; i++)
+				{
+					ExecutionEnvironment env = envComboBox.getItemAt(i);
+					env.terminate();
+				}
 			}
 		});
 	}

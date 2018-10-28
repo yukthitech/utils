@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import javax.swing.ImageIcon;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.utils.ObjectLockManager;
@@ -146,6 +148,11 @@ public class IdeUtils
 	{
 		try
 		{
+			if(!file.canWrite())
+			{
+				file.setWritable(true);
+			}
+			
 			objectMapper.writeValue(file, object);
 		}catch(Exception ex)
 		{
@@ -345,5 +352,11 @@ public class IdeUtils
 		int y = (screenSize.height / 2) - (height / 2);
 
 		c.setLocation(x, y);
+	}
+	
+	public static void autowireBean(ApplicationContext applicationContext, Object bean)
+	{
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(bean);
+		applicationContext.getAutowireCapableBeanFactory().initializeBean(bean, UUID.randomUUID().toString());
 	}
 }

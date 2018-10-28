@@ -1,11 +1,15 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import javax.swing.Icon;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
@@ -15,52 +19,68 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class FolderTreeNode extends BaseTreeNode
 {
 	private static final long serialVersionUID = 1L;
-	
-	private static Logger logger = LogManager.getLogger(FolderTreeNode.class);
 
 	private File folder;
 
 	private Project project;
-
-	public FolderTreeNode(Project project, String name, File folder)
+	
+	protected FolderTreeNode(Icon icon, Project project, String name, File folder)
 	{
-		super(IdeUtils.loadIcon("/ui/icons/folder.png", 20), name);
+		super(icon, name);
 
 		this.project = project;
 		this.folder = folder;
 		reload(false);
 	}
 
-	private void removeNonExistingNodes()
+	public FolderTreeNode(Project project, String name, File folder)
 	{
-		File file = null;
+		this(IdeUtils.loadIcon("/ui/icons/folder.png", 20), project, name, folder);
+	}
+
+	protected void removeNonExistingNodes()
+	{
 		Set<String> nodesToRemove = new HashSet<>();
 
 		for(BaseTreeNode child : super.getChildNodes())
 		{
-			if(child instanceof FolderTreeNode)
-			{
-				file = ((FolderTreeNode) child).folder;
-			}
-			else
-			{
-				file = ((FileTreeNode) child).getFile();
-			}
-
-			if(!file.exists())
+			if(checkForRemoval(child))
 			{
 				nodesToRemove.add(child.getId());
 			}
 		}
 
-		super.removeChildNodes(nodesToRemove);
+		if(nodesToRemove != null)
+		{
+			super.removeChildNodes(nodesToRemove);
+
+		}
+	}
+	
+	protected boolean checkForRemoval(BaseTreeNode child)
+	{
+		File file = null;
+		
+		if(child instanceof FolderTreeNode)
+		{
+			file = ((FolderTreeNode) child).folder;
+		}
+		else
+		{
+			file = ((FileTreeNode) child).getFile();
+		}
+
+		if(!file.exists())
+		{
+			return true;
+		}
+		
+		return false;
 	}
 
 	@Override
 	public synchronized void reload(boolean childReload)
 	{
-		logger.debug("Reloading folder: {}", folder.getPath() );
-		
 		removeNonExistingNodes();
 
 		File[] files = null;
@@ -78,10 +98,35 @@ public class FolderTreeNode extends BaseTreeNode
 			return;
 		}
 
-		BaseTreeNode existingNode = null;
-
-		for(File file : files)
+		List<File> list = new ArrayList<>(Arrays.asList(files));
+		
+		Collections.sort(list, new Comparator<File>()
 		{
+			@Override
+			public int compare(File o1, File o2)
+			{
+				if(o1.isDirectory() != o2.isDirectory())
+				{
+					return o1.isDirectory() ? -1 : 1;
+				}
+
+				String name1 = o1.getName();
+				String name2 = o2.getName();
+				return name1.compareTo(name2);
+			}
+
+		});
+
+		BaseTreeNode existingNode = null;
+		int index = 0;
+
+		for(File file : list)
+		{
+			if(file.getPath().startsWith("."))
+			{
+				continue;
+			}
+			
 			existingNode = super.getChild(file.getPath());
 
 			if(existingNode != null)
@@ -90,32 +135,23 @@ public class FolderTreeNode extends BaseTreeNode
 				{
 					existingNode.reload(true);
 				}
-				
+
+				index++;
 				continue;
 			}
 
 			if(file.isDirectory())
 			{
 				FolderTreeNode folderTreeNode = new FolderTreeNode(project, file.getName(), file);
-				super.addChild(file.getPath(), folderTreeNode);
+				super.insert(file.getPath(), folderTreeNode, index);
 			}
-		}
-		
-		for(File file : files)
-		{
-			existingNode = super.getChild(file.getPath());
-
-			if(existingNode != null)
-			{
-				continue;
-			}
-
-			if(!file.isDirectory())
+			else if(file.isFile())
 			{
 				FileTreeNode fileNode = new FileTreeNode(project, file.getName(), file, null);
-				super.addChild(file.getPath(), fileNode);
-
+				super.insert(file.getPath(), fileNode, index);
 			}
+
+			index++;
 		}
 	}
 

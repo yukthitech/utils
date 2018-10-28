@@ -14,7 +14,12 @@ public enum EnvironmentEventType
 	/**
 	 * New log entry is added to reports.
 	 */
-	REPORT_LOG_ADDED
+	REPORT_LOG_ADDED,
+	
+	/**
+	 * New context attribute is added to ContextAttributesPanel 
+	 */
+	CONTEXT_ATTRIBUTE_ADDED
 	
 	;
 }

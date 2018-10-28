@@ -46,10 +46,15 @@ public class AutomationLauncher
 	 *            Application config to be used
 	 * @return Test suites mapped by name.
 	 */
-	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig)
+	private static TestSuiteGroup loadTestSuites(AutomationContext context, ApplicationConfiguration appConfig, boolean loadTestSuites)
 	{
 		TestSuiteParserHandler defaultParserHandler = new TestSuiteParserHandler(context);
 		context.setTestSuiteParserHandler(defaultParserHandler);
+		
+		if(!loadTestSuites)
+		{
+			return null;
+		}
 		
 		logger.debug("Loading test suites from folders - {}", appConfig.getTestSuiteFolders());
 		
@@ -330,13 +335,23 @@ public class AutomationLauncher
 		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
 		validateCommandLineArguments(context, extendedCommandLineArgs);
 		
+		boolean loadTestSuites = true;
+		boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
+		boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
+		
+		if(isInteractive)
+		{
+			//test suites needs to be loaded only if global setup needs to be executed.
+			loadTestSuites = isInteractiveExeGlobal;
+		}
+		
 		// load test suites
-		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig);
+		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
 
 		//execute test suites
-		TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(context, testSuiteGroup);
+		TestSuiteExecutor testSuiteExecutor = loadTestSuites ? new TestSuiteExecutor(context, testSuiteGroup) : null;
 		
-		if(context.getBasicArguments().isInteractiveEnvironment())
+		if(isInteractive)
 		{
 			if(!context.isMonitoringEnabled())
 			{
@@ -344,7 +359,7 @@ public class AutomationLauncher
 				System.exit(-1);
 			}
 			
-			if(context.getBasicArguments().isInteractiveExecuteGlobal())
+			if(isInteractiveExeGlobal)
 			{
 				logger.debug("As part of interactive environment, executing global setup...");
 				testSuiteExecutor.executeGlobalSetup();

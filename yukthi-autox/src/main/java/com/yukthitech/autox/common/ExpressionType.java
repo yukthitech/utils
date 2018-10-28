@@ -141,6 +141,16 @@ public enum ExpressionType
 		}
 	},
 
+	CONDITION
+	{
+		@Override
+		public Object parse(AutomationContext context, String value, JavaType resultType)
+		{
+			value = value.trim();
+			return AutomationUtils.evaluateCondition(context, value);
+		}
+	},
+
 	;
 	
 	public abstract Object parse(AutomationContext context, String value, JavaType resultType);

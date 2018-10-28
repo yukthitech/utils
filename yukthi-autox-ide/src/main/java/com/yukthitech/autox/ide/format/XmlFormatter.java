@@ -18,9 +18,9 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dom4j.Comment;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -143,8 +143,8 @@ public class XmlFormatter
 			
 			if(node instanceof Comment)
 			{
-				String text = ((Comment) node).getText();
-				text = formatText(text, childIndent, indentation);
+				String text = ((Comment) node).getNodeValue();
+				text = formatText(text, childIndent + "\t", indentation + "\t");
 				
 				element.appendChild(newDoc.createTextNode(indentText));
 				element.appendChild(newDoc.createComment(text));
@@ -162,7 +162,7 @@ public class XmlFormatter
 				continue;
 			}
 			
-			throw new IllegalStateException("Unknow node type encountered in xml conent: " + node.getNodeType());
+			throw new IllegalStateException("Unknow node type encountered in xml conent: " + node.getNodeType() + "[" + node.getClass().getName() + "]");
 		}
 		
 		return element;

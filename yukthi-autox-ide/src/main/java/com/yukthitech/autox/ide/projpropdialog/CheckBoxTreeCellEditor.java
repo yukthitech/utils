@@ -7,11 +7,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import com.yukthitech.autox.ide.*;
-
 public class CheckBoxTreeCellEditor extends DefaultCellEditor
 {
-
+	private static final long serialVersionUID = 1L;
 	protected NodeData nodeData;
 
 	public CheckBoxTreeCellEditor()
@@ -26,7 +24,7 @@ public class CheckBoxTreeCellEditor extends DefaultCellEditor
 		if(nodeData != null)
 		{
 			editor = (JCheckBox) (super.getComponent());
-			editor.setText(nodeData.getValue());
+			editor.setText(nodeData.getLable());
 			editor.setSelected(nodeData.isChecked());
 		}
 		return editor;
@@ -38,11 +36,13 @@ public class CheckBoxTreeCellEditor extends DefaultCellEditor
 		{
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 			Object userObject = node.getUserObject();
+			
 			if(userObject instanceof NodeData)
 			{
 				return (NodeData) userObject;
 			}
 		}
+		
 		return null;
 	}
 

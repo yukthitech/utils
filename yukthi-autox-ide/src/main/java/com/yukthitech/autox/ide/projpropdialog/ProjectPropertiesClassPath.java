@@ -1,5 +1,6 @@
 package com.yukthitech.autox.ide.projpropdialog;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -14,14 +15,17 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
-
-import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.ide.model.Project;
 
 public class ProjectPropertiesClassPath extends JPanel
 {
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel panel_1;
 	private JButton btnNewButton;
@@ -32,32 +36,19 @@ public class ProjectPropertiesClassPath extends JPanel
 	private Set<String> setOfEntries = new HashSet<>();
 	private DefaultListModel<String> listModel = new DefaultListModel<>();
 
+	private Project project = new Project();
 	private JList<String> list;
+	private JScrollPane scrollPane;
 
 	/**
 	 * Create the panel.
 	 */
 	public ProjectPropertiesClassPath()
 	{
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 272, 110, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 301, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
-		setLayout(gridBagLayout);
-		GridBagConstraints gbc_list = new GridBagConstraints();
-		gbc_list.insets = new Insets(0, 0, 0, 5);
-		gbc_list.fill = GridBagConstraints.BOTH;
-		gbc_list.gridx = 0;
-		gbc_list.gridy = 0;
-		add(getList_1(), gbc_list);
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.anchor = GridBagConstraints.EAST;
-		gbc_panel_1.insets = new Insets(0, 0, 0, 5);
-		gbc_panel_1.fill = GridBagConstraints.VERTICAL;
-		gbc_panel_1.gridx = 1;
-		gbc_panel_1.gridy = 0;
-		add(getPanel_1(), gbc_panel_1);
+		setLayout(new BorderLayout(0, 0));
+		// add(getList_1(), BorderLayout.CENTER);
+		add(getScrollPane(), BorderLayout.CENTER);
+		add(getPanel_1(), BorderLayout.EAST);
 
 	}
 
@@ -66,6 +57,7 @@ public class ProjectPropertiesClassPath extends JPanel
 		if(panel_1 == null)
 		{
 			panel_1 = new JPanel();
+			panel_1.setBorder(new EmptyBorder(5, 5, 5, 5));
 			GridBagLayout gbl_panel_1 = new GridBagLayout();
 			gbl_panel_1.columnWidths = new int[] { 101, 0 };
 			gbl_panel_1.rowHeights = new int[] { 20, 20, 20, 20, 0 };
@@ -140,7 +132,7 @@ public class ProjectPropertiesClassPath extends JPanel
 	{
 		if(btnAddClasspath == null)
 		{
-			btnAddClasspath = new JButton("Add ClassPath");
+			btnAddClasspath = new JButton("Add Directory");
 			btnAddClasspath.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e)
@@ -160,7 +152,6 @@ public class ProjectPropertiesClassPath extends JPanel
 				}
 			});
 		}
-
 		return btnAddClasspath;
 	}
 
@@ -183,16 +174,13 @@ public class ProjectPropertiesClassPath extends JPanel
 
 	public void setProject(Project project)
 	{
+
 		Set<String> set = project.getClassPathEntriesList();
-		
-		if(CollectionUtils.isNotEmpty(set))
-		{
+		if(set != null && !set.isEmpty())
 			for(String s : set)
 			{
 				listModel.addElement(s);
 			}
-		}
-		
 		super.setVisible(true);
 	}
 
@@ -212,5 +200,14 @@ public class ProjectPropertiesClassPath extends JPanel
 			list = new JList();
 		}
 		return list;
+	}
+
+	private JScrollPane getScrollPane()
+	{
+		if(scrollPane == null)
+		{
+			scrollPane = new JScrollPane(getList_1());
+		}
+		return scrollPane;
 	}
 }

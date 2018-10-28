@@ -7,6 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.NewProjectDialog;
@@ -21,17 +22,20 @@ import com.yukthitech.autox.ide.projpropdialog.ProjectPropertiesDialog;
 public class ProjectActions
 {
 	private JFileChooser projectChooser = new JFileChooser();
-	
+
 	@Autowired
 	private IdeContext ideContext;
-	
+
 	@Autowired
 	private ProjectExplorer projectExplorer;
-	
+
+	@Autowired
+	private ApplicationContext applicationContext;
+
 	private NewProjectDialog newProjDialog;
-	
+
 	private ProjectPropertiesDialog projtPropertiesDialog;
-	
+
 	@PostConstruct
 	private void init()
 	{
@@ -46,7 +50,7 @@ public class ProjectActions
 			{
 				return "AutoX Project Files (" + Project.PROJECT_FILE_NAME + ")";
 			}
-			
+
 			@Override
 			public boolean accept(File f)
 			{
@@ -54,19 +58,19 @@ public class ProjectActions
 			}
 		});
 	}
-	
+
 	public Project openExistingProject(String path)
 	{
 		return projectExplorer.openProject(path);
 	}
-	
+
 	@Action
 	public void newProject()
 	{
 		Project project = newProjDialog.display();
 		projectExplorer.openProject(project.getProjectFilePath());
 	}
-	
+
 	@Action
 	public void openProject()
 	{
@@ -79,22 +83,24 @@ public class ProjectActions
 	@Action
 	public void deleteProject()
 	{
-		
-	}
 
+	}
 
 	@Action
 	public void refreshProject()
 	{
 		projectExplorer.reloadActiveNode();
 	}
-	
+
 	@Action
 	public void projectProperties()
 	{
-		if(projtPropertiesDialog==null)
+		if(projtPropertiesDialog == null)
+		{
 			projtPropertiesDialog = new ProjectPropertiesDialog(IdeUtils.getCurrentWindow());
-		
-		Project project = projtPropertiesDialog.display(ideContext);
+			IdeUtils.autowireBean(applicationContext, projtPropertiesDialog);
+		}
+
+		projtPropertiesDialog.display(ideContext);
 	}
 }

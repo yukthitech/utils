@@ -139,4 +139,11 @@
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />
 	</popup-menu>
+	<popup-menu label="restResponsePopup">
+		<item label="assert" action="assertValue" />
+		<item label="extract" action="extract" />
+	</popup-menu>
+	<popup-menu label="contextAttributePopup">
+		<item label="assert" action="assertValue" />
+	</popup-menu>
 </layout>

@@ -5,6 +5,7 @@ import java.io.File;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.model.IdeState;
+import com.yukthitech.autox.ide.model.Project;
 
 /**
  * Listener to listen to the events of the ide and take approp actions.
@@ -67,5 +68,8 @@ public interface IContextListener
 	 * @param environment
 	 */
 	public default void environmentTerminated(ExecutionEnvironment environment)
+	{}
+	
+	public default void projectStateChanged(Project project)
 	{}
 }

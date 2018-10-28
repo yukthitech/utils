@@ -2,16 +2,21 @@ package com.yukthitech.autox.ide.projpropdialog;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.IdeFileUtils;
+import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class TestSuitesFolderTreeNode extends DefaultMutableTreeNode
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	File baseFolder;
 
 	public File getFolder()
@@ -34,14 +39,26 @@ public class TestSuitesFolderTreeNode extends DefaultMutableTreeNode
 		reload(false);
 	}
 
-	public void getSelectedFolders(Set<File> folders)
+	public void getSelectedFolders(Set<File> folders, Project project, File selectedParent)
 	{
 		Object userObject = super.getUserObject();
+		boolean selected = false;
+		
 		if(userObject instanceof NodeData)
 		{
-			boolean selected = ((NodeData) userObject).isChecked();
+			selected = ((NodeData) userObject).isChecked();
+		
 			if(selected)
 			{
+				if(selectedParent != null)
+				{
+					File projBaseFolder = new File(project.getBaseFolderPath());
+					String curRelativePath = IdeFileUtils.getRelativePath(projBaseFolder, baseFolder);
+					String parentRelativePath = IdeFileUtils.getRelativePath(projBaseFolder, selectedParent);
+					
+					throw new InvalidStateException("Multiple folders are selected from same hierarchy. [Parent: {}, Child: {}]", parentRelativePath, curRelativePath);
+				}
+				
 				folders.add(baseFolder);
 			}
 		}
@@ -53,22 +70,22 @@ public class TestSuitesFolderTreeNode extends DefaultMutableTreeNode
 		{
 			TestSuitesFolderTreeNode child = (TestSuitesFolderTreeNode) super.getChildAt(i);
 			// call getSelectedFolders on each child
-			child.getSelectedFolders(folders);
+			child.getSelectedFolders(folders, project, selected ? baseFolder : selectedParent);
 		}
 	}
 
 	public void reload(boolean reloadChild)
 	{
 		File[] files = null;
+		
 		try
 		{
 			files = baseFolder.getCanonicalFile().listFiles();
-
-		} catch(IOException e)
+		} catch(IOException ex)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new InvalidStateException("An error occurred while loading cannoical file paths", ex);
 		}
+		
 		if(files == null)
 		{
 			return;
@@ -94,7 +111,6 @@ public class TestSuitesFolderTreeNode extends DefaultMutableTreeNode
 			{
 				TestSuitesFolderTreeNode folderTreeNode = new TestSuitesFolderTreeNode(new NodeData(file.getName()), file);
 				super.add(folderTreeNode);
-				// super.addChild(file.getPath(), folderTreeNode);
 			}
 		}
 

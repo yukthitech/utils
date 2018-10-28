@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
+import org.fife.ui.rtextarea.RTextArea;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
@@ -29,8 +30,9 @@ public class FormatActions
 			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "No active file editor found for formatting.");
 			return;
 		}
-		
-		String currentText = fileEditor.getTextArea().getText();
+
+		RTextArea textArea = fileEditor.getTextArea();
+		String currentText = textArea.getText();
 		currentText = formatFile(fileEditor.getFile(), currentText);
 		
 		if(currentText == null)
@@ -38,7 +40,9 @@ public class FormatActions
 			return;
 		}
 		
-		fileEditor.getTextArea().setText(currentText);
+		int caretPos = textArea.getCaretPosition(); 
+		fileEditor.getTextArea().replaceRange(currentText, 0, textArea.getText().length());
+		textArea.setCaretPosition(caretPos);
 	}
 	
 	private String formatFile(File file, String content)

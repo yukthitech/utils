@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
@@ -21,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.IdeFileUtils;
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.MaximizableTabbedPane;
 import com.yukthitech.autox.ide.actions.ProjectActions;
 import com.yukthitech.autox.ide.context.IContextListener;
@@ -153,12 +153,11 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		int nextTabIndex = super.getTabCount();
 		
 		fileEditor = new FileEditor(project, file);
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(fileEditor);
-		applicationContext.getAutowireCapableBeanFactory().initializeBean(fileEditor, UUID.randomUUID().toString());
+		IdeUtils.autowireBean(applicationContext, fileEditor);
+		
 		
 		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
-		applicationContext.getAutowireCapableBeanFactory().autowireBean(fileEditorTab);
-		applicationContext.getAutowireCapableBeanFactory().initializeBean(fileEditorTab, UUID.randomUUID().toString());
+		IdeUtils.autowireBean(applicationContext, fileEditorTab);
 		
 		addTab(file.getName(), null, fileEditor);
 		super.setTabComponentAt(nextTabIndex, fileEditorTab);
