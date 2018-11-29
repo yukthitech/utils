@@ -1,15 +1,23 @@
 package com.yukthitech.autox.ide.xmlfile;
 
-import java.io.StringReader;
+import java.io.File;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.events.XMLEvent;
+import org.apache.commons.io.FileUtils;
 
 public class XmlFile
 {
 	private Element rootElement;
 
+	/**
+	 * Line number till which parsing is done to generate this xml file. If the full content is parsed this
+	 * value will be -1.
+	 */
+	private int parsedTill = -1;
+	
+	public XmlFile()
+	{
+	}
+	
 	public XmlFile(Element rootElement)
 	{
 		this.rootElement = rootElement;
@@ -17,56 +25,39 @@ public class XmlFile
 	
 	public Element getElement(String withName, int curLineNo)
 	{
-		if(!rootElement.hasLineNumber(curLineNo))
+		if(!rootElement.hasOffset(curLineNo))
 		{
 			return null;
 		}
 
 		return rootElement.getElement(withName.toLowerCase(), curLineNo);
 	}
-
-	public static XmlFile parse(String content) throws Exception
+	
+	public static XmlFile parse(String content, int validPosition) throws Exception
 	{
-		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-		XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new StringReader(content));
+		boolean partial = (validPosition > 0);
 		
-		Element curElement = null, rootElement = null;
-		
-		while(xmlStreamReader.hasNext())
+		try
 		{
-			xmlStreamReader.next();
+			return XmlFileParser.parse(content);
+		}catch(XmlParseException ex)
+		{
+			if(!partial)
+			{
+				throw ex;
+			}
 			
-			if(xmlStreamReader.getEventType() == XMLEvent.START_ELEMENT)
+			int posFromEx = ex.getOffset();
+			
+			if(posFromEx >= validPosition)
 			{
-				Element newElement = new Element(curElement, xmlStreamReader.getNamespaceURI(), xmlStreamReader.getLocalName(), xmlStreamReader.getLocation().getLineNumber());
-				
-				if(curElement != null)
-				{
-					curElement.addElement(newElement);
-				}
-				
-				curElement = newElement;
-				
-				if(rootElement == null)
-				{
-					rootElement = curElement;
-				}
-				
-				int attrCount = xmlStreamReader.getAttributeCount();
-				
-				for(int i = 0; i < attrCount; i++)
-				{
-					curElement.addAttribute(new Attribute(xmlStreamReader.getAttributeNamespace(i), xmlStreamReader.getAttributeLocalName(i), xmlStreamReader.getAttributeValue(i)));
-				}
+				XmlFile xmlFile = ex.getXmlFile();
+				xmlFile.parsedTill = validPosition;
+				return xmlFile;
 			}
-			else if(xmlStreamReader.getEventType() == XMLEvent.END_ELEMENT)
-			{
-				curElement.setEndLineNo(xmlStreamReader.getLocation().getLineNumber());
-				curElement = curElement.getParentElement();
-			}
+			
+			throw ex;
 		}
-		
-		return new XmlFile(rootElement);
 	}
 	
 	public Element getRootElement()
@@ -74,9 +65,48 @@ public class XmlFile
 		return rootElement;
 	}
 	
+	public Element getLastElement(int offset)
+	{
+		return rootElement.getLastElement(offset);
+	}
+	
+	/**
+	 * Returns flag indicating if this file object is created by full or partial parsing.
+	 * @return
+	 */
+	public boolean isPartiallyParsed()
+	{
+		return parsedTill >= 0;
+	}
+	
+	/**
+	 * Gets the line number till which parsing is done to generate this xml file. If the full content is parsed this value will be -1.
+	 *
+	 * @return the line number till which parsing is done to generate this xml file
+	 */
+	public int getParsedTill()
+	{
+		return parsedTill;
+	}
+	
+	public String getNamespaceWithPrefix(String prefix)
+	{
+		return rootElement.getNamespaceWithPrefix(prefix);
+	}
+	
+	public String getPrefixForNamespace(String namespace)
+	{
+		return rootElement.getPrefixForNamespace(namespace);
+	}
+	
 	@Override
 	public String toString()
 	{
 		return super.toString() + " - " + rootElement.toString();
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		XmlFile.parse(FileUtils.readFileToString(new File("./dml-test-suite.xml")), -1);
 	}
 }

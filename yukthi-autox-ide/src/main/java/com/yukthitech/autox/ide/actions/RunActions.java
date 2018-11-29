@@ -32,7 +32,7 @@ public class RunActions
 	@Autowired
 	private ExecutionEnvironmentManager executionEnvironmentManager;
 	
-	@Autowired
+	
 	private InProgressDialog inProgressDialog;
 	
 	@Action
@@ -81,6 +81,47 @@ public class RunActions
 		executionEnvironmentManager.executeTestCase(project, testCase);
 	}
 	
+	public void executeStepCode(String code, Project project)
+	{
+		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
+		
+		if(interactiveEnv == null)
+		{
+			final String mssg = "Starting interactive environment for project: " + project.getName();
+			inProgressDialog=InProgressDialog.getInstance();
+			inProgressDialog.display(mssg, new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					logger.debug("Starting interactive environment for project: {}", project.getName());
+					
+					ExecutionEnvironment newInteractiveEnv = executionEnvironmentManager.startInteractiveEnvironment(project, true);
+					inProgressDialog.setSubmessage("Waiting for environment to get started...");
+					
+					while(!newInteractiveEnv.isReadyToInteract() && !newInteractiveEnv.isTerminated())
+					{
+						try
+						{
+							Thread.sleep(100);
+						}catch(Exception ex)
+						{}
+					}
+					
+					if(!newInteractiveEnv.isTerminated())
+					{
+						newInteractiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
+					}
+				}
+			});
+		}
+		else
+		{
+			interactiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
+		}
+
+	}
+	
 	@Action
 	public synchronized void runSelectedSteps()
 	{
@@ -101,39 +142,7 @@ public class RunActions
 			return;
 		}
 
-		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
-		
-		if(interactiveEnv == null)
-		{
-			final String mssg = "Starting interactive environment for project: " + project.getName();
-			
-			inProgressDialog.display(mssg, new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					logger.debug("Starting interactive environment for project: {}", project.getName());
-					
-					ExecutionEnvironment newInteractiveEnv = executionEnvironmentManager.startInteractiveEnvironment(project, true);
-					inProgressDialog.setSubmessage("Waiting for environment to get started...");
-					
-					while(!newInteractiveEnv.isReadyToInteract())
-					{
-						try
-						{
-							Thread.sleep(100);
-						}catch(Exception ex)
-						{}
-					}
-					
-					newInteractiveEnv.sendDataToServer(new InteractiveExecuteSteps(selectedText));
-				}
-			});
-		}
-		else
-		{
-			interactiveEnv.sendDataToServer(new InteractiveExecuteSteps(selectedText));
-		}
+		executeStepCode(selectedText, project);
 	}
 	
 	@Action

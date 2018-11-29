@@ -49,7 +49,7 @@ public class DocGenerator
 				continue;
 			}
 			
-			System.out.println("Found step of type: " + stepType.getName());
+			//System.out.println("Found step of type: " + stepType.getName());
 			docInformation.addStep(new StepInfo( (Class) stepType, executableAnnot));
 		}
 	}
@@ -78,7 +78,7 @@ public class DocGenerator
 				continue;
 			}
 			
-			System.out.println("Found validation of type: " + validationType.getName());
+			//System.out.println("Found validation of type: " + validationType.getName());
 			docInformation.addValidation(new ValidationInfo( (Class) validationType, executableAnnot));
 		}
 	}

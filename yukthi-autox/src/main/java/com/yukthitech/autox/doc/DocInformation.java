@@ -1,7 +1,9 @@
 package com.yukthitech.autox.doc;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
@@ -14,22 +16,22 @@ public class DocInformation
 	/**
 	 * List of plugin's information.
 	 */
-	private Set<PluginInfo> plugins = new TreeSet<>();
+	private Map<String, PluginInfo> plugins = new TreeMap<>();
 	
 	/**
 	 * List of step information.
 	 */
-	private Set<StepInfo> steps = new TreeSet<>();
+	private Map<String, StepInfo> steps = new TreeMap<>();
 	
 	/**
 	 * List of validation information.
 	 */
-	private Set<ValidationInfo> validations = new TreeSet<>();
+	private Map<String, ValidationInfo> validations = new TreeMap<>();
 	
 	/**
 	 * SEt of free method documentations.
 	 */
-	private Set<FreeMarkerMethodDoc> freeMarkerMethods = new TreeSet<>();
+	private Map<String, FreeMarkerMethodDoc> freeMarkerMethods = new TreeMap<>();
 	
 	/**
 	 * Adds specified plugin.
@@ -37,7 +39,7 @@ public class DocInformation
 	 */
 	public void addPlugin(PluginInfo plugin)
 	{
-		plugins.add(plugin);
+		plugins.put(plugin.getName(), plugin);
 	}
 	
 	/**
@@ -46,7 +48,7 @@ public class DocInformation
 	 */
 	public void addStep(StepInfo step)
 	{
-		steps.add(step);
+		steps.put(step.getName(), step);
 	}
 	
 	/**
@@ -55,7 +57,7 @@ public class DocInformation
 	 */
 	public void addValidation(ValidationInfo validation)
 	{
-		validations.add(validation);
+		validations.put(validation.getName(), validation);
 	}
 	
 	/**
@@ -63,9 +65,9 @@ public class DocInformation
 	 *
 	 * @return the list of plugin's information
 	 */
-	public Set<PluginInfo> getPlugins()
+	public Collection<PluginInfo> getPlugins()
 	{
-		return plugins;
+		return plugins.values();
 	}
 
 	/**
@@ -73,9 +75,14 @@ public class DocInformation
 	 *
 	 * @return the list of step information
 	 */
-	public Set<StepInfo> getSteps()
+	public Collection<StepInfo> getSteps()
 	{
-		return steps;
+		return steps.values();
+	}
+	
+	public StepInfo getStep(String name)
+	{
+		return this.steps.get(name);
 	}
 
 	/**
@@ -83,9 +90,14 @@ public class DocInformation
 	 *
 	 * @return the list of validation information
 	 */
-	public Set<ValidationInfo> getValidations()
+	public Collection<ValidationInfo> getValidations()
 	{
-		return validations;
+		return validations.values();
+	}
+	
+	public ValidationInfo getValidation(String name)
+	{
+		return validations.get(name);
 	}
 
 	/**
@@ -93,9 +105,9 @@ public class DocInformation
 	 *
 	 * @return the sEt of free method documentations
 	 */
-	public Set<FreeMarkerMethodDoc> getFreeMarkerMethods()
+	public Collection<FreeMarkerMethodDoc> getFreeMarkerMethods()
 	{
-		return freeMarkerMethods;
+		return freeMarkerMethods.values();
 	}
 
 	/**
@@ -105,6 +117,9 @@ public class DocInformation
 	 */
 	public void setFreeMarkerMethods(Set<FreeMarkerMethodDoc> freeMarkerMethods)
 	{
-		this.freeMarkerMethods = new TreeSet<>( freeMarkerMethods );
+		for(FreeMarkerMethodDoc met : freeMarkerMethods)
+		{
+			this.freeMarkerMethods.put(met.getName(), met);
+		}
 	}
 }

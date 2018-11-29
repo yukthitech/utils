@@ -29,6 +29,7 @@ import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
+import com.yukthitech.autox.ide.rest.RestRequest;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
 import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
@@ -71,6 +72,9 @@ public class ProjectExplorer extends JPanel
 	private Set<Project> projects = new HashSet<>();
 	
 	private BaseTreeNode activeTreeNode;
+	
+	@Autowired
+	private RestRequest restRequest;
 	
 	/**
 	 * Create the panel.
@@ -212,6 +216,7 @@ public class ProjectExplorer extends JPanel
 		treeModel.addProject(new ProjectTreeNode(project));
 		
 		projects.add(project);
+		restRequest.addProject(project);
 		logger.debug("Adding project {} to project tree", project.getName());
 	}
 	

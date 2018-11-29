@@ -50,12 +50,14 @@ public class ExecutionEnvironment
 
 	private List<ContextAttributeDetails> contextAttributes = new LinkedList<>();
 
-	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder)
+	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage)
 	{
 		this.name = name;
 		this.process = process;
 		this.proxyListener = proxyListener;
 		this.reportFolder = reportFolder;
+		
+		logOnConsole(initialMessage, false);
 
 		Thread outputThread = new Thread()
 		{
@@ -106,39 +108,48 @@ public class ExecutionEnvironment
 		proxyListener.environmentChanged(EnvironmentEvent.newConsoleChangedEvent(this, html));
 	}
 
+	private void logOnConsole(String lineText, boolean error)
+	{
+		if(error)
+		{
+			logger.error(">>[{}] {}", name, lineText);
+		}
+		else
+		{
+			logger.debug(">>[{}] {}", name, lineText);
+		}
+
+		lineText = lineText.replace("&", "&amp;");
+		lineText = lineText.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+		lineText = lineText.replace("<", "&lt;");
+		lineText = lineText.replace(">", "&gt;");
+
+		String lineHtml = null;
+		
+		if(error)
+		{
+			lineHtml = "<div style=\"color:red;\">" + lineText + "</div>";
+		}
+		else
+		{
+			lineHtml = "<div>" + lineText + "</div>";
+		}
+
+		appenConsoleHtml(lineHtml);
+	}
 	
 	private void readConsoleStream(InputStream input, boolean error)
 	{
 		InputStreamReader inReader = new InputStreamReader(input);
 		final BufferedReader reader = new BufferedReader(inReader);
 
-		String line = null, lineHtml = null;
+		String line = null;
 
 		try
 		{
 			while((line = reader.readLine()) != null)
 			{
-				if(error)
-				{
-					logger.error(">>[{}] {}", name, line);
-				}
-				else
-				{
-					logger.debug(">>[{}] {}", name, line);
-				}
-
-				line = line.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-
-				if(error)
-				{
-					lineHtml = "<div style=\"color:red;\">" + line + "</div>";
-				}
-				else
-				{
-					lineHtml = "<div>" + line + "</div>";
-				}
-
-				appenConsoleHtml(lineHtml);
+				logOnConsole(line, error);
 			}
 
 			reader.close();

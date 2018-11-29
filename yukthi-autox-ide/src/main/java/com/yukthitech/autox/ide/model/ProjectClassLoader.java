@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -51,5 +52,20 @@ public class ProjectClassLoader extends URLClassLoader
 		resUrls.addAll(Arrays.asList( ((URLClassLoader)cl).getURLs() ));
 		
         return resUrls.toArray(new URL[0]);
+	}
+	
+	public String toClassPath()
+	{
+		StringBuilder builder = new StringBuilder();
+		URL urls[] = super.getURLs();
+		
+		for(URL url : urls)
+		{
+			File file = FileUtils.toFile(url);
+			builder.append(file.getPath());
+			builder.append(File.pathSeparator);
+		}
+		
+		return builder.toString();
 	}
 }

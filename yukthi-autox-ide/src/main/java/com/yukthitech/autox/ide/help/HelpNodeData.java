@@ -142,6 +142,12 @@ public class HelpNodeData
 			return true;
 		}
 		
+		if(label == null)
+		{
+			filtered = false;
+			return false;
+		}
+		
 		filtered = label.toLowerCase().contains(text);
 		return filtered;
 	}

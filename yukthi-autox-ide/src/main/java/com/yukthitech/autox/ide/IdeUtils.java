@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.ide.xmlfile.LocationRange;
 import com.yukthitech.utils.ObjectLockManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -358,5 +359,56 @@ public class IdeUtils
 	{
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(bean);
 		applicationContext.getAutowireCapableBeanFactory().initializeBean(bean, UUID.randomUUID().toString());
+	}
+
+	public static int getLineCount(char chArr[], int tillPos)
+	{
+		int count = 1;
+		tillPos = (tillPos >= 0) ? tillPos : (chArr.length - 1);
+		
+		for(int  i = 0; i < tillPos; i++)
+		{
+			if(chArr[i] == '\n')
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+	
+	public static void getLocationRange(char chArr[], int from, int end, LocationRange location)
+	{
+		if(from > end)
+		{
+			throw new InvalidStateException("From value {} is greater than end value {}", from, end);
+		}
+		
+		if(end > chArr.length)
+		{
+			throw new InvalidStateException("End value {} is greater than array length {}", end, chArr.length);
+		}
+		
+		int lineNo = 1;
+		int colNo = 1;
+		
+		for(int i = 0; i <= end; i++)
+		{
+			if(i == from)
+			{
+				location.setStartLocation(i, lineNo, colNo);
+			}
+			
+			if(chArr[i] == '\n')
+			{
+				lineNo++;
+				colNo = 0;
+				continue;
+			}
+			
+			colNo++;
+		}
+		
+		location.setEndLocation(end, lineNo, colNo);
 	}
 }

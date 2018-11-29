@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.help;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -24,7 +25,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
@@ -166,6 +169,27 @@ public class HelpPanel extends JPanel implements IViewPanel
 				{
 					displayNodeContent();
 				}
+			});
+			tree.setCellRenderer(new DefaultTreeCellRenderer() {
+
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public java.awt.Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
+				{
+					JLabel label = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+					if(!searchField.getText().isEmpty()&&label.getText().contains(searchField.getText()))
+					
+					{
+						label.setForeground(Color.GRAY);
+						
+						return label;
+					}
+					return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+				}			
 			});
 		}
 		return tree;

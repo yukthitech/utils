@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.yukthitech.ccg.xml.DefaultParserHandler;
+import com.yukthitech.ccg.xml.annotations.CollectionElement;
 import com.yukthitech.ccg.xml.annotations.XmlAttribute;
 import com.yukthitech.ccg.xml.annotations.XmlElement;
 import com.yukthitech.ccg.xml.annotations.XmlIgnore;
@@ -98,7 +99,7 @@ class BeanToDocPopulator
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void populateCollectionNode(Document document, Element lstElem, Object value, Type genericType, XmlWriterConfig writerConfig)
+	private static void populateCollectionNode(Document document, Element lstElem, Object value, Type genericType, XmlWriterConfig writerConfig, String elementName)
 	{
 		//fetch element type
 		Type elementType = null;
@@ -113,7 +114,15 @@ class BeanToDocPopulator
 				
 		for(Object elemBean : lst)
 		{
-			elemElem = document.createElement(CCG_PREFIX + "element");
+			if(elementName != null)
+			{
+				elemElem = document.createElement(elementName);
+			}
+			else
+			{
+				elemElem = document.createElement(CCG_PREFIX + "element");
+			}
+		
 			lstElem.appendChild(elemElem);
 			
 			if(elementType != null && isAttributeType((Class<?>)elementType))
@@ -175,6 +184,17 @@ class BeanToDocPopulator
 		XmlElement elem = prop.getAnnotation(XmlElement.class);
 		String name = ( elem == null || StringUtils.isBlank(elem.name()) ) ? prop.getName() : elem.name();
 		
+		if(value instanceof Collection)
+		{
+			CollectionElement colElem = prop.getAnnotation(CollectionElement.class);
+			
+			if(colElem != null)
+			{
+				populateCollectionNode(document, parentElem, value, prop.getReadMethod().getGenericReturnType(), writerConfig, colElem.value());
+				return;
+			}
+		}
+		
 		Element newElem = document.createElement(name);
 		parentElem.appendChild(newElem);
 		
@@ -210,7 +230,7 @@ class BeanToDocPopulator
 		
 		if(bean instanceof Collection)
 		{
-			populateCollectionNode(document, element, bean, declaredType, writerConfig);
+			populateCollectionNode(document, element, bean, declaredType, writerConfig, null);
 			return;
 		}
 		

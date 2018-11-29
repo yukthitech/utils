@@ -21,6 +21,11 @@ public class XmlWriterConfig
 	 * the properties which are writeable only will be considered for generating the xml.
 	 */
 	private boolean readCompatible = true;
+	
+	/**
+	 * If set to true, ccg namespace settings will be excluded in output xml.
+	 */
+	private boolean excludeNameSpace = false;
 
 	/**
 	 * Gets the indicates whether output xml should be indented or not.
@@ -80,5 +85,25 @@ public class XmlWriterConfig
 	public void setReadCompatible(boolean readCompatible)
 	{
 		this.readCompatible = readCompatible;
+	}
+
+	/**
+	 * Gets the if set to true, ccg namespace settings will be excluded in output xml.
+	 *
+	 * @return the if set to true, ccg namespace settings will be excluded in output xml
+	 */
+	public boolean isExcludeNameSpace()
+	{
+		return excludeNameSpace;
+	}
+
+	/**
+	 * Sets the if set to true, ccg namespace settings will be excluded in output xml.
+	 *
+	 * @param excludeNameSpace the new if set to true, ccg namespace settings will be excluded in output xml
+	 */
+	public void setExcludeNameSpace(boolean excludeNameSpace)
+	{
+		this.excludeNameSpace = excludeNameSpace;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.yukthitech.utils.annotations.PropertyAdder;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -22,6 +23,11 @@ public class BeanProperty
 	 * Setter method pattern.
 	 */
 	private static final Pattern SETTER_PATTERN = Pattern.compile("set([\\w\\$]+)");
+	
+	/**
+	 * Adder method pattern.
+	 */
+	private static final Pattern ADDER_PATTERN = Pattern.compile("add([\\w\\$]+)");
 	
 	/**
 	 * Getter method pattern.
@@ -52,6 +58,11 @@ public class BeanProperty
 	 * Property write method.
 	 */
 	private Method writeMethod;
+	
+	/**
+	 * Add method based on type of property.
+	 */
+	private Method addMethod;
 	
 	/**
 	 * Field corresponding to the property.
@@ -113,6 +124,26 @@ public class BeanProperty
 	public Method getWriteMethod()
 	{
 		return writeMethod;
+	}
+	
+	/**
+	 * Gets the add method based on type of property.
+	 *
+	 * @return the add method based on type of property
+	 */
+	public Method getAddMethod()
+	{
+		return addMethod;
+	}
+
+	/**
+	 * Sets the add method based on type of property.
+	 *
+	 * @param addMethod the new add method based on type of property
+	 */
+	public void setAddMethod(Method addMethod)
+	{
+		this.addMethod = addMethod;
 	}
 
 	/**
@@ -245,16 +276,22 @@ public class BeanProperty
 		}
 	}
 	
+	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable)
+	{
+		return loadProperties(beanType, readable, writeable, false);
+	}
+	
 	/**
 	 * Loads and returns bean properties.
 	 * @param beanType Bean type from which properties should be loaded.
 	 * @param readable If true, non readable properties will not be loaded.
 	 * @param writeable If true, non writeable properties will not be loaded.
+	 * @param adders if true, this method will try to identify approp adders also (based on param type) and set it on properties.
 	 * @return List of matching properties.
 	 */
-	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable)
+	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable, boolean adders)
 	{
-		List<BeanProperty> propLst = fetchProperties(beanType);
+		List<BeanProperty> propLst = fetchProperties(beanType, adders);
 		List<BeanProperty> resLst = new ArrayList<BeanProperty>(propLst.size());
 		
 		for(BeanProperty prop : propLst)
@@ -288,11 +325,17 @@ public class BeanProperty
 	 * @param method method to be inspected
 	 * @param propMap prop map to be populated
 	 */
-	private static void fetchPropertyDetails(Method method, Map<String, BeanProperty> propMap)
+	private static BeanProperty fetchPropertyDetails(Method method, Map<String, BeanProperty> propMap)
 	{
 		boolean setter = true;
 		Matcher matcher = SETTER_PATTERN.matcher(method.getName());
 		Class<?> type = null;
+		
+		//if setter is not found check for adder
+		if(!matcher.matches())
+		{
+			matcher = ADDER_PATTERN.matcher(method.getName());
+		}
 		
 		//if not setter method
 		if(!matcher.matches())
@@ -300,7 +343,7 @@ public class BeanProperty
 			//before checking for getter pattern, ensure zero params
 			if(method.getParameterTypes().length > 0 || void.class.equals(method.getReturnType()))
 			{
-				return;
+				return null;
 			}
 			
 			setter = false;
@@ -312,14 +355,14 @@ public class BeanProperty
 			{
 				if(!boolean.class.equals(method.getReturnType()))
 				{
-					return;
+					return null;
 				}
 				
 				matcher = IS_PATTERN.matcher(method.getName());
 				
 				if(!matcher.matches())
 				{
-					return;
+					return null;
 				}
 			}
 			
@@ -330,7 +373,7 @@ public class BeanProperty
 		{
 			if(method.getParameterTypes().length != 1)
 			{
-				return;
+				return null;
 			}
 			
 			type = method.getParameterTypes()[0];
@@ -363,7 +406,7 @@ public class BeanProperty
 		{
 			if(!type.equals(beanProperty.type))
 			{
-				return;
+				return null;
 			}
 		}
 		
@@ -375,21 +418,52 @@ public class BeanProperty
 		{
 			beanProperty.readMethod = method;
 		}
+		
+		return beanProperty;
 	}
 	
 	/**
 	 * Fetches properties for given type.
 	 * @param beanType type for which properties needs to be fetched.
+	 * @param linkAdders if true, will try to add adder to properties (based on type).
 	 * @return properties
 	 */
-	private static List<BeanProperty> fetchProperties(Class<?> beanType)
+	private static List<BeanProperty> fetchProperties(Class<?> beanType, boolean linkAdders)
 	{
 		Method methods[] = beanType.getMethods();
 		Map<String, BeanProperty> propMap = new TreeMap<String, BeanProperty>();
+		BeanProperty prop = null;
 		
 		for(Method method : methods)
 		{
-			fetchPropertyDetails(method, propMap);
+			prop = fetchPropertyDetails(method, propMap);
+			
+			if(prop == null)
+			{
+				continue;
+			}
+			
+			if(linkAdders && prop.getAddMethod() == null)
+			{
+				PropertyAdder propAdder = prop.getAnnotation(PropertyAdder.class);
+				
+				if(propAdder != null)
+				{
+					Method addMethod = null;
+					
+					try
+					{
+						addMethod = beanType.getMethod(propAdder.value(), prop.getType());
+					}catch(Exception ex)
+					{
+					}
+					
+					if(addMethod != null)
+					{
+						prop.setAddMethod(addMethod);
+					}
+				}
+			}
 		}
 		
 		return new ArrayList<BeanProperty>(propMap.values());

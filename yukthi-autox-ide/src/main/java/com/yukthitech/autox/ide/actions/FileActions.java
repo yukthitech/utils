@@ -37,7 +37,10 @@ public class FileActions
 
 	private static Map<String, String> templates = new HashMap<>();
 
-	Transferable fileTransferable;
+	private Transferable fileTransferable;
+	
+	private File moveFile=null;
+	
 
 	static
 	{
@@ -320,9 +323,16 @@ public class FileActions
 			renameFile(activeFile);
 		}
 	}
-
+	
+	@Action
+	public void cutFile() throws UnsupportedFlavorException, IOException {
+		File file = ideContext.getActiveFile();
+		copyFile(file);
+		moveFile=file;
+	}
 	public void copyFile(File activeFile) throws UnsupportedFlavorException, IOException
 	{
+		moveFile=null;
 		ArrayList<File> listOfFiles = new ArrayList<File>();
 		listOfFiles.add(activeFile);
 		fileTransferable = new TransferableFiles(listOfFiles);
@@ -401,6 +411,9 @@ public class FileActions
 			{
 				FileUtils.copyFile(srcFile, destFile);
 			}
+		}
+		if(moveFile!=null) {
+			FileUtils.forceDelete(moveFile);
 		}
 
 		projectExplorer.reloadActiveNode();

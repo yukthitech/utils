@@ -2,10 +2,8 @@ package com.yukthitech.autox.doc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
@@ -43,6 +41,11 @@ public class StepInfo implements Comparable<StepInfo>
 	private Set<String> requiredPlugins = new TreeSet<>();
 	
 	/**
+	 * Name to be used with hyphens.
+	 */
+	private String nameWithHyphens;
+	
+	/**
 	 * Instantiates a new step info.
 	 *
 	 * @param stepClass the step class
@@ -50,9 +53,10 @@ public class StepInfo implements Comparable<StepInfo>
 	 */
 	public StepInfo(Class<? extends IStep> stepClass, Executable executablAnnot)
 	{
-		this.name = Arrays.asList( executablAnnot.name() ).stream().collect(Collectors.joining(","));
+		this.name = executablAnnot.name()[0];
 		this.description = executablAnnot.message();
 		this.javaType = stepClass.getName();
+		this.nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
 		
 		Class<?> curType = stepClass;
 		Param param = null;
@@ -138,6 +142,16 @@ public class StepInfo implements Comparable<StepInfo>
 	public Set<String> getRequiredPlugins()
 	{
 		return requiredPlugins;
+	}
+	
+	/**
+	 * Gets the name to be used with hyphens.
+	 *
+	 * @return the name to be used with hyphens
+	 */
+	public String getNameWithHyphens()
+	{
+		return nameWithHyphens;
 	}
 
 	@Override

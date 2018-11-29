@@ -59,7 +59,7 @@ public class ExecutionEnvironmentManager
 	
 	private ExecutionEnvironment startAutoxEnvironment(String envName, Project project, String... extraArgs)
 	{
-		String classpath = System.getProperty("java.class.path");
+		String classpath = project.getProjectClassLoader().toClassPath();
 		String javaCmd = "java";
 		String outputDir = "autox-report";
 		File reportFolder = new File(project.getBaseFolderPath(), outputDir);
@@ -79,15 +79,18 @@ public class ExecutionEnvironmentManager
 		
 		command.addAll(Arrays.asList(extraArgs));
 		
+		StringBuilder initMssg = new StringBuilder();
+		initMssg.append(String.format("Executing command: %s", command.stream().collect(Collectors.joining(" "))));
 		
-		logger.debug("Executing command: {}", command.stream().collect(Collectors.joining(" ")));
+		logger.debug(initMssg);
+		initMssg.append("<br/><br/>");
 		
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.directory( new File(project.getBaseFolderPath()) );
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(envName, builder.start(), ideContext.getProxy(), monitorPort, reportFolder);
+			ExecutionEnvironment env = new ExecutionEnvironment(envName, builder.start(), ideContext.getProxy(), monitorPort, reportFolder, initMssg.toString());
 			ideContext.getProxy().newEnvironmentStarted(env);
 			
 			return env;

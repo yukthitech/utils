@@ -59,7 +59,7 @@ public class XmlBeanWriter
 		}
 		
 		boolean readCompatible = writerConfig.isReadCompatible();
-		properties = BeanProperty.loadProperties(type, true, readCompatible);
+		properties = BeanProperty.loadProperties(type, true, readCompatible, true);
 		typeToProperties.put(type, properties);
 		
 		return properties;
@@ -168,11 +168,14 @@ public class XmlBeanWriter
 			Element rootElement = doc.createElement(rootName);
 			doc.appendChild(rootElement);
 
-			rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ccg", XMLConstants.CCG_URI);
-			rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", XMLConstants.CCG_WRAP_URI);
-			
-			rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_DATE_FORMAT, DEF_DATE_FORMAT_STR);
-			rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_BEAN_TYPE, bean.getClass().getName());
+			if(!writerConfig.isExcludeNameSpace())
+			{
+				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ccg", XMLConstants.CCG_URI);
+				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", XMLConstants.CCG_WRAP_URI);
+				
+				rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_DATE_FORMAT, DEF_DATE_FORMAT_STR);
+				rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_BEAN_TYPE, bean.getClass().getName());
+			}
 			
 			if(writerConfig.isEscapeExpressions())
 			{

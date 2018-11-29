@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -37,7 +38,7 @@ public class RestClient
 		{
 			int status = response.getStatusLine().getStatusCode();
 			String value = null;
-	
+			
 			logger.debug("Got response-status as {}", status);
 			
 			HttpEntity entity = response.getEntity();
@@ -58,7 +59,19 @@ public class RestClient
 				value = null;
 			}
 			
-			return new RestResult<String>(value, status, response);
+			RestResult<String> result = new RestResult<String>(value, status, response);
+			
+			Header headers[] =  response.getAllHeaders();
+			
+			if(headers != null)
+			{
+				for(Header header : headers)
+				{
+					result.addHeader(header.getName(), header.getValue());
+				}
+			}
+			
+			return result;
 		}
 
 	}

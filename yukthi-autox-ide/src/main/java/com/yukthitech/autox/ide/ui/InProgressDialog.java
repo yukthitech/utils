@@ -2,6 +2,8 @@ package com.yukthitech.autox.ide.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Window;
+import java.awt.Dialog.ModalityType;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -15,10 +17,11 @@ import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.IdeUtils;
 
-@Component
 public class InProgressDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static InProgressDialog instance;
 	
 	private static Logger logger = LogManager.getLogger(InProgressDialog.class);
 	
@@ -29,8 +32,11 @@ public class InProgressDialog extends JDialog
 	/**
 	 * Create the dialog.
 	 */
-	public InProgressDialog()
+	public InProgressDialog(Window window)
 	{
+		super(window);
+//		super(window,ModalityType.APPLICATION_MODAL);
+//		setModalityType(ModalityType.APPLICATION_MODAL);
 		setUndecorated(true);
 		setResizable(false);
 		setBounds(100, 100, 531, 143);
@@ -77,5 +83,11 @@ public class InProgressDialog extends JDialog
 			}
 		}, 1);
 	}
-
+	
+	public synchronized static InProgressDialog getInstance(){
+		if(instance==null){
+			instance=new InProgressDialog(IdeUtils.getCurrentWindow());
+		}
+		return instance;
+	}
 }

@@ -10,8 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yukthitech.autox.doc.DocGenerator;
+import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -38,6 +41,10 @@ public class Project implements Serializable
 	private Set<String> classPathEntriesList;
 	
 	private transient ProjectClassLoader projectClassLoader;
+	
+	private transient DocInformation docInformation;
+	
+	private transient BeanPropertyInfoFactory beanPropertyInfoFactory;
 
 	public Project()
 	{
@@ -230,6 +237,39 @@ public class Project implements Serializable
 		}
 		
 		return projectClassLoader;
+	}
+	
+	@JsonIgnore
+	public DocInformation getDocInformation()
+	{
+		if(docInformation != null)
+		{
+			return docInformation;
+		}
+
+		String[] basepackage = { "com.yukthitech" };
+
+		try
+		{
+			docInformation = DocGenerator.buildDocInformation(basepackage);
+		} catch(Exception e)
+		{
+			throw new IllegalStateException("An error occured while loading document Information", e);
+		}
+		
+		return docInformation;
+	}
+	
+	@JsonIgnore
+	public BeanPropertyInfoFactory getBeanPropertyInfoFactory()
+	{
+		if(beanPropertyInfoFactory != null)
+		{
+			return beanPropertyInfoFactory;
+		}
+		
+		beanPropertyInfoFactory = new BeanPropertyInfoFactory();
+		return beanPropertyInfoFactory;
 	}
 
 	/*

@@ -4,7 +4,7 @@
 	
 		<testCase name="testPost">
 			<description>Test post api invocation</description>
-
+			<ccg:assert
 			<wrap:steps>
 				<ccg:invokePost uri="/emp/save">
 					<body><![CDATA[

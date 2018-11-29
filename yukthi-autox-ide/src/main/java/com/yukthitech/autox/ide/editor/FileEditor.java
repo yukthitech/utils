@@ -29,12 +29,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.autox.ide.IdeNotificationPanel;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.Attribute;
 import com.yukthitech.autox.ide.xmlfile.Element;
 import com.yukthitech.autox.ide.xmlfile.XmlFile;
+import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
+import com.yukthitech.autox.ide.xmlfile.XmlLocationType;
+import com.yukthitech.autox.ide.xmlfile.XmlLoctionAnalyzer;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class FileEditor extends RTextScrollPane
@@ -53,10 +57,22 @@ public class FileEditor extends RTextScrollPane
 
 	@Autowired
 	private IdeContext ideContext;
-
+	
+	@Autowired
+	private IdeNotificationPanel ideNotificationPanel;
+	
+	/**
+	 * Last parsed content line number.
+	 */
+	private XmlFile lastParsedContent;
+	
+	private XmlCompletionProvider xmlCompletionProvider;
+	
 	public FileEditor(Project project, File file)
 	{
 		super(new RSyntaxTextArea());
+		xmlCompletionProvider = new XmlCompletionProvider(project, this);
+		
 		getGutter().setBookmarkIcon(IdeUtils.loadIcon("/ui/icons/bullet.png", 7));
 		getGutter().setBookmarkingEnabled(true);
 
@@ -124,11 +140,42 @@ public class FileEditor extends RTextScrollPane
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
 
-		CompletionProvider provider = getStepsProvider();
+		CompletionProvider provider = getStepsProvider1();
 		AutoCompletion ac = new AutoCompletion(provider);
 		// show documentation dialog box
 		ac.setShowDescWindow(true);
 		ac.install(syntaxTextArea);
+	}
+	
+	public void insertStepCode(String code)
+	{
+		int pos = syntaxTextArea.getCaretPosition();
+		syntaxTextArea.insert(code, pos);
+	}
+	
+	public XmlFileLocation getXmlFileLocation()
+	{
+		try
+		{
+			XmlFileLocation loc = XmlLoctionAnalyzer.getLocation(syntaxTextArea.getText(), syntaxTextArea.getCaretPosition());
+			return loc;
+		}catch(Exception ex)
+		{
+			ideNotificationPanel.displayWarning("Failed to parse xml till current location. Error: " + ex.getMessage());
+			return null;
+		}
+	}
+	
+	public boolean isStepInsertablePosition()
+	{
+		XmlFileLocation loc = getXmlFileLocation();
+		
+		if(loc == null)
+		{
+			return false;
+		}
+		
+		return (loc.getType() == XmlLocationType.CHILD_ELEMENT);
 	}
 
 	private void setSyntaxStyle()
@@ -215,7 +262,7 @@ public class FileEditor extends RTextScrollPane
 
 		try
 		{
-			XmlFile xmlFile = XmlFile.parse(syntaxTextArea.getText());
+			XmlFile xmlFile = XmlFile.parse(syntaxTextArea.getText(), -1);
 			return xmlFile;
 		} catch(Exception ex)
 		{
@@ -268,6 +315,11 @@ public class FileEditor extends RTextScrollPane
 		return file;
 	}
 
+	private CompletionProvider getStepsProvider1()
+	{
+		return xmlCompletionProvider;
+	}
+	
 	private CompletionProvider getStepsProvider()
 	{
 		DefaultCompletionProvider stepProvider = new DefaultCompletionProvider();

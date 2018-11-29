@@ -31,6 +31,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -393,5 +394,64 @@ public class ReflectionUtils
 		
 		A newInstance = (A) Proxy.newProxyInstance(ReflectionUtils.class.getClassLoader(), new Class[] {annotationType}, handler);
 		return newInstance;
+	}
+	
+	private static Method getMethod(Class<?> type, String name, Class<?>... paramTypes)
+	{
+		try
+		{
+			return type.getMethod(name, paramTypes);
+		}catch(NoSuchMethodException ex)
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * Fetches property details from specified type with specified name.
+	 * @param type type from which property needs to be fetched
+	 * @param propName name of property to be fetched
+	 * @return matching property.
+	 */
+	public static BeanProperty fetchProperty(Class<?> type, String propName)
+	{
+		String modPropName = StringUtils.toStartUpper(propName);
+		Method readMethod = getMethod(type, "get" + modPropName);
+		
+		if(readMethod == null)
+		{
+			readMethod = getMethod(type, "is" + modPropName);
+		}
+		
+		if(readMethod != null)
+		{
+			Method writeMethod = getMethod(type, "set" + modPropName, readMethod.getReturnType());
+			
+			if(writeMethod != null)
+			{
+				return new BeanProperty(propName, readMethod.getReturnType(), readMethod, writeMethod, null);
+			}
+			
+			writeMethod = getMethod(type, "add" + modPropName, readMethod.getReturnType());
+			return new BeanProperty(propName, readMethod.getReturnType(), readMethod, writeMethod, null);
+		}
+		
+		String setterName = "set" + modPropName;
+		String adderName = "add" + modPropName;
+		
+		for(Method met : type.getMethods())
+		{
+			if(met.getParameterCount() != 1)
+			{
+				continue;
+			}
+			
+			if(setterName.equals(met.getName()) || adderName.equals(met.getName()))
+			{
+				return new BeanProperty(propName, type, null, met, null);
+			}
+		}
+		
+		return null;
 	}
 }

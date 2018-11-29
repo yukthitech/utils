@@ -30,6 +30,7 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.rest.RestPanel;
 import com.yukthitech.autox.ide.views.ConsolePanel;
 import com.yukthitech.autox.ide.views.report.ReportPanel;
 
@@ -47,6 +48,9 @@ public class AutoxIDE extends JFrame
 	
 	@Autowired
 	private ProjectExplorer projectExplorer;
+	
+	@Autowired
+	private RestPanel restPanel;
 	
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;
@@ -76,7 +80,7 @@ public class AutoxIDE extends JFrame
 	private HelpPanel helpPanel;
 	
 	@Autowired
-	private ContextAttributesPanel contextAttributePanle;
+	private ContextAttributesPanel contextAttributePanel;
 	
 	/**
 	 * Top panel to hold tool bar and env panel.
@@ -216,6 +220,7 @@ public class AutoxIDE extends JFrame
 		leftTabbedPane.setParentDetails(maximizeListener, verticalSplitPane, true);
 
 		leftTabbedPane.addTab("Project Explorer", null, projectExplorer, null);
+		leftTabbedPane.addTab("Rest", null, restPanel, null);
 
 		horizontalSplitPane = new JSplitPane();
 		horizontalSplitPane.setResizeWeight(0.8);
@@ -231,12 +236,12 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane.setParentDetails(maximizeListener, horizontalSplitPane, false);
 
 		rightBottomTabbedPane.addTab("Report", null, reportPanel, null);
+		reportPanel.setParent(rightBottomTabbedPane);
 
 		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
-		rightBottomTabbedPane.addTab("Context Attributes", null, contextAttributePanle, null);
-		consolePanel.setParent(rightBottomTabbedPane);
+		rightBottomTabbedPane.addTab("Context Attributes", null, contextAttributePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
 		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);
