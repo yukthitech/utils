@@ -236,6 +236,15 @@ public class IdeUtils
 		return new ImageIcon(img);
 	}
 	
+	public static ImageIcon loadIconWithoutBorder(String resource, int size)
+	{
+		ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+		img.getGraphics().drawImage(icon.getImage(), 0, 0, size, size, null);
+		
+		return new ImageIcon(img);
+	}
+
 	private static ImageIcon getEmptyFileIcon()
 	{
 		ImageIcon imageIcon = extensionToIcon.get("");

@@ -65,6 +65,11 @@ public class BeanProperty
 	private Method addMethod;
 	
 	/**
+	 * Property name of the adder.
+	 */
+	private String adderName;
+	
+	/**
 	 * Field corresponding to the property.
 	 */
 	private Field field;
@@ -144,6 +149,31 @@ public class BeanProperty
 	public void setAddMethod(Method addMethod)
 	{
 		this.addMethod = addMethod;
+	}
+	
+	/**
+	 * Gets the property name of the adder.
+	 *
+	 * @return the property name of the adder
+	 */
+	public String getAdderName()
+	{
+		if(adderName != null)
+		{
+			return adderName;
+		}
+		
+		if(addMethod == null)
+		{
+			return null;
+		}
+		
+		String adderName = addMethod.getName();
+		adderName = adderName.substring(3);
+		adderName = Character.toUpperCase(adderName.charAt(0)) + adderName.substring(1);
+		
+		this.adderName = adderName;
+		return adderName;
 	}
 
 	/**
@@ -286,12 +316,12 @@ public class BeanProperty
 	 * @param beanType Bean type from which properties should be loaded.
 	 * @param readable If true, non readable properties will not be loaded.
 	 * @param writeable If true, non writeable properties will not be loaded.
-	 * @param adders if true, this method will try to identify approp adders also (based on param type) and set it on properties.
+	 * @param linkAdders if true, this method will try to identify approp adders also (based on param type) and set it on properties.
 	 * @return List of matching properties.
 	 */
-	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable, boolean adders)
+	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable, boolean linkAdders)
 	{
-		List<BeanProperty> propLst = fetchProperties(beanType, adders);
+		List<BeanProperty> propLst = fetchProperties(beanType, linkAdders);
 		List<BeanProperty> resLst = new ArrayList<BeanProperty>(propLst.size());
 		
 		for(BeanProperty prop : propLst)

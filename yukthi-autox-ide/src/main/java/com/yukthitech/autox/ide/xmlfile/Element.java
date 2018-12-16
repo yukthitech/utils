@@ -2,10 +2,13 @@ package com.yukthitech.autox.ide.xmlfile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.yukthitech.autox.doc.DocInformation;
+import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.model.Project;
@@ -14,6 +17,7 @@ import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.utils.beans.BeanProperty;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class Element implements INode
 {
@@ -34,6 +38,11 @@ public class Element implements INode
 	private LocationRange endLocation;
 	
 	private Class<?> elementType;
+	
+	/**
+	 * Step info corresponding to this element.
+	 */
+	private StepInfo stepInfo;
 	
 	/**
 	 * Prefix to namespace mapping.
@@ -144,6 +153,11 @@ public class Element implements INode
 		this.attributes.put(attr.getName(), attr);
 	}
 	
+	public void setPrefix(String prefix)
+	{
+		this.prefix = prefix;
+	}
+	
 	public String getPrefix()
 	{
 		return prefix;
@@ -157,6 +171,36 @@ public class Element implements INode
 	public Class<?> getElementType()
 	{
 		return elementType;
+	}
+	
+	public StepInfo getStepInfo()
+	{
+		return stepInfo;
+	}
+	
+	public Set<String> getChildNames()
+	{
+		Set<String> names = new HashSet<>();
+		
+		for(Attribute attr : attributes.values())
+		{
+			names.add(attr.getName());
+			names.add( attr.getName().replaceAll("([A-Z])", "-$1").toLowerCase() );
+		}
+		
+		for(INode node : nodes)
+		{
+			if(!(node instanceof Element))
+			{
+				continue;
+			}
+			
+			Element elem = (Element) node;
+			names.add(elem.getName());
+			names.add( elem.getName().replaceAll("([A-Z])", "-$1").toLowerCase() );
+		}
+		
+		return names;
 	}
 	
 	public void toText(String indent, StringBuilder builder)
@@ -273,7 +317,7 @@ public class Element implements INode
 				return finalElem;
 			}
 			
-			if(celem.getEndLocation() == null || celem.getEndLocation().getEndOffset() < offset)
+			if(celem.getEndLocation() == null || celem.getEndLocation().getEndOffset() >= offset)
 			{
 				break;
 			}
@@ -316,7 +360,14 @@ public class Element implements INode
 				}
 			}catch(Exception ex)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "Invalid bean type specified: " + beanTypeStr, startLocation.getStartLineNumber()));
+				Attribute attr = getAttribute(DefaultParserHandler.ATTR_BEAN_TYPE);
+				
+				messages.add(
+						new XmlFileMessage(MessageType.ERROR, "Invalid bean type specified: " + beanTypeStr, 
+								startLocation.getStartLineNumber(), 
+								attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
+							)
+						);
 			}
 			
 			return;
@@ -328,6 +379,7 @@ public class Element implements INode
 		{
 			try
 			{
+				this.stepInfo = stepInfo;
 				this.elementType = Class.forName(stepInfo.getJavaType(), false, project.getProjectClassLoader());
 				
 				if(recursive)
@@ -336,7 +388,15 @@ public class Element implements INode
 				}
 			}catch(Exception ex)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "Failed to load step type class: " + stepInfo.getJavaType(), startLocation.getStartLineNumber()));
+				messages.add(
+						new XmlFileMessage(
+								MessageType.ERROR, 
+								"Failed to load step type class: " + stepInfo.getJavaType(), 
+								startLocation.getStartLineNumber(),
+								this.startLocation.getStartOffset(),
+								this.startLocation.getEndOffset()
+								)
+						);
 			}
 			
 			return;
@@ -348,6 +408,7 @@ public class Element implements INode
 		{
 			try
 			{
+				this.stepInfo = validationInfo;
 				this.elementType = Class.forName(validationInfo.getJavaType(), false, project.getProjectClassLoader());
 
 				if(recursive)
@@ -356,13 +417,28 @@ public class Element implements INode
 				}
 			}catch(Exception ex)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "Failed to load validation type class: " + validationInfo.getJavaType(), startLocation.getStartLineNumber()));
+				messages.add(
+						new XmlFileMessage(
+								MessageType.ERROR, 
+								"Failed to load validation type class: " + validationInfo.getJavaType(), 
+								startLocation.getStartLineNumber(),
+								this.startLocation.getStartOffset(),
+								this.startLocation.getEndOffset()
+								)
+						);
 			}
 			
 			return;
 		}
 
-		messages.add(new XmlFileMessage(MessageType.ERROR, "No matching step or validation found for this element.", startLocation.getStartLineNumber()));
+		messages.add(
+				new XmlFileMessage(MessageType.ERROR, 
+						"No matching step or validation found with name: " + name, 
+						startLocation.getStartLineNumber(),
+						this.startLocation.getStartOffset(),
+						this.startLocation.getEndOffset()
+						)
+				);
 	}
 	
 	public void populateTestFileTypes(Project project, List<XmlFileMessage> messages)
@@ -388,21 +464,56 @@ public class Element implements INode
 		}
 		else
 		{
-			BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(parentElementType).getProperty(name);
+			StepInfo parentStepInfo = parentElement.getStepInfo();
+			ElementInfo childElementInfo = (parentStepInfo != null) ? parentStepInfo.getChildElement(name) : null;
 			
-			if(propInfo == null)
+			if(childElementInfo != null)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "No matching property found with name: " + name, startLocation.getStartLineNumber()));
-				return;
+				this.stepInfo = childElementInfo;
+				
+				try
+				{
+					this.elementType = Class.forName(childElementInfo.getType());
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("An error occurred while loading class of type: {}", childElementInfo.getType(), ex);
+				}
 			}
 			
-			if(propInfo.getWriteMethod() == null)
+			if(this.elementType == null)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "No writeable property found with name: " + name, startLocation.getStartLineNumber()));
-				return;
+				BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(parentElementType).getProperty(name);
+				
+				if(propInfo == null)
+				{
+					messages.add(
+							new XmlFileMessage(
+									MessageType.ERROR, 
+									String.format("No matching property '%s' under parent-element bean type: %s", name, parentElementType.getName()), 
+									startLocation.getStartLineNumber(),
+									this.startLocation.getStartOffset(),
+									this.startLocation.getEndOffset()
+									)
+							);
+					return;
+				}
+				
+				if(propInfo.getWriteMethod() == null)
+				{
+					messages.add(
+							new XmlFileMessage(
+									MessageType.ERROR, 
+									String.format("No writeable property '%s' under parent-element bean type: %s", name, parentElementType.getName()),
+									startLocation.getStartLineNumber(),
+									this.startLocation.getStartOffset(),
+									this.startLocation.getEndOffset()
+									)
+							);
+					return;
+				}
+				
+				this.elementType = propInfo.getType();
 			}
-			
-			this.elementType = propInfo.getType();
 		}
 		
 		
@@ -445,13 +556,24 @@ public class Element implements INode
 			
 			if(propInfo == null)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "No matching property found for attribute with name: " + attr.getName(), startLocation.getStartLineNumber()));
+				messages.add(
+						new XmlFileMessage(
+								MessageType.ERROR, "No matching property found for attribute: " + attr.getName(), 
+								startLocation.getStartLineNumber(),
+								attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
+								)
+						);
 				continue;
 			}
 			
 			if(propInfo.getWriteMethod() == null)
 			{
-				messages.add(new XmlFileMessage(MessageType.ERROR, "No writeable property found for attribute with name: " + attr.getName(), startLocation.getStartLineNumber()));
+				messages.add(new XmlFileMessage(
+							MessageType.ERROR, "No writeable property found for attribute with name: " + attr.getName(), 
+							startLocation.getStartLineNumber(),
+							attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
+							)
+						);
 				continue;
 			}
 			

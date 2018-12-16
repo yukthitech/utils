@@ -10,15 +10,18 @@ public class XmlParseException extends UtilsException
 	
 	private int offset;
 	
+	private int endOffset;
+	
 	private int lineNumber;
 	
 	private int columnNumber;
 	
-	public XmlParseException(XmlFile xmlFile, int offset, int lineNo, int colNo, String mssg, Object... params)
+	public XmlParseException(XmlFile xmlFile, int offset, int endOffset, int lineNo, int colNo, String mssg, Object... params)
 	{
 		super(getPositionString(lineNo, colNo) + mssg, params);
 		
 		this.offset = offset;
+		this.endOffset = endOffset;
 		this.xmlFile = xmlFile;
 		this.lineNumber = lineNo;
 		this.columnNumber = colNo;
@@ -47,5 +50,10 @@ public class XmlParseException extends UtilsException
 	public int getColumnNumber()
 	{
 		return columnNumber;
+	}
+	
+	public int getEndOffset()
+	{
+		return endOffset;
 	}
 }

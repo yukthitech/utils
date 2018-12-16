@@ -35,7 +35,7 @@ public class XmlLoctionAnalyzer
 		}
 		
 		//if the current position is before current element close
-		if(closePos == -1 || closePos > pos)
+		if(closePos == -1 || closePos >= pos)
 		{
 			return getAttributeLocation(xmlContent, chArr, pos, elemStart, closePos, lastToken);
 		}
@@ -152,7 +152,8 @@ public class XmlLoctionAnalyzer
 		if( (idx = elemName.indexOf(":")) > 0)
 		{
 			curElement.setName(elemName.substring(idx + 1));
-			curElement.setNamespace(elemName.substring(0, idx));
+			curElement.setPrefix(elemName.substring(0, idx));
+			curElement.setNamespace(curElement.getNamespaceWithPrefix(curElement.getPrefix()));
 		}
 		else
 		{

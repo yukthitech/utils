@@ -160,7 +160,11 @@ public class XmlFileParser
 			
 			if(!matcher.matches())
 			{
-				throw new XmlParseException(new XmlFile(rootElement), offset, lineNo, colNo, "Invalid name specified: {}", name);
+				throw new XmlParseException(
+						new XmlFile(rootElement), 
+						offset, offset + name.length(), 
+						lineNo, colNo,
+						"Invalid node name format encountered: {}", name);
 			}
 			
 			return new String[] {matcher.group(1), matcher.group(2)};
@@ -240,7 +244,11 @@ public class XmlFileParser
 		
 		if(scanner.next(PATTERN_TAG_CLOSER) == null)
 		{
-			throw new XmlParseException(new XmlFile(rootElement), match.end(), curRange.line, match.end() + 1, "Unable to find closing bracket (>) for tag: {}", newElement.getName());
+			throw new XmlParseException(
+					new XmlFile(rootElement), 
+					newElement.getStartLocation().getStartOffset(), match.end(), 
+					curRange.line, match.end() + 1, 
+					"Unable to find closing bracket (>) for tag: {}", newElement.getName());
 		}
 
 		setCurrentPositionAsEnd(newElement.getStartLocation(), false);
@@ -296,7 +304,11 @@ public class XmlFileParser
 		
 		if(!Objects.equals(prefix, currentElement.getPrefix()) || !Objects.equals(name, currentElement.getName()))
 		{
-			throw new XmlParseException(new XmlFile(rootElement), match.start(), curRange.line, col, "When expecting close tag </{}> found close tag </{}>", currentElement.getFullElementName(), match.group(1));
+			throw new XmlParseException(
+					new XmlFile(rootElement), 
+					match.start(), match.end(), 
+					curRange.line, col, 
+					"When expecting close tag </{}> found close tag </{}>", currentElement.getFullElementName(), match.group(1));
 		}
 		
 		currentElement.setEndLocation(setCurrentPositionAsStart(new LocationRange()));
@@ -323,7 +335,11 @@ public class XmlFileParser
 		//if end of ctag is not found
 		if(text == null)
 		{
-			throw new XmlParseException(new XmlFile(rootElement), content.length() - 1, curRange.line, col, "CDATA ending is not found");
+			throw new XmlParseException(
+					new XmlFile(rootElement), 
+					match.start(), content.length() - 1, 
+					curRange.line, col, 
+					"CDATA ending is not found");
 		}
 		
 		scanner.next(PATTERN_CDATA_CLOSER);
@@ -346,7 +362,10 @@ public class XmlFileParser
 			range = moveToPositon(curPos);
 			col = range.getColumn(curPos);
 			
-			throw new XmlParseException(new XmlFile(rootElement), curPos, range.line, col, "EOF encountered when expecting next tag");
+			throw new XmlParseException(new XmlFile(rootElement), 
+					curPos, content.length() - 1,
+					range.line, col, 
+					"EOF encountered when expecting next tag");
 		}
 		
 		if(textContent.trim().length() > 0)
@@ -375,7 +394,10 @@ public class XmlFileParser
 		
 		range = moveToPositon(scanner.getPosition());
 		col = range.getColumn(scanner.getPosition());
-		throw new XmlParseException(new XmlFile(rootElement), scanner.getPosition(), range.line, col, "Unsupported content found.");
+		throw new XmlParseException(
+				new XmlFile(rootElement), 
+				scanner.getPosition(), content.length() - 1, 
+				range.line, col, "Unsupported content found.");
 	}
 	
 	private Element parseElement()

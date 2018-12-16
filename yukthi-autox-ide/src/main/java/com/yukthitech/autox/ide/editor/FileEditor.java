@@ -1,57 +1,72 @@
 package com.yukthitech.autox.ide.editor;
 
+import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
-import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
-import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
+import org.fife.ui.rsyntaxtextarea.SquiggleUnderlineHighlightPainter;
+import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.GutterIconInfo;
 import org.fife.ui.rtextarea.IconRowHeader;
+import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.yukthitech.autox.doc.DocGenerator;
-import com.yukthitech.autox.doc.DocInformation;
-import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.ide.IdeNotificationPanel;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.Attribute;
 import com.yukthitech.autox.ide.xmlfile.Element;
+import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFile;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
+import com.yukthitech.autox.ide.xmlfile.XmlFileMessage;
 import com.yukthitech.autox.ide.xmlfile.XmlLocationType;
 import com.yukthitech.autox.ide.xmlfile.XmlLoctionAnalyzer;
+import com.yukthitech.autox.ide.xmlfile.XmlParseException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class FileEditor extends RTextScrollPane
 {
 	private static final long serialVersionUID = 1L;
-
+	
 	private static Logger logger = LogManager.getLogger(FileEditor.class);
+	
+	private static ImageIcon ERROR_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark_error.png", 16);
+	
+	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark_warn.png", 16);
 
 	private Project project;
 
 	private File file;
 
 	private RSyntaxTextArea syntaxTextArea = new RSyntaxTextArea("");
+	
+	private RSyntaxTextAreaHighlighter highlighter = new RSyntaxTextAreaHighlighter();
 
 	private IconRowHeader iconArea;
 
@@ -68,12 +83,19 @@ public class FileEditor extends RTextScrollPane
 	
 	private XmlCompletionProvider xmlCompletionProvider;
 	
+	private List<XmlFileMessage> currentHighlights = new ArrayList<>();
+	
+	//private IconRowHeader
+	
 	public FileEditor(Project project, File file)
 	{
 		super(new RSyntaxTextArea());
-		xmlCompletionProvider = new XmlCompletionProvider(project, this);
 		
-		getGutter().setBookmarkIcon(IdeUtils.loadIcon("/ui/icons/bullet.png", 7));
+		if(file.getName().toLowerCase().endsWith(".xml"))
+		{
+			xmlCompletionProvider = new XmlCompletionProvider(project, this);
+		}
+		
 		getGutter().setBookmarkingEnabled(true);
 
 		try
@@ -102,6 +124,9 @@ public class FileEditor extends RTextScrollPane
 
 		this.project = project;
 		this.syntaxTextArea = (RSyntaxTextArea) super.getViewport().getView();
+		this.syntaxTextArea.setHighlighter(highlighter);
+		this.syntaxTextArea.setToolTipSupplier(this::getToolTip);
+		
 		super.setLineNumbersEnabled(true);
 
 		this.file = file;
@@ -140,11 +165,21 @@ public class FileEditor extends RTextScrollPane
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
 
-		CompletionProvider provider = getStepsProvider1();
-		AutoCompletion ac = new AutoCompletion(provider);
-		// show documentation dialog box
-		ac.setShowDescWindow(true);
-		ac.install(syntaxTextArea);
+		CompletionProvider provider = getStepsProvider();
+		
+		if(provider != null)
+		{
+			AutoCompletion ac = new AutoCompletion(provider);
+			// show documentation dialog box
+			ac.setShowDescWindow(true);
+			ac.install(syntaxTextArea);
+		}
+	}
+	
+	@PostConstruct
+	private void init()
+	{
+		fileContentChanged();
 	}
 	
 	public void insertStepCode(String code)
@@ -241,6 +276,104 @@ public class FileEditor extends RTextScrollPane
 	private void fileContentChanged()
 	{
 		ideContext.getProxy().fileChanged(file);
+		
+		if(file.getName().toLowerCase().endsWith(".xml"))
+		{
+			//from last change time, try to parse the xml content and highlight errors if any
+			IdeUtils.executeConsolidatedJob("FileEditor.parseXmlContent", this::parseXmlContent, 3000);
+		}
+	}
+	
+	private String getToolTip(RTextArea textArea, MouseEvent e)
+	{
+		int offset = textArea.viewToModel(e.getPoint());
+		
+		if(offset < 0)
+		{
+			return null;
+		}
+		
+		for(XmlFileMessage mssg : this.currentHighlights)
+		{
+			if(!mssg.hasValidOffsets())
+			{
+				continue;
+			}
+			
+			if(offset >= mssg.getStartOffset() && offset <= mssg.getEndOffset())
+			{
+				return mssg.getMessage();
+			}
+		}
+		
+		return null;
+	}
+	
+	private void addMessage(XmlFileMessage message)
+	{
+		Gutter gutter = getGutter();
+		
+		try
+		{
+			if(message.getMessageType() == MessageType.ERROR)
+			{
+				gutter.addLineTrackingIcon(message.getLineNo() - 1, ERROR_ICON, message.getMessage());
+				
+				if(message.hasValidOffsets())
+				{
+					highlighter.addHighlight(message.getStartOffset(), message.getEndOffset(), new SquiggleUnderlineHighlightPainter(Color.red));
+				}
+			}
+			else
+			{
+				gutter.addLineTrackingIcon(message.getLineNo() - 1, WARN_ICON, message.getMessage());
+				
+				if(message.hasValidOffsets())
+				{
+					highlighter.addHighlight(message.getStartOffset(), message.getEndOffset(), new SquiggleUnderlineHighlightPainter(Color.yellow));
+				}
+			}
+			
+			this.currentHighlights.add(message);
+			
+		}catch(BadLocationException ex)
+		{
+			throw new InvalidStateException("An error occurred while adding xml file message", ex);
+		}
+	}
+	
+	private void clearAllMessages()
+	{
+		getGutter().removeAllTrackingIcons();
+		highlighter.removeAllHighlights();
+		this.currentHighlights.clear();
+	}
+	
+	private void parseXmlContent()
+	{
+		clearAllMessages();
+		
+		XmlFile xmlFile = null;
+		
+		try
+		{
+			xmlFile = XmlFile.parse(syntaxTextArea.getText(), -1);
+		}catch(XmlParseException ex)
+		{
+			xmlFile = ex.getXmlFile();
+			addMessage(new XmlFileMessage(MessageType.ERROR, ex.getMessage(), ex.getLineNumber(), ex.getOffset(), ex.getEndOffset()));
+		}catch(Exception ex)
+		{
+			addMessage(new XmlFileMessage(MessageType.ERROR, "Failed to parse xml file with error: " + ex, 1));
+		}
+		
+		if(xmlFile != null)
+		{
+			List<XmlFileMessage> messages = new LinkedList<>();
+			xmlFile.getRootElement().populateTestFileTypes(project, messages);
+			
+			messages.stream().forEach(mssg -> this.addMessage(mssg));
+		}
 	}
 
 	public int getCaretPosition()
@@ -315,31 +448,9 @@ public class FileEditor extends RTextScrollPane
 		return file;
 	}
 
-	private CompletionProvider getStepsProvider1()
-	{
-		return xmlCompletionProvider;
-	}
-	
 	private CompletionProvider getStepsProvider()
 	{
-		DefaultCompletionProvider stepProvider = new DefaultCompletionProvider();
-		String[] basepackage = { "com.yukthitech" };
-		DocInformation docInformation = null;
-
-		try
-		{
-			docInformation = DocGenerator.buildDocInformation(basepackage);
-		} catch(Exception e)
-		{
-			throw new IllegalStateException("An error occured while loading document Information", e);
-		}
-
-		for(StepInfo step : docInformation.getSteps())
-		{
-			stepProvider.addCompletion((new BasicCompletion(stepProvider, step.getName(), "short discription", step.getDescription())));
-		}
-		return stepProvider;
-
+		return xmlCompletionProvider;
 	}
 
 	public GutterIconInfo addLineTrackingIcon(int line, Icon icon, String tip)

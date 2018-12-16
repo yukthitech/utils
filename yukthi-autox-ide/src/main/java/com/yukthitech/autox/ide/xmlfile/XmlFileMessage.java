@@ -8,9 +8,9 @@ public class XmlFileMessage
 	
 	private int lineNo;
 	
-	private int startColumn;
+	private int startOffset = -1;
 	
-	private int endColumn;
+	private int endOffset;
 	
 	public XmlFileMessage()
 	{}
@@ -22,13 +22,13 @@ public class XmlFileMessage
 		this.lineNo = lineNo;
 	}
 	
-	public XmlFileMessage(MessageType messageType, String message, int lineNo, int startColumn, int endColumn)
+	public XmlFileMessage(MessageType messageType, String message, int lineNo, int startOffset, int endOffset)
 	{
 		this.messageType = messageType;
 		this.message = message;
 		this.lineNo = lineNo;
-		this.startColumn = startColumn;
-		this.endColumn = endColumn;
+		this.startOffset = startOffset;
+		this.endOffset = endOffset;
 	}
 
 	public MessageType getMessageType()
@@ -61,23 +61,33 @@ public class XmlFileMessage
 		this.lineNo = lineNo;
 	}
 
-	public int getStartColumn()
+	public int getStartOffset()
 	{
-		return startColumn;
+		return startOffset;
 	}
 
-	public void setStartColumn(int startColumn)
+	public void setStartOffset(int startOffset)
 	{
-		this.startColumn = startColumn;
+		this.startOffset = startOffset;
 	}
 
-	public int getEndColumn()
+	public int getEndOffset()
 	{
-		return endColumn;
+		return endOffset;
+	}
+	
+	public boolean hasValidOffsets()
+	{
+		if(startOffset < 0)
+		{
+			return false;
+		}
+		
+		return (endOffset > startOffset);
 	}
 
-	public void setEndColumn(int endColumn)
+	public void setEndOffset(int endOffset)
 	{
-		this.endColumn = endColumn;
+		this.endOffset = endOffset;
 	}
 }

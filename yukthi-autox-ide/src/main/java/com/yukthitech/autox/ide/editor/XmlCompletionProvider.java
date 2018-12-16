@@ -5,25 +5,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AbstractCompletionProvider;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.xmlfile.Element;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 import com.yukthitech.ccg.xml.XMLConstants;
+import com.yukthitech.ccg.xml.XMLUtil;
 
 public class XmlCompletionProvider extends AbstractCompletionProvider
 {
+	private static Logger logger = LogManager.getLogger(XmlCompletionProvider.class);
+	
 	private Project project;
 	
 	private XmlFileLocation xmlFileLocation;
@@ -36,19 +44,19 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		this.fileEditor = fileEditor;
 	}
 	
-	private String getReplacementText(StepInfo step, XmlFileLocation location)
+	private String getElementReplacementText(StepInfo step, XmlFileLocation location)
 	{
 		StringBuilder builder = new StringBuilder();
 		String nodeName = null;
 		
-		if(StringUtils.isEmpty(location.getCurrentToken()))
+		if(location.getCurrentToken() == null)
 		{
 			nodeName = step.getNameWithHyphens();
 			builder.append("<").append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(" ");
 		}
 		else
 		{
-			nodeName = step.getNameWithHyphens().startsWith(location.getName()) ? step.getNameWithHyphens() : step.getName();
+			nodeName = step.getName().startsWith(location.getName()) ? step.getName() : step.getNameWithHyphens();
 			builder.append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(" ");
 			
 			if(builder.toString().startsWith(location.getCurrentToken()))
@@ -68,15 +76,92 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 			}
 		}
 		
+		builder.deleteCharAt(builder.length() - 1);
+		
 		builder.append(">").append("\n").append(location.getIndentation());
 		builder.append("</").append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(">");
 		
 		return builder.toString();
 	}
 	
+	private String getElementReplacementText(ElementInfo step, XmlFileLocation location)
+	{
+		StringBuilder builder = new StringBuilder();
+		String nodeName = null;
+		
+		if(location.getCurrentToken() == null)
+		{
+			nodeName = step.getNameWithHyphens();
+			builder.append("<").append(nodeName).append(" ");
+		}
+		else
+		{
+			nodeName = step.getName().startsWith(location.getName()) ? step.getName() : step.getNameWithHyphens();
+			builder.append(nodeName).append(" ");
+			
+			if(builder.toString().startsWith(location.getCurrentToken()))
+			{
+				builder.delete(0, location.getCurrentToken().length());
+			}
+		}
+		
+		if(step.getParams() != null)
+		{
+			for(ParamInfo param : step.getParams())
+			{
+				if(param.isMandatory())
+				{
+					builder.append(param.getName()).append("=\"\" ");
+				}
+			}
+		}
+		
+		if(step.getKeyName() != null)
+		{
+			builder.append(step.getKeyName()).append("=\"\"");
+			builder.append(">").append("</").append(nodeName).append(">");
+		}
+		else
+		{
+			builder.deleteCharAt(builder.length() - 1);
+			
+			builder.append(">").append("\n").append(location.getIndentation());
+			builder.append("</").append(nodeName).append(">");
+		}
+		
+		return builder.toString();
+	}
+
+	private String getElementReplacementText(ParamInfo step, XmlFileLocation location)
+	{
+		StringBuilder builder = new StringBuilder();
+		String nodeName = null;
+		
+		if(location.getCurrentToken() == null)
+		{
+			nodeName = step.getNameWithHyphens();
+			builder.append("<").append(nodeName);
+		}
+		else
+		{
+			nodeName = step.getName().startsWith(location.getName()) ? step.getName() : step.getNameWithHyphens();
+			builder.append(nodeName);
+			
+			if(builder.toString().startsWith(location.getCurrentToken()))
+			{
+				builder.delete(0, location.getCurrentToken().length());
+			}
+		}
+		
+		builder.append(">").append("</").append(nodeName).append(">");
+		
+		return builder.toString();
+	}
+
 	private List<Completion> getElementCompletions(XmlFileLocation location)
 	{
-		Class<?> parentType = location.getParentElement().getElementType();
+		Element parentElement = location.getParentElement();
+		Class<?> parentType = parentElement.getElementType();
 		
 		if(parentType == null)
 		{
@@ -85,13 +170,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		
 		List<Completion> completions = new ArrayList<>();
 		String namespace = location.getNameSpace();
+		String curToken = location.getName() != null ? location.getName().toLowerCase().trim() : null;
 		
 		if(IStepContainer.class.isAssignableFrom(parentType) && 
 				( namespace == null || XMLConstants.CCG_URI.equals(namespace) )
 				)
 		{
 			Collection<StepInfo> steps = project.getDocInformation().getSteps();
-			String curToken = location.getName() != null ? location.getName().toLowerCase().trim() : null;
 			
 			for(StepInfo step : steps)
 			{
@@ -100,7 +185,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					continue;
 				}
 				
-				completions.add( new ShorthandCompletion(this, step.getName(), getReplacementText(step, location), step.getName(), step.getDescription()) );
+				completions.add( new ShorthandCompletion(this, step.getNameWithHyphens(), getElementReplacementText(step, location), step.getName(), step.getDescription()) );
 			}
 
 			for(ValidationInfo validation : project.getDocInformation().getValidations())
@@ -110,16 +195,125 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					continue;
 				}
 				
-				completions.add( new ShorthandCompletion(this, validation.getName(), getReplacementText(validation, location), validation.getName(), validation.getDescription()) );
+				completions.add( new ShorthandCompletion(this, validation.getNameWithHyphens(), getElementReplacementText(validation, location), validation.getName(), validation.getDescription()) );
 			}
 		}
+		
+		StepInfo stepInfo = parentElement.getStepInfo();
+		
+		if(stepInfo != null)
+		{
+			Set<String> childNames = parentElement.getChildNames();
+			Collection<ParamInfo> params = stepInfo.getParams();
+			
+			for(ParamInfo param : params)
+			{
+				if(childNames.contains(param.getName()))
+				{
+					continue;
+				}
+				
+				if(curToken != null && !param.getName().toLowerCase().startsWith(curToken) && !param.getNameWithHyphens().toLowerCase().startsWith(curToken))
+				{
+					continue;
+				}
+
+				completions.add( new ShorthandCompletion(this, param.getNameWithHyphens(), getElementReplacementText(param, location), param.getName(), param.getDescription()) );
+			}
+			
+			Collection<ElementInfo> childElems = stepInfo.getChildElements();
+			
+			for(ElementInfo elem : childElems)
+			{
+				if(!elem.isMultiple() && childNames.contains(elem.getName()))
+				{
+					continue;
+				}
+				
+				if(curToken != null && !elem.getName().toLowerCase().startsWith(curToken) && !elem.getNameWithHyphens().toLowerCase().startsWith(curToken))
+				{
+					continue;
+				}
+
+				completions.add( new ShorthandCompletion(this, elem.getNameWithHyphens(), getElementReplacementText(elem, location), elem.getName(), elem.getDescription()) );
+			}
+			
+			return completions;
+		}
+		
+		/*
+		BeanPropertyInfo beanInfo = project.getBeanPropertyInfoFactory().getBeanPropertyInfo(parentType);
+		
+		for(BeanProperty prop : beanInfo.getProperties())
+		{
+			if(prop.getAddMethod() != null)
+			{
+				String adder = prop.getAdderName();
+				completions.add( new ShorthandCompletion(this, adder, getElementReplacementText(validation, location), adder, validation.getDescription()) );
+			}
+		}
+		*/
 		
 		return completions;
 	}
 
 	private List<Completion> getAttributeCompletions(XmlFileLocation location)
 	{
-		return Collections.emptyList();
+		Element elem = location.getParentElement();
+		StepInfo step = project.getDocInformation().getStep(elem.getName());
+		
+		if(step == null)
+		{
+			step = project.getDocInformation().getValidation(elem.getName());
+		}
+		
+		List<Completion> completions = new ArrayList<>();
+		Collection<ParamInfo> params = step != null ? step.getParams() : null;
+		String prefix = location.getCurrentToken();
+		
+		if(params != null)
+		{
+			Class<?> paramType = null;
+			
+			for(ParamInfo param : params)
+			{
+				if(elem.getAttribute(param.getName()) != null)
+				{
+					continue;
+				}
+				
+				try
+				{
+					paramType = Class.forName(param.getType());
+				}catch(Exception ex)
+				{
+					logger.warn("Failed to determine type of attribute '{}' of element: {}. Type String: {}", param.getName(), elem.getName(), param.getType());
+					continue;
+				}
+				
+				if(!XMLUtil.isSupportedAttributeClass(paramType))
+				{
+					continue;
+				}
+				
+				if(StringUtils.isNotBlank(prefix))
+				{
+					if(!param.getName().startsWith(prefix))
+					{
+						continue;
+					}
+					
+					String name = param.getName().substring(prefix.length());
+					completions.add( new ShorthandCompletion(this, param.getName(), name + "=\"\"", param.getName(), param.getDescription()) );
+				}
+				else
+				{
+					completions.add( new ShorthandCompletion(this, param.getName(), param.getName() + "=\"\"", param.getName(), param.getDescription()) );
+				}
+			}
+		}
+		
+		return completions;
 	}
 
 	@Override
@@ -166,143 +360,4 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		
 		return "";
 	}
-
-	/*
-	@Override
-	public void clearParameterizedCompletionParams()
-	{
-	}
-
-	@Override
-	public String getAlreadyEnteredText(JTextComponent comp)
-	{
-		return null;
-	}
-
-	private List<Completion> getElementCompletions(XmlFileLocation location)
-	{
-		Class<?> parentType = location.getParentElement().getElementType();
-		
-		if(parentType == null)
-		{
-			return Collections.emptyList();
-		}
-		
-		List<Completion> completions = new ArrayList<>();
-		
-		if(StepGroup.class.isAssignableFrom(parentType))
-		{
-			Collection<StepInfo> steps = project.getDocInformation().getSteps();
-			String prefix = location.getCurrentToken() != null ? location.getCurrentToken().toLowerCase().trim() : null;
-			
-			for(StepInfo step : steps)
-			{
-				if(location.getCurrentToken() != null && !step.getName().toLowerCase().startsWith(prefix))
-				{
-					continue;
-				}
-				
-				completions.add( new BasicCompletion(this, step.getName(), step.getName(), step.getDescription()) );
-			}
-		}
-		
-		return completions;
-	}
-
-	private List<Completion> getAttributeCompletions(XmlFileLocation location)
-	{
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<Completion> getCompletions(JTextComponent comp)
-	{
-		return getCompletionsAt(comp, null);
-	}
-
-	@Override
-	public List<Completion> getCompletionsAt(JTextComponent comp, Point p)
-	{
-		XmlFileLocation fileLoc = fileEditor.getXmlFileLocation();
-		fileLoc.getXmlFile().getRootElement().populateTestFileTypes(project, new ArrayList<>());
-		
-		switch(fileLoc.getType())
-		{
-			case CHILD_ELEMENT:
-			{
-				return getElementCompletions(fileLoc);
-			}
-			case ATTRIBUTE:
-			{
-				return getAttributeCompletions(fileLoc);
-			}
-		}
-		
-		return Collections.emptyList();
-	}
-
-	@Override
-	public ListCellRenderer getListCellRenderer()
-	{
-		return null;
-	}
-
-	@Override
-	public ParameterChoicesProvider getParameterChoicesProvider()
-	{
-		return null;
-	}
-	
-	@Override
-	public List<ParameterizedCompletion> getParameterizedCompletions(JTextComponent tc)
-	{
-		return null;
-	}
-
-	@Override
-	public char getParameterListEnd()
-	{
-		return 0;
-	}
-
-	@Override
-	public String getParameterListSeparator()
-	{
-		return null;
-	}
-
-	@Override
-	public char getParameterListStart()
-	{
-		return 0;
-	}
-
-	@Override
-	public CompletionProvider getParent()
-	{
-		return null;
-	}
-
-	@Override
-	public boolean isAutoActivateOkay(JTextComponent tc)
-	{
-		return false;
-	}
-
-	@Override
-	public void setListCellRenderer(ListCellRenderer r)
-	{
-	}
-
-	@Override
-	public void setParameterizedCompletionParams(char listStart, String separator, char listEnd)
-	{
-	}
-
-	@Override
-	public void setParent(CompletionProvider parent)
-	{
-	}
-	*/
-
 }
