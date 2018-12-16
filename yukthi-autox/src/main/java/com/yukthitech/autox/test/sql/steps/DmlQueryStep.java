@@ -24,7 +24,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Step to execute DML Query.
  * @author akiran
  */
-@Executable(name = "dmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified DML Query on specified data source.")
+@Executable(name = "sqlDmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified DML Query on specified data source.")
 public class DmlQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

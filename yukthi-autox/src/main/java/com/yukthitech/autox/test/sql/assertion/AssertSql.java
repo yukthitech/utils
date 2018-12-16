@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.sql.validations;
+package com.yukthitech.autox.test.sql.assertion;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -16,6 +16,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IValidation;
@@ -29,8 +30,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * SQL based validation.
  */
-@Executable(name = "validateWithSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
-public class SqlValidation extends AbstractValidation
+@Executable(name = "assertSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
+public class AssertSql extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
 
@@ -56,6 +57,7 @@ public class SqlValidation extends AbstractValidation
 		 * @param value
 		 *            Expected value.
 		 */
+		@ChildElement(description = "Used to specify column-value pair to be validated.", key = "name", keyDescription = "Name of the column to validate.")
 		public void addColumn(String name, String value)
 		{
 			if(name == null || name.trim().length() == 0)
@@ -174,7 +176,7 @@ public class SqlValidation extends AbstractValidation
 					{
 						if(expectedRows.size() <= rowIdx)
 						{
-							exeLogger.error(SqlValidation.this, "Actual rows are more than expected row count: {}", expectedRows.size());
+							exeLogger.error(AssertSql.this, "Actual rows are more than expected row count: {}", expectedRows.size());
 							return false;
 						}
 
@@ -187,7 +189,7 @@ public class SqlValidation extends AbstractValidation
 
 							if(!expectedVal.equals(actualVal))
 							{
-								exeLogger.error(SqlValidation.this, "At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
+								exeLogger.error(AssertSql.this, "At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
 								return false;
 							}
 						}

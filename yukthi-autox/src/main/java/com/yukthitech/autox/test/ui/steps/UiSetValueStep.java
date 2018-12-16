@@ -19,15 +19,15 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author Pritam.
  */
-@Executable(name = {"uiPopulateField", "populateField"}, requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified message")
-public class PopulateFieldStep extends AbstractUiStep
+@Executable(name = "uiSetValue", requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified value")
+public class UiSetValueStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The logger.
 	 */
-	private static Logger logger = LogManager.getLogger(PopulateFieldStep.class);
+	private static Logger logger = LogManager.getLogger(UiSetValueStep.class);
 
 	/**
 	 * Html locator of the form or container (like DIV) enclosing the input

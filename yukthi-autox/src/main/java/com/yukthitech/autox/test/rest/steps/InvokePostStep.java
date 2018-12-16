@@ -11,7 +11,7 @@ import com.yukthitech.utils.rest.PostRestRequest;
  * Used to invoke POST REST API.
  * @author akiran
  */
-@Executable(name = "invokePost", requiredPluginTypes = RestPlugin.class, message = "Used to invoke POST api.")
+@Executable(name = "restInvokePost", requiredPluginTypes = RestPlugin.class, message = "Used to invoke POST api.")
 public class InvokePostStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

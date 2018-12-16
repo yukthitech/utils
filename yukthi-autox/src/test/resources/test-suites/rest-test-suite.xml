@@ -4,7 +4,6 @@
 	
 		<testCase name="testPost">
 			<description>Test post api invocation</description>
-			<ccg:assert
 			<wrap:steps>
 				<ccg:invokePost uri="/emp/save">
 					<body><![CDATA[
@@ -21,8 +20,7 @@
 
 				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
 
-
-				<ccg:invokePost uri="/emp/save">
+				<ccg:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
 						{
 							"name" : "Emp2",

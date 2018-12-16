@@ -12,7 +12,7 @@ import com.jcraft.jsch.UserInfo;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
 /**
- * The Class RemoteSession.
+ * Represents remote ssh session.
  */
 public class RemoteSession
 {

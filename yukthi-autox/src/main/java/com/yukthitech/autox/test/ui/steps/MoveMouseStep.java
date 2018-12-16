@@ -14,7 +14,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * 
  * @author akiran
  */
-@Executable(name = {"uiMoveMouse"}, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
+@Executable(name = "uiMoveMouse", requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
 public class MoveMouseStep extends AbstractUiStep
 {
 	/** The Constant serialVersionUID. */

@@ -24,7 +24,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiMoveTo"}, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
+@Executable(name = "uiMoveTo", requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
 public class MoveToStep extends AbstractUiStep
 {
 	/** The Constant serialVersionUID. */

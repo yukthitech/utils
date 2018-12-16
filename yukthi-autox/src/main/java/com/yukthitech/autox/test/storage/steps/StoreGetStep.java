@@ -11,8 +11,8 @@ import com.yukthitech.autox.Param;
  * 
  * @author akiran
  */
-@Executable(name = {"storeGet", "storeValue"}, message = "Fetches value from store for specified key.")
-public class StoreValueStep extends AbstractStep
+@Executable(name = "storeGet", message = "Fetches value from store for specified key.")
+public class StoreGetStep extends AbstractStep
 {
 	
 	/** The Constant serialVersionUID. */

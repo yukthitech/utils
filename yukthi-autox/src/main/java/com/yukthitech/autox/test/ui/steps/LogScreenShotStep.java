@@ -18,7 +18,7 @@ import com.yukthitech.autox.test.log.LogLevel;
  * Takes the screen shot of the browser and adds it to the log .
  * @author akiran
  */
-@Executable(name = {"uiLogScreenShot", "logScreenShot"}, requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
+@Executable(name = "uiLogScreenShot", requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
 public class LogScreenShotStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

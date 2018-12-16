@@ -165,5 +165,7 @@ public class DocGenerator
 		
 		File dataJsFile = new File(dataJsFolder, "data.js");
 		FileUtils.write(dataJsFile, "var docData = " + json + ";", (String) null);
+		
+		System.out.println("Files are generate to folder: " + outFolder);
 	}
 }

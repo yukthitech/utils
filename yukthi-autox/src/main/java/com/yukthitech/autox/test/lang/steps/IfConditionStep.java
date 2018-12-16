@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.lang.steps;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
@@ -58,6 +59,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 *
 	 * @param then the new group of steps/validations to be executed when condition evaluated to be true
 	 */
+	@ChildElement(description = "Used to group steps to be executed when this if condition is true.")
 	public void setThen(StepGroup then)
 	{
 		this.then = then;
@@ -68,6 +70,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 *
 	 * @param elseGroup the new group of steps/validations to be executed when condition evaluated to be false
 	 */
+	@ChildElement(description = "Used to group steps to be executed when this if condition is false.")
 	public void setElse(StepGroup elseGroup)
 	{
 		if(this.elseGroup != null)

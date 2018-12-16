@@ -11,7 +11,7 @@ import com.yukthitech.utils.rest.PutRestRequest;
  * Used to invoke PUT REST API.
  * @author akiran
  */
-@Executable(name = "invokePut", requiredPluginTypes = RestPlugin.class, message = "Used to invoke PUT api.")
+@Executable(name = "restInvokePut", requiredPluginTypes = RestPlugin.class, message = "Used to invoke PUT api.")
 public class InvokePutStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

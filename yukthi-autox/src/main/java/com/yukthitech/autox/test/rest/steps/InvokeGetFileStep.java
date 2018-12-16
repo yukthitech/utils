@@ -26,7 +26,7 @@ import com.yukthitech.utils.rest.RestResult;
  * Used to invoke GET REST API.
  * @author akiran
  */
-@Executable(name = "invokeGetFile", requiredPluginTypes = RestPlugin.class, message = "Used to invoke GET api and save response as file.")
+@Executable(name = "restInvokeGetFile", requiredPluginTypes = RestPlugin.class, message = "Used to invoke GET api and save response as file.")
 public class InvokeGetFileStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

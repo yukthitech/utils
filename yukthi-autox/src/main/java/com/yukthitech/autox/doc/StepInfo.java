@@ -1,10 +1,15 @@
 package com.yukthitech.autox.doc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
@@ -33,7 +38,12 @@ public class StepInfo implements Comparable<StepInfo>
 	/**
 	 * List of params accepted by this step.
 	 */
-	private Set<ParamInfo> params = new TreeSet<>();
+	private Map<String, ParamInfo> params = new TreeMap<>();
+	
+	/**
+	 * Child elements of this step.
+	 */
+	private Map<String, ElementInfo> childElements = new TreeMap<>();
 	
 	/**
 	 * Plugins required by this step.
@@ -53,11 +63,30 @@ public class StepInfo implements Comparable<StepInfo>
 	 */
 	public StepInfo(Class<? extends IStep> stepClass, Executable executablAnnot)
 	{
-		this.name = executablAnnot.name()[0];
-		this.description = executablAnnot.message();
+		setDetails(executablAnnot.name()[0], executablAnnot.message());
+
 		this.javaType = stepClass.getName();
+
+		loadParams(stepClass);
+
+		for(Class<?> pluginType : executablAnnot.requiredPluginTypes())
+		{
+			this.requiredPlugins.add(pluginType.getSimpleName());
+		}
+	}
+	
+	protected StepInfo()
+	{}
+	
+	protected void setDetails(String name, String description)
+	{
+		this.name = name;
+		this.description = description;
 		this.nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
-		
+	}
+
+	protected void loadParams(Class<?> stepClass)
+	{
 		Class<?> curType = stepClass;
 		Param param = null;
 		
@@ -82,15 +111,31 @@ public class StepInfo implements Comparable<StepInfo>
 					continue;
 				}
 				
-				this.params.add( new ParamInfo(field, param) );
+				ParamInfo paramInfo = new ParamInfo(field, param); 
+				this.params.put(paramInfo.getName(), paramInfo);
 			}
 			
 			curType = curType.getSuperclass();
 		}
 		
-		for(Class<?> pluginType : executablAnnot.requiredPluginTypes())
+		ChildElement childElement = null;
+		
+		for(Method method : stepClass.getMethods())
 		{
-			this.requiredPlugins.add(pluginType.getSimpleName());
+			if(Modifier.isStatic(method.getModifiers()))
+			{
+				continue;
+			}
+			
+			childElement = method.getAnnotation(ChildElement.class);
+			
+			if(childElement == null)
+			{
+				continue;
+			}
+			
+			ElementInfo elemInfo = new ElementInfo(method, childElement);
+			this.childElements.put(elemInfo.getName(), elemInfo);
 		}
 	}
 
@@ -129,9 +174,39 @@ public class StepInfo implements Comparable<StepInfo>
 	 *
 	 * @return the list of params accepted by this step
 	 */
-	public Set<ParamInfo> getParams()
+	public Collection<ParamInfo> getParams()
 	{
-		return params;
+		return params.values();
+	}
+	
+	/**
+	 * Fetches param info for specified name.
+	 * @param name name of param to fetch
+	 * @return matching param
+	 */
+	public ParamInfo getParam(String name)
+	{
+		return params.get(name);
+	}
+	
+	/**
+	 * Gets the child elements of this step.
+	 *
+	 * @return the child elements of this step
+	 */
+	public Collection<ElementInfo> getChildElements()
+	{
+		return childElements.values();
+	}
+	
+	/**
+	 * Fetches child element info with specified name.
+	 * @param name name of child fetch.
+	 * @return matching child element.
+	 */
+	public ElementInfo getChildElement(String name)
+	{
+		return childElements.get(name);
 	}
 	
 	/**

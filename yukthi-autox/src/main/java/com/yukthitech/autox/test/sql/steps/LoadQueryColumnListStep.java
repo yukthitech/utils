@@ -24,7 +24,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * Executes specified query and loads the result first column values as list on the context. In case of zero results empty list will be kept on context.
  */
-@Executable(name = "loadQueryColumnList", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the result first column values as list on the context. "
+@Executable(name = "sqlLoadQueryColumnList", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the result first column values as list on the context. "
 		+ "\nIn case of zero results empty list will be kept on context.")
 public class LoadQueryColumnListStep extends AbstractStep
 {

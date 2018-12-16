@@ -1,5 +1,7 @@
 package com.yukthitech.autox.test.ui.common;
 
+import com.yukthitech.autox.Param;
+
 /**
  * Represents field options.
  * @author akiran
@@ -9,11 +11,13 @@ public class FieldOption
 	/**
 	 * Option value.
 	 */
+	@Param(description = "Value of the option")
 	private String value;
 	
 	/**
 	 * Option label.
 	 */
+	@Param(description = "Label of the option")
 	private String label;
 	
 	/**

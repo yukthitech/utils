@@ -22,6 +22,11 @@ public class ParamInfo implements Comparable<ParamInfo>
 	private String name;
 	
 	/**
+	 * Name with hyphens.
+	 */
+	private String nameWithHyphens;
+	
+	/**
 	 * Description about the parameter.
 	 */
 	private String description;
@@ -50,6 +55,7 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public ParamInfo(Field field, Param paramAnnot)
 	{
 		this.name = field.getName();
+		this.nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
 		
 		if(StringUtils.isNotBlank(paramAnnot.name()))
 		{
@@ -94,6 +100,16 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public String getName()
 	{
 		return name;
+	}
+	
+	/**
+	 * Gets the name with hyphens.
+	 *
+	 * @return the name with hyphens
+	 */
+	public String getNameWithHyphens()
+	{
+		return nameWithHyphens;
 	}
 
 	/**

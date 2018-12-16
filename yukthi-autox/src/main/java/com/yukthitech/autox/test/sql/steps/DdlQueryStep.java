@@ -20,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * Step to execute DDL query.
  */
-@Executable(name = "ddlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified DDL query on specified data source.")
+@Executable(name = "sqlDdlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified DDL query on specified data source.")
 public class DdlQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

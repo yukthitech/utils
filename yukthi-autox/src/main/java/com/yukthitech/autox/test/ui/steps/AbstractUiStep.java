@@ -9,7 +9,6 @@ import com.yukthitech.autox.Param;
  */
 public abstract class AbstractUiStep extends AbstractStep
 {
-	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
 	/**

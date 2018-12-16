@@ -26,7 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(name = "fetchValueQuery", requiredPluginTypes = DbPlugin.class, message = "Fetches single value (first row, first column value) from the results of specified query.")
+@Executable(name = "sqlFetchValueQuery", requiredPluginTypes = DbPlugin.class, message = "Fetches single value (first row, first column value) from the results of specified query.")
 public class FetchValueQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

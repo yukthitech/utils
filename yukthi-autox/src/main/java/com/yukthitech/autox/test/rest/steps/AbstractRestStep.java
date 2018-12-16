@@ -7,6 +7,7 @@ import org.apache.http.client.ResponseHandler;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
@@ -40,19 +41,16 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Headers to be added to the request.
 	 */
-	@Param(description = "Headers to be added to the request.", required = false)
 	protected Map<String, String> headers = new HashMap<>();
 	
 	/**
 	 * Path variables to be replaced.
 	 */
-	@Param(description = "Path variables to be replaced.", required = false)
 	protected Map<String, String> pathVariables = new HashMap<>();
 	
 	/**
 	 * Path variables to be replaced.
 	 */
-	@Param(description = "Path variables to be replaced.", required = false)
 	protected Map<String, String> params = new HashMap<>();
 	
 	/**
@@ -104,6 +102,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	 * @param name Name of the header.
 	 * @param value Value of the header.
 	 */
+	@ChildElement(description = "Http Header for the request", key = "name", keyDescription = "Name of the header")
 	public void addHeader(String name, String value)
 	{
 		headers.put(name, value);
@@ -114,6 +113,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	 * @param name name of the variable.
 	 * @param value value of the variable.
 	 */
+	@ChildElement(description = "Path variable to be replaced in the URI", key = "name", keyDescription = "Name of the path variable")
 	public void addPathVariable(String name, String value)
 	{
 		pathVariables.put(name, value);
@@ -154,6 +154,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	 * @param name name of the param
 	 * @param value value of the param
 	 */
+	@ChildElement(description = "Request parameter of current request", key = "name", keyDescription = "Name of the parameter.")
 	public void addParam(String name, String value)
 	{
 		params.put(name, value);

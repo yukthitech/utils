@@ -1,26 +1,31 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.WebElement;
+
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
-import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
+import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 
 /**
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = {"uiGetUiValue", "getUiValue"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
-public class GetUiValueStep extends AbstractUiStep
+@Executable(name = {"uiGetElements"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
+public class UiGetElementsStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Locator of the element for which value needs to be fetched.
 	 */
-	@Param(description = "Locator of the element for which value needs to be fetched", sourceType = SourceType.UI_LOCATOR)
+	@Param(description = "Locator of the elements to be fetched", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 	
 	/**
@@ -48,7 +53,7 @@ public class GetUiValueStep extends AbstractUiStep
 	{
 		this.name = name;
 	}
-
+	
 	/**
 	 * Simulates the click event on the specified button.
 	 * @param context Current automation context 
@@ -56,12 +61,22 @@ public class GetUiValueStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Fetching ui element value for locator - {}", getLocatorWithParent(locator));
+		exeLogger.trace(this, "Fetching ui element value for locator - {}", locator);
 		
-		String elementValue = UiFreeMarkerMethods.uiValue(locator, parentElement);
 		
-		exeLogger.debug(this, "Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
-		context.setAttribute(name, elementValue);
+		List<WebElement> webElements = UiAutomationUtils.findElements(context, parentElement, locator);
+		
+		if(webElements == null || webElements.isEmpty())
+		{
+			exeLogger.debug(this, "No webelements found with locator: {}", getLocatorWithParent(locator));
+			context.setAttribute(name, new ArrayList<>());
+			
+			return true;
+		}
+		
+		exeLogger.debug(this, "Setting context attribute '{}' with webelements [count: {}] matching locator: {}", 
+				name, webElements.size(), getLocatorWithParent(locator));
+		context.setAttribute(name, webElements);
 		
 		return true;
 	}

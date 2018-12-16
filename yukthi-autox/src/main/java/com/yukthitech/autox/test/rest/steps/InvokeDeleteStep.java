@@ -10,7 +10,7 @@ import com.yukthitech.utils.rest.DeleteRestRequest;
  * Used to invoke DELETE REST API.
  * @author akiran
  */
-@Executable(name = "invokeDelete", requiredPluginTypes = RestPlugin.class, message = "Used to invoke DELETE api.")
+@Executable(name = "restInvokeDelete", requiredPluginTypes = RestPlugin.class, message = "Used to invoke DELETE api.")
 public class InvokeDeleteStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

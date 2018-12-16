@@ -10,7 +10,7 @@ import com.yukthitech.utils.rest.GetRestRequest;
  * Used to invoke GET REST API.
  * @author akiran
  */
-@Executable(name = "invokeGet", requiredPluginTypes = RestPlugin.class, message = "Used to invoke GET api.")
+@Executable(name = "restInvokeGet", requiredPluginTypes = RestPlugin.class, message = "Used to invoke GET api.")
 public class InvokeGetStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

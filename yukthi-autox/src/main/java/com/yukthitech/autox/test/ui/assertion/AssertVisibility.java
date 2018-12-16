@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.ui.validations;
+package com.yukthitech.autox.test.ui.assertion;
 
 import org.openqa.selenium.WebElement;
 
@@ -17,8 +17,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiValidateVisibility", "validateVisibility"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
-public class ValidateVisibility extends AbstractUiValidation
+@Executable(name = "uiAssertVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
+public class AssertVisibility extends AbstractUiAssert
 {
 	private static final long serialVersionUID = 1L;
 

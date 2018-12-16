@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.ui.validations;
+package com.yukthitech.autox.test.ui.assertion;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IValidation;
@@ -22,8 +23,8 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 /**
  * Validates specified form has specified fields with specified field details.
  */
-@Executable(name = {"uiValidateFormFields", "validateFormFields"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
-public class ValidateFormFields extends AbstractValidation
+@Executable(name = "uiAssertFormFields", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
+public class AssertFormFields extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
 
@@ -39,16 +40,19 @@ public class ValidateFormFields extends AbstractValidation
 		/**
 		 * locator of the field.
 		 */
+		@Param(description = "Locator of the field")
 		private String locator;
 
 		/**
 		 * Indicates if multiple fields are expected with same name.
 		 */
+		@Param(description = "Should be true, if multiple fields are expected with same locator")
 		private boolean multiple;
 
 		/**
 		 * Expected form field type.
 		 */
+		@Param(description = "Expected form field type.")
 		private FormFieldType type;
 
 		/**
@@ -59,6 +63,7 @@ public class ValidateFormFields extends AbstractValidation
 		/**
 		 * Expected value of the field.
 		 */
+		@Param(description = "Expected value of the field.")
 		private String value;
 
 		/**
@@ -153,6 +158,7 @@ public class ValidateFormFields extends AbstractValidation
 		 * @param fieldOption
 		 *            fieldOption to be added
 		 */
+		@ChildElement(description = "Adds expected drop down option of the field.")
 		public void addFieldOption(FieldOption fieldOption)
 		{
 			if(fieldOptions == null)
@@ -194,7 +200,6 @@ public class ValidateFormFields extends AbstractValidation
 	/**
 	 * Field details to validate.
 	 */
-	@Param(description = "Form fields to be validated.")
 	private List<FormField> fields;
 
 	/**
@@ -214,6 +219,7 @@ public class ValidateFormFields extends AbstractValidation
 	 * @param field
 	 *            field to be added
 	 */
+	@ChildElement(description = "Form field to validate")
 	public void addField(FormField field)
 	{
 		if(fields == null)

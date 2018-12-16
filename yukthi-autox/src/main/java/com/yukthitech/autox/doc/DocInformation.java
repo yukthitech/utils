@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
@@ -13,6 +15,11 @@ import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
  */
 public class DocInformation
 {
+	/**
+	 * Expected hyphen pattern in names.
+	 */
+	private static final Pattern HYPHEN_PATTERN = Pattern.compile("\\-(\\w)");
+	
 	/**
 	 * List of plugin's information.
 	 */
@@ -69,7 +76,26 @@ public class DocInformation
 	{
 		return plugins.values();
 	}
-
+	
+	/**
+	 * From the input name removes the hyphens and injects capital letters approp.
+	 * @param name name in which hyphens has to be replaced.
+	 * @return resultant string after transformation.
+	 */
+	private static String removeHyphens(String name)
+	{
+		StringBuffer buff = new StringBuffer();
+		Matcher matcher = HYPHEN_PATTERN.matcher(name);
+		
+		while(matcher.find())
+		{
+			matcher.appendReplacement(buff, matcher.group(1).toUpperCase());
+		}
+		
+		matcher.appendTail(buff);
+		return buff.toString();
+	}
+	
 	/**
 	 * Gets the list of step information.
 	 *
@@ -82,7 +108,7 @@ public class DocInformation
 	
 	public StepInfo getStep(String name)
 	{
-		return this.steps.get(name);
+		return this.steps.get( removeHyphens(name) );
 	}
 
 	/**
@@ -97,7 +123,7 @@ public class DocInformation
 	
 	public ValidationInfo getValidation(String name)
 	{
-		return validations.get(name);
+		return validations.get( removeHyphens(name) );
 	}
 
 	/**

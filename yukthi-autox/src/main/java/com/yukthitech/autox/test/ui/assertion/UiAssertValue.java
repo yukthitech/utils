@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.ui.validations;
+package com.yukthitech.autox.test.ui.assertion;
 
 import org.openqa.selenium.WebElement;
 
@@ -15,8 +15,8 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author akiran
  */
-@Executable(name = {"uiValidateValue", "validateValue"}, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
-public class ValidateValue extends AbstractUiValidation
+@Executable(name = "uiAssertValue", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
+public class UiAssertValue extends AbstractUiAssert
 {
 	private static final long serialVersionUID = 1L;
 

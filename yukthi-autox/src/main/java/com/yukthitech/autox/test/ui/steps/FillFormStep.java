@@ -92,8 +92,8 @@ public class FillFormStep extends AbstractStep
 
 			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), value))
 			{
-				exeLogger.error(this, "Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
-				throw new TestCaseFailedException(this, "Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), value);
+				exeLogger.error(this, "Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), locator, value);
+				throw new TestCaseFailedException(this, "Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), locator, value);
 			}
 			
 			try
@@ -136,7 +136,7 @@ public class FillFormStep extends AbstractStep
 
 			if(!UiAutomationUtils.populateField(context, parentElement, name, value))
 			{
-				exeLogger.error(this, "Failed to fill element '{}' under parent '{}' with value - {}", name, value);
+				exeLogger.error(this, "Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
 				throw new TestCaseFailedException(this, "Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
 			}
 			

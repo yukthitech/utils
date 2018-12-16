@@ -10,7 +10,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * Simulates the click event on the specified button.
  * @author akiran
  */
-@Executable(name = {"uiCloseSession", "closeSession"}, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current browser window.")
+@Executable(name = "uiCloseSession", requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current browser window.")
 public class CloseSessionStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

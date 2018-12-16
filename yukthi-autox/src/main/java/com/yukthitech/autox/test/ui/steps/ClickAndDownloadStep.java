@@ -21,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiClickAndDownload"}, requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target and download the result file. If no  file is downloaded, this will throw exception.")
+@Executable(name = "uiClickAndDownload", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target and download the result file. If no  file is downloaded, this will throw exception.")
 public class ClickAndDownloadStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
@@ -80,6 +81,7 @@ public class ValidatePollAndCheck extends AbstractValidation
 	 *
 	 * @param poll the new group of steps/validations to be executed when condition evaluated to be true
 	 */
+	@ChildElement(description = "Used to specify polling steps.", required = true)
 	public void setPoll(StepGroup poll)
 	{
 		this.poll = poll;

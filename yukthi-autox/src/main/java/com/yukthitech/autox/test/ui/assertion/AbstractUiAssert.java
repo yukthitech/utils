@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.ui.validations;
+package com.yukthitech.autox.test.ui.assertion;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.Param;
@@ -7,7 +7,7 @@ import com.yukthitech.autox.Param;
  * Base abstract class for ui validations, which will hold optional parent element.
  * @author akiran
  */
-public abstract class AbstractUiValidation extends AbstractValidation
+public abstract class AbstractUiAssert extends AbstractValidation
 {
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;

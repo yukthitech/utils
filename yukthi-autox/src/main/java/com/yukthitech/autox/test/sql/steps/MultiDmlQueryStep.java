@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
@@ -25,7 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Step to execute multiple dml queries in single transaction.
  * @author akiran
  */
-@Executable(name = "multiDmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified multiple DML queries in single transaction")
+@Executable(name = "sqlMultiDmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified multiple DML queries in single transaction")
 public class MultiDmlQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
@@ -33,7 +34,6 @@ public class MultiDmlQueryStep extends AbstractStep
 	/**
 	 * List of queries executed in single transaction.
 	 */
-	@Param(description = "Queries to execute.")
 	private List<String> queries;
 	
 	/**
@@ -63,6 +63,7 @@ public class MultiDmlQueryStep extends AbstractStep
 	 * 
 	 * @param query query to add.
 	 */
+	@ChildElement(description = "DML Query to execute.")
 	public void addQuery(String query) 
 	{
 		if(StringUtils.isBlank(query))
