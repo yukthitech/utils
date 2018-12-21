@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,11 +19,15 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IIdeFileManager;
+import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.ActionCollection;
@@ -52,6 +58,9 @@ public class ProjectExplorer extends JPanel
 	
 	@Autowired
 	private TreeDropTarget target;
+	
+	@Autowired
+	private IdeFileManagerFactory ideFileManagerFactory;
 	
 	private JPopupMenu filePopup;
 	
@@ -213,7 +222,7 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		treeModel.addProject(new ProjectTreeNode(project));
+		treeModel.addProject(new ProjectTreeNode(this, project));
 		
 		projects.add(project);
 		restRequest.addProject(project);
@@ -347,5 +356,33 @@ public class ProjectExplorer extends JPanel
 		
 		parentNode.reload(true);
 		treeModel.reload(parentNode);
+	}
+	
+	public void checkFile(FileTreeNode fileNode)
+	{
+		File file = fileNode.getFile();
+		IIdeFileManager fileManager = ideFileManagerFactory.getFileManager(file);
+		
+		if(fileManager != null)
+		{
+			FileParseCollector collector = new FileParseCollector();
+		
+			try
+			{
+				fileManager.parseContent(fileNode.getProject(), file.getName(), FileUtils.readFileToString(file), collector);
+				
+				if(collector.getErrorCount() > 0)
+				{
+					fileNode.setErrored(true);
+				}
+				else if(collector.getWarningCount() > 0)
+				{
+					fileNode.setWarned(true);
+				}
+			} catch(IOException ex)
+			{
+				logger.error("An error occurred while loading file: {}", file.getPath(), ex);
+			}
+		}
 	}
 }

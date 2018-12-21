@@ -1,6 +1,8 @@
-package com.yukthitech.autox.ide.xmlfile;
+package com.yukthitech.autox.ide.editor;
 
-public class XmlFileMessage
+import com.yukthitech.autox.ide.xmlfile.MessageType;
+
+public class FileParseMessage
 {
 	private MessageType messageType;
 	
@@ -12,17 +14,17 @@ public class XmlFileMessage
 	
 	private int endOffset;
 	
-	public XmlFileMessage()
+	public FileParseMessage()
 	{}
 
-	public XmlFileMessage(MessageType messageType, String message, int lineNo)
+	public FileParseMessage(MessageType messageType, String message, int lineNo)
 	{
 		this.messageType = messageType;
 		this.message = message;
 		this.lineNo = lineNo;
 	}
 	
-	public XmlFileMessage(MessageType messageType, String message, int lineNo, int startOffset, int endOffset)
+	public FileParseMessage(MessageType messageType, String message, int lineNo, int startOffset, int endOffset)
 	{
 		this.messageType = messageType;
 		this.message = message;

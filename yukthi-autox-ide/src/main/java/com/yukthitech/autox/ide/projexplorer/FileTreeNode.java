@@ -18,8 +18,10 @@ public class FileTreeNode extends BaseTreeNode
 	private Project project;
 	
 	private BiConsumer<Project, File> fileReloadOp;
+	
+	private ProjectExplorer projectExplorer;
 
-	public FileTreeNode(Project project, String name, File file, BiConsumer<Project, File> fileReloadOp)
+	public FileTreeNode(ProjectExplorer projectExplorer, Project project, String name, File file, BiConsumer<Project, File> fileReloadOp)
 	{
 		if(project == null)
 		{
@@ -31,6 +33,7 @@ public class FileTreeNode extends BaseTreeNode
 			throw new NullPointerException("File can not be null.");
 		}
 		
+		this.projectExplorer = projectExplorer;
 		this.project = project;
 		this.fileReloadOp = fileReloadOp;
 		
@@ -44,6 +47,11 @@ public class FileTreeNode extends BaseTreeNode
 	@Override
 	public synchronized void reload(boolean childReload)
 	{
+		if(projectExplorer != null)
+		{
+			projectExplorer.checkFile(this);
+		}
+		
 		if(fileReloadOp == null)
 		{
 			return;

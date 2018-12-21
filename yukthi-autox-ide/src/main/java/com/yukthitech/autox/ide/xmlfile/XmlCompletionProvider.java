@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.editor;
+package com.yukthitech.autox.ide.xmlfile;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -22,9 +22,9 @@ import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
+import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.xmlfile.Element;
-import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 
@@ -325,7 +325,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 	@Override
 	public List<Completion> getCompletionsAt(JTextComponent comp, Point p)
 	{
-		xmlFileLocation.getXmlFile().getRootElement().populateTestFileTypes(project, new ArrayList<>());
+		xmlFileLocation.getXmlFile().getRootElement().populateTestFileTypes(project, new FileParseCollector());
 		
 		switch(xmlFileLocation.getType())
 		{

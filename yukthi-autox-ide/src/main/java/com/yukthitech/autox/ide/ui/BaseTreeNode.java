@@ -33,6 +33,16 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	private String label;
 	
 	/**
+	 * flag indicating if the current resource has errors.
+	 */
+	private boolean errored;
+	
+	/**
+	 * Flag indicating if the curent resource has warnings.
+	 */
+	private boolean warned;
+	
+	/**
 	 * Child nodes added to this node.
 	 */
 	private Map<String, BaseTreeNode> childNodes = new LinkedHashMap<>();
@@ -96,6 +106,46 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		this.label = label;
 	}
 	
+	/**
+	 * Gets the flag indicating if the current resource has errors.
+	 *
+	 * @return the flag indicating if the current resource has errors
+	 */
+	public boolean isErrored()
+	{
+		return errored;
+	}
+
+	/**
+	 * Sets the flag indicating if the current resource has errors.
+	 *
+	 * @param errored the new flag indicating if the current resource has errors
+	 */
+	public void setErrored(boolean errored)
+	{
+		this.errored = errored;
+	}
+
+	/**
+	 * Gets the flag indicating if the curent resource has warnings.
+	 *
+	 * @return the flag indicating if the curent resource has warnings
+	 */
+	public boolean isWarned()
+	{
+		return warned;
+	}
+
+	/**
+	 * Sets the flag indicating if the curent resource has warnings.
+	 *
+	 * @param warned the new flag indicating if the curent resource has warnings
+	 */
+	public void setWarned(boolean warned)
+	{
+		this.warned = warned;
+	}
+
 	public void addChild(String id, BaseTreeNode node)
 	{
 		if(childNodes.containsKey(id))

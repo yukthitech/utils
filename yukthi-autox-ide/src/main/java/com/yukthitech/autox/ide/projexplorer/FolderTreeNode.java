@@ -24,18 +24,22 @@ public class FolderTreeNode extends BaseTreeNode
 
 	private Project project;
 	
-	protected FolderTreeNode(Icon icon, Project project, String name, File folder)
+	private ProjectExplorer projectExplorer;
+	
+	protected FolderTreeNode(ProjectExplorer projectExplorer, Icon icon, Project project, String name, File folder)
 	{
 		super(icon, name);
 
 		this.project = project;
 		this.folder = folder;
+		this.projectExplorer = projectExplorer;
+		
 		reload(false);
 	}
 
-	public FolderTreeNode(Project project, String name, File folder)
+	public FolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
 	{
-		this(IdeUtils.loadIcon("/ui/icons/folder.png", 20), project, name, folder);
+		this(projectExplorer, IdeUtils.loadIcon("/ui/icons/folder.png", 20), project, name, folder);
 	}
 
 	protected void removeNonExistingNodes()
@@ -142,12 +146,12 @@ public class FolderTreeNode extends BaseTreeNode
 
 			if(file.isDirectory())
 			{
-				FolderTreeNode folderTreeNode = new FolderTreeNode(project, file.getName(), file);
+				FolderTreeNode folderTreeNode = new FolderTreeNode(projectExplorer, project, file.getName(), file);
 				super.insert(file.getPath(), folderTreeNode, index);
 			}
 			else if(file.isFile())
 			{
-				FileTreeNode fileNode = new FileTreeNode(project, file.getName(), file, null);
+				FileTreeNode fileNode = new FileTreeNode(projectExplorer, project, file.getName(), file, null);
 				super.insert(file.getPath(), fileNode, index);
 			}
 

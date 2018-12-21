@@ -14,11 +14,14 @@ public class ProjectTreeNode extends FolderTreeNode
 	private static final long serialVersionUID = 1L;
 
 	private Project project;
+	
+	private ProjectExplorer projectExplorer;
 
-	public ProjectTreeNode(Project project)
+	public ProjectTreeNode(ProjectExplorer projectExplorer, Project project)
 	{
-		super(IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
+		super(projectExplorer, IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
 
+		this.projectExplorer = projectExplorer;
 		this.project = project;
 		reload(false);
 	}
@@ -84,7 +87,7 @@ public class ProjectTreeNode extends FolderTreeNode
 				}
 				else
 				{
-					super.insert(id, new TestSuiteFolderTreeNode(project, tsf, file), index);
+					super.insert(id, new TestSuiteFolderTreeNode(projectExplorer, project, tsf, file), index);
 				}
 				
 				index++;
@@ -95,7 +98,7 @@ public class ProjectTreeNode extends FolderTreeNode
 		if(super.getChild(":appConfig") == null)
 		{
 			File appConfigFile = new File(project.getBaseFolderPath(), project.getAppConfigFilePath());
-			super.insert(":appConfig", new FileTreeNode(project, "App Configuration", appConfigFile, null), index);
+			super.insert(":appConfig", new FileTreeNode(projectExplorer, project, "App Configuration", appConfigFile, null), index);
 		}
 
 		index++;
@@ -104,7 +107,7 @@ public class ProjectTreeNode extends FolderTreeNode
 		if(super.getChild(":appProp") == null)
 		{
 			File appPropFile = new File(project.getBaseFolderPath(), project.getAppPropertyFilePath());
-			super.insert(":appProp", new FileTreeNode(project, "App Properties", appPropFile, null), index);
+			super.insert(":appProp", new FileTreeNode(projectExplorer, project, "App Properties", appPropFile, null), index);
 		}
 	}
 

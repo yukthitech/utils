@@ -6,11 +6,9 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
@@ -29,25 +27,19 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
 import org.fife.ui.rsyntaxtextarea.SquiggleUnderlineHighlightPainter;
 import org.fife.ui.rtextarea.Gutter;
-import org.fife.ui.rtextarea.GutterIconInfo;
 import org.fife.ui.rtextarea.IconRowHeader;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.yukthitech.autox.ide.IdeNotificationPanel;
+import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IIdeFileManager;
+import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.xmlfile.Attribute;
-import com.yukthitech.autox.ide.xmlfile.Element;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
-import com.yukthitech.autox.ide.xmlfile.XmlFile;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
-import com.yukthitech.autox.ide.xmlfile.XmlFileMessage;
-import com.yukthitech.autox.ide.xmlfile.XmlLocationType;
-import com.yukthitech.autox.ide.xmlfile.XmlLoctionAnalyzer;
-import com.yukthitech.autox.ide.xmlfile.XmlParseException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class FileEditor extends RTextScrollPane
@@ -74,27 +66,23 @@ public class FileEditor extends RTextScrollPane
 	private IdeContext ideContext;
 	
 	@Autowired
-	private IdeNotificationPanel ideNotificationPanel;
+	private IdeFileManagerFactory ideFileManagerFactory;
 	
 	/**
-	 * Last parsed content line number.
+	 * File manager for current file.
 	 */
-	private XmlFile lastParsedContent;
+	private IIdeFileManager currentFileManager;
 	
-	private XmlCompletionProvider xmlCompletionProvider;
+	private List<FileParseMessage> currentHighlights = new ArrayList<>();
 	
-	private List<XmlFileMessage> currentHighlights = new ArrayList<>();
-	
-	//private IconRowHeader
+	/**
+	 * Content parsed in last iteration.
+	 */
+	private Object parsedFileContent;
 	
 	public FileEditor(Project project, File file)
 	{
 		super(new RSyntaxTextArea());
-		
-		if(file.getName().toLowerCase().endsWith(".xml"))
-		{
-			xmlCompletionProvider = new XmlCompletionProvider(project, this);
-		}
 		
 		getGutter().setBookmarkingEnabled(true);
 
@@ -131,9 +119,6 @@ public class FileEditor extends RTextScrollPane
 
 		this.file = file;
 
-		setSyntaxStyle();
-		syntaxTextArea.setCodeFoldingEnabled(true);
-
 		try
 		{
 			syntaxTextArea.setText(FileUtils.readFileToString(file));
@@ -164,21 +149,29 @@ public class FileEditor extends RTextScrollPane
 		});
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
-
-		CompletionProvider provider = getStepsProvider();
-		
-		if(provider != null)
-		{
-			AutoCompletion ac = new AutoCompletion(provider);
-			// show documentation dialog box
-			ac.setShowDescWindow(true);
-			ac.install(syntaxTextArea);
-		}
 	}
 	
 	@PostConstruct
 	private void init()
 	{
+		this.currentFileManager = ideFileManagerFactory.getFileManager(file);
+		
+		if(this.currentFileManager != null)
+		{
+			CompletionProvider provider = currentFileManager.getCompletionProvider(this);
+			
+			if(provider != null)
+			{
+				AutoCompletion ac = new AutoCompletion(provider);
+				// show documentation dialog box
+				ac.setShowDescWindow(true);
+				ac.install(syntaxTextArea);
+			}
+		}
+
+		setSyntaxStyle();
+		syntaxTextArea.setCodeFoldingEnabled(true);
+
 		fileContentChanged();
 	}
 	
@@ -190,27 +183,12 @@ public class FileEditor extends RTextScrollPane
 	
 	public XmlFileLocation getXmlFileLocation()
 	{
-		try
-		{
-			XmlFileLocation loc = XmlLoctionAnalyzer.getLocation(syntaxTextArea.getText(), syntaxTextArea.getCaretPosition());
-			return loc;
-		}catch(Exception ex)
-		{
-			ideNotificationPanel.displayWarning("Failed to parse xml till current location. Error: " + ex.getMessage());
-			return null;
-		}
+		return currentFileManager.getXmlFileLocation(this);
 	}
 	
 	public boolean isStepInsertablePosition()
 	{
-		XmlFileLocation loc = getXmlFileLocation();
-		
-		if(loc == null)
-		{
-			return false;
-		}
-		
-		return (loc.getType() == XmlLocationType.CHILD_ELEMENT);
+		return currentFileManager.isStepInsertablePosition(this);
 	}
 
 	private void setSyntaxStyle()
@@ -222,19 +200,9 @@ public class FileEditor extends RTextScrollPane
 		{
 			extension = file.getName().substring(extIdx + 1).toLowerCase();
 		}
-
-		if("properties".equals(extension))
-		{
-			syntaxTextArea.setSyntaxEditingStyle(RSyntaxTextArea.SYNTAX_STYLE_PROPERTIES_FILE);
-		}
-		else if("xml".equals(extension))
-		{
-			syntaxTextArea.setSyntaxEditingStyle(RSyntaxTextArea.SYNTAX_STYLE_XML);
-		}
-		else if("json".equals(extension))
-		{
-			syntaxTextArea.setSyntaxEditingStyle(RSyntaxTextArea.SYNTAX_STYLE_JSON);
-		}
+		
+		String style = currentFileManager.getSyntaxEditingStyle(extension);
+		syntaxTextArea.setSyntaxEditingStyle(style);
 	}
 
 	public void setFile(File file)
@@ -277,11 +245,8 @@ public class FileEditor extends RTextScrollPane
 	{
 		ideContext.getProxy().fileChanged(file);
 		
-		if(file.getName().toLowerCase().endsWith(".xml"))
-		{
-			//from last change time, try to parse the xml content and highlight errors if any
-			IdeUtils.executeConsolidatedJob("FileEditor.parseXmlContent", this::parseXmlContent, 3000);
-		}
+		//from last change time, try to parse the content and highlight regions if any
+		IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 2000);
 	}
 	
 	private String getToolTip(RTextArea textArea, MouseEvent e)
@@ -293,7 +258,7 @@ public class FileEditor extends RTextScrollPane
 			return null;
 		}
 		
-		for(XmlFileMessage mssg : this.currentHighlights)
+		for(FileParseMessage mssg : this.currentHighlights)
 		{
 			if(!mssg.hasValidOffsets())
 			{
@@ -306,10 +271,10 @@ public class FileEditor extends RTextScrollPane
 			}
 		}
 		
-		return null;
+		return currentFileManager.getToolTip(this, parsedFileContent, offset);
 	}
 	
-	private void addMessage(XmlFileMessage message)
+	private void addMessage(FileParseMessage message)
 	{
 		Gutter gutter = getGutter();
 		
@@ -349,31 +314,17 @@ public class FileEditor extends RTextScrollPane
 		this.currentHighlights.clear();
 	}
 	
-	private void parseXmlContent()
+	private void parseFileContent()
 	{
-		clearAllMessages();
-		
-		XmlFile xmlFile = null;
-		
-		try
+		if(!this.currentHighlights.isEmpty())
 		{
-			xmlFile = XmlFile.parse(syntaxTextArea.getText(), -1);
-		}catch(XmlParseException ex)
-		{
-			xmlFile = ex.getXmlFile();
-			addMessage(new XmlFileMessage(MessageType.ERROR, ex.getMessage(), ex.getLineNumber(), ex.getOffset(), ex.getEndOffset()));
-		}catch(Exception ex)
-		{
-			addMessage(new XmlFileMessage(MessageType.ERROR, "Failed to parse xml file with error: " + ex, 1));
+			clearAllMessages();
 		}
 		
-		if(xmlFile != null)
-		{
-			List<XmlFileMessage> messages = new LinkedList<>();
-			xmlFile.getRootElement().populateTestFileTypes(project, messages);
-			
-			messages.stream().forEach(mssg -> this.addMessage(mssg));
-		}
+		FileParseCollector collector = new FileParseCollector();
+		parsedFileContent = currentFileManager.parseContent(project, file.getName(), syntaxTextArea.getText(), collector);
+		
+		collector.getMessages().stream().forEach(mssg -> this.addMessage(mssg));
 	}
 
 	public int getCaretPosition()
@@ -385,50 +336,20 @@ public class FileEditor extends RTextScrollPane
 	{
 		syntaxTextArea.setCaretPosition(position);
 	}
-
-	private XmlFile getXmlFile()
+	
+	public String getContent()
 	{
-		if(!file.getName().toLowerCase().endsWith(".xml"))
-		{
-			return null;
-		}
-
-		try
-		{
-			XmlFile xmlFile = XmlFile.parse(syntaxTextArea.getText(), -1);
-			return xmlFile;
-		} catch(Exception ex)
-		{
-			logger.trace("Failed to parse xml file: " + file.getName() + " Error: " + ex);
-			return null;
-		}
+		return syntaxTextArea.getText();
+	}
+	
+	public int getCurrentLineNumber()
+	{
+		return syntaxTextArea.getCaretLineNumber();
 	}
 
-	public String getCurrentElementName(String nodeName)
+	public String getCurrentElementName(String nodeType)
 	{
-		XmlFile xmlFile = getXmlFile();
-
-		if(xmlFile == null)
-		{
-			return null;
-		}
-
-		int curLineNo = syntaxTextArea.getCaretLineNumber();
-		Element testSuiteElement = xmlFile.getElement(nodeName, curLineNo);
-
-		if(testSuiteElement == null)
-		{
-			return null;
-		}
-
-		Attribute attr = testSuiteElement.getAttribute("name");
-
-		if(attr == null || StringUtils.isBlank(attr.getValue()))
-		{
-			return null;
-		}
-
-		return attr.getValue();
+		return currentFileManager.getActiveElement(this, nodeType);
 	}
 
 	public String getSelectedText()
@@ -446,15 +367,5 @@ public class FileEditor extends RTextScrollPane
 	public File getFile()
 	{
 		return file;
-	}
-
-	private CompletionProvider getStepsProvider()
-	{
-		return xmlCompletionProvider;
-	}
-
-	public GutterIconInfo addLineTrackingIcon(int line, Icon icon, String tip)
-	{
-		return addLineTrackingIcon(line, icon, tip);
 	}
 }

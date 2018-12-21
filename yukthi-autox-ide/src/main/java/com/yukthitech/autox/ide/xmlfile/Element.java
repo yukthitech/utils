@@ -11,6 +11,8 @@ import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
+import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
@@ -343,7 +345,7 @@ public class Element implements INode
 		return attr.getValue();
 	}
 	
-	private void populateTypesForReserved(Project project, List<XmlFileMessage> messages, boolean recursive)
+	private void populateTypesForReserved(Project project, FileParseCollector collector, boolean recursive)
 	{
 		String beanTypeStr = getReservedAttribute(DefaultParserHandler.ATTR_BEAN_TYPE);
 		DocInformation docInformation = project.getDocInformation();
@@ -356,14 +358,14 @@ public class Element implements INode
 				
 				if(recursive)
 				{
-					populateChildren(project, messages);
+					populateChildren(project, collector);
 				}
 			}catch(Exception ex)
 			{
 				Attribute attr = getAttribute(DefaultParserHandler.ATTR_BEAN_TYPE);
 				
-				messages.add(
-						new XmlFileMessage(MessageType.ERROR, "Invalid bean type specified: " + beanTypeStr, 
+				collector.addMessage(
+						new FileParseMessage(MessageType.ERROR, "Invalid bean type specified: " + beanTypeStr, 
 								startLocation.getStartLineNumber(), 
 								attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
 							)
@@ -384,12 +386,12 @@ public class Element implements INode
 				
 				if(recursive)
 				{
-					populateChildren(project, messages);
+					populateChildren(project, collector);
 				}
 			}catch(Exception ex)
 			{
-				messages.add(
-						new XmlFileMessage(
+				collector.addMessage(
+						new FileParseMessage(
 								MessageType.ERROR, 
 								"Failed to load step type class: " + stepInfo.getJavaType(), 
 								startLocation.getStartLineNumber(),
@@ -413,12 +415,12 @@ public class Element implements INode
 
 				if(recursive)
 				{
-					populateChildren(project, messages);
+					populateChildren(project, collector);
 				}
 			}catch(Exception ex)
 			{
-				messages.add(
-						new XmlFileMessage(
+				collector.addMessage(
+						new FileParseMessage(
 								MessageType.ERROR, 
 								"Failed to load validation type class: " + validationInfo.getJavaType(), 
 								startLocation.getStartLineNumber(),
@@ -431,8 +433,8 @@ public class Element implements INode
 			return;
 		}
 
-		messages.add(
-				new XmlFileMessage(MessageType.ERROR, 
+		collector.addMessage(
+				new FileParseMessage(MessageType.ERROR, 
 						"No matching step or validation found with name: " + name, 
 						startLocation.getStartLineNumber(),
 						this.startLocation.getStartOffset(),
@@ -441,12 +443,12 @@ public class Element implements INode
 				);
 	}
 	
-	public void populateTestFileTypes(Project project, List<XmlFileMessage> messages)
+	public void populateTestFileTypes(Project project, FileParseCollector collector)
 	{
-		this.populateTypes(null, project, messages, true);
+		this.populateTypes(null, project, collector, true);
 	}
 	
-	public void populateTypes(Class<?> parentElementType, Project project, List<XmlFileMessage> messages, boolean recursive)
+	public void populateTypes(Class<?> parentElementType, Project project, FileParseCollector collector, boolean recursive)
 	{
 		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
 		
@@ -456,7 +458,7 @@ public class Element implements INode
 		}
 		else if(XMLConstants.CCG_URI.equals(namespace))
 		{
-			populateTypesForReserved(project, messages, recursive);
+			populateTypesForReserved(project, collector, recursive);
 		}
 		else if(parentElementType == null)
 		{
@@ -486,8 +488,8 @@ public class Element implements INode
 				
 				if(propInfo == null)
 				{
-					messages.add(
-							new XmlFileMessage(
+					collector.addMessage(
+							new FileParseMessage(
 									MessageType.ERROR, 
 									String.format("No matching property '%s' under parent-element bean type: %s", name, parentElementType.getName()), 
 									startLocation.getStartLineNumber(),
@@ -500,8 +502,8 @@ public class Element implements INode
 				
 				if(propInfo.getWriteMethod() == null)
 				{
-					messages.add(
-							new XmlFileMessage(
+					collector.addMessage(
+							new FileParseMessage(
 									MessageType.ERROR, 
 									String.format("No writeable property '%s' under parent-element bean type: %s", name, parentElementType.getName()),
 									startLocation.getStartLineNumber(),
@@ -526,11 +528,11 @@ public class Element implements INode
 
 		if(recursive)
 		{
-			populateChildren(project, messages);
+			populateChildren(project, collector);
 		}
 	}
 	
-	private void populateChildren(Project project, List<XmlFileMessage> messages)
+	private void populateChildren(Project project, FileParseCollector collector)
 	{
 		for(INode node : this.nodes)
 		{
@@ -540,7 +542,7 @@ public class Element implements INode
 			}
 			
 			Element selem = (Element) node;
-			selem.populateTypes(elementType, project, messages, true);
+			selem.populateTypes(elementType, project, collector, true);
 		}
 		
 		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
@@ -556,8 +558,8 @@ public class Element implements INode
 			
 			if(propInfo == null)
 			{
-				messages.add(
-						new XmlFileMessage(
+				collector.addMessage(
+						new FileParseMessage(
 								MessageType.ERROR, "No matching property found for attribute: " + attr.getName(), 
 								startLocation.getStartLineNumber(),
 								attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
@@ -568,7 +570,7 @@ public class Element implements INode
 			
 			if(propInfo.getWriteMethod() == null)
 			{
-				messages.add(new XmlFileMessage(
+				collector.addMessage(new FileParseMessage(
 							MessageType.ERROR, "No writeable property found for attribute with name: " + attr.getName(), 
 							startLocation.getStartLineNumber(),
 							attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
@@ -587,7 +589,7 @@ public class Element implements INode
 	 * @param messages
 	 * @return
 	 */
-	public Class<?> findElementType(Project project, List<XmlFileMessage> messages)
+	public Class<?> findElementType(Project project, FileParseCollector collector)
 	{
 		if(elementType != null)
 		{
@@ -599,14 +601,14 @@ public class Element implements INode
 			return TestDataFile.class;
 		}
 		
-		Class<?> parentElemType = parentElement.findElementType(project, messages);
+		Class<?> parentElemType = parentElement.findElementType(project, collector);
 		
 		if(parentElemType == null)
 		{
 			return null;
 		}
 		
-		populateTypes(parentElemType, project, messages, false);
+		populateTypes(parentElemType, project, collector, false);
 		
 		return this.elementType;
 	}

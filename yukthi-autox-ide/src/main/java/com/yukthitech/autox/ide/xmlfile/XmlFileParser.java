@@ -14,6 +14,14 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class XmlFileParser
 {
+	public static Pattern PATTERN_VER_TAG_OPENER = Pattern.compile("\\<\\?");
+	
+	public static Pattern PATTERN_VER_TAG_CLOSER = Pattern.compile("\\?\\>");
+	
+	public static Pattern PATTERN_COMMENT_TAG_OPENER = Pattern.compile("\\<\\!\\-\\-");
+	
+	public static Pattern PATTERN_COMMENT_TAG_CLOSER = Pattern.compile("\\-\\-\\>");
+
 	public static Pattern PATTERN_TAG_OPENER = Pattern.compile("\\<");
 	
 	public static Pattern PATTERN_TAG_CLOSER = Pattern.compile("\\s*\\>");
@@ -356,6 +364,20 @@ public class XmlFileParser
 
 		String textContent = scanner.skipTill(PATTERN_TAG_OPENER);
 		
+		if(scanner.hasNext(PATTERN_VER_TAG_OPENER))
+		{
+			scanner.skipTill(PATTERN_VER_TAG_CLOSER);
+			scanner.skip(PATTERN_VER_TAG_CLOSER);
+			return parseNextContent();
+		}
+		
+		if(scanner.hasNext(PATTERN_COMMENT_TAG_OPENER))
+		{
+			scanner.skipTill(PATTERN_COMMENT_TAG_CLOSER);
+			scanner.skip(PATTERN_COMMENT_TAG_CLOSER);
+			return parseNextContent();
+		}
+
 		if(textContent == null)
 		{
 			curPos = content.length() - 1;
