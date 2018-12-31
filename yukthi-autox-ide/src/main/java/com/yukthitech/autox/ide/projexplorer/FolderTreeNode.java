@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.swing.Icon;
 
+import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
@@ -24,11 +25,11 @@ public class FolderTreeNode extends BaseTreeNode
 
 	private Project project;
 	
-	private ProjectExplorer projectExplorer;
+	protected ProjectExplorer projectExplorer;
 	
 	protected FolderTreeNode(ProjectExplorer projectExplorer, Icon icon, Project project, String name, File folder)
 	{
-		super(icon, name);
+		super(projectExplorer.getProjectTreeModel(), icon, name);
 
 		this.project = project;
 		this.folder = folder;
@@ -157,6 +158,8 @@ public class FolderTreeNode extends BaseTreeNode
 
 			index++;
 		}
+		
+		super.checkErrorStatus();
 	}
 
 	public File getFolder()
@@ -167,5 +170,79 @@ public class FolderTreeNode extends BaseTreeNode
 	public Project getProject()
 	{
 		return project;
+	}
+	
+	public FileTreeNode getFileNode(File file)
+	{
+		String relativePath = IdeFileUtils.getRelativePath(folder, file);
+		
+		if(relativePath == null || relativePath.length() == 0)
+		{
+			return null;
+		}
+		
+		String path[] = relativePath.split("\\" + File.separator);
+		return getFileNode(file, path, 0);
+	}
+	
+	public FileTreeNode getFileNode(File file, String path[], int index)
+	{
+		int count = super.getChildCount();
+		
+		if(count <= 0)
+		{
+			return null;
+		}
+
+		//from second level
+		if(index > 0)
+		{
+			//before proceeding further, current folder matches with parent in path
+			if(!folder.getName().equals(path[index - 1]))
+			{
+				return null;
+			}
+		}
+		
+		boolean immediateChild = ( index == (path.length - 1) );
+		BaseTreeNode node = null;
+		
+		for(int i = 0; i < count; i++)
+		{
+			node = (BaseTreeNode) super.getChildAt(i);
+			
+			if(node instanceof FolderTreeNode)
+			{
+				if(immediateChild)
+				{
+					continue;
+				}
+				
+				FolderTreeNode folderNode = (FolderTreeNode) node;
+				FileTreeNode fileNode = folderNode.getFileNode(file, path, index + 1);
+				
+				if(fileNode != null)
+				{
+					return fileNode;
+				}
+			}
+			
+			if(!immediateChild)
+			{
+				continue;
+			}
+			
+			if(node instanceof FileTreeNode)
+			{
+				FileTreeNode fileNode = (FileTreeNode) node;
+				
+				if(fileNode.getFile().getName().equals(path[index]))
+				{
+					return fileNode;
+				}
+			}
+		}
+		
+		return null;
 	}
 }

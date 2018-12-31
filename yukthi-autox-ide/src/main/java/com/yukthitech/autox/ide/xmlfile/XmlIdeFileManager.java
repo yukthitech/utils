@@ -1,7 +1,10 @@
 package com.yukthitech.autox.ide.xmlfile;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,8 +29,26 @@ public class XmlIdeFileManager implements IIdeFileManager
 {
 	private static Logger logger = LogManager.getLogger(XmlIdeFileManager.class);
 	
+	private static class XmlParseDetails
+	{
+		private FileParseCollector collector;
+		
+		private Object result;
+		
+		private long lastModifiedTime;
+
+		public XmlParseDetails(FileParseCollector collector, Object result, long lastModifiedTime)
+		{
+			this.collector = collector;
+			this.result = result;
+			this.lastModifiedTime = lastModifiedTime;
+		}
+	}
+	
 	@Autowired
 	private IdeNotificationPanel ideNotificationPanel;
+	
+	private Map<File, XmlParseDetails> parseCacheMap = new HashMap<>();
 	
 	@Override
 	public boolean isSuppored(File file)
@@ -40,6 +61,34 @@ public class XmlIdeFileManager implements IIdeFileManager
 	{
 		XmlCompletionProvider xmlCompletionProvider = new XmlCompletionProvider(fileEditor.getProject(), fileEditor);
 		return xmlCompletionProvider;
+	}
+	
+	@Override
+	public synchronized Object parseFile(Project project, File file, FileParseCollector collector)
+	{
+		XmlParseDetails parseDetails = parseCacheMap.get(file);
+		
+		if(parseDetails != null && parseDetails.lastModifiedTime == file.lastModified())
+		{
+			collector.load(parseDetails.collector);
+			return parseDetails.result;
+		}
+		
+		FileParseCollector newCollector = new FileParseCollector();
+		Object result = null;
+		
+		try
+		{
+			result = parseContent(project, file.getName(), FileUtils.readFileToString(file), newCollector);
+			collector.load(newCollector);
+		}catch(Exception ex)
+		{
+			logger.debug("Failed to parse xml file: " + file.getPath(), ex);
+			collector.addMessage(new FileParseMessage(MessageType.ERROR, "Failed to parse xml file with error: " + ex, 1));
+		}
+		
+		parseCacheMap.put(file, new XmlParseDetails(newCollector, result, file.lastModified()));
+		return result;
 	}
 
 	@Override

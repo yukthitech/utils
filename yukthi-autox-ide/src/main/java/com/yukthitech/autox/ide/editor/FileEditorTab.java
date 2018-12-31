@@ -8,7 +8,10 @@ import javax.swing.JPopupMenu;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IMaximizationListener;
+import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.MaximizableTabbedPaneTab;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -33,6 +36,9 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	@Autowired
 	private ActionCollection actionCollection;
 	
+	@Autowired
+	private IdeFileManagerFactory ideFileManagerFactory;
+	
 	private Project project;
 	
 	private File file;
@@ -40,6 +46,8 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	private JPopupMenu popupMenu;
 	
 	private FileEditor fileEditor;
+	
+	private IIdeFileManager ideFileManager;
 	
 	public FileEditorTab(Project project, File file, FileEditor fileEditor, FileEditorTabbedPane fileTabPane, IMaximizationListener maximizationListener)
 	{
@@ -67,6 +75,9 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 				fileContentSaved(file);
 			}
 		});
+		
+		this.ideFileManager = ideFileManagerFactory.getFileManager(file);
+		parseFile();
 	}
 
 	@Override
@@ -136,6 +147,17 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 		}
 		
 		changeLabel.setText("");
+
+		parseFile();
+	}
+	
+	private void parseFile()
+	{
+		FileParseCollector collector = new FileParseCollector();
+		ideFileManager.parseFile(project, file, collector);
+		
+		super.setErrored(collector.getErrorCount() > 0);
+		super.setWarned(collector.getWarningCount() > 0);
 	}
 	
 	public boolean isFileChanged()

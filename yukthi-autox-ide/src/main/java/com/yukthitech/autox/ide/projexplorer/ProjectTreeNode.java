@@ -15,13 +15,10 @@ public class ProjectTreeNode extends FolderTreeNode
 
 	private Project project;
 	
-	private ProjectExplorer projectExplorer;
-
 	public ProjectTreeNode(ProjectExplorer projectExplorer, Project project)
 	{
 		super(projectExplorer, IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
 
-		this.projectExplorer = projectExplorer;
 		this.project = project;
 		reload(false);
 	}

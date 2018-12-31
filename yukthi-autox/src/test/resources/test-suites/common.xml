@@ -1,8 +1,8 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<setup>
 		<ccg:log message="Message from global setup."/>
-		
-		<ccg:ddlQuery dataSourceName="dataSource">
+	
+		<ccg:sql-ddl-query dataSourceName="dataSource">
 			<query>
 				CREATE TABLE EMPLOYEE
 				(
@@ -10,16 +10,14 @@
 					NAME	VARCHAR(100)
 				)
 			</query>
-		</ccg:ddlQuery>
-		
+		</ccg:sql-ddl-query>
 	</setup>
-	
+
 	<cleanup>
 		<ccg:log message="Message from global cleanup."/>
-		<ccg:ddlQuery dataSourceName="dataSource">
-			<query>
-				DROP TABLE EMPLOYEE
-			</query>
-		</ccg:ddlQuery>
+	
+		<ccg:sql-ddl-query dataSourceName="dataSource">
+			<query>DROP TABLE EMPLOYEE</query>
+		</ccg:sql-ddl-query>
 	</cleanup>
 </testData>

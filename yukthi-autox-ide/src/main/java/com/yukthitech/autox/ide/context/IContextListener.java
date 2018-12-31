@@ -72,4 +72,13 @@ public interface IContextListener
 	
 	public default void projectStateChanged(Project project)
 	{}
+	
+	/**
+	 * Invoked when a file selection is changed.
+	 *
+	 * @param file new active file
+	 * @param source ui component which observed this change.
+	 */
+	public default void activeFileChanged(File file, Object source)
+	{}
 }

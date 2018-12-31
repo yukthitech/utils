@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JOptionPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,6 +53,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	private ProjectActions projectActions;
 	
 	private Map<String, FileEditor> pathToEditor = new HashMap<>();
+	
+	private int currentTabIndex = -1;
 	
 	@PostConstruct
 	private void init()
@@ -93,6 +97,35 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 						fileEditor.setCaretPosition(fileState.getCursorPositon());
 					}
 				}
+			}
+			
+			@Override
+			public void activeFileChanged(File file, Object source)
+			{
+				if(source == FileEditorTabbedPane.this)
+				{
+					return;
+				}
+				
+				selectProjectFile(ideContext.getActiveProject(), file);
+			}
+		});
+		
+		super.addChangeListener(new ChangeListener()
+		{
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				int newIdx = FileEditorTabbedPane.this.getSelectedIndex();
+				
+				if(newIdx < 0 || currentTabIndex == newIdx)
+				{
+					return;
+				}
+				
+				currentTabIndex = newIdx;
+				FileEditor editor = (FileEditor) FileEditorTabbedPane.this.getComponentAt(newIdx);
+				ideContext.getProxy().activeFileChanged(editor.getFile(), FileEditorTabbedPane.this);
 			}
 		});
 	}
@@ -168,6 +201,43 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		return fileEditor;
 	}
 	
+	private void selectProjectFile(Project project, File file)
+	{
+		if(!file.exists())
+		{
+			logger.warn("Tried to open non-existing project file '{}' under project '{}'. Ignoring open request.", 
+					file.getPath(), project.getName());
+			return;
+		}
+		
+		String canonicalPath = null;
+		
+		try
+		{
+			canonicalPath = file.getCanonicalPath();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An exception occurred while fetching cannonical path of file: {}", file.getPath(), ex);
+		}
+		
+		String projectPath = project.getBaseFolderPath();
+		
+		if(!canonicalPath.startsWith(projectPath))
+		{
+			logger.warn("Tried to open project file '{}' under project '{}'. Ignoring open request specified file as it is not part of project base folder: {}", 
+					canonicalPath, project.getName(), projectPath);
+			return;
+		}
+
+		FileEditor fileEditor = pathToEditor.get(canonicalPath);
+		
+		if(fileEditor != null)
+		{
+			logger.debug("Selecting existing tab for file: {}", canonicalPath);
+			super.setSelectedComponent(fileEditor);
+		}
+	}
+
 	public FileEditor getCurrentFileEditor()
 	{
 		return (FileEditor) super.getSelectedComponent();

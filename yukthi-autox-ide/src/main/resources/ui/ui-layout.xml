@@ -44,7 +44,7 @@
 			<item label="-" />
 			
 			<item label="Format Code" mnemonic="F" action="formatCode">
-				<short-key ctrl="true" key="F"/>
+				<short-key ctrl="true" shift="true" key="F"/>
 			</item>
 		</menu>
 

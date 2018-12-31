@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,6 +42,12 @@ public class MaximizableTabbedPaneTab extends JPanel
 			button.setForeground(INACTIVE_COLOR);
 		}
 	};
+	
+	private static ImageIcon ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_error.png", 14);
+	
+	private static ImageIcon WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_warn.png", 14);
+
+	protected JLabel iconLabel = new JLabel();
 
 	protected JLabel changeLabel = new JLabel();
 	
@@ -53,6 +60,10 @@ public class MaximizableTabbedPaneTab extends JPanel
 	private Component component;
 	
 	private IMaximizationListener maximizationListener;
+	
+	private boolean errored;
+	
+	private boolean warned;
 	
 	public MaximizableTabbedPaneTab(String text, MaximizableTabbedPane parentPane, Component component, IMaximizationListener maximizationListener)
 	{
@@ -77,6 +88,7 @@ public class MaximizableTabbedPaneTab extends JPanel
 		closeButton.setToolTipText("Close");
 
 		super.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		super.add(iconLabel);
 		super.add(changeLabel);
 		super.add(label);
 		super.add(closeButton);
@@ -145,6 +157,44 @@ public class MaximizableTabbedPaneTab extends JPanel
 		}
 	}
 	
+	public boolean isErrored()
+	{
+		return errored;
+	}
+
+	public void setErrored(boolean errored)
+	{
+		this.errored = errored;
+		updateIconLabel();
+	}
+
+	public boolean isWarned()
+	{
+		return warned;
+	}
+
+	public void setWarned(boolean warned)
+	{
+		this.warned = warned;
+		updateIconLabel();
+	}
+	
+	protected void updateIconLabel()
+	{
+		if(errored)
+		{
+			iconLabel.setIcon(ERROR_ICON);
+		}
+		else if(warned)
+		{
+			iconLabel.setIcon(WARN_ICON);
+		}
+		else
+		{
+			iconLabel.setIcon(null);
+		}
+	}
+
 	protected void displayPopup(MouseEvent e)
 	{
 		/*

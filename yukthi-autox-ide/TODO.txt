@@ -1,7 +1,5 @@
 Errors highlighting
-	In project explorer, When a file is errored/warned, the status should be highlighted on the parent folder tree recursively.
-	The errored/warned file tab also should have error icon
-	Once the error is cleaned (on save), the file in tab, project explorer and its parent tree should be updated recursively.
+	fies in test suite folders only should be compiled
 
 Find and replace
 	With in the file
@@ -30,10 +28,14 @@ Others
 	Ability to hide/display views
 		state should be persisted in ide state
 	
-	Auto expand project tree
-	
-	auto highlight file in tree based on file opened and vice versa (should be optional)
-	
 	CTRL + SHIFT + R => to open resources
 	
 	maven based class path and packaging
+
+	
+file managers for standard files
+
+If auto complete is triggered on existing node (cursor is followed by > instead of <), attributes and end node should not be included.
+
+common.xml formating is not working properly
+	in sql query 

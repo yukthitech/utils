@@ -5,14 +5,14 @@
 		<testCase name="testPost">
 			<description>Test post api invocation</description>
 			<wrap:steps>
-				<ccg:invokePost uri="/emp/save">
+				<ccg:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
 						{
 							"name" : "Emp1",
 							"address": "some address"
 						}
 					]]></body>
-				</ccg:invokePost>
+				</ccg:rest-invoke-post>
 				
 				<ccg:setXpath valueExpression="//id" name="emp1_id">
 					<source>ref: attr.response</source>
@@ -27,7 +27,7 @@
 							"address": "some address"
 						}
 					]]></body>
-				</ccg:invokePost>
+				</ccg:rest-invoke-post>
 				
 				<ccg:setXpath valueExpression="//id" name="emp2_id">
 					<source>ref:attr.response</source>
@@ -39,9 +39,9 @@
 		<testCase name="testGet" dependencies="testPost">
 			<description>Tests get api invocation</description>
 
-			<ccg:invokeGet uri="/emp/get/{id}">
+			<ccg:rest-invoke-get uri="/emp/get/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
-			</ccg:invokeGet>
+			</ccg:rest-invoke-get>
 			
 			<ccg:validateXpathValue valueExpression="//name" value="Emp2" source="ref: attr.response"/>
 		</testCase>
@@ -55,9 +55,9 @@
 			
 			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
 			
-			<ccg:invokeGet uri="/emp/get/{id}">
+			<ccg:rest-invoke-get uri="/emp/get/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
-			</ccg:invokeGet>
+			</ccg:rest-invoke-get>
 			
 			<!-- As emp2 is deleted, get should result in 400 error -->
 			<ccg:validateContextParam expression="attr.result.statusCode" value="400" />

@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.xmlfile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -86,6 +87,7 @@ public class XmlFileParser
 
 			builder.append("Start: ").append(start);
 			builder.append(",").append("End: ").append(end);
+			builder.append(",").append("Line: ").append(line);
 
 			builder.append("]");
 			return builder.toString();
@@ -155,7 +157,7 @@ public class XmlFileParser
 			}
 		}
 		
-		throw new InvalidStateException("Failed to find range for position {}", pos);
+		throw new InvalidStateException("Failed to find range for position {}\nCurrent Ranges: {}", pos, Arrays.toString(lineRanges));
 	}
 	
 	private String[] split(String name, int offset, int lineNo, int colNo)

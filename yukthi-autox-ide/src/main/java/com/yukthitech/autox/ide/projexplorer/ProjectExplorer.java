@@ -1,17 +1,20 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.event.TreeSelectionEvent;
@@ -19,7 +22,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Component;
 import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.ActionCollection;
@@ -47,8 +50,14 @@ public class ProjectExplorer extends JPanel
 	
 	private static Logger logger = LogManager.getLogger(ProjectExplorer.class);
 	
+	private static ImageIcon EDITOR_LINK_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/toggle-button.png", 16);
+	
+	private static final String STATE_ATTR_EDITOR_LINK_BUTTON_STATE = "ProjectExplorer.editorLinkState";
+	
 	private JTree tree = new JTree();
-	private ProjectsTreeModel treeModel;
+	private JScrollPane treeScrollPane = new JScrollPane(tree);
+	
+	private ProjectsTreeModel projectTreeModel;
 
 	@Autowired
 	private IdeContext ideContext;
@@ -85,6 +94,10 @@ public class ProjectExplorer extends JPanel
 	@Autowired
 	private RestRequest restRequest;
 	
+	private JPanel iconPanel = new JPanel();
+	
+	private JToggleButton editorLinkButton = new JToggleButton();
+
 	/**
 	 * Create the panel.
 	 */
@@ -119,8 +132,8 @@ public class ProjectExplorer extends JPanel
 		
 		addMouseListener(listener);
 		
-		treeModel = new ProjectsTreeModel();
-		tree.setModel(treeModel);
+		projectTreeModel = new ProjectsTreeModel();
+		tree.setModel(projectTreeModel);
 		tree.setRootVisible(false);
 		tree.setCellRenderer(new BaseTreeNodeRenderer());
 
@@ -135,6 +148,13 @@ public class ProjectExplorer extends JPanel
 		tree.getInputMap().put(KeyStroke.getKeyStroke("ctrl X"), "dummy");
 		tree.getInputMap().put(KeyStroke.getKeyStroke("F2"), "dummy");
 		
+		//set tool bar panel
+		super.add(iconPanel, BorderLayout.NORTH);
+		iconPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 4, 4));
+		
+		editorLinkButton.setIcon(EDITOR_LINK_ICON);
+		iconPanel.add(editorLinkButton);
+		
 		tree.addTreeSelectionListener(new TreeSelectionListener()
 		{
 			@Override
@@ -147,6 +167,11 @@ public class ProjectExplorer extends JPanel
 				{
 					FileTreeNode fileNode = (FileTreeNode) treeNode;
 					ideContext.setActiveDetails(fileNode.getProject(), fileNode.getFile());
+					
+					if(editorLinkButton.isSelected())
+					{
+						ideContext.getProxy().activeFileChanged(fileNode.getFile(), ProjectExplorer.this);
+					}
 				}
 				else if(treeNode instanceof FolderTreeNode)
 				{
@@ -156,7 +181,7 @@ public class ProjectExplorer extends JPanel
 			}
 		});
 		
-		super.add(tree);
+		super.add(treeScrollPane, BorderLayout.CENTER);
 		
 		ideContext.addContextListener(new IContextListener()
 		{
@@ -167,6 +192,8 @@ public class ProjectExplorer extends JPanel
 				{
 					state.addOpenProject(proj);
 				}
+				
+				state.setAtribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE, editorLinkButton.isSelected());
 			}
 			
 			@Override
@@ -176,6 +203,11 @@ public class ProjectExplorer extends JPanel
 				{
 					openProject(project.getPath());
 				}
+				
+				if(Boolean.TRUE.equals(state.getAttribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE)))
+				{
+					editorLinkButton.setSelected(true);
+				}
 			}
 			
 			@Override
@@ -183,7 +215,60 @@ public class ProjectExplorer extends JPanel
 			{
 				reloadProjectNode(project);
 			}
+
+			@Override
+			public void fileSaved(File file)
+			{
+				FileTreeNode fileNode = getFileNode(file);
+				
+				if(fileNode == null)
+				{
+					return;
+				}
+				
+				checkFile(fileNode);
+			}
+			
+			@Override
+			public void activeFileChanged(File file, Object source)
+			{
+				if(source == ProjectExplorer.this)
+				{
+					return;
+				}
+				
+				setActiveFile(file);
+			}
 		});
+	}
+	
+	private void setActiveFile(File file)
+	{
+		if(!editorLinkButton.isSelected())
+		{
+			return;
+		}
+		
+		FileTreeNode node = getFileNode(file);
+		
+		if(node == null)
+		{
+			return;
+		}
+		
+		tree.setSelectionPath(new TreePath(node.getPath()));
+	}
+	
+	public FileTreeNode getFileNode(File file)
+	{
+		ProjectTreeNode projNode = projectTreeModel.getProjectNode(ideContext.getActiveProject());
+		
+		if(projNode == null)
+		{
+			return null;
+		}
+		
+		return projNode.getFileNode(file);
 	}
 	
 	public void setActiveTreeNode(BaseTreeNode activeTreeNode)
@@ -222,7 +307,7 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		treeModel.addProject(new ProjectTreeNode(this, project));
+		projectTreeModel.addProject(new ProjectTreeNode(this, project));
 		
 		projects.add(project);
 		restRequest.addProject(project);
@@ -316,7 +401,7 @@ public class ProjectExplorer extends JPanel
 	
 	public void reloadProjectNode(Project project)
 	{
-		ProjectTreeNode node = treeModel.getProjectNode(project);
+		ProjectTreeNode node = projectTreeModel.getProjectNode(project);
 		
 		if(node == null)
 		{
@@ -324,7 +409,7 @@ public class ProjectExplorer extends JPanel
 		}
 		
 		node.reload(true);
-		treeModel.reload(node);
+		projectTreeModel.reload(node);
 	}
 	
 	public void reloadActiveNode()
@@ -336,7 +421,7 @@ public class ProjectExplorer extends JPanel
 		}
 
 		activeTreeNode.reload(true);
-		treeModel.reload(activeTreeNode);
+		projectTreeModel.reload(activeTreeNode);
 	}
 
 	
@@ -355,7 +440,7 @@ public class ProjectExplorer extends JPanel
 		}
 		
 		parentNode.reload(true);
-		treeModel.reload(parentNode);
+		projectTreeModel.reload(parentNode);
 	}
 	
 	public void checkFile(FileTreeNode fileNode)
@@ -369,20 +454,19 @@ public class ProjectExplorer extends JPanel
 		
 			try
 			{
-				fileManager.parseContent(fileNode.getProject(), file.getName(), FileUtils.readFileToString(file), collector);
+				fileManager.parseFile(fileNode.getProject(), file, collector);
 				
-				if(collector.getErrorCount() > 0)
-				{
-					fileNode.setErrored(true);
-				}
-				else if(collector.getWarningCount() > 0)
-				{
-					fileNode.setWarned(true);
-				}
-			} catch(IOException ex)
+				fileNode.setErrored(collector.getErrorCount() > 0);
+				fileNode.setWarned(collector.getWarningCount() > 0);
+			} catch(Exception ex)
 			{
 				logger.error("An error occurred while loading file: {}", file.getPath(), ex);
 			}
 		}
+	}
+	
+	public ProjectsTreeModel getProjectTreeModel()
+	{
+		return projectTreeModel;
 	}
 }

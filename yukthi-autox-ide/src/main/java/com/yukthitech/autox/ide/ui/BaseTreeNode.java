@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -47,11 +48,17 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	 */
 	private Map<String, BaseTreeNode> childNodes = new LinkedHashMap<>();
 	
-	public BaseTreeNode()
-	{}
-
-	public BaseTreeNode(Icon icon, String label)
+	private DefaultTreeModel model;
+	
+	public BaseTreeNode(DefaultTreeModel model)
 	{
+		this.model = model;
+	}
+
+	public BaseTreeNode(DefaultTreeModel model, Icon icon, String label)
+	{
+		this(model);
+		
 		this.icon = icon;
 		this.label = label;
 	}
@@ -115,6 +122,39 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	{
 		return errored;
 	}
+	
+	protected boolean checkErrorStatus()
+	{
+		boolean isErr = false;
+		
+		for(BaseTreeNode cnode : this.childNodes.values())
+		{
+			if(cnode.isErrored())
+			{
+				isErr = true;
+			}
+		}
+		
+		if(this.errored == isErr)
+		{
+			return false;
+		}
+		
+		this.errored = isErr;
+		
+		if(parent != null && (parent instanceof BaseTreeNode))
+		{
+			boolean parentLoaded = ((BaseTreeNode)parent).checkErrorStatus();
+			
+			if(parentLoaded)
+			{
+				return true;
+			}
+		}
+		
+		model.reload(this);
+		return true;
+	}
 
 	/**
 	 * Sets the flag indicating if the current resource has errors.
@@ -123,13 +163,30 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	 */
 	public void setErrored(boolean errored)
 	{
+		if(this.errored == errored)
+		{
+			return;
+		}
+		
 		this.errored = errored;
+		
+		if(parent != null && (parent instanceof BaseTreeNode))
+		{
+			boolean parentLoaded = ((BaseTreeNode)parent).checkErrorStatus();
+			
+			if(parentLoaded)
+			{
+				return;
+			}
+		}
+		
+		model.reload(this);
 	}
 
 	/**
-	 * Gets the flag indicating if the curent resource has warnings.
+	 * Gets the flag indicating if the current resource has warnings.
 	 *
-	 * @return the flag indicating if the curent resource has warnings
+	 * @return the flag indicating if the current resource has warnings
 	 */
 	public boolean isWarned()
 	{
@@ -137,13 +194,23 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	}
 
 	/**
-	 * Sets the flag indicating if the curent resource has warnings.
+	 * Sets the flag indicating if the current resource has warnings.
 	 *
-	 * @param warned the new flag indicating if the curent resource has warnings
+	 * @param warned the new flag indicating if the current resource has warnings
 	 */
 	public void setWarned(boolean warned)
 	{
+		if(this.warned == warned)
+		{
+			return;
+		}
+		
 		this.warned = warned;
+		
+		if(parent != null && (parent instanceof BaseTreeNode))
+		{
+			((BaseTreeNode)parent).setWarned(warned);
+		}
 	}
 
 	public void addChild(String id, BaseTreeNode node)

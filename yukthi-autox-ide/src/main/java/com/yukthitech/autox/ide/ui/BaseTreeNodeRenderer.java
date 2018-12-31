@@ -13,9 +13,13 @@ public class BaseTreeNodeRenderer extends DefaultTreeCellRenderer implements Tre
 {
 	private static final long serialVersionUID = 1L;
 	
-	private static Image ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_error.png", 12).getImage();
+	private static final int ICON_HEIGHT = 12;
 	
-	private static Image WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_warn.png", 12).getImage();
+	private static final int ICON_BORDER = 5;
+	
+	private static Image ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_error.png", ICON_HEIGHT).getImage();
+	
+	private static Image WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_warn.png", ICON_HEIGHT).getImage();
 	
 	private boolean hasErrors = false;
 	
@@ -45,13 +49,15 @@ public class BaseTreeNodeRenderer extends DefaultTreeCellRenderer implements Tre
 	{
 		super.paintComponent(g);
 		
+		int height = super.getSize().height;
+		
 		if(hasErrors)
 		{
-			g.drawImage(ERROR_ICON, -5, -5, this);
+			g.drawImage(ERROR_ICON, -ICON_BORDER, height - ICON_HEIGHT - 3, this);
 		}
 		else if(hasWarnings)
 		{
-			g.drawImage(WARN_ICON, -5, -5, this);
+			g.drawImage(WARN_ICON, -ICON_BORDER, height - ICON_HEIGHT - 3, this);
 		}
 	}
 }

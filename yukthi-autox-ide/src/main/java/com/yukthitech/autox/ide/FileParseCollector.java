@@ -18,6 +18,14 @@ public class FileParseCollector
 	
 	private int warningCount;
 	
+	public void load(FileParseCollector collector)
+	{
+		for(FileParseMessage mssg : collector.messages)
+		{
+			addMessage(mssg);
+		}
+	}
+	
 	public void addMessage(FileParseMessage mssg)
 	{
 		this.messages.add(mssg);

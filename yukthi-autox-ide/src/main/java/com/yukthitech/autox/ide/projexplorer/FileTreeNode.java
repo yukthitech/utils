@@ -23,6 +23,8 @@ public class FileTreeNode extends BaseTreeNode
 
 	public FileTreeNode(ProjectExplorer projectExplorer, Project project, String name, File file, BiConsumer<Project, File> fileReloadOp)
 	{
+		super(projectExplorer.getProjectTreeModel());
+		
 		if(project == null)
 		{
 			throw new NullPointerException("Project can not be null");

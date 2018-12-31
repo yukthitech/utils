@@ -36,6 +36,17 @@ public interface IIdeFileManager
 	public CompletionProvider getCompletionProvider(FileEditor fileEditor);
 	
 	/**
+	 * Parses the file and adds the errors/warnings if any to messages.
+	 * @param project Project in which file is present.
+	 * @param file file whose content needs to be parsed.
+	 * @param content content to be parsed
+	 * @param collector collector to collect messages.
+	 * 
+	 * @return parsed file content object.
+	 */
+	public Object parseFile(Project project, File file, FileParseCollector collector);
+	
+	/**
 	 * Parses the specified content and add the errors/warnings messages to messages.
 	 * @param project Project in which file is present.
 	 * @param name name of the file which holds this content.
