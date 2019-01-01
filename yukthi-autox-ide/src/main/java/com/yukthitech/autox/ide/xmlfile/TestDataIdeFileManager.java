@@ -3,27 +3,33 @@ package com.yukthitech.autox.ide.xmlfile;
 import java.io.File;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.AbstractIdeFileManager;
 import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IdeFileUtils;
+import com.yukthitech.autox.ide.IdeNotificationPanel;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.model.Project;
 
 /**
- * Ide file manager for xml files.
+ * Ide file manager for test-data files.
  * @author akiran
  */
 @Service
-public class XmlIdeFileManager extends AbstractIdeFileManager
+public class TestDataIdeFileManager extends AbstractIdeFileManager
 {
-	private static Logger logger = LogManager.getLogger(XmlIdeFileManager.class);
+	private static Logger logger = LogManager.getLogger(TestDataIdeFileManager.class);
+	
+	@Autowired
+	private IdeNotificationPanel ideNotificationPanel;
 	
 	@Override
 	public boolean isSuppored(Project project, File file)
@@ -41,17 +47,18 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 			
 			if(IdeFileUtils.getRelativePath(folder, file) != null)
 			{
-				return false;
+				return true;
 			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	@Override
 	public CompletionProvider getCompletionProvider(FileEditor fileEditor)
 	{
-		return null;
+		XmlCompletionProvider xmlCompletionProvider = new XmlCompletionProvider(fileEditor.getProject(), fileEditor);
+		return xmlCompletionProvider;
 	}
 	
 	@Override
@@ -72,6 +79,11 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 			collector.addMessage(new FileParseMessage(MessageType.ERROR, "Failed to parse xml file with error: " + ex, 1));
 		}
 		
+		if(xmlFile != null && xmlFile.getRootElement() != null)
+		{
+			xmlFile.getRootElement().populateTestFileTypes(project, collector);
+		}
+		
 		return xmlFile;
 	}
 
@@ -84,24 +96,80 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 	@Override
 	public String getToolTip(FileEditor fileEditor, Object parsedFile, int offset)
 	{
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
 	public String getActiveElement(FileEditor fileEditor, String nodeType)
 	{
-		return null;
+		XmlFile xmlFile = getXmlFile(fileEditor.getFile(), fileEditor.getContent());
+
+		if(xmlFile == null)
+		{
+			return null;
+		}
+
+		int curLineNo = fileEditor.getCurrentLineNumber();
+		Element testSuiteElement = xmlFile.getElement(nodeType, curLineNo);
+
+		if(testSuiteElement == null)
+		{
+			return null;
+		}
+
+		Attribute attr = testSuiteElement.getAttribute("name");
+
+		if(attr == null || StringUtils.isBlank(attr.getValue()))
+		{
+			return null;
+		}
+
+		return attr.getValue();
 	}
 
+	private XmlFile getXmlFile(File file, String content)
+	{
+		if(!file.getName().toLowerCase().endsWith(".xml"))
+		{
+			return null;
+		}
+
+		try
+		{
+			XmlFile xmlFile = XmlFile.parse(content, -1);
+			return xmlFile;
+		} catch(Exception ex)
+		{
+			logger.trace("Failed to parse xml file: " + file.getName() + " Error: " + ex);
+			return null;
+		}
+	}
+	
 	@Override
 	public boolean isStepInsertablePosition(FileEditor fileEditor)
 	{
-		return false;
+		XmlFileLocation loc = getXmlFileLocation(fileEditor);
+		
+		if(loc == null)
+		{
+			return false;
+		}
+		
+		return (loc.getType() == XmlLocationType.CHILD_ELEMENT);
 	}
 
 	@Override
 	public XmlFileLocation getXmlFileLocation(FileEditor fileEditor)
 	{
-		return null;
+		try
+		{
+			XmlFileLocation loc = XmlLoctionAnalyzer.getLocation(fileEditor.getContent(), fileEditor.getCaretPosition());
+			return loc;
+		}catch(Exception ex)
+		{
+			ideNotificationPanel.displayWarning("Failed to parse xml till current location. Error: " + ex.getMessage());
+			return null;
+		}
 	}
 }

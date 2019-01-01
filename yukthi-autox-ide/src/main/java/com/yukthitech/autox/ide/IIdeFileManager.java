@@ -19,7 +19,7 @@ public interface IIdeFileManager
 	 * @param file file to check
 	 * @return true if supported
 	 */
-	public boolean isSuppored(File file);
+	public boolean isSuppored(Project project, File file);
 	
 	/**
 	 * Fetches style to be used for specified extension.

@@ -1,9 +1,12 @@
-Errors highlighting
-	fies in test suite folders only should be compiled
-
 Find and replace
 	With in the file
-	among the file tree
+	
+	goto line #
+	
+	CTRL + SHIFT + R => to open resources
+
+	Ability to hide/display views
+		state should be persisted in ide state
 
 Execution changes
 	ability to execute all test cases in a folder or test-suite folder
@@ -25,17 +28,17 @@ Documentation in ide changes
 	Freemarker functions with docs in attr values.
 	
 Others
-	Ability to hide/display views
-		state should be persisted in ide state
 	
-	CTRL + SHIFT + R => to open resources
+	Find and replace
+		among the file tree
+	
 	
 	maven based class path and packaging
 
 	
-file managers for standard files
-
 If auto complete is triggered on existing node (cursor is followed by > instead of <), attributes and end node should not be included.
 
 common.xml formating is not working properly
 	in sql query 
+	
+tool tip documentations

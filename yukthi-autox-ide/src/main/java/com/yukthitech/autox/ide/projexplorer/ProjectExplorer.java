@@ -446,7 +446,7 @@ public class ProjectExplorer extends JPanel
 	public void checkFile(FileTreeNode fileNode)
 	{
 		File file = fileNode.getFile();
-		IIdeFileManager fileManager = ideFileManagerFactory.getFileManager(file);
+		IIdeFileManager fileManager = ideFileManagerFactory.getFileManager(fileNode.getProject(), file);
 		
 		if(fileManager != null)
 		{

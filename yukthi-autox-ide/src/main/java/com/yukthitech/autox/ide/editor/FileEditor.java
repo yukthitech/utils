@@ -154,7 +154,7 @@ public class FileEditor extends RTextScrollPane
 	@PostConstruct
 	private void init()
 	{
-		this.currentFileManager = ideFileManagerFactory.getFileManager(file);
+		this.currentFileManager = ideFileManagerFactory.getFileManager(project, file);
 		
 		if(this.currentFileManager != null)
 		{

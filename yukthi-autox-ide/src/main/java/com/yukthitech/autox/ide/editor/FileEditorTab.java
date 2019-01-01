@@ -76,7 +76,7 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 			}
 		});
 		
-		this.ideFileManager = ideFileManagerFactory.getFileManager(file);
+		this.ideFileManager = ideFileManagerFactory.getFileManager(project, file);
 		parseFile();
 	}
 

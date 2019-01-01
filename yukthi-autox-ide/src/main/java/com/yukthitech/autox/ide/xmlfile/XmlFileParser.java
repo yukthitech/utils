@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.ide.xmlfile.PatternScanner.ScannerMatch;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -434,6 +435,11 @@ public class XmlFileParser
 	
 	public static XmlFile parse(String content)
 	{
+		if(StringUtils.isBlank(content))
+		{
+			return null;
+		}
+		
 		XmlFileParser parser = new XmlFileParser(content);
 		Element rootElement = parser.parseElement();
 		return new XmlFile(rootElement);
