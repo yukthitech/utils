@@ -42,3 +42,5 @@ common.xml formating is not working properly
 	in sql query 
 	
 tool tip documentations
+
+highlighting search strings

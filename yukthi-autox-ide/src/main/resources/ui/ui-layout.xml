@@ -46,6 +46,12 @@
 			<item label="Format Code" mnemonic="F" action="formatCode">
 				<short-key ctrl="true" shift="true" key="F"/>
 			</item>
+
+			<item label="-" />
+
+			<item label="Find And Replace" mnemonic="n" action="findAndReplace">
+				<short-key ctrl="true" key="F"/>
+			</item>
 		</menu>
 
 		<menu label="Run" mnemonic="R">
