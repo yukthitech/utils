@@ -350,6 +350,31 @@ public class FileEditor extends RTextScrollPane
 	{
 		return syntaxTextArea.getCaretLineNumber();
 	}
+	
+	public int getLineCount()
+	{
+		return syntaxTextArea.getLineCount();
+	}
+	
+	public void gotoLine(int line)
+	{
+		if(line < 1 || line > getLineCount())
+		{
+			return;
+		}
+		
+		line = line - 1;
+		
+		try
+		{
+			int pos = syntaxTextArea.getLineStartOffset(line);
+			syntaxTextArea.setCaretPosition(pos);
+		}catch(BadLocationException ex)
+		{
+			ex.printStackTrace();
+			JOptionPane.showMessageDialog(this, "An error occurred while moving cursor to specified location. Error: " + ex);
+		}
+	}
 
 	public String getCurrentElementName(String nodeType)
 	{

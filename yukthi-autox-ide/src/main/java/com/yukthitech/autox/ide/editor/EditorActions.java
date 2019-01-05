@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.find.FindAndReplaceDialog;
+import com.yukthitech.autox.ide.find.GotoLineDialog;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 
@@ -25,6 +26,8 @@ public class EditorActions
 	
 	private FindAndReplaceDialog findAndReplaceDialog;
 	
+	private GotoLineDialog gotoLineDialog;
+	
 	private void init()
 	{
 		if(findAndReplaceDialog != null)
@@ -34,6 +37,11 @@ public class EditorActions
 		
 		findAndReplaceDialog = new FindAndReplaceDialog( (Frame) IdeUtils.getCurrentWindow() );
 		IdeUtils.autowireBean(applicationContext, findAndReplaceDialog);
+		
+		gotoLineDialog = new GotoLineDialog( (Frame) IdeUtils.getCurrentWindow() );
+		IdeUtils.autowireBean(applicationContext, gotoLineDialog);
+		
+		IdeUtils.centerOnScreen(gotoLineDialog);
 	}
 
 	@Action
@@ -49,5 +57,19 @@ public class EditorActions
 		}
 
 		findAndReplaceDialog.display();
+	}
+	
+	@Action
+	public void gotoLine()
+	{
+		init();
+		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
+		
+		if(editor == null)
+		{
+			return;
+		}
+
+		gotoLineDialog.display(editor);
 	}
 }
