@@ -391,7 +391,9 @@ public class FileEditor extends RTextScrollPane
 		
 		if(command.isRegularExpression())
 		{
-			Pattern pattern = Pattern.compile(command.getSearchString());
+			Pattern pattern = (command.getRegexOptions() == 0) ? Pattern.compile(command.getSearchString()) :
+				Pattern.compile(command.getSearchString(), command.getRegexOptions());
+			
 			Matcher matcher = pattern.matcher(fullText);
 			
 			if(command.isReverseDirection())
@@ -490,9 +492,18 @@ public class FileEditor extends RTextScrollPane
 		String targetStr = content.substring(range[0], range[1]);
 		
 		//in obtained string replace the pattern, this will ensure $ expressions of regex is respected
-		String repStr = targetStr.replaceAll(command.getSearchString(), command.getReplaceWith());
+		Pattern pattern = (command.getRegexOptions() == 0) ? Pattern.compile(command.getSearchString()) :
+			Pattern.compile(command.getSearchString(), command.getRegexOptions());
+		Matcher matcher = pattern.matcher(targetStr);
+		StringBuffer buff = new StringBuffer();
 		
-		return repStr;
+		while(matcher.find())
+		{
+			matcher.appendReplacement(buff, command.getReplaceWith());
+		}
+		
+		matcher.appendTail(buff);
+		return buff.toString();
 	}
 	
 	public String executeFindOperation(FindCommand command, FindOperation op)
@@ -533,15 +544,19 @@ public class FileEditor extends RTextScrollPane
 			}
 			case REPLACE_AND_FIND:
 			{
-				if(syntaxTextArea.getSelectedText().length() <= 0)
+				if(syntaxTextArea.getSelectedText() == null || syntaxTextArea.getSelectedText().length() <= 0)
 				{
 					return "No text is selected to replace";
 				}
 				
 				int range[] = new int[] {syntaxTextArea.getSelectionStart(), syntaxTextArea.getSelectionEnd()};
 				
-				syntaxTextArea.replaceRange(command.getReplaceWith(), range[0], range[1]);
-				syntaxTextArea.setCaretPosition(range[0] + command.getReplaceWith().length());
+				String repString = findReplaceString(command, fullText, range);
+				
+				syntaxTextArea.replaceRange(repString, range[0], range[1]);
+				syntaxTextArea.setCaretPosition(range[0] + repString.length());
+				
+				fullText = syntaxTextArea.getText();
 				
 				range = find(command, startPos, getCaretPositionForFind(command), false, fullText);
 				

@@ -1,6 +1,4 @@
 Find and replace
-	With in the file
-	
 	goto line #
 	
 	CTRL + SHIFT + R => to open resources
@@ -44,3 +42,6 @@ common.xml formating is not working properly
 tool tip documentations
 
 highlighting search strings
+
+
+splash screen during startup

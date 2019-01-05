@@ -63,6 +63,14 @@ public class BasicArguments
 	private boolean interactiveExecuteGlobal = false;
 
 	/**
+	 * Comma separated folder paths to which execution should be limited.
+	 */
+	@CliArgument(name = "flmt", longName = "folder-limits", description = "Comma separated folder paths to which execution should be limited.", required = false)
+	private String folderLimits;
+	
+	private boolean skipCommonSteps;
+
+	/**
 	 * Gets the if specified the execution will be limited only for this test suites.
 	 *
 	 * @return the if specified the execution will be limited only for this test suites

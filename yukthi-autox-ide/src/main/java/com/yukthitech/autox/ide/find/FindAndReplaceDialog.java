@@ -9,14 +9,22 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
@@ -25,9 +33,6 @@ import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
-import java.awt.event.ItemListener;
-import java.util.regex.Pattern;
-import java.awt.event.ItemEvent;
 
 @Service
 public class FindAndReplaceDialog extends JDialog
@@ -190,6 +195,7 @@ public class FindAndReplaceDialog extends JDialog
 		gbc_chckbxCaseInsensitive.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxCaseInsensitive.gridx = 0;
 		gbc_chckbxCaseInsensitive.gridy = 0;
+		chckbxCaseInsensitive.setToolTipText("Enables case-insensitive matching.");
 		chckbxCaseInsensitive.setEnabled(false);
 		panelRegex.add(chckbxCaseInsensitive, gbc_chckbxCaseInsensitive);
 
@@ -197,6 +203,7 @@ public class FindAndReplaceDialog extends JDialog
 		gbc_chckbxMultiLined.insets = new Insets(0, 0, 5, 0);
 		gbc_chckbxMultiLined.gridx = 1;
 		gbc_chckbxMultiLined.gridy = 0;
+		chckbxMultiLined.setToolTipText("In multiline mode the expressions ^ and $ match just after or just before, respectively, a line terminator or the end of the input sequence.");
 		chckbxMultiLined.setEnabled(false);
 		panelRegex.add(chckbxMultiLined, gbc_chckbxMultiLined);
 
@@ -205,6 +212,7 @@ public class FindAndReplaceDialog extends JDialog
 		gbc_chckbxDotAll.insets = new Insets(0, 0, 0, 5);
 		gbc_chckbxDotAll.gridx = 0;
 		gbc_chckbxDotAll.gridy = 1;
+		chckbxDotAll.setToolTipText("In dotall mode, the expression . matches any character, including a line terminator. ");
 		chckbxDotAll.setEnabled(false);
 		panelRegex.add(chckbxDotAll, gbc_chckbxDotAll);
 
@@ -239,11 +247,13 @@ public class FindAndReplaceDialog extends JDialog
 		FlowLayout flowLayout = (FlowLayout) panel_3.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		panel_2.add(panel_3, gbc_panel_3);
+		btnFind.setMnemonic('F');
 
 		btnFind.addActionListener(this::find);
 		btnFind.setPreferredSize(new Dimension(120, 25));
 
 		panel_3.add(btnFind);
+		btnReplaceFind.setMnemonic('e');
 
 		btnReplaceFind.setPreferredSize(new Dimension(120, 25));
 		btnReplaceFind.addActionListener(this::replaceAndFind);
@@ -256,10 +266,13 @@ public class FindAndReplaceDialog extends JDialog
 		FlowLayout flowLayout_1 = (FlowLayout) panel_4.getLayout();
 		flowLayout_1.setAlignment(FlowLayout.RIGHT);
 		panel_2.add(panel_4, gbc_panel_4);
+		btnReplace.setMnemonic('R');
 
 		btnReplace.setPreferredSize(new Dimension(120, 25));
 		btnReplace.addActionListener(this::replace);
 		panel_4.add(btnReplace);
+		btnReplaceAll.setMnemonic('A');
+		btnReplaceAll.setMnemonic(KeyEvent.VK_A);
 		btnReplaceAll.setPreferredSize(new Dimension(120, 25));
 		btnReplaceAll.addActionListener(this::replaceAll);
 
@@ -275,6 +288,24 @@ public class FindAndReplaceDialog extends JDialog
 				closeButton.addActionListener(this::close);
 			}
 		}
+		
+		super.getRootPane().registerKeyboardAction(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				FindAndReplaceDialog.this.dispatchEvent(new WindowEvent(FindAndReplaceDialog.this, WindowEvent.WINDOW_CLOSING));
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+		super.getRootPane().registerKeyboardAction(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				find(e);
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 
 	public void display()
