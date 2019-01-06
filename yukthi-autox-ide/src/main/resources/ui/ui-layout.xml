@@ -56,6 +56,10 @@
 			<item label="Goto Line" action="gotoLine">
 				<short-key ctrl="true" key="L"/>
 			</item>
+
+			<item label="Open Resource" action="openResource">
+				<short-key ctrl="true" shift="true" key="O"/>
+			</item>
 		</menu>
 
 		<menu label="Run" mnemonic="R">

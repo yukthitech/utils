@@ -26,6 +26,8 @@ public class MaximizableTabbedPane extends JTabbedPane
 	
 	protected IMaximizationListener maximizationListener;
 	
+	private boolean viewsCloseable = true;
+	
 	public MaximizableTabbedPane()
 	{
 	}
@@ -47,13 +49,18 @@ public class MaximizableTabbedPane extends JTabbedPane
 		return leftComponent;
 	}
 	
+	public void setViewsCloseable(boolean viewsCloseable)
+	{
+		this.viewsCloseable = viewsCloseable;
+	}
+	
 	@Override
 	public void addTab(String title, Component component)
 	{
 		int nextTabIndex = super.getTabCount();
 		super.addTab(title, component);
 		
-		super.setTabComponentAt(nextTabIndex, new MaximizableTabbedPaneTab(title, this, component, maximizationListener));
+		super.setTabComponentAt(nextTabIndex, new MaximizableTabbedPaneTab(title, this, component, maximizationListener, viewsCloseable));
 	}
 	
 	@Override
@@ -62,7 +69,7 @@ public class MaximizableTabbedPane extends JTabbedPane
 		int nextTabIndex = super.getTabCount();
 		super.addTab(title, icon, component);
 		
-		super.setTabComponentAt(nextTabIndex, new MaximizableTabbedPaneTab(title, this, component, maximizationListener));
+		super.setTabComponentAt(nextTabIndex, new MaximizableTabbedPaneTab(title, this, component, maximizationListener, viewsCloseable));
 	}
 	
 	@Override
@@ -71,6 +78,6 @@ public class MaximizableTabbedPane extends JTabbedPane
 		int nextTabIndex = super.getTabCount();
 		super.addTab(title, icon, component, tip);
 		
-		super.setTabComponentAt(nextTabIndex, new MaximizableTabbedPaneTab(title, this, component, maximizationListener));
+		super.setTabComponentAt(nextTabIndex, new MaximizableTabbedPaneTab(title, this, component, maximizationListener, viewsCloseable));
 	}
 }

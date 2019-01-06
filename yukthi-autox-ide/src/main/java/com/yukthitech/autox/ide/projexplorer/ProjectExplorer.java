@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,9 +28,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.FileDetails;
 import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
+import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -70,6 +73,9 @@ public class ProjectExplorer extends JPanel
 	
 	@Autowired
 	private IdeFileManagerFactory ideFileManagerFactory;
+	
+	@Autowired
+	private IdeIndex ideIndex;
 	
 	private JPopupMenu filePopup;
 	
@@ -208,6 +214,8 @@ public class ProjectExplorer extends JPanel
 				{
 					editorLinkButton.setSelected(true);
 				}
+				
+				loadFilesToIndex();
 			}
 			
 			@Override
@@ -256,7 +264,10 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		tree.setSelectionPath(new TreePath(node.getPath()));
+		TreePath treePath = new TreePath(node.getPath());
+		
+		tree.setSelectionPath(treePath);
+		tree.scrollPathToVisible(treePath);
 	}
 	
 	public FileTreeNode getFileNode(File file)
@@ -410,6 +421,8 @@ public class ProjectExplorer extends JPanel
 		
 		node.reload(true);
 		projectTreeModel.reload(node);
+		
+		loadFilesToIndex();
 	}
 	
 	public void reloadActiveNode()
@@ -422,6 +435,8 @@ public class ProjectExplorer extends JPanel
 
 		activeTreeNode.reload(true);
 		projectTreeModel.reload(activeTreeNode);
+		
+		loadFilesToIndex();
 	}
 
 	
@@ -441,6 +456,8 @@ public class ProjectExplorer extends JPanel
 		
 		parentNode.reload(true);
 		projectTreeModel.reload(parentNode);
+		
+		loadFilesToIndex();
 	}
 	
 	public void checkFile(FileTreeNode fileNode)
@@ -468,5 +485,37 @@ public class ProjectExplorer extends JPanel
 	public ProjectsTreeModel getProjectTreeModel()
 	{
 		return projectTreeModel;
+	}
+	
+	public void loadFilesToIndex()
+	{
+		ideIndex.cleanFileIndex();
+		
+		for(ProjectTreeNode projNode : projectTreeModel.getProjectNodes())
+		{
+			loadFilesFromNode(projNode, projNode);
+		}
+	}
+	
+	private void loadFilesFromNode(ProjectTreeNode projNode, BaseTreeNode node)
+	{
+		if(node instanceof FileTreeNode)
+		{
+			File file = ((FileTreeNode) node).getFile();
+			ideIndex.addFile( new FileDetails(file, projNode.getProject()) );
+			return;
+		}
+		
+		Collection<BaseTreeNode> childNodes = node.getChildNodes();
+		
+		if(childNodes == null || childNodes.isEmpty())
+		{
+			return;
+		}
+		
+		for(BaseTreeNode cnode : childNodes)
+		{
+			loadFilesFromNode(projNode, cnode);
+		}
 	}
 }

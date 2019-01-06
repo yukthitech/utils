@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.find;
+package com.yukthitech.autox.ide.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -317,6 +317,7 @@ public class FindAndReplaceDialog extends JDialog
 			return;
 		}
 
+		fldReplaceStr.requestFocus();
 		this.setVisible(true);
 	}
 

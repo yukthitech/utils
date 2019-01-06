@@ -1,11 +1,3 @@
-Find and replace
-	goto line #
-	
-	CTRL + SHIFT + R => to open resources
-
-	Ability to hide/display views
-		state should be persisted in ide state
-
 Execution changes
 	ability to execute all test cases in a folder or test-suite folder
 	ability to execute entire project (all test suite folders)
@@ -27,8 +19,6 @@ Documentation in ide changes
 	
 Others
 	
-	Find and replace
-		among the file tree
 	
 	
 	maven based class path and packaging
@@ -41,7 +31,18 @@ common.xml formating is not working properly
 	
 tool tip documentations
 
+application icon
+
+splash screen during startup
+
+
+==============================
+
 highlighting search strings
 
 
-splash screen during startup
+Ability to hide/display views
+		state should be persisted in ide state
+
+Find and replace
+		among the file tree

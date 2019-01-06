@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.find;
+package com.yukthitech.autox.ide.dialog;
 
 /**
  * Command object to be used for find and replace operations.

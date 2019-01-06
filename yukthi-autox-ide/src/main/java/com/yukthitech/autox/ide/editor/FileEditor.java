@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.editor;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -39,8 +40,8 @@ import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
-import com.yukthitech.autox.ide.find.FindCommand;
-import com.yukthitech.autox.ide.find.FindOperation;
+import com.yukthitech.autox.ide.dialog.FindCommand;
+import com.yukthitech.autox.ide.dialog.FindOperation;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
@@ -153,6 +154,9 @@ public class FileEditor extends RTextScrollPane
 		});
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
+		//syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl shift R"), "dummy");
+		
+		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.VK_CONTROL | KeyEvent.VK_SHIFT), "dummy");
 	}
 	
 	@PostConstruct

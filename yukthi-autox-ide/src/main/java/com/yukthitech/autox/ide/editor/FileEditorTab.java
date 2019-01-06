@@ -51,7 +51,7 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	
 	public FileEditorTab(Project project, File file, FileEditor fileEditor, FileEditorTabbedPane fileTabPane, IMaximizationListener maximizationListener)
 	{
-		super(file.getName(), fileTabPane, fileEditor, maximizationListener);
+		super(file.getName(), fileTabPane, fileEditor, maximizationListener, true);
 		
 		this.project = project;
 		this.file = file;

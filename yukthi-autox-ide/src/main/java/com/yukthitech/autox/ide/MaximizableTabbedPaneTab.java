@@ -65,7 +65,8 @@ public class MaximizableTabbedPaneTab extends JPanel
 	
 	private boolean warned;
 	
-	public MaximizableTabbedPaneTab(String text, MaximizableTabbedPane parentPane, Component component, IMaximizationListener maximizationListener)
+	public MaximizableTabbedPaneTab(String text, MaximizableTabbedPane parentPane, 
+			Component component, IMaximizationListener maximizationListener, boolean closeable)
 	{
 		this.parentTabbedPane = parentPane;
 		this.component = component;
@@ -91,7 +92,11 @@ public class MaximizableTabbedPaneTab extends JPanel
 		super.add(iconLabel);
 		super.add(changeLabel);
 		super.add(label);
-		super.add(closeButton);
+		
+		if(closeable)
+		{
+			super.add(closeButton);
+		}
 		
 		init();
 	}

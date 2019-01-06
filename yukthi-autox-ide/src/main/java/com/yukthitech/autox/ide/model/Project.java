@@ -45,7 +45,9 @@ public class Project implements Serializable
 	private transient DocInformation docInformation;
 	
 	private transient BeanPropertyInfoFactory beanPropertyInfoFactory;
-
+	
+	private transient File baseFolder;
+	
 	public Project()
 	{
 		name = "";
@@ -91,6 +93,18 @@ public class Project implements Serializable
 		}
 
 		return new File(projectFilePath).getParentFile().getPath();
+	}
+	
+	@JsonIgnore
+	public File getBaseFolder()
+	{
+		if(baseFolder != null)
+		{
+			return baseFolder;
+		}
+		
+		baseFolder = new File(projectFilePath).getParentFile();
+		return baseFolder;
 	}
 
 	public String getAppConfigFilePath()

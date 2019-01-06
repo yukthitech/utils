@@ -1,5 +1,8 @@
 package com.yukthitech.autox.ide.projexplorer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
@@ -38,5 +41,19 @@ public class ProjectsTreeModel extends DefaultTreeModel
 		}
 		
 		return null;
+	}
+	
+	public List<ProjectTreeNode> getProjectNodes()
+	{
+		List<ProjectTreeNode> projLst = new ArrayList<>();
+		int count = rootNode.getChildCount();
+		
+		for(int i = 0; i < count; i++)
+		{
+			ProjectTreeNode node = (ProjectTreeNode) root.getChildAt(i);
+			projLst.add(node);
+		}
+		
+		return projLst;
 	}
 }

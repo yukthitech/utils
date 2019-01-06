@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.find;
+package com.yukthitech.autox.ide.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -197,6 +197,8 @@ public class GotoLineDialog extends JDialog
 		lblInput.setText("Enter line number in range (1.. " + maxLine + "): ");
 		lblMssg.setText("");
 		textField.setText("");
+		
+		textField.requestFocus();
 		
 		setVisible(true);
 	}

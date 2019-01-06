@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.find;
+package com.yukthitech.autox.ide.dialog;
 
 /**
  * Find operations.

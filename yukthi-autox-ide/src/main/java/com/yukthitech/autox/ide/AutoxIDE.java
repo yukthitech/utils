@@ -218,6 +218,7 @@ public class AutoxIDE extends JFrame
 		leftTabbedPane = new MaximizableTabbedPane();
 		verticalSplitPane.setLeftComponent(leftTabbedPane);
 		leftTabbedPane.setParentDetails(maximizeListener, verticalSplitPane, true);
+		leftTabbedPane.setViewsCloseable(false);
 
 		leftTabbedPane.addTab("Project Explorer", null, projectExplorer, null);
 		leftTabbedPane.addTab("Rest", null, restPanel, null);
@@ -234,6 +235,7 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane = new MaximizableTabbedPane();
 		horizontalSplitPane.setRightComponent(rightBottomTabbedPane);
 		rightBottomTabbedPane.setParentDetails(maximizeListener, horizontalSplitPane, false);
+		rightBottomTabbedPane.setViewsCloseable(false);
 
 		rightBottomTabbedPane.addTab("Report", null, reportPanel, null);
 		reportPanel.setParent(rightBottomTabbedPane);

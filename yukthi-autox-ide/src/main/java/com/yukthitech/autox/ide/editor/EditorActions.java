@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.find.FindAndReplaceDialog;
-import com.yukthitech.autox.ide.find.GotoLineDialog;
+import com.yukthitech.autox.ide.dialog.FindAndReplaceDialog;
+import com.yukthitech.autox.ide.dialog.GotoLineDialog;
+import com.yukthitech.autox.ide.dialog.OpenResourceDialog;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 
@@ -28,6 +29,8 @@ public class EditorActions
 	
 	private GotoLineDialog gotoLineDialog;
 	
+	private OpenResourceDialog openResourceDialog;
+	
 	private void init()
 	{
 		if(findAndReplaceDialog != null)
@@ -42,6 +45,10 @@ public class EditorActions
 		IdeUtils.autowireBean(applicationContext, gotoLineDialog);
 		
 		IdeUtils.centerOnScreen(gotoLineDialog);
+		
+		openResourceDialog = new OpenResourceDialog(IdeUtils.getCurrentWindow());
+		IdeUtils.autowireBean(applicationContext, openResourceDialog);
+		IdeUtils.centerOnScreen(openResourceDialog);
 	}
 
 	@Action
@@ -71,5 +78,12 @@ public class EditorActions
 		}
 
 		gotoLineDialog.display(editor);
+	}
+	
+	@Action
+	public void openResource()
+	{
+		init();
+		openResourceDialog.display();
 	}
 }
