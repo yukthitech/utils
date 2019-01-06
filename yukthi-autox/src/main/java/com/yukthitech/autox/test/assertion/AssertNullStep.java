@@ -7,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 
 /**
  * Asserts the value to be null.
@@ -20,7 +21,7 @@ public class AssertNullStep extends AbstractValidation
 	/**
 	 * Value to check.
 	 */
-	@Param(description = "Value to check.")
+	@Param(description = "Value to check.", sourceType = SourceType.EXPRESSION)
 	private Object value;
 
 	public void setValue(Object value)

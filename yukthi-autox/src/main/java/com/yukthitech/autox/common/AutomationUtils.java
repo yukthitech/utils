@@ -31,6 +31,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.expr.ExpressionFactory;
 import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
@@ -284,7 +285,8 @@ public class AutomationUtils
 				
 				if(param != null && param.sourceType() == SourceType.EXPRESSION)
 				{
-					field.set(object, AutomationUtils.parseObjectSource(context, context.getExecutionLogger(), field.get(object), null));
+					Object result = ExpressionFactory.getExpressionFactory().parseExpression(context, field.get(object));
+					field.set(object, result);
 					continue;
 				}
 
@@ -522,20 +524,6 @@ public class AutomationUtils
 			sourceStr = sourceStr.substring(matcherWithType.end()).trim();
 		}
 		
-		if(exprType != null)
-		{
-			ExpressionType type = null;
-			
-			try
-			{
-				type = ExpressionType.valueOf(exprType.trim().toUpperCase());
-				return type.parse(context, sourceStr, resultType);
-			}catch(Exception ex)
-			{
-				//assume if type is not expression type, it is resource type and ignore current exception
-			}
-		}
-
 		IResource resource = ResourceFactory.getResource(context, exeLogger, exprType, sourceStr);
 		resource = ResourceFactory.parseExpressions(context, resource);
 		

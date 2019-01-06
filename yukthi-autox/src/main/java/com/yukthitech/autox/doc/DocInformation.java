@@ -1,6 +1,7 @@
 package com.yukthitech.autox.doc;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -19,6 +20,11 @@ public class DocInformation
 	 * Expected hyphen pattern in names.
 	 */
 	private static final Pattern HYPHEN_PATTERN = Pattern.compile("\\-(\\w)");
+
+	/**
+	 * The basic documents.
+	 */
+	private List<BasicDocs.Document> basicDocuments;
 	
 	/**
 	 * List of plugin's information.
@@ -40,6 +46,26 @@ public class DocInformation
 	 */
 	private Map<String, FreeMarkerMethodDoc> freeMarkerMethods = new TreeMap<>();
 	
+	/**
+	 * Gets the basic documents.
+	 *
+	 * @return the basic documents
+	 */
+	public List<BasicDocs.Document> getBasicDocuments()
+	{
+		return basicDocuments;
+	}
+
+	/**
+	 * Sets the basic documents.
+	 *
+	 * @param basicDocuments the new basic documents
+	 */
+	public void setBasicDocuments(List<BasicDocs.Document> basicDocuments)
+	{
+		this.basicDocuments = basicDocuments;
+	}
+
 	/**
 	 * Adds specified plugin.
 	 * @param plugin plugin to add.
@@ -106,6 +132,12 @@ public class DocInformation
 		return steps.values();
 	}
 	
+	/**
+	 * Gets the step.
+	 *
+	 * @param name the name
+	 * @return the step
+	 */
 	public StepInfo getStep(String name)
 	{
 		return this.steps.get( removeHyphens(name) );
@@ -121,6 +153,12 @@ public class DocInformation
 		return validations.values();
 	}
 	
+	/**
+	 * Gets the validation.
+	 *
+	 * @param name the name
+	 * @return the validation
+	 */
 	public ValidationInfo getValidation(String name)
 	{
 		return validations.get( removeHyphens(name) );

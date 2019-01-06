@@ -1,13 +1,16 @@
 package com.yukthitech.autox.doc;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
@@ -17,6 +20,7 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 /**
@@ -138,6 +142,24 @@ public class DocGenerator
 		//convert data into json
 		return docInformation;
 	}
+	
+	/**
+	 * Loads basic documents.
+	 * @return basic documents.
+	 */
+	private static List<BasicDocs.Document> loadBasicDocs() throws IOException
+	{
+		BasicDocs docs = new BasicDocs();
+		XMLBeanParser.parse(DocGenerator.class.getResourceAsStream("/docs/basic-docs.xml"), docs);
+		
+		for(BasicDocs.Document doc : docs.getDocuments())
+		{
+			String content = IOUtils.toString(DocGenerator.class.getResourceAsStream(doc.getFile()));
+			doc.setContent(content);
+		}
+		
+		return docs.getDocuments();
+	}
 
 	public static void main(String[] args) throws Exception
 	{
@@ -153,6 +175,7 @@ public class DocGenerator
 		String basePackages[] = packStr.split("\\s*\\,\\s*");
 		
 		DocInformation docInformation = buildDocInformation(basePackages);
+		docInformation.setBasicDocuments(loadBasicDocs());
 
 		//convert data into json
 		ObjectMapper objectMapper = new ObjectMapper();

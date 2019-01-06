@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.event.IAutomationListener;
+import com.yukthitech.autox.expr.ExpressionFactory;
 import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
@@ -263,6 +264,8 @@ public class AutomationLauncher
 		// load the configuration file
 		ApplicationConfiguration appConfig = ApplicationConfiguration.loadApplicationConfiguration(appConfigurationFile, basicArguments);
 		AutomationContext context = new AutomationContext(appConfig);
+		
+		ExpressionFactory.init(null, appConfig.getBasePackages());
 
 		//set monitoring port info
 		Integer monitorPort = getMonitoringPort();

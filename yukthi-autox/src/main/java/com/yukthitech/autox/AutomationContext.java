@@ -365,7 +365,11 @@ public class AutomationContext
 	public void setAttribute(String name, Object value)
 	{
 		nameToAttr.put(name, value);
-		monitorServer.sendAsync(new ContextAttributeDetails(name, value));
+		
+		if(monitorServer != null)
+		{
+			monitorServer.sendAsync(new ContextAttributeDetails(name, value));
+		}
 	}
 	
 	/**
