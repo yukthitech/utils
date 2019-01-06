@@ -303,11 +303,11 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:store key="testStoreKey">
+				<ccg:store-set key="testStoreKey">
 					<value><![CDATA["value1"]]></value>
-				</ccg:store>
+				</ccg:store-set>
 				
-				<ccg:storeValue key="testStoreKey" attribute="ctxAttrKey"/>
+				<ccg:store-get key="testStoreKey" attribute="ctxAttrKey"/>
 				
 				<ccg:set name="ctxAttrKey1" value="Value is ${storeValue('testStoreKey')}"/>
 			</wrap:steps>

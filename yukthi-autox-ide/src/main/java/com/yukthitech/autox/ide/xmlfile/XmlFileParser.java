@@ -23,6 +23,10 @@ public class XmlFileParser
 	public static Pattern PATTERN_COMMENT_TAG_OPENER = Pattern.compile("\\<\\!\\-\\-");
 	
 	public static Pattern PATTERN_COMMENT_TAG_CLOSER = Pattern.compile("\\-\\-\\>");
+	
+	public static Pattern PATTERN_DOCTYPE_TAG_OPENER = Pattern.compile("\\<\\!\\s*\\w+");
+	
+	public static Pattern PATTERN_DOCTYPE_TAG_CLOSER = Pattern.compile("\\>");
 
 	public static Pattern PATTERN_TAG_OPENER = Pattern.compile("\\<");
 	
@@ -32,19 +36,19 @@ public class XmlFileParser
 	
 	public static Pattern PATTERN_CDATA_CLOSER = Pattern.compile("\\]\\]\\>");
 
-	public static Pattern PATTERN_START_TAG = Pattern.compile("\\<([\\w\\-\\:]+)");
+	public static Pattern PATTERN_START_TAG = Pattern.compile("\\<([\\w\\-\\:\\.]+)");
 	
 	public static Pattern PATTERN_NODE_SELF_CLOSE = Pattern.compile("\\s*\\/\\>");
 	
-	public static Pattern PATTERN_CLOSE_TAG = Pattern.compile("\\<\\/([\\w\\-\\:]+)\\s*\\>");
+	public static Pattern PATTERN_CLOSE_TAG = Pattern.compile("\\<\\/([\\w\\-\\:\\.]+)\\s*\\>");
 	
-	public static Pattern PATTERN_PREFIX_NAME = Pattern.compile("([\\w-]+)\\:([\\w\\-]+)");
+	public static Pattern PATTERN_PREFIX_NAME = Pattern.compile("([\\w-]+)\\:([\\w\\-\\.]+)");
 	
 	public static Pattern PATTERN_WHITE_SPACE = Pattern.compile("\\s*");
 	
-	public static Pattern PATTERN_NAME = Pattern.compile("([\\w\\-\\:]+)");
+	public static Pattern PATTERN_NAME = Pattern.compile("([\\w\\-\\:\\.]+)");
 	
-	public static Pattern PATTERN_ATTR = Pattern.compile("\\s*([\\w\\-\\:]+)\\s*\\=\\s*\"(.*?)\"", Pattern.DOTALL);
+	public static Pattern PATTERN_ATTR = Pattern.compile("\\s*([\\w\\-\\:\\.]+)\\s*\\=\\s*\"(.*?)\"", Pattern.DOTALL);
 	
 	private static enum EventType
 	{
@@ -378,6 +382,13 @@ public class XmlFileParser
 		{
 			scanner.skipTill(PATTERN_COMMENT_TAG_CLOSER);
 			scanner.skip(PATTERN_COMMENT_TAG_CLOSER);
+			return parseNextContent();
+		}
+
+		if(scanner.hasNext(PATTERN_DOCTYPE_TAG_OPENER))
+		{
+			scanner.skipTill(PATTERN_DOCTYPE_TAG_CLOSER);
+			scanner.skip(PATTERN_DOCTYPE_TAG_CLOSER);
 			return parseNextContent();
 		}
 

@@ -106,7 +106,26 @@ public class XmlLoctionAnalyzer
 			return XmlFileLocation.newTextElementLocation(xmlFile, xmlFile.getLastElement(validPos), nodeText, lastToken);
 		}
 		
-		return XmlFileLocation.newElementLocation(xmlFile, xmlFile.getLastElement(validPos), lastToken, getIndentation(chArr, pos));
+		boolean fullElement = true;
+		
+		for(int i = pos; i < chArr.length; i++)
+		{
+			if(chArr[i] == '<')
+			{
+				fullElement = true;
+				break;
+			}
+			
+			//if non-white space and not opening bracket is found
+			// mark full element generation as false
+			if(!Character.isWhitespace(chArr[i]))
+			{
+				fullElement = false;
+				break;
+			}
+		}
+
+		return XmlFileLocation.newElementLocation(xmlFile, xmlFile.getLastElement(validPos), lastToken, getIndentation(chArr, pos), fullElement);
 	}
 	
 	private static String getLastToken(String xmlContent, char chArr[], int pos)

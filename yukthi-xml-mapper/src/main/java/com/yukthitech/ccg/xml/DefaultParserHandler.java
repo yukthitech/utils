@@ -645,6 +645,19 @@ public class DefaultParserHandler implements IParserHandler
 
 		return null;
 	}
+	
+	public boolean isValidReserverNode(String nodeName)
+	{
+		for(ReserveNodeHandlerDetails reserveNodeHandler : this.reserveNodeHandlers)
+		{
+			if(reserveNodeHandler.pattern.matcher(nodeName).matches())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/*
 	 * (non-Javadoc)

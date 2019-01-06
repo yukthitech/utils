@@ -24,8 +24,6 @@ Others
 	maven based class path and packaging
 
 	
-If auto complete is triggered on existing node (cursor is followed by > instead of <), attributes and end node should not be included.
-
 common.xml formating is not working properly
 	in sql query 
 	

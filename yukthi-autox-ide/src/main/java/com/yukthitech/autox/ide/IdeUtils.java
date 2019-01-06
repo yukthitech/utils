@@ -20,6 +20,8 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
@@ -45,6 +47,8 @@ public class IdeUtils
 	 * Used to serialize and deserialize the objects.
 	 */
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	private static Pattern HYPHEN_PATTERN = Pattern.compile("\\-(\\w)");
 	
 	private static final int BORDER_SIZE = 8;
 	private static final int HALF_BORDER_SIZE = BORDER_SIZE / 2;
@@ -419,5 +423,19 @@ public class IdeUtils
 		}
 		
 		location.setEndLocation(end, lineNo, colNo);
+	}
+	
+	public static String removeHyphens(String str)
+	{
+		Matcher matcher = HYPHEN_PATTERN.matcher(str);
+		StringBuffer buff = new StringBuffer();
+		
+		while(matcher.find())
+		{
+			matcher.appendReplacement(buff, matcher.group(1).toUpperCase());
+		}
+		
+		matcher.appendTail(buff);
+		return buff.toString();
 	}
 }

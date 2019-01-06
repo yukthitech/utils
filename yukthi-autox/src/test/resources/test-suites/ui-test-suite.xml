@@ -4,20 +4,20 @@
 			<description>Validates button click action is working</description>
 			
 			<wrap:steps>
-				<ccg:gotoPage uri="/index.html" />
-				<ccg:isVisible locator="id: testLayer" name="visibFlag1"/>
+				<ccg:ui-goto-page uri="/index.html" />
+				<ccg:ui-is-visible locator="id: testLayer" name="visibFlag1"/>
 				
-				<ccg:click locator="id: button"/>
+				<ccg:ui-click locator="id: button"/>
 				<ccg:sleep time="1000"/>
 				
-				<ccg:logScreenShot name="test.png" />
+				<ccg:ui-log-screen-shot name="test.png" />
 				
-				<ccg:isVisible locator="id: testLayer" name="visibFlag2"/>
-				<ccg:getUiValue locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+				<ccg:ui-is-visible locator="id: testLayer" name="visibFlag2"/>
+				<ccg:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
 			</wrap:steps>
 	
 			<wrap:validations>
-				<ccg:validateValue locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
+				<ccg:ui-assert-value locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
 				<ccg:validateContextParam expression="attr.visibFlag1" value="false"/>
 				<ccg:validateContextParam expression="attr.visibFlag2" value="true"/>
 				<ccg:validateContextParam expression="attr.fldValue" value="button Clicked"/>
@@ -27,9 +27,9 @@
 		<testCase name="fillForm">
 			<description>Validates form filling is working</description>
 			
-			<ccg:gotoPage uri="/form.html" />
+			<ccg:ui-goto-page uri="/form.html" />
 
-			<ccg:fillForm locator="id:sampleForm">
+			<ccg:ui-fill-form locator="id:sampleForm">
 				<data>
 					{
 						"name": "kranthi",
@@ -38,17 +38,17 @@
 						"color": ["red", "green", "blue"]
 					}
 				</data>
-			</ccg:fillForm>
+			</ccg:ui-fill-form>
 			
-			<ccg:logScreenShot name="filledForm.png" />
+			<ccg:ui-log-screen-shot name="filledForm.png" />
 							
-			<ccg:validateValue locator="xpath: //input[@name='name']" value="kranthi"/>
+			<ccg:ui-assert-value locator="xpath: //input[@name='name']" value="kranthi"/>
 		</testCase>
 
 		<testCase name="uiGetElements">
 			<description>Validates get elements is working</description>
 			
-			<ccg:gotoPage uri="/form.html" />
+			<ccg:ui-goto-page uri="/form.html" />
 			
 			<ccg:ui-get-elements locator="xpath: //input[@type='checkbox']" name="checkBoxes"/>
 			
@@ -64,12 +64,12 @@
 		<testCase name="uiMethods">
 			<description>Validates functionality of free marker methods</description>
 			
-			<ccg:gotoPage uri="/form.html" />
+			<ccg:ui-goto-page uri="/form.html" />
 			
 			<ccg:set name="result" value="false"/>
 			<ccg:set name="locator" value="xpath: //input[@type='checkbox']"/>
 			
-			<ccg:if condition="uiIsVisible(attr.locator, null)">
+			<ccg:if condition="uiui-is-visible(attr.locator, null)">
 				<then>
 					<ccg:set name="result" value="true"/>
 				</then>
@@ -81,7 +81,7 @@
 		<testCase name="testDownload">
 			<description>Validates download functionality</description>
 			
-			<ccg:gotoPage uri="/form.html" />
+			<ccg:ui-goto-page uri="/form.html" />
 			
 			<ccg:ui-clickAndDownload locator="id: downloadLink" pathName="filePath"/>
 						
@@ -91,20 +91,20 @@
 		<testCase name="testOpenWindow">
 			<description>Validates download functionality</description>
 			
-			<ccg:gotoPage uri="/form.html" />
+			<ccg:ui-goto-page uri="/form.html" />
 			<ccg:ui-open-window url="/index.html" name="Index"/>
-			<ccg:isVisible locator="id: button" name="visibFlag1"/>
+			<ccg:ui-is-visible locator="id: button" name="visibFlag1"/>
 			
 			<ccg:sleep time="5000"/>
 			
 			<!-- Ensure switch windows is working fine -->
 			<ccg:ui-switch-window />
-			<ccg:isVisible locator="id: downloadLink" name="visibFlag1"/>
+			<ccg:ui-is-visible locator="id: downloadLink" name="visibFlag1"/>
 			<ccg:validateContextParam expression="attr.visibFlag1" value="true"/>
 			<ccg:sleep time="5000"/>
 			
 			<ccg:ui-switch-window locator="Index"/>
-			<ccg:isVisible locator="id: button" name="visibFlag1"/>
+			<ccg:ui-is-visible locator="id: button" name="visibFlag1"/>
 			<ccg:ui-close-window />
 			<ccg:sleep time="5000"/>
 						
@@ -112,7 +112,7 @@
 		</testCase>
 
 		<cleanup>
-			<ccg:quitSession/>
+			<ccg:ui-quit-session/>
 		</cleanup>
 	</testSuite>
 	

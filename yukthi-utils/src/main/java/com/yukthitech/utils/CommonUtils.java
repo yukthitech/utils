@@ -90,6 +90,26 @@ public class CommonUtils
 	{
 		return wrapperToPrimitive.get(wrapperType);
 	}
+	
+	/**
+	 * Checks if specified type is simple type - primitive, wrapper or String type.
+	 * @param type type to check
+	 * @return true if type is simple type.
+	 */
+	public static boolean isSimpleType(Class<?> type)
+	{
+		if(type.isPrimitive())
+		{
+			return true;
+		}
+		
+		if(wrapperToPrimitive.containsKey(type))
+		{
+			return true;
+		}
+		
+		return String.class.equals(type);
+	}
 
 	/**
 	 * Returns default value for specified types. For wrappers and primitives default value is returned.

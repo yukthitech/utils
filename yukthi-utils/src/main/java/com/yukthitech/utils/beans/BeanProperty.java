@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.annotations.PropertyAdder;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -43,6 +44,11 @@ public class BeanProperty
 	 * Name of the property.
 	 */
 	private String name;
+	
+	/**
+	 * For key based properties, this represents key type.
+	 */
+	private Class<?> keyType;
 	
 	/**
 	 * Type of this property.
@@ -101,6 +107,25 @@ public class BeanProperty
 		this.name = name;
 	}
 	
+	/**
+	 * Gets the for key based properties, this represents key type.
+	 *
+	 * @return the for key based properties, this represents key type
+	 */
+	public Class<?> getKeyType()
+	{
+		return keyType;
+	}
+	
+	/**
+	 * Determines if this is key based property or not.
+	 * @return true if key based property.
+	 */
+	public boolean isKeyProperty()
+	{
+		return (keyType != null);
+	}
+
 	/**
 	 * Gets the name.
 	 *
@@ -306,6 +331,14 @@ public class BeanProperty
 		}
 	}
 	
+	/**
+	 * Load properties.
+	 *
+	 * @param beanType the bean type
+	 * @param readable the readable
+	 * @param writeable the writeable
+	 * @return the list
+	 */
 	public static List<BeanProperty> loadProperties(Class<?> beanType, boolean readable, boolean writeable)
 	{
 		return loadProperties(beanType, readable, writeable, false);
@@ -360,6 +393,7 @@ public class BeanProperty
 		boolean setter = true;
 		Matcher matcher = SETTER_PATTERN.matcher(method.getName());
 		Class<?> type = null;
+		Class<?> keyType = null;
 		
 		//if setter is not found check for adder
 		if(!matcher.matches())
@@ -401,12 +435,25 @@ public class BeanProperty
 		//if setter ensure single param
 		else 
 		{
-			if(method.getParameterTypes().length != 1)
+			if(method.getParameterTypes().length == 1)
+			{
+				type = method.getParameterTypes()[0];
+			}
+			else if(method.getParameterTypes().length == 2)
+			{
+				keyType = method.getParameterTypes()[0];
+				
+				if(!CommonUtils.isSimpleType(keyType))
+				{
+					return null;
+				}
+				
+				type = method.getParameterTypes()[1];
+			}
+			else
 			{
 				return null;
 			}
-			
-			type = method.getParameterTypes()[0];
 		}
 
 		String propName = matcher.group(1);
@@ -419,6 +466,7 @@ public class BeanProperty
 		{
 			beanProperty = new BeanProperty(propName);
 			beanProperty.type = type;
+			beanProperty.keyType = keyType;
 			
 			try
 			{

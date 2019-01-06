@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.test.TestDataFile;
@@ -23,6 +26,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class Element implements INode
 {
+	private static DefaultParserHandler defaultParserHandler = new DefaultParserHandler();
+	
 	private Element parentElement;
 	
 	private String prefix;
@@ -55,6 +60,8 @@ public class Element implements INode
 	 * Prefix to namespace mapping.
 	 */
 	private Map<String, String> namespaceToPrefix;
+	
+	private BeanProperty beanProperty;
 
 	public Element()
 	{}
@@ -432,6 +439,12 @@ public class Element implements INode
 			
 			return;
 		}
+		
+		//if reserve node is supported by default handler, ignore
+		if(defaultParserHandler.isValidReserverNode(this.name))
+		{
+			return;
+		}
 
 		collector.addMessage(
 				new FileParseMessage(MessageType.ERROR, 
@@ -484,6 +497,7 @@ public class Element implements INode
 			
 			if(this.elementType == null)
 			{
+				String name = IdeUtils.removeHyphens(this.name);
 				BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(parentElementType).getProperty(name);
 				
 				if(propInfo == null)
@@ -491,7 +505,7 @@ public class Element implements INode
 					collector.addMessage(
 							new FileParseMessage(
 									MessageType.ERROR, 
-									String.format("No matching property '%s' under parent-element bean type: %s", name, parentElementType.getName()), 
+									String.format("No matching property '%s' under parent-element bean type: %s", this.name, parentElementType.getName()), 
 									startLocation.getStartLineNumber(),
 									this.startLocation.getStartOffset(),
 									this.startLocation.getEndOffset()
@@ -505,7 +519,7 @@ public class Element implements INode
 					collector.addMessage(
 							new FileParseMessage(
 									MessageType.ERROR, 
-									String.format("No writeable property '%s' under parent-element bean type: %s", name, parentElementType.getName()),
+									String.format("No writeable property '%s' under parent-element bean type: %s", this.name, parentElementType.getName()),
 									startLocation.getStartLineNumber(),
 									this.startLocation.getStartOffset(),
 									this.startLocation.getEndOffset()
@@ -515,6 +529,29 @@ public class Element implements INode
 				}
 				
 				this.elementType = propInfo.getType();
+				this.beanProperty = propInfo;
+
+				String beanTypeStr = getReservedAttribute(DefaultParserHandler.ATTR_BEAN_TYPE);
+				
+				if(StringUtils.isNotBlank(beanTypeStr))
+				{
+					try
+					{
+						this.elementType = Class.forName(beanTypeStr);
+					}catch(Exception ex)
+					{
+						collector.addMessage(
+								new FileParseMessage(
+										MessageType.ERROR, 
+										String.format("An error occurred while fetching dynamic type: {}", beanTypeStr),
+										startLocation.getStartLineNumber(),
+										this.startLocation.getStartOffset(),
+										this.startLocation.getEndOffset()
+										)
+								);
+						return;
+					}
+				}
 			}
 		}
 		
@@ -522,6 +559,15 @@ public class Element implements INode
 		//if failed to determine the current element type
 		// move to next element
 		if(this.elementType == null)
+		{
+			return;
+		}
+
+		//TODO: handle bean copy property properly
+		String beanCopy = getReservedAttribute("beanCopy");
+		
+		//if bean copy is present, for temp fix, dont process children or attributes
+		if(StringUtils.isNotBlank(beanCopy))
 		{
 			return;
 		}
@@ -558,9 +604,27 @@ public class Element implements INode
 			
 			if(propInfo == null)
 			{
+				//if this id based node ignore it
+				if(this.beanProperty != null && this.beanProperty.isKeyProperty())
+				{
+					continue;
+				}
+				
+				//if step info is present and it is of key based, ignore missing attribute prop
+				if(this.stepInfo != null && (this.stepInfo instanceof ElementInfo))
+				{
+					ElementInfo elemInfo = (ElementInfo) this.stepInfo;
+					
+					if(StringUtils.isNotBlank(elemInfo.getKeyName()))
+					{
+						continue;
+					}
+				}
+				
 				collector.addMessage(
 						new FileParseMessage(
-								MessageType.ERROR, "No matching property found for attribute: " + attr.getName(), 
+								MessageType.ERROR, 
+								String.format("No matching property found for attribute '%s' under bean-type: %s'", attr.getName(), elementType.getName()), 
 								startLocation.getStartLineNumber(),
 								attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
 								)

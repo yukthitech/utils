@@ -49,9 +49,9 @@
 		<testCase name="testDelete" dependencies="testPost">
 			<description>Tests delete api invocation</description>
 
-			<ccg:invokeDelete uri="/emp/delete/{id}">
+			<ccg:rest-invoke-delete uri="/emp/delete/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
-			</ccg:invokeDelete>
+			</ccg:rest-invoke-delete>
 			
 			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
 			
@@ -66,7 +66,7 @@
 		<testCase name="testMultiPart" dependencies="testPost">
 			<description>Tests multi part post request</description>
 
-			<ccg:invokeMultipartPost uri="/emp/saveWithFile">
+			<ccg:rest-invoke-multipart-post uri="/emp/saveWithFile">
 				<part name="details">
 					<value>
 						{
@@ -77,7 +77,7 @@
 				</part>
 
 				<attachment name="file" file="file:./src/test/resources/testFile.txt"/>				
-			</ccg:invokeMultipartPost>
+			</ccg:rest-invoke-multipart-post>
 			
 			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
 			
@@ -85,9 +85,9 @@
 				<source>ref: attr.response</source>
 			</ccg:setXpath>
 			
-			<ccg:invokeGetFile uri="/emp/getFile/{id}">
+			<ccg:rest-invoke-get-file uri="/emp/getFile/{id}">
 				<pathVariable name="id">${attr.emp3_id}</pathVariable>
-			</ccg:invokeGetFile>
+			</ccg:rest-invoke-get-file>
 			
 			<ccg:loadText resource="file:${attr.response}" contextAttribute="outputContent"/>
 			

@@ -56,13 +56,23 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		}
 		else
 		{
-			nodeName = step.getName().startsWith(location.getName()) ? step.getName() : step.getNameWithHyphens();
+			nodeName = step.getNameWithHyphens().startsWith(location.getName()) ? step.getNameWithHyphens() : step.getName();
 			builder.append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(" ");
 			
 			if(builder.toString().startsWith(location.getCurrentToken()))
 			{
 				builder.delete(0, location.getCurrentToken().length());
 			}
+		}
+		
+		if(!location.isFullElementGeneration())
+		{
+			if(builder.charAt(builder.length() - 1) == ' ')
+			{
+				builder.deleteCharAt(builder.length() - 1);
+			}
+			
+			return builder.toString();
 		}
 		
 		if(step.getParams() != null)

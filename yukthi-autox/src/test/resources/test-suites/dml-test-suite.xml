@@ -9,15 +9,15 @@
 				This comment is to test formatting
 			-->
 			<wrap:steps>
-				<ccg:dmlQuery countAttribute="countAttr" dataSourceName="dataSource" failOnNoUpdate="true">
+				<ccg:sql-dml-query countAttribute="countAttr" dataSourceName="dataSource" failOnNoUpdate="true">
 					<query>
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
-				</ccg:dmlQuery>
+				</ccg:sql-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:validateWithSql dataSourceName="dataSource">
+				<ccg:assert-sql dataSourceName="dataSource">
 					<query>
 						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>
@@ -25,7 +25,7 @@
 					<expectedRow>
 						<column name="NAME">employee1</column>
 					</expectedRow>
-				</ccg:validateWithSql>
+				</ccg:assert-sql>
 			</wrap:validations>
 		</testCase>
 	
@@ -37,11 +37,11 @@
 			<wrap:steps>
 				<ccg:set name="empId" value="1"/>
 			
-				<ccg:dmlQuery countAttribute="updateCount" dataSourceName="dataSource">
+				<ccg:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
 					<query>
 						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
 					</query>
-				</ccg:dmlQuery>
+				</ccg:sql-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
@@ -57,11 +57,11 @@
 			<wrap:steps>
 				<ccg:set name="empId" type="java.lang.Integer" value="1"/>
 			
-				<ccg:dmlQuery countAttribute="deleteCount" dataSourceName="dataSource">
+				<ccg:sql-dml-query countAttribute="deleteCount" dataSourceName="dataSource">
 					<query>
 						DELETE FROM EMPLOYEE WHERE ID = ?{attr.empId}
 					</query>
-				</ccg:dmlQuery>
+				</ccg:sql-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
@@ -75,7 +75,7 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:multiDmlQuery dataSourceName="dataSource">
+				<ccg:sql-multi-dml-query dataSourceName="dataSource">
 					<query>
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
@@ -83,11 +83,11 @@
 					<query>
 						INSERT INTO EMPLOYEE VALUES (3, 'employee2')
 					</query>
-				</ccg:multiDmlQuery>
+				</ccg:sql-multi-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:validateWithSql dataSourceName="dataSource">
+				<ccg:assert-sql dataSourceName="dataSource">
 					<query>
 						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 1
 					</query>
@@ -95,7 +95,7 @@
 					<expectedRow>
 						<column name="COUNT">2</column>
 					</expectedRow>
-				</ccg:validateWithSql>
+				</ccg:assert-sql>
 			</wrap:validations>
 		</testCase>
 	
@@ -105,14 +105,14 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:loadQueryColumnList contextAttribute="empNames" dataSourceName="dataSource">
+				<ccg:sql-load-query-column-list contextAttribute="empNames" dataSourceName="dataSource">
 					<query>
 						SELECT NAME
 						FROM EMPLOYEE
 						WHERE NAME IN ('employee1', 'employee2')
 						ORDER BY NAME
 					</query>
-				</ccg:loadQueryColumnList>
+				</ccg:sql-load-query-column-list>
 			</wrap:steps>
 		
 			<wrap:validations>
@@ -126,13 +126,13 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:fetchValueQuery contextAttribute="empId" dataSourceName="dataSource">
+				<ccg:sql-fetch-value-query contextAttribute="empId" dataSourceName="dataSource">
 					<query>
 						SELECT ID
 						FROM EMPLOYEE
 						WHERE NAME = 'employee1'
 					</query>
-				</ccg:fetchValueQuery>
+				</ccg:sql-fetch-value-query>
 			</wrap:steps>
 		
 			<wrap:validations>

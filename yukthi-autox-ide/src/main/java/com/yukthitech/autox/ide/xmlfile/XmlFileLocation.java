@@ -52,6 +52,12 @@ public class XmlFileLocation
 	 */
 	private String indentation;
 	
+	/**
+	 * Flag indicating if current location needs full element generation. If the element already contains
+	 * attributes or any other text then this flag will be false.
+	 */
+	private boolean fullElementGeneration;
+	
 	public XmlFileLocation(XmlFile xmlFile)
 	{
 		this.xmlFile = xmlFile;
@@ -107,12 +113,13 @@ public class XmlFileLocation
 		return loc;
 	}
 
-	public static XmlFileLocation newElementLocation(XmlFile xmlFile, Element parentElement, String currentToken, String indentation)
+	public static XmlFileLocation newElementLocation(XmlFile xmlFile, Element parentElement, String currentToken, String indentation, boolean fullElement)
 	{
 		XmlFileLocation loc = new XmlFileLocation(xmlFile);
 		loc.setType(XmlLocationType.CHILD_ELEMENT);
 		loc.parentElement = parentElement;
 		loc.indentation = indentation;
+		loc.fullElementGeneration = fullElement;
 		
 		splitNameToken(parentElement, currentToken, loc);
 		
@@ -199,5 +206,10 @@ public class XmlFileLocation
 	public String getPrefix()
 	{
 		return prefix;
+	}
+	
+	public boolean isFullElementGeneration()
+	{
+		return fullElementGeneration;
 	}
 }
