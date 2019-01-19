@@ -30,8 +30,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * SQL based validation.
  */
-@Executable(name = "assertSql", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
-public class AssertSql extends AbstractValidation
+@Executable(name = "sqlAssert", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
+public class SqlAssert extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
 
@@ -176,7 +176,7 @@ public class AssertSql extends AbstractValidation
 					{
 						if(expectedRows.size() <= rowIdx)
 						{
-							exeLogger.error(AssertSql.this, "Actual rows are more than expected row count: {}", expectedRows.size());
+							exeLogger.error(SqlAssert.this, "Actual rows are more than expected row count: {}", expectedRows.size());
 							return false;
 						}
 
@@ -189,7 +189,7 @@ public class AssertSql extends AbstractValidation
 
 							if(!expectedVal.equals(actualVal))
 							{
-								exeLogger.error(AssertSql.this, "At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
+								exeLogger.error(SqlAssert.this, "At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
 								return false;
 							}
 						}

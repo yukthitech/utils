@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -622,5 +623,27 @@ public class AutomationUtils
 		}
 
 		return originalValue;
+	}
+	
+	/**
+	 * Checks whether specified child is really a child file/folder of specified parent.
+	 *
+	 * @param parent the parent file to check
+	 * @param child the child file to check
+	 * @return true, if specified child path is really child of specified parent path
+	 */
+	public static boolean isChild(File parent, File child)
+	{
+		try
+		{
+			Path parentPath = parent.getCanonicalFile().toPath();
+			Path childPath = child.getCanonicalFile().toPath();
+			
+			return childPath.startsWith(parentPath);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while checking parent-child relationship of paths [Parent: %s, Child: %s]", 
+					parent, child, ex);
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.editor;
 
 import java.awt.Color;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -137,19 +138,36 @@ public class FileEditor extends RTextScrollPane
 			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
-				fileContentChanged();
+				fileContentChanged(true);
 			}
 
 			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
-				fileContentChanged();
+				fileContentChanged(true);
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
-				fileContentChanged();
+				fileContentChanged(true);
+			}
+		});
+
+		//during key events also fire content changed, so that content is not restyled
+			// when typing is going on, even when content is not changed (like arrow keys)
+		syntaxTextArea.addKeyListener(new KeyAdapter() 
+		{
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				fileContentChanged(false);
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				fileContentChanged(false);
 			}
 		});
 
@@ -180,7 +198,7 @@ public class FileEditor extends RTextScrollPane
 		setSyntaxStyle();
 		syntaxTextArea.setCodeFoldingEnabled(true);
 
-		fileContentChanged();
+		fileContentChanged(false);
 	}
 	
 	public void insertStepCode(String code)
@@ -249,12 +267,23 @@ public class FileEditor extends RTextScrollPane
 		}
 	}
 
-	private void fileContentChanged()
+	private void fileContentChanged(boolean contentChangedEvent)
 	{
-		ideContext.getProxy().fileChanged(file);
+		if(contentChangedEvent)
+		{
+			ideContext.getProxy().fileChanged(file);
+		}
 		
-		//from last change time, try to parse the content and highlight regions if any
-		IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 2000);
+		if(contentChangedEvent)
+		{
+			//from last change time, try to parse the content and highlight regions if any
+			IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 2000);
+		}
+		//if content is not changed, if job is already submitted, simply reshedule it
+		else
+		{
+			IdeUtils.rescheduleConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 2000);
+		}
 	}
 	
 	private String getToolTip(RTextArea textArea, MouseEvent e)
@@ -324,6 +353,9 @@ public class FileEditor extends RTextScrollPane
 	
 	private void parseFileContent()
 	{
+		int selSt = syntaxTextArea.getSelectionStart();
+		int selEnd = syntaxTextArea.getSelectionEnd();
+		
 		if(!this.currentHighlights.isEmpty())
 		{
 			clearAllMessages();
@@ -333,6 +365,12 @@ public class FileEditor extends RTextScrollPane
 		parsedFileContent = currentFileManager.parseContent(project, file.getName(), syntaxTextArea.getText(), collector);
 		
 		collector.getMessages().stream().forEach(mssg -> this.addMessage(mssg));
+		
+		//this will ensure selection is not lost when resetting the messages
+		if(selSt > 0 && selEnd > 0 && selEnd > selSt)
+		{
+			syntaxTextArea.select(selSt, selEnd);
+		}
 	}
 
 	public int getCaretPosition()

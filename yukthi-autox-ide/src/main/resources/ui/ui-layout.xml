@@ -117,6 +117,10 @@
 	<popup-menu label="projectExplorerPopup">
 		<item icon="/ui/icons/new.png" label="New Project" action="newProject" />
 		<item icon="/ui/icons/open.png" label="Open Project" action="openProject" />
+		
+		<item label="-" />
+		
+		<item label="Execute" action="executeProject" />
 	</popup-menu>
 
 	<popup-menu label="projectPopup">
@@ -152,6 +156,10 @@
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />
+		
+		<item label="-" />
+		
+		<item label="Execute" action="executeTestSuiteFolder" />
 	</popup-menu>
 	<popup-menu label="restResponsePopup">
 		<item label="assert" action="assertValue" />

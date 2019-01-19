@@ -17,7 +17,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-sql dataSourceName="dataSource">
+				<ccg:sql-assert dataSourceName="dataSource">
 					<query>
 						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>
@@ -25,7 +25,7 @@
 					<expectedRow>
 						<column name="NAME">employee1</column>
 					</expectedRow>
-				</ccg:assert-sql>
+				</ccg:sql-assert>
 			</wrap:validations>
 		</testCase>
 	
@@ -45,7 +45,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.updateCount" value="1"/>
+				<ccg:assert-equals value1="attr: updateCount" value2="1"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -65,7 +65,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.deleteCount" value="1"/>
+				<ccg:assert-equals value1="attr: deleteCount" value2="1"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -87,7 +87,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-sql dataSourceName="dataSource">
+				<ccg:sql-assert dataSourceName="dataSource">
 					<query>
 						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 1
 					</query>
@@ -95,7 +95,7 @@
 					<expectedRow>
 						<column name="COUNT">2</column>
 					</expectedRow>
-				</ccg:assert-sql>
+				</ccg:sql-assert>
 			</wrap:validations>
 		</testCase>
 	
@@ -116,7 +116,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.empNames" value="[employee1, employee2]"/>
+				<ccg:assert-equals value1="attr: empNames" value2="list: employee1, employee2"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -136,7 +136,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.empId" value="1"/>
+				<ccg:assert-equals value1="attr: empId" value2="1"/>
 			</wrap:validations>
 		</testCase>
 	</testSuite>

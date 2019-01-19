@@ -4,7 +4,7 @@
 		<ccg:log message="This message is from step group"/>
 		<ccg:set name="simpleGroupOutput" value="true"/>
 		
-		<ccg:validateContextParam expression="attr.simpleGroupInput" value="true"/>
+		<ccg:assert-true value="attr: simpleGroupInput"/>
 	</step-group>
 
 	<testSuite name="jobj-test-suites">
@@ -37,8 +37,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="beanFromApp:someName" />
+				<ccg:assert-equals value1="attr: returnValue" value2="string: beanFromApp:someName"/>
 			</wrap:validations>
 		</testCase>
 
@@ -63,8 +62,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="beanCopy=>someName1" />
+				<ccg:assert-equals value1="attr: returnValue" value2="beanCopy=>someName1"/>
 			</wrap:validations>
 		</testCase>
 
@@ -85,8 +83,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="beanFromTestSuite=>someName1" />
+				<ccg:assert-equals value1="attr: returnValue" value2="beanFromTestSuite=>someName1"/>
 			</wrap:validations>
 		</testCase>
 
@@ -131,8 +128,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="beanFromTestSuite=>${attr.dataString}" />
+				<ccg:assert-equals value1="attr: returnValue" value2="beanFromTestSuite=>${attr.dataString}"/>
 			</wrap:validations>
 		</testCase>
 
@@ -150,7 +146,7 @@
 					</list-data-provider>
 				</ccg:set>
 
-				<ccg:validateContextParam expression="attr.res" value="|1|2|3" />
+				<ccg:assert-equals value1="attr: res" value2="|1|2|3"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -171,8 +167,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="${attr.extDataProvider.result}" />
+				<ccg:assert-equals value1="attr: returnValue" value2="${attr.extDataProvider.result}"/>
 			</wrap:validations>
 
 			<expectedException enabled="${attr.extDataProvider.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException">
@@ -197,8 +192,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.returnValue"
-					value="${attr.extDataProvider.value.result}" />
+				<ccg:assert-equals value1="attr: returnValue" value2="${attr.extDataProvider.value.result}"/>
 			</wrap:validations>
 
 			<expectedException enabled="${attr.extDataProvider.value.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException">
@@ -220,8 +214,9 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.xpathAttr1"
-					value="value1" />
+				<ccg:assert-equals value1="attr: xpathAttr1" value2="value1"/>
+				<ccg:assert-equals value1="attr: xpathAttr1" value2="value1"/>
+
 				<ccg:validateXpathValue source="res:/data/data1.json"
 					valueExpression="//bean1/subbean1/sprop2" value="value3" />
 

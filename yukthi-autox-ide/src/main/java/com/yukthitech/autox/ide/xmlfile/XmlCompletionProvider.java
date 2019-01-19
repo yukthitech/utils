@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,6 +88,12 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		}
 		
 		builder.deleteCharAt(builder.length() - 1);
+		
+		if(CollectionUtils.isEmpty(step.getChildElements()))
+		{
+			builder.append("/>");
+			return builder.toString();
+		}
 		
 		builder.append(">").append("\n").append(location.getIndentation());
 		builder.append("</").append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(">");

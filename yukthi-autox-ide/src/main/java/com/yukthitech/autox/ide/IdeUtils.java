@@ -345,6 +345,8 @@ public class IdeUtils
 			}
 			
 			consolidatedJob = new ConsolidatedJob(name, runnable, delay);
+			consolidatedJobs.put(name, consolidatedJob);
+			
 			threadPool.schedule(consolidatedJob, delay, TimeUnit.MILLISECONDS);
 		}finally
 		{
@@ -352,6 +354,26 @@ public class IdeUtils
 		}
 	}
 	
+	public static synchronized void rescheduleConsolidatedJob(String name, Runnable runnable, long delay)
+	{
+		jobNameLocker.lockObject(name);
+		
+		try
+		{
+			ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
+			
+			if(consolidatedJob == null)
+			{
+				return;
+			}
+			
+			consolidatedJob.scheduleAfter(runnable, delay);
+		}finally
+		{
+			jobNameLocker.releaseObject(name);
+		}
+	}
+
 	public static void executeUiTask(Runnable runnable)
 	{
 		EventQueue.invokeLater(runnable);

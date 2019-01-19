@@ -147,7 +147,7 @@ public class UiFreeMarkerMethods
 			description = "Removes special characters and coverts result into json string (enclosed in double quotes)",
 			returnDescription = "Converted string"
 			)
-	public static String getValue(
+	public static String escape(
 			@FmParam(name = "str", description = "String to be converted") String str)
 	{
 		if(str == null)
@@ -155,7 +155,7 @@ public class UiFreeMarkerMethods
 			return "null";
 		}
 		
-		//remove special charaters if any
+		//remove special characters if any
 		char chArr[] = str.toCharArray();
 		
 		for(int i = 0; i < chArr.length; i++)

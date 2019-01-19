@@ -20,6 +20,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Executable(name = "uiAssertVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
 public class AssertVisibility extends AbstractUiAssert
 {
+	
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -32,8 +36,8 @@ public class AssertVisibility extends AbstractUiAssert
 	 * If true, this step waits for element with specified locator gets removed
 	 * or hidden.
 	 */
-	@Param(description = "Flag indicating if the validation is for visibility or invisibility.\nDefault: false", required = false)
-	private String hidden = "false";
+	@Param(description = "Flag indicating if the validation is for visibility or invisibility.\nDefault: true", required = false)
+	private String visible = "true";
 
 	/**
 	 * Message expected in the target element.
@@ -59,12 +63,12 @@ public class AssertVisibility extends AbstractUiAssert
 			return true;
 		}
 		
-		exeLogger.trace(this, "Checking for element '{}' is {}", locator, "true".equals(hidden) ? "Invisible" : "Visible");
+		exeLogger.trace(this, "Checking for element Visibility is {}", locator, "true".equals(visible) ? "Visible" : "Invisible");
 		
 		UiAutomationUtils.validateWithWait(() -> {
 			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
 
-			if("true".equals(hidden))
+			if(!"true".equals(visible))
 			{
 				return (element == null || !element.isDisplayed());
 			}
@@ -111,28 +115,23 @@ public class AssertVisibility extends AbstractUiAssert
 	}
 
 	/**
-	 * Checks if is if true, this step waits for element with specified locator
-	 * gets removed or hidden.
+	 * Gets the if true, this step waits for element with specified locator gets removed or hidden.
 	 *
-	 * @return the if true, this step waits for element with specified locator
-	 *         gets removed or hidden
+	 * @return the if true, this step waits for element with specified locator gets removed or hidden
 	 */
-	public String isHidden()
+	public String getVisible()
 	{
-		return hidden;
+		return visible;
 	}
 
 	/**
-	 * Sets the if true, this step waits for element with specified locator gets
-	 * removed or hidden.
+	 * Sets the if true, this step waits for element with specified locator gets removed or hidden.
 	 *
-	 * @param hidden
-	 *            the new if true, this step waits for element with specified
-	 *            locator gets removed or hidden
+	 * @param visible the new if true, this step waits for element with specified locator gets removed or hidden
 	 */
-	public void setHidden(String hidden)
+	public void setVisible(String visible)
 	{
-		this.hidden = hidden;
+		this.visible = visible;
 	}
 
 	/**
@@ -169,7 +168,7 @@ public class AssertVisibility extends AbstractUiAssert
 		builder.append("[");
 
 		builder.append("Locator: ").append(locator);
-		builder.append(comma).append("Hidden: ").append(hidden);
+		builder.append(comma).append("Visible: ").append(visible);
 		builder.append(comma).append("Message: ").append(message);
 
 		builder.append("]");

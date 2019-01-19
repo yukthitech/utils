@@ -2,7 +2,6 @@ package com.yukthitech.autox.expr;
 
 import java.lang.reflect.Method;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -153,16 +152,32 @@ public class ExpressionParserDetails
 	}
 	
 	/**
+	 * Fetches if the parser can take of expression value conversion.
+	 * @return
+	 */
+	public boolean isConversionHandled()
+	{
+		return (method.getParameterTypes().length == 3);
+	}
+	
+	/**
 	 * Invokes underlying parser method and returns the result.
 	 * @param context context to be used
 	 * @param expression expression to be executed
 	 * @return result
 	 */
-	public Object invoke(AutomationContext context, String expression)
+	public IPropertyPath invoke(ExpressionParserContext context, String expression, String expectedType[])
 	{
 		try
 		{
-			return method.invoke(enclosingObject, context, expression);
+			if(method.getParameterTypes().length == 2)
+			{
+				return (IPropertyPath) method.invoke(enclosingObject, context, expression);
+			}
+			else
+			{
+				return (IPropertyPath) method.invoke(enclosingObject, context, expression, expectedType);
+			}
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while parsing expression '{}' of type '{}' using parser method: {}.{}", 

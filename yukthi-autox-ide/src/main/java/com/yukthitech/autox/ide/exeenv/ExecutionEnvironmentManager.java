@@ -110,6 +110,16 @@ public class ExecutionEnvironmentManager
 		return startAutoxEnvironment("tc-" + testCase, project, "-tc", testCase);
 	}
 	
+	public ExecutionEnvironment executeTestSuiteFolder(Project project, File testSuiteFolder)
+	{
+		return startAutoxEnvironment("dir-" + testSuiteFolder.getName(), project, "-flmt", testSuiteFolder.getPath());
+	}
+
+	public ExecutionEnvironment executeProject(Project project)
+	{
+		return startAutoxEnvironment(project.getName(), project);
+	}
+
 	public synchronized ExecutionEnvironment getInteractiveEnvironment(Project project)
 	{
 		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());

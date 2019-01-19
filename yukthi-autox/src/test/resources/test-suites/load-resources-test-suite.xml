@@ -19,9 +19,9 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.propFile.key1" value="value1"/>
-				<ccg:validateContextParam expression="attr.propFile.key2" value="value2"/>
-				<ccg:validateContextParam expression="attr.propFile.key3" value="someValue"/>
+				<ccg:assert-equals value1="prop: attr.propFile.key1" value2="value1"/>
+				<ccg:assert-equals value1="prop: attr.propFile.key2" value2="value2"/>
+				<ccg:assert-equals value1="prop: attr.propFile.key3" value2="value3"/>
 			</wrap:validations>
 		</testCase>
 
@@ -39,9 +39,9 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.propFile1.key1" value="value1"/>
-				<ccg:validateContextParam expression="attr.propFile1.key2" value="value2"/>
-				<ccg:validateContextParam expression="attr.propFile1.key3" value="${'$'}{attr.resAttribute}"/>
+				<ccg:assert-equals value1="prop: attr.propFile1.key1" value2="value1"/>
+				<ccg:assert-equals value1="prop: attr.propFile1.key2" value2="value2"/>
+				<ccg:assert-equals value1="prop: attr.propFile1.key3" value2="${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
 
@@ -60,7 +60,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.jsonObj.bean1.subbean1.sprop3" value="someValue" />
+				<ccg:assert-equals value1="prop: attr.jsonObj.bean1.subbean1.sprop3" value2="someValue"/>
 			</wrap:validations>
 		</testCase>
 
@@ -75,7 +75,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.jsonObj.bean1.subbean1.sprop3" value="${'$'}{attr.resAttribute}" />
+				<ccg:assert-equals value1="prop: attr.jsonObj.bean1.subbean1.sprop3" value2="${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
 
@@ -94,7 +94,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.textObj" value="Some test content someValue" />
+				<ccg:assert-equals value1="attr: textObj" value2="Some test content someValue"/>
 			</wrap:validations>
 		</testCase>
 
@@ -109,7 +109,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.textObj" value="Some test content ${'$'}{attr.resAttribute}" />
+				<ccg:assert-equals value1="attr: textObj" value2="Some test content ${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
 	</testSuite>

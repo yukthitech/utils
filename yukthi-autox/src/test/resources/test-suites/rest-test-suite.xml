@@ -18,7 +18,7 @@
 					<source>ref: attr.response</source>
 				</ccg:setXpath>
 
-				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+				<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
 
 				<ccg:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
@@ -32,7 +32,7 @@
 				<ccg:setXpath valueExpression="//id" name="emp2_id">
 					<source>ref:attr.response</source>
 				</ccg:setXpath>
-				<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+				<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
 			</wrap:steps>
 		</testCase>
 
@@ -43,7 +43,7 @@
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:rest-invoke-get>
 			
-			<ccg:validateXpathValue valueExpression="//name" value="Emp2" source="ref: attr.response"/>
+			<ccg:assert-equals value1="xpath: /attr/response//name" value2="Emp2"/>
 		</testCase>
 
 		<testCase name="testDelete" dependencies="testPost">
@@ -53,14 +53,14 @@
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:rest-invoke-delete>
 			
-			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+			<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
 			
 			<ccg:rest-invoke-get uri="/emp/get/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:rest-invoke-get>
 			
 			<!-- As emp2 is deleted, get should result in 400 error -->
-			<ccg:validateContextParam expression="attr.result.statusCode" value="400" />
+			<ccg:assert-equals value1="prop: attr.result.statusCode" value2="400"/>
 		</testCase>
 
 		<testCase name="testMultiPart" dependencies="testPost">
@@ -79,7 +79,7 @@
 				<attachment name="file" file="file:./src/test/resources/testFile.txt"/>				
 			</ccg:rest-invoke-multipart-post>
 			
-			<ccg:validateContextParam expression="attr.result.statusCode" value="200" />
+			<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
 			
 			<ccg:setXpath valueExpression="//id" name="emp3_id">
 				<source>ref: attr.response</source>
@@ -91,7 +91,7 @@
 			
 			<ccg:loadText resource="file:${attr.response}" contextAttribute="outputContent"/>
 			
-			<ccg:validateContextParam expression="attr.outputContent" value="This is simple test file for upload." />
+			<ccg:assert-equals value1="attr: outputContent" value2="This is simple test file for upload."/>
 		</testCase>
 	</testSuite>
 </testData>

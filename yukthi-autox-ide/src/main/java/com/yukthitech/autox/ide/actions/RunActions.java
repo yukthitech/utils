@@ -1,5 +1,7 @@
 package com.yukthitech.autox.ide.actions;
 
+import java.io.File;
+
 import javax.swing.JOptionPane;
 
 import org.apache.logging.log4j.LogManager;
@@ -7,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
@@ -32,6 +35,8 @@ public class RunActions
 	@Autowired
 	private ExecutionEnvironmentManager executionEnvironmentManager;
 	
+	@Autowired
+	private IdeContext ideContext;
 	
 	private InProgressDialog inProgressDialog;
 	
@@ -146,7 +151,23 @@ public class RunActions
 	}
 	
 	@Action
-	public void execute() 
+	public synchronized void executeTestSuiteFolder() 
 	{
+		File activeFolder = ideContext.getActiveFile();
+
+		if(activeFolder == null || !activeFolder.isDirectory())
+		{
+			return;
+		}
+
+		Project project = ideContext.getActiveProject();
+		executionEnvironmentManager.executeTestSuiteFolder(project, activeFolder);	
+	}
+	
+	@Action
+	public synchronized void executeProject() 
+	{
+		Project project = ideContext.getActiveProject();
+		executionEnvironmentManager.executeProject(project);
 	}
 }

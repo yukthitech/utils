@@ -33,10 +33,9 @@
 				<value>Value: ${attr.testAttr + ' #{test.app.prop}'}</value>
 			</ccg:set>
 			
-			<ccg:validateContextParam expression="attr.testAttr2" value="Value: TestValue" />
-			<ccg:validateContextParam expression="attr.testAttr3" value="Value: TestValue SimpleValue" />
-			<ccg:validateContextParam expression="attr.testAttr4" value="Value: SimpleValue TestValue" />
-			
+			<ccg:assert-equals value1="attr: testAttr2" value2="TestValue"/>
+			<ccg:assert-equals value1="attr: testAttr3" value2="TestValue SimpleValue"/>
+			<ccg:assert-equals value1="attr: testAttr4" value2="SimpleValue TestValue"/>
 		</testCase>
 
 		<testCase name="testIfThenCondition">
@@ -45,7 +44,7 @@
 			<wrap:steps>
 				<ccg:set name="flag" value="1" type="java.lang.Integer"/>
 				<ccg:step-group-ref name="condSimpleGroup"/>
-				<ccg:validateContextParam expression="attr.ifExec" value="if-then" />
+				<ccg:assert-equals value1="attr: ifExec" value2="if-then"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -59,7 +58,7 @@
 				<ccg:step-group-ref name="condSimpleGroup"/>
 				<ccg:remove name="returnFlag"/>
 
-				<ccg:validateContextParam expression="attr.ifExec" value="returnFlag: true" />
+				<ccg:assert-equals value1="attr: ifExec" value2="string: returnFlag: true"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -69,7 +68,7 @@
 			<wrap:steps>
 				<ccg:set name="flag" value="2" type="java.lang.Integer"/>
 				<ccg:step-group-ref name="condSimpleGroup"/>
-				<ccg:validateContextParam expression="attr.ifExec" value="if-else" />
+				<ccg:assert-equals value1="attr: ifExec" value2="if-else"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -83,7 +82,7 @@
 					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:for>
 				
-				<ccg:validateContextParam expression="attr.res" value="|1|2|3|4|5" />
+				<ccg:assert-equals value1="attr: res" value2="|1|2|3|4|5"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -105,7 +104,7 @@
 					</ccg:if>
 				</ccg:for>
 				
-				<ccg:validateContextParam expression="attr.res" value="|2|4|6|8|10" />
+				<ccg:assert-equals value1="attr: res" value2="|2|4|6|8|10"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -121,7 +120,7 @@
 					<ccg:set name="i" value="${attr.i + 1}" type="java.lang.Integer"/>
 				</ccg:while>
 				
-				<ccg:validateContextParam expression="attr.res" value="|1|2|3|4" />
+				<ccg:assert-equals value1="attr: res" value2="|1|2|3|4"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -147,7 +146,7 @@
 					
 				</ccg:while>
 				
-				<ccg:validateContextParam expression="attr.res" value="|2|4|6|8|10" />
+				<ccg:assert-equals value1="attr: res" value2="|2|4|6|8|10"/>
 			</wrap:steps>				
 		</testCase>
 		
@@ -166,7 +165,7 @@
 					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:forEach>
 				
-				<ccg:validateContextParam expression="attr.res" value="|a|b|c|d|e|f" />
+				<ccg:assert-equals value1="attr: res" value2="|a|b|c|d|e|f"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -180,7 +179,7 @@
 					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:forEach>
 				
-				<ccg:validateContextParam expression="attr.res" value="|a|b|c" />
+				<ccg:assert-equals value1="attr: res" value2="|a|b|c"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -200,7 +199,7 @@
 					<ccg:set name="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:forEach>
 				
-				<ccg:validateContextParam expression="attr.res" value="|a|b|c" />
+				<ccg:assert-equals value1="attr: res" value2="|a|b|c"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -220,7 +219,7 @@
 					<ccg:set name="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
 				</ccg:forEach>
 				
-				<ccg:validateContextParam expression="attr.res" value="|key1=Value1|key2=Value2|key3=Value3" />
+				<ccg:assert-equals value1="attr: res" value2="|key1=Value1|key2=Value2|key3=Value3"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -243,7 +242,7 @@
 					</ccg:if>
 				</ccg:forEach>
 				
-				<ccg:validateContextParam expression="attr.res" value="|a|c|d|e" />
+				<ccg:assert-equals value1="attr: res" value2="|a|c|d|e"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -269,7 +268,7 @@
 			<ccg:stopTimer name="timeTaken"/>
 			
 			<ccg:log level="SUMMARY" message="Time taken during test was: ${attr.timeTaken}"/>
-			<ccg:validateContextParam expression="attr.timeTaken"/>
+			<ccg:assert-not-null value="attr.timeTaken"/>
 		</testCase>
 		
 		<step-group name="factorialGroup1">
@@ -293,7 +292,7 @@
 				<parameter name="value" value="4" type="int"/>
 			</ccg:step-group-ref>
 
-			<ccg:validateContextParam expression="attr.result" value="24"/>
+			<ccg:assert-equals value1="attr: result" value2="24"/>
 		</testCase>
 		
 		<testCase name="testExecute">
@@ -305,7 +304,7 @@
 				<parameter name="value" value="4" type="int"/>
 			</ccg:step-group-ref>
 
-			<ccg:validateContextParam expression="attr.result" value="24"/>
+			<ccg:assert-equals value1="attr: result" value2="24"/>
 		</testCase>
 		
 		
@@ -318,7 +317,7 @@
 			
 			<wrap:steps>
 				<ccg:set name="setupVar" value="${attr.setupVar + 1}" type="java.lang.Integer"/>
-				<ccg:validateContextParam expression="attr.setupVar" value="2"/>
+				<ccg:assert-equals value1="attr: setupVar" value2="2"/>
 			</wrap:steps>
 
 			<cleanup>
@@ -330,7 +329,7 @@
 			<description>Ensures cleanup is executed at end of testCaseSetupCleanup</description>
 
 			<wrap:steps>
-				<ccg:validateContextParam expression="attr.setupVar" value="10"/>
+				<ccg:assert-equals value1="attr: setupVar" value2="20"/>
 			</wrap:steps>
 		</testCase>
 	</testSuite>

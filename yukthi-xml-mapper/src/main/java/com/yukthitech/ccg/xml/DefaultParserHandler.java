@@ -307,8 +307,12 @@ public class DefaultParserHandler implements IParserHandler
 		if(root == null)
 		{
 			String beanType = (String) att.getReserved(ATTR_BEAN_TYPE);
+			
 			if(beanType == null)
-				throw new IllegalStateException("Root bean is not specified.Attribute " + ATTR_BEAN_TYPE + " is mandatory");
+			{
+				return new DynamicBean();
+			}
+			
 			String params = (String) att.getReserved(ATTR_PARAMTERS);
 			String paramTypes = (String) att.getReserved(ATTR_PARAMTER_TYPES);
 			root = createBean(null, beanType, paramTypes, params, dateFormat, classLoader, objIdToObj);

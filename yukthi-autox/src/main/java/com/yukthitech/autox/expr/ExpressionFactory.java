@@ -1,8 +1,10 @@
 package com.yukthitech.autox.expr;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -13,7 +15,9 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 
+import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.utils.ConvertUtils;
@@ -24,7 +28,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Factory for parsing expressions.
  * @author akiran
  */
-public class ExpressionFactory
+public class ExpressionFactory extends AbstractLocationBased
 {
 	private static Logger logger = LogManager.getLogger(ExpressionFactory.class);
 	
@@ -89,9 +93,28 @@ public class ExpressionFactory
 				{
 					paramTypes = method.getParameterTypes();
 					
-					if(paramTypes.length != 2 || !AutomationContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]))
+					if(paramTypes.length == 2)
+					{
+						if(!ExpressionParserContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]))
+						{
+							throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
+						}
+					}
+					else if(paramTypes.length == 3)
+					{
+						if(!ExpressionParserContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]) || !String[].class.equals(paramTypes[2]))
+						{
+							throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
+						}
+					} 
+					else
 					{
 						throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
+					}
+					
+					if(!IPropertyPath.class.equals(method.getReturnType()))
+					{
+						throw new InvalidStateException("Expression parser method is not returning property path: {}.{}", method.getDeclaringClass().getName(), method.getName());
 					}
 					
 					parserAnnot = method.getAnnotation(ExpressionParser.class);
@@ -133,10 +156,57 @@ public class ExpressionFactory
 		}
 		
 		String expression = (String) expressionObj;
+
+		//Parse the expression into tokens delimited by '|'
+		List<String> lst = new ArrayList<String>();
+		char ch[] = expression.toCharArray();
+		StringBuilder token = new StringBuilder();
 		
+		for(int i = 0; i < ch.length; i++)
+		{
+			if(ch[i] == '\\')
+			{
+				if(i < ch.length - 1)
+				{
+					token.append(ch[i + 1]);
+				}
+				
+				i++;
+				continue;
+			}
+			
+			if(ch[i] == '|')
+			{
+				if(token.length() > 0)
+				{
+					lst.add(token.toString());
+				}
+				
+				token.setLength(0);
+				continue;
+			}
+			
+			token.append(ch[i]);
+		}
+		
+		Object result = null;
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		
+		//convert tokens into objects
+		for(String tokenStr : lst)
+		{
+			result = parseSingleExpression(expressionParserContext, tokenStr);
+			expressionParserContext.setCurrentValue(result);
+		}
+		
+		return result;
+	}
+	
+	private Object parseSingleExpression(ExpressionParserContext context, String expression)
+	{
 		//check if string is a reference
 		String exprType = null, mainExpr = null;
-		Class<?> resultType = null;
+		String exprTypeParams[] = null;
 		
 		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(expression);
 		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_TYPE_PATTERN.matcher(expression);
@@ -149,16 +219,9 @@ public class ExpressionFactory
 		else if(matcherWithType.find())
 		{
 			exprType = matcherWithType.group("exprType");
-			
-			try
-			{
-				resultType = Class.forName( matcherWithType.group("type") );
-			}catch(Exception ex)
-			{
-				throw new InvalidArgumentException("Invalid result type '{}' specified in expression: {}", matcherWithType.group("type"), expression, ex);
-			}
-			
 			mainExpr = expression.substring(matcherWithType.end()).trim();
+			
+			exprTypeParams = exprType.trim().split("\\s*\\,\\s*");
 		}
 		
 		ExpressionParserDetails parser = parsers.get(exprType);
@@ -168,13 +231,39 @@ public class ExpressionFactory
 			throw new InvalidArgumentException("Invalid expression type '{}' specified in expression: {}", exprType, expression);
 		}
 		
-		Object result = parser.invoke(context, mainExpr);
+		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
+		exeLogger.trace(this, "Executing expression: {}", expression);
 		
-		if(resultType != null)
+		try
 		{
-			result = ConvertUtils.convert(result, resultType);
+			IPropertyPath propPath = parser.invoke(context, mainExpr, exprTypeParams);
+			Object result = propPath.getValue();
+			
+			exeLogger.trace(this, "Execution of property expression {} resulted in: {}", expression, result);
+	
+			if(!parser.isConversionHandled())
+			{
+				Class<?> resultType = null;
+				
+				try
+				{
+					resultType = Class.forName( matcherWithType.group("type") );
+				}catch(Exception ex)
+				{
+					throw new InvalidArgumentException("Invalid result type '{}' specified in expression: {}", matcherWithType.group("type"), expression, ex);
+				}
+	
+				if(resultType != null)
+				{
+					result = ConvertUtils.convert(result, resultType);
+				}
+			}
+			
+			return result;
+		}catch(Exception ex)
+		{
+			exeLogger.error(this, "Evaluation of expression {} resulted in error", expression, ex);
+			throw new InvalidStateException("An error occurred while evaluating expression '{}'", expression, ex);
 		}
-		
-		return result;
 	}
 }

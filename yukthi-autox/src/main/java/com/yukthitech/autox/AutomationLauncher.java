@@ -82,9 +82,35 @@ public class AutomationLauncher
 		TestSuiteGroup testSuiteGroup = new TestSuiteGroup();
 		
 		File setupFile = null, cleanupFile = null;
+		List<File> limitFolders = context.getBasicArguments().getFolderLimitFiles();
 		
+		if(limitFolders != null)
+		{
+			logger.debug("Limiting the xml file loading to folders: {}", limitFolders);
+		}
+
 		for(File xmlFile : xmlFiles)
 		{
+			if(limitFolders != null)
+			{
+				boolean found = false;
+				
+				for(File folder : limitFolders)
+				{
+					if(AutomationUtils.isChild(folder, xmlFile))
+					{
+						found = true;
+						break;
+					}
+				}
+				
+				if(!found)
+				{
+					logger.trace("Skiping file as it is not present in specified folder limits. File: {}", xmlFile.getPath());
+					continue;
+				}
+			}
+			
 			testDataFile = new TestDataFile(context);
 			defaultParserHandler.setFileBeingParsed(xmlFile.getName());
 

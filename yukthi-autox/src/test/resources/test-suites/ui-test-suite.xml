@@ -18,9 +18,10 @@
 	
 			<wrap:validations>
 				<ccg:ui-assert-value locator="xpath: //input[@name='statusFld']" value="button Clicked"/>
-				<ccg:validateContextParam expression="attr.visibFlag1" value="false"/>
-				<ccg:validateContextParam expression="attr.visibFlag2" value="true"/>
-				<ccg:validateContextParam expression="attr.fldValue" value="button Clicked"/>
+
+				<ccg:assert-false value="attr: visibFlag1"/>
+				<ccg:assert-true value="attr: visibFlag2"/>
+				<ccg:assert-equals value1="aatr: fldValue" value2="button Clicked"/>
 			</wrap:validations>
 		</testCase>
 
@@ -58,7 +59,7 @@
 				<ccg:set name="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
 			</ccg:forEach>
 
-			<ccg:validateContextParam expression="attr.values" value=",red,green,blue,yellow,orange"/>
+			<ccg:assert-equals value1="attr: values" value2=",red,green,blue,yellow,orange"/>
 		</testCase>
 
 		<testCase name="uiMethods">
@@ -69,13 +70,7 @@
 			<ccg:set name="result" value="false"/>
 			<ccg:set name="locator" value="xpath: //input[@type='checkbox']"/>
 			
-			<ccg:if condition="uiui-is-visible(attr.locator, null)">
-				<then>
-					<ccg:set name="result" value="true"/>
-				</then>
-			</ccg:if>
-			
-			<ccg:validateContextParam expression="attr.result" value="true"/>
+			<ccg:assert-true value="condition: ui-is-visible(attr.locator, null)"/>
 		</testCase>
 
 		<testCase name="testDownload">
@@ -99,16 +94,15 @@
 			
 			<!-- Ensure switch windows is working fine -->
 			<ccg:ui-switch-window />
-			<ccg:ui-is-visible locator="id: downloadLink" name="visibFlag1"/>
-			<ccg:validateContextParam expression="attr.visibFlag1" value="true"/>
+			<ccg:ui-assert-visibility locator="id: downloadLink"/>
 			<ccg:sleep time="5000"/>
 			
 			<ccg:ui-switch-window locator="Index"/>
 			<ccg:ui-is-visible locator="id: button" name="visibFlag1"/>
 			<ccg:ui-close-window />
 			<ccg:sleep time="5000"/>
-						
-			<ccg:validateContextParam expression="attr.visibFlag1" value="true"/>
+
+			<ccg:assert-true value="attr: visibFlag1"/>
 		</testCase>
 
 		<cleanup>

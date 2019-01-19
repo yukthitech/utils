@@ -1,7 +1,10 @@
 package com.yukthitech.autox;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -68,8 +71,6 @@ public class BasicArguments
 	@CliArgument(name = "flmt", longName = "folder-limits", description = "Comma separated folder paths to which execution should be limited.", required = false)
 	private String folderLimits;
 	
-	private boolean skipCommonSteps;
-
 	/**
 	 * Gets the if specified the execution will be limited only for this test suites.
 	 *
@@ -258,5 +259,55 @@ public class BasicArguments
 	public void setInteractiveExecuteGlobal(boolean interactiveExecuteGlobal)
 	{
 		this.interactiveExecuteGlobal = interactiveExecuteGlobal;
+	}
+
+	/**
+	 * Gets the comma separated folder paths to which execution should be limited.
+	 *
+	 * @return the comma separated folder paths to which execution should be limited
+	 */
+	public String getFolderLimits()
+	{
+		return folderLimits;
+	}
+
+	/**
+	 * Sets the comma separated folder paths to which execution should be limited.
+	 *
+	 * @param folderLimits the new comma separated folder paths to which execution should be limited
+	 */
+	public void setFolderLimits(String folderLimits)
+	{
+		this.folderLimits = folderLimits;
+	}
+	
+	/**
+	 * Fetches the folder limits as file objects.
+	 * @return folder limits as files
+	 */
+	public List<File> getFolderLimitFiles()
+	{
+		if(StringUtils.isBlank(folderLimits))
+		{
+			return null;
+		}
+		
+		String files[] = folderLimits.split("\\s*\\,\\s*");
+		List<File> resList = new ArrayList<>();
+		
+		for(String path : files)
+		{
+			File file = new File(path);
+			
+			if(!file.exists() || !file.isDirectory())
+			{
+				System.err.println("Invalid limit folder specified: " + path);
+				System.exit(-1);
+			}
+			
+			resList.add(file);
+		}
+		
+		return resList;
 	}
 }
