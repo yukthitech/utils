@@ -14,11 +14,9 @@
 					]]></body>
 				</ccg:rest-invoke-post>
 				
-				<ccg:setXpath valueExpression="//id" name="emp1_id">
-					<source>ref: attr.response</source>
-				</ccg:setXpath>
+				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
 
-				<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
+				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 
 				<ccg:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
@@ -29,10 +27,8 @@
 					]]></body>
 				</ccg:rest-invoke-post>
 				
-				<ccg:setXpath valueExpression="//id" name="emp2_id">
-					<source>ref:attr.response</source>
-				</ccg:setXpath>
-				<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
+				<ccg:set expression="emp2_id" value="attr: response | xpath: //id"/>
+				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			</wrap:steps>
 		</testCase>
 
@@ -43,7 +39,7 @@
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:rest-invoke-get>
 			
-			<ccg:assert-equals value1="xpath: /attr/response//name" value2="Emp2"/>
+			<ccg:assert-equals actual="xpath: /attr/response//name" expected="Emp2"/>
 		</testCase>
 
 		<testCase name="testDelete" dependencies="testPost">
@@ -53,14 +49,14 @@
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:rest-invoke-delete>
 			
-			<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
+			<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			
 			<ccg:rest-invoke-get uri="/emp/get/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</ccg:rest-invoke-get>
 			
 			<!-- As emp2 is deleted, get should result in 400 error -->
-			<ccg:assert-equals value1="prop: attr.result.statusCode" value2="400"/>
+			<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 400"/>
 		</testCase>
 
 		<testCase name="testMultiPart" dependencies="testPost">
@@ -79,11 +75,9 @@
 				<attachment name="file" file="file:./src/test/resources/testFile.txt"/>				
 			</ccg:rest-invoke-multipart-post>
 			
-			<ccg:assert-equals value1="prop: attr.result.statusCode" value2="200"/>
+			<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			
-			<ccg:setXpath valueExpression="//id" name="emp3_id">
-				<source>ref: attr.response</source>
-			</ccg:setXpath>
+			<ccg:set expression="emp3_id" value="attr: response | xpath: //id"/>
 			
 			<ccg:rest-invoke-get-file uri="/emp/getFile/{id}">
 				<pathVariable name="id">${attr.emp3_id}</pathVariable>
@@ -91,7 +85,7 @@
 			
 			<ccg:loadText resource="file:${attr.response}" contextAttribute="outputContent"/>
 			
-			<ccg:assert-equals value1="attr: outputContent" value2="This is simple test file for upload."/>
+			<ccg:assert-equals actual="attr: outputContent" expected="This is simple test file for upload."/>
 		</testCase>
 	</testSuite>
 </testData>

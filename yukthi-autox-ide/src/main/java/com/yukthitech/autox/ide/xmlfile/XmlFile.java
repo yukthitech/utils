@@ -25,7 +25,7 @@ public class XmlFile
 	
 	public Element getElement(String withName, int curLineNo)
 	{
-		if(!rootElement.hasOffset(curLineNo))
+		if(!rootElement.hasLine(curLineNo))
 		{
 			return null;
 		}

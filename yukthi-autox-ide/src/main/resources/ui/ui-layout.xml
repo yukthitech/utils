@@ -93,7 +93,6 @@
 	<popup-menu label="folderPopup">
 		<menu label="New">
 			<item label="Folder" action="newFolder" />
-			<item label="Test File" action="newTestFile" />
 			<item label="File" action="newFile" />
 		</menu>
 
@@ -127,6 +126,10 @@
 		<item label="Delete Project" action="deleteProject" />
 		<item label="Refresh" action="refreshProject" />
 		<item label="Properties" action="projectProperties"></item>
+
+		<item label="-" />
+		
+		<item label="Execute" action="executeProject" />
 	</popup-menu>
 
 	<popup-menu label="fileTabPopup">
@@ -161,6 +164,27 @@
 		
 		<item label="Execute" action="executeTestSuiteFolder" />
 	</popup-menu>
+
+	<popup-menu label="testFolderPopup">
+		<menu label="New">
+			<item label="Folder" action="newFolder" />
+			<item label="Test File" action="newTestFile" />
+			<item label="File" action="newFile" />
+		</menu>
+
+		<item label="Refresh" action="refreshFolder"/>
+
+		<item label="-" />
+		<item label="Copy" action="copyFile" />
+		<item label="Paste" action="pasteFile" />
+		<item label="Rename" action="renameFile" />
+		<item label="Delete" action="deleteFile" />
+		
+		<item label="-" />
+		
+		<item label="Execute" action="executeTestSuiteFolder" />
+	</popup-menu>
+
 	<popup-menu label="restResponsePopup">
 		<item label="assert" action="assertValue" />
 		<item label="extract" action="extract" />

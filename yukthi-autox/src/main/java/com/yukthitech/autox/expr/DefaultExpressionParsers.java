@@ -1,5 +1,6 @@
 package com.yukthitech.autox.expr;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -17,10 +18,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.persistence.UnsupportedOperationException;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Default expression parser methods.
@@ -271,6 +272,7 @@ public class DefaultExpressionParsers
 	private Object loadInputStream(InputStream is, String name, String exprType[]) throws Exception
 	{
 		Class<?> type = null;
+		name = name.trim();
 		
 		if(exprType != null)
 		{
@@ -297,7 +299,10 @@ public class DefaultExpressionParsers
 				type = Object.class;
 			}
 			
-			return objectMapper.readValue(is, type);
+			Object res = AutomationUtils.convertToWriteable( objectMapper.readValue(is, type) );
+			System.out.println("============>" + res.getClass().getName());
+			
+			return res;
 		}
 		
 		if(name.toLowerCase().endsWith(".xml"))
@@ -315,9 +320,11 @@ public class DefaultExpressionParsers
 			{
 				return ((DynamicBean) res).toSimpleMap();
 			}
+			
+			return res;
 		}
 		
-		throw new UnsupportedOperationException("Unsupported input specified for bean loading: " + name);
+		throw new com.yukthitech.utils.exceptions.UnsupportedOperationException("Unsupported input specified for bean loading: '{}'", name);
 	}
 
 	@ExpressionParser(type = "file", description = "Parses specified expression as file path and loads it as object. Supported file types: xml, json, properties", 
@@ -354,15 +361,66 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				InputStream is = DefaultExpressionParsers.class.getResourceAsStream(expression);
-				File file = new File(expression);
+				InputStream is = null;
 				
-				if(!file.exists() || !file.isFile())
+				if("$".equals(expression))
+				{
+					Object curVal = parserContext.getCurrentValue();
+					
+					if(curVal == null || !(curVal instanceof String))
+					{
+						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
+					}
+					
+					is = new ByteArrayInputStream(curVal.toString().getBytes());
+				}
+				else
+				{
+					is = DefaultExpressionParsers.class.getResourceAsStream(expression); 
+				}
+				
+				
+				if(is == null)
 				{
 					throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", expression);
 				}
 				
 				Object object = loadInputStream(is, expression, exprType);
+				is.close();
+				
+				return object;
+			}
+		};
+	}
+
+	@ExpressionParser(type = "json", description = "Parses specified expression as json string and loads it as object.", 
+			example = "json: {\"a\": 2, \"b\": 3}")
+	public IPropertyPath jsonParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				InputStream is = null;
+				
+				if("$".equals(expression))
+				{
+					Object curVal = parserContext.getCurrentValue();
+					
+					if(curVal == null || !(curVal instanceof String))
+					{
+						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
+					}
+					
+					is = new ByteArrayInputStream(curVal.toString().getBytes());
+				}
+				else
+				{
+					is = new ByteArrayInputStream(expression.getBytes()); 
+				}
+				
+				Object object = loadInputStream(is, ".json", exprType);
 				is.close();
 				
 				return object;

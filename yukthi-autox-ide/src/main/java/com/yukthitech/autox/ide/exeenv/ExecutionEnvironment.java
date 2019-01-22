@@ -49,6 +49,8 @@ public class ExecutionEnvironment
 	private boolean readyToInteract = false;
 
 	private List<ContextAttributeDetails> contextAttributes = new LinkedList<>();
+	
+	private File reportFile;
 
 	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage)
 	{
@@ -169,6 +171,14 @@ public class ExecutionEnvironment
 				if(!terminated)
 				{
 					terminated = true;
+					
+					File repFile = new File(reportFolder, "index.html");
+					
+					if(repFile.exists())
+					{
+						this.reportFile = repFile;
+					}
+					
 					proxyListener.environmentTerminated(this);
 				}
 			}
@@ -258,6 +268,16 @@ public class ExecutionEnvironment
 	public synchronized void clearConsole()
 	{
 		consoleHtml.setLength(0);
+	}
+	
+	public boolean isReportFileAvailable()
+	{
+		return (reportFile != null && reportFile.exists());
+	}
+	
+	public File getReportFile()
+	{
+		return reportFile;
 	}
 	
 	@Override

@@ -20,7 +20,9 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -156,7 +158,12 @@ public class ExpressionFactory extends AbstractLocationBased
 		}
 		
 		String expression = (String) expressionObj;
-
+		
+		if(expression.trim().length() == 0)
+		{
+			return expression;
+		}
+			
 		//Parse the expression into tokens delimited by '|'
 		List<String> lst = new ArrayList<String>();
 		char ch[] = expression.toCharArray();
@@ -189,20 +196,32 @@ public class ExpressionFactory extends AbstractLocationBased
 			token.append(ch[i]);
 		}
 		
+		if(token.length() > 0)
+		{
+			lst.add(token.toString());
+		}
+		
 		Object result = null;
 		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		ObjectWrapper<Boolean> expressionParsed = new ObjectWrapper<Boolean>(true);
 		
 		//convert tokens into objects
 		for(String tokenStr : lst)
 		{
-			result = parseSingleExpression(expressionParserContext, tokenStr);
+			result = parseSingleExpression(expressionParserContext, tokenStr, expressionParsed);
+			
+			if(!expressionParsed.getValue())
+			{
+				return expressionObj;
+			}
+			
 			expressionParserContext.setCurrentValue(result);
 		}
 		
 		return result;
 	}
 	
-	private Object parseSingleExpression(ExpressionParserContext context, String expression)
+	private IPropertyPath getPropertyPath(ExpressionParserContext context, String expression)
 	{
 		//check if string is a reference
 		String exprType = null, mainExpr = null;
@@ -221,7 +240,12 @@ public class ExpressionFactory extends AbstractLocationBased
 			exprType = matcherWithType.group("exprType");
 			mainExpr = expression.substring(matcherWithType.end()).trim();
 			
-			exprTypeParams = exprType.trim().split("\\s*\\,\\s*");
+			String type = matcherWithType.group("type");
+			exprTypeParams = type.trim().split("\\s*\\,\\s*");
+		}
+		else
+		{
+			return null;
 		}
 		
 		ExpressionParserDetails parser = parsers.get(exprType);
@@ -231,26 +255,50 @@ public class ExpressionFactory extends AbstractLocationBased
 			throw new InvalidArgumentException("Invalid expression type '{}' specified in expression: {}", exprType, expression);
 		}
 		
+		context.setCurrentParser(parser);
+		
+		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
+		exeLogger.trace(this, "Executing expression: {}", expression);
+		
+		return parser.invoke(context, mainExpr, exprTypeParams);
+	}
+	
+	private Object parseSingleExpression(ExpressionParserContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
+	{
+		IPropertyPath propPath = getPropertyPath(context, expression);
+		
+		if(propPath == null)
+		{
+			expressionParsed.setValue(false);
+			return expression;
+		}
+		
 		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		exeLogger.trace(this, "Executing expression: {}", expression);
 		
 		try
 		{
-			IPropertyPath propPath = parser.invoke(context, mainExpr, exprTypeParams);
 			Object result = propPath.getValue();
+			ExpressionParserDetails parser = context.getCurrentParser();
+			String exprTypeParams[] = context.getExpressionTypeParameters();
 			
 			exeLogger.trace(this, "Execution of property expression {} resulted in: {}", expression, result);
 	
-			if(!parser.isConversionHandled())
+			if(!parser.isConversionHandled() && exprTypeParams != null)
 			{
+				if(exprTypeParams.length > 0)
+				{
+					throw new InvalidArgumentException("Multiple result type parameters specified in expression: {}", expression);
+				}
+				
 				Class<?> resultType = null;
 				
 				try
 				{
-					resultType = Class.forName( matcherWithType.group("type") );
+					resultType = CommonUtils.getClass(exprTypeParams[0]);
 				}catch(Exception ex)
 				{
-					throw new InvalidArgumentException("Invalid result type '{}' specified in expression: {}", matcherWithType.group("type"), expression, ex);
+					throw new InvalidArgumentException("Invalid result type '{}' specified in expression: {}", exprTypeParams[0], expression, ex);
 				}
 	
 				if(resultType != null)
@@ -264,6 +312,57 @@ public class ExpressionFactory extends AbstractLocationBased
 		{
 			exeLogger.error(this, "Evaluation of expression {} resulted in error", expression, ex);
 			throw new InvalidStateException("An error occurred while evaluating expression '{}'", expression, ex);
+		}
+	}
+	
+	public void setExpressionValue(AutomationContext context, String expression, Object value)
+	{
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
+		ExecutionLogger exeLogger = context.getExecutionLogger();
+		
+		if(propertyPath == null)
+		{
+			exeLogger.debug(this, "Setting attribute '{}' as value: {}", expression, value);
+			context.setAttribute(expression, value);
+			return;
+		}
+		
+		exeLogger.debug(this, "Setting expression '{}' as value: {}", expression, value);
+		
+		ExpressionParserDetails parser = expressionParserContext.getCurrentParser();
+		String exprTypeParams[] = expressionParserContext.getExpressionTypeParameters();
+
+		if(!parser.isConversionHandled() && exprTypeParams != null)
+		{
+			if(exprTypeParams.length > 0)
+			{
+				throw new InvalidArgumentException("Multiple result type parameters specified in expression: {}", expression);
+			}
+			
+			Class<?> valueType = null;
+			
+			try
+			{
+				valueType = CommonUtils.getClass(exprTypeParams[0]);
+			}catch(Exception ex)
+			{
+				throw new InvalidArgumentException("Invalid result type '{}' specified in expression: {}", exprTypeParams[0], expression, ex);
+			}
+
+			if(valueType != null)
+			{
+				value = ConvertUtils.convert(value, valueType);
+			}
+		}
+
+		try
+		{
+			propertyPath.setValue(value);
+		}catch(Exception ex)
+		{
+			exeLogger.error(this, "Failed to set specified value {} on path {}", value, expression, ex);
+			throw new InvalidStateException("Failed to set specified value {} on path {}", value, expression, ex);
 		}
 	}
 }

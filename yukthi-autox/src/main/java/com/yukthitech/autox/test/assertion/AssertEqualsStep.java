@@ -16,48 +16,57 @@ import com.yukthitech.autox.SourceType;
 @Executable(name = "assertEquals", message = "Compares specified values for euqality.")
 public class AssertEqualsStep extends AbstractValidation
 {
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Value1 to compare.
+	 * Expected value in comparison..
 	 */
-	@Param(description = "Value1 to compare.", sourceType = SourceType.EXPRESSION)
-	private Object value1;
+	@Param(description = "Expected value in comparison.", sourceType = SourceType.EXPRESSION)
+	private Object expected;
 
 	/**
-	 * Value2 to compare.
+	 * Actual value in comparison.
 	 */
-	@Param(description = "Value2 to compare.", sourceType = SourceType.EXPRESSION)
-	private Object value2;
+	@Param(description = "Actual value in comparison", sourceType = SourceType.EXPRESSION)
+	private Object actual;
 
 	/**
-	 * Sets the value1 to compare.
+	 * Sets the expected value in comparison..
 	 *
-	 * @param value1 the new value1 to compare
+	 * @param expected the new expected value in comparison
 	 */
-	public void setValue1(Object value1)
+	public void setExpected(Object expected)
 	{
-		this.value1 = value1;
+		this.expected = expected;
 	}
 
 	/**
-	 * Gets the value2 to compare.
+	 * Sets the actual value in comparison.
 	 *
-	 * @return the value2 to compare
+	 * @param actual the new actual value in comparison
 	 */
-	public Object getValue2()
+	public void setActual(Object actual)
 	{
-		return value2;
+		this.actual = actual;
 	}
 
 	/**
-	 * Sets the value2 to compare.
+	 * Gets the type.
 	 *
-	 * @param value2 the new value2 to compare
+	 * @param val the val
+	 * @return the type
 	 */
-	public void setValue2(Object value2)
+	private Class<?> getType(Object val)
 	{
-		this.value2 = value2;
+		if(val == null)
+		{
+			return null;
+		}
+		
+		return val.getClass();
 	}
 
 	/* (non-Javadoc)
@@ -65,12 +74,13 @@ public class AssertEqualsStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Comparing values for equlity. [Value1: {}, Value2: {}]", value1, value2);
+		exeLogger.debug(this, "Comparing values for equlity. [Expected: {} [{}], Actual: {} [{}]]", 
+				expected, getType(expected),  
+				actual, getType(actual));
 
-		boolean res = Objects.equals(value1, value2);
+		boolean res = Objects.equals(expected, actual);
 		exeLogger.debug(this, "Result of comparision is: {}", res);
 
 		return res;
-
 	}
 }

@@ -239,6 +239,21 @@ public class Element implements INode
 		return false;
 	}
 	
+	public boolean hasLine(int line)
+	{
+		if(line < startLocation.getStartLineNumber())
+		{
+			return false;
+		}
+		
+		if(endLocation == null || line <= endLocation.getEndLineNumber())
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
 	public boolean isSameName(String name)
 	{
 		String elemName = this.name.toLowerCase().replaceAll("\\W+", "");
@@ -265,7 +280,7 @@ public class Element implements INode
 			
 			Element elem = (Element) node;
 			
-			if(elem.hasOffset(curLineNo))
+			if(elem.hasLine(curLineNo))
 			{
 				return elem.getElement(withName, curLineNo);
 			}

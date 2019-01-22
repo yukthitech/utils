@@ -2,10 +2,11 @@ package com.yukthitech.autox.test.ui;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.expr.ExpressionParser;
+import com.yukthitech.autox.expr.ExpressionParserContext;
 import com.yukthitech.autox.expr.IPropertyPath;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Ui related expression parsers.
@@ -14,20 +15,59 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 public class UiExpressionParsers
 {
 	@ExpressionParser(type = "uival", description = "Parses provided exprssion as ui locator and fetches/sets its value.", example = "uival: id:name")
-	public Object propertyParser(AutomationContext context, String expression)
+	public IPropertyPath propertyParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
 			@Override
 			public void setValue(Object value) throws Exception
 			{
-				UiAutomationUtils.populateField(context, (WebElement) null, expression, value);
+				Object parent = parserContext.getCurrentValue();
+				
+				if(parent != null && !(parent instanceof String) && !(parent instanceof WebElement))
+				{
+					throw new InvalidArgumentException("Invalid/incompatible parent specified from piped input. Input: {}", parent);
+				}
+				
+				if(parent == null)
+				{
+					UiAutomationUtils.populateField(parserContext.getAutomationContext(), (WebElement) null, expression, value);
+				}
+				else if(parent instanceof String)
+				{
+					UiAutomationUtils.populateField(parserContext.getAutomationContext(), (String) parent, expression, value);
+				}
+				else
+				{
+					UiAutomationUtils.populateField(parserContext.getAutomationContext(), (WebElement) parent, expression, value);
+				}
 			}
 			
 			@Override
 			public Object getValue() throws Exception
 			{
-				WebElement element = UiAutomationUtils.findElement(context, (String) null, expression);
+				Object parent = parserContext.getCurrentValue();
+				
+				if(parent != null && !(parent instanceof String) && !(parent instanceof WebElement))
+				{
+					throw new InvalidArgumentException("Invalid/incompatible parent specified from piped input. Input: {}", parent);
+				}
+				
+				WebElement element = null;
+				
+				if(parent == null)
+				{
+					element = UiAutomationUtils.findElement(parserContext.getAutomationContext(), (String) null, expression);
+				}
+				else if(parent instanceof String)
+				{
+					element = UiAutomationUtils.findElement(parserContext.getAutomationContext(), (String) parent, expression);
+				}
+				else
+				{
+					element = UiAutomationUtils.findElement(parserContext.getAutomationContext(), (WebElement) parent, expression);
+				}
+				
 				String value = null;
 				
 				if("input".equals(element.getTagName().toLowerCase()))

@@ -2,7 +2,7 @@
 
 	<step-group name="simpleGroup">
 		<ccg:log message="This message is from step group"/>
-		<ccg:set name="simpleGroupOutput" value="true"/>
+		<ccg:set expression="simpleGroupOutput" value="true"/>
 		
 		<ccg:assert-true value="attr: simpleGroupInput"/>
 	</step-group>
@@ -37,7 +37,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: returnValue" value2="string: beanFromApp:someName"/>
+				<ccg:assert-equals actual="attr: returnValue" expected="string: beanFromApp:someName"/>
 			</wrap:validations>
 		</testCase>
 
@@ -62,7 +62,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: returnValue" value2="beanCopy=>someName1"/>
+				<ccg:assert-equals actual="attr: returnValue" expected="beanCopy=>someName1"/>
 			</wrap:validations>
 		</testCase>
 
@@ -83,7 +83,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: returnValue" value2="beanFromTestSuite=>someName1"/>
+				<ccg:assert-equals actual="attr: returnValue" expected="beanFromTestSuite=>someName1"/>
 			</wrap:validations>
 		</testCase>
 
@@ -128,7 +128,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: returnValue" value2="beanFromTestSuite=>${attr.dataString}"/>
+				<ccg:assert-equals actual="attr: returnValue" expected="beanFromTestSuite=>${attr.dataString}"/>
 			</wrap:validations>
 		</testCase>
 
@@ -136,9 +136,9 @@
 			<description>Tests data provider usage at step level</description>
 			
 			<wrap:steps>
-				<ccg:set name="res" value=""/>
+				<ccg:set expression="res" value=""/>
 			
-				<ccg:set name="res" value="${attr.res}|${attr.number}">
+				<ccg:set expression="res" value="${attr.res}|${attr.number}">
 					<list-data-provider name="number">
 						<data>1</data>
 						<data>2</data>
@@ -146,7 +146,7 @@
 					</list-data-provider>
 				</ccg:set>
 
-				<ccg:assert-equals value1="attr: res" value2="|1|2|3"/>
+				<ccg:assert-equals actual="attr: res" expected="|1|2|3"/>
 			</wrap:steps>				
 		</testCase>
 
@@ -167,7 +167,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: returnValue" value2="${attr.extDataProvider.result}"/>
+				<ccg:assert-equals actual="attr: returnValue" expected="int: ${attr.extDataProvider.result}"/>
 			</wrap:validations>
 
 			<expectedException enabled="${attr.extDataProvider.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException">
@@ -192,7 +192,7 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: returnValue" value2="${attr.extDataProvider.value.result}"/>
+				<ccg:assert-equals actual="attr: returnValue" expected="int: ${attr.extDataProvider.value.result}"/>
 			</wrap:validations>
 
 			<expectedException enabled="${attr.extDataProvider.value.exception?c}"	type="com.yukthitech.utils.exceptions.InvalidStateException">
@@ -206,27 +206,16 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:setXpath name="xpathAttr1"
-					source="file:./src/test/resources/data/data1.json" valueExpression="//bean1/prop1" />
-				<ccg:setXpath name="xpathAttr2"
-					source="res:/data/data1.json" valueExpression="//bean1/subbean1/sprop1" />
+				<ccg:set expression="xpathAttr1" value="file:./src/test/resources/data/data1.json | xpath: //bean1/prop1"/>
+				<ccg:set expression="xpathAttr2" value="res:/data/data1.json | xpath: //bean1/subbean1/sprop1"/>
 				<ccg:loadJson contextAttribute="xpathObj" resource="res:/data/data1.json" />
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: xpathAttr1" value2="value1"/>
-				<ccg:assert-equals value1="attr: xpathAttr1" value2="value1"/>
-
-				<ccg:validateXpathValue source="res:/data/data1.json"
-					valueExpression="//bean1/subbean1/sprop2" value="value3" />
-
-				<ccg:validateXpathValue valueExpression="//bean1/subbean1/sprop2"
-					value="value3" source="ref:attr.xpathObj">
-				</ccg:validateXpathValue>
-
-				<ccg:validateXpathValue valueExpression="//bean1/arrProp[1]/key1"
-					value="val1-1" source="res:/data/data1.json">
-				</ccg:validateXpathValue>
+				<ccg:assert-equals actual="attr: xpathAttr1" expected="value1"/>
+				<ccg:assert-equals actual="res:/data/data1.json | xpath: //bean1/subbean1/sprop2" expected="value3"/>
+				<ccg:assert-equals actual="attr: xpathObj | xpath: //bean1/subbean1/sprop2" expected="value3"/>
+				<ccg:assert-equals actual="res:/data/data1.json | xpath: //bean1/arrProp[1]/key1" expected="val1-1"/>
 			</wrap:validations>
 		</testCase>
 		
@@ -236,18 +225,15 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:setProperty name="propAttr1"
-					source="file:./src/test/resources/data/data1.json" valueExpression="bean1.prop1" />
-				<ccg:setProperty name="propAttr2"
-					source="file(com.yukthitech.test.beans.SimpleComplexBean):./src/test/resources/data/data1.xml" valueExpression="name" />
-				<ccg:setProperty name="propAttr3"
-					source="file:./src/test/resources/data/data2.xml" valueExpression="size" />
+				<ccg:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
+				<ccg:set expression="propAttr2" value="file(com.yukthitech.test.beans.SimpleComplexBean):./src/test/resources/data/data1.xml | prop: name"/>
+				<ccg:set expression="propAttr3" value="file:./src/test/resources/data/data2.xml | prop: size"/>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.propAttr1" value="value1" />
-				<ccg:validateContextParam expression="attr.propAttr2" value="Test123" />
-				<ccg:validateContextParam expression="attr.propAttr3" value="234" />
+				<ccg:assert-equals actual="attr: propAttr1" expected="value1"/>
+				<ccg:assert-equals actual="attr: propAttr2" expected="Test123"/>
+				<ccg:assert-equals actual="attr: propAttr3" expected="int: 234"/>
 			</wrap:validations>
 		</testCase>
 
@@ -256,11 +242,11 @@
 				Ensures steps and validations from specified group are added properly.
 			</description>
 			
-			<ccg:set name="simpleGroupInput" value="true"/>
+			<ccg:set expression="simpleGroupInput" value="true"/>
 			
 			<ccg:step-group-ref name="simpleGroup"/>
 			
-			<ccg:validateContextParam expression="attr.simpleGroupOutput" value="true"/>
+			<ccg:assert-true value="attr: simpleGroupOutput"/>
 		</testCase>
 
 		<data-bean id="listForFuncTest" ccg:beanType="java.util.ArrayList">
@@ -281,13 +267,13 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="listStr" value="${collectionToString(data.listForFuncTest, '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
-				<ccg:set name="mapStr" value="${mapToString(data.dataMap, '#key=#value', '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
+				<ccg:set expression="listStr" value="${collectionToString(data.listForFuncTest, '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
+				<ccg:set expression="mapStr" value="${mapToString(data.dataMap, '#key=#value', '&quot;', '&quot;,&quot;', '&quot;', 'null')}"/>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.listStr" value="&quot;a&quot;,&quot;b&quot;,&quot;c&quot;"/>
-				<ccg:validateContextParam expression="attr.mapStr" value="&quot;key1=Value1&quot;,&quot;key2=Value2&quot;,&quot;key3=Value3&quot;"/>
+				<ccg:assert-equals actual="attr: listStr" expected="&quot;a&quot;,&quot;b&quot;,&quot;c&quot;"/>
+				<ccg:assert-equals actual="attr: mapStr" expected="&quot;key1=Value1&quot;,&quot;key2=Value2&quot;,&quot;key3=Value3&quot;"/>
 			</wrap:validations>
 		</testCase>
 
@@ -304,12 +290,12 @@
 				
 				<ccg:store-get key="testStoreKey" attribute="ctxAttrKey"/>
 				
-				<ccg:set name="ctxAttrKey1" value="Value is ${storeValue('testStoreKey')}"/>
+				<ccg:set expression="ctxAttrKey1" value="Value is ${storeValue('testStoreKey')}"/>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.ctxAttrKey" value="value1"/>
-				<ccg:validateContextParam expression="attr.ctxAttrKey1" value="Value is value1"/>
+				<ccg:assert-equals actual="attr: ctxAttrKey" expected="value1"/>
+				<ccg:assert-equals actual="attr: ctxAttrKey1" expected="Value is value1"/>
 			</wrap:validations>
 		</testCase>
 		
@@ -319,25 +305,23 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="beanForTest">
-					<valueObject><![CDATA[
+				<ccg:set expression="beanForTest">
+					<value><![CDATA[json:
 						{
 							"key1" : "value1",
 							"key2" : "value2"
 						}
-					]]></valueObject>
+					]]></value>
 				</ccg:set>
 				
-				<ccg:validateContextParam expression="attr.beanForTest.key1" value="value1"/>
+				<ccg:assert-equals actual="prop: attr.beanForTest.key1" expected="value1"/>
 				
-				<ccg:setBeanProperty beanAttr="beanForTest" property="key1">
-					<value><![CDATA["newValue1"]]></value>
-				</ccg:setBeanProperty>
+				<ccg:set expression="prop: attr.beanForTest.key1" value="newValue1" />
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.beanForTest.key1" value="newValue1"/>
-				<ccg:validateNullContextParam expression="attr.beanForTest.key3"/>
+				<ccg:assert-equals actual="prop: attr.beanForTest.key1" expected="newValue1"/>
+				<ccg:assert-null value="prop: attr.beanForTest.key3"/>
 			</wrap:validations>
 		</testCase>
 		
@@ -347,26 +331,26 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="bean1">
-					<valueObject><![CDATA[
+				<ccg:set expression="bean1">
+					<value><![CDATA[json:
 						{
 							"key1" : "value1",
 							"key2" : "value2"
 						}
-					]]></valueObject>
+					]]></value>
 				</ccg:set>
 				
-				<ccg:set name="bean2">
-					<valueObject><![CDATA[
+				<ccg:set expression="bean2">
+					<value><![CDATA[json:
 						{
 							"key" : ${toJson(attr.bean1)}
 						}
-					]]></valueObject>
+					]]></value>
 				</ccg:set>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.bean2.key.key1" value="value1"/>
+				<ccg:assert-equals actual="prop: attr.bean2.key.key1" expected="value1"/>
 			</wrap:validations>
 		</testCase>
 
@@ -376,8 +360,8 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="bean">
-					<valueObject><![CDATA[
+				<ccg:set expression="bean">
+					<value><![CDATA[json:
 						{
 							"key1" : "value1",
 							"key2" : "value2",
@@ -386,21 +370,16 @@
 								"skey2": "svalue2"
 							}
 						}
-					]]></valueObject>
+					]]></value>
 				</ccg:set>
 				
-				<ccg:set name="attr1">
-					<valueObject ccg:attrRef="bean.key3.skey1"/>
-				</ccg:set>
-
-				<ccg:set name="attr2">
-					<valueObject ccg:attrXpathRef="/bean//skey2"/>
-				</ccg:set>
+				<ccg:set expression="attr1" value="prop: attr.bean.key3.skey1"/>
+				<ccg:set expression="attr2" value="xpath: /attr/bean//skey2"/>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:validateContextParam expression="attr.attr1" value="svalue1"/>
-				<ccg:validateContextParam expression="attr.attr2" value="svalue2"/>
+				<ccg:assert-equals actual="attr: attr1" expected="svalue1"/>
+				<ccg:assert-equals actual="attr: attr2" expected="svalue2"/>
 			</wrap:validations>
 		</testCase>
 

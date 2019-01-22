@@ -1,5 +1,8 @@
 package com.yukthitech.autox;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.IDataProvider;
 import com.yukthitech.autox.test.ListDataProvider;
@@ -128,5 +131,16 @@ public abstract class AbstractStep implements IStep, Validateable
 	public void setRangeDataProvider(RangeDataProvider dataProvider)
 	{
 		this.setDataProvider(dataProvider);
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public String toString()
+	{
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE, true, (Class) this.getClass());
 	}
 }

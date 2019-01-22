@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.views;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -9,6 +10,7 @@ import java.awt.GridBagLayout;
 import javax.annotation.PostConstruct;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -31,7 +33,9 @@ import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.awt.event.ActionEvent;
+import javax.swing.border.EtchedBorder;
 
 @Component
 public class ConsolePanel extends JPanel implements IViewPanel
@@ -53,6 +57,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	private JTabbedPane parentTabbedPane;
 
 	private ExecutionEnvironment activeEnvironment;
+	private final JButton btnOpenReport = new JButton("Open Report");
 
 	/**
 	 * Create the panel.
@@ -76,6 +81,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		gbc_panel_1.gridx = 0;
 		gbc_panel_1.gridy = 0;
 		panel.add(panel_1, gbc_panel_1);
+		btnClear.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		btnClear.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -87,6 +93,11 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		btnClear.setIcon(IdeUtils.loadIcon("/ui/icons/clear-console.png", 16));
 
 		panel_1.add(btnClear);
+		btnOpenReport.addActionListener(this::openReport);
+		btnOpenReport.setEnabled(false);
+		btnOpenReport.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		
+		panel_1.add(btnOpenReport);
 		lblEnvironment.setBorder(new EmptyBorder(3, 3, 3, 3));
 		lblEnvironment.setFont(new Font("Tahoma", Font.BOLD, 12));
 		lblEnvironment.setOpaque(true);
@@ -136,6 +147,16 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				}
 
 				appendNewContent(event.getNewMessage());
+				
+				boolean repFile = (event.getEnvironment().isReportFileAvailable());
+				btnOpenReport.setEnabled(repFile);
+			}
+			
+			@Override
+			public void environmentTerminated(ExecutionEnvironment environment)
+			{
+				boolean repFile = (environment.isReportFileAvailable());
+				btnOpenReport.setEnabled(repFile);
 			}
 		});
 	}
@@ -170,6 +191,9 @@ public class ConsolePanel extends JPanel implements IViewPanel
 				// move scroll pane to the end
 				JScrollBar vertical = scrollPane.getVerticalScrollBar();
 				vertical.setValue(vertical.getMaximum());
+				
+				JScrollBar horizontal = scrollPane.getHorizontalScrollBar();
+				horizontal.setValue(0);
 			});
 
 			if(parentTabbedPane != null)
@@ -191,5 +215,22 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		
 		activeEnvironment.clearConsole();
 		refreshConsoleText();
+	}
+	
+	private void openReport(ActionEvent e)
+	{
+		File file = activeEnvironment.getReportFile();
+		
+		if(file.exists())
+		{
+			try
+			{
+				Desktop.getDesktop().open(file);
+			}catch(Exception ex)
+			{
+				logger.error("An error occurred while opening file: " + file.getPath(), ex);
+				JOptionPane.showMessageDialog(this, "An error occurred while opening file: " + file.getPath() + "\nError: " + ex);
+			}
+		}
 	}
 }

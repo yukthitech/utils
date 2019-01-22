@@ -277,12 +277,12 @@ public class FileEditor extends RTextScrollPane
 		if(contentChangedEvent)
 		{
 			//from last change time, try to parse the content and highlight regions if any
-			IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 2000);
+			IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 1500);
 		}
 		//if content is not changed, if job is already submitted, simply reshedule it
 		else
 		{
-			IdeUtils.rescheduleConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 2000);
+			IdeUtils.rescheduleConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 1500);
 		}
 	}
 	

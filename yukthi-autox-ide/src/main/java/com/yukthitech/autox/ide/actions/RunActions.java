@@ -1,6 +1,8 @@
 package com.yukthitech.autox.ide.actions;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -153,15 +155,40 @@ public class RunActions
 	@Action
 	public synchronized void executeTestSuiteFolder() 
 	{
-		File activeFolder = ideContext.getActiveFile();
+		//find the selected files
+		List<File> selectedFiles = ideContext.getSelectedFiles();
+		
+		if(selectedFiles == null || selectedFiles.isEmpty())
+		{
+			File activeFolder = ideContext.getActiveFile();
+			
+			if(activeFolder == null)
+			{
+				return;
+			}
+			
+			selectedFiles = new ArrayList<>();
+			selectedFiles.add(activeFolder);
+		}
+		
+		//filter folders only from selected files
+		List<File> filteredFolders = new ArrayList<>();
+		
+		for(File file : selectedFiles)
+		{
+			if(!file.isDirectory())
+			{
+				filteredFolders.add(file);
+			}
+		}
 
-		if(activeFolder == null || !activeFolder.isDirectory())
+		if(selectedFiles.isEmpty())
 		{
 			return;
 		}
 
 		Project project = ideContext.getActiveProject();
-		executionEnvironmentManager.executeTestSuiteFolder(project, activeFolder);	
+		executionEnvironmentManager.executeTestSuiteFolder(project, selectedFiles);	
 	}
 	
 	@Action

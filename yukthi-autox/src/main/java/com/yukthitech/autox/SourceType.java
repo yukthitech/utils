@@ -23,6 +23,11 @@ public enum SourceType
 	EXPRESSION,
 	
 	/**
+	 * Indicates param is expression path type.
+	 */
+	EXPRESSION_PATH,
+	
+	/**
 	 * Indicates param represents ui locator.
 	 */
 	UI_LOCATOR,

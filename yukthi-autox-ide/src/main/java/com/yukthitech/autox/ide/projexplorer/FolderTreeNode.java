@@ -127,7 +127,12 @@ public class FolderTreeNode extends BaseTreeNode
 
 		for(File file : list)
 		{
-			if(file.getPath().startsWith("."))
+			if(file.getName().startsWith("."))
+			{
+				continue;
+			}
+			
+			if(project.isReservedFile(file))
 			{
 				continue;
 			}
@@ -160,6 +165,11 @@ public class FolderTreeNode extends BaseTreeNode
 		}
 		
 		super.checkErrorStatus();
+	}
+	
+	protected FolderTreeNode newFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
+	{
+		return new FolderTreeNode(projectExplorer, project, folder.getName(), folder);
 	}
 
 	public File getFolder()

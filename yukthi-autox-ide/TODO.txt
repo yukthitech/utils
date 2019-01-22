@@ -1,12 +1,9 @@
 Execution changes
 	ability to execute all test cases in a folder or test-suite folder
-	ability to execute entire project (all test suite folders)
 	CTRL + ENTER => if no text is selected should execute current step.
 		
 Steps related
 	double click step
-	removal of duplicate steps (most of the steps should be replaced by set and get steps).
-	Property path and value path handlers should be dynamic based on annotation. Which should contribute for documentation.
 	
 Documentation in ide changes
 	Ability to include examples.
@@ -33,6 +30,8 @@ application icon
 
 splash screen during startup
 
+drop down is not coming from second attr
+attr ="" should not come if it is already followed by =
 
 ==============================
 
@@ -44,3 +43,9 @@ Ability to hide/display views
 
 Find and replace
 		among the file tree
+
+		
+Find dialog
+	when displayed search string should be focused
+	on focus the current value should be selected
+	on display take current selected string as search string

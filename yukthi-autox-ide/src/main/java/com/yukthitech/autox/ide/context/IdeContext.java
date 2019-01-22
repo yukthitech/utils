@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.context;
 
 import java.io.File;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,11 @@ public class IdeContext
 	private File activeFile;
 	
 	/**
+	 * List of files currently selected.
+	 */
+	private List<File> selectedFiles;
+	
+	/**
 	 * Adds specified listener to the context.
 	 * @param listener listener to add.
 	 */
@@ -49,10 +55,17 @@ public class IdeContext
 	
 	public void setActiveDetails(Project project, File file)
 	{
-		this.activeProject = project;
-		this.activeFile = file;
+		this.setActiveDetails(project, file, null);
 	}
 	
+	public void setActiveDetails(Project project, File file, List<File> selectedFiles)
+	{
+		this.activeProject = project;
+		this.activeFile = file;
+		
+		this.selectedFiles = selectedFiles;
+	}
+
 	/**
 	 * Gets the currently active project.
 	 *
@@ -71,5 +84,15 @@ public class IdeContext
 	public File getActiveFile()
 	{
 		return activeFile;
+	}
+	
+	/**
+	 * Gets the list of files currently selected.
+	 *
+	 * @return the list of files currently selected
+	 */
+	public List<File> getSelectedFiles()
+	{
+		return selectedFiles;
 	}
 }

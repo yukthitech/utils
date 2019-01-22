@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -284,16 +285,15 @@ public class AutomationUtils
 					continue;
 				}
 				
+				fieldValue = replaceExpressions(templateName + "." + field.getName(), context, fieldValue);
+				field.set(object, fieldValue);
+				
 				if(param != null && param.sourceType() == SourceType.EXPRESSION)
 				{
 					Object result = ExpressionFactory.getExpressionFactory().parseExpression(context, field.get(object));
 					field.set(object, result);
-					continue;
 				}
 
-				fieldValue = replaceExpressions(templateName + "." + field.getName(), context, fieldValue);
-				field.set(object, fieldValue);
-				
 			} catch(InvalidStateException ex)
 			{
 				throw ex;
@@ -645,5 +645,43 @@ public class AutomationUtils
 			throw new InvalidStateException("An error occurred while checking parent-child relationship of paths [Parent: %s, Child: %s]", 
 					parent, child, ex);
 		}
+	}
+	
+	/**
+	 * Converts specified value into writeable object recursively.
+	 * @param value value to convert
+	 * @return converted value.
+	 */
+	@SuppressWarnings("unchecked")
+	public static Object convertToWriteable(Object value)
+	{
+		if(value instanceof Map)
+		{
+			Map<Object, Object> newMap = new HashMap<>();
+			Map<Object, Object> curMap = (Map<Object, Object>) value; 
+			
+			for(Object key : curMap.keySet())
+			{
+				Object entryValue = convertToWriteable(curMap.get(key));
+				newMap.put(key, entryValue);
+			}
+			
+			return newMap;
+		}
+		
+		if(value instanceof List)
+		{
+			List<Object> newLst = new ArrayList<>();
+			List<Object> curLst = (List<Object>) value;
+			
+			for(Object elem : curLst)
+			{
+				newLst.add( convertToWriteable(elem) );
+			}
+			
+			return newLst;
+		}
+		
+		return value;
 	}
 }

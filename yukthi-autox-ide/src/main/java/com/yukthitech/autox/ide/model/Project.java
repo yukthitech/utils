@@ -16,6 +16,7 @@ import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Represents project and its details.
@@ -47,6 +48,8 @@ public class Project implements Serializable
 	private transient BeanPropertyInfoFactory beanPropertyInfoFactory;
 	
 	private transient File baseFolder;
+	
+	private transient Set<File> reservedFiles;
 	
 	public Project()
 	{
@@ -284,6 +287,38 @@ public class Project implements Serializable
 		
 		beanPropertyInfoFactory = new BeanPropertyInfoFactory();
 		return beanPropertyInfoFactory;
+	}
+	
+	@JsonIgnore
+	public synchronized boolean isReservedFile(File file)
+	{
+		if(file.getName().startsWith("."))
+		{
+			return true;
+		}
+		
+		if(reservedFiles == null)
+		{
+			reservedFiles = new HashSet<>();
+			File baseFolder = getBaseFolder();
+			
+			try
+			{
+				reservedFiles.add( new File(baseFolder, appConfigFilePath).getCanonicalFile() );
+				reservedFiles.add( new File(baseFolder, appPropertyFilePath).getCanonicalFile() );
+				reservedFiles.add( new File(projectFilePath).getCanonicalFile() );
+				
+				for(String testSuiteFolder : this.testSuitesFoldersList)
+				{
+					reservedFiles.add( new File(baseFolder, testSuiteFolder).getCanonicalFile() );
+				}
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while creating reserved folder list", ex);
+			}
+		}
+		
+		return reservedFiles.contains(file);
 	}
 
 	/*

@@ -110,9 +110,14 @@ public class ExecutionEnvironmentManager
 		return startAutoxEnvironment("tc-" + testCase, project, "-tc", testCase);
 	}
 	
-	public ExecutionEnvironment executeTestSuiteFolder(Project project, File testSuiteFolder)
+	public ExecutionEnvironment executeTestSuiteFolder(Project project, List<File> testSuiteFolder)
 	{
-		return startAutoxEnvironment("dir-" + testSuiteFolder.getName(), project, "-flmt", testSuiteFolder.getPath());
+		String foldersPath = testSuiteFolder.stream()
+			.map(file -> file.getPath())
+			.collect(Collectors.joining(","));
+		
+		String firstFolderName = testSuiteFolder.get(0).getName();
+		return startAutoxEnvironment("dir-" + firstFolderName, project, "-flmt", foldersPath);
 	}
 
 	public ExecutionEnvironment executeProject(Project project)

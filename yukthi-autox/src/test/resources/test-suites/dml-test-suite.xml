@@ -35,7 +35,7 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set name="empId" value="1"/>
+				<ccg:set expression="empId" value="1"/>
 			
 				<ccg:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
 					<query>
@@ -45,7 +45,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: updateCount" value2="1"/>
+				<ccg:assert-equals actual="attr: updateCount" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -55,7 +55,7 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set name="empId" type="java.lang.Integer" value="1"/>
+				<ccg:set expression="empId" value="int: 1"/>
 			
 				<ccg:sql-dml-query countAttribute="deleteCount" dataSourceName="dataSource">
 					<query>
@@ -65,7 +65,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: deleteCount" value2="1"/>
+				<ccg:assert-equals actual="attr: deleteCount" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -116,7 +116,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: empNames" value2="list: employee1, employee2"/>
+				<ccg:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -136,7 +136,7 @@
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: empId" value2="1"/>
+				<ccg:assert-equals actual="attr: empId" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
 	</testSuite>

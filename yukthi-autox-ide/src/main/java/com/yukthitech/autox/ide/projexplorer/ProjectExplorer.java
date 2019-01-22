@@ -6,8 +6,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -86,6 +88,8 @@ public class ProjectExplorer extends JPanel
 	private JPopupMenu projectPopup;
 	
 	private JPopupMenu testSuitePopup;
+	
+	private JPopupMenu testFolderPopup;
 	
 	@Autowired
 	private UiLayout uiLayout;
@@ -337,6 +341,50 @@ public class ProjectExplorer extends JPanel
 		projectPopup = uiLayout.getPopupMenu("projectPopup").toPopupMenu(actionCollection);
 		projectExplorerPopup = uiLayout.getPopupMenu("projectExplorerPopup").toPopupMenu(actionCollection);
 		testSuitePopup = uiLayout.getPopupMenu("testStuitePopup").toPopupMenu(actionCollection);
+		
+		testFolderPopup = uiLayout.getPopupMenu("testFolderPopup").toPopupMenu(actionCollection);
+	}
+	
+	/**
+	 * Fetches currently selected files.
+	 * @return
+	 */
+	private List<File> getSelectedFiles()
+	{
+		TreePath selectedPaths[] = tree.getSelectionPaths();
+		List<File> selectedFiles = new ArrayList<>();
+		
+		for(TreePath path : selectedPaths)
+		{
+			Object selectedItem = path.getLastPathComponent();
+			
+			if(selectedItem instanceof FolderTreeNode)
+			{
+				selectedFiles.add( ((FolderTreeNode)selectedItem).getFolder() );
+			}
+			else if(selectedItem instanceof FileTreeNode)
+			{
+				selectedFiles.add( ((FileTreeNode)selectedItem).getFile() );
+			}
+		}
+		
+		return selectedFiles;
+	}
+	
+	private void selectRow(int row, boolean controlDown)
+	{
+		if(tree.isRowSelected(row))
+		{
+			return;
+		}
+		
+		if(!controlDown)
+		{
+			tree.setSelectionRow(row);
+			return;
+		}
+		
+		tree.addSelectionRow(row);
 	}
 	
 	private void handleMouseClick(MouseEvent e)
@@ -355,7 +403,12 @@ public class ProjectExplorer extends JPanel
 			projectExplorerPopup.show(this, e.getX(), e.getY());
 			return;
 		}
+
+		selectRow(clickedRow, e.isControlDown() || e.isShiftDown());
 		
+		//find the selected file
+		List<File> selectedFiles = getSelectedFiles();
+
 		TreePath treePath = tree.getPathForLocation(e.getX(), e.getY());
 		Object clickedItem = treePath.getLastPathComponent();
 		
@@ -364,27 +417,35 @@ public class ProjectExplorer extends JPanel
 		if(clickedItem instanceof ProjectTreeNode)
 		{
 			ProjectTreeNode projTreeNode = (ProjectTreeNode) clickedItem;
-			ideContext.setActiveDetails(projTreeNode.getProject(), null);
+			ideContext.setActiveDetails(projTreeNode.getProject(), null, selectedFiles);
 			
 			projectPopup.show(tree, e.getX(), e.getY());
 		}
 		else if(clickedItem instanceof TestSuiteFolderTreeNode) 
 		{
 			TestSuiteFolderTreeNode testSuiteFolderTreeNode = (TestSuiteFolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), null);
+			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), null, selectedFiles);
+			
 			testSuitePopup.show(tree, e.getX(), e.getY());
+		}
+		else if(clickedItem instanceof TestFolderTreeNode) 
+		{
+			TestFolderTreeNode testFolderTreeNode = (TestFolderTreeNode) clickedItem;
+			ideContext.setActiveDetails(testFolderTreeNode.getProject(), null, selectedFiles);
+			
+			testFolderPopup.show(tree, e.getX(), e.getY());
 		}
 		else if(clickedItem instanceof FileTreeNode)
 		{
 			FileTreeNode fileTreeNode = (FileTreeNode) clickedItem;
-			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile());
+			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile(), selectedFiles);
 			
 			filePopup.show(tree, e.getX(), e.getY());
 		}
 		else if(clickedItem instanceof FolderTreeNode)
 		{
 			FolderTreeNode folderTreeNode = (FolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(folderTreeNode.getProject(), folderTreeNode.getFolder());
+			ideContext.setActiveDetails(folderTreeNode.getProject(), folderTreeNode.getFolder(), selectedFiles);
 	
 			folderPopup.show(tree, e.getX(), e.getY());
 		}

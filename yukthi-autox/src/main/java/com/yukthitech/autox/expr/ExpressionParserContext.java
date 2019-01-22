@@ -17,6 +17,16 @@ public class ExpressionParserContext
 	 * Last expression value in expression chain.
 	 */
 	private Object currentValue;
+	
+	/**
+	 * Expression type parameters specified as part of expression.
+	 */
+	private String expressionTypeParameters[];
+	
+	/**
+	 * Current parser in use.
+	 */
+	private ExpressionParserDetails currentParser;
 
 	/**
 	 * Instantiates a new expression parser context.
@@ -65,5 +75,45 @@ public class ExpressionParserContext
 	public Object getEffectiveContext()
 	{
 		return (currentValue == null) ? automationContext : currentValue;
+	}
+	
+	/**
+	 * Sets the expression type parameters specified as part of expression.
+	 *
+	 * @param expressionTypeParameters the new expression type parameters specified as part of expression
+	 */
+	void setExpressionTypeParameters(String[] expressionTypeParameters)
+	{
+		this.expressionTypeParameters = expressionTypeParameters;
+	}
+	
+	/**
+	 * Gets the expression type parameters specified as part of expression.
+	 *
+	 * @return the expression type parameters specified as part of expression
+	 */
+	public String[] getExpressionTypeParameters()
+	{
+		return expressionTypeParameters;
+	}
+
+	/**
+	 * Gets the current parser in use.
+	 *
+	 * @return the current parser in use
+	 */
+	public ExpressionParserDetails getCurrentParser()
+	{
+		return currentParser;
+	}
+
+	/**
+	 * Sets the current parser in use.
+	 *
+	 * @param currentParser the new current parser in use
+	 */
+	void setCurrentParser(ExpressionParserDetails currentParser)
+	{
+		this.currentParser = currentParser;
 	}
 }

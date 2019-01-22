@@ -9,7 +9,7 @@
 			<description>Validates loading of properties file to context</description>
 
 			<wrap:steps>
-				<ccg:set name="resAttribute" value="someValue"/>
+				<ccg:set expression="resAttribute" value="someValue"/>
 				
 				<ccg:loadProperties contextAttribute="propFile">
 					<resource>
@@ -19,9 +19,9 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="prop: attr.propFile.key1" value2="value1"/>
-				<ccg:assert-equals value1="prop: attr.propFile.key2" value2="value2"/>
-				<ccg:assert-equals value1="prop: attr.propFile.key3" value2="value3"/>
+				<ccg:assert-equals actual="prop: attr.propFile.key1" expected="value1"/>
+				<ccg:assert-equals actual="prop: attr.propFile.key2" expected="value2"/>
+				<ccg:assert-equals actual="prop: attr.propFile.key3" expected="someValue"/>
 			</wrap:validations>
 		</testCase>
 
@@ -29,7 +29,7 @@
 			<description>Validates loading of properties file to context by marking input as non-template</description>
 
 			<wrap:steps>
-				<ccg:set name="resAttribute" value="someValue"/>
+				<ccg:set expression="resAttribute" value="someValue"/>
 				
 				<ccg:loadProperties contextAttribute="propFile1" template="false">
 					<resource>
@@ -39,9 +39,9 @@
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="prop: attr.propFile1.key1" value2="value1"/>
-				<ccg:assert-equals value1="prop: attr.propFile1.key2" value2="value2"/>
-				<ccg:assert-equals value1="prop: attr.propFile1.key3" value2="${'$'}{attr.resAttribute}"/>
+				<ccg:assert-equals actual="prop: attr.propFile1.key1" expected="value1"/>
+				<ccg:assert-equals actual="prop: attr.propFile1.key2" expected="value2"/>
+				<ccg:assert-equals actual="prop: attr.propFile1.key3" expected="${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
 
@@ -55,12 +55,12 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="resAttribute" value="someValue"/>
+				<ccg:set expression="resAttribute" value="someValue"/>
 				<ccg:loadJson contextAttribute="jsonObj" resource="res:/data/data.json" />
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="prop: attr.jsonObj.bean1.subbean1.sprop3" value2="someValue"/>
+				<ccg:assert-equals actual="prop: attr.jsonObj.bean1.subbean1.sprop3" expected="someValue"/>
 			</wrap:validations>
 		</testCase>
 
@@ -70,12 +70,12 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="resAttribute" value="someValue"/>
+				<ccg:set expression="resAttribute" value="someValue"/>
 				<ccg:loadJson contextAttribute="jsonObj" resource="res:/data/data.json" template="false"/>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="prop: attr.jsonObj.bean1.subbean1.sprop3" value2="${'$'}{attr.resAttribute}"/>
+				<ccg:assert-equals actual="prop: attr.jsonObj.bean1.subbean1.sprop3" expected="${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
 
@@ -89,12 +89,12 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="resAttribute" value="someValue"/>
+				<ccg:set expression="resAttribute" value="someValue"/>
 				<ccg:loadText contextAttribute="textObj" resource="res:/data/test-text1.txt" />
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: textObj" value2="Some test content someValue"/>
+				<ccg:assert-equals actual="attr: textObj" expected="Some test content someValue"/>
 			</wrap:validations>
 		</testCase>
 
@@ -104,12 +104,12 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:set name="resAttribute" value="someValue"/>
+				<ccg:set expression="resAttribute" value="someValue"/>
 				<ccg:loadText contextAttribute="textObj" resource="res:/data/test-text1.txt" template="false"/>
 			</wrap:steps>
 
 			<wrap:validations>
-				<ccg:assert-equals value1="attr: textObj" value2="Some test content ${'$'}{attr.resAttribute}"/>
+				<ccg:assert-equals actual="attr: textObj" expected="Some test content ${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
 	</testSuite>

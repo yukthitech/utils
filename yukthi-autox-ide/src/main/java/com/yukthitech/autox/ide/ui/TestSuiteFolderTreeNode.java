@@ -8,6 +8,7 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.projexplorer.FileTreeNode;
 import com.yukthitech.autox.ide.projexplorer.FolderTreeNode;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.projexplorer.TestFolderTreeNode;
 
 public class TestSuiteFolderTreeNode extends FolderTreeNode
 {
@@ -32,5 +33,11 @@ public class TestSuiteFolderTreeNode extends FolderTreeNode
 		
 		String newPath[] = relativePath.split("\\" + File.separator);
 		return super.getFileNode(file, newPath, 0);
-	}	
+	}
+	
+	@Override
+	protected FolderTreeNode newFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
+	{
+		return new TestFolderTreeNode(projectExplorer, project, name, folder);
+	}
 }

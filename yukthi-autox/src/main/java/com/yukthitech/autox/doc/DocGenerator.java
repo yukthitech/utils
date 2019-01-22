@@ -53,6 +53,12 @@ public class DocGenerator
 				continue;
 			}
 			
+			//ignore validation steps
+			if(IValidation.class.isAssignableFrom(stepType))
+			{
+				continue;
+			}
+			
 			//System.out.println("Found step of type: " + stepType.getName());
 			docInformation.addStep(new StepInfo( (Class) stepType, executableAnnot));
 		}
