@@ -1,10 +1,3 @@
-Execution changes
-	ability to execute all test cases in a folder or test-suite folder
-	CTRL + ENTER => if no text is selected should execute current step.
-		
-Steps related
-	double click step
-	
 Documentation in ide changes
 	Ability to include examples.
 	On CTRL + F1, current word should be searched
@@ -26,12 +19,12 @@ common.xml formating is not working properly
 	
 tool tip documentations
 
-application icon
-
 splash screen during startup
 
 drop down is not coming from second attr
 attr ="" should not come if it is already followed by =
+
+shutdown hooks to stop executing environments
 
 ==============================
 

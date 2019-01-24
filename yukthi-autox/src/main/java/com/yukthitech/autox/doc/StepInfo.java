@@ -228,6 +228,15 @@ public class StepInfo implements Comparable<StepInfo>
 	{
 		return nameWithHyphens;
 	}
+	
+	/**
+	 * Returns flag indicating if this is executable step.
+	 * @return
+	 */
+	public boolean isExecutable()
+	{
+		return true;
+	}
 
 	@Override
 	public int compareTo(StepInfo o)

@@ -423,6 +423,11 @@ public class FileEditor extends RTextScrollPane
 		return currentFileManager.getActiveElement(this, nodeType);
 	}
 
+	public String getCurrentElementText(String nodeType)
+	{
+		return currentFileManager.getActiveElementText(this, nodeType);
+	}
+
 	public String getSelectedText()
 	{
 		String selectedText = syntaxTextArea.getSelectedText();

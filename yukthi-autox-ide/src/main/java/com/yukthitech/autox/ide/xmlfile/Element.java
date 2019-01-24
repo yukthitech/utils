@@ -14,6 +14,7 @@ import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.model.Project;
@@ -264,11 +265,24 @@ public class Element implements INode
 	
 	public Element getElement(String withName, int curLineNo)
 	{
-		String elemName = name.toLowerCase().replaceAll("\\W+", "");
+		//$ indicates any step 
 		
-		if(elemName.equals(withName))
+		//if the search is for non-step
+		if(!IIdeConstants.ELEMENT_TYPE_STEP.equals(withName))
 		{
-			return this;
+			String elemName = name.toLowerCase().replaceAll("\\W+", "");
+			
+			if(elemName.equals(withName))
+			{
+				return this;
+			}
+		}
+		else
+		{
+			if(stepInfo != null && stepInfo.isExecutable())
+			{
+				return this;
+			}
 		}
 
 		for(INode node : this.nodes)

@@ -125,6 +125,7 @@ public class ExecutionEnvironment
 		lineText = lineText.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 		lineText = lineText.replace("<", "&lt;");
 		lineText = lineText.replace(">", "&gt;");
+		lineText = lineText.replace("\n", "<br/>");
 
 		String lineHtml = null;
 		

@@ -417,21 +417,21 @@ public class ProjectExplorer extends JPanel
 		if(clickedItem instanceof ProjectTreeNode)
 		{
 			ProjectTreeNode projTreeNode = (ProjectTreeNode) clickedItem;
-			ideContext.setActiveDetails(projTreeNode.getProject(), null, selectedFiles);
+			ideContext.setActiveDetails(projTreeNode.getProject(), projTreeNode.getFolder(), selectedFiles);
 			
 			projectPopup.show(tree, e.getX(), e.getY());
 		}
 		else if(clickedItem instanceof TestSuiteFolderTreeNode) 
 		{
 			TestSuiteFolderTreeNode testSuiteFolderTreeNode = (TestSuiteFolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), null, selectedFiles);
+			ideContext.setActiveDetails(testSuiteFolderTreeNode.getProject(), testSuiteFolderTreeNode.getFolder(), selectedFiles);
 			
 			testSuitePopup.show(tree, e.getX(), e.getY());
 		}
 		else if(clickedItem instanceof TestFolderTreeNode) 
 		{
 			TestFolderTreeNode testFolderTreeNode = (TestFolderTreeNode) clickedItem;
-			ideContext.setActiveDetails(testFolderTreeNode.getProject(), null, selectedFiles);
+			ideContext.setActiveDetails(testFolderTreeNode.getProject(), testFolderTreeNode.getFolder(), selectedFiles);
 			
 			testFolderPopup.show(tree, e.getX(), e.getY());
 		}

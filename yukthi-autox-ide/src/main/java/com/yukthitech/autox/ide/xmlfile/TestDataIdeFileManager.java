@@ -109,16 +109,16 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 		{
 			return null;
 		}
-
+		
 		int curLineNo = fileEditor.getCurrentLineNumber();
-		Element testSuiteElement = xmlFile.getElement(nodeType, curLineNo);
+		Element curElement = xmlFile.getElement(nodeType, curLineNo);
 
-		if(testSuiteElement == null)
+		if(curElement == null)
 		{
 			return null;
 		}
 
-		Attribute attr = testSuiteElement.getAttribute("name");
+		Attribute attr = curElement.getAttribute("name");
 
 		if(attr == null || StringUtils.isBlank(attr.getValue()))
 		{
@@ -126,6 +126,31 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 		}
 
 		return attr.getValue();
+	}
+	
+	@Override
+	public String getActiveElementText(FileEditor fileEditor, String nodeType)
+	{
+		String content = fileEditor.getContent();
+		
+		XmlFile xmlFile = getXmlFile(fileEditor.getFile(), fileEditor.getContent());
+
+		if(xmlFile == null)
+		{
+			return null;
+		}
+		
+		xmlFile.getRootElement().populateTestFileTypes(fileEditor.getProject(), new FileParseCollector());
+
+		int curLineNo = fileEditor.getCurrentLineNumber() + 1;
+		Element curElement = xmlFile.getElement(nodeType, curLineNo);
+
+		if(curElement == null)
+		{
+			return null;
+		}
+		
+		return content.substring(curElement.getStartLocation().getStartOffset(), curElement.getEndLocation().getEndOffset() + 1);
 	}
 
 	private XmlFile getXmlFile(File file, String content)

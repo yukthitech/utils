@@ -67,12 +67,23 @@ public interface IIdeFileManager
 	public String getToolTip(FileEditor fileEditor, Object parsedFile, int offset);
 	
 	/**
-	 * Fetches the active element of specified node type.
+	 * Fetches the active element name of specified node type.
 	 * @param fileEditor file editor in use.
 	 * @param nodeType node type to be fetched.
 	 * @return matching node type at current position.
 	 */
 	public String getActiveElement(FileEditor fileEditor, String nodeType);
+	
+	/**
+	 * Fetches the active element text of specified node type.
+	 * @param fileEditor file editor in use.
+	 * @param nodeType node type to be fetched.
+	 * @return matching node type at current position.
+	 */
+	public default String getActiveElementText(FileEditor fileEditor, String nodeType)
+	{
+		return null;
+	}
 	
 	/**
 	 * Checks whether steps can be inserted at current position. 

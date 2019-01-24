@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
@@ -141,12 +142,17 @@ public class RunActions
 		}
 		
 		Project project = fileEditor.getProject();
-		final String selectedText = fileEditor.getSelectedText();
+		String selectedText = fileEditor.getSelectedText();
 		
 		if(selectedText == null)
 		{
-			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no selected test for execution.");
-			return;
+			selectedText = fileEditor.getCurrentElementText(IIdeConstants.ELEMENT_TYPE_STEP);
+			
+			if(selectedText == null)
+			{
+				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no selected text for execution nor current location is part of any step.");
+				return;
+			}
 		}
 
 		executeStepCode(selectedText, project);

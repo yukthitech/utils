@@ -83,7 +83,7 @@ public class ExecutionEnvironmentManager
 		initMssg.append(String.format("Executing command: %s", command.stream().collect(Collectors.joining(" "))));
 		
 		logger.debug(initMssg);
-		initMssg.append("<br/><br/>");
+		initMssg.append("\n\n");
 		
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.directory( new File(project.getBaseFolderPath()) );

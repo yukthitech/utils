@@ -152,7 +152,7 @@ public class FolderTreeNode extends BaseTreeNode
 
 			if(file.isDirectory())
 			{
-				FolderTreeNode folderTreeNode = new FolderTreeNode(projectExplorer, project, file.getName(), file);
+				FolderTreeNode folderTreeNode = newFolderTreeNode(projectExplorer, project, file.getName(), file);
 				super.insert(file.getPath(), folderTreeNode, index);
 			}
 			else if(file.isFile())

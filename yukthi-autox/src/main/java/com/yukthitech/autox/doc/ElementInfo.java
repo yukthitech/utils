@@ -183,4 +183,10 @@ public class ElementInfo extends StepInfo
 	{
 		return type;
 	}
+	
+	@Override
+	public boolean isExecutable()
+	{
+		return false;
+	}
 }
