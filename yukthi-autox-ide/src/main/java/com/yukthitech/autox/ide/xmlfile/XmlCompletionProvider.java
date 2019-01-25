@@ -19,6 +19,7 @@ import org.fife.ui.autocomplete.ParameterizedCompletion;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
@@ -28,6 +29,7 @@ import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
+import com.yukthitech.utils.CommonUtils;
 
 public class XmlCompletionProvider extends AbstractCompletionProvider
 {
@@ -301,14 +303,14 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				
 				try
 				{
-					paramType = Class.forName(param.getType());
+					paramType = CommonUtils.getClass(param.getType());
 				}catch(Exception ex)
 				{
 					logger.warn("Failed to determine type of attribute '{}' of element: {}. Type String: {}", param.getName(), elem.getName(), param.getType());
 					continue;
 				}
 				
-				if(!XMLUtil.isSupportedAttributeClass(paramType))
+				if(param.getSourceType() == SourceType.NONE && !XMLUtil.isSupportedAttributeClass(paramType))
 				{
 					continue;
 				}
@@ -321,11 +323,14 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					}
 					
 					String name = param.getName().substring(prefix.length());
-					completions.add( new ShorthandCompletion(this, param.getName(), name + "=\"\"", param.getName(), param.getDescription()) );
+					String attrCompletion = location.isFullElementGeneration() ? name + "=\"\"" : name;
+					
+					completions.add( new ShorthandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
 				}
 				else
 				{
-					completions.add( new ShorthandCompletion(this, param.getName(), param.getName() + "=\"\"", param.getName(), param.getDescription()) );
+					String attrCompletion = location.isFullElementGeneration() ? param.getName() + "=\"\"" : param.getName();
+					completions.add( new ShorthandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
 				}
 			}
 		}

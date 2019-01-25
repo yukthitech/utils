@@ -88,12 +88,13 @@ public class XmlFileLocation
 		}
 	}
 	
-	public static XmlFileLocation newAttributeLocation(XmlFile xmlFile, Element currentElement, String currentToken)
+	public static XmlFileLocation newAttributeLocation(XmlFile xmlFile, Element currentElement, String currentToken, boolean fullElement)
 	{
 		XmlFileLocation loc = new XmlFileLocation(xmlFile);
 		loc.setType(XmlLocationType.ATTRIBUTE);
 		loc.currentToken = currentToken;
 		loc.parentElement = currentElement;
+		loc.fullElementGeneration = fullElement;
 		
 		splitNameToken(currentElement, currentToken, loc);
 		

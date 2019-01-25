@@ -2,6 +2,7 @@ package com.yukthitech.autox.doc;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,6 +14,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.Executable;
@@ -30,12 +34,48 @@ import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 public class DocGenerator
 {
 	/**
+	 * Loads the examples from all the autox example resources.
+	 */
+	private static ExampleCollectionFile loadExamples()
+	{
+		try
+		{
+			ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();   
+			Resource [] mappingLocations = patternResolver.getResources("classpath*:/autox-examples/*.xml");
+			
+			if(mappingLocations == null || mappingLocations.length == 0)
+			{
+				return null;
+			}
+			
+			InputStream is = null;
+			ExampleCollectionFile finalFile = new ExampleCollectionFile(), curFile = null;
+			
+			for(Resource res : mappingLocations)
+			{
+				is = res.getInputStream();
+				
+				curFile = new ExampleCollectionFile();
+				XMLBeanParser.parse(is, curFile);
+				is.close();
+				
+				finalFile.merge(curFile);
+			}
+			
+			return finalFile;
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while loading example resources", ex);
+		}
+	}
+	
+	/**
 	 * Loads the specified step types into specified doc info.
 	 * @param docInformation target doc info
 	 * @param stepTypes step types to be loaded
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void loadSteps(DocInformation docInformation, Set<Class<?>> stepTypes)
+	private static void loadSteps(DocInformation docInformation, Set<Class<?>> stepTypes, ExampleCollectionFile exampleCollections)
 	{
 		Executable executableAnnot = null;
 
@@ -60,7 +100,7 @@ public class DocGenerator
 			}
 			
 			//System.out.println("Found step of type: " + stepType.getName());
-			docInformation.addStep(new StepInfo( (Class) stepType, executableAnnot));
+			docInformation.addStep(new StepInfo( (Class) stepType, executableAnnot, exampleCollections.getExamples(stepType.getName()) ));
 		}
 	}
 	
@@ -70,7 +110,7 @@ public class DocGenerator
 	 * @param validationTypes Validation types to be loaded
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void loadValidations(DocInformation docInformation, Set<Class<?>> validationTypes)
+	private static void loadValidations(DocInformation docInformation, Set<Class<?>> validationTypes, ExampleCollectionFile exampleCollections)
 	{
 		Executable executableAnnot = null;
 
@@ -89,7 +129,13 @@ public class DocGenerator
 			}
 			
 			//System.out.println("Found validation of type: " + validationType.getName());
-			docInformation.addValidation(new ValidationInfo( (Class) validationType, executableAnnot));
+			docInformation.addValidation(
+					new ValidationInfo( 
+							(Class) validationType, 
+							executableAnnot,
+							exampleCollections.getExamples(validationType.getName())
+							)
+					);
 		}
 	}
 
@@ -126,16 +172,17 @@ public class DocGenerator
 	public static DocInformation buildDocInformation(String basePackages[]) throws Exception
 	{
 		DocInformation docInformation = new DocInformation();
-		
 		Reflections reflections = null;
+		
+		ExampleCollectionFile exampleCollections = loadExamples();
 		
 		for(String pack : basePackages)
 		{
 			reflections = new Reflections(pack, new SubTypesScanner());
 			
-			loadSteps(docInformation, (Set) reflections.getSubTypesOf(IStep.class) );
+			loadSteps(docInformation, (Set) reflections.getSubTypesOf(IStep.class), exampleCollections );
 
-			loadValidations(docInformation, (Set) reflections.getSubTypesOf(IValidation.class) );
+			loadValidations(docInformation, (Set) reflections.getSubTypesOf(IValidation.class), exampleCollections );
 			
 			loadPlugins(docInformation, (Set) reflections.getSubTypesOf(IPlugin.class) );
 		}

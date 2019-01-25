@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -56,12 +57,17 @@ public class StepInfo implements Comparable<StepInfo>
 	private String nameWithHyphens;
 	
 	/**
+	 * Examples for this step info.
+	 */
+	private List<Example> examples;
+	
+	/**
 	 * Instantiates a new step info.
 	 *
 	 * @param stepClass the step class
 	 * @param executablAnnot the executabl annot
 	 */
-	public StepInfo(Class<? extends IStep> stepClass, Executable executablAnnot)
+	public StepInfo(Class<? extends IStep> stepClass, Executable executablAnnot, List<Example> examples)
 	{
 		setDetails(executablAnnot.name()[0], executablAnnot.message());
 
@@ -73,6 +79,8 @@ public class StepInfo implements Comparable<StepInfo>
 		{
 			this.requiredPlugins.add(pluginType.getSimpleName());
 		}
+		
+		this.examples = examples;
 	}
 	
 	protected StepInfo()
@@ -236,6 +244,26 @@ public class StepInfo implements Comparable<StepInfo>
 	public boolean isExecutable()
 	{
 		return true;
+	}
+	
+	/**
+	 * Sets the examples for this step info.
+	 *
+	 * @param examples the new examples for this step info
+	 */
+	protected void setExamples(List<Example> examples)
+	{
+		this.examples = examples;
+	}
+	
+	/**
+	 * Gets the examples for this step info.
+	 *
+	 * @return the examples for this step info
+	 */
+	public List<Example> getExamples()
+	{
+		return examples;
 	}
 
 	@Override

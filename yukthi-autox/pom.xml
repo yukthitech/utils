@@ -134,6 +134,14 @@
 			<artifactId>yukthi-data</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>5.0.8.RELEASE</version>
+		</dependency>
+
 	</dependencies>
 
 	<!-- <build> <finalName>yukthi-autox</finalName> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 

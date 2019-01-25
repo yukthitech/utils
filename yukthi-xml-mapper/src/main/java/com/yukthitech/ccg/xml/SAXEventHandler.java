@@ -310,16 +310,18 @@ class SAXEventHandler extends DefaultHandler
 			met.invoke(parentNode.getActualBean(), parameters);
 		} catch(Exception ex)
 		{
+			Throwable th = ex;
+			
 			if( (ex instanceof InvocationTargetException) && ex.getCause() != null)
 			{
-				ex = (Exception) ex.getCause();
+				th = ex.getCause();
 			}
 
 			String mssg = String.format("Failed to invoke method '%s' on bean '%s' with args %s. [Node: %s:%s]", ReflectionUtils.toString(met), beanDesc, Arrays.toString(parameters), nodeType, name); 
 			
 			throw new XMLLoadException(
 					mssg, 
-					ex, activeNode, saxLocator);
+					th, activeNode, saxLocator);
 		}
 
 	}

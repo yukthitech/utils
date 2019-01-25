@@ -225,7 +225,7 @@ public class XmlLoctionAnalyzer
 		//the position is for next attribute insertion
 		if(!scanner.hasNext("\\S+"))
 		{
-			return XmlFileLocation.newAttributeLocation(xmlFile, curElement, null);
+			return XmlFileLocation.newAttributeLocation(xmlFile, curElement, null, true);
 		}
 		
 		//invalid scenario
@@ -241,7 +241,25 @@ public class XmlLoctionAnalyzer
 		{
 			if(elementContent.endsWith(attrName))
 			{
-				return XmlFileLocation.newAttributeLocation(xmlFile, curElement, attrName);
+				boolean fullElement = true;
+				
+				for(int i = pos; i < chArr.length; i++)
+				{
+					if(chArr[i] == '=')
+					{
+						fullElement = false;
+						break;
+					}
+					
+					//if non-white space and not = is found
+					// mark full element generation as true
+					if(!Character.isWhitespace(chArr[i]))
+					{
+						break;
+					}
+				}
+
+				return XmlFileLocation.newAttributeLocation(xmlFile, curElement, attrName, fullElement);
 			}
 			
 			//if there is a space or something after attr name

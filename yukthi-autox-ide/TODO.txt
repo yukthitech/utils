@@ -1,11 +1,12 @@
 Documentation in ide changes
 	Ability to include examples.
+	drop down + highlighting for attr values. 
+	Freemarker functions with docs in attr values.
+	
 	On CTRL + F1, current word should be searched
 	Searching should be lucene based
 	popup help of node should include attributes and examples also
 	
-	drop down + highlighting for attr values. 
-	Freemarker functions with docs in attr values.
 	
 Others
 	
@@ -21,10 +22,9 @@ tool tip documentations
 
 splash screen during startup
 
-drop down is not coming from second attr
-attr ="" should not come if it is already followed by =
-
 shutdown hooks to stop executing environments
+
+ability to debug
 
 ==============================
 

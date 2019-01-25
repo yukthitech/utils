@@ -1,5 +1,7 @@
 package com.yukthitech.autox.doc;
 
+import java.util.List;
+
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IValidation;
 
@@ -15,8 +17,8 @@ public class ValidationInfo extends StepInfo
 	 * @param validationClass the step class
 	 * @param executablAnnot the executabl annot
 	 */
-	public ValidationInfo(Class<? extends IValidation> validationClass, Executable executablAnnot)
+	public ValidationInfo(Class<? extends IValidation> validationClass, Executable executablAnnot, List<Example> examples)
 	{
-		super(validationClass, executablAnnot);
+		super(validationClass, executablAnnot, examples);
 	}
 }
