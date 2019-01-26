@@ -8,12 +8,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -27,19 +31,37 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
-import com.yukthitech.autox.doc.PluginInfo;
 import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.views.IViewPanel;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
@@ -47,6 +69,8 @@ import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 public class HelpPanel extends JPanel implements IViewPanel
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(HelpPanel.class);
 
 	private JTabbedPane parentTabbedPane;
 
@@ -66,9 +90,16 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 	private String currentSearchText = "";
 
-	private HelpNodeData rootNodeData = new HelpNodeData("Autox Documentation", null);
 	private final JLabel lblSearch = new JLabel("Search: ");
 
+	private HelpNodeData rootNode;
+	
+	private Directory indexDirectory;
+	
+	private StandardAnalyzer indexAnalyzer = new StandardAnalyzer();
+	
+	private IndexSearcher indexSearcher;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -101,33 +132,88 @@ public class HelpPanel extends JPanel implements IViewPanel
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
 		}
+	}
+	
+	private void initIndex()
+	{
+		File folder = new File("./autox-work/help-index");
 
+		try
+		{
+			if(folder.exists())
+			{
+				AutomationUtils.deleteFolder(folder);
+			}
+			
+			FileUtils.forceMkdir(folder);
+			indexDirectory = FSDirectory.open(folder.toPath());
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while creating index folder: " + folder.getPath(), ex);
+		}
 	}
 
 	@PostConstruct
 	private void display()
 	{
+		initIndex();
+		
 		String[] basepackage = { "com.yukthitech" };
 
 		try
 		{
 			DocInformation docInformation = DocGenerator.buildDocInformation(basepackage);
-			rootNodeData.addHelpNode(new HelpNodeData("Default Plugins", docInformation));
-
-			for(PluginInfo pluginInfo : docInformation.getPlugins())
+			Map<String, Object> context = new HashMap<>();
+			
+			rootNode = new HelpNodeData("root", "root", "", null);
+			
+			HelpNodeData stepRootNode = new HelpNodeData("steps", "Steps", "", null);
+			rootNode.addHelpNode(stepRootNode);
+			
+			for(StepInfo step : docInformation.getSteps())
 			{
-				rootNodeData.addHelpNode(new HelpNodeData(pluginInfo, docInformation));
+				context.put("type", "step");
+				context.put("node", step);
+				stepRootNode.addHelpNode(new HelpNodeData("step:" + step.getName(), step.getName(), buildDoc(documentTemplate, context), step));
 			}
+			
+			HelpNodeData validationNode = new HelpNodeData("validations", "Validations", "", null);
+			rootNode.addHelpNode(validationNode);
 
-			rootNodeData.addHelpNode(new HelpNodeData(docInformation.getFreeMarkerMethods(), docInformation));
+			for(ValidationInfo step : docInformation.getValidations())
+			{
+				context.put("type", "step");
+				context.put("node", step);
+				validationNode.addHelpNode(new HelpNodeData("validation:" + step.getName(), step.getName(), buildDoc(documentTemplate, context), step));
+			}
+			
+			HelpNodeData methodNode = new HelpNodeData("methods", "Free Marker Methods", "", null);
+			rootNode.addHelpNode(methodNode);
 
-			HelpTreeModel model = new HelpTreeModel(rootNodeData);
+			for(FreeMarkerMethodDoc method : docInformation.getFreeMarkerMethods())
+			{
+				context.put("type", "method");
+				context.put("node", method);
+				methodNode.addHelpNode(new HelpNodeData("method:" + method.getName(), method.getName(), buildDoc(fmMethodDocTemplate, context), method));
+			}
+			
+			//create and open index
+			IndexWriterConfig config = new IndexWriterConfig(indexAnalyzer);
+			IndexWriter writer = new IndexWriter(indexDirectory, config);
+			rootNode.index(writer);
+			writer.close();
+			
+			IndexReader indexReader = DirectoryReader.open(indexDirectory);
+			indexSearcher = new IndexSearcher(indexReader);
+
+			//create final tree
+			HelpTreeModel model = new HelpTreeModel(rootNode);
 			tree.setModel(model);
-		} catch(Exception e)
+		} catch(Exception ex)
 		{
-			e.printStackTrace();
+			logger.error("An error occurred while initializing help panel", ex);
+			throw new InvalidStateException("An error occurred while initializing help panel", ex);
 		}
-
 	}
 
 	@Override
@@ -162,6 +248,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 		if(tree == null)
 		{
 			tree = new JTree();
+			tree.setRootVisible(false);
+			tree.setShowsRootHandles(true);
+			
 			tree.addTreeSelectionListener(new TreeSelectionListener()
 			{
 				@Override
@@ -170,11 +259,8 @@ public class HelpPanel extends JPanel implements IViewPanel
 					displayNodeContent();
 				}
 			});
-			tree.setCellRenderer(new DefaultTreeCellRenderer() {
-
-				/**
-				 * 
-				 */
+			tree.setCellRenderer(new DefaultTreeCellRenderer() 
+			{
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -252,18 +338,17 @@ public class HelpPanel extends JPanel implements IViewPanel
 			searchField = new JTextField();
 			searchField.addKeyListener(new KeyAdapter()
 			{
-				@SuppressWarnings("deprecation")
 				@Override
 				public void keyPressed(KeyEvent e)
 				{
 					if(e.getKeyCode() == KeyEvent.VK_UP)
 					{
-						setNextFocusableComponent(tree);
+						tree.requestFocus();
 						transferFocus();
 					}
 					if(e.getKeyCode() == KeyEvent.VK_DOWN)
 					{
-						setNextFocusableComponent(tree);
+						tree.requestFocus();
 						transferFocus();
 					}
 				}
@@ -303,6 +388,45 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 		return searchField;
 	}
+	
+	private Set<String> performSearch(String newText, Set<String> filteredIds)
+	{
+		if(StringUtils.isBlank(newText))
+		{
+			return filteredIds;
+		}
+		
+		try
+		{
+			TopScoreDocCollector collector = TopScoreDocCollector.create(1000);
+			Query q = new QueryParser("doc", indexAnalyzer).parse(newText);
+			indexSearcher.search(q, collector);
+			ScoreDoc[] hits = collector.topDocs().scoreDocs;
+			Set<String> filteredDocIds = new HashSet<>();
+			
+			if(hits != null)
+			{
+				for(ScoreDoc doc : hits)
+				{
+					Document filteredDoc = indexSearcher.doc(doc.doc);
+					filteredDocIds.add(filteredDoc.get("id"));
+				}
+			}
+			
+			if(filteredIds == null)
+			{
+				return filteredDocIds;
+			}
+			
+			filteredIds.retainAll(filteredDocIds);
+			return filteredIds;
+		} catch(Exception ex)
+		{
+			logger.error("An error occurred while performing search operation with string: {}", newText, ex);
+			JOptionPane.showMessageDialog(this, "An error occurred while performing search operation. Search string: " + newText + "\nError: " + ex);
+			return null;
+		}
+	}
 
 	private void applyFilter()
 	{
@@ -313,9 +437,36 @@ public class HelpPanel extends JPanel implements IViewPanel
 			return;
 		}
 
+		//do the lucene search
+		Set<String> filteredDocIds = null;
+		
+		if(StringUtils.isNotBlank(newText))
+		{
+			String searchQueries[] = newText.split("\\|");
+			
+			for(String query : searchQueries)
+			{
+				filteredDocIds = performSearch(query, filteredDocIds);
+				
+				//when error occurs
+				if(filteredDocIds == null)
+				{
+					return;
+				}
+				
+				//if empty results are encountered
+				if(filteredDocIds.isEmpty())
+				{
+					break;
+				}
+			}
+		}
+		
+		//filter the tree in the ui
 		currentSearchText = newText;
-		rootNodeData.filter(newText);
-		HelpTreeModel model = new HelpTreeModel(rootNodeData);
+		rootNode.filter(filteredDocIds);
+		
+		HelpTreeModel model = new HelpTreeModel(rootNode);
 		tree.setModel(model);
 		selectNode((HelpTreeNode) model.getRoot());
 	}
@@ -335,6 +486,11 @@ public class HelpPanel extends JPanel implements IViewPanel
 			tree.setSelectionPath(path);
 		}
 	}
+	
+	private String buildDoc(String template, Map<String, Object> context)
+	{
+		return freeMarkerEngine.processTemplate("documentation.ftl", template, context);
+	}
 
 	private void displayNodeContent()
 	{
@@ -352,56 +508,22 @@ public class HelpPanel extends JPanel implements IViewPanel
 			return;
 		}
 
-		Map<String, Object> input = new HashMap<>();
-		Object nodeValue = node.getHelpNodeData().getNodeValue();
+		HelpNodeData nodeValue = node.getHelpNodeData();
+		editorPane.setText(nodeValue.getDocumentation());
 
-		try
-		{
-			if(nodeValue instanceof PluginInfo)
-			{
-				PluginInfo plugin = (PluginInfo) nodeValue;
-
-				input.put("type", "plugin");
-				input.put("node", plugin);
-
-				String output = freeMarkerEngine.processTemplate("documentation.ftl", documentTemplate, input);
-				editorPane.setText(output);
-			}
-			else if(nodeValue instanceof StepInfo)
-			{
-				StepInfo step = (StepInfo) nodeValue;
-				input.put("type", "step");
-				input.put("node", step);
-
-				String output = freeMarkerEngine.processTemplate("documentation.html", documentTemplate, input);
-				editorPane.setText(output);
-			}
-			else if(nodeValue instanceof FreeMarkerMethodDoc)
-			{
-				FreeMarkerMethodDoc method = (FreeMarkerMethodDoc) nodeValue;
-				input.put("type", "method");
-				input.put("node", method);
-
-				String output = freeMarkerEngine.processTemplate("fm-method-doc.html", fmMethodDocTemplate, input);
-				editorPane.setText(output);
-			}
-			else
-			{
-				editorPane.setText(" ");
-			}
-
-			IdeUtils.executeUiTask(() -> {
-				editorScrollPane.getVerticalScrollBar().setValue(0);
-			});
-		} catch(Exception e1)
-		{
-			e1.printStackTrace();
-		}
+		IdeUtils.executeUiTask(() -> {
+			editorScrollPane.getVerticalScrollBar().setValue(0);
+		});
 	}
 
 	public void activatePanel()
 	{
 		parentTabbedPane.setSelectedComponent(this);
 		searchField.requestFocus();
+		
+		if(searchField.getText().length() > 0)
+		{
+			searchField.select(0, searchField.getText().length());
+		}
 	}
 }

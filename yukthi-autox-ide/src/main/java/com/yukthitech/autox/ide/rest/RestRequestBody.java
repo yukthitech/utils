@@ -24,7 +24,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.model.Param;

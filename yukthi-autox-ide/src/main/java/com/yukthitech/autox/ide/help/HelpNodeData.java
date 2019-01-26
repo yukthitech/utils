@@ -1,98 +1,36 @@
 package com.yukthitech.autox.ide.help;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import com.yukthitech.autox.doc.DocInformation;
-import com.yukthitech.autox.doc.PluginInfo;
-import com.yukthitech.autox.doc.StepInfo;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
 
 public class HelpNodeData
 {
-	private Object nodeValue;
+	private String id;
 	
 	private String label;
+	
+	private String documentation;
 	
 	private List<HelpNodeData> childNodes;
 	
 	private boolean filtered = true;
 	
-	public HelpNodeData filterNode;
-
-	public HelpNodeData(Object nodeValue, DocInformation docInformation)
+	private Object nodeValue;
+	
+	public HelpNodeData(String id, String label, String documentation, Object nodeValue)
 	{
+		this.id = id;
+		this.label = label;
+		this.documentation = documentation;
 		this.nodeValue = nodeValue;
-		
-		if(docInformation == null)
-		{
-			this.label = "" + nodeValue;
-			return;
-		}
-		
-		if(nodeValue instanceof PluginInfo)
-		{
-			PluginInfo pluginInfo = (PluginInfo) nodeValue;
-			this.label = pluginInfo.getName();
-			
-			childNodes = new ArrayList<>();
-			
-			for(StepInfo step : docInformation.getSteps())
-			{
-				if(!step.getRequiredPlugins().contains(label))
-				{
-					continue;
-				}
-				
-				childNodes.add( new HelpNodeData(step, docInformation) );
-			}
-		}
-		else if(nodeValue instanceof String)
-		{
-			this.label = (String) nodeValue;
-			childNodes = new ArrayList<>();
-			
-			for(StepInfo step : docInformation.getSteps())
-			{
-				if(CollectionUtils.isNotEmpty(step.getRequiredPlugins()))
-				{
-					continue;
-				}
-				
-				childNodes.add( new HelpNodeData(step, docInformation) );
-			}
-		}
-		else if(nodeValue instanceof StepInfo)
-		{
-			StepInfo info = (StepInfo) nodeValue;
-			this.label = info.getName();
-		}
-		else if(nodeValue instanceof Set)
-		{
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			Set<FreeMarkerMethodDoc> freeMarkerMethods = (Set) nodeValue;
-			this.label = "Methods";
-			childNodes = new ArrayList<>();
-			
-			for(FreeMarkerMethodDoc met : freeMarkerMethods)
-			{
-				childNodes.add( new HelpNodeData(met, docInformation) );
-			}
-		}
-		else if(nodeValue instanceof FreeMarkerMethodDoc)
-		{
-			FreeMarkerMethodDoc metDoc = (FreeMarkerMethodDoc) nodeValue;
-			this.label = metDoc.getName();
-		}
-	}
-
-	public Object getNodeValue()
-	{
-		return nodeValue;
 	}
 
 	public String getLabel()
@@ -110,6 +48,21 @@ public class HelpNodeData
 		return filtered;
 	}
 	
+	public String getId()
+	{
+		return id;
+	}
+	
+	public String getDocumentation()
+	{
+		return documentation;
+	}
+	
+	public Object getNodeValue()
+	{
+		return nodeValue;
+	}
+	
 	public void addHelpNode(HelpNodeData child)
 	{
 		if(this.childNodes == null)
@@ -120,7 +73,32 @@ public class HelpNodeData
 		this.childNodes.add(child);
 	}
 	
-	public boolean filter(String text)
+	public void index(IndexWriter writer) throws IOException
+	{
+		if(nodeValue != null)
+		{
+			String labelTokens = label
+					.replace("-", " ")
+					.replaceAll("([A-Z])", " $1")
+					.replace("  ", " ")
+					.toLowerCase();
+			
+			writer.addDocument(Arrays.asList(
+				new StringField("id", id, Store.YES),
+				new TextField("doc", documentation + " " + labelTokens, Store.NO)
+			));
+		}
+		
+		if(this.childNodes != null)
+		{
+			for(HelpNodeData node : this.childNodes)
+			{
+				node.index(writer);
+			}
+		}
+	}
+	
+	public boolean filter(Set<String> filteredIds)
 	{
 		boolean res = false;
 		
@@ -128,27 +106,20 @@ public class HelpNodeData
 		{
 			for(HelpNodeData child: childNodes)
 			{
-				if(child.filter(text))
+				if(child.filter(filteredIds))
 				{
-					filterNode = child;
 					res = true;
 				}
 			}
 		}
 		
-		if(res || StringUtils.isEmpty(text))
+		if(res || filteredIds == null)
 		{
 			filtered = true;
 			return true;
 		}
 		
-		if(label == null)
-		{
-			filtered = false;
-			return false;
-		}
-		
-		filtered = label.toLowerCase().contains(text);
+		filtered = filteredIds.contains(id);
 		return filtered;
 	}
 	
