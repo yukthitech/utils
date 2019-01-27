@@ -4,7 +4,6 @@ Documentation in ide changes
 	Freemarker functions with docs in attr values.
 	
 	On CTRL + F1, current word should be searched
-	Searching should be lucene based
 	popup help of node should include attributes and examples also
 	
 	
@@ -25,6 +24,8 @@ splash screen during startup
 shutdown hooks to stop executing environments
 
 ability to debug
+
+short key to maximize and minimize sub windows
 
 ==============================
 

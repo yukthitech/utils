@@ -83,7 +83,7 @@
 				<pathVariable name="id">${attr.emp3_id}</pathVariable>
 			</ccg:rest-invoke-get-file>
 			
-			<ccg:loadText resource="file:${attr.response}" contextAttribute="outputContent"/>
+			<ccg:set expression="outputContent" value="file(text=true): ${attr.response}"/>
 			
 			<ccg:assert-equals actual="attr: outputContent" expected="This is simple test file for upload."/>
 		</testCase>

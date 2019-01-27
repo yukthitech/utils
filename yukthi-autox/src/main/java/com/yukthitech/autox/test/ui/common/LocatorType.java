@@ -12,37 +12,37 @@ public enum LocatorType
 	/**
 	 * Element id based locator.
 	 */
-	ID("id"),
+	ID("id", "Used to find ui elements using id."),
 	
 	/**
 	 * Element's CSS class based locator.
 	 */
-	CLASS("class"),
+	CLASS("class", "Used to find ui elements using css class"),
 	
 	/**
 	 * Element's tag name based locator.
 	 */
-	TAG("tag"),
+	TAG("tag", "Used to find ui elements using tag name"),
 	
 	/**
 	 * Element's name based locator.
 	 */
-	NAME("name"),
+	NAME("name", "Used to find ui elements using name of the element"),
 	
 	/**
 	 * CSS expression based locator.
 	 */
-	CSS("css"),
+	CSS("css", "Used to find ui elements using css locator."),
 	
 	/**
 	 * Xpath based locator.
 	 */
-	XPATH("xpath"),
+	XPATH("xpath", "Used to find ui elements using xpath."),
 	
 	/**
 	 * JS expression based locator.
 	 */
-	JS("js")
+	JS("js", "Used to find ui elements using js expression.")
 	
 	;
 	
@@ -57,13 +57,20 @@ public enum LocatorType
 	private String key;
 	
 	/**
+	 * Description of the locator.
+	 */
+	private String description;
+	
+	/**
 	 * Instantiates a new locator type.
 	 *
 	 * @param key the key
+	 * @param description the description
 	 */
-	private LocatorType(String key)
+	private LocatorType(String key, String description)
 	{
 		this.key = key;
+		this.description = description;
 	}
 	
 	/**
@@ -74,6 +81,16 @@ public enum LocatorType
 	public String getKey()
 	{
 		return key;
+	}
+	
+	/**
+	 * Gets the description of the locator.
+	 *
+	 * @return the description of the locator
+	 */
+	public String getDescription()
+	{
+		return description;
 	}
 	
 	/**

@@ -2,7 +2,7 @@ package com.yukthitech.autox.expr;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +12,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.XMLBeanParser;
@@ -269,8 +272,26 @@ public class DefaultExpressionParsers
 	 * @param name name of the input
 	 * @return loaded object
 	 */
-	private Object loadInputStream(InputStream is, String name, String exprType[]) throws Exception
+	private Object loadInputStream(String data, String name, String exprType[], ExpressionParserContext parserContext) throws Exception
 	{
+		ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
+		
+		//if the input stream needs to be loaded as template, parse the expressions
+		if("true".equalsIgnoreCase(parserContext.getParameter("template")))
+		{
+			logger.debug(null, "Processing input data as template: {}", name);
+			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
+		}
+		
+		//if input stream has to be loaded as simple text, simply return the current data string
+		if("true".equalsIgnoreCase(parserContext.getParameter("text")))
+		{
+			logger.debug(null, "Returning input data as string: {}", name);
+			return data;
+		}
+		
+		InputStream is = new ByteArrayInputStream(data.getBytes());
+		
 		Class<?> type = null;
 		name = name.trim();
 		
@@ -286,6 +307,7 @@ public class DefaultExpressionParsers
 		
 		if(name.toLowerCase().endsWith(".properties"))
 		{
+			logger.debug(null, "Processing input file as properties file: {}", name);
 			Properties prop = new Properties();
 			prop.load(is);
 			
@@ -294,19 +316,22 @@ public class DefaultExpressionParsers
 		
 		if(name.toLowerCase().endsWith(".json"))
 		{
+			logger.debug(null, "Processing input file as json file: {} [Type: {}]", name, type);
+			
 			if(type == null)
 			{
 				type = Object.class;
 			}
 			
 			Object res = AutomationUtils.convertToWriteable( objectMapper.readValue(is, type) );
-			System.out.println("============>" + res.getClass().getName());
 			
 			return res;
 		}
 		
 		if(name.toLowerCase().endsWith(".xml"))
 		{
+			logger.debug(null, "Processing input file as xml file: {} [Type: {}]", name, type);
+			
 			Object res = null;
 			
 			if(type != null)
@@ -326,6 +351,18 @@ public class DefaultExpressionParsers
 		
 		throw new com.yukthitech.utils.exceptions.UnsupportedOperationException("Unsupported input specified for bean loading: '{}'", name);
 	}
+	
+	private String loadFile(String filePath) throws IOException
+	{
+		File file = new File(filePath);
+		
+		if(!file.exists() || !file.isFile())
+		{
+			throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", filePath);
+		}
+		
+		return FileUtils.readFileToString(file);
+	}
 
 	@ExpressionParser(type = "file", description = "Parses specified expression as file path and loads it as object. Supported file types: xml, json, properties", 
 			example = "file: /tmp/data.json")
@@ -336,18 +373,7 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				File file = new File(expression);
-				
-				if(!file.exists() || !file.isFile())
-				{
-					throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", expression);
-				}
-				
-				FileInputStream fis = new FileInputStream(expression);
-				Object object = loadInputStream(fis, expression, exprType);
-				fis.close();
-				
-				return object;
+				return loadInputStream(loadFile(expression), expression, exprType, parserContext);
 			}
 		};
 	}
@@ -361,7 +387,7 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				InputStream is = null;
+				String data = null;
 				
 				if("$".equals(expression))
 				{
@@ -372,22 +398,22 @@ public class DefaultExpressionParsers
 						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
 					}
 					
-					is = new ByteArrayInputStream(curVal.toString().getBytes());
+					data = curVal.toString();
 				}
 				else
 				{
-					is = DefaultExpressionParsers.class.getResourceAsStream(expression); 
+					InputStream is = DefaultExpressionParsers.class.getResourceAsStream(expression); 
+
+					if(is == null)
+					{
+						throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", expression);
+					}
+					
+					data = IOUtils.toString(is);
+					is.close();
 				}
 				
-				
-				if(is == null)
-				{
-					throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", expression);
-				}
-				
-				Object object = loadInputStream(is, expression, exprType);
-				is.close();
-				
+				Object object = loadInputStream(data, expression, exprType, parserContext);
 				return object;
 			}
 		};
@@ -402,7 +428,7 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				InputStream is = null;
+				String data = null;
 				
 				if("$".equals(expression))
 				{
@@ -413,16 +439,14 @@ public class DefaultExpressionParsers
 						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
 					}
 					
-					is = new ByteArrayInputStream(curVal.toString().getBytes());
+					data = curVal.toString();
 				}
 				else
 				{
-					is = new ByteArrayInputStream(expression.getBytes()); 
+					data = expression;
 				}
 				
-				Object object = loadInputStream(is, ".json", exprType);
-				is.close();
-				
+				Object object = loadInputStream(data, ".json", exprType, parserContext);
 				return object;
 			}
 		};

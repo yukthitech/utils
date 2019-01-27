@@ -1,5 +1,8 @@
 package com.yukthitech.autox.expr;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.yukthitech.autox.AutomationContext;
 
 /**
@@ -27,6 +30,8 @@ public class ExpressionParserContext
 	 * Current parser in use.
 	 */
 	private ExpressionParserDetails currentParser;
+	
+	private Map<String, String> parameters = new HashMap<>();
 
 	/**
 	 * Instantiates a new expression parser context.
@@ -115,5 +120,34 @@ public class ExpressionParserContext
 	void setCurrentParser(ExpressionParserDetails currentParser)
 	{
 		this.currentParser = currentParser;
+	}
+	
+	/**
+	 * Clears the current parameters from the context.
+	 */
+	public void clearParameters()
+	{
+		parameters.clear();
+	}
+	
+	/**
+	 * Adds the parameter to the context.
+	 *
+	 * @param name the name
+	 * @param value the value
+	 */
+	public void addParameter(String name, String value)
+	{
+		parameters.put(name.toLowerCase(), value);
+	}
+	
+	/**
+	 * Fetches the parameter value with specified name.
+	 * @param name name of param to fetch
+	 * @return matching param value
+	 */
+	public String getParameter(String name)
+	{
+		return parameters.get(name.toLowerCase());
 	}
 }

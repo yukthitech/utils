@@ -208,7 +208,7 @@
 			<wrap:steps>
 				<ccg:set expression="xpathAttr1" value="file:./src/test/resources/data/data1.json | xpath: //bean1/prop1"/>
 				<ccg:set expression="xpathAttr2" value="res:/data/data1.json | xpath: //bean1/subbean1/sprop1"/>
-				<ccg:loadJson contextAttribute="xpathObj" resource="res:/data/data1.json" />
+				<ccg:set expression="xpathObj" value="res:/data/data1.json"/>
 			</wrap:steps>
 
 			<wrap:validations>

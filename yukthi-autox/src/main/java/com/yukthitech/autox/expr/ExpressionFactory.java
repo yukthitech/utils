@@ -173,13 +173,12 @@ public class ExpressionFactory extends AbstractLocationBased
 		{
 			if(ch[i] == '\\')
 			{
-				if(i < ch.length - 1)
+				if(i < ch.length - 1 && ch[i + 1] == '|')
 				{
-					token.append(ch[i + 1]);
+					token.append('|');
+					i++;
+					continue;
 				}
-				
-				i++;
-				continue;
 			}
 			
 			if(ch[i] == '|')
@@ -223,6 +222,12 @@ public class ExpressionFactory extends AbstractLocationBased
 	
 	private IPropertyPath getPropertyPath(ExpressionParserContext context, String expression)
 	{
+		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
+		
+		exeLogger.debug(this, "Fetching expression parser for value: {}", expression);
+		
+		context.clearParameters();
+		
 		//check if string is a reference
 		String exprType = null, mainExpr = null;
 		String exprTypeParams[] = null;
@@ -242,6 +247,26 @@ public class ExpressionFactory extends AbstractLocationBased
 			
 			String type = matcherWithType.group("type");
 			exprTypeParams = type.trim().split("\\s*\\,\\s*");
+			
+			//parse parameter types
+			List<String> typeParams = new ArrayList<>();
+			Matcher keyValMatcher = null;
+			
+			for(String param : exprTypeParams)
+			{
+				keyValMatcher = IAutomationConstants.KEY_VALUE_PATTERN.matcher(param);
+				
+				if(keyValMatcher.matches())
+				{
+					context.addParameter(keyValMatcher.group("key"), keyValMatcher.group("value"));
+				}
+				else
+				{
+					typeParams.add(param);
+				}
+			}
+			
+			exprTypeParams = typeParams.isEmpty() ? null : typeParams.toArray(new String[0]);
 		}
 		else
 		{
@@ -257,9 +282,7 @@ public class ExpressionFactory extends AbstractLocationBased
 		
 		context.setCurrentParser(parser);
 		
-		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		exeLogger.trace(this, "Executing expression: {}", expression);
-		
 		return parser.invoke(context, mainExpr, exprTypeParams);
 	}
 	

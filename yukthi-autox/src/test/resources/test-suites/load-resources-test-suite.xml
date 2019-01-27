@@ -10,12 +10,8 @@
 
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-				
-				<ccg:loadProperties contextAttribute="propFile">
-					<resource>
-						file:.\src\test\resources\test-suites\test.properties
-					</resource>
-				</ccg:loadProperties>
+
+				<ccg:set expression="propFile" value="file(template=true):.\src\test\resources\test-suites\test.properties"/>
 			</wrap:steps>
 
 			<wrap:validations>
@@ -31,11 +27,7 @@
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
 				
-				<ccg:loadProperties contextAttribute="propFile1" template="false">
-					<resource>
-						res:/test-suites/test.properties
-					</resource>
-				</ccg:loadProperties>
+				<ccg:set expression="propFile1" value="file:.\src\test\resources\test-suites\test.properties"/>
 			</wrap:steps>
 
 			<wrap:validations>
@@ -56,7 +48,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-				<ccg:loadJson contextAttribute="jsonObj" resource="res:/data/data.json" />
+				<ccg:set expression="jsonObj" value="res(template=true):/data/data.json"/>
 			</wrap:steps>
 
 			<wrap:validations>
@@ -71,7 +63,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-				<ccg:loadJson contextAttribute="jsonObj" resource="res:/data/data.json" template="false"/>
+				<ccg:set expression="jsonObj" value="res:/data/data.json"/>
 			</wrap:steps>
 
 			<wrap:validations>
@@ -90,7 +82,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-				<ccg:loadText contextAttribute="textObj" resource="res:/data/test-text1.txt" />
+				<ccg:set expression="textObj" value="res(text=true, template=true):/data/test-text1.txt"/>
 			</wrap:steps>
 
 			<wrap:validations>
@@ -105,7 +97,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-				<ccg:loadText contextAttribute="textObj" resource="res:/data/test-text1.txt" template="false"/>
+				<ccg:set expression="textObj" value="res(text=true):/data/test-text1.txt"/>
 			</wrap:steps>
 
 			<wrap:validations>

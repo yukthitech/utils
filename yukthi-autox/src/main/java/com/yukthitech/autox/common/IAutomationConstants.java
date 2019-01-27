@@ -22,7 +22,9 @@ public interface IAutomationConstants
 	
 	public Pattern EXPRESSION_PATTERN = Pattern.compile("^\\s*(?<exprType>\\w+)\\s*\\:\\s*");
 	
-	public Pattern EXPRESSION_WITH_TYPE_PATTERN = Pattern.compile("^\\s*(?<exprType>\\w+)\\s*\\(\\s*(?<type>[\\w\\.\\<\\>\\,\\ ]+)\\s*\\)\\s*\\:\\s*");
+	public Pattern EXPRESSION_WITH_TYPE_PATTERN = Pattern.compile("^\\s*(?<exprType>\\w+)\\s*\\(\\s*(?<type>[\\w\\.\\<\\>\\,\\ \\=]+)\\s*\\)\\s*\\:\\s*");
+	
+	public Pattern KEY_VALUE_PATTERN = Pattern.compile("\\s*(?<key>\\w+)\\s*\\=\\s*(?<value>\\w+)\\s*");
 
 	/**
 	 * Five seconds.
