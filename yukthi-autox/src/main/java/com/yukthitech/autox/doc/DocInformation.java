@@ -47,6 +47,16 @@ public class DocInformation
 	private Map<String, FreeMarkerMethodDoc> freeMarkerMethods = new TreeMap<>();
 	
 	/**
+	 * Ui locator details.
+	 */
+	private Map<String, UiLocatorDoc> uiLocators = new TreeMap<>();
+	
+	/**
+	 * Expression parser details.
+	 */
+	private Map<String, ExpressionParserDoc> parsers = new TreeMap<>();
+	
+	/**
 	 * Gets the basic documents.
 	 *
 	 * @return the basic documents
@@ -185,5 +195,55 @@ public class DocInformation
 		{
 			this.freeMarkerMethods.put(met.getName(), met);
 		}
+	}
+	
+	/**
+	 * Adds the ui locator.
+	 *
+	 * @param locator the locator
+	 */
+	public void addUiLocator(UiLocatorDoc locator)
+	{
+		this.uiLocators.put(locator.getName(), locator);
+	}
+	
+	/**
+	 * Gets the ui locator details.
+	 *
+	 * @return the ui locator details
+	 */
+	public Collection<UiLocatorDoc> getUiLocators()
+	{
+		return uiLocators.values();
+	}
+
+	/**
+	 * Gets the expression parser details.
+	 *
+	 * @return the expression parser details
+	 */
+	public Collection<ExpressionParserDoc> getParsers()
+	{
+		return parsers.values();
+	}
+
+	/**
+	 * Sets the expression parser details.
+	 *
+	 * @param parsers the new expression parser details
+	 */
+	public void setParsers(Map<String, ExpressionParserDoc> parsers)
+	{
+		this.parsers = parsers;
+	}
+
+	/**
+	 * Adds the parser.
+	 *
+	 * @param parser the parser
+	 */
+	public void addParser(ExpressionParserDoc parser)
+	{
+		this.parsers.put(parser.getName(), parser);
 	}
 }

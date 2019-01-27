@@ -2,6 +2,7 @@ package com.yukthitech.autox.expr;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -387,5 +388,10 @@ public class ExpressionFactory extends AbstractLocationBased
 			exeLogger.error(this, "Failed to set specified value {} on path {}", value, expression, ex);
 			throw new InvalidStateException("Failed to set specified value {} on path {}", value, expression, ex);
 		}
+	}
+	
+	public Collection<ExpressionParserDetails> getParserDetails()
+	{
+		return parsers.values();
 	}
 }

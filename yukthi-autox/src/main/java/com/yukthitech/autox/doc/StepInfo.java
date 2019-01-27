@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
@@ -264,6 +266,11 @@ public class StepInfo implements Comparable<StepInfo>
 	public List<Example> getExamples()
 	{
 		return examples;
+	}
+	
+	public boolean hasExamples()
+	{
+		return CollectionUtils.isNotEmpty(examples);
 	}
 
 	@Override

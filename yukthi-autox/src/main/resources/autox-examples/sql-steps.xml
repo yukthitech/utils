@@ -1,0 +1,109 @@
+<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<ccg:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.DdlQueryStep">
+		<example>
+			<description>Executing ddl query</description>
+			
+			<content><![CDATA[
+				<ccg:sql-ddl-query dataSourceName="dataSource">
+					<query>
+						CREATE TABLE EMPLOYEE
+						(
+							ID		INT,
+							NAME	VARCHAR(100)
+						)
+					</query>
+				</ccg:sql-ddl-query>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.DmlQueryStep">
+		<example>
+			<description>Executing dml query and validating number of rows affected</description>
+			
+			<content><![CDATA[
+				<ccg:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
+					<query>
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
+					</query>
+				</ccg:sql-dml-query>
+
+				<ccg:assert-equals actual="attr: updateCount" expected="int: 1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.FetchValueQueryStep">
+		<example>
+			<description>Executing dml query and validating number of rows affected</description>
+			
+			<content><![CDATA[
+				<ccg:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
+					<query>
+						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
+					</query>
+				</ccg:sql-dml-query>
+
+				<ccg:assert-equals actual="attr: updateCount" expected="int: 1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.FetchValueQueryStep">
+		<example>
+			<description>Fetching value using query and validating it</description>
+			
+			<content><![CDATA[
+				<ccg:sql-fetch-value-query contextAttribute="empId" dataSourceName="dataSource">
+					<query>
+						SELECT ID
+						FROM EMPLOYEE
+						WHERE NAME = 'employee1'
+					</query>
+				</ccg:sql-fetch-value-query>
+
+				<ccg:assert-equals actual="attr: empId" expected="int: 1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.LoadQueryColumnListStep">
+		<example>
+			<description>Fetching single column values as list</description>
+			
+			<content><![CDATA[
+				<ccg:sql-load-query-column-list contextAttribute="empNames" dataSourceName="dataSource">
+					<query>
+						SELECT NAME
+						FROM EMPLOYEE
+						WHERE NAME IN ('employee1', 'employee2')
+						ORDER BY NAME
+					</query>
+				</ccg:sql-load-query-column-list>
+
+				<ccg:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.rest.steps.MultiDmlQueryStep">
+		<example>
+			<description>Executing multiple dml queries in single transaction</description>
+			
+			<content><![CDATA[
+				<ccg:sql-multi-dml-query dataSourceName="dataSource">
+					<query>
+						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
+					</query>
+				
+					<query>
+						INSERT INTO EMPLOYEE VALUES (3, 'employee2')
+					</query>
+				</ccg:sql-multi-dml-query>
+			]]></content>
+		</example>
+	</collection>
+
+</examples>

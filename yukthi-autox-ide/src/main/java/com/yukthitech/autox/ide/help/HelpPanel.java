@@ -57,7 +57,9 @@ import org.springframework.stereotype.Component;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
+import com.yukthitech.autox.doc.ExpressionParserDoc;
 import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.views.IViewPanel;
@@ -88,6 +90,8 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 	private String fmMethodDocTemplate = null;
 
+	private String exprDocTemplate = null;
+
 	private String currentSearchText = "";
 
 	private final JLabel lblSearch = new JLabel("Search: ");
@@ -105,21 +109,6 @@ public class HelpPanel extends JPanel implements IViewPanel
 	 */
 	public HelpPanel()
 	{
-		addKeyListener(new KeyAdapter()
-		{
-			@Override
-			public void keyPressed(KeyEvent e)
-			{
-				System.out.println("key pressed" + e.getKeyCode());
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e)
-			{
-				System.out.println("key pressed" + e.getKeyCode());
-			}
-		});
-
 		setLayout(new BorderLayout(0, 0));
 		add(getPanel(), BorderLayout.NORTH);
 		add(getSplitPane());
@@ -128,6 +117,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 		{
 			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"));
 			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/fm-method-doc.html"));
+			exprDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/expr-doc.html"));
 		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
@@ -154,7 +144,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 	}
 
 	@PostConstruct
-	private void display()
+	private void init()
 	{
 		initIndex();
 		
@@ -197,6 +187,26 @@ public class HelpPanel extends JPanel implements IViewPanel
 				methodNode.addHelpNode(new HelpNodeData("method:" + method.getName(), method.getName(), buildDoc(fmMethodDocTemplate, context), method));
 			}
 			
+			HelpNodeData expressionNode = new HelpNodeData("expressions", "Expression Prefixes", "", null);
+			rootNode.addHelpNode(expressionNode);
+
+			for(ExpressionParserDoc method : docInformation.getParsers())
+			{
+				context.put("type", "expression");
+				context.put("node", method);
+				expressionNode.addHelpNode(new HelpNodeData("expression:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
+			}
+
+			HelpNodeData uiLocatorNode = new HelpNodeData("uiLocators", "UI Locators", "", null);
+			rootNode.addHelpNode(uiLocatorNode);
+
+			for(UiLocatorDoc method : docInformation.getUiLocators())
+			{
+				context.put("type", "locator");
+				context.put("node", method);
+				uiLocatorNode.addHelpNode(new HelpNodeData("uiloc:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
+			}
+
 			//create and open index
 			IndexWriterConfig config = new IndexWriterConfig(indexAnalyzer);
 			IndexWriter writer = new IndexWriter(indexDirectory, config);

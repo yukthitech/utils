@@ -1,0 +1,152 @@
+<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<ccg:exprPattern enabled="false"/>
+
+	<collection name="com.yukthitech.autox.test.common.steps.LogStep">
+		<example>
+			<description>Logging simple message at default level (DEBUG)</description>
+			
+			<content><![CDATA[
+				<ccg:log message="This message is from step group"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Logging multiple messages and by using expressions</description>
+			
+			<content><![CDATA[
+				<ccg:log>
+					<message>Invoking method using object from app config: </message>
+					<message>prop: data.beanFromApp</message>
+				</ccg:log>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Logging at specific level</description>
+			
+			<content><![CDATA[
+				<ccg:log level="SUMMARY" message="Time taken during test was: 100"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.MkDirStep">
+		<example>
+			<description>Creating dir in work folder</description>
+			
+			<content><![CDATA[
+				<ccg:mkdir path="tmp/test1" name="tmpDir"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.RemoveStep">
+		<example>
+			<description>Removing context attribute</description>
+			
+			<content><![CDATA[
+				<ccg:remove name="tmpDir"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.SetStep">
+		<example>
+			<description>Setting context attribute with type</description>
+			
+			<content><![CDATA[
+				<ccg:set expression="intAttr" value="int: 10" />
+				<ccg:set expression="attr(int): intAttr1" value="10"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Using piped expressions for setting the value</description>
+			
+			<content><![CDATA[
+				<ccg:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Setting property (instead of default context attribute)</description>
+			
+			<content><![CDATA[
+				<ccg:set expression="prop: attr.beanForTest.key1" value="newValue1" />
+			]]></content>
+		</example>
+
+		<example>
+			<description>Setting property using json</description>
+			
+			<content><![CDATA[
+				<ccg:set expression="beanForTest">
+					<value>json:
+						{
+							"key1" : "value1",
+							"key2" : "value2"
+						}
+					</value>
+				</ccg:set>
+			]]></content>
+		</example>
+	</collection>
+
+
+	<collection name="com.yukthitech.autox.test.common.steps.SleepStep">
+		<example>
+			<description>Sleep for specified number of millis (default time units)</description>
+			
+			<content><![CDATA[
+				<ccg:sleep time="5000"/>
+			]]></content>
+		</example>
+
+		<example>
+			<description>Sleep using non-default time units</description>
+			
+			<content><![CDATA[
+				<ccg:sleep time="10" timeUnit="SECONDS"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.StartTimerStep">
+		<example>
+			<description>Starting/stopped timer with specified name</description>
+			
+			<content><![CDATA[
+				<ccg:start-timer name="timeTaken"/>
+				<ccg:sleep time="10" timeUnit="SECONDS"/>
+				<ccg:stop-timer name="timeTaken"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="com.yukthitech.autox.test.common.steps.StopTimerStep">
+		<example>
+			<description>Starting/stopped timer with specified name</description>
+			
+			<content><![CDATA[
+				<ccg:start-timer name="timeTaken"/>
+				<ccg:sleep time="10" timeUnit="SECONDS"/>
+				<ccg:stop-timer name="timeTaken"/>
+			]]></content>
+		</example>
+	</collection>
+
+
+	<collection name="com.yukthitech.autox.test.common.steps.InvokeMethodStep">
+		<example>
+			<description>Invoking java object method</description>
+			
+			<content><![CDATA[
+				<ccg:invoke-method method="toText">
+					<object ccg:beanRef="beanFromApp" />
+
+					<parameter ccg:beanType="com.yukthitech.test.beans.SimpleBean" name="someName"/>
+				</ccg:invoke-method>
+			]]></content>
+		</example>
+	</collection>
+</examples>

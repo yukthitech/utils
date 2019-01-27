@@ -1,4 +1,6 @@
-<examples>
+<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<ccg:exprPattern enabled="false"/>
+
 	<collection name="com.yukthitech.autox.test.assertion.AssertEqualsStep">
 		<example>
 			<description>Any object reference can be used both for expected and actual</description>

@@ -24,7 +24,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiFillForm", "fillForm"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
+@Executable(name = {"uiFillForm"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
 public class FillFormStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

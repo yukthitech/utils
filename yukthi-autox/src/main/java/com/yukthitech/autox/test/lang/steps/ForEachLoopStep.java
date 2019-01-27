@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.beanutils.PropertyUtils;
-
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
@@ -13,6 +11,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -38,8 +37,8 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	/**
 	 * Expression which will be evaluated to collection or map or String.
 	 */
-	@Param(description = "Expression which will be evaluated to collection or map or String")
-	private String expression;
+	@Param(description = "Expression which will be evaluated to collection or map or String", sourceType = SourceType.EXPRESSION)
+	private Object expression;
 	
 	/**
 	 * If expression evaluated to string, delimiter to be used to split the string.
@@ -133,15 +132,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
-		Object exprValue = null;
-		
-		try
-		{
-			exprValue = PropertyUtils.getProperty(context, expression);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while evaluating expression: {}", expression, ex);
-		}
+		Object exprValue = expression;
 		
 		if(exprValue == null)
 		{

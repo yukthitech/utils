@@ -52,6 +52,25 @@ public class DefaultExpressionParsers
 			}
 		};
 	}
+	
+	@ExpressionParser(type = "store", description = "Parses specified expression as value on/from store.", example = "store: key1")
+	public IPropertyPath storeParser(ExpressionParserContext parserContext, String expression)
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public void setValue(Object value) throws Exception
+			{
+				parserContext.getAutomationContext().getPersistenceStorage().set(expression, value);
+			}
+			
+			@Override
+			public Object getValue() throws Exception
+			{
+				return parserContext.getAutomationContext().getPersistenceStorage().get(expression);
+			}
+		};
+	}
 
 	@ExpressionParser(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName")
 	public IPropertyPath attrParser(ExpressionParserContext parserContext, String expression)

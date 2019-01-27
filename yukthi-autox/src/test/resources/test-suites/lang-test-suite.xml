@@ -161,7 +161,7 @@
 				<ccg:set expression="loopExpr" value="a,b,  c, d,e, f"/>
 				<ccg:set expression="res" value=""/>
 				
-				<ccg:forEach expression="attr.loopExpr">
+				<ccg:forEach expression="attr: loopExpr">
 					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:forEach>
 				
@@ -175,7 +175,7 @@
 			<wrap:steps>
 				<ccg:set expression="res" value=""/>
 				
-				<ccg:forEach expression="data.dataList">
+				<ccg:forEach expression="prop: data.dataList">
 					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:forEach>
 				
@@ -195,7 +195,7 @@
 			<wrap:steps>
 				<ccg:set expression="res" value=""/>
 				
-				<ccg:forEach expression="data.dataList">
+				<ccg:forEach expression="prop: data.dataList">
 					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 				</ccg:forEach>
 				
@@ -215,7 +215,7 @@
 			<wrap:steps>
 				<ccg:set expression="res" value=""/>
 				
-				<ccg:forEach expression="data.dataMap">
+				<ccg:forEach expression="prop: data.dataMap">
 					<ccg:set expression="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
 				</ccg:forEach>
 				
@@ -230,7 +230,7 @@
 				<ccg:set expression="loopExpr" value="a,b,  c, d,e, f"/>
 				<ccg:set expression="res" value=""/>
 				
-				<ccg:forEach expression="attr.loopExpr">
+				<ccg:forEach expression="attr: loopExpr">
 					<ccg:if condition="attr.loopVar == 'b'">
 						<ccg:continue/>
 					</ccg:if>

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -172,8 +173,6 @@ public class AutomationUtils
 		{
 			return (T) replaceExpressionsInString(templateName, context, (String) object);
 		}
-
-		//logger.trace("Processing expressions in object: {}", object);
 		
 		//when executable is collection
 		if(object instanceof Collection)
@@ -290,7 +289,10 @@ public class AutomationUtils
 				
 				if(param != null && param.sourceType() == SourceType.EXPRESSION)
 				{
-					Object result = ExpressionFactory.getExpressionFactory().parseExpression(context, field.get(object));
+					Object result = mapObjects(context, field.get(object), val -> {
+						return ExpressionFactory.getExpressionFactory().parseExpression(context, val);
+					});
+					
 					field.set(object, result);
 				}
 
@@ -305,6 +307,55 @@ public class AutomationUtils
 		}
 		
 		return object;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static Object mapObjects(AutomationContext context, Object value, Function<Object, Object> consumer) throws Exception
+	{
+		if(value == null)
+		{
+			return null;
+		}
+		
+		if(value instanceof Collection)
+		{
+			Collection<Object> input = (Collection<Object>) value;
+			
+			if(input.isEmpty())
+			{
+				return input;
+			}
+			
+			Collection<Object> res = (Collection<Object>) input.getClass().newInstance();
+			
+			for(Object inputVal : input)
+			{
+				res.add(consumer.apply(inputVal));
+			}
+			
+			return res;
+		}
+
+		if(value instanceof Map)
+		{
+			Map<Object, Object> input = (Map<Object, Object>) value;
+			
+			if(input.isEmpty())
+			{
+				return input;
+			}
+			
+			Map<Object, Object> res = (Map<Object, Object>) input.getClass().newInstance();
+			
+			for(Object key : input.keySet())
+			{
+				res.put(consumer.apply(key), consumer.apply(input.get(key)));
+			}
+			
+			return res;
+		}
+		
+		return consumer.apply(value);
 	}
 
 	/**

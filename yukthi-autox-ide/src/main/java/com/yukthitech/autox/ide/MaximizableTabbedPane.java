@@ -54,6 +54,11 @@ public class MaximizableTabbedPane extends JTabbedPane
 		this.viewsCloseable = viewsCloseable;
 	}
 	
+	public void flipMaximization()
+	{
+		maximizationListener.flipMaximizationStatus(this);
+	}
+
 	@Override
 	public void addTab(String title, Component component)
 	{

@@ -24,7 +24,7 @@
 			<wrap:steps>
 				<ccg:log>
 					<message>Invoking method using object from app config: </message>
-					<message ccg:beanRef="beanFromApp"></message>
+					<message>prop: data.beanFromApp</message>
 				</ccg:log>
 
 				<ccg:invokeMethod method="toText">
@@ -284,11 +284,8 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:store-set key="testStoreKey">
-					<value><![CDATA["value1"]]></value>
-				</ccg:store-set>
-				
-				<ccg:store-get key="testStoreKey" attribute="ctxAttrKey"/>
+				<ccg:set expression="store: testStoreKey" value="value1"/>
+				<ccg:set expression="ctxAttrKey" value="store: testStoreKey"/>
 				
 				<ccg:set expression="ctxAttrKey1" value="Value is ${storeValue('testStoreKey')}"/>
 			</wrap:steps>
@@ -306,7 +303,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="beanForTest">
-					<value><![CDATA[json:
+					<value><![CDATA[json:
 						{
 							"key1" : "value1",
 							"key2" : "value2"
@@ -332,7 +329,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="bean1">
-					<value><![CDATA[json:
+					<value><![CDATA[json:
 						{
 							"key1" : "value1",
 							"key2" : "value2"
@@ -341,7 +338,7 @@
 				</ccg:set>
 				
 				<ccg:set expression="bean2">
-					<value><![CDATA[json:
+					<value><![CDATA[json:
 						{
 							"key" : ${toJson(attr.bean1)}
 						}
@@ -361,7 +358,7 @@
 
 			<wrap:steps>
 				<ccg:set expression="bean">
-					<value><![CDATA[json:
+					<value><![CDATA[json:
 						{
 							"key1" : "value1",
 							"key2" : "value2",

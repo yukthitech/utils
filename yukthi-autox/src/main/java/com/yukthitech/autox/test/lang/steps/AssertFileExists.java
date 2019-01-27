@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.lang.validations;
+package com.yukthitech.autox.test.lang.steps;
 
 import java.io.File;
 
@@ -12,8 +12,8 @@ import com.yukthitech.autox.config.DbPlugin;
 /**
  * Validates specified path exists.
  */
-@Executable(name = "validateFileExists", requiredPluginTypes = DbPlugin.class, message = "Validates specified path exists.")
-public class FileExistsValidation extends AbstractValidation
+@Executable(name = "assertFileExists", requiredPluginTypes = DbPlugin.class, message = "Validates specified path exists.")
+public class AssertFileExists extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
 	/**

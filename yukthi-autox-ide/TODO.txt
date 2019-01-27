@@ -1,5 +1,4 @@
 Documentation in ide changes
-	Ability to include examples.
 	drop down + highlighting for attr values. 
 	Freemarker functions with docs in attr values.
 	
@@ -18,16 +17,13 @@ common.xml formating is not working properly
 	in sql query 
 	
 tool tip documentations
+	Should not parse file for each tool tip
 
 splash screen during startup
 
-shutdown hooks to stop executing environments
+==============================
 
 ability to debug
-
-short key to maximize and minimize sub windows
-
-==============================
 
 highlighting search strings
 

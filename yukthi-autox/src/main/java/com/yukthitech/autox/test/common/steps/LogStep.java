@@ -9,6 +9,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -17,7 +18,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Logs the specified message using execution logger.
  * @author akiran
  */
-@Executable(name = "log", message = "Logs specified message")
+@Executable(name = "log", message = "Logs specified message. Multiple messages can be specified in single log statement. "
+		+ "If non-string or non-primitive values are specified they are converted to json before printing.")
 public class LogStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
@@ -30,7 +32,7 @@ public class LogStep extends AbstractStep
 	/**
 	 * Logs specified message in ui.
 	 */
-	@Param(description = "Message(s)/object(s) to log")
+	@Param(name = "message", description = "Message(s)/object(s) to log", sourceType = SourceType.EXPRESSION)
 	private List<Object> messages = new ArrayList<>();
 	
 	/**

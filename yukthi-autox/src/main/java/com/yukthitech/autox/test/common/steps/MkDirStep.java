@@ -31,7 +31,7 @@ public class MkDirStep extends AbstractStep
 	 * Context attribute to which result folder path will be set.
 	 */
 	@Param(description = "Context attribute to which result folder path will be set")
-	private String contextAttribute;
+	private String name;
 
 	/**
 	 * Sets the directory path to create.
@@ -46,11 +46,11 @@ public class MkDirStep extends AbstractStep
 	/**
 	 * Sets the context attribute to which result folder path will be set.
 	 *
-	 * @param contextAttribute the new context attribute to which result folder path will be set
+	 * @param name the new context attribute to which result folder path will be set
 	 */
-	public void setContextAttribute(String contextAttribute)
+	public void setName(String name)
 	{
-		this.contextAttribute = contextAttribute;
+		this.name = name;
 	}
 
 	/* (non-Javadoc)
@@ -67,9 +67,9 @@ public class MkDirStep extends AbstractStep
 		{
 			FileUtils.forceMkdir(dirToCreate);
 			
-			exeLogger.debug(this, "Setting created directory path {} on context with attribute - {}", dirToCreate, contextAttribute);
+			exeLogger.debug(this, "Setting created directory path {} on context with attribute - {}", dirToCreate, name);
 			
-			context.setAttribute(contextAttribute, dirToCreate);
+			context.setAttribute(name, dirToCreate);
 		}catch(Exception ex)
 		{
 			exeLogger.error(this, ex, "An error occurred while creating directory - {}", path);

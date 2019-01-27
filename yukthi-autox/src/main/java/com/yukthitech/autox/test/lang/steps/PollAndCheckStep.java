@@ -22,7 +22,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "pollAndCheck", message = "Used to execute polling steps till check condition is met with specified interval gap. Validation will fail if required condition is not met or exceeds timeout.")
-public class ValidatePollAndCheck extends AbstractValidation
+public class PollAndCheckStep extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
 

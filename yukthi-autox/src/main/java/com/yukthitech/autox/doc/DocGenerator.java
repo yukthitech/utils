@@ -24,6 +24,9 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.expr.ExpressionFactory;
+import com.yukthitech.autox.expr.ExpressionParserDetails;
+import com.yukthitech.autox.test.ui.common.LocatorType;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
@@ -168,6 +171,33 @@ public class DocGenerator
 		}
 	}
 	
+	private static void loadUiLocators(DocInformation docInfo, ExampleCollectionFile exampleCollections)
+	{
+		for(LocatorType loc : LocatorType.values())
+		{
+			UiLocatorDoc locDoc = new UiLocatorDoc(loc.getKey(), loc.getDescription());
+			
+			locDoc.addExamples(exampleCollections.getExamples("$uilocators." + loc.getKey()));
+			
+			docInfo.addUiLocator(locDoc);
+		}
+	}
+	
+	private static void loadExpressionParsers(DocInformation docInfo, ExampleCollectionFile exampleCollections)
+	{
+		ExpressionFactory.init(null, null);
+		
+		for(ExpressionParserDetails parser : ExpressionFactory.getExpressionFactory().getParserDetails())
+		{
+			ExpressionParserDoc parserDoc = new ExpressionParserDoc(parser.getType(), parser.getDescription());
+			parserDoc.addExample(new Example("Default", parser.getExample()));
+			
+			parserDoc.addExamples(exampleCollections.getExamples("$parsers." + parser.getType()));
+			
+			docInfo.addParser(parserDoc);
+		}
+	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static DocInformation buildDocInformation(String basePackages[]) throws Exception
 	{
@@ -191,6 +221,10 @@ public class DocGenerator
 		Collection<FreeMarkerMethodDoc> methodDocs = FreeMarkerMethodManager.getRegisterMethodDocuments();
 
 		docInformation.setFreeMarkerMethods(new HashSet<>(methodDocs));
+		
+		loadUiLocators(docInformation, exampleCollections);
+		
+		loadExpressionParsers(docInformation, exampleCollections);
 		
 		//convert data into json
 		return docInformation;

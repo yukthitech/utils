@@ -74,6 +74,12 @@
 			</item>
 		</menu>
 
+		<menu label="Window" mnemonic="W">
+			<item label="Maximize/Minimize Window" mnemonic="M" action="flipMaximization">
+				<short-key ctrl="true" key="M" />
+			</item>
+		</menu>
+
 		<menu label="Help" mnemonic="H">
 			<item label="Help Contents" mnemonic="F" icon="/ui/icons/new.png" action="help">
 				<short-key key="F1" />
