@@ -115,23 +115,30 @@ public class AutoxIDE extends JFrame
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
+		AutoxSplashScreen.display();
+		
+		//wait for splash screen to display
+		Thread.sleep(200);
+		
 		SpringApplication.run(AutoxIDE.class, args);
 	}
 	
 	@PostConstruct
-	private void display()
+	private void initIde()
 	{
+		init();
+		loadState();
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				try
 				{
-					init();
 					setVisible(true);
-					loadState();
+					AutoxSplashScreen.close();
 				} catch(Exception e)
 				{
 					e.printStackTrace();
@@ -139,12 +146,14 @@ public class AutoxIDE extends JFrame
 			}
 		});
 	}
-
+	
 	/**
 	 * Create the frame.
 	 */
 	private void init()
 	{
+		super.setSize(640, 480);
+		
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		

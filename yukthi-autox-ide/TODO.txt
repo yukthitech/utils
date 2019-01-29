@@ -19,13 +19,15 @@ common.xml formating is not working properly
 tool tip documentations
 	Should not parse file for each tool tip
 
-splash screen during startup
-
 ==============================
 
 ability to debug
 
 highlighting search strings
+
+parse text to support free marker auto completed and syntax check
+	tool tip docs for free market functions
+	highlighting text based on content type (Expression type, etc)
 
 
 Ability to hide/display views

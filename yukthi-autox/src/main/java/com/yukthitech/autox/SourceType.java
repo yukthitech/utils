@@ -7,6 +7,11 @@ package com.yukthitech.autox;
 public enum SourceType
 {
 	/**
+	 * Indicates param is condition expression.
+	 */
+	CONDITION,
+
+	/**
 	 * Indicates param is resource.
 	 */
 	RESOURCE,

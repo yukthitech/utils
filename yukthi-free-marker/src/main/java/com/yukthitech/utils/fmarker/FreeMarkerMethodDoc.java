@@ -47,6 +47,8 @@ public class FreeMarkerMethodDoc implements Comparable<FreeMarkerMethodDoc>
 	 */
 	private List<FreeMarkerMethodExampleDoc> examples;
 	
+	private String parameterString;
+	
 	public FreeMarkerMethodDoc()
 	{}
 
@@ -168,6 +170,33 @@ public class FreeMarkerMethodDoc implements Comparable<FreeMarkerMethodDoc>
 	public boolean hasParameters()
 	{
 		return (parameters != null && parameters.size() > 0);
+	}
+	
+	public String getParameterString()
+	{
+		if(parameterString != null)
+		{
+			return parameterString;
+		}
+		
+		if(parameters == null || parameters.size() == 0)
+		{
+			parameterString = "()";
+			return parameterString;
+		}
+		
+		StringBuilder builder = new StringBuilder("(");
+		
+		for(ParamDoc param : parameters)
+		{
+			builder.append(param.getName()).append(", ");
+		}
+		
+		builder.delete(builder.length() - 2, builder.length() - 1);
+		builder.append(")");
+		
+		parameterString = builder.toString();
+		return parameterString;
 	}
 
 	/* (non-Javadoc)

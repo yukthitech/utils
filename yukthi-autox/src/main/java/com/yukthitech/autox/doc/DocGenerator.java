@@ -189,7 +189,7 @@ public class DocGenerator
 		
 		for(ExpressionParserDetails parser : ExpressionFactory.getExpressionFactory().getParserDetails())
 		{
-			ExpressionParserDoc parserDoc = new ExpressionParserDoc(parser.getType(), parser.getDescription());
+			ExpressionParserDoc parserDoc = new ExpressionParserDoc(parser.getType(), parser.getDescription(), parser.getContentType());
 			parserDoc.addExample(new Example("Default", parser.getExample()));
 			
 			parserDoc.addExamples(exampleCollections.getExamples("$parsers." + parser.getType()));
@@ -262,7 +262,7 @@ public class DocGenerator
 		String basePackages[] = packStr.split("\\s*\\,\\s*");
 		
 		DocInformation docInformation = buildDocInformation(basePackages);
-		docInformation.setBasicDocuments(loadBasicDocs());
+		//docInformation.setBasicDocuments(loadBasicDocs());
 
 		//convert data into json
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -274,7 +274,10 @@ public class DocGenerator
 		dataJsFolder.mkdirs();
 		
 		File dataJsFile = new File(dataJsFolder, "data.js");
+		File dataJsonFile = new File(dataJsFolder, "data.json");
+		
 		FileUtils.write(dataJsFile, "var docData = " + json + ";", (String) null);
+		FileUtils.write(dataJsonFile, json, (String) null);
 		
 		System.out.println("Files are generate to folder: " + outFolder);
 	}

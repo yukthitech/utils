@@ -8,6 +8,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.StepGroup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -27,7 +28,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	/**
 	 * Freemarker condition to be evaluated.
 	 */
-	@Param(description = "Freemarker condition to be evaluated.", required = true)
+	@Param(description = "Freemarker condition to be evaluated.", required = true, sourceType = SourceType.CONDITION)
 	private String condition;
 
 	/**

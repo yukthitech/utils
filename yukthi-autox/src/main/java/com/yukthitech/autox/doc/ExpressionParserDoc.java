@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.yukthitech.autox.expr.ParserContentType;
+
 /**
  * Expression parser details.
  * @author akiran
@@ -21,6 +23,11 @@ public class ExpressionParserDoc
 	 * Description about the parser.
 	 */
 	private String description;
+	
+	/**
+	 * Expected content type of the parser.
+	 */
+	private ParserContentType contentType;
 	
 	/**
 	 * Examples of the parser.
@@ -39,13 +46,12 @@ public class ExpressionParserDoc
 	 * @param name the name
 	 * @param description the description
 	 */
-	public ExpressionParserDoc(String name, String description)
+	public ExpressionParserDoc(String name, String description, ParserContentType contentType)
 	{
 		this.name = name;
 		this.description = description;
+		this.contentType = contentType;
 	}
-
-
 
 	/**
 	 * Gets the name of the expression parser.
@@ -130,5 +136,15 @@ public class ExpressionParserDoc
 	public boolean hasExamples()
 	{
 		return CollectionUtils.isNotEmpty(examples);
+	}
+
+	public ParserContentType getContentType()
+	{
+		return contentType;
+	}
+
+	public void setContentType(ParserContentType contentType)
+	{
+		this.contentType = contentType;
 	}
 }

@@ -15,6 +15,7 @@ import com.yukthitech.autox.ide.AbstractIdeFileManager;
 import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeNotificationPanel;
+import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.model.Project;
@@ -30,6 +31,9 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	
 	@Autowired
 	private IdeNotificationPanel ideNotificationPanel;
+	
+	@Autowired
+	private IdeContext ideContext;
 	
 	@Override
 	public boolean isSuppored(Project project, File file)
@@ -57,7 +61,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	@Override
 	public CompletionProvider getCompletionProvider(FileEditor fileEditor)
 	{
-		XmlCompletionProvider xmlCompletionProvider = new XmlCompletionProvider(fileEditor.getProject(), fileEditor);
+		XmlCompletionProvider xmlCompletionProvider = new XmlCompletionProvider(fileEditor.getProject(), fileEditor, ideContext);
 		return xmlCompletionProvider;
 	}
 	

@@ -136,7 +136,8 @@ public class ExpressionFactory extends AbstractLocationBased
 						parserClasses.put(method.getDeclaringClass(), parserObj);
 					}
 					
-					parserDet = new ExpressionParserDetails(parserAnnot.type(), parserAnnot.description(), parserAnnot.example(), parserObj, method);
+					parserDet = new ExpressionParserDetails(parserAnnot.type(), parserAnnot.description(), 
+							parserAnnot.example(), parserObj, method, parserAnnot.contentType());
 					factory.parsers.put(parserDet.getType(), parserDet);
 				}
 			}
@@ -151,20 +152,8 @@ public class ExpressionFactory extends AbstractLocationBased
 		return expressionFactory;
 	}
 	
-	public Object parseExpression(AutomationContext context, Object expressionObj)
+	public static List<String> parseExpressionTokens(String expression)
 	{
-		if(!(expressionObj instanceof String))
-		{
-			return expressionObj;
-		}
-		
-		String expression = (String) expressionObj;
-		
-		if(expression.trim().length() == 0)
-		{
-			return expression;
-		}
-			
 		//Parse the expression into tokens delimited by '|'
 		List<String> lst = new ArrayList<String>();
 		char ch[] = expression.toCharArray();
@@ -200,10 +189,30 @@ public class ExpressionFactory extends AbstractLocationBased
 		{
 			lst.add(token.toString());
 		}
+
+		return lst;
+	}
+	
+	public Object parseExpression(AutomationContext context, Object expressionObj)
+	{
+		if(!(expressionObj instanceof String))
+		{
+			return expressionObj;
+		}
+		
+		String expression = (String) expressionObj;
+		
+		if(expression.trim().length() == 0)
+		{
+			return expression;
+		}
+			
 		
 		Object result = null;
 		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
 		ObjectWrapper<Boolean> expressionParsed = new ObjectWrapper<Boolean>(true);
+		
+		List<String> lst = parseExpressionTokens(expression);
 		
 		//convert tokens into objects
 		for(String tokenStr : lst)

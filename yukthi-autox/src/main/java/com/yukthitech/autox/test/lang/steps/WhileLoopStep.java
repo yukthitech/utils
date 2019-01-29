@@ -7,6 +7,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.StepGroup;
@@ -32,7 +33,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	/**
 	 * Freemarker condition to be evaluated.
 	 */
-	@Param(description = "Freemarker condition to be evaluated.")
+	@Param(description = "Freemarker condition to be evaluated.", sourceType = SourceType.CONDITION)
 	private String condition;
 
 	/**

@@ -72,7 +72,7 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName")
+	@ExpressionParser(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = ParserContentType.ATTRIBUTE)
 	public IPropertyPath attrParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -272,7 +272,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned", example = "condition: (attr.flag == true)")
+	@ExpressionParser(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned", 
+			example = "condition: (attr.flag == true)", contentType = ParserContentType.FM_EXPRESSION)
 	public IPropertyPath conditionParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()

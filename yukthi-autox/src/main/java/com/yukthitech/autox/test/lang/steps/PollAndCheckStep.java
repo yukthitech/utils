@@ -10,6 +10,7 @@ import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.StepGroup;
@@ -31,7 +32,7 @@ public class PollAndCheckStep extends AbstractValidation
 	/**
 	 * Freemarker condition to be evaluated.
 	 */
-	@Param(description = "Check Freemarker condition to be evaluated.", required = true)
+	@Param(description = "Check Freemarker condition to be evaluated.", required = true, sourceType = SourceType.CONDITION)
 	private String checkCondition;
 
 	/**

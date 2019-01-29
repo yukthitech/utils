@@ -226,6 +226,11 @@ public class DocInformation
 	{
 		return parsers.values();
 	}
+	
+	public ExpressionParserDoc getParser(String name)
+	{
+		return parsers.get(name);
+	}
 
 	/**
 	 * Sets the expression parser details.

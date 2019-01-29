@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.text.JTextComponent;
 
@@ -21,19 +23,34 @@ import org.fife.ui.autocomplete.ShorthandCompletion;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.doc.ElementInfo;
+import com.yukthitech.autox.doc.ExpressionParserDoc;
 import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
+import com.yukthitech.autox.expr.ExpressionFactory;
+import com.yukthitech.autox.expr.ParserContentType;
 import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 public class XmlCompletionProvider extends AbstractCompletionProvider
 {
 	private static Logger logger = LogManager.getLogger(XmlCompletionProvider.class);
+	
+	private static Pattern ALPHA_NUMERIC_ONLY = Pattern.compile("\\w*");
+	
+	private static Pattern EXPR_PREFIX_PATTERN = Pattern.compile("^\\s*(\\w+)\\s*\\:");
+	
+	private static Pattern FM_BLOCK_START = Pattern.compile("\\<[\\#\\@](\\w+)\\s+");
+	
+	private static Pattern LAST_TOKEN = Pattern.compile("([\\w\\.]+)$");
 	
 	private Project project;
 	
@@ -41,10 +58,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 	
 	private FileEditor fileEditor;
 	
-	public XmlCompletionProvider(Project project, FileEditor fileEditor)
+	private IdeContext ideContext;
+	
+	public XmlCompletionProvider(Project project, FileEditor fileEditor, IdeContext ideContext)
 	{
 		this.project = project;
 		this.fileEditor = fileEditor;
+		this.ideContext = ideContext;
 	}
 	
 	private String getElementReplacementText(StepInfo step, XmlFileLocation location)
@@ -338,6 +358,178 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		return completions;
 	}
 
+	private List<Completion> getAttributeValueCompletions(XmlFileLocation location)
+	{
+		Element elem = location.getParentElement();
+		StepInfo step = project.getDocInformation().getStep(elem.getName());
+		
+		if(step == null)
+		{
+			step = project.getDocInformation().getValidation(elem.getName());
+		}
+		
+		ParamInfo paramInfo = step != null ? step.getParam(location.getName()) : null;
+		SourceType sourceType = paramInfo != null ? paramInfo.getSourceType() : null;
+		
+		List<Completion> completions = new ArrayList<>();
+		
+		String curVal = location.getText();
+		curVal = StringUtils.isBlank(curVal) ? null : curVal.trim().toLowerCase();
+
+		//fetch the content type based on expression type
+		ParserContentType contentType = ParserContentType.NONE;
+
+		if(sourceType == SourceType.EXPRESSION || sourceType == SourceType.EXPRESSION_PATH)
+		{
+			if(curVal == null || ALPHA_NUMERIC_ONLY.matcher(curVal).matches())
+			{
+				String name = null;
+				
+				for(ExpressionParserDoc parser : project.getDocInformation().getParsers())
+				{
+					if(curVal != null && !parser.getName().startsWith(curVal))
+					{
+						continue;
+					}
+					
+					name = curVal != null ? parser.getName().substring(curVal.length()) : parser.getName();
+					
+					completions.add( new ShorthandCompletion(this, parser.getName(), name + ":", parser.getName(), parser.getDescription()) );
+				}
+				
+				return completions;
+			}
+
+			if(curVal != null)
+			{
+				List<String> expressionTokens = ExpressionFactory.parseExpressionTokens(curVal);
+				Matcher matcher = EXPR_PREFIX_PATTERN.matcher(expressionTokens.get(expressionTokens.size() - 1));
+				
+				if(matcher.matches())
+				{
+					String exprType = matcher.group(1);
+					ExpressionParserDoc parser = project.getDocInformation().getParser(exprType);
+					
+					if(parser != null)
+					{
+						contentType = parser.getContentType();
+					}
+				}
+			}
+		}
+		
+		if(sourceType == SourceType.UI_LOCATOR)
+		{
+			if(curVal == null || ALPHA_NUMERIC_ONLY.matcher(curVal).matches())
+			{
+				String name = null;
+				
+				for(UiLocatorDoc locDoc : project.getDocInformation().getUiLocators())
+				{
+					if(curVal != null && !locDoc.getName().startsWith(curVal))
+					{
+						continue;
+					}
+					
+					name = curVal != null ? locDoc.getName().substring(curVal.length()) : locDoc.getName();
+					
+					completions.add( new ShorthandCompletion(this, locDoc.getName(), name + ":", locDoc.getName(), locDoc.getDescription()) );
+				}
+				
+				return completions;
+			}
+		}
+		
+		boolean isExprPart = false;
+
+		if(curVal != null)
+		{
+			//check if current position is part of ${} expression
+			int exprStartIdx = curVal.lastIndexOf("${");
+			int exprEndIdx = (exprStartIdx >= 0) ? curVal.substring(exprStartIdx).indexOf("}") : -1;
+			
+			isExprPart = (exprStartIdx >=0 && exprEndIdx < 0);
+			
+			if(!isExprPart)
+			{
+				Matcher matcher = FM_BLOCK_START.matcher(curVal);
+				
+				if(matcher.find())
+				{
+					exprEndIdx = curVal.substring(matcher.start()).indexOf(">");
+					isExprPart = (exprEndIdx < 0);
+				}
+				
+				if(isExprPart)
+				{
+					//skip free marker block start
+					curVal = curVal.substring(matcher.end(1));
+				}
+			}
+			
+			//if current position is part of expression, based on last token find
+			// the type of auto completion required
+			if(isExprPart)
+			{
+				Matcher matcher = LAST_TOKEN.matcher(curVal);
+				contentType = ParserContentType.FM_EXPRESSION;
+				
+				if(matcher.find())
+				{
+					curVal = matcher.group(1);
+					
+					if(curVal.startsWith("attr."))
+					{
+						curVal = curVal.substring("attr.".length());
+						contentType = ParserContentType.ATTRIBUTE;
+					}
+				}
+			}
+		}
+		
+		if(contentType == ParserContentType.FM_EXPRESSION)
+		{
+			String complText = null;
+			
+			for(FreeMarkerMethodDoc method : project.getDocInformation().getFreeMarkerMethods())
+			{
+				if(curVal != null && !method.getName().startsWith(curVal))
+				{
+					continue;
+				}
+				
+				complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
+				completions.add( new ShorthandCompletion(this, method.getName(), complText + "()", method.getName() + "()", method.getDescription()) );
+
+				//auto complete with params
+				if(method.hasParameters())
+				{
+					complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
+					completions.add( new ShorthandCompletion(this, method.getName(), complText + method.getParameterString(), method.getName() + method.getParameterString(), method.getDescription()) );
+				}
+			}
+		}
+		else if(contentType == ParserContentType.ATTRIBUTE && ideContext.getActiveEnvironment() != null)
+		{
+			List<ContextAttributeDetails> contextAttrs = ideContext.getActiveEnvironment().getContextAttributes();
+			String complText = null, name = null;
+			
+			for(ContextAttributeDetails attr : contextAttrs)
+			{
+				if(curVal != null && !attr.getName().startsWith(curVal))
+				{
+					continue;
+				}
+				
+				name = attr.getName();
+				complText = curVal != null ? name.substring(curVal.length()) : name;
+				completions.add( new ShorthandCompletion(this, name, complText, name, name) );
+			}
+		}
+
+		return completions;
+	}
+
 	@Override
 	public List<Completion> getCompletions(JTextComponent comp)
 	{
@@ -358,6 +550,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 			case ATTRIBUTE:
 			{
 				return getAttributeCompletions(xmlFileLocation);
+			}
+			case ATTRIBUTE_VALUE:
+			{
+				return getAttributeValueCompletions(xmlFileLocation);
 			}
 		}
 		

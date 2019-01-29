@@ -30,4 +30,10 @@ public @interface ExpressionParser
 	 * @return example
 	 */
 	public String example();
+	
+	/**
+	 * Type of content expected.
+	 * @return content type
+	 */
+	public ParserContentType contentType() default ParserContentType.NONE;
 }

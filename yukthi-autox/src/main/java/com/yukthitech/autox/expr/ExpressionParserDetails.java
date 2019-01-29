@@ -37,18 +37,24 @@ public class ExpressionParserDetails
 	private Method method;
 	
 	/**
+	 * Expected content type of the expression.
+	 */
+	private ParserContentType contentType;
+	
+	/**
 	 * Instantiates a new expression parser details.
 	 */
 	public ExpressionParserDetails()
 	{}
 	
-	public ExpressionParserDetails(String type, String description, String example, Object enclosingObject, Method method)
+	public ExpressionParserDetails(String type, String description, String example, Object enclosingObject, Method method, ParserContentType contentType)
 	{
 		this.type = type;
 		this.description = description;
 		this.example = example;
 		this.enclosingObject = enclosingObject;
 		this.method = method;
+		this.contentType = contentType;
 	}
 
 	/**
@@ -183,6 +189,26 @@ public class ExpressionParserDetails
 			throw new InvalidStateException("An error occurred while parsing expression '{}' of type '{}' using parser method: {}.{}", 
 					expression, type, method.getDeclaringClass().getName(), method.getName());
 		}
+	}
+	
+	/**
+	 * Sets the expected content type of the expression.
+	 *
+	 * @param contentType the new expected content type of the expression
+	 */
+	public void setContentType(ParserContentType contentType)
+	{
+		this.contentType = contentType;
+	}
+	
+	/**
+	 * Gets the expected content type of the expression.
+	 *
+	 * @return the expected content type of the expression
+	 */
+	public ParserContentType getContentType()
+	{
+		return contentType;
 	}
 	
 	/* (non-Javadoc)
