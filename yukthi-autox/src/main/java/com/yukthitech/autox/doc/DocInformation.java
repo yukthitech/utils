@@ -8,8 +8,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
-
 /**
  * Represents the information required to generate documentation.
  * @author akiran
@@ -44,7 +42,7 @@ public class DocInformation
 	/**
 	 * SEt of free method documentations.
 	 */
-	private Map<String, FreeMarkerMethodDoc> freeMarkerMethods = new TreeMap<>();
+	private Map<String, FreeMarkerMethodDocInfo> freeMarkerMethods = new TreeMap<>();
 	
 	/**
 	 * Ui locator details.
@@ -179,7 +177,7 @@ public class DocInformation
 	 *
 	 * @return the sEt of free method documentations
 	 */
-	public Collection<FreeMarkerMethodDoc> getFreeMarkerMethods()
+	public Collection<FreeMarkerMethodDocInfo> getFreeMarkerMethods()
 	{
 		return freeMarkerMethods.values();
 	}
@@ -189,12 +187,17 @@ public class DocInformation
 	 *
 	 * @param freeMarkerMethods the new sEt of free method documentations
 	 */
-	public void setFreeMarkerMethods(Set<FreeMarkerMethodDoc> freeMarkerMethods)
+	public void setFreeMarkerMethods(Set<FreeMarkerMethodDocInfo> freeMarkerMethods)
 	{
-		for(FreeMarkerMethodDoc met : freeMarkerMethods)
+		for(FreeMarkerMethodDocInfo met : freeMarkerMethods)
 		{
 			this.freeMarkerMethods.put(met.getName(), met);
 		}
+	}
+	
+	public void addFreeMarkerMethod(FreeMarkerMethodDocInfo methodInfo)
+	{
+		freeMarkerMethods.put(methodInfo.getName(), methodInfo);
 	}
 	
 	/**

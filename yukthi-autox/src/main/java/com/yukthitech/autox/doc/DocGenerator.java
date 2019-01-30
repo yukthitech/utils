@@ -29,6 +29,8 @@ import com.yukthitech.autox.expr.ExpressionParserDetails;
 import com.yukthitech.autox.test.ui.common.LocatorType;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
+import com.yukthitech.utils.fmarker.FreeMarkerMethodExampleDoc;
+import com.yukthitech.utils.fmarker.ParamDoc;
 
 /**
  * Tool to generate documentation for all plugins, steps and validations.
@@ -198,6 +200,39 @@ public class DocGenerator
 		}
 	}
 	
+	private static void loadFreeMarmerMethodDocs(DocInformation docInfo, String basePackages[])
+	{
+		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)));
+		Collection<FreeMarkerMethodDoc> methodDocs = FreeMarkerMethodManager.getRegisterMethodDocuments();
+
+		for(FreeMarkerMethodDoc doc : methodDocs)
+		{
+			FreeMarkerMethodDocInfo metInfo = new FreeMarkerMethodDocInfo();
+			metInfo.setDescription(doc.getDescription());
+			metInfo.setName(doc.getName());
+			metInfo.setReturnDescription(doc.getReturnDescription());
+			metInfo.setReturnType(doc.getReturnType());
+			
+			if(doc.getParameters() != null)
+			{
+				for(ParamDoc pdoc : doc.getParameters())
+				{
+					metInfo.addParameter(new ParamInfo(pdoc.getName(), pdoc.getDescription(), pdoc.getType()));
+				}
+			}
+			
+			if(doc.getExamples() != null)
+			{
+				for(FreeMarkerMethodExampleDoc exDoc : doc.getExamples())
+				{
+					metInfo.addExample(new Example(exDoc.getUsage(), exDoc.getResult()));
+				}
+			}
+			
+			docInfo.addFreeMarkerMethod(metInfo);
+		}
+	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static DocInformation buildDocInformation(String basePackages[]) throws Exception
 	{
@@ -216,11 +251,8 @@ public class DocGenerator
 			
 			loadPlugins(docInformation, (Set) reflections.getSubTypesOf(IPlugin.class) );
 		}
-		
-		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)));
-		Collection<FreeMarkerMethodDoc> methodDocs = FreeMarkerMethodManager.getRegisterMethodDocuments();
 
-		docInformation.setFreeMarkerMethods(new HashSet<>(methodDocs));
+		loadFreeMarmerMethodDocs(docInformation, basePackages);
 		
 		loadUiLocators(docInformation, exampleCollections);
 		

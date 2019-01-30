@@ -92,6 +92,13 @@ public class ParamInfo implements Comparable<ParamInfo>
 		}
 	}
 
+	public ParamInfo(String name, String description, String type)
+	{
+		this.name = name;
+		this.description = description;
+		this.type = type;
+	}
+
 	/**
 	 * Gets the name of the parameter.
 	 *

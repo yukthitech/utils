@@ -10,7 +10,7 @@ import org.apache.commons.collections.CollectionUtils;
  * Ui locator documentation.
  * @author akiran
  */
-public class UiLocatorDoc
+public class UiLocatorDoc extends AbstractDocInfo
 {
 	/**
 	 * Name of the locator.

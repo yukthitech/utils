@@ -1,0 +1,168 @@
+package com.yukthitech.autox.doc;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+
+/**
+ * Documentation of free marker method.
+ * 
+ * @author akiran
+ */
+public class FreeMarkerMethodDocInfo extends AbstractDocInfo
+{
+	/**
+	 * Name of the document.
+	 */
+	private String name;
+
+	/**
+	 * Return type of the function.
+	 */
+	private String returnType;
+
+	/**
+	 * Description about the method.
+	 */
+	private String description;
+
+	/**
+	 * Description of return value.
+	 */
+	private String returnDescription;
+
+	/**
+	 * Parameters of the method.
+	 */
+	private List<ParamInfo> parameters;
+
+	/**
+	 * Examples of usage.
+	 */
+	private List<Example> examples;
+
+	private String parameterString;
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getReturnType()
+	{
+		return returnType;
+	}
+
+	public void setReturnType(String returnType)
+	{
+		this.returnType = returnType;
+	}
+
+	public String getDescription()
+	{
+		return description;
+	}
+
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
+
+	public String getReturnDescription()
+	{
+		return returnDescription;
+	}
+
+	public void setReturnDescription(String returnDescription)
+	{
+		this.returnDescription = returnDescription;
+	}
+
+	public List<ParamInfo> getParameters()
+	{
+		return parameters;
+	}
+
+	public void setParameters(List<ParamInfo> parameters)
+	{
+		this.parameters = parameters;
+	}
+	
+	public void addParameter(ParamInfo param)
+	{
+		if(this.parameters == null)
+		{
+			this.parameters = new ArrayList<>();
+		}
+		
+		this.parameters.add(param);
+	}
+	
+	public boolean hasParameters()
+	{
+		return CollectionUtils.isNotEmpty(parameters);
+	}
+
+	public List<Example> getExamples()
+	{
+		return examples;
+	}
+
+	public void setExamples(List<Example> examples)
+	{
+		this.examples = examples;
+	}
+	
+	public void addExample(Example example)
+	{
+		if(this.examples == null)
+		{
+			this.examples = new ArrayList<>();
+		}
+		
+		this.examples.add(example);
+	}
+	
+	public boolean hasExamples()
+	{
+		return CollectionUtils.isNotEmpty(examples);
+	}
+
+	public void setParameterString(String parameterString)
+	{
+		this.parameterString = parameterString;
+	}
+
+	public String getParameterString()
+	{
+		if(parameterString != null)
+		{
+			return parameterString;
+		}
+
+		if(parameters == null || parameters.size() == 0)
+		{
+			parameterString = "()";
+			return parameterString;
+		}
+
+		StringBuilder builder = new StringBuilder("(");
+
+		for(ParamInfo param : parameters)
+		{
+			builder.append(param.getName()).append(", ");
+		}
+
+		builder.delete(builder.length() - 2, builder.length() - 1);
+		builder.append(")");
+
+		parameterString = builder.toString();
+		return parameterString;
+	}
+}

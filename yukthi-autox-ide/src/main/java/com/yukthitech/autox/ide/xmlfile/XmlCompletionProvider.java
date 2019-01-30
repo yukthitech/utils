@@ -24,6 +24,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ExpressionParserDoc;
+import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.ParamInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
@@ -38,7 +39,6 @@ import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.CommonUtils;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 public class XmlCompletionProvider extends AbstractCompletionProvider
 {
@@ -216,6 +216,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				)
 		{
 			Collection<StepInfo> steps = project.getDocInformation().getSteps();
+			String doc = null;
 			
 			for(StepInfo step : steps)
 			{
@@ -224,7 +225,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					continue;
 				}
 				
-				completions.add( new ShorthandCompletion(this, step.getNameWithHyphens(), getElementReplacementText(step, location), step.getName(), step.getDescription()) );
+				doc = step.getDocumentation();
+				doc = (doc == null) ? step.getDescription() : doc;
+				
+				completions.add( new ShorthandCompletion(this, step.getNameWithHyphens(), getElementReplacementText(step, location), step.getName(), doc) );
 			}
 
 			for(ValidationInfo validation : project.getDocInformation().getValidations())
@@ -234,7 +238,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					continue;
 				}
 				
-				completions.add( new ShorthandCompletion(this, validation.getNameWithHyphens(), getElementReplacementText(validation, location), validation.getName(), validation.getDescription()) );
+				doc = validation.getDocumentation();
+				doc = (doc == null) ? validation.getDescription() : doc;
+
+				completions.add( new ShorthandCompletion(this, validation.getNameWithHyphens(), getElementReplacementText(validation, location), validation.getName(), doc) );
 			}
 		}
 		
@@ -279,19 +286,6 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 			
 			return completions;
 		}
-		
-		/*
-		BeanPropertyInfo beanInfo = project.getBeanPropertyInfoFactory().getBeanPropertyInfo(parentType);
-		
-		for(BeanProperty prop : beanInfo.getProperties())
-		{
-			if(prop.getAddMethod() != null)
-			{
-				String adder = prop.getAdderName();
-				completions.add( new ShorthandCompletion(this, adder, getElementReplacementText(validation, location), adder, validation.getDescription()) );
-			}
-		}
-		*/
 		
 		return completions;
 	}
@@ -358,9 +352,8 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 		return completions;
 	}
 
-	private List<Completion> getAttributeValueCompletions(XmlFileLocation location)
+	private List<Completion> getAttributeValueCompletions(Element elem, String propName, String curVal)
 	{
-		Element elem = location.getParentElement();
 		StepInfo step = project.getDocInformation().getStep(elem.getName());
 		
 		if(step == null)
@@ -368,13 +361,12 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 			step = project.getDocInformation().getValidation(elem.getName());
 		}
 		
-		ParamInfo paramInfo = step != null ? step.getParam(location.getName()) : null;
+		ParamInfo paramInfo = step != null ? step.getParam(propName) : null;
 		SourceType sourceType = paramInfo != null ? paramInfo.getSourceType() : null;
 		
 		List<Completion> completions = new ArrayList<>();
 		
-		String curVal = location.getText();
-		curVal = StringUtils.isBlank(curVal) ? null : curVal.trim().toLowerCase();
+		curVal = StringUtils.isBlank(curVal) ? null : curVal;
 
 		//fetch the content type based on expression type
 		ParserContentType contentType = ParserContentType.NONE;
@@ -405,7 +397,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				List<String> expressionTokens = ExpressionFactory.parseExpressionTokens(curVal);
 				Matcher matcher = EXPR_PREFIX_PATTERN.matcher(expressionTokens.get(expressionTokens.size() - 1));
 				
-				if(matcher.matches())
+				if(matcher.find())
 				{
 					String exprType = matcher.group(1);
 					ExpressionParserDoc parser = project.getDocInformation().getParser(exprType);
@@ -413,6 +405,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					if(parser != null)
 					{
 						contentType = parser.getContentType();
+						curVal = curVal.substring(matcher.group().length());
 					}
 				}
 			}
@@ -469,7 +462,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 			
 			//if current position is part of expression, based on last token find
 			// the type of auto completion required
-			if(isExprPart)
+			if(isExprPart || contentType == ParserContentType.FM_EXPRESSION)
 			{
 				Matcher matcher = LAST_TOKEN.matcher(curVal);
 				contentType = ParserContentType.FM_EXPRESSION;
@@ -484,28 +477,37 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 						contentType = ParserContentType.ATTRIBUTE;
 					}
 				}
+				else
+				{
+					curVal = "";
+				}
 			}
 		}
 		
+		curVal = StringUtils.isBlank(curVal) ? null : curVal.trim();
+		
 		if(contentType == ParserContentType.FM_EXPRESSION)
 		{
-			String complText = null;
+			String complText = null, doc = null;
 			
-			for(FreeMarkerMethodDoc method : project.getDocInformation().getFreeMarkerMethods())
+			for(FreeMarkerMethodDocInfo method : project.getDocInformation().getFreeMarkerMethods())
 			{
 				if(curVal != null && !method.getName().startsWith(curVal))
 				{
 					continue;
 				}
 				
+				doc = method.getDocumentation();
+				doc = (doc == null) ? step.getDescription() : doc;
+
 				complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
-				completions.add( new ShorthandCompletion(this, method.getName(), complText + "()", method.getName() + "()", method.getDescription()) );
+				completions.add( new ShorthandCompletion(this, method.getName(), complText + "()", method.getName() + "()", doc) );
 
 				//auto complete with params
 				if(method.hasParameters())
 				{
 					complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
-					completions.add( new ShorthandCompletion(this, method.getName(), complText + method.getParameterString(), method.getName() + method.getParameterString(), method.getDescription()) );
+					completions.add( new ShorthandCompletion(this, method.getName(), complText + method.getParameterString(), method.getName() + method.getParameterString(), doc) );
 				}
 			}
 		}
@@ -552,8 +554,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				return getAttributeCompletions(xmlFileLocation);
 			}
 			case ATTRIBUTE_VALUE:
+			case CDATA_VALUE:
+			case TEXT_ELEMENT:
 			{
-				return getAttributeValueCompletions(xmlFileLocation);
+				return getAttributeValueCompletions(xmlFileLocation.getParentElement(), xmlFileLocation.getName(), xmlFileLocation.getText());
 			}
 		}
 		

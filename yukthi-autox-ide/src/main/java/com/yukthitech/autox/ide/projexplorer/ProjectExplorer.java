@@ -25,19 +25,26 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.doc.DocInformation;
+import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
+import com.yukthitech.autox.doc.StepInfo;
+import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.FileDetails;
 import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
@@ -47,6 +54,8 @@ import com.yukthitech.autox.ide.rest.RestRequest;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
 import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
+import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Component
 public class ProjectExplorer extends JPanel
@@ -310,6 +319,52 @@ public class ProjectExplorer extends JPanel
 		openProject(project);
 		return project;
 	}
+	
+	private void initDocs(Project project)
+	{
+		String documentTemplate = null;
+		String fmMethTemp = null;
+		
+		try
+		{
+			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/autocomp-doc-templates/documentation.html"));
+			fmMethTemp = IOUtils.toString(HelpPanel.class.getResourceAsStream("/autocomp-doc-templates/fm-method-doc.html"));
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while loading templates", ex);
+		}
+		
+		DocInformation docInfo = project.getDocInformation();
+		String finalDoc = null;
+		
+		for(StepInfo step : docInfo.getSteps())
+		{
+			finalDoc = IIdeConstants.FREE_MARKER_ENGINE.processTemplate("/autocomp-doc-templates/documentation.html", 
+						documentTemplate, 
+						CommonUtils.toMap("node", step)
+					);
+			step.setDocumentation(finalDoc);
+		}
+
+		for(ValidationInfo validation : docInfo.getValidations())
+		{
+			finalDoc = IIdeConstants.FREE_MARKER_ENGINE.processTemplate("/autocomp-doc-templates/documentation.html", 
+						documentTemplate, 
+						CommonUtils.toMap("node", validation)
+					);
+			validation.setDocumentation(finalDoc);
+		}
+		
+		for(FreeMarkerMethodDocInfo method : docInfo.getFreeMarkerMethods())
+		{
+			finalDoc = IIdeConstants.FREE_MARKER_ENGINE.processTemplate("/autocomp-doc-templates/fm-method-doc.html", 
+					fmMethTemp, 
+					CommonUtils.toMap("node", method)
+				);
+			
+			method.setDocumentation(finalDoc);
+		}
+	}
 
 	/**
 	 * Called when an existing project object needs to be opened.
@@ -325,6 +380,8 @@ public class ProjectExplorer extends JPanel
 		projectTreeModel.addProject(new ProjectTreeNode(this, project));
 		
 		projects.add(project);
+		initDocs(project);
+		
 		restRequest.addProject(project);
 		logger.debug("Adding project {} to project tree", project.getName());
 	}

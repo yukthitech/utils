@@ -12,7 +12,7 @@ import com.yukthitech.autox.expr.ParserContentType;
  * Expression parser details.
  * @author akiran
  */
-public class ExpressionParserDoc
+public class ExpressionParserDoc extends AbstractDocInfo
 {
 	/**
 	 * Name of the expression parser.

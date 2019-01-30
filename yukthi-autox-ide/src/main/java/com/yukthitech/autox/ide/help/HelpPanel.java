@@ -58,14 +58,14 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ExpressionParserDoc;
+import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
 import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.views.IViewPanel;
 import com.yukthitech.utils.exceptions.InvalidStateException;
-import com.yukthitech.utils.fmarker.FreeMarkerEngine;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 @Component
 public class HelpPanel extends JPanel implements IViewPanel
@@ -83,8 +83,6 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private JEditorPane editorPane;
 	private JPanel panel;
 	private JTextField searchField;
-
-	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 
 	private String documentTemplate = null;
 
@@ -180,7 +178,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 			HelpNodeData methodNode = new HelpNodeData("methods", "Free Marker Methods", "", null);
 			rootNode.addHelpNode(methodNode);
 
-			for(FreeMarkerMethodDoc method : docInformation.getFreeMarkerMethods())
+			for(FreeMarkerMethodDocInfo method : docInformation.getFreeMarkerMethods())
 			{
 				context.put("type", "method");
 				context.put("node", method);
@@ -499,7 +497,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 	
 	private String buildDoc(String template, Map<String, Object> context)
 	{
-		return freeMarkerEngine.processTemplate("documentation.ftl", template, context);
+		return IIdeConstants.FREE_MARKER_ENGINE.processTemplate("documentation.ftl", template, context);
 	}
 
 	private void displayNodeContent()

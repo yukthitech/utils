@@ -6,6 +6,8 @@ import com.yukthitech.autox.ide.IdeUtils;
 
 public class XmlLoctionAnalyzer
 {
+	private static final String CDATA_START = "<![CDATA[";
+	
 	private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s*");
 	
 	private static final Pattern PATTERN_ATTR_VALUE_START = Pattern.compile("\\s*\\=\\s*\\\"");
@@ -19,9 +21,18 @@ public class XmlLoctionAnalyzer
 		char chArr[] = xmlContent.toCharArray();
 		String lastToken = getLastToken(xmlContent, chArr, pos);
 		
+		int cdataStart = xmlContent.lastIndexOf(CDATA_START, pos);
+		int cdataEnd = xmlContent.indexOf("]]>", cdataStart);
+		
+		if(cdataStart > 0 && cdataEnd > pos)
+		{
+			String nodeText = xmlContent.substring(cdataStart + CDATA_START.length(), pos);
+			return getElementLocation(xmlContent, chArr, pos, lastToken, nodeText, cdataStart);
+		}
+		
 		if(lastToken != null && lastToken.startsWith("<"))
 		{
-			return getElementLocation(xmlContent, chArr, pos, lastToken, null);
+			return getElementLocation(xmlContent, chArr, pos, lastToken, null, -1);
 		}
 		
 		int elemStart = xmlContent.lastIndexOf("<", pos);
@@ -41,7 +52,7 @@ public class XmlLoctionAnalyzer
 		}
 		
 		String nodeText = xmlContent.substring(closePos + 1, pos);
-		return getElementLocation(xmlContent, chArr, pos, lastToken, nodeText);
+		return getElementLocation(xmlContent, chArr, pos, lastToken, nodeText, -1);
 	}
 	
 	private static String getIndentation(char chArr[], int pos)
@@ -80,9 +91,10 @@ public class XmlLoctionAnalyzer
 		return indent.toString();
 	}
 	
-	private static XmlFileLocation getElementLocation(String xmlContent, char chArr[], int pos, String lastToken, String nodeText)
+	private static XmlFileLocation getElementLocation(String xmlContent, char chArr[], int pos, String lastToken, String nodeText, int cdataStart)
 	{
 		int validPos = lastToken == null ? pos : (pos - lastToken.length());
+		validPos = (cdataStart > 0) ? cdataStart : validPos;
 		
 		String contentWithoutToken = xmlContent.substring(0, validPos);
 		XmlFile xmlFile = null;
@@ -95,15 +107,15 @@ public class XmlLoctionAnalyzer
 			return null;
 		}
 		
+		//if text is present in current element before current position
+		if(cdataStart > 0 || nodeText != null)
+		{
+			return XmlFileLocation.newTextElementLocation(xmlFile, xmlFile.getLastElement(validPos), nodeText, lastToken);
+		}
+
 		if(lastToken != null && lastToken.startsWith("<"))
 		{
 			lastToken = lastToken.substring(1);
-		}
-		
-		//if text is present in current element before current position
-		if(nodeText != null && nodeText.trim().length() > 0)
-		{
-			return XmlFileLocation.newTextElementLocation(xmlFile, xmlFile.getLastElement(validPos), nodeText, lastToken);
 		}
 		
 		boolean fullElement = true;
@@ -270,7 +282,7 @@ public class XmlLoctionAnalyzer
 		
 		//position of attribute value
 		int attrValStartPos = matchRes.end();
-		String attrText = (attrValStartPos < (elementContent.length() - 1)) ? elementContent.substring(attrValStartPos) : null;
+		String attrText = (attrValStartPos <= (elementContent.length() - 1)) ? elementContent.substring(attrValStartPos) : null;
 		
 		return XmlFileLocation.newAttributeValueLocation(xmlFile, curElement, attrName, attrText, lastToken);
 	}

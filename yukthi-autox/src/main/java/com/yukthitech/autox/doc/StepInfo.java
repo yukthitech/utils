@@ -21,7 +21,7 @@ import com.yukthitech.autox.Param;
  * Information about a step.
  * @author akiran
  */
-public class StepInfo implements Comparable<StepInfo>
+public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 {
 	/**
 	 * Name of the step.

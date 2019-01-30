@@ -1,25 +1,21 @@
 Documentation in ide changes
-	drop down + highlighting for attr values. 
-	Freemarker functions with docs in attr values.
-	
 	On CTRL + F1, current word should be searched
-	popup help of node should include attributes and examples also
 	
-	
+
+common.xml formating is not working properly
+	in sql query 
+
 Others
-	
-	
 	
 	maven based class path and packaging
 
 	
-common.xml formating is not working properly
-	in sql query 
 	
-tool tip documentations
-	Should not parse file for each tool tip
 
 ==============================
+
+tool tip documentations
+	Should not parse file for each tool tip
 
 ability to debug
 
