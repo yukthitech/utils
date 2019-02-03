@@ -81,8 +81,12 @@
 		</menu>
 
 		<menu label="Help" mnemonic="H">
-			<item label="Help Contents" mnemonic="F" icon="/ui/icons/new.png" action="help">
+			<item label="Help" mnemonic="F" icon="/ui/icons/new.png" action="help">
 				<short-key key="F1" />
+			</item>
+
+			<item label="Context Help" mnemonic="C" icon="/ui/icons/new.png" action="contextHelp">
+				<short-key key="F1" shift="true"/>
 			</item>
 		</menu>
 	</menuBar>

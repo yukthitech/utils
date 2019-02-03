@@ -1,7 +1,3 @@
-Documentation in ide changes
-	On CTRL + F1, current word should be searched
-	
-
 common.xml formating is not working properly
 	in sql query 
 
@@ -10,9 +6,13 @@ Others
 	maven based class path and packaging
 
 	
-	
+Beautify icons
+
+Finalize general documentation
 
 ==============================
+
+Ability to reexecute only failed test cases
 
 tool tip documentations
 	Should not parse file for each tool tip

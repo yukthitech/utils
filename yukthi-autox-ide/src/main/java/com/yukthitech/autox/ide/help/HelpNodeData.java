@@ -85,7 +85,7 @@ public class HelpNodeData
 			
 			writer.addDocument(Arrays.asList(
 				new StringField("id", id, Store.YES),
-				new TextField("doc", documentation + " " + labelTokens, Store.NO)
+				new TextField("doc", documentation + " " + labelTokens + " " + label, Store.NO)
 			));
 		}
 		

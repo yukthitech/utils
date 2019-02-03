@@ -37,6 +37,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IIdeFileManager;
 import com.yukthitech.autox.ide.IdeFileManagerFactory;
 import com.yukthitech.autox.ide.IdeUtils;
@@ -172,6 +173,7 @@ public class FileEditor extends RTextScrollPane
 		});
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
+		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl F1"), "dummy help");
 		//syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl shift R"), "dummy");
 		
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.VK_CONTROL | KeyEvent.VK_SHIFT), "dummy");
@@ -277,12 +279,12 @@ public class FileEditor extends RTextScrollPane
 		if(contentChangedEvent)
 		{
 			//from last change time, try to parse the content and highlight regions if any
-			IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 1500);
+			IdeUtils.executeConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, IIdeConstants.FILE_EDITOR_PARSE_DELAY);
 		}
 		//if content is not changed, if job is already submitted, simply reshedule it
 		else
 		{
-			IdeUtils.rescheduleConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, 1500);
+			IdeUtils.rescheduleConsolidatedJob("FileEditor.parseFileContent." + file.getName(), this::parseFileContent, IIdeConstants.FILE_EDITOR_PARSE_DELAY);
 		}
 	}
 	
@@ -438,6 +440,70 @@ public class FileEditor extends RTextScrollPane
 		}
 
 		return null;
+	}
+	
+	private boolean isWordChar(char ch)
+	{
+		if(Character.isAlphabetic(ch))
+		{
+			return true;
+		}
+		
+		return (ch == '-');
+	}
+	
+	/**
+	 * Fetches the current word at the cursor.
+	 * @return
+	 */
+	public String getCursorWord()
+	{
+		try
+		{
+			int line = syntaxTextArea.getCaretLineNumber();
+			int lineStart = syntaxTextArea.getLineStartOffset(line);
+			int lineEnd = syntaxTextArea.getLineEndOffset(line);
+	
+			//if current line is not having any text
+			if(lineStart >= lineEnd)
+			{
+				return null;
+			}
+			
+			String lineText = syntaxTextArea.getText(lineStart, (lineEnd - lineStart) + 1);
+			int pos = syntaxTextArea.getCaretOffsetFromLineStart();
+			char ch[] = lineText.toCharArray();
+			
+			int st = -1;
+			
+			for(int i = pos; i >= 0 && isWordChar(ch[i]); i--)
+			{
+				st = i;
+			}
+			
+			if(st < 0)
+			{
+				return null;
+			}
+			
+			int end = pos;
+			
+			for(int i = pos; i < ch.length && isWordChar(ch[i]); i++)
+			{
+				end = i;
+			}
+			
+			if(st >= end)
+			{
+				return null;
+			}
+			
+			return new String(ch, st, (end - st + 1));
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while fetching current word", ex);
+			return null;
+		}
 	}
 
 	public File getFile()

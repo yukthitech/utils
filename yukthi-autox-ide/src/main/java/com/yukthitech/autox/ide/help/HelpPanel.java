@@ -10,7 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,7 +71,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class HelpPanel extends JPanel implements IViewPanel
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static Logger logger = LogManager.getLogger(HelpPanel.class);
 
 	private JTabbedPane parentTabbedPane;
@@ -95,13 +95,14 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private final JLabel lblSearch = new JLabel("Search: ");
 
 	private HelpNodeData rootNode;
-	
+
 	private Directory indexDirectory;
-	
+
 	private StandardAnalyzer indexAnalyzer = new StandardAnalyzer();
-	
+
 	private IndexSearcher indexSearcher;
-	
+	private final JLabel errLabel = new JLabel("");
+
 	/**
 	 * Create the panel.
 	 */
@@ -121,7 +122,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 			throw new IllegalStateException("An error occured while loading documentation template", ex);
 		}
 	}
-	
+
 	private void initIndex()
 	{
 		File folder = new File("./autox-work/help-index");
@@ -132,10 +133,10 @@ public class HelpPanel extends JPanel implements IViewPanel
 			{
 				AutomationUtils.deleteFolder(folder);
 			}
-			
+
 			FileUtils.forceMkdir(folder);
 			indexDirectory = FSDirectory.open(folder.toPath());
-		}catch(Exception ex)
+		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while creating index folder: " + folder.getPath(), ex);
 		}
@@ -145,26 +146,26 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private void init()
 	{
 		initIndex();
-		
+
 		String[] basepackage = { "com.yukthitech" };
 
 		try
 		{
 			DocInformation docInformation = DocGenerator.buildDocInformation(basepackage);
 			Map<String, Object> context = new HashMap<>();
-			
+
 			rootNode = new HelpNodeData("root", "root", "", null);
-			
+
 			HelpNodeData stepRootNode = new HelpNodeData("steps", "Steps", "", null);
 			rootNode.addHelpNode(stepRootNode);
-			
+
 			for(StepInfo step : docInformation.getSteps())
 			{
 				context.put("type", "step");
 				context.put("node", step);
 				stepRootNode.addHelpNode(new HelpNodeData("step:" + step.getName(), step.getName(), buildDoc(documentTemplate, context), step));
 			}
-			
+
 			HelpNodeData validationNode = new HelpNodeData("validations", "Validations", "", null);
 			rootNode.addHelpNode(validationNode);
 
@@ -174,7 +175,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 				context.put("node", step);
 				validationNode.addHelpNode(new HelpNodeData("validation:" + step.getName(), step.getName(), buildDoc(documentTemplate, context), step));
 			}
-			
+
 			HelpNodeData methodNode = new HelpNodeData("methods", "Free Marker Methods", "", null);
 			rootNode.addHelpNode(methodNode);
 
@@ -184,7 +185,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 				context.put("node", method);
 				methodNode.addHelpNode(new HelpNodeData("method:" + method.getName(), method.getName(), buildDoc(fmMethodDocTemplate, context), method));
 			}
-			
+
 			HelpNodeData expressionNode = new HelpNodeData("expressions", "Expression Prefixes", "", null);
 			rootNode.addHelpNode(expressionNode);
 
@@ -205,16 +206,16 @@ public class HelpPanel extends JPanel implements IViewPanel
 				uiLocatorNode.addHelpNode(new HelpNodeData("uiloc:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
 			}
 
-			//create and open index
+			// create and open index
 			IndexWriterConfig config = new IndexWriterConfig(indexAnalyzer);
 			IndexWriter writer = new IndexWriter(indexDirectory, config);
 			rootNode.index(writer);
 			writer.close();
-			
+
 			IndexReader indexReader = DirectoryReader.open(indexDirectory);
 			indexSearcher = new IndexSearcher(indexReader);
 
-			//create final tree
+			// create final tree
 			HelpTreeModel model = new HelpTreeModel(rootNode);
 			tree.setModel(model);
 		} catch(Exception ex)
@@ -258,7 +259,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 			tree = new JTree();
 			tree.setRootVisible(false);
 			tree.setShowsRootHandles(true);
-			
+
 			tree.addTreeSelectionListener(new TreeSelectionListener()
 			{
 				@Override
@@ -267,7 +268,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 					displayNodeContent();
 				}
 			});
-			tree.setCellRenderer(new DefaultTreeCellRenderer() 
+			tree.setCellRenderer(new DefaultTreeCellRenderer()
 			{
 				private static final long serialVersionUID = 1L;
 
@@ -275,15 +276,15 @@ public class HelpPanel extends JPanel implements IViewPanel
 				public java.awt.Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
 				{
 					JLabel label = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-					if(!searchField.getText().isEmpty()&&label.getText().contains(searchField.getText()))
-					
+					if(!searchField.getText().isEmpty() && label.getText().contains(searchField.getText()))
+
 					{
 						label.setForeground(Color.GRAY);
-						
+
 						return label;
 					}
 					return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-				}			
+				}
 			});
 		}
 		return tree;
@@ -314,12 +315,12 @@ public class HelpPanel extends JPanel implements IViewPanel
 		if(panel == null)
 		{
 			panel = new JPanel();
-			panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+			panel.setBorder(new EmptyBorder(5, 5, 2, 5));
 			GridBagLayout gbl_panel = new GridBagLayout();
 			gbl_panel.columnWidths = new int[] { 0, 0 };
-			gbl_panel.rowHeights = new int[] { 23, 0 };
+			gbl_panel.rowHeights = new int[] { 23, 0, 0 };
 			gbl_panel.columnWeights = new double[] { 0.0, 1.0 };
-			gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+			gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 			panel.setLayout(gbl_panel);
 
 			GridBagConstraints gbc_lblSearch = new GridBagConstraints();
@@ -330,11 +331,20 @@ public class HelpPanel extends JPanel implements IViewPanel
 			lblSearch.setFont(new Font("Tahoma", Font.BOLD, 12));
 			panel.add(lblSearch, gbc_lblSearch);
 			GridBagConstraints gbc_textField = new GridBagConstraints();
+			gbc_textField.insets = new Insets(0, 0, 5, 0);
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-			gbc_textField.insets = new Insets(0, 0, 0, 5);
 			gbc_textField.gridx = 1;
 			gbc_textField.gridy = 0;
 			panel.add(getTextField(), gbc_textField);
+			
+			GridBagConstraints gbc_errLabel = new GridBagConstraints();
+			gbc_errLabel.anchor = GridBagConstraints.EAST;
+			gbc_errLabel.gridx = 1;
+			gbc_errLabel.gridy = 1;
+			errLabel.setBorder(new EmptyBorder(0, 0, 0, 5));
+			errLabel.setForeground(Color.RED);
+			errLabel.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 10));
+			panel.add(errLabel, gbc_errLabel);
 		}
 		return panel;
 	}
@@ -396,22 +406,34 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 		return searchField;
 	}
-	
-	private Set<String> performSearch(String newText, Set<String> filteredIds)
+
+	private Set<String> performSearch(String query, Set<String> filteredIds)
 	{
-		if(StringUtils.isBlank(newText))
+		if(StringUtils.isBlank(query))
 		{
 			return filteredIds;
 		}
-		
+
+		String finalQuery = transformQuery(query);
+
 		try
 		{
+			Query q = null;
+			
+			try
+			{
+				q = new QueryParser("doc", indexAnalyzer).parse(finalQuery);
+			}catch(Exception ex)
+			{
+				errLabel.setText("Invalid lucene query specified: " + query);
+				return null;
+			}
+
 			TopScoreDocCollector collector = TopScoreDocCollector.create(1000);
-			Query q = new QueryParser("doc", indexAnalyzer).parse(newText);
 			indexSearcher.search(q, collector);
 			ScoreDoc[] hits = collector.topDocs().scoreDocs;
-			Set<String> filteredDocIds = new HashSet<>();
-			
+			Set<String> filteredDocIds = new LinkedHashSet<>();
+
 			if(hits != null)
 			{
 				for(ScoreDoc doc : hits)
@@ -420,20 +442,58 @@ public class HelpPanel extends JPanel implements IViewPanel
 					filteredDocIds.add(filteredDoc.get("id"));
 				}
 			}
-			
+
 			if(filteredIds == null)
 			{
 				return filteredDocIds;
 			}
-			
+
 			filteredIds.retainAll(filteredDocIds);
 			return filteredIds;
 		} catch(Exception ex)
 		{
-			logger.error("An error occurred while performing search operation with string: {}", newText, ex);
-			JOptionPane.showMessageDialog(this, "An error occurred while performing search operation. Search string: " + newText + "\nError: " + ex);
+			logger.error("An error occurred while performing search operation with string: {}", query, ex);
+			JOptionPane.showMessageDialog(this, "An error occurred while performing search operation. Search string: " + query + "\nError: " + ex);
 			return null;
 		}
+	}
+	
+	private String transformQuery(String query)
+	{
+		// if single word is provided divide them into subquery using camel case
+		// syntax
+		String queryWords[] = query.split("\\s+");
+		
+		if(queryWords.length > 1)
+		{
+			return query;
+		}
+		
+		String nonHyphenString = query.replaceAll("-(\\w)", "$1");
+		
+		if(nonHyphenString.toLowerCase().equals(query.toLowerCase()))
+		{
+			nonHyphenString = null;
+		}
+
+		String subwordStr = queryWords[0].replaceAll("([A-Z])", " $1");
+		subwordStr = subwordStr.replace("-", " ");
+		
+		//if there are no sub words
+		if(query.equals(subwordStr.trim()))
+		{
+			return query;
+		}
+
+		String finalQuery = query + "^2 " + subwordStr;
+		
+		if(nonHyphenString != null)
+		{
+			finalQuery += " " + nonHyphenString + "^3";
+		}
+		
+		logger.debug("Using effective final query as: {}", subwordStr);
+		return finalQuery;
 	}
 
 	private void applyFilter()
@@ -444,6 +504,8 @@ public class HelpPanel extends JPanel implements IViewPanel
 		{
 			return;
 		}
+		
+		errLabel.setText("");
 
 		//do the lucene search
 		Set<String> filteredDocIds = null;
@@ -454,6 +516,12 @@ public class HelpPanel extends JPanel implements IViewPanel
 			
 			for(String query : searchQueries)
 			{
+				if(StringUtils.isBlank(query))
+				{
+					errLabel.setText("Empty filter query specified.");
+					return;
+				}
+				
 				filteredDocIds = performSearch(query, filteredDocIds);
 				
 				//when error occurs
@@ -470,13 +538,27 @@ public class HelpPanel extends JPanel implements IViewPanel
 			}
 		}
 		
+		if(filteredDocIds == null)
+		{
+			return;
+		}
+			
 		//filter the tree in the ui
 		currentSearchText = newText;
 		rootNode.filter(filteredDocIds);
 		
 		HelpTreeModel model = new HelpTreeModel(rootNode);
 		tree.setModel(model);
-		selectNode((HelpTreeNode) model.getRoot());
+
+		if(!filteredDocIds.isEmpty())
+		{
+			HelpTreeNode selectedNode = model.getNode(filteredDocIds.iterator().next());
+			selectNode(selectedNode);
+		}
+		else
+		{
+			selectNode((HelpTreeNode) model.getRoot());
+		}
 	}
 
 	private void selectNode(HelpTreeNode select)
@@ -494,7 +576,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 			tree.setSelectionPath(path);
 		}
 	}
-	
+
 	private String buildDoc(String template, Map<String, Object> context)
 	{
 		return IIdeConstants.FREE_MARKER_ENGINE.processTemplate("documentation.ftl", template, context);
@@ -524,11 +606,17 @@ public class HelpPanel extends JPanel implements IViewPanel
 		});
 	}
 
-	public void activatePanel()
+	public void activatePanel(String defaultSearchString)
 	{
+		if(defaultSearchString != null)
+		{
+			searchField.setText(defaultSearchString.trim());
+			applyFilter();
+		}
+
 		parentTabbedPane.setSelectedComponent(this);
 		searchField.requestFocus();
-		
+
 		if(searchField.getText().length() > 0)
 		{
 			searchField.select(0, searchField.getText().length());

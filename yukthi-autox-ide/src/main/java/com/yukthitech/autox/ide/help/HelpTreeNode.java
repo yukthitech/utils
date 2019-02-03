@@ -33,4 +33,32 @@ public class HelpTreeNode extends DefaultMutableTreeNode
 	{
 		return helpNodeData;
 	}
+	
+	public HelpTreeNode getNode(String id)
+	{
+		if(helpNodeData != null && id.equals(helpNodeData.getId()))
+		{
+			return this;
+		}
+		
+		int count = super.getChildCount();
+		
+		if(count <= 0)
+		{
+			return null;
+		}
+		
+		for(int i = 0; i < count; i++)
+		{
+			HelpTreeNode childNode = (HelpTreeNode) super.getChildAt(i);
+			HelpTreeNode selectedNode = childNode.getNode(id);
+			
+			if(selectedNode != null)
+			{
+				return selectedNode;
+			}
+		}
+		
+		return null;
+	}
 }
