@@ -1,12 +1,15 @@
 package com.yukthitech.autox.ide;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 public class AutoxSplashScreen extends JFrame
 {
@@ -51,11 +54,12 @@ public class AutoxSplashScreen extends JFrame
 		setUndecorated(true);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		super.setIconImage(IdeUtils.loadIconWithoutBorder("/ui/icons/autox-logo.png", 64).getImage());
-		setBounds(100, 100, 817, 374);
+		setBounds(100, 100, 832, 350);
 		contentPane = new JPanel();
-		contentPane.setBorder(null);
+		contentPane.setBorder(new LineBorder(new Color(0, 0, 255), 2));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
+		label.setBorder(new EmptyBorder(3, 3, 3, 3));
 		
 		contentPane.add(label, BorderLayout.CENTER);
 		
