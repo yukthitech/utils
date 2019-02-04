@@ -118,6 +118,15 @@ public class XmlFormatter
 				continue;
 			}
 			
+			if(node instanceof CDATASection)
+			{
+				String text = ((CDATASection) node).getNodeValue();
+				text = formatText(text, childIndent, indentation);
+				
+				element.appendChild(newDoc.createCDATASection(text));
+				continue;
+			}
+			
 			if(node instanceof Text)
 			{
 				String text = ((Text) node).getNodeValue();
@@ -129,15 +138,6 @@ public class XmlFormatter
 				}
 				
 				element.appendChild(newDoc.createTextNode(text));
-				continue;
-			}
-			
-			if(node instanceof CDATASection)
-			{
-				String text = ((CDATASection) node).getNodeValue();
-				text = formatText(text, childIndent, indentation);
-				
-				element.appendChild(newDoc.createCDATASection(text));
 				continue;
 			}
 			
@@ -214,25 +214,25 @@ public class XmlFormatter
 					extraIndent = matchedRule.getIndentAction().alterIndet(true, extraIndent);
 				}
 				
-				builder.append("\n").append(indentation).append(extraIndent).append(line);
-				
 				if(matchedRule != null)
 				{
+					builder.append("\n").append(indentation).append(extraIndent).append(line);
 					extraIndent = matchedRule.getIndentAction().alterIndet(false, extraIndent);
 				}
 				else
 				{
+					String prevExtraIndent = extraIndent;
 					char chArr[] = line.toCharArray();
 					bracketCount = 0;
 					
 					for(int i = 0; i < chArr.length; i++)
 					{
-						if(chArr[i] == '(' || chArr[i] == '{' || chArr[i] == '[')
+						if(isOpenBracket(chArr[i]))
 						{
 							bracketCount++;
 						}
 						
-						if(chArr[i] == ')' || chArr[i] == '}' || chArr[i] == ']')
+						if(isCloseBracket(chArr[i]))
 						{
 							bracketCount--;
 						}
@@ -249,6 +249,15 @@ public class XmlFormatter
 							extraIndent = extraIndent.substring(1);
 						}
 					}
+					
+					if(chArr.length == 1 && isCloseBracket(chArr[0]))
+					{
+						builder.append("\n").append(indentation).append(extraIndent).append(line);
+					}
+					else
+					{
+						builder.append("\n").append(indentation).append(prevExtraIndent).append(line);
+					}
 				}
 			}
 			
@@ -260,6 +269,16 @@ public class XmlFormatter
 		}
 	}
 	
+	private static boolean isOpenBracket(char ch)
+	{
+		return (ch == '(' || ch == '{' || ch == '[');
+	}
+	
+	private static boolean isCloseBracket(char ch)
+	{
+		return (ch == ')' || ch == '}' || ch == ']');
+	}
+
 	public static void main(String[] args) throws Exception
 	{
 		String xmlContent = FileUtils.readFileToString(new File("./dml-test-suite.xml"));

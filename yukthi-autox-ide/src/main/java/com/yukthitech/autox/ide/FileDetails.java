@@ -46,10 +46,7 @@ public class FileDetails implements Comparable<FileDetails>
 		
 		if(diff == 0)
 		{
-			if(file.equals(o.file))
-			{
-				return 0;
-			}
+			return file.compareTo(o.file);
 		}
 		
 		return diff;

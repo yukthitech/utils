@@ -1,16 +1,20 @@
-common.xml formating is not working properly
-	in sql query 
-
 Others
 	
 	maven based class path and packaging
 
 	
-Beautify icons
-
 Finalize general documentation
 
 ==============================
+Beautify icons
+
+
+Performance support
+	Ability to execute with load - step or test case level
+	Ability to execute for durability - for specified time
+	
+Run actions
+	like eclipse currently executed programs should come in icons
 
 Ability to reexecute only failed test cases
 

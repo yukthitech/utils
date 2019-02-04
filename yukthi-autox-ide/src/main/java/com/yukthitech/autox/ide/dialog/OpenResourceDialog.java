@@ -260,7 +260,7 @@ public class OpenResourceDialog extends JDialog
 			{
 				filter();
 			}
-		}, 2000);
+		}, 100);
 	}
 
 	public void display()
@@ -295,6 +295,11 @@ public class OpenResourceDialog extends JDialog
 	{
 		String filterStr = fldResName.getText().trim();
 		Pattern filter = null;
+		
+		if(!filterStr.contains("*"))
+		{
+			filterStr += "*";
+		}
 		
 		if(filterStr.length() > 0)
 		{

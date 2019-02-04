@@ -1,105 +1,119 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<testSuite name="load-resources-test-suites">
-		
-		<!-- =================================
+		<!--
+			=================================
 			Test with properties file
-		-======================================= -->
-		
+			-=======================================
+		-->
 		<testCase name="load_Properties">
-			<description>Validates loading of properties file to context</description>
-
+			<description>
+				Validates loading of properties file to context
+			</description>
+		
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-
+			
 				<ccg:set expression="propFile" value="file(template=true):.\src\test\resources\test-suites\test.properties"/>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:assert-equals actual="prop: attr.propFile.key1" expected="value1"/>
+			
 				<ccg:assert-equals actual="prop: attr.propFile.key2" expected="value2"/>
+			
 				<ccg:assert-equals actual="prop: attr.propFile.key3" expected="someValue"/>
 			</wrap:validations>
 		</testCase>
-
+	
 		<testCase name="load_Properties_nonTemplate">
-			<description>Validates loading of properties file to context by marking input as non-template</description>
-
+			<description>
+				Validates loading of properties file to context by marking input as non-template
+			</description>
+		
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
-				
+			
 				<ccg:set expression="propFile1" value="file:.\src\test\resources\test-suites\test.properties"/>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:assert-equals actual="prop: attr.propFile1.key1" expected="value1"/>
+			
 				<ccg:assert-equals actual="prop: attr.propFile1.key2" expected="value2"/>
+			
 				<ccg:assert-equals actual="prop: attr.propFile1.key3" expected="${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
-
-		<!-- =================================
+	
+		<!--
+			=================================
 			Test with json file
-		-======================================= -->
-
+			-=======================================
+		-->
 		<testCase name="load_json">
 			<description>
 				Loads json on to context and validates the same.
 			</description>
-
+		
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
+			
 				<ccg:set expression="jsonObj" value="res(template=true):/data/data.json"/>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:assert-equals actual="prop: attr.jsonObj.bean1.subbean1.sprop3" expected="someValue"/>
 			</wrap:validations>
 		</testCase>
-
+	
 		<testCase name="load_json_nonTemplate">
 			<description>
 				Loads json on to context as non-template and validates the same.
 			</description>
-
+		
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
+			
 				<ccg:set expression="jsonObj" value="res:/data/data.json"/>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:assert-equals actual="prop: attr.jsonObj.bean1.subbean1.sprop3" expected="${'$'}{attr.resAttribute}"/>
 			</wrap:validations>
 		</testCase>
-
-		<!-- =================================
+	
+		<!--
+			=================================
 			Test with text file
-		-======================================= -->
-
+			-=======================================
+		-->
 		<testCase name="load_text">
 			<description>
 				Loads text on to context and validates the same.
 			</description>
-
+		
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
+			
 				<ccg:set expression="textObj" value="res(text=true, template=true):/data/test-text1.txt"/>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:assert-equals actual="attr: textObj" expected="Some test content someValue"/>
 			</wrap:validations>
 		</testCase>
-
+	
 		<testCase name="load_text_nonTemplate">
 			<description>
 				Loads text as non template on to context and validates the same.
 			</description>
-
+		
 			<wrap:steps>
 				<ccg:set expression="resAttribute" value="someValue"/>
+			
 				<ccg:set expression="textObj" value="res(text=true):/data/test-text1.txt"/>
 			</wrap:steps>
-
+		
 			<wrap:validations>
 				<ccg:assert-equals actual="attr: textObj" expected="Some test content ${'$'}{attr.resAttribute}"/>
 			</wrap:validations>

@@ -304,6 +304,10 @@ public class Project implements Serializable
 			
 			try
 			{
+				//exclude maven target folder
+				reservedFiles.add( new File(baseFolder, "target").getCanonicalFile() );
+				
+				//exclude autox files
 				reservedFiles.add( new File(baseFolder, appConfigFilePath).getCanonicalFile() );
 				reservedFiles.add( new File(baseFolder, appPropertyFilePath).getCanonicalFile() );
 				reservedFiles.add( new File(projectFilePath).getCanonicalFile() );
