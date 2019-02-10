@@ -523,8 +523,15 @@ public class ProjectExplorer extends JPanel
 		if(clickedItem instanceof FileTreeNode)
 		{
 			FileTreeNode fileTreeNode = (FileTreeNode) clickedItem;
+			
+			logger.debug("Setting active file as: [Project: {}, File: {}]", fileTreeNode.getProject().getName(), fileTreeNode.getFile().getPath());
+			
 			ideContext.setActiveDetails(fileTreeNode.getProject(), fileTreeNode.getFile());
 			actionCollection.invokeAction("openFile");
+		}
+		else
+		{
+			logger.debug("As selected node is not file tree node, not setting active file. Current node: {}", clickedItem);
 		}
 	}
 	

@@ -9,6 +9,7 @@ import java.awt.Insets;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -536,13 +537,13 @@ public class HelpPanel extends JPanel implements IViewPanel
 					break;
 				}
 			}
+
+			if(filteredDocIds == null)
+			{
+				filteredDocIds = Collections.emptySet();
+			}
 		}
 		
-		if(filteredDocIds == null)
-		{
-			return;
-		}
-			
 		//filter the tree in the ui
 		currentSearchText = newText;
 		rootNode.filter(filteredDocIds);

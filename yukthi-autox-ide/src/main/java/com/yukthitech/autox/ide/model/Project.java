@@ -3,6 +3,7 @@ package com.yukthitech.autox.ide.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -95,7 +96,13 @@ public class Project implements Serializable
 			return null;
 		}
 
-		return new File(projectFilePath).getParentFile().getPath();
+		try
+		{
+			return new File(projectFilePath).getParentFile().getCanonicalPath();
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while loading project file cannonical path: " + projectFilePath, ex);
+		}
 	}
 	
 	@JsonIgnore
@@ -152,6 +159,26 @@ public class Project implements Serializable
 
 	public Set<String> getClassPathEntriesList()
 	{
+		String libJarPath = null;
+		File libFolder = new File(baseFolder, "lib");
+		
+		try
+		{
+			libJarPath = libFolder.getCanonicalPath() + File.separator + "*";
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while getting canonical path of lib folder: " + libFolder.getPath(), ex);
+		}
+		
+		if(classPathEntriesList == null)
+		{
+			return Collections.singleton(libJarPath);
+		}
+		else if(!classPathEntriesList.contains(libJarPath))
+		{
+			classPathEntriesList.add(libJarPath);
+		}
+		
 		return classPathEntriesList;
 	}
 

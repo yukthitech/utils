@@ -30,7 +30,6 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
-import com.yukthitech.autox.ide.rest.RestPanel;
 import com.yukthitech.autox.ide.views.ConsolePanel;
 import com.yukthitech.autox.ide.views.report.ReportPanel;
 
@@ -49,8 +48,8 @@ public class AutoxIDE extends JFrame
 	@Autowired
 	private ProjectExplorer projectExplorer;
 	
-	@Autowired
-	private RestPanel restPanel;
+	//@Autowired
+	//private RestPanel restPanel;
 	
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;
@@ -233,7 +232,7 @@ public class AutoxIDE extends JFrame
 		leftTabbedPane.setViewsCloseable(false);
 
 		leftTabbedPane.addTab("Project Explorer", null, projectExplorer, null);
-		leftTabbedPane.addTab("Rest", null, restPanel, null);
+		//leftTabbedPane.addTab("Rest", null, restPanel, null);
 
 		horizontalSplitPane = new JSplitPane();
 		horizontalSplitPane.setResizeWeight(0.8);

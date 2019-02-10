@@ -1,11 +1,12 @@
-Others
-	
-	maven based class path and packaging
 
 	
 Finalize general documentation
 
 ==============================
+Others
+	
+	maven based class path and packaging
+
 Beautify icons
 
 
