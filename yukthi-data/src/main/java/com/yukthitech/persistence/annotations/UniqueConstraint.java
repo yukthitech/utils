@@ -40,8 +40,8 @@ public @interface UniqueConstraint
 	
 	/**
 	 * Indicates that specified constraint name is final name. And framework 
-	 * should not prefix or suffix with anything else. Default: false.
+	 * should not prefix or suffix with anything else. Default: true.
 	 * @return true if specified name is final one.
 	 */
-	public boolean finalName() default false;
+	public boolean finalName() default true;
 }

@@ -43,7 +43,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 {
 	private static Logger logger = LogManager.getLogger(SaveQueryExecutor.class);
-	private static final String COL_UQ_ENTITY_ID = "UQ_ENTITY_ID";
 	
 	/**
 	 * Encapsulation of prechild that needs to be persisted before main entity can be persisted.
@@ -274,7 +273,12 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		
 		//add random unique id while persisting entity, which in turn can be used to fetch primary key value
 		String entityUid = UUID.randomUUID().toString();
-		query.addColumn(new ColumnParam(COL_UQ_ENTITY_ID, entityUid, -1));
+		boolean hasUqIdCol = entityDetails.hasColumn(EntityDetails.COL_UQ_ENTITY_ID);
+		
+		if(hasUqIdCol)
+		{
+			query.addColumn(new ColumnParam(EntityDetails.COL_UQ_ENTITY_ID, entityUid, -1));
+		}
 		
 		//save the entity
 		try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
@@ -306,6 +310,11 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 				//if id value is found from statement or was explicitly specified
 				if(idWrapper.getValue() == null)
 				{
+					if(hasUqIdCol)
+					{
+						throw new InvalidStateException("No unique id column [{}] configured. Failed to fetch id of saved entity. Entity: {}", EntityDetails.COL_UQ_ENTITY_ID, entityDetails);
+					}
+					
 					//fetch the newly save entry id and populate it to entity
 					idWrapper.setValue( fetchId(entity, dataStore, entityUid, conversionService) );
 				}
@@ -535,7 +544,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 		FinderQuery findQuery = new FinderQuery(entityDetails);
 		findQuery.addResultField(new QueryResultField(null, idFieldDetails.getDbColumnName(), null));
 		
-		findQuery.addCondition(new QueryCondition(null, COL_UQ_ENTITY_ID, Operator.EQ, uuid, JoinOperator.AND, false));
+		findQuery.addCondition(new QueryCondition(null, EntityDetails.COL_UQ_ENTITY_ID, Operator.EQ, uuid, JoinOperator.AND, false));
 		
 		//execute finder query 
 		List<Record> records = dataStore.executeFinder(findQuery, entityDetails, null);

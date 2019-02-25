@@ -234,6 +234,26 @@ public class RepositoryFactory
 		this.name = name;
 	}
 	
+	/**
+	 * Gets the flag indicating if unique id column should be added during table creation. This in turn will be used to fetch auto generated id on need basis.
+	 *
+	 * @return the flag indicating if unique id column should be added during table creation
+	 */
+	public boolean isAddUniqueIdColumnEnabled()
+	{
+		return entityDetailsFactory.isAddUniqueIdColumnEnabled();
+	}
+
+	/**
+	 * Sets the flag indicating if unique id column should be added during table creation. This in turn will be used to fetch auto generated id on need basis.
+	 *
+	 * @param addUniqueIdColumnEnabled the new flag indicating if unique id column should be added during table creation
+	 */
+	public void setAddUniqueIdColumnEnabled(boolean addUniqueIdColumnEnabled)
+	{
+		entityDetailsFactory.setAddUniqueIdColumnEnabled(addUniqueIdColumnEnabled);
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

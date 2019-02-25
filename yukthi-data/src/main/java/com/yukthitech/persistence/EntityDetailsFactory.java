@@ -59,6 +59,32 @@ public class EntityDetailsFactory
 	private RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
 	/**
+	 * Flag indicating if unique id column should be added during table creation. This in turn 
+	 * will be used to fetch auto generated id on need basis.
+	 */
+	private boolean addUniqueIdColumnEnabled = false;
+	
+	/**
+	 * Sets the flag indicating if unique id column should be added during table creation. This in turn will be used to fetch auto generated id on need basis.
+	 *
+	 * @param addUniqueIdColumnEnabled the new flag indicating if unique id column should be added during table creation
+	 */
+	public void setAddUniqueIdColumnEnabled(boolean addUniqueIdColumnEnabled)
+	{
+		this.addUniqueIdColumnEnabled = addUniqueIdColumnEnabled;
+	}
+	
+	/**
+	 * Gets the flag indicating if unique id column should be added during table creation. This in turn will be used to fetch auto generated id on need basis.
+	 *
+	 * @return the flag indicating if unique id column should be added during table creation
+	 */
+	public boolean isAddUniqueIdColumnEnabled()
+	{
+		return addUniqueIdColumnEnabled;
+	}
+
+	/**
 	 * Removes non aplha numeric characters (including underscore) from column names and sets it as key and the actual column
 	 * name as value of the resultant map. This can be used to find column mapping for undeclared columns.
 	 * 
@@ -66,8 +92,10 @@ public class EntityDetailsFactory
 	 * @param dataStore
 	 * @return
 	 */
-	private Map<String, String> flattenColumnNames(String tableName, IDataStore dataStore)
+	private Map<String, String> flattenColumnNames(EntityDetails entityDetails, IDataStore dataStore)
 	{
+		String tableName = entityDetails.getTableName();
+		
 		Set<String> columns = dataStore.getColumnNames(tableName);
 		String flattenName = null;
 		
@@ -75,6 +103,8 @@ public class EntityDetailsFactory
 		
 		for(String column: columns)
 		{
+			entityDetails.addColumn(column);
+			
 			//remove all special characters including underscore
 			flattenName = column.replaceAll(SPECIAL_CHAR_PATTERN, "");
 			
@@ -209,7 +239,7 @@ public class EntityDetailsFactory
 		{
 			if(nameToConstraints.containsKey(constraint.getConstraintName()))
 			{
-				throw new InvalidStateException("Multiple constraint(s) found with same name - {}", constraint.getConstraintName());
+				throw new InvalidStateException("Multiple constraint(s) found with same name - {} [Entity: {}]", constraint.getConstraintName(), entityDetails.getEntityType().getName());
 			}
 			
 			nameToConstraints.put(constraint.getConstraintName(), constraint);
@@ -220,7 +250,7 @@ public class EntityDetailsFactory
 		{
 			if(nameToConstraints.containsKey(constraint.getConstraintName()))
 			{
-				throw new InvalidStateException("Multiple constraint(s) found with same name - {}", constraint.getConstraintName());
+				throw new InvalidStateException("Multiple constraint(s) found with same name - {} [Entity: {}]", constraint.getConstraintName(), entityDetails.getEntityType().getName());
 			}
 			
 			nameToConstraints.put(constraint.getConstraintName(), constraint);
@@ -256,7 +286,7 @@ public class EntityDetailsFactory
 		
 		try
 		{
-			flattenColumnMap = flattenColumnNames(entityDetails.getTableName(), dataStore);
+			flattenColumnMap = flattenColumnNames(entityDetails, dataStore);
 			entityDetails.setTableCreated(true);
 			tableExists = true;
 		}catch(RuntimeException ex)
@@ -353,7 +383,7 @@ public class EntityDetailsFactory
 			entityDetailsMonitor.addEntityWithTable(entityDetails);
 		}
 		
-		logger.trace("Completed building of entity details {}", entityDetails);
+		logger.trace("Completed building of entity details {}.", entityDetails);
 		logger.trace("*********************************************************");
 		
 		loadConstraintDetails(entityDetails);
@@ -712,6 +742,12 @@ public class EntityDetailsFactory
 		//create the main table for the entity type
 		CreateTableQuery createTableQuery = new CreateTableQuery(entityDetails, isUniqueKeyDisable);
 		dataStore.createTable(createTableQuery);
+		
+		//add unique id column getting added to table on need basis
+		if(!isUniqueKeyDisable)
+		{
+			entityDetails.addColumn(EntityDetails.COL_UQ_ENTITY_ID);
+		}
 
 		//reset the column mapping, to take new column names (if any) into consideration
 		entityDetails.resetColumnMapping(createTableQuery.getTableStructure().getFieldMapping());

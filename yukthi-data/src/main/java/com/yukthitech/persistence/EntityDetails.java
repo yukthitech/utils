@@ -19,6 +19,8 @@ public class EntityDetails
 {
 	private static Logger logger = LogManager.getLogger(EntityDetails.class);
 	
+	public static final String COL_UQ_ENTITY_ID = "UQ_ENTITY_ID";
+	
 	private String tableName;
 	private Class<?> entityType;
 
@@ -55,6 +57,11 @@ public class EntityDetails
 	 * Short name to be used for this entity.
 	 */
 	private String shortName;
+	
+	/**
+	 * Full column names of the tables. Some of which may not have mapping to fields.
+	 */
+	private Set<String> fullColumnNames = new HashSet<>();
 
 	public EntityDetails(String tableName, Class<?> entityType)
 	{
@@ -152,6 +159,9 @@ public class EntityDetails
 		}
 		
 		String columnName = fieldDetails.getDbColumnName().toLowerCase();
+		columnName = (columnName != null) ? columnName.toLowerCase() : null;
+		
+		addColumn(columnName);
 
 		if(columnToDetails.containsKey(columnName))
 		{
@@ -164,7 +174,7 @@ public class EntityDetails
 		fieldToDetails.put(fieldDetails.getName(), fieldDetails);
 		
 		//if column name is present, this might be case with non-owned relation fields
-		if(fieldDetails.getDbColumnName() != null)
+		if(columnName != null)
 		{
 			columnToDetails.put(columnName, fieldDetails);
 		}
@@ -391,6 +401,21 @@ public class EntityDetails
 	public void setExtendedTableDetails(ExtendedTableDetails extendedTableDetails)
 	{
 		this.extendedTableDetails = extendedTableDetails;
+	}
+	
+	public void addColumn(String column)
+	{
+		if(column == null)
+		{
+			return;
+		}
+		
+		this.fullColumnNames.add(column.toLowerCase());
+	}
+	
+	public boolean hasColumn(String column)
+	{
+		return fullColumnNames.contains(column.toLowerCase());
 	}
 
 	/* (non-Javadoc)
