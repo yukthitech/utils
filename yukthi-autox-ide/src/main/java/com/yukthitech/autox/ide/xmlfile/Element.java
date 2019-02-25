@@ -572,7 +572,7 @@ public class Element implements INode
 						collector.addMessage(
 								new FileParseMessage(
 										MessageType.ERROR, 
-										String.format("An error occurred while fetching dynamic type: {}", beanTypeStr),
+										String.format("An error occurred while fetching dynamic type: %s", beanTypeStr),
 										startLocation.getStartLineNumber(),
 										this.startLocation.getStartOffset(),
 										this.startLocation.getEndOffset()

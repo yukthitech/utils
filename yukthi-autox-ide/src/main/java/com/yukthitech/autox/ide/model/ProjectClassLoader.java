@@ -34,11 +34,6 @@ public class ProjectClassLoader extends URLClassLoader
 			{
 				File file = new File(entry);
 				
-				if(!file.exists())
-				{
-					continue;
-				}
-				
 				try
 				{
 					resUrls.add(file.toURI().toURL());

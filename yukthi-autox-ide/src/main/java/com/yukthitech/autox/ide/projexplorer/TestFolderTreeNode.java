@@ -12,4 +12,10 @@ public class TestFolderTreeNode extends FolderTreeNode
 	{
 		super(projectExplorer, project, name, folder);
 	}
+
+	@Override
+	protected FolderTreeNode newFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
+	{
+		return new TestFolderTreeNode(projectExplorer, project, name, folder);
+	}
 }
