@@ -8,6 +8,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.yukthitech.persistence.annotations.DataType;
+import com.yukthitech.persistence.annotations.DataTypeMapping;
+
 /**
  * The Class ExecutionInfoEntity.
  */
@@ -24,13 +27,13 @@ public class ExecutionInfoEntity
 	/**
 	 * Name of test suite.
 	 */
-	@Column(name = "TEST_SUITE", length = 100, nullable = false)
+	@Column(name = "TEST_SUITE", length = 1000, nullable = false)
 	private String testSuite;
 
 	/**
 	 * Name of test suite.
 	 */
-	@Column(name = "TEST_CASE", length = 100, nullable = false)
+	@Column(name = "TEST_CASE", length = 1000, nullable = false)
 	private String testCase;
 
 	/**
@@ -55,6 +58,7 @@ public class ExecutionInfoEntity
 	 * In case of error, high level reason of error/failure.
 	 */
 	@Column(name = "ERROR_MESSAGE")
+	@DataTypeMapping(type = DataType.CLOB)
 	private String errorMessage;
 	
 	/**

@@ -26,7 +26,7 @@ public class DataTableEntity
 	/**
 	 * key of the entry.
 	 */
-	@Column(name = "DATA_KEY", length = 100, unique = true)
+	@Column(name = "DATA_KEY", length = 1000, unique = true)
 	private String key;
 	
 	/**

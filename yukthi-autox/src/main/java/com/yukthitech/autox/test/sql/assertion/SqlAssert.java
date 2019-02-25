@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
@@ -162,6 +163,8 @@ public class SqlAssert extends AbstractValidation
 			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, query, paramMap);
 			
 			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, processedQuery, values);
+			
+			AtomicInteger recCount = new AtomicInteger(0);
 
 			ResultSetHandler<Boolean> rsHandler = new ResultSetHandler<Boolean>()
 			{
@@ -171,9 +174,12 @@ public class SqlAssert extends AbstractValidation
 					int rowIdx = 0;
 					ExpectedRow row = null;
 					String actualVal = null, expectedVal = null;
+					Map<String, String> actualRow = new HashMap<>();
 
 					while(rs.next())
 					{
+						recCount.incrementAndGet();
+						
 						if(expectedRows.size() <= rowIdx)
 						{
 							exeLogger.error(SqlAssert.this, "Actual rows are more than expected row count: {}", expectedRows.size());
@@ -181,6 +187,9 @@ public class SqlAssert extends AbstractValidation
 						}
 
 						row = expectedRows.get(rowIdx);
+						actualRow.clear();
+						
+						exeLogger.debug(SqlAssert.this, "Validating row {} values are: {}", rowIdx, row.columnToValue);
 
 						for(String column : row.columnToValue.keySet())
 						{
@@ -194,6 +203,8 @@ public class SqlAssert extends AbstractValidation
 							}
 						}
 						
+						exeLogger.debug(SqlAssert.this, "Found row {} to be as per expected values", rowIdx);
+						
 						rowIdx ++;
 					}
 
@@ -202,6 +213,13 @@ public class SqlAssert extends AbstractValidation
 			};
 			
 			Boolean res = QueryUtils.getQueryRunner().query(connection, processedQuery, rsHandler);
+
+			if(recCount.get() < expectedRows.size())
+			{
+				exeLogger.error(SqlAssert.this, "Actual rows {} are less than expected row count: {}", recCount.get(), expectedRows.size());
+				return false;
+			}
+			
 			return res;
 		} catch(SQLException ex)
 		{

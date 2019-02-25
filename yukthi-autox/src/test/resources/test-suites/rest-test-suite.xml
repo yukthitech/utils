@@ -16,7 +16,7 @@
 				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
 			
 				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
-			
+
 				<ccg:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
 						{

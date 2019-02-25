@@ -269,7 +269,7 @@ public class DocGenerator
 	private static List<BasicDocs.Document> loadBasicDocs() throws IOException
 	{
 		BasicDocs docs = new BasicDocs();
-		XMLBeanParser.parse(DocGenerator.class.getResourceAsStream("/docs/basic-docs.xml"), docs);
+		XMLBeanParser.parse(DocGenerator.class.getResourceAsStream("/docs/index-basic-docs.xml"), docs);
 		
 		for(BasicDocs.Document doc : docs.getDocuments())
 		{
