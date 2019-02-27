@@ -167,6 +167,16 @@ public class ExeEnvironmentPanel extends JPanel
 				IdeUtils.execute(() -> {
 					envComboBox.revalidate();
 					envComboBox.getParent().revalidate();
+					
+					int selIdx = envComboBox.getSelectedIndex();
+					envComboBox.setSelectedItem(null);
+					
+					if(selIdx >= 0)
+					{
+						envComboBox.setSelectedIndex(selIdx);
+					}
+					
+					checkForButtons();
 				}, 200);
 			}
 		});
@@ -187,6 +197,8 @@ public class ExeEnvironmentPanel extends JPanel
 				}
 			}
 		});
+		
+		checkForButtons();
 	}
 
 	private void stopEnvironment()
@@ -214,6 +226,8 @@ public class ExeEnvironmentPanel extends JPanel
 		{
 			envComboBox.removeItem(activeEnv);
 			ideContext.getProxy().activeEnvironmentChanged(null);
+			
+			checkForButtons();
 		}
 	}
 
@@ -255,6 +269,8 @@ public class ExeEnvironmentPanel extends JPanel
 		{
 			ideContext.getProxy().activeEnvironmentChanged(null);
 		}
+		
+		checkForButtons();
 	}
 
 	private synchronized void changeEnvironment()
@@ -263,12 +279,59 @@ public class ExeEnvironmentPanel extends JPanel
 		ideContext.getProxy().activeEnvironmentChanged(env);
 	}
 	
+	private void checkForButtons()
+	{
+		clearAllBut.setEnabled(false);
+		clearBut.setEnabled(false);
+		stopBut.setEnabled(false);
+		
+		int itemCount = envComboBox.getItemCount();
+		
+		if(itemCount <= 0)
+		{
+			return;
+		}
+		
+		if(envComboBox.getSelectedItem() != null)
+		{
+			ExecutionEnvironment env = (ExecutionEnvironment) envComboBox.getSelectedItem();
+			
+			if(env.isTerminated())
+			{
+				clearBut.setEnabled(true);
+			}
+			else
+			{
+				stopBut.setEnabled(true);
+			}
+		}
+		
+		if(clearBut.isEnabled())
+		{
+			clearAllBut.setEnabled(true);
+			return;
+		}
+		
+		for(int i = 0; i < itemCount; i++)
+		{
+			ExecutionEnvironment env = envComboBox.getItemAt(i);
+			
+			if(env.isTerminated())
+			{
+				clearAllBut.setEnabled(true);
+				break;
+			}
+		}
+	}
+	
 	private synchronized void newEnvironmentAdded(ExecutionEnvironment environment)
 	{
 		clearAllEnvironments();
 		
 		envComboBox.addItem(environment);
 		envComboBox.setSelectedItem(environment);
+		
+		checkForButtons();
 		
 		ideContext.getProxy().activeEnvironmentChanged(environment);
 	}

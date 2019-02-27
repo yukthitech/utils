@@ -12,14 +12,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -35,15 +30,6 @@ import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 public class ContextAttributesPanel extends JPanel implements IViewPanel
 {
 	private static final long serialVersionUID = 1L;
-	
-	private static Logger logger = LogManager.getLogger(ContextAttributesPanel.class);
-	
-	private static ObjectMapper objectMapper = new ObjectMapper();
-	
-	static
-	{
-		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-	}
 	
 	/**
 	 * Create the panel.
@@ -84,6 +70,7 @@ public class ContextAttributesPanel extends JPanel implements IViewPanel
 			public void activeEnvironmentChanged(ExecutionEnvironment activeEnvironment)
 			{
 				ContextAttributesPanel.this.activeEnvironment = activeEnvironment;
+				model.reload(activeEnvironment);
 			}
 
 			@Override
@@ -96,7 +83,6 @@ public class ContextAttributesPanel extends JPanel implements IViewPanel
 				
 				addNewContextAttribute(event.getNewContextAttribute());
 			}
-
 		});
 	}
 
@@ -151,26 +137,8 @@ public class ContextAttributesPanel extends JPanel implements IViewPanel
 		return table;
 	}
 
-	private void addNewContextAttribute(ContextAttributeDetails ctx)
+	private void addNewContextAttribute(ContextAttributeDetails attr)
 	{
-		Object value = ctx.getValue();
-		
-		if(value == null)
-		{
-			value = "";
-		}
-		else if(!(value instanceof String))
-		{
-			try
-			{
-				value = objectMapper.writeValueAsString(value);
-			} catch(JsonProcessingException e)
-			{
-				logger.warn("Failed to convert object into json [Object: {}, Error: {}]", value, "" + e);
-				value = value.toString();
-			}
-		}
-		
-		model.addRow(new Object[] { ctx.getName(), value });
+		model.addContextAttribute(attr);
 	}
 }

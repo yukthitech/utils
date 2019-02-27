@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,6 +97,8 @@ public class MonitorClient
 	@SuppressWarnings("unchecked")
 	private void readDataFromServer()
 	{
+		boolean firstError = true;
+		
 		//wait till client socket is closed
 		while(clientSocket != null && !clientSocket.isClosed())
 		{
@@ -110,7 +113,18 @@ public class MonitorClient
 				}
 			}catch(Exception ex)
 			{
-				logger.error("An error occurred while fetching data from server", ex);
+				if(ex instanceof SocketException)
+				{
+					//ignore first erorr as it may happen during env termination
+					if(!firstError)
+					{
+						logger.error("An error occurred while fetching data from server", ex);	
+					}
+					else
+					{
+						firstError = false;
+					}
+				}
 				
 				//as the exception might be because of client close. So wait for second and check again
 				try

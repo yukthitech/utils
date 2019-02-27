@@ -176,6 +176,19 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		}
 
 		consoleDisplayArea.setText("<html><body id=\"body\">" + activeEnvironment.getConsoleHtml() + "</body></html>");
+		moveToEnd();
+	}
+	
+	private void moveToEnd()
+	{
+		EventQueue.invokeLater(() -> {
+			// move scroll pane to the end
+			JScrollBar vertical = scrollPane.getVerticalScrollBar();
+			vertical.setValue(vertical.getMaximum());
+			
+			JScrollBar horizontal = scrollPane.getHorizontalScrollBar();
+			horizontal.setValue(0);
+		});
 	}
 
 	private void appendNewContent(String content)
@@ -187,15 +200,8 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		{
 			htmlDoc.insertBeforeEnd(element, content);
 
-			EventQueue.invokeLater(() -> {
-				// move scroll pane to the end
-				JScrollBar vertical = scrollPane.getVerticalScrollBar();
-				vertical.setValue(vertical.getMaximum());
-				
-				JScrollBar horizontal = scrollPane.getHorizontalScrollBar();
-				horizontal.setValue(0);
-			});
-
+			moveToEnd();
+			
 			if(parentTabbedPane != null)
 			{
 				parentTabbedPane.setSelectedComponent(this);
