@@ -349,71 +349,78 @@ public class AutomationLauncher
 			System.exit(-1);
 		}
 		
-		//initialize the configurations
-		String extendedCommandLineArgs[] = {};
-		
-		if(args.length > 1)
+		try
 		{
-			extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
-		}
-		
-		//load automation context
-		AutomationContext context = loadAutomationContext(appConfigurationFile, extendedCommandLineArgs);
-		ApplicationConfiguration appConfig = context.getAppConfiguration();
-		
-		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
-		validateCommandLineArguments(context, extendedCommandLineArgs);
-		
-		boolean loadTestSuites = true;
-		boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
-		boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
-		
-		if(isInteractive)
-		{
-			//test suites needs to be loaded only if global setup needs to be executed.
-			loadTestSuites = isInteractiveExeGlobal;
-		}
-		
-		// load test suites
-		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
-
-		//execute test suites
-		TestSuiteExecutor testSuiteExecutor = loadTestSuites ? new TestSuiteExecutor(context, testSuiteGroup) : null;
-		
-		if(isInteractive)
-		{
-			if(!context.isMonitoringEnabled())
+			//initialize the configurations
+			String extendedCommandLineArgs[] = {};
+			
+			if(args.length > 1)
 			{
-				System.err.println("Tried to start interactive environment without monitoring.");
-				System.exit(-1);
+				extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
 			}
 			
-			if(isInteractiveExeGlobal)
+			//load automation context
+			AutomationContext context = loadAutomationContext(appConfigurationFile, extendedCommandLineArgs);
+			ApplicationConfiguration appConfig = context.getAppConfiguration();
+			
+			logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
+			validateCommandLineArguments(context, extendedCommandLineArgs);
+			
+			boolean loadTestSuites = true;
+			boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
+			boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
+			
+			if(isInteractive)
 			{
-				logger.debug("As part of interactive environment, executing global setup...");
-				testSuiteExecutor.executeGlobalSetup();
+				//test suites needs to be loaded only if global setup needs to be executed.
+				loadTestSuites = isInteractiveExeGlobal;
 			}
 			
-			logger.debug("Skipping actual test suite execution, as this is interactive environment exection.");
-			context.sendReadyToInteract();
-			return;
-		}
-		
-		boolean res = testSuiteExecutor.executeTestSuites();
-		
-		context.close();
-
-		if(!context.getBasicArguments().isReportOpeningDisalbed())
-		{
-			try
+			// load test suites
+			TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
+	
+			//execute test suites
+			TestSuiteExecutor testSuiteExecutor = loadTestSuites ? new TestSuiteExecutor(context, testSuiteGroup) : null;
+			
+			if(isInteractive)
 			{
-				Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
-			}catch(Exception ex)
-			{
-				logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
+				if(!context.isMonitoringEnabled())
+				{
+					System.err.println("Tried to start interactive environment without monitoring.");
+					System.exit(-1);
+				}
+				
+				if(isInteractiveExeGlobal)
+				{
+					logger.debug("As part of interactive environment, executing global setup...");
+					testSuiteExecutor.executeGlobalSetup();
+				}
+				
+				logger.debug("Skipping actual test suite execution, as this is interactive environment exection.");
+				context.sendReadyToInteract();
+				return;
 			}
-		}
+			
+			boolean res = testSuiteExecutor.executeTestSuites();
+			
+			context.close();
+	
+			if(!context.getBasicArguments().isReportOpeningDisalbed())
+			{
+				try
+				{
+					Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
+				}catch(Exception ex)
+				{
+					logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
+				}
+			}
 		
-		System.exit( res ? 0 : -1 );
+			System.exit( res ? 0 : -1 );
+		}catch(Exception ex)
+		{
+			logger.error("An unhandled error occurred during execution", ex);
+			System.exit(-1);
+		}
 	}
 }
