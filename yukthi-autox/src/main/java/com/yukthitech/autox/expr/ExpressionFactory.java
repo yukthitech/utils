@@ -234,7 +234,7 @@ public class ExpressionFactory extends AbstractLocationBased
 	{
 		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		
-		exeLogger.debug(this, "Fetching expression parser for value: {}", expression);
+		exeLogger.debug(this, "Fetching expression parser for value and parsing expression: {}", expression);
 		
 		context.clearParameters();
 		
@@ -291,8 +291,6 @@ public class ExpressionFactory extends AbstractLocationBased
 		}
 		
 		context.setCurrentParser(parser);
-		
-		exeLogger.trace(this, "Executing expression: {}", expression);
 		return parser.invoke(context, mainExpr, exprTypeParams);
 	}
 	
@@ -307,7 +305,7 @@ public class ExpressionFactory extends AbstractLocationBased
 		}
 		
 		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
-		exeLogger.trace(this, "Executing expression: {}", expression);
+		logger.debug("Executing expression: {}", expression);
 		
 		try
 		{
@@ -315,7 +313,7 @@ public class ExpressionFactory extends AbstractLocationBased
 			ExpressionParserDetails parser = context.getCurrentParser();
 			String exprTypeParams[] = context.getExpressionTypeParameters();
 			
-			exeLogger.trace(this, "Execution of property expression {} resulted in: {}", expression, result);
+			exeLogger.trace(this, "Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
 	
 			if(!parser.isConversionHandled() && exprTypeParams != null)
 			{

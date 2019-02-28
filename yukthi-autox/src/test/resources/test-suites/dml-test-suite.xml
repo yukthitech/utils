@@ -26,6 +26,12 @@
 						<column name="NAME">employee1</column>
 					</expectedRow>
 				</ccg:sql-assert>
+
+				<ccg:sql-assert-value dataSourceName="dataSource" expected-value="int: 1">
+					<query>
+						SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
+					</query>
+				</ccg:sql-assert-value>
 			</wrap:validations>
 		</testCase>
 	
