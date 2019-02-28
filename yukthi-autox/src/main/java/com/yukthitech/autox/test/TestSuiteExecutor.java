@@ -2,6 +2,7 @@ package com.yukthitech.autox.test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -297,7 +298,7 @@ public class TestSuiteExecutor
 				// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
 				if(!setupExecuted)
 				{
-					if( !executeSetup(testSuite.getName(), testSuite.getSetup()) )
+					if( !executeSetup(testSuite.getName(), testSuite.getSetups()) )
 					{
 						TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
 						results.setSetupFailed(true);
@@ -379,32 +380,39 @@ public class TestSuiteExecutor
 		return successful;
 	}
 	
-	
 	/**
 	 * Executes the setup steps.
 	 */
-	private boolean executeSetup(String prefix, Setup setup)
+	private boolean executeSetup(String prefix, List<Setup> setups)
 	{
-		if(setup == null)
+		if(CollectionUtils.isEmpty(setups))
 		{
 			logger.debug("No {} setup steps found, ignoring global setup execution.", prefix);
 			return true;
 		}
 		
-		logger.debug("Executing {} setup steps specified at location: {}", prefix, setup.getLocation());
+		for(Setup setup : setups)
+		{
+			logger.debug("Executing {} setup steps specified at location: {}", prefix, setup.getLocation());
+			
+			TestCaseResult testCaseResult = setup.execute(context);
+			reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");
+			
+			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+			{
+				return false;
+			}
+		}
 		
-		TestCaseResult testCaseResult = setup.execute(context);
-		reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");
-		
-		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
+		return true;
 	}
 
 	/**
 	 * Executes the cleanup steps.
 	 */
-	private boolean executeCleanup(String prefix, Cleanup cleanup)
+	private boolean executeCleanup(String prefix, List<Cleanup> cleanups)
 	{
-		if(cleanup == null)
+		if(CollectionUtils.isEmpty(cleanups))
 		{
 			logger.debug("No {} cleanup steps found, ignoring global cleanup execution.", prefix);
 			return true;
@@ -412,10 +420,18 @@ public class TestSuiteExecutor
 		
 		logger.debug("Executing {} cleanup steps...", prefix);
 		
-		TestCaseResult testCaseResult = cleanup.execute(context);
-		reportGenerator.createLogFiles(context, testCaseResult, prefix + "-cleanup", null, "");
+		for(Cleanup cleanup : cleanups)
+		{
+			TestCaseResult testCaseResult = cleanup.execute(context);
+			reportGenerator.createLogFiles(context, testCaseResult, prefix + "-cleanup", null, "");
+			
+			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+			{
+				return false;
+			}
+		}
 		
-		return testCaseResult.getStatus() == TestStatus.SUCCESSFUL;
+		return true;
 	}
 	
 	/**
@@ -424,7 +440,12 @@ public class TestSuiteExecutor
 	 */
 	public boolean executeGlobalSetup()
 	{
-		return executeSetup("_global", testSuiteGroup.getSetup());
+		if(testSuiteGroup.getSetup() == null)
+		{
+			return true;
+		}
+		
+		return executeSetup("_global", Arrays.asList(testSuiteGroup.getSetup()));
 	}
 
 	/**
@@ -486,7 +507,7 @@ public class TestSuiteExecutor
 			}
 		}
 		
-		if( !executeCleanup("_global", testSuiteGroup.getCleanup()) )
+		if( testSuiteGroup.getCleanup() != null && !executeCleanup("_global", Arrays.asList(testSuiteGroup.getCleanup())) )
 		{
 			logger.error("Global cleanup failed.");
 			fullExecutionDetails.setCleanupSuccessful(false);

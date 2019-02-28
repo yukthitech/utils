@@ -80,7 +80,16 @@ public class TestSuiteGroup
 	 */
 	public void addTestSuite(TestSuite testSuite)
 	{
-		this.testSuitesMap.put(testSuite.getName(), testSuite);
+		TestSuite existingTestSuite = this.testSuitesMap.get(testSuite.getName());
+		
+		if(existingTestSuite == null)
+		{
+			this.testSuitesMap.put(testSuite.getName(), testSuite);
+		}
+		else
+		{
+			existingTestSuite.merge(testSuite);
+		}
 	}
 	
 	/**

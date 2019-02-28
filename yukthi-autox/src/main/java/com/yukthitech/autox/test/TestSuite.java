@@ -45,12 +45,12 @@ public class TestSuite implements Validateable
 	/**
 	 * Setup steps to be executed before executing test suite.
 	 */
-	private Setup setup;
+	private List<Setup> setups;
 	
 	/**
 	 * Cleanup steps to be executed after executing test suite.
 	 */
-	private Cleanup cleanup;
+	private List<Cleanup> cleanups;
 	
 	/**
 	 * Name to step group mapping.
@@ -63,6 +63,47 @@ public class TestSuite implements Validateable
 	public TestSuite(String name)
 	{
 		this.name = name;
+	}
+	
+	public void merge(TestSuite newTestSuite)
+	{
+		if(newTestSuite.getSetups() != null)
+		{
+			if(this.setups == null)
+			{
+				this.setups = newTestSuite.setups;
+			}
+			else
+			{
+				this.setups.addAll(newTestSuite.setups);
+			}
+		}
+		
+		if(newTestSuite.cleanups != null)
+		{
+			if(this.cleanups == null)
+			{
+				this.cleanups = newTestSuite.cleanups;
+			}
+			else
+			{
+				this.cleanups.addAll(newTestSuite.cleanups);
+			}
+		}
+		
+		if(newTestSuite.testCases != null)
+		{
+			if(this.testCases == null)
+			{
+				this.testCases = newTestSuite.testCases;
+			}
+			else
+			{
+				this.testCases.addAll(newTestSuite.testCases);
+			}
+		}
+		
+		this.nameToGroup.putAll(newTestSuite.nameToGroup);
 	}
 
 	/**
@@ -188,9 +229,9 @@ public class TestSuite implements Validateable
 	 *
 	 * @return the setup steps to be executed before executing test suite
 	 */
-	public Setup getSetup()
+	public List<Setup> getSetups()
 	{
-		return setup;
+		return setups;
 	}
 
 	/**
@@ -198,14 +239,14 @@ public class TestSuite implements Validateable
 	 *
 	 * @param setup the new setup steps to be executed before executing test suite
 	 */
-	public void setSetup(Setup setup)
+	public void addSetup(Setup setup)
 	{
-		if(this.setup != null)
+		if(this.setups == null)
 		{
-			throw new InvalidStateException("Multiple setup are specified under single test suite");
+			this.setups = new ArrayList<>();
 		}
 		
-		this.setup = setup;
+		this.setups.add(setup);
 	}
 
 	/**
@@ -213,9 +254,9 @@ public class TestSuite implements Validateable
 	 *
 	 * @return the cleanup steps to be executed after executing test suite
 	 */
-	public Cleanup getCleanup()
+	public List<Cleanup> getCleanup()
 	{
-		return cleanup;
+		return cleanups;
 	}
 
 	/**
@@ -223,14 +264,14 @@ public class TestSuite implements Validateable
 	 *
 	 * @param cleanup the new cleanup steps to be executed after executing test suite
 	 */
-	public void setCleanup(Cleanup cleanup)
+	public void addCleanup(Cleanup cleanup)
 	{
-		if(this.cleanup != null)
+		if(this.cleanups == null)
 		{
-			throw new InvalidStateException("Multiple cleanup are specified under single test suite");
+			this.cleanups = new ArrayList<>();
 		}
 		
-		this.cleanup = cleanup;
+		this.cleanups.add(cleanup);
 	}
 
 	/**
