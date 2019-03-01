@@ -2,9 +2,8 @@ package com.yukthitech.autox.ide;
 
 import java.io.File;
 
-import org.fife.ui.autocomplete.CompletionProvider;
-
 import com.yukthitech.autox.ide.editor.FileEditor;
+import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 
@@ -33,7 +32,7 @@ public interface IIdeFileManager
 	 * @param fileEditor File editor for which completion provider needs to be created.
 	 * @return matching completion provider.
 	 */
-	public CompletionProvider getCompletionProvider(FileEditor fileEditor);
+	public IIdeCompletionProvider getCompletionProvider(FileEditor fileEditor);
 	
 	/**
 	 * Parses the file and adds the errors/warnings if any to messages.

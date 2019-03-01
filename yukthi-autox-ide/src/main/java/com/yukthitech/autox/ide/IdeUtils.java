@@ -460,4 +460,12 @@ public class IdeUtils
 		matcher.appendTail(buff);
 		return buff.toString();
 	}
+	
+	public static String removeCarriageReturns(String text)
+	{
+		text = text.replace("\r\n", "\n");
+		text = text.replace("\r", "\n");
+		
+		return text;
+	}
 }

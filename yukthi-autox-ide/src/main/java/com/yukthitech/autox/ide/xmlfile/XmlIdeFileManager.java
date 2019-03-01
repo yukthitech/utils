@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +13,7 @@ import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
+import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.model.Project;
 
 /**
@@ -49,7 +49,7 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 	}
 	
 	@Override
-	public CompletionProvider getCompletionProvider(FileEditor fileEditor)
+	public IIdeCompletionProvider getCompletionProvider(FileEditor fileEditor)
 	{
 		return null;
 	}

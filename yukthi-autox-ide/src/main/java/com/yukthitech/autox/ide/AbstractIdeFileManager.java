@@ -7,10 +7,10 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fife.ui.autocomplete.CompletionProvider;
 
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileParseMessage;
+import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 
@@ -71,7 +71,7 @@ public abstract class AbstractIdeFileManager implements IIdeFileManager
 	}
 
 	@Override
-	public CompletionProvider getCompletionProvider(FileEditor fileEditor)
+	public IIdeCompletionProvider getCompletionProvider(FileEditor fileEditor)
 	{
 		return null;
 	}

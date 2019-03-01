@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
-import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
 import org.fife.ui.rsyntaxtextarea.SquiggleUnderlineHighlightPainter;
@@ -128,7 +128,10 @@ public class FileEditor extends RTextScrollPane
 
 		try
 		{
-			syntaxTextArea.setText(FileUtils.readFileToString(file));
+			String loadedText = FileUtils.readFileToString(file);
+			loadedText = IdeUtils.removeCarriageReturns(loadedText);
+			
+			syntaxTextArea.setText(loadedText);
 		} catch(Exception ex)
 		{
 			ex.printStackTrace();
@@ -186,11 +189,20 @@ public class FileEditor extends RTextScrollPane
 		
 		if(this.currentFileManager != null)
 		{
-			CompletionProvider provider = currentFileManager.getCompletionProvider(this);
+			IIdeCompletionProvider provider = currentFileManager.getCompletionProvider(this);
 			
 			if(provider != null)
 			{
-				AutoCompletion ac = new AutoCompletion(provider);
+				AutoCompletion ac = new AutoCompletion(provider) 
+				{
+					@Override
+					protected void insertCompletion(Completion c, boolean typedParamListStartChar)
+					{
+						super.insertCompletion(c, typedParamListStartChar);
+						provider.onAutoCompleteInsert(c);
+					}
+				};
+				
 				// show documentation dialog box
 				ac.setShowDescWindow(true);
 				ac.install(syntaxTextArea);

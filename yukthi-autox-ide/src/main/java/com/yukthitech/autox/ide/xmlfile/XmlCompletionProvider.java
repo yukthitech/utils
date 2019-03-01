@@ -18,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AbstractCompletionProvider;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
-import org.fife.ui.autocomplete.ShorthandCompletion;
 
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.SourceType;
@@ -34,13 +33,15 @@ import com.yukthitech.autox.expr.ParserContentType;
 import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
+import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
+import com.yukthitech.autox.ide.editor.IdeShortHandCompletion;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.CommonUtils;
 
-public class XmlCompletionProvider extends AbstractCompletionProvider
+public class XmlCompletionProvider extends AbstractCompletionProvider implements IIdeCompletionProvider
 {
 	private static Logger logger = LogManager.getLogger(XmlCompletionProvider.class);
 	
@@ -59,6 +60,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 	private FileEditor fileEditor;
 	
 	private IdeContext ideContext;
+	
+	private List<Completion> curCompletions;
+	
+	/**
+	 * Used to specify which text to be replaced when auto completion is used.
+	 */
+	private String alreadyEnteredText;
 	
 	public XmlCompletionProvider(Project project, FileEditor fileEditor, IdeContext ideContext)
 	{
@@ -228,7 +236,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				doc = step.getDocumentation();
 				doc = (doc == null) ? step.getDescription() : doc;
 				
-				completions.add( new ShorthandCompletion(this, step.getNameWithHyphens(), getElementReplacementText(step, location), step.getName(), doc) );
+				completions.add( new IdeShortHandCompletion(this, step.getNameWithHyphens(), getElementReplacementText(step, location), step.getName(), doc) );
 			}
 
 			for(ValidationInfo validation : project.getDocInformation().getValidations())
@@ -241,7 +249,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				doc = validation.getDocumentation();
 				doc = (doc == null) ? validation.getDescription() : doc;
 
-				completions.add( new ShorthandCompletion(this, validation.getNameWithHyphens(), getElementReplacementText(validation, location), validation.getName(), doc) );
+				completions.add( new IdeShortHandCompletion(this, validation.getNameWithHyphens(), getElementReplacementText(validation, location), validation.getName(), doc) );
 			}
 		}
 		
@@ -264,7 +272,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					continue;
 				}
 
-				completions.add( new ShorthandCompletion(this, param.getNameWithHyphens(), getElementReplacementText(param, location), param.getName(), param.getDescription()) );
+				completions.add( new IdeShortHandCompletion(this, param.getNameWithHyphens(), getElementReplacementText(param, location), param.getName(), param.getDescription()) );
 			}
 			
 			Collection<ElementInfo> childElems = stepInfo.getChildElements();
@@ -281,7 +289,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					continue;
 				}
 
-				completions.add( new ShorthandCompletion(this, elem.getNameWithHyphens(), getElementReplacementText(elem, location), elem.getName(), elem.getDescription()) );
+				completions.add( new IdeShortHandCompletion(this, elem.getNameWithHyphens(), getElementReplacementText(elem, location), elem.getName(), elem.getDescription()) );
 			}
 			
 			return completions;
@@ -337,14 +345,14 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					}
 					
 					String name = param.getName().substring(prefix.length());
-					String attrCompletion = location.isFullElementGeneration() ? name + "=\"\"" : name;
+					String attrCompletion = location.isFullElementGeneration() ? name + "=\"###CUR###\"" : name;
 					
-					completions.add( new ShorthandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
+					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
 				}
 				else
 				{
-					String attrCompletion = location.isFullElementGeneration() ? param.getName() + "=\"\"" : param.getName();
-					completions.add( new ShorthandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
+					String attrCompletion = location.isFullElementGeneration() ? param.getName() + "=\"###CUR###\"" : param.getName();
+					completions.add( new IdeShortHandCompletion(this, param.getName(), attrCompletion, param.getName(), param.getDescription()) );
 				}
 			}
 		}
@@ -386,7 +394,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					
 					name = curVal != null ? parser.getName().substring(curVal.length()) : parser.getName();
 					
-					completions.add( new ShorthandCompletion(this, parser.getName(), name + ":", parser.getName(), parser.getDescription()) );
+					completions.add( new IdeShortHandCompletion(this, parser.getName(), name + ":", parser.getName(), parser.getDescription()) );
 				}
 				
 				return completions;
@@ -426,7 +434,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 					
 					name = curVal != null ? locDoc.getName().substring(curVal.length()) : locDoc.getName();
 					
-					completions.add( new ShorthandCompletion(this, locDoc.getName(), name + ":", locDoc.getName(), locDoc.getDescription()) );
+					completions.add( new IdeShortHandCompletion(this, locDoc.getName(), name + ":", locDoc.getName(), locDoc.getDescription()) );
 				}
 				
 				return completions;
@@ -501,13 +509,13 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				doc = (doc == null) ? step.getDescription() : doc;
 
 				complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
-				completions.add( new ShorthandCompletion(this, method.getName(), complText + "()", method.getName() + "()", doc) );
+				completions.add( new IdeShortHandCompletion(this, method.getName(), complText + "()", method.getName() + "()", doc) );
 
 				//auto complete with params
 				if(method.hasParameters())
 				{
 					complText = curVal != null ? method.getName().substring(curVal.length()) : method.getName();
-					completions.add( new ShorthandCompletion(this, method.getName(), complText + method.getParameterString(), method.getName() + method.getParameterString(), doc) );
+					completions.add( new IdeShortHandCompletion(this, method.getName(), complText + method.getParameterString(), method.getName() + method.getParameterString(), doc) );
 				}
 			}
 		}
@@ -525,8 +533,50 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				
 				name = attr.getName();
 				complText = curVal != null ? name.substring(curVal.length()) : name;
-				completions.add( new ShorthandCompletion(this, name, complText, name, name) );
+				completions.add( new IdeShortHandCompletion(this, name, complText, name, name) );
 			}
+		}
+
+		return completions;
+	}
+	
+	private List<Completion> getGeneralTextCompletions(Element elem, String propName, String curVal, boolean cdata)
+	{
+		curVal = curVal.trim();
+		alreadyEnteredText = curVal;
+		
+		List<Completion> completions = new ArrayList<>();
+		
+		if(!cdata && "cdata".startsWith(curVal.toLowerCase()))
+		{
+			String replacementString = "<![CDATA[###CUR###]]>";
+			completions.add( new IdeShortHandCompletion(this, "cdata", replacementString, "CDATA Section", "CDATA Section") );
+		}
+		
+		//TODO: Even when cursor is in cdata, type is coming as text-element. Once that is fixed below code has to be uncommented
+		/*
+		if(!cdata)
+		{
+			return completions;
+		}
+		*/
+		
+		if("list".startsWith(curVal.toLowerCase()))
+		{
+			String replacementString = "<#list ###CUR###seq as item></#list>";
+			completions.add( new IdeShortHandCompletion(this, "list", replacementString, "Freemarker <#list>", "Freemarker <#list>") );
+		}
+
+		if("if".startsWith(curVal.toLowerCase()))
+		{
+			String replacementString = "<#if ###CUR###condition></#if>";
+			completions.add( new IdeShortHandCompletion(this, "if", replacementString, "Freemarker <#if>", "Freemarker <#if>") );
+		}
+
+		if("assign".startsWith(curVal.toLowerCase()))
+		{
+			String replacementString = "<#assign ###CUR###var></#assign>";
+			completions.add( new IdeShortHandCompletion(this, "assign", replacementString, "Freemarker <#assign>", "Freemarker <#assign>") );
 		}
 
 		return completions;
@@ -541,6 +591,17 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 	@Override
 	public List<Completion> getCompletionsAt(JTextComponent comp, Point p)
 	{
+		return curCompletions;
+	}
+	
+	@Override
+	public List<ParameterizedCompletion> getParameterizedCompletions(JTextComponent tc)
+	{
+		return null;
+	}
+	
+	private List<Completion> getCurLocationCompletions()
+	{
 		xmlFileLocation.getXmlFile().getRootElement().populateTestFileTypes(project, new FileParseCollector());
 		
 		switch(xmlFileLocation.getType())
@@ -554,25 +615,32 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 				return getAttributeCompletions(xmlFileLocation);
 			}
 			case ATTRIBUTE_VALUE:
+			{
+				return getAttributeValueCompletions(xmlFileLocation.getParentElement(), xmlFileLocation.getName(), xmlFileLocation.getText());
+			}
 			case CDATA_VALUE:
 			case TEXT_ELEMENT:
 			{
-				return getAttributeValueCompletions(xmlFileLocation.getParentElement(), xmlFileLocation.getName(), xmlFileLocation.getText());
+				List<Completion> completions = getAttributeValueCompletions(xmlFileLocation.getParentElement(), xmlFileLocation.getName(), xmlFileLocation.getText());
+				
+				if(CollectionUtils.isNotEmpty(completions))
+				{
+					return completions;
+				}
+				
+				//TODO: Even when cursor is in cdata, type is coming as text-element
+				return getGeneralTextCompletions(xmlFileLocation.getParentElement(), xmlFileLocation.getName(), xmlFileLocation.getText(), 
+						(xmlFileLocation.getType() == XmlLocationType.CDATA_VALUE));
 			}
 		}
 		
 		return Collections.emptyList();
 	}
-	
-	@Override
-	public List<ParameterizedCompletion> getParameterizedCompletions(JTextComponent tc)
-	{
-		return null;
-	}
-	
+
 	@Override
 	public String getAlreadyEnteredText(JTextComponent comp)
 	{
+		alreadyEnteredText = "";
 		this.xmlFileLocation = fileEditor.getXmlFileLocation();
 
 		if(this.xmlFileLocation == null)
@@ -580,6 +648,34 @@ public class XmlCompletionProvider extends AbstractCompletionProvider
 			return null;
 		}
 		
-		return "";
+		curCompletions = getCurLocationCompletions();
+		return alreadyEnteredText;
+	}
+
+	@Override
+	public void onAutoCompleteInsert(Completion completion)
+	{
+		if(!(completion instanceof IdeShortHandCompletion))
+		{
+			return;
+		}
+		
+		IdeShortHandCompletion ideShortHandCompletion = (IdeShortHandCompletion) completion;
+		int requiredMovement = ideShortHandCompletion.getCursorLeftMovement();
+		
+		if(requiredMovement < 0)
+		{
+			return;
+		}
+		
+		int curPos = fileEditor.getCaretPosition();
+		curPos = curPos - requiredMovement;
+		
+		if(curPos < 0)
+		{
+			curPos = 0;
+		}
+		
+		fileEditor.setCaretPosition(curPos);
 	}
 }

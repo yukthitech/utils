@@ -2,9 +2,8 @@ package com.yukthitech.autox.ide;
 
 import java.io.File;
 
-import org.fife.ui.autocomplete.CompletionProvider;
-
 import com.yukthitech.autox.ide.editor.FileEditor;
+import com.yukthitech.autox.ide.editor.IIdeCompletionProvider;
 import com.yukthitech.autox.ide.model.Project;
 
 /**
@@ -26,7 +25,7 @@ public class DefaultIdeFileManager implements IIdeFileManager
 	}
 
 	@Override
-	public CompletionProvider getCompletionProvider(FileEditor fileEditor)
+	public IIdeCompletionProvider getCompletionProvider(FileEditor fileEditor)
 	{
 		return null;
 	}
