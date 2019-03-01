@@ -2,6 +2,8 @@ package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -44,6 +46,8 @@ import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.editor.FileEditor;
+import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
@@ -117,6 +121,9 @@ public class ProjectExplorer extends JPanel
 	
 	private JToggleButton editorLinkButton = new JToggleButton();
 
+	@Autowired
+	private FileEditorTabbedPane fileEditorTabbedPane;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -173,6 +180,34 @@ public class ProjectExplorer extends JPanel
 		
 		editorLinkButton.setIcon(EDITOR_LINK_ICON);
 		iconPanel.add(editorLinkButton);
+		
+		editorLinkButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if(!editorLinkButton.isSelected())
+				{
+					return;
+				}
+				
+				FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
+				
+				if(editor == null)
+				{
+					return;
+				}
+				
+				File file = editor.getFile();
+				
+				if(file == null)
+				{
+					return;
+				}
+				
+				setActiveFile(file);
+			}
+		});
 		
 		tree.addTreeSelectionListener(new TreeSelectionListener()
 		{
@@ -285,14 +320,26 @@ public class ProjectExplorer extends JPanel
 	
 	public FileTreeNode getFileNode(File file)
 	{
-		ProjectTreeNode projNode = projectTreeModel.getProjectNode(ideContext.getActiveProject());
+		List<ProjectTreeNode> nodes = projectTreeModel.getProjectNodes();
 		
-		if(projNode == null)
+		if(nodes == null || nodes.isEmpty())
 		{
 			return null;
 		}
 		
-		return projNode.getFileNode(file);
+		FileTreeNode fileNode = null;
+		
+		for(ProjectTreeNode projNode : nodes)
+		{
+			fileNode = projNode.getFileNode(file);
+			
+			if(fileNode != null)
+			{
+				return fileNode;
+			}
+		}
+		
+		return null;
 	}
 	
 	public void setActiveTreeNode(BaseTreeNode activeTreeNode)
