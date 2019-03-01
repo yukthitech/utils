@@ -3,7 +3,6 @@ package com.yukthitech.autox.ide.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,6 +50,8 @@ public class Project implements Serializable
 	private transient File baseFolder;
 	
 	private transient Set<File> reservedFiles;
+	
+	private transient boolean defaultEntriesAdded = false; 
 	
 	public Project()
 	{
@@ -159,32 +160,45 @@ public class Project implements Serializable
 
 	public Set<String> getClassPathEntriesList()
 	{
-		String libJarPath = null;
+		if(!defaultEntriesAdded)
+		{
+			addDefaultClasspathEntries();
+		}
+		
+		return classPathEntriesList;
+	}
+	
+	private void addDefaultClasspathEntries()
+	{
+		if(classPathEntriesList == null)
+		{
+			classPathEntriesList = new HashSet<>();
+		}
+
+		//add lib folder of project
 		File libFolder = new File(baseFolder, "lib");
+		String libJarPath = null;
 		
 		try
 		{
 			libJarPath = libFolder.getCanonicalPath() + File.separator + "*";
+			classPathEntriesList.add(libJarPath);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while getting canonical path of lib folder: " + libFolder.getPath(), ex);
 		}
 		
-		if(classPathEntriesList == null)
-		{
-			return Collections.singleton(libJarPath);
-		}
-		else if(!classPathEntriesList.contains(libJarPath))
-		{
-			classPathEntriesList.add(libJarPath);
-		}
+		//add main resources and config folders
+		classPathEntriesList.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
+		classPathEntriesList.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
 		
-		return classPathEntriesList;
+		defaultEntriesAdded = true;
 	}
 
 	public void setClassPathEntries(Set<String> classPathEntriesList)
 	{
 		this.classPathEntriesList = classPathEntriesList;
+		addDefaultClasspathEntries();
 	}
 
 	/**
