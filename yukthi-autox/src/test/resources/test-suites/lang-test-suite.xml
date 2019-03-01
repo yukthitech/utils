@@ -333,7 +333,7 @@
 			</ccg:if>
 		
 			<ccg:step-group-ref name="factorialGroup1">
-				<parameter name="value" type="int" value="${attr.parameters.value - 1}"/>
+				<parameter name="value" value="int: ${attr.parameters.value - 1}"/>
 			</ccg:step-group-ref>
 		
 			<ccg:set expression="result" value="int: ${attr.parameters.value * attr.result}"/>
@@ -345,7 +345,7 @@
 			</description>
 		
 			<ccg:step-group-ref name="factorialGroup1">
-				<parameter name="value" type="int" value="4"/>
+				<parameter name="value" value="int: 4"/>
 			</ccg:step-group-ref>
 		
 			<ccg:assert-equals actual="attr: result" expected="int: 24"/>
@@ -357,7 +357,7 @@
 			<ccg:set expression="checkVar" value="int: 1"/>
 		
 			<ccg:step-group-ref name="factorialGroup1">
-				<parameter name="value" type="int" value="4"/>
+				<parameter name="value" value="int: 4"/>
 			</ccg:step-group-ref>
 		
 			<ccg:assert-equals actual="attr: result" expected="int: 24"/>

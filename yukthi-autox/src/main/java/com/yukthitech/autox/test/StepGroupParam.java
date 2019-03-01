@@ -2,7 +2,8 @@ package com.yukthitech.autox.test;
 
 import java.io.Serializable;
 
-import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 
 /**
  * Parameter that can be passed during step group execution.
@@ -10,8 +11,6 @@ import com.yukthitech.autox.common.AutomationUtils;
  */
 public class StepGroupParam implements Serializable
 {
-	
-	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -22,12 +21,8 @@ public class StepGroupParam implements Serializable
 	/**
 	 * Value of the param.
 	 */
+	@Param(description = "Value of the parameter", sourceType = SourceType.EXPRESSION)
 	private Object value;
-	
-	/**
-	 * Type to be coverted to.
-	 */
-	private String type;
 
 	/**
 	 * Gets the name of the group param.
@@ -60,15 +55,6 @@ public class StepGroupParam implements Serializable
 	}
 	
 	/**
-	 * Fetches final result value. If needed type conversion will be done.
-	 * @return converted value
-	 */
-	public Object getResultValue()
-	{
-		return AutomationUtils.convert(value, type);
-	}
-
-	/**
 	 * Sets the value of the param.
 	 *
 	 * @param value the new value of the param
@@ -78,26 +64,6 @@ public class StepGroupParam implements Serializable
 		this.value = value;
 	}
 	
-	/**
-	 * Gets the type to be coverted to.
-	 *
-	 * @return the type to be coverted to
-	 */
-	public String getType()
-	{
-		return type;
-	}
-
-	/**
-	 * Sets the type to be coverted to.
-	 *
-	 * @param type the new type to be coverted to
-	 */
-	public void setType(String type)
-	{
-		this.type = type;
-	}
-
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

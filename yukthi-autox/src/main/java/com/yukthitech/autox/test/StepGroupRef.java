@@ -10,7 +10,6 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -31,7 +30,6 @@ public class StepGroupRef extends AbstractStep
 	/**
 	 * Parameters for the step group to be executed.
 	 */
-	@SkipParsing
 	@Param(description = "Parameters to be passed to step group.", required = false)
 	private Map<String, StepGroupParam> params;
 	
@@ -69,27 +67,25 @@ public class StepGroupRef extends AbstractStep
 			throw new InvalidStateException("No step group found with specified name: {}", name);
 		}
 
-		Map<String, StepGroupParam> params = null;
 		Map<String, Object> paramValues = null;
 
 		//build the params for step group to execute
 		if(this.params != null)
 		{
-			params = new HashMap<>(this.params);
-			params = AutomationUtils.replaceExpressions("params", context, params);
-
 			paramValues = new HashMap<>();
 			
 			for(String key : params.keySet())
 			{
-				paramValues.put(key, params.get(key).getResultValue());
+				paramValues.put(key, params.get(key).getValue());
 			}
 		}
 		
 		stepGroup = (StepGroup) stepGroup.clone();
 		stepGroup.setLoggingDisabled(super.isLoggingDisabled());
-		stepGroup.setParams(paramValues);
 		
+		logger.debug(this, "Executing step-group '{}' with parameters: {}", name, paramValues);
+		
+		stepGroup.setParams(paramValues);
 		stepGroup.execute(context, logger);
 		
 		return true;
