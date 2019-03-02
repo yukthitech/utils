@@ -47,7 +47,7 @@ public class FunctionRef extends AbstractStep
 	 * Adds the specified param.
 	 * @param param
 	 */
-	public void addParameter(FunctionParam param)
+	public void addParam(FunctionParam param)
 	{
 		if(this.params == null)
 		{

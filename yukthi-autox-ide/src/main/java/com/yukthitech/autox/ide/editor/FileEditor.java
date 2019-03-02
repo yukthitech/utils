@@ -448,6 +448,8 @@ public class FileEditor extends JPanel
 		
 		try
 		{
+			syntaxTextArea.requestFocus();
+			
 			int pos = syntaxTextArea.getLineStartOffset(line);
 			
 			//if current position is same as new position
@@ -708,7 +710,7 @@ public class FileEditor extends JPanel
 		return buff.toString();
 	}
 	
-	public String executeFindOperation(FindCommand command, FindOperation op)
+	public synchronized String executeFindOperation(FindCommand command, FindOperation op)
 	{
 		String fullText = syntaxTextArea.getText();
 		int startPos = getCaretPositionForFind(command);

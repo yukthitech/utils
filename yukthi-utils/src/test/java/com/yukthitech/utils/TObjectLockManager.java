@@ -240,4 +240,27 @@ public class TObjectLockManager
 		
 		Assert.assertEquals(objectLockManager.getLockCount(), 0, "Some locks are not released.");
 	}
+	
+	/**
+	 * Tests that multiple locking on same object is not creating any problem
+	 */
+	@Test(groups = ITestGroups.UNIT_TESTS)
+	public void testLockMultipleTimes() throws Exception
+	{
+		for(int i = 0; i < 100; i++)
+		{
+			String s = new String("testObject");
+			
+			objectLockManager.lockObject(s);
+			
+			try
+			{
+				System.out.println("Locked: " + i);
+				Thread.sleep(10);
+			}finally
+			{
+				objectLockManager.releaseObject(s);
+			}
+		}
+	}
 }
