@@ -357,7 +357,7 @@ public class TestSuiteExecutor
 			// Note: setup will be executed only if atleast one test case is executed in current test suite
 			if(setupExecuted)
 			{
-				if( !executeCleanup(testSuite.getName(), testSuite.getCleanup()) )
+				if( !executeCleanup(testSuite.getName(), testSuite.getCleanups()) )
 				{
 					fullExecutionDetails.testSuiteFailed(testSuite, "Failing as cleanup of test suite is failed");
 					return false;
@@ -412,6 +412,12 @@ public class TestSuiteExecutor
 	 */
 	private boolean executeCleanup(String prefix, List<Cleanup> cleanups)
 	{
+		if(context.getInteractiveEnvironmentContext() != null)
+		{
+			logger.debug("As the execution is part of interactive environment, skipping cleanup of: {}", prefix);
+			return true;
+		}
+		
 		if(CollectionUtils.isEmpty(cleanups))
 		{
 			logger.debug("No {} cleanup steps found, ignoring global cleanup execution.", prefix);
@@ -440,6 +446,11 @@ public class TestSuiteExecutor
 	 */
 	public boolean executeGlobalSetup()
 	{
+		if(context.getInteractiveEnvironmentContext() != null && !context.getInteractiveEnvironmentContext().isExecuteGlobalSetup())
+		{
+			return true;
+		}
+		
 		if(testSuiteGroup.getSetup() == null)
 		{
 			return true;
@@ -513,6 +524,12 @@ public class TestSuiteExecutor
 			fullExecutionDetails.setCleanupSuccessful(false);
 			
 			successful = false;
+		}
+		
+		if(context.getInteractiveEnvironmentContext() != null)
+		{
+			logger.debug("As this is interactive environment, skipping the report generation");
+			return successful;
 		}
 		
 		//create final report files

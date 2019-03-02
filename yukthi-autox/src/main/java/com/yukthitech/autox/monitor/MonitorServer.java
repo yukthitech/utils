@@ -17,6 +17,7 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.monitor.ienv.InteractiveStepHandler;
+import com.yukthitech.autox.monitor.ienv.InteractiveTestCaseExecHandler;
 import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -96,6 +97,7 @@ public class MonitorServer
 		readThread = new Thread(this::readDataFromClient, "Monitor Reader");
 		
 		addAsyncServerDataHandler(new InteractiveStepHandler(AutomationContext.getInstance()));
+		addAsyncServerDataHandler(new InteractiveTestCaseExecHandler(AutomationContext.getInstance()));
 	}
 	
 	/**
@@ -156,6 +158,8 @@ public class MonitorServer
 			try
 			{
 				Serializable object = (Serializable) clientInputStream.readObject();
+				logger.debug("Received command from client: {}", object);
+				
 				listenerManager.get().processData(object);
 			}catch(Exception ex)
 			{

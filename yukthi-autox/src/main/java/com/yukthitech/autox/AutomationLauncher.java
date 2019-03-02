@@ -127,6 +127,8 @@ public class AutomationLauncher
 				for(TestSuite testSuite : testDataFile.getTestSuites())
 				{
 					logger.debug("Loading test suite '{}' from file: {}", testSuite.getName(), filePath);
+					
+					testSuite.setFile(xmlFile);
 					testSuiteGroup.addTestSuite(testSuite);
 				}
 				
@@ -139,7 +141,7 @@ public class AutomationLauncher
 					
 					if(testDataFile.getSetup().getLocation() == null)
 					{
-						testDataFile.getSetup().setLocation(filePath);
+						testDataFile.getSetup().setLocation(filePath, -1);
 					}
 					
 					testSuiteGroup.setSetup(testDataFile.getSetup());
@@ -155,7 +157,7 @@ public class AutomationLauncher
 					
 					if(testDataFile.getCleanup().getLocation() == null)
 					{
-						testDataFile.getCleanup().setLocation(filePath);
+						testDataFile.getCleanup().setLocation(filePath, -1);
 					}
 					
 					testSuiteGroup.setCleanup(testDataFile.getCleanup());
@@ -384,6 +386,9 @@ public class AutomationLauncher
 			
 			if(isInteractive)
 			{
+				InteractiveEnvironmentContext interactiveEnvironmentContext = new InteractiveEnvironmentContext(testSuiteGroup);
+				context.setInteractiveEnvironmentContext(interactiveEnvironmentContext);
+				
 				if(!context.isMonitoringEnabled())
 				{
 					System.err.println("Tried to start interactive environment without monitoring.");

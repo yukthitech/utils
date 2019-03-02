@@ -1,1 +1,11 @@
-{"name":"Autox","appConfigFilePath":"src/test/resources/app-configuration.xml","appPropertyFilePath":"src/test/resources/app.properties","testSuitesFoldersList":["src\\test\\resources\\test-suites"],"classPathEntriesList":["C:\\Users\\akiran\\git\\utils\\yukthi-autox\\src\\test\\resources","C:\\Users\\akiran\\git\\utils\\yukthi-autox\\lib\\*","D:\\p4a\\razor\\devops\\sdp\\services\\platform\\sdp-automation\\lib\\*"]}
+{
+  "name": "Autox",
+  "appConfigFilePath": "src/test/resources/app-configuration.xml",
+  "appPropertyFilePath": "src/test/resources/app.properties",
+  "testSuitesFoldersList": [
+    "src\\test\\resources\\test-suites"
+  ],
+  "classPathEntriesList": [
+    "C:\\Users\\akiran\\git\\utils\\yukthi-autox\\src\\test\\resources"
+  ]
+}

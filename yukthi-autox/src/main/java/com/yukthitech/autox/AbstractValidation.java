@@ -34,6 +34,11 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	protected String location;
 	
 	/**
+	 * Line number where this step is defined.
+	 */
+	protected int lineNumber = -1;
+	
+	/**
 	 * Optional data provider for the step.
 	 */
 	private IDataProvider dataProvider;
@@ -80,14 +85,14 @@ public abstract class AbstractValidation implements IValidation, Validateable
 		return disableLogging;
 	}
 
-
 	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
+	 * @see com.yukthitech.autox.ILocationBased#setLocation(java.lang.String, int)
 	 */
 	@Override
-	public void setLocation(String location)
+	public void setLocation(String location, int lineNumber)
 	{
 		this.location = location;
+		this.lineNumber = lineNumber;
 	}
 
 	/* (non-Javadoc)
@@ -99,6 +104,11 @@ public abstract class AbstractValidation implements IValidation, Validateable
 		return location;
 	}
 
+	@Override
+	public int getLineNumber()
+	{
+		return lineNumber;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#getDataProvider()

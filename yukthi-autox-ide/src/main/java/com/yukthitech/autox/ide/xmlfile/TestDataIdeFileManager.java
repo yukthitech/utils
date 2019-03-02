@@ -133,6 +133,29 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	}
 	
 	@Override
+	public int getActiveElementLineNumber(FileEditor fileEditor, String nodeType)
+	{
+		XmlFile xmlFile = getXmlFile(fileEditor.getFile(), fileEditor.getContent());
+
+		if(xmlFile == null)
+		{
+			return -1;
+		}
+		
+		xmlFile.getRootElement().populateTestFileTypes(fileEditor.getProject(), new FileParseCollector());
+		
+		int curLineNo = fileEditor.getCurrentLineNumber() + 1;
+		Element curElement = xmlFile.getElement(nodeType, curLineNo);
+
+		if(curElement == null)
+		{
+			return -1;
+		}
+		
+		return curElement.getStartLocation().getStartLineNumber();
+	}
+	
+	@Override
 	public String getActiveElementText(FileEditor fileEditor, String nodeType)
 	{
 		String content = fileEditor.getContent();

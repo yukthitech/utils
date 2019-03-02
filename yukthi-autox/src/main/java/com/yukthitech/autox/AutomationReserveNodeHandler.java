@@ -93,6 +93,11 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	{
 		this.fileBeingParsed = fileBeingParsed;
 	}
+	
+	public String getFileBeingParsed()
+	{
+		return fileBeingParsed;
+	}
 
 	/**
 	 * Loads all step types found in specified base packages.
@@ -156,7 +161,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 
 			if(step != null)
 			{
-				step.setLocation(fileBeingParsed + ":" + locator.getLineNumber());
+				step.setLocation(fileBeingParsed + ":" + locator.getLineNumber(), locator.getLineNumber());
 				return step;
 			}
 			

@@ -127,7 +127,14 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 			}
 		}
 		
-		return super.createBean(node, att, loader);
+		Object bean = super.createBean(node, att, loader);
+		
+		if(bean instanceof ILocationBased)
+		{
+			((ILocationBased) bean).setLocation(reserveNodeHandler.getFileBeingParsed(), saxLocator.getLineNumber());
+		}
+		
+		return bean;
 	}
 	
 	@Override

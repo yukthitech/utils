@@ -27,7 +27,7 @@
 					</expectedRow>
 				</ccg:sql-assert>
 
-				<ccg:sql-assert-value dataSourceName="dataSource" expected-value="int: 1">
+				<ccg:sql-assert-value dataSourceName="dataSource" expectedValue="int: 1">
 					<query>
 						SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>

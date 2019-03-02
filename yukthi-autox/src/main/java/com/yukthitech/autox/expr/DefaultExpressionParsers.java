@@ -91,6 +91,19 @@ public class DefaultExpressionParsers
 		};
 	}
 
+	@ExpressionParser(type = "param", description = "Parses specified expression as parameter.", example = "param: paramName")
+	public IPropertyPath paramParser(ExpressionParserContext parserContext, String expression)
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				return parserContext.getAutomationContext().getParameter(expression);
+			}
+		};
+	}
+
 	@ExpressionParser(type = "xpath", description = "Parses specified expression as xpath on context.", example = "xpath: /attr/bean/value1")
 	public IPropertyPath xpathParser(ExpressionParserContext parserContext, String expression)
 	{
@@ -426,7 +439,7 @@ public class DefaultExpressionParsers
 
 					if(is == null)
 					{
-						throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", expression);
+						throw new InvalidArgumentException("Invalid/non-existing resource specified for loading: {}", expression);
 					}
 					
 					data = IOUtils.toString(is);

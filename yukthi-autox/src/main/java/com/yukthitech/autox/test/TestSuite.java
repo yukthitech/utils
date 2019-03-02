@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,12 +58,43 @@ public class TestSuite implements Validateable
 	 */
 	private Map<String, StepGroup> nameToGroup = new HashMap<>();
 	
+	/**
+	 * File in which this test suite is defined.
+	 */
+	private File file;
+	
 	public TestSuite()
 	{}
 	
 	public TestSuite(String name)
 	{
 		this.name = name;
+	}
+	
+	/**
+	 * Sets the file in which this test suite is defined.
+	 *
+	 * @param file the new file in which this test suite is defined
+	 */
+	public void setFile(File file)
+	{
+		try
+		{
+			this.file = file.getCanonicalFile();
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while determining cannotical path", ex);
+		}
+	}
+	
+	/**
+	 * Gets the file in which this test suite is defined.
+	 *
+	 * @return the file in which this test suite is defined
+	 */
+	public File getFile()
+	{
+		return file;
 	}
 	
 	public void merge(TestSuite newTestSuite)
@@ -254,7 +286,7 @@ public class TestSuite implements Validateable
 	 *
 	 * @return the cleanup steps to be executed after executing test suite
 	 */
-	public List<Cleanup> getCleanup()
+	public List<Cleanup> getCleanups()
 	{
 		return cleanups;
 	}

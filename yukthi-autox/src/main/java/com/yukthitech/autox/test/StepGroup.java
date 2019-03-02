@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -18,7 +19,7 @@ import com.yukthitech.autox.test.lang.steps.ReturnException;
  * @author akiran
  */
 @Executable(name = "stepGroup", message = "Can be used to group multiple steps into single step")
-public class StepGroup implements IStepContainer, IStep, Cloneable
+public class StepGroup extends AbstractLocationBased implements IStepContainer, IStep, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -50,11 +51,6 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	 */
 	private Map<String, Object> params;
 	
-	/**
-	 * Used to maintain the location of step group.
-	 */
-	private String location;
-
 	/**
 	 * Optional data provider for the step.
 	 */
@@ -169,25 +165,6 @@ public class StepGroup implements IStepContainer, IStep, Cloneable
 	public boolean isLoggingDisabled()
 	{
 		return loggingDisabled;
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
-	 */
-	@Override
-	public void setLocation(String location)
-	{
-		this.location = location;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#getLocation()
-	 */
-	@Override
-	public String getLocation()
-	{
-		return location;
 	}
 
 	/* (non-Javadoc)

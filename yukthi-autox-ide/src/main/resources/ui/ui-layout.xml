@@ -72,6 +72,9 @@
 			<item label="Run Selected Steps..." action="runSelectedSteps">
 				<short-key ctrl="true" key="ENTER" />
 			</item>
+			<item label="Run To Current Step" action="runToCurrentStep">
+				<short-key ctrl="true" shift="true" key="ENTER" />
+			</item>
 		</menu>
 
 		<menu label="Window" mnemonic="W">

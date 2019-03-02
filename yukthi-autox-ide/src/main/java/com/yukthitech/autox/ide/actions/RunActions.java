@@ -3,6 +3,7 @@ package com.yukthitech.autox.ide.actions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.JOptionPane;
 
@@ -22,6 +23,7 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.InProgressDialog;
 import com.yukthitech.autox.monitor.ienv.InteractiveExecuteSteps;
+import com.yukthitech.autox.monitor.ienv.InteractiveTestCaseExecDetails;
 
 @ActionHolder
 public class RunActions
@@ -89,7 +91,7 @@ public class RunActions
 		executionEnvironmentManager.executeTestCase(project, testCase);
 	}
 	
-	public void executeStepCode(String code, Project project)
+	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
 	{
 		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
 		
@@ -118,7 +120,15 @@ public class RunActions
 					
 					if(!newInteractiveEnv.isTerminated())
 					{
-						newInteractiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
+						if(code != null)
+						{
+							newInteractiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
+						}
+						
+						if(envCallback != null)
+						{
+							envCallback.accept(newInteractiveEnv);
+						}
 					}
 				}
 			});
@@ -127,7 +137,6 @@ public class RunActions
 		{
 			interactiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
 		}
-
 	}
 	
 	@Action
@@ -155,7 +164,48 @@ public class RunActions
 			}
 		}
 
-		executeStepCode(selectedText, project);
+		executeStepCode(selectedText, project, null);
+	}
+	
+	@Action
+	public synchronized void runToCurrentStep()
+	{
+		FileEditor fileEditor = fileEditorTabbedPane.getCurrentFileEditor();
+		
+		if(fileEditor == null)
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "There is no active test-suite file for execution.");
+			return;
+		}
+		
+		Project project = fileEditor.getProject();
+		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
+		
+		if(interactiveEnv != null)
+		{
+			JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "An interactive environment is already active.");
+			return;
+		}
+
+		String testCaseName = fileEditor.getCurrentElementName(NODE_TEST_CASE);
+		int stepLineNo = testCaseName != null ? fileEditor.getCurrentElementLineNo(IIdeConstants.ELEMENT_TYPE_STEP) : -1;
+		
+		if(testCaseName == null || stepLineNo <= 0)
+		{
+			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), "At current position found no test-case or executable step.\n"
+					+ "Would you like to execute global setup only?", "Run To Position..", JOptionPane.YES_NO_OPTION);
+			
+			if(res == JOptionPane.NO_OPTION)
+			{
+				return;
+			}
+		}
+		
+		executeStepCode(null, project, env -> 
+		{
+			logger.debug("Sending command to execute test case '{}' till line number: {}", testCaseName, stepLineNo);
+			env.sendDataToServer(new InteractiveTestCaseExecDetails(testCaseName, fileEditor.getFile().getPath(), stepLineNo));
+		});
 	}
 	
 	@Action

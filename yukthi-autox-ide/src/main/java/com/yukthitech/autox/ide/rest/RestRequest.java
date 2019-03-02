@@ -238,7 +238,7 @@ public class RestRequest extends JPanel
 					System.out.println(code);
 					System.out.println("-------------------------------------");
 
-					runAction.executeStepCode(code, projects.get(projectsComboBox.getSelectedIndex()));
+					runAction.executeStepCode(code, projects.get(projectsComboBox.getSelectedIndex()), null);
 
 					if(chckbxGenerateCode.isSelected())
 					{

@@ -11,10 +11,22 @@ public abstract class AbstractLocationBased implements ILocationBased
 	 */
 	private String location;
 	
+	/**
+	 * Line number.
+	 */
+	private int lineNumber;
+	
 	@Override
-	public void setLocation(String location)
+	public void setLocation(String location, int lineNumber)
 	{
 		this.location = location;
+		this.lineNumber = lineNumber;
+	}
+	
+	@Override
+	public int getLineNumber()
+	{
+		return lineNumber;
 	}
 
 	@Override

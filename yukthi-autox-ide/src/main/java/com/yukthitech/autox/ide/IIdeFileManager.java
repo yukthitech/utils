@@ -85,6 +85,17 @@ public interface IIdeFileManager
 	}
 	
 	/**
+	 * Fetches line number of the active element.
+	 * @param fileEditor file editor in use.
+	 * @param nodeType node type to be fetched.
+	 * @return line number of active element.
+	 */
+	public default int getActiveElementLineNumber(FileEditor fileEditor, String nodeType)
+	{
+		return -1;
+	}
+	
+	/**
 	 * Checks whether steps can be inserted at current position. 
 	 * @param fileEditor file editor in use.
 	 * @return flag indicating insertable position or not.

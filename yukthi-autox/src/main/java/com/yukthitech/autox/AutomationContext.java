@@ -162,7 +162,15 @@ public class AutomationContext
 	 */
 	private boolean readyToInteract;
 	
+	/**
+	 * The test suite parser handler.
+	 */
 	private TestSuiteParserHandler testSuiteParserHandler;
+	
+	/**
+	 * The interactive environment context.
+	 */
+	private InteractiveEnvironmentContext interactiveEnvironmentContext;
 
 	/**
 	 * Constructor.
@@ -447,6 +455,25 @@ public class AutomationContext
 	public Map<String, Object> getAttr()
 	{
 		return Collections.unmodifiableMap(nameToAttr);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getParam()
+	{
+		return (Map<String, Object>) nameToAttr.get("parameters");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Object getParameter(String name)
+	{
+		Map<String, Object> paramMap = (Map<String, Object>) nameToAttr.get("parameters");
+		
+		if(paramMap == null)
+		{
+			return null;
+		}
+		
+		return paramMap.get(name);
 	}
 	
 	/**
@@ -791,6 +818,9 @@ public class AutomationContext
 		}
 	}
 	
+	/**
+	 * Send ready to interact.
+	 */
 	public void sendReadyToInteract()
 	{
 		readyToInteract = true;
@@ -835,6 +865,26 @@ public class AutomationContext
 	public void setTestSuiteParserHandler(TestSuiteParserHandler testSuiteParserHandler)
 	{
 		this.testSuiteParserHandler = testSuiteParserHandler;
+	}
+
+	/**
+	 * Gets the interactive environment context.
+	 *
+	 * @return the interactive environment context
+	 */
+	public InteractiveEnvironmentContext getInteractiveEnvironmentContext()
+	{
+		return interactiveEnvironmentContext;
+	}
+
+	/**
+	 * Sets the interactive environment context.
+	 *
+	 * @param interactiveEnvironmentContext the new interactive environment context
+	 */
+	public void setInteractiveEnvironmentContext(InteractiveEnvironmentContext interactiveEnvironmentContext)
+	{
+		this.interactiveEnvironmentContext = interactiveEnvironmentContext;
 	}
 
 	/**

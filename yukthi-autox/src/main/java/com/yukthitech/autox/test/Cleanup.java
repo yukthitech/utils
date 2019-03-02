@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.ILocationBased;
@@ -16,7 +17,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
 /**
  * Represents list of steps that needs to be executed after executing testing unit.
  */
-public class Cleanup implements IStepContainer, Validateable, ILocationBased
+public class Cleanup extends AbstractLocationBased implements IStepContainer, Validateable, ILocationBased
 {
 	/**
 	 * Name for logger and other purposes.
@@ -27,11 +28,6 @@ public class Cleanup implements IStepContainer, Validateable, ILocationBased
 	 * Steps for the test case.
 	 */
 	private List<IStep> steps = new ArrayList<>();
-	
-	/**
-	 * Used to maintain the location of step.
-	 */
-	protected String location;
 
 	/*
 	 * (non-Javadoc)
@@ -118,23 +114,5 @@ public class Cleanup implements IStepContainer, Validateable, ILocationBased
 		{
 			throw new ValidateException("No steps provided for setup");
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#setLocation(java.lang.String)
-	 */
-	@Override
-	public void setLocation(String location)
-	{
-		this.location = location;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#getLocation()
-	 */
-	@Override
-	public String getLocation()
-	{
-		return location;
 	}
 }

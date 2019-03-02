@@ -193,8 +193,7 @@ public class ActionPlanExecutor
 		TestCase dummy = new TestCase();
 		dummy.setName("action-plan");
 		
-		TestSuite testSuite = new TestSuite();
-		testSuite.setName("action-plan-test-suite");
+		TestSuite testSuite = new TestSuite("action-plan-test-suite");
 		testSuite.addTestCase(dummy);
 		
 		//populate init context params

@@ -484,6 +484,11 @@ public class FileEditor extends JPanel
 		return currentFileManager.getActiveElement(this, nodeType);
 	}
 
+	public int getCurrentElementLineNo(String nodeType)
+	{
+		return currentFileManager.getActiveElementLineNumber(this, nodeType);
+	}
+
 	public String getCurrentElementText(String nodeType)
 	{
 		return currentFileManager.getActiveElementText(this, nodeType);

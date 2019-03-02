@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
-import com.yukthitech.autox.IValidation;
+import com.yukthitech.autox.InteractiveExecutionController;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -287,9 +288,24 @@ public class TestCase implements IStepContainer, Validateable
 		
 		try
 		{
+			TestSuite activeTestSuite = context.getActiveTestSuite();
+			InteractiveExecutionController executionController = (context.getInteractiveEnvironmentContext() == null) ? null : context.getInteractiveEnvironmentContext().getExecutionController();
+			File testSuiteFile = (activeTestSuite != null) ? activeTestSuite.getFile() : null; 
+			
 			// execute the steps involved
 			for(IStep step : steps)
 			{
+				if(executionController != null && testSuiteFile != null && step.getLineNumber() >= 0)
+				{
+					InteractiveExecutionController.Action action = executionController.getAction(testSuiteFile, step.getLineNumber());
+					
+					if(action == InteractiveExecutionController.Action.STOP_EXECUTION)
+					{
+						logger.debug("Because of stop point at {}#{} stopping the execution", testSuiteFile.getName(), step.getLineNumber());
+						return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+					}
+				}
+				
 				try
 				{
 					StepExecutor.executeStep(context, exeLogger, step);
@@ -385,13 +401,6 @@ public class TestCase implements IStepContainer, Validateable
 		if(CollectionUtils.isEmpty(steps))
 		{
 			throw new ValidateException("No steps specified for execution of test case - " + name);
-		}
-		
-		IStep lastStep = steps.get(steps.size() - 1);
-
-		if( !(lastStep instanceof IValidation) && expectedException == null)
-		{
-			throw new ValidateException("No validations provided at end of test case - " + name);
 		}
 	}
 }
