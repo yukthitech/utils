@@ -1,5 +1,6 @@
 package com.yukthitech.autox.ide.editor;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
@@ -49,7 +51,7 @@ import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class FileEditor extends RTextScrollPane
+public class FileEditor extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -58,12 +60,14 @@ public class FileEditor extends RTextScrollPane
 	private static ImageIcon ERROR_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark_error.png", 16);
 	
 	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark_warn.png", 16);
+	
+	private RTextScrollPane scrollPane;
 
 	private Project project;
 
 	private File file;
 
-	private RSyntaxTextArea syntaxTextArea = new RSyntaxTextArea("");
+	private RSyntaxTextArea syntaxTextArea;
 	
 	private RSyntaxTextAreaHighlighter highlighter = new RSyntaxTextAreaHighlighter();
 
@@ -87,17 +91,24 @@ public class FileEditor extends RTextScrollPane
 	 */
 	private Object parsedFileContent;
 	
+	private ErrorHighLigherPanel errorHighLigherPanel;
+	
 	public FileEditor(Project project, File file)
 	{
-		super(new RSyntaxTextArea());
+		scrollPane = new RTextScrollPane(new RSyntaxTextArea());
+		scrollPane.getGutter().setBookmarkingEnabled(true);
+
+		errorHighLigherPanel = new ErrorHighLigherPanel(this);
 		
-		getGutter().setBookmarkingEnabled(true);
+		super.setLayout(new BorderLayout());
+		super.add(scrollPane, BorderLayout.CENTER);
+		super.add(errorHighLigherPanel, BorderLayout.EAST);
 
 		try
 		{
-			Field iconAreaFld = getGutter().getClass().getDeclaredField("iconArea");
+			Field iconAreaFld = scrollPane.getGutter().getClass().getDeclaredField("iconArea");
 			iconAreaFld.setAccessible(true);
-			iconArea = (IconRowHeader) iconAreaFld.get(getGutter());
+			iconArea = (IconRowHeader) iconAreaFld.get(scrollPane.getGutter());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while fetching icon area", ex);
@@ -118,11 +129,11 @@ public class FileEditor extends RTextScrollPane
 		});
 
 		this.project = project;
-		this.syntaxTextArea = (RSyntaxTextArea) super.getViewport().getView();
+		this.syntaxTextArea = (RSyntaxTextArea) scrollPane.getViewport().getView();
 		this.syntaxTextArea.setHighlighter(highlighter);
 		this.syntaxTextArea.setToolTipSupplier(this::getToolTip);
 		
-		super.setLineNumbersEnabled(true);
+		scrollPane.setLineNumbersEnabled(true);
 
 		this.file = file;
 
@@ -215,6 +226,11 @@ public class FileEditor extends RTextScrollPane
 		fileContentChanged(false);
 	}
 	
+	public RSyntaxTextArea getTextArea()
+	{
+		return syntaxTextArea;
+	}
+	
 	public void insertStepCode(String code)
 	{
 		int pos = syntaxTextArea.getCaretPosition();
@@ -229,6 +245,11 @@ public class FileEditor extends RTextScrollPane
 	public boolean isStepInsertablePosition()
 	{
 		return currentFileManager.isStepInsertablePosition(this);
+	}
+	
+	public List<FileParseMessage> getCurrentHighlights()
+	{
+		return currentHighlights;
 	}
 
 	private void setSyntaxStyle()
@@ -327,7 +348,7 @@ public class FileEditor extends RTextScrollPane
 	
 	private void addMessage(FileParseMessage message)
 	{
-		Gutter gutter = getGutter();
+		Gutter gutter = scrollPane.getGutter();
 		
 		try
 		{
@@ -351,6 +372,7 @@ public class FileEditor extends RTextScrollPane
 			}
 			
 			this.currentHighlights.add(message);
+			this.errorHighLigherPanel.addMessage(message);
 			
 		}catch(BadLocationException ex)
 		{
@@ -360,9 +382,12 @@ public class FileEditor extends RTextScrollPane
 	
 	private void clearAllMessages()
 	{
-		getGutter().removeAllTrackingIcons();
+		scrollPane.getGutter().removeAllTrackingIcons();
 		highlighter.removeAllHighlights();
+		
 		this.currentHighlights.clear();
+		
+		this.errorHighLigherPanel.clear();
 	}
 	
 	private void parseFileContent()
@@ -424,6 +449,28 @@ public class FileEditor extends RTextScrollPane
 		try
 		{
 			int pos = syntaxTextArea.getLineStartOffset(line);
+			
+			//if current position is same as new position
+			if(syntaxTextArea.getCaretPosition() == pos)
+			{
+				// move cursor to a different position and back to same position, this will ensure
+				//  scroll bars are moved approp
+				if(pos > 0)
+				{
+					syntaxTextArea.setCaretPosition(pos - 1);
+				}
+				else
+				{
+					try
+					{
+						syntaxTextArea.setCaretPosition(pos + 1);
+					}catch(Exception ex)
+					{
+						//ignore if moving to this temp position failed
+					}
+				}
+			}
+			
 			syntaxTextArea.setCaretPosition(pos);
 		}catch(BadLocationException ex)
 		{
