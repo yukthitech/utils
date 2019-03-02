@@ -56,7 +56,7 @@ public class TestSuite implements Validateable
 	/**
 	 * Name to step group mapping.
 	 */
-	private Map<String, StepGroup> nameToGroup = new HashMap<>();
+	private Map<String, Function> nameToFunction = new HashMap<>();
 	
 	/**
 	 * File in which this test suite is defined.
@@ -135,7 +135,7 @@ public class TestSuite implements Validateable
 			}
 		}
 		
-		this.nameToGroup.putAll(newTestSuite.nameToGroup);
+		this.nameToFunction.putAll(newTestSuite.nameToFunction);
 	}
 
 	/**
@@ -308,22 +308,22 @@ public class TestSuite implements Validateable
 
 	/**
 	 * Adds specified test group.
-	 * @param group group to add.
+	 * @param function group to add.
 	 */
-	public void addStepGroup(StepGroup group)
+	public void addFunction(Function function)
 	{
-		if(StringUtils.isEmpty(group.getName()))
+		if(StringUtils.isEmpty(function.getName()))
 		{
 			throw new InvalidArgumentException("Step group can not be added without name");
 		}
 		
-		if(nameToGroup.containsKey(group.getName()))
+		if(nameToFunction.containsKey(function.getName()))
 		{
-			throw new InvalidStateException("Duplicate step group name encountered: {}", group.getName());
+			throw new InvalidStateException("Duplicate step group name encountered: {}", function.getName());
 		}
 		
-		group.markAsFunctionGroup();
-		nameToGroup.put(group.getName(), group);
+		function.markAsFunctionGroup();
+		nameToFunction.put(function.getName(), function);
 	}
 
 	
@@ -332,9 +332,9 @@ public class TestSuite implements Validateable
 	 * @param name name of step group.
 	 * @return matching group
 	 */
-	public StepGroup getStepGroup(String name)
+	public Function getFunction(String name)
 	{
-		return nameToGroup.get(name);
+		return nameToFunction.get(name);
 	}
 
 	/* (non-Javadoc)

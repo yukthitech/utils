@@ -18,8 +18,8 @@ import com.yukthitech.autox.test.lang.steps.ReturnException;
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
-@Executable(name = "stepGroup", message = "Can be used to group multiple steps into single step")
-public class StepGroup extends AbstractLocationBased implements IStepContainer, IStep, Cloneable
+@Executable(name = "function", message = "Can be used to group multiple steps into single step")
+public class Function extends AbstractLocationBased implements IStepContainer, IStep, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 

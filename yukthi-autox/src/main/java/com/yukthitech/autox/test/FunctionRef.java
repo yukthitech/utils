@@ -13,25 +13,25 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Reference step to execute target step group with specified parameters.
+ * Reference step to execute target function with specified parameters.
  * @author akiran
  */
-@Executable(name = "stepGroupRef", message = "Sets the specified context attribute with specified value")
-public class StepGroupRef extends AbstractStep
+@Executable(name = "functionRef", message = "Reference step to execute target function with specified parameters.")
+public class FunctionRef extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Name of the step group to execute.
 	 */
-	@Param(description = "Name of the group to execute.")
+	@Param(description = "Name of the function to execute.")
 	private String name;
 	
 	/**
 	 * Parameters for the step group to be executed.
 	 */
-	@Param(description = "Parameters to be passed to step group.", required = false)
-	private Map<String, StepGroupParam> params;
+	@Param(description = "Parameters to be passed to function.", required = false)
+	private Map<String, FunctionParam> params;
 	
 	/**
 	 * Sets the name of the step group to execute.
@@ -47,7 +47,7 @@ public class StepGroupRef extends AbstractStep
 	 * Adds the specified param.
 	 * @param param
 	 */
-	public void addParameter(StepGroupParam param)
+	public void addParameter(FunctionParam param)
 	{
 		if(this.params == null)
 		{
@@ -60,11 +60,11 @@ public class StepGroupRef extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		StepGroup stepGroup = context.getStepGroup(name);
+		Function function = context.getFunction(name);
 		
-		if(stepGroup == null)
+		if(function == null)
 		{
-			throw new InvalidStateException("No step group found with specified name: {}", name);
+			throw new InvalidStateException("No function found with specified name: {}", name);
 		}
 
 		Map<String, Object> paramValues = null;
@@ -80,13 +80,13 @@ public class StepGroupRef extends AbstractStep
 			}
 		}
 		
-		stepGroup = (StepGroup) stepGroup.clone();
-		stepGroup.setLoggingDisabled(super.isLoggingDisabled());
+		function = (Function) function.clone();
+		function.setLoggingDisabled(super.isLoggingDisabled());
 		
-		logger.debug(this, "Executing step-group '{}' with parameters: {}", name, paramValues);
+		logger.debug(this, "Executing function '{}' with parameters: {}", name, paramValues);
 		
-		stepGroup.setParams(paramValues);
-		stepGroup.execute(context, logger);
+		function.setParams(paramValues);
+		function.execute(context, logger);
 		
 		return true;
 	}

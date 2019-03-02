@@ -28,7 +28,7 @@ import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.autox.monitor.ienv.InteractiveServerReady;
 import com.yukthitech.autox.storage.PersistenceStorage;
-import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestSuite;
@@ -91,7 +91,7 @@ public class AutomationContext
 	/**
 	 * Name to step group mapping.
 	 */
-	private Map<String, StepGroup> nameToGroup = new HashMap<>();
+	private Map<String, Function> nameToFunction = new HashMap<>();
 	
 	/**
 	 * Listener for automation.
@@ -655,40 +655,40 @@ public class AutomationContext
 	
 	/**
 	 * Adds specified test group.
-	 * @param group group to add.
+	 * @param function group to add.
 	 */
-	public void addStepGroup(StepGroup group)
+	public void addFunction(Function function)
 	{
-		if(StringUtils.isEmpty(group.getName()))
+		if(StringUtils.isEmpty(function.getName()))
 		{
-			throw new InvalidArgumentException("Step group can not be added without name");
+			throw new InvalidArgumentException("Function can not be added without name");
 		}
 		
-		if(nameToGroup.containsKey(group.getName()))
+		if(nameToFunction.containsKey(function.getName()))
 		{
-			throw new InvalidStateException("Duplicate step group name encountered: {}", group.getName());
+			throw new InvalidStateException("Duplicate function name encountered: {}", function.getName());
 		}
 		
-		group.markAsFunctionGroup();
-		nameToGroup.put(group.getName(), group);
+		function.markAsFunctionGroup();
+		nameToFunction.put(function.getName(), function);
 	}
 	
 	/**
 	 * Clears step groups.
 	 */
-	public void clearStepGroups()
+	public void clearFunctions()
 	{
-		nameToGroup.clear();
+		nameToFunction.clear();
 	}
 	
 	/**
 	 * Adds the specified step groups.
 	 *
-	 * @param stepGroups step groups to add
+	 * @param functions step groups to add
 	 */
-	public void addStepGroups(Map<String, StepGroup> stepGroups)
+	public void addFunctions(Map<String, Function> functions)
 	{
-		nameToGroup.putAll(stepGroups);
+		nameToFunction.putAll(functions);
 	}
 	
 	/**
@@ -696,20 +696,20 @@ public class AutomationContext
 	 * @param name name of step group.
 	 * @return matching group
 	 */
-	public StepGroup getStepGroup(String name)
+	public Function getFunction(String name)
 	{
 		//check if current test suite has the group, if present give that higher preference
 		if(activeTestSuite != null)
 		{
-			StepGroup stepGroup = activeTestSuite.getStepGroup(name);
+			Function function = activeTestSuite.getFunction(name);
 			
-			if(stepGroup != null)
+			if(function != null)
 			{
-				return stepGroup;
+				return function;
 			}
 		}
 		
-		return nameToGroup.get(name);
+		return nameToFunction.get(name);
 	}
 
 	/**

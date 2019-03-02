@@ -10,7 +10,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.Function;
 
 /**
  * Loops through specified range of values and for each iteration executed underlying steps
@@ -28,7 +28,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	 */
 	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
-	private StepGroup steps;
+	private Function steps;
 
 	/**
 	 * Freemarker condition to be evaluated.
@@ -54,7 +54,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	{
 		if(steps == null)
 		{
-			steps = new StepGroup();
+			steps = new Function();
 		}
 		
 		steps.addStep(step);

@@ -1,11 +1,11 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
-	<step-group name="simpleGroup">
+	<function name="simpleGroup">
 		<ccg:log message="This message is from step group"/>
 	
 		<ccg:set expression="simpleGroupOutput" value="true"/>
 	
 		<ccg:assert-true value="attr: simpleGroupInput"/>
-	</step-group>
+	</function>
 
 	<testSuite name="jobj-test-suites">
 		<wrap:data-beans>
@@ -253,7 +253,7 @@
 		
 			<ccg:set expression="simpleGroupInput" value="true"/>
 		
-			<ccg:step-group-ref name="simpleGroup"/>
+			<ccg:function-ref name="simpleGroup"/>
 		
 			<ccg:assert-true value="attr: simpleGroupOutput"/>
 		</testCase>

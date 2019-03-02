@@ -1,5 +1,5 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
-	<step-group name="condSimpleGroup">
+	<function name="condSimpleGroup">
 		<ccg:if condition="attr.returnFlag??">
 			<ccg:set expression="ifExec">
 				<value>
@@ -19,7 +19,7 @@
 				<ccg:set expression="ifExec" value="if-else"/>
 			</else>
 		</ccg:if>
-	</step-group>
+	</function>
 
 	<testSuite name="lang-test-suites">
 		<testCase name="testExpressions">
@@ -58,7 +58,7 @@
 			<wrap:steps>
 				<ccg:set expression="flag" value="int: 1"/>
 			
-				<ccg:step-group-ref name="condSimpleGroup"/>
+				<ccg:function-ref name="condSimpleGroup"/>
 			
 				<ccg:assert-equals actual="attr: ifExec" expected="if-then"/>
 			</wrap:steps>
@@ -72,7 +72,7 @@
 			
 				<ccg:set expression="ifExec" value="test"/>
 			
-				<ccg:step-group-ref name="condSimpleGroup"/>
+				<ccg:function-ref name="condSimpleGroup"/>
 			
 				<ccg:remove name="returnFlag"/>
 			
@@ -88,7 +88,7 @@
 			<wrap:steps>
 				<ccg:set expression="flag" value="int: 2"/>
 			
-				<ccg:step-group-ref name="condSimpleGroup"/>
+				<ccg:function-ref name="condSimpleGroup"/>
 			
 				<ccg:assert-equals actual="attr: ifExec" expected="if-else"/>
 			</wrap:steps>
@@ -325,28 +325,28 @@
 			<ccg:assert-not-null value="attr.timeTaken"/>
 		</testCase>
 	
-		<step-group name="factorialGroup1">
+		<function name="factorialGroup1">
 			<ccg:if condition="attr.parameters.value lt 2">
 				<ccg:set expression="result" value="int: 1"/>
 			
 				<ccg:return/>
 			</ccg:if>
 		
-			<ccg:step-group-ref name="factorialGroup1">
+			<ccg:function-ref name="factorialGroup1">
 				<parameter name="value" value="int: ${attr.parameters.value - 1}"/>
-			</ccg:step-group-ref>
+			</ccg:function-ref>
 		
 			<ccg:set expression="result" value="int: ${attr.parameters.value * attr.result}"/>
-		</step-group>
+		</function>
 	
 		<testCase name="testGroupRecursion">
 			<description>
 				Tests recursion working within the group
 			</description>
 		
-			<ccg:step-group-ref name="factorialGroup1">
+			<ccg:function-ref name="factorialGroup1">
 				<parameter name="value" value="int: 4"/>
-			</ccg:step-group-ref>
+			</ccg:function-ref>
 		
 			<ccg:assert-equals actual="attr: result" expected="int: 24"/>
 		</testCase>
@@ -356,9 +356,9 @@
 		
 			<ccg:set expression="checkVar" value="int: 1"/>
 		
-			<ccg:step-group-ref name="factorialGroup1">
+			<ccg:function-ref name="factorialGroup1">
 				<parameter name="value" value="int: 4"/>
-			</ccg:step-group-ref>
+			</ccg:function-ref>
 		
 			<ccg:assert-equals actual="attr: result" expected="int: 24"/>
 		</testCase>

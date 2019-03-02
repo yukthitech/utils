@@ -179,7 +179,7 @@ public class ActionPlanExecutor
 		context.setReportFolder(reportFolder);
 		
 		//clean current context
-		context.clearStepGroups();
+		context.clearFunctions();
 		context.clearAttributes();
 		
 		//load the action plan

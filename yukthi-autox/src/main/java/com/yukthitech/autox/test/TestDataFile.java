@@ -130,10 +130,10 @@ public class TestDataFile
 	
 	/**
 	 * Adds specified test group.
-	 * @param stepGroup group to add.
+	 * @param function group to add.
 	 */
-	public void addStepGroup(StepGroup stepGroup)
+	public void addFunction(Function function)
 	{
-		context.addStepGroup(stepGroup);
+		context.addFunction(function);
 	}
 }

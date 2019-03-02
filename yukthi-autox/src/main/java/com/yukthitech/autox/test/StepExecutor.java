@@ -142,10 +142,10 @@ public class StepExecutor
 	
 	/**
 	 * Creates executable proxy annotation for specified step-group.
-	 * @param stepGroup
+	 * @param function
 	 * @return
 	 */
-	private static Executable createExecutable(final StepGroup stepGroup)
+	private static Executable createExecutable(final Function function)
 	{
 		Executable executable = (Executable) Proxy.newProxyInstance(StepExecutor.class.getClassLoader(), new Class[] {Executable.class}, new InvocationHandler()
 		{
@@ -156,7 +156,7 @@ public class StepExecutor
 				
 				if("name".equals(methodName) || "message".equals(methodName))
 				{
-					return "StepGroup-" + stepGroup.getName();
+					return "Function-" + function.getName();
 				}
 				
 				return null;
@@ -192,7 +192,7 @@ public class StepExecutor
 			}
 		}
 		
-		Executable executable = (step instanceof StepGroup) ?  createExecutable((StepGroup) step) : step.getClass().getAnnotation(Executable.class);
+		Executable executable = (step instanceof Function) ?  createExecutable((Function) step) : step.getClass().getAnnotation(Executable.class);
 		String name = executable.name()[0];
 		
 		String stepType = (step instanceof IValidation) ? "Validation" : "Step";

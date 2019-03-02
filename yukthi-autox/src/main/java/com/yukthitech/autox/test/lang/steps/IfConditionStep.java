@@ -10,7 +10,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -36,14 +36,14 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 * true.
 	 */
 	@Param(description = "Group of steps/validations to be executed when condition evaluated to be true.", required = true)
-	private StepGroup then;
+	private Function then;
 
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * false.
 	 */
 	@Param(name = "else", description = "Group of steps/validations to be executed when condition evaluated to be false.", required = false)
-	private StepGroup elseGroup;
+	private Function elseGroup;
 
 	/**
 	 * Sets the freemarker condition to be evaluated.
@@ -61,7 +61,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 * @param then the new group of steps/validations to be executed when condition evaluated to be true
 	 */
 	@ChildElement(description = "Used to group steps to be executed when this if condition is true.")
-	public void setThen(StepGroup then)
+	public void setThen(Function then)
 	{
 		this.then = then;
 	}
@@ -72,7 +72,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 * @param elseGroup the new group of steps/validations to be executed when condition evaluated to be false
 	 */
 	@ChildElement(description = "Used to group steps to be executed when this if condition is false.")
-	public void setElse(StepGroup elseGroup)
+	public void setElse(Function elseGroup)
 	{
 		if(this.elseGroup != null)
 		{
@@ -87,7 +87,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	{
 		if(then == null)
 		{
-			then = new StepGroup();
+			then = new Function();
 		}
 		
 		then.addStep(step);

@@ -13,7 +13,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -32,7 +32,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	 */
 	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
-	private StepGroup steps;
+	private Function steps;
 
 	/**
 	 * Expression which will be evaluated to collection or map or String.
@@ -92,7 +92,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	{
 		if(steps == null)
 		{
-			steps = new StepGroup();
+			steps = new Function();
 		}
 		
 		steps.addStep(step);

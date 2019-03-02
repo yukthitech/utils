@@ -9,7 +9,7 @@ import com.yukthitech.autox.SourceType;
  * Parameter that can be passed during step group execution.
  * @author akiran
  */
-public class StepGroupParam implements Serializable
+public class FunctionParam implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 

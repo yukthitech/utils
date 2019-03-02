@@ -1,7 +1,7 @@
 package com.yukthitech.autox.action;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -54,11 +54,11 @@ public class ActionPlanFile implements Validateable
 	/**
 	 * Adds the step group.
 	 *
-	 * @param stepGroup the step group
+	 * @param function the step group
 	 */
-	public void addStepGroup(StepGroup stepGroup)
+	public void addFunction(Function function)
 	{
-		context.addStepGroup(stepGroup);
+		context.addFunction(function);
 	}
 
 	@Override

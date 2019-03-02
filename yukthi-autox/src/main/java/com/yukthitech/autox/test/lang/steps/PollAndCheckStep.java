@@ -13,7 +13,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.StepGroup;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -41,7 +41,7 @@ public class PollAndCheckStep extends AbstractValidation
 	 */
 	@Param(description = "Group of steps/validations to be executed as part of polling.", required = true)
 	@SkipParsing
-	private StepGroup poll;
+	private Function poll;
 
 	/**
 	 * Polling interval duration.
@@ -83,7 +83,7 @@ public class PollAndCheckStep extends AbstractValidation
 	 * @param poll the new group of steps/validations to be executed when condition evaluated to be true
 	 */
 	@ChildElement(description = "Used to specify polling steps.", required = true)
-	public void setPoll(StepGroup poll)
+	public void setPoll(Function poll)
 	{
 		this.poll = poll;
 	}
