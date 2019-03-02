@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -51,7 +52,7 @@ public class Project implements Serializable
 	
 	private transient Set<File> reservedFiles;
 	
-	private transient boolean defaultEntriesAdded = false; 
+	private transient Set<String> finalClassPathEntries = null; 
 	
 	public Project()
 	{
@@ -160,23 +161,34 @@ public class Project implements Serializable
 
 	public Set<String> getClassPathEntriesList()
 	{
-		if(!defaultEntriesAdded)
+		if(finalClassPathEntries == null)
 		{
 			addDefaultClasspathEntries();
 		}
 		
-		return classPathEntriesList;
+		return finalClassPathEntries;
 	}
 	
-	private void addDefaultClasspathEntries()
+	private synchronized void addDefaultClasspathEntries()
 	{
-		if(classPathEntriesList == null)
-		{
-			classPathEntriesList = new HashSet<>();
-		}
+		finalClassPathEntries = new LinkedHashSet<>();
 
 		//add lib folder of project
 		File libFolder = new File(baseFolder, "lib");
+		
+		if(libFolder.exists())
+		{
+			for(File file : libFolder.listFiles())
+			{
+				if(!file.getName().toLowerCase().endsWith(".jar") && !file.getName().toLowerCase().endsWith(".zip"))
+				{
+					continue;
+				}
+				
+				finalClassPathEntries.add(file.getPath());
+			}
+		}
+		
 		String libJarPath = null;
 		
 		try
@@ -189,16 +201,25 @@ public class Project implements Serializable
 		}
 		
 		//add main resources and config folders
-		classPathEntriesList.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
-		classPathEntriesList.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
+		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
+		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
 		
-		defaultEntriesAdded = true;
+		if(classPathEntriesList != null)
+		{
+			finalClassPathEntries.addAll(classPathEntriesList);
+		}
 	}
 
 	public void setClassPathEntries(Set<String> classPathEntriesList)
 	{
 		this.classPathEntriesList = classPathEntriesList;
-		addDefaultClasspathEntries();
+		finalClassPathEntries = null;
+	}
+	
+	public void reset()
+	{
+		finalClassPathEntries = null;
+		projectClassLoader = null;
 	}
 
 	/**

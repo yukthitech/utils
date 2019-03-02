@@ -597,18 +597,19 @@ public class ProjectExplorer extends JPanel
 		loadFilesToIndex();
 	}
 	
-	public void reloadActiveNode()
+	public BaseTreeNode reloadActiveNode()
 	{
 		if(activeTreeNode == null)
 		{
 			logger.debug("No active node found for reload.");
-			return;
+			return null;
 		}
 
 		activeTreeNode.reload(true);
 		projectTreeModel.reload(activeTreeNode);
 		
 		loadFilesToIndex();
+		return activeTreeNode;
 	}
 
 	

@@ -566,7 +566,7 @@ public class Element implements INode
 				{
 					try
 					{
-						this.elementType = Class.forName(beanTypeStr);
+						this.elementType = Class.forName(beanTypeStr, false, project.getProjectClassLoader());
 					}catch(Exception ex)
 					{
 						collector.addMessage(
