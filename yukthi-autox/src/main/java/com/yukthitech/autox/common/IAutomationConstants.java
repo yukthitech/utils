@@ -31,6 +31,12 @@ public interface IAutomationConstants
 	 */
 	public int FIVE_SECONDS = 5;
 
+
+	/**
+	 * Five seconds.
+	 */
+	public int SIXTY_SECONDS = 60;
+
 	/**
 	 * One seconds.
 	 */
