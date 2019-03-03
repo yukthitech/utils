@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,31 +28,139 @@ public class ObjectLockManager
 {
 	private static Logger logger = LogManager.getLogger(ObjectLockManager.class);
 	
+	private class ObjectLock extends ReentrantLock
+	{
+		private static final long serialVersionUID = 1L;
+		private AtomicInteger counter = new AtomicInteger(0);
+		
+		public void lockObject(Object object)
+		{
+			System.out.println("Obtaining lock for object: " + object + "   Lock: " + this);
+			
+			try
+			{
+				super.lockInterruptibly();
+			}catch(InterruptedException ex)
+			{
+				throw new RuntimeInterruptedException(ex);
+			}
+			
+			counter.incrementAndGet();
+			
+			mainLock.lock();
+			
+			try
+			{
+				objectToLocks.put(object, this);
+			}finally
+			{
+				mainLock.unlock();
+			}
+		}
+		
+		public void releaseObject(Object object)
+		{
+			System.out.println("Trying to release lock: " + object + "   Lock: " + this);
+			int val = counter.decrementAndGet();
+			
+			if(val > 0)
+			{
+				super.unlock();
+				return;
+			}
+
+			mainLock.lock();
+			
+			try
+			{
+				objectToLocks.remove(object);
+				lockPool.add(this);
+			}finally
+			{
+				mainLock.unlock();
+			}
+			
+			super.unlock();
+			
+			System.out.println("Fully released the lock: " + object + "   Lock: " + this);
+		}
+	}
+	
 	/**
 	 * Lock to synchronize the threads will obtaining object lock
 	 */
-	private ReentrantLock lock = new ReentrantLock();
+	private ReentrantLock mainLock = new ReentrantLock();
 	
 	/**
-	 * Maintains the objects that are locked and their corresponding conditions. Conditions are used to 
+	 * Maintains the objects that are locked and their corresponding locks. Locks are used to 
 	 * notify other waiting threads for same object lock.
 	 */
-	private Map<Object, Condition> objectToConditions = new HashMap<Object, Condition>();
+	private Map<Object, ObjectLock> objectToLocks = new HashMap<Object, ObjectLock>();
 	
 	/**
-	 * Pool of conditions. So that condition objects can be reused
+	 * Pool of locks. So that lock objects can be reused
 	 */
-	private List<Condition> conditionPool = new ArrayList<Condition>();
+	private List<ObjectLock> lockPool = new ArrayList<ObjectLock>();
 	
 	/**
 	 * Keeps track maximum pool size that was used during this lock manager
 	 * life
 	 */
-	private int maxConditionsUsed = 0;
+	private AtomicInteger maxLocksUsed = new AtomicInteger(0);
 	
 	public boolean isObjectLocked(Object object)
 	{
-		return  (objectToConditions.get(object) != null);
+		mainLock.lock();
+		
+		try
+		{
+			return  (objectToLocks.get(object) != null);
+		}finally
+		{
+			mainLock.unlock();
+		}
+	}
+
+	public ObjectLock getLockOf(Object object)
+	{
+		mainLock.lock();
+		
+		try
+		{
+			return objectToLocks.get(object);
+		}finally
+		{
+			mainLock.unlock();
+		}
+	}
+	
+	public ObjectLock getFreeLock()
+	{
+		ObjectLock objLock = null;
+
+		mainLock.lock();
+		
+		try
+		{
+			//if no locks are available in pool
+			if(lockPool.isEmpty())
+			{
+				//create new lock
+				objLock = new ObjectLock();
+				maxLocksUsed.incrementAndGet();
+			}
+			//if pool has locks
+			else
+			{
+				//reuse the lock from pool
+				objLock = lockPool.remove(lockPool.size() - 1);
+			}
+			
+			return objLock;
+		}finally
+		{
+			mainLock.unlock();
+		}
 	}
 
 	/**
@@ -63,51 +170,20 @@ public class ObjectLockManager
 	 */
 	public void lockObject(Object object)
 	{
-		lock.lock();
-		
-		try
+		//check if current object is already locked
+		ObjectLock objLock = getLockOf(object);
+
+		//if locked wait for lock to be released
+		if(objLock != null)
 		{
-			//wait till condition is present (that is locked) for the current object
-			Condition condition = objectToConditions.get(object);
-	
-			while(condition != null)
-			{
-				//note different iterations may get different conditions
-				// based on the number of threads running parallely on same object
-				logger.debug("Waiting for lock on object - {}", object);
-					
-				try
-				{
-					condition.await(5000, TimeUnit.MICROSECONDS);
-				} catch(InterruptedException ex)
-				{
-					throw new RuntimeInterruptedException(ex);
-				}
-				
-				condition = objectToConditions.get(object);
-			}
+			logger.debug("Waiting for lock on object using same lock - {}", object);
 			
-			//if no conditions are available in pool
-			if(conditionPool.isEmpty())
-			{
-				//create new condition
-				condition = lock.newCondition();
-				
-				maxConditionsUsed++;
-			}
-			//if pool has conditions
-			else
-			{
-				//reuse the condition from pool
-				condition = conditionPool.remove(conditionPool.size() - 1);
-			}
-			
-			//put the condition on map locking the object
-			objectToConditions.put(object, condition);
-		}finally
-		{
-			lock.unlock();			
+			objLock.lockObject(object);
+			return;
 		}
+		
+		objLock = getFreeLock();
+		objLock.lockObject(object);
 	}
 	
 	/**
@@ -117,40 +193,24 @@ public class ObjectLockManager
 	 */
 	public void releaseObject(Object object)
 	{
-		lock.lock();
-		
-		try
+		ObjectLock objLock = getLockOf(object);
+
+		//if the object was not locked
+		if(objLock == null)
 		{
-			//get the condition-lock of specified object
-			Condition condition = objectToConditions.get(object);
-			
-			//if the object was not locked
-			if(condition == null)
-			{
-				throw new IllegalStateException("Specified object is not locked by this manager - " + object);
-			}
-			
-			//remove the lock
-			objectToConditions.remove(object);
-			
-			//add the condition back to pool
-			conditionPool.add(condition);
-			
-			//signal other threads which are waiting for this object
-			condition.signalAll();
-		}finally
-		{
-			lock.unlock();
+			throw new IllegalStateException("Specified object is not locked by this manager - " + object);
 		}
+		
+		objLock.releaseObject(object);
 	}
 	
 	/**
 	 * Gets maxumum number of conditions used by this manager
 	 * @return the maxConditionsUsed
 	 */
-	public int getMaxConditionsUsed()
+	public int getMaxLocksUsed()
 	{
-		return maxConditionsUsed;
+		return maxLocksUsed.get();
 	}
 	
 	/**
@@ -159,6 +219,14 @@ public class ObjectLockManager
 	 */
 	public int getLockCount()
 	{
-		return objectToConditions.size();
+		mainLock.lock();
+		
+		try
+		{
+			return objectToLocks.size();
+		}finally
+		{
+			mainLock.unlock();
+		}
 	}
 }

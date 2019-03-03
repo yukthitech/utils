@@ -25,8 +25,10 @@ public class TObjectLockManager
 		
 		private Object forLock = new Object();
 		
-		public LockThread(Object forLock)
+		public LockThread(Object forLock, String name)
 		{
+			super(name);
+			
 			this.forLock = forLock;
 		}
 		
@@ -102,7 +104,7 @@ public class TObjectLockManager
 		//make sure lock is free
 		Assert.assertFalse(objectLockManager.isObjectLocked(forLock));
 		
-		LockThread thread = new LockThread(forLock);
+		LockThread thread = new LockThread(forLock, "LockThread1");
 		thread.start();
 		
 		thread.waitTillLocked();
@@ -130,12 +132,12 @@ public class TObjectLockManager
 	public void testThreadsSynchronization() throws Exception
 	{
 		//start thread1 and make sure it got the lock
-		LockThread thread1 = new LockThread(forLock);
+		LockThread thread1 = new LockThread(forLock, "LockThread2");
 		thread1.start();
 		thread1.waitTillLocked();
 		
 		//start thread2 and wait for sometime and check if it is able to obtain the lock
-		LockThread thread2 = new LockThread(forLock);
+		LockThread thread2 = new LockThread(forLock, "LockThread3");
 		thread2.start();
 		
 		Thread.sleep(1000);
@@ -170,27 +172,27 @@ public class TObjectLockManager
 		Object lock3 = new Object();
 		
 		//start 2 threads without releasing locks and check number of conditions used
-		LockThread thread1 = new LockThread(lock1);
+		LockThread thread1 = new LockThread(lock1, "LockThread4");
 		thread1.start();
 		thread1.waitTillLocked();
 		
-		LockThread thread2 = new LockThread(lock2);
+		LockThread thread2 = new LockThread(lock2, "LockThread5");
 		thread2.start();
 		thread2.waitTillLocked();
 		
-		Assert.assertEquals(objectLockManager.getMaxConditionsUsed(), 2);
+		Assert.assertEquals(objectLockManager.getMaxLocksUsed(), 2);
 		
 		//release one of the lock
 		thread2.waitTillReleased();
 		
-		Assert.assertEquals(objectLockManager.getMaxConditionsUsed(), 2);
+		Assert.assertEquals(objectLockManager.getMaxLocksUsed(), 2);
 		
 		//now create new lock by new thread and no new condition is created
-		LockThread thread3 = new LockThread(lock3);
+		LockThread thread3 = new LockThread(lock3, "LockThread6");
 		thread3.start();
 		thread3.waitTillLocked();
 		
-		Assert.assertEquals(objectLockManager.getMaxConditionsUsed(), 2);
+		Assert.assertEquals(objectLockManager.getMaxLocksUsed(), 2);
 		
 		//release all locks
 		thread1.waitTillReleased();
@@ -215,11 +217,11 @@ public class TObjectLockManager
 	public void testWithInterrupution() throws Exception
 	{
 		//start 2 threads with same lock
-		LockThread thread1 = new LockThread(forLock);
+		LockThread thread1 = new LockThread(forLock, "LockThread7");
 		thread1.start();
 		thread1.waitTillLocked();
 		
-		LockThread thread2 = new LockThread(forLock);
+		LockThread thread2 = new LockThread(forLock, "LockThread8");
 		thread2.start();
 
 		Thread.sleep(100);
@@ -261,6 +263,36 @@ public class TObjectLockManager
 			{
 				objectLockManager.releaseObject(s);
 			}
+		}
+	}
+	
+	/**
+	 * Ensures relocking by same thread works.
+	 * @throws Exception
+	 */
+	@Test(groups = ITestGroups.UNIT_TESTS)
+	public void testRelocking() throws Exception
+	{
+		String lockObject = new String("lockForRelock");
+		
+		objectLockManager.lockObject(lockObject);
+		
+		try
+		{
+			System.out.println("Got first lock...");
+			
+			objectLockManager.lockObject(lockObject);
+			
+			try
+			{
+				System.out.println("Second level lock...");
+			}finally
+			{
+				objectLockManager.releaseObject(lockObject);
+			}
+		}finally
+		{
+			objectLockManager.releaseObject(lockObject);
 		}
 	}
 }

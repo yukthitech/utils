@@ -105,6 +105,9 @@ public class IdeUtils
 		{
 			jobNameLocker.lockObject(name);
 			
+			String threadName = Thread.currentThread().getName();
+			Thread.currentThread().setName("cjob-" + name);
+			
 			try
 			{
 				long timeLeft = getTimeLeft();
@@ -122,6 +125,7 @@ public class IdeUtils
 				logger.error("An error occurred while executing consolidated task: {}", name, ex);
 			} finally
 			{
+				Thread.currentThread().setName(threadName);
 				jobNameLocker.releaseObject(name);
 			}
 		}
