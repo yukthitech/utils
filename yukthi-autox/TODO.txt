@@ -1,3 +1,8 @@
+Special xml namespace for functions
+	function-ref should be invokable directly and should be able to pass params directly something like below
+		<func:factorial value="4" />
+
+======================
 Collection/map steps
 	create new collection/map
 	add/put an entry

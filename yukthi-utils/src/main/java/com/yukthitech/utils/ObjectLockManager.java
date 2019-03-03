@@ -35,8 +35,6 @@ public class ObjectLockManager
 		
 		public void lockObject(Object object)
 		{
-			System.out.println("Obtaining lock for object: " + object + "   Lock: " + this);
-			
 			try
 			{
 				super.lockInterruptibly();
@@ -60,7 +58,6 @@ public class ObjectLockManager
 		
 		public void releaseObject(Object object)
 		{
-			System.out.println("Trying to release lock: " + object + "   Lock: " + this);
 			int val = counter.decrementAndGet();
 			
 			if(val > 0)
@@ -81,8 +78,6 @@ public class ObjectLockManager
 			}
 			
 			super.unlock();
-			
-			System.out.println("Fully released the lock: " + object + "   Lock: " + this);
 		}
 	}
 	
