@@ -100,6 +100,48 @@
 							</#list>
 						</table>
 					</#if>
+
+
+					<#if node.hasParams()>
+						<table class="docTable">
+							<tr>
+								<td class="doc_mainHeading">
+									#
+								</td>
+								<td class="doc_mainHeading">
+									Name
+								</td>
+								<td class="doc_mainHeading">
+									Type
+								</td>
+								<td class="doc_mainHeading">
+									Default Value
+								</td>
+								<td class="doc_mainHeading">
+									Description
+								</td>
+							</tr>
+							<#list node.params as param>
+								<tr>
+									<td class="doc_heading" style="width: 30px;"> ${param?index + 1} </td>
+									<td>
+										${param.name}
+									</td>
+									<td>
+										${param.type}
+									</td>
+									<td>
+										${param.defaultValue}
+									</td>
+									<td>
+										${param.description}
+									</td>
+								</tr>
+							</#list>
+						</table>
+					</#if>
+
+
 				</div>
 			</div>		
 		</div>
