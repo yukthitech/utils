@@ -1,6 +1,8 @@
 package com.yukthitech.autox.expr;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -11,6 +13,126 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ExpressionParserDetails
 {
+	/**
+	 * Parameter of the parser.
+	 * @author akiran
+	 */
+	public static class Param
+	{
+		/**
+		 * Name of the param.
+		 */
+		private String name;
+		
+		/**
+		 * Type of the param.
+		 */
+		private String type;
+		
+		/**
+		 * Default value.
+		 */
+		private String defaultValue;
+		
+		/**
+		 * Description.
+		 */
+		private String description;
+		
+		public Param()
+		{}
+
+		public Param(String name, String type, String defaultValue, String description)
+		{
+			this.name = name;
+			this.type = type;
+			this.defaultValue = defaultValue;
+			this.description = description;
+		}
+
+
+
+		/**
+		 * Gets the name of the param.
+		 *
+		 * @return the name of the param
+		 */
+		public String getName()
+		{
+			return name;
+		}
+
+		/**
+		 * Sets the name of the param.
+		 *
+		 * @param name the new name of the param
+		 */
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		/**
+		 * Gets the type of the param.
+		 *
+		 * @return the type of the param
+		 */
+		public String getType()
+		{
+			return type;
+		}
+
+		/**
+		 * Sets the type of the param.
+		 *
+		 * @param type the new type of the param
+		 */
+		public void setType(String type)
+		{
+			this.type = type;
+		}
+
+		/**
+		 * Gets the default value.
+		 *
+		 * @return the default value
+		 */
+		public String getDefaultValue()
+		{
+			return defaultValue;
+		}
+
+		/**
+		 * Sets the default value.
+		 *
+		 * @param defaultValue the new default value
+		 */
+		public void setDefaultValue(String defaultValue)
+		{
+			this.defaultValue = defaultValue;
+		}
+
+		/**
+		 * Gets the description.
+		 *
+		 * @return the description
+		 */
+		public String getDescription()
+		{
+			return description;
+		}
+
+		/**
+		 * Sets the description.
+		 *
+		 * @param description the new description
+		 */
+		public void setDescription(String description)
+		{
+			this.description = description;
+		}
+	}
+	
 	/**
 	 * Type of the expression supported.
 	 */
@@ -42,11 +164,26 @@ public class ExpressionParserDetails
 	private ParserContentType contentType;
 	
 	/**
+	 * Params supported by this parser.
+	 */
+	private List<Param> params;
+	
+	/**
 	 * Instantiates a new expression parser details.
 	 */
 	public ExpressionParserDetails()
 	{}
 	
+	/**
+	 * Instantiates a new expression parser details.
+	 *
+	 * @param type the type
+	 * @param description the description
+	 * @param example the example
+	 * @param enclosingObject the enclosing object
+	 * @param method the method
+	 * @param contentType the content type
+	 */
 	public ExpressionParserDetails(String type, String description, String example, Object enclosingObject, Method method, ParserContentType contentType)
 	{
 		this.type = type;
@@ -210,7 +347,42 @@ public class ExpressionParserDetails
 	{
 		return contentType;
 	}
+
+	/**
+	 * Adds the param.
+	 *
+	 * @param param the param
+	 */
+	public void addParam(Param param)
+	{
+		if(this.params == null)
+		{
+			this.params = new ArrayList<>();
+		}
+		
+		this.params.add(param);
+	}
 	
+	/**
+	 * Gets the params supported by this parser.
+	 *
+	 * @return the params supported by this parser
+	 */
+	public List<Param> getParams()
+	{
+		return params;
+	}
+
+	/**
+	 * Sets the params supported by this parser.
+	 *
+	 * @param params the new params supported by this parser
+	 */
+	public void setParams(List<Param> params)
+	{
+		this.params = params;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

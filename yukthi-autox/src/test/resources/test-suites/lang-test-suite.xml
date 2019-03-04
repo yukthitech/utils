@@ -326,17 +326,21 @@
 		</testCase>
 	
 		<function name="factorialGroup1">
-			<ccg:if condition="attr.parameters.value lt 2">
-				<ccg:set expression="result" value="int: 1"/>
-			
-				<ccg:return/>
+			<ccg:if condition="param.value lt 2">
+				<then>
+					<ccg:set expression="result" value="int: 1"/>
+					<ccg:return/>
+				</then>
+				<else>
+					<ccg:log message="Executing factorial for ${param.value}"/>
+				</else>
 			</ccg:if>
 		
 			<ccg:function-ref name="factorialGroup1">
-				<parameter name="value" value="int: ${attr.parameters.value - 1}"/>
+				<param name="value" value="int: ${param.value - 1}"/>
 			</ccg:function-ref>
 		
-			<ccg:set expression="result" value="int: ${attr.parameters.value * attr.result}"/>
+			<ccg:set expression="result" value="int: ${param.value * attr.result}"/>
 		</function>
 	
 		<testCase name="testGroupRecursion">
@@ -345,7 +349,7 @@
 			</description>
 		
 			<ccg:function-ref name="factorialGroup1">
-				<parameter name="value" value="int: 4"/>
+				<param name="value" value="int: 4"/>
 			</ccg:function-ref>
 		
 			<ccg:assert-equals actual="attr: result" expected="int: 24"/>
@@ -357,7 +361,7 @@
 			<ccg:set expression="checkVar" value="int: 1"/>
 		
 			<ccg:function-ref name="factorialGroup1">
-				<parameter name="value" value="int: 4"/>
+				<param name="value" value="int: 4"/>
 			</ccg:function-ref>
 		
 			<ccg:assert-equals actual="attr: result" expected="int: 24"/>

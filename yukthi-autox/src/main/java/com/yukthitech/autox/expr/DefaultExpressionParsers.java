@@ -398,7 +398,11 @@ public class DefaultExpressionParsers
 	}
 
 	@ExpressionParser(type = "file", description = "Parses specified expression as file path and loads it as object. Supported file types: xml, json, properties", 
-			example = "file: /tmp/data.json")
+			example = "file: /tmp/data.json",
+			params = {
+				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object.")
+			})
 	public IPropertyPath fileParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
@@ -411,8 +415,26 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "res", description = "Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties", 
-			example = "res: /tmp/data.json")
+	@ExpressionParser(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array).", 
+			example = "bfile: /tmp/data")
+	public IPropertyPath bfileParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				return FileUtils.readFileToByteArray(new File(expression));
+			}
+		};
+	}
+
+	@ExpressionParser(type = "res", description = "Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties",
+			example = "res: /tmp/data.json",
+			params = {
+				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object.")
+			})
 	public IPropertyPath resParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
@@ -448,6 +470,53 @@ public class DefaultExpressionParsers
 				
 				Object object = loadInputStream(data, expression, exprType, parserContext);
 				return object;
+			}
+		};
+	}
+
+	@ExpressionParser(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
+			example = "res: /tmp/data.json")
+	public IPropertyPath bresParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				byte data[] = null;
+				
+				if("$".equals(expression))
+				{
+					Object curVal = parserContext.getCurrentValue();
+					
+					if(curVal == null || (!(curVal instanceof String) && !(curVal instanceof byte[])) )
+					{
+						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
+					}
+					
+					if(curVal instanceof String)
+					{
+						data = ((String) curVal).getBytes();
+					}
+					else
+					{
+						data = (byte[]) curVal;
+					}
+				}
+				else
+				{
+					InputStream is = DefaultExpressionParsers.class.getResourceAsStream(expression); 
+
+					if(is == null)
+					{
+						throw new InvalidArgumentException("Invalid/non-existing resource specified for loading: {}", expression);
+					}
+					
+					data = IOUtils.toByteArray(is);
+					is.close();
+				}
+				
+				return data;
 			}
 		};
 	}

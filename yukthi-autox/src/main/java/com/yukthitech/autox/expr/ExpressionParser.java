@@ -36,4 +36,10 @@ public @interface ExpressionParser
 	 * @return content type
 	 */
 	public ParserContentType contentType() default ParserContentType.NONE;
+	
+	/**
+	 * Parameters supported by this parser.
+	 * @return parameters
+	 */
+	public ParserParam[] params() default {};
 }

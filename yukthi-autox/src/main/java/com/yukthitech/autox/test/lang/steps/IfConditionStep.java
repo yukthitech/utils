@@ -102,13 +102,13 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 		
 		if(res)
 		{
-			then.execute(context, exeLogger);
+			then.execute(context, exeLogger, true);
 		}
 		else
 		{
 			if(elseGroup != null)
 			{
-				elseGroup.execute(context, exeLogger);
+				elseGroup.execute(context, exeLogger, true);
 			}
 		}
 		

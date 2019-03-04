@@ -196,6 +196,14 @@ public class DocGenerator
 			
 			parserDoc.addExamples(exampleCollections.getExamples("$parsers." + parser.getType()));
 			
+			if(parser.getParams() != null)
+			{
+				for(ExpressionParserDetails.Param param : parser.getParams())
+				{
+					parserDoc.addParam(new ExpressionParserDoc.Param(param.getName(), param.getType(), param.getDefaultValue(), param.getDescription()));
+				}
+			}
+			
 			docInfo.addParser(parserDoc);
 		}
 	}

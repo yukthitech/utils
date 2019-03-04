@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -171,6 +172,11 @@ public class AutomationContext
 	 * The interactive environment context.
 	 */
 	private InteractiveEnvironmentContext interactiveEnvironmentContext;
+	
+	/**
+	 * Used to maintain parameter stack.
+	 */
+	private Stack<Map<String, Object>> parametersStack = new Stack<>();
 
 	/**
 	 * Constructor.
@@ -457,16 +463,42 @@ public class AutomationContext
 		return Collections.unmodifiableMap(nameToAttr);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getParam()
+	/**
+	 * Used to push the parameters on stack of the function going to be executed on. Expected to be
+	 * called only before fucntion execution by framework itself.
+	 * @param parameters parameters to be pushed
+	 */
+	public void pushParameters(Map<String, Object> parameters)
 	{
-		return (Map<String, Object>) nameToAttr.get("parameters");
+		if(parameters == null)
+		{
+			parameters = Collections.emptyMap();
+		}
+		
+		parametersStack.push(parameters);
 	}
 	
-	@SuppressWarnings("unchecked")
+	/**
+	 * Pops the parameters from the function stack.
+	 */
+	public void popParameters()
+	{
+		parametersStack.pop();
+	}
+	
+	public Map<String, Object> getParam()
+	{
+		if(parametersStack.isEmpty())
+		{
+			throw new InvalidStateException("Parameters are accessed outside the function");
+		}
+		
+		return (Map<String, Object>) parametersStack.peek();
+	}
+	
 	public Object getParameter(String name)
 	{
-		Map<String, Object> paramMap = (Map<String, Object>) nameToAttr.get("parameters");
+		Map<String, Object> paramMap = (Map<String, Object>) getParam();
 		
 		if(paramMap == null)
 		{

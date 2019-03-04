@@ -138,6 +138,13 @@ public class ExpressionFactory extends AbstractLocationBased
 					
 					parserDet = new ExpressionParserDetails(parserAnnot.type(), parserAnnot.description(), 
 							parserAnnot.example(), parserObj, method, parserAnnot.contentType());
+					
+					for(ParserParam paramAnnot : parserAnnot.params())
+					{
+						parserDet.addParam(new ExpressionParserDetails.Param(paramAnnot.name(), paramAnnot.type(), 
+								paramAnnot.defaultValue(), paramAnnot.description()));
+					}
+					
 					factory.parsers.put(parserDet.getType(), parserDet);
 				}
 			}
@@ -243,7 +250,7 @@ public class ExpressionFactory extends AbstractLocationBased
 		String exprTypeParams[] = null;
 		
 		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(expression);
-		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_TYPE_PATTERN.matcher(expression);
+		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(expression);
 		
 		if(matcher.find())
 		{
@@ -255,7 +262,7 @@ public class ExpressionFactory extends AbstractLocationBased
 			exprType = matcherWithType.group("exprType");
 			mainExpr = expression.substring(matcherWithType.end()).trim();
 			
-			String type = matcherWithType.group("type");
+			String type = matcherWithType.group("params");
 			exprTypeParams = type.trim().split("\\s*\\,\\s*");
 			
 			//parse parameter types

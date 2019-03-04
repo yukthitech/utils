@@ -562,7 +562,7 @@ public class AutomationUtils
 		JavaType resultType = defaultType != null ? defaultType : TypeFactory.defaultInstance().constructSimpleType(Object.class, null);
 		
 		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(sourceStr);
-		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_TYPE_PATTERN.matcher(sourceStr);
+		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(sourceStr);
 		
 		if(matcher.find())
 		{
@@ -572,7 +572,7 @@ public class AutomationUtils
 		else if(matcherWithType.find())
 		{
 			exprType = matcherWithType.group("exprType");
-			resultType = parseJavaType( matcherWithType.group("type") );
+			resultType = parseJavaType( matcherWithType.group("params") );
 			sourceStr = sourceStr.substring(matcherWithType.end()).trim();
 		}
 		

@@ -76,7 +76,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 			
 			try
 			{
-				steps.execute(context, exeLogger);
+				steps.execute(context, exeLogger, true);
 			} catch(BreakException ex)
 			{
 				break;

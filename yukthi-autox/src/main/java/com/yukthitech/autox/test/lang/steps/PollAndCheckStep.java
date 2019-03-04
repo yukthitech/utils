@@ -139,7 +139,7 @@ public class PollAndCheckStep extends AbstractValidation
 		
 		while(true)
 		{
-			poll.execute(context, exeLogger);
+			poll.execute(context, exeLogger, true);
 			
 			res = AutomationUtils.evaluateCondition(context, checkCondition);
 			

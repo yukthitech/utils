@@ -113,40 +113,58 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		return steps;
 	}
 	
-	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger logger, boolean withCurrentParams) throws Exception
 	{
-		for(IStep step : this.steps)
+		/*
+		 * Note: function invocation may happen as part of other lang steps like, if, for, while etc.
+		 * In such cases, the current params should be retained and new params should not be pushed.
+		 */
+		
+		if(!withCurrentParams)
 		{
-			/*
-			 * parameters needs to be set in loop so that in case of recursion or one step group
-			 * calling other, current group parameters will be restored before executing next step.
-			 */
-			context.setAttribute("parameters", params);
-			
-			try
+			context.pushParameters(params);
+		}
+		
+		try
+		{
+			for(IStep step : this.steps)
 			{
-				StepExecutor.executeStep(context, logger, step);
-			} catch (Exception ex)
-			{
-				if(functionGroup && (ex instanceof ReturnException))
+				try
 				{
-					logger.debug(this, "Exiting from current step group");
-					break;
-				}
-				
-				if(ex instanceof LangException)
+					StepExecutor.executeStep(context, logger, step);
+				} catch (Exception ex)
 				{
+					if(functionGroup && (ex instanceof ReturnException))
+					{
+						logger.debug(this, "Exiting from current step group");
+						break;
+					}
+					
+					if(ex instanceof LangException)
+					{
+						throw ex;
+					}
+					
+					Executable executable = step.getClass().getAnnotation(Executable.class);
+					logger.error(this, "An error occurred while executing child-step '{}'. Error: {}", executable.name()[0], ex);
 					throw ex;
 				}
-				
-				Executable executable = step.getClass().getAnnotation(Executable.class);
-				logger.error(this, "An error occurred while executing child-step '{}'. Error: {}", executable.name()[0], ex);
-				throw ex;
+			}
+		}finally
+		{
+			if(!withCurrentParams)
+			{
+				context.popParameters();
 			}
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	{
+		return execute(context, logger, false);
 	}
 
 	@Override

@@ -129,4 +129,9 @@ public class UiLocatorDoc extends AbstractDocInfo
 		
 		this.examples.addAll(examples);
 	}
+	
+	public boolean hasParams()
+	{
+		return false;
+	}
 }
