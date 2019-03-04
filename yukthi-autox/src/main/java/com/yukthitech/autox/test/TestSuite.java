@@ -347,10 +347,5 @@ public class TestSuite implements Validateable
 		{
 			throw new ValidateException("No name is provided for test suite.");
 		}
-
-		if(testCases.isEmpty())
-		{
-			throw new ValidateException("No test cases specified under this test suite.");
-		}
 	}
 }

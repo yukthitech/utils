@@ -1,0 +1,92 @@
+<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<testSuite name="assert-test-suites">
+		<!--
+			================================= Test with properties file -=======================================
+		-->
+		<testCase name="assertEquals">
+			<description>
+				Validates assert equals work properly
+			</description>
+		
+			<ccg:set expression="intAttr" value="int: 10"/>
+		
+			<ccg:set expression="attr(int): intAttr1" value="10"/>
+		
+			<ccg:assert-equals actual="string:value" expected="string:value"/>
+		
+			<ccg:assert-equals actual="prop: attr.intAttr" expected="int:10"/>
+		</testCase>
+	
+		<testCase name="assertNotEquals">
+			<description>
+				Validate assert not equals work properly
+			</description>
+		
+			<ccg:set expression="intAttr" value="int: 10"/>
+		
+			<ccg:assert-not-equals actual="prop:attr.intAttr" expected="int:11"/>
+		</testCase>
+	
+		<testCase name="assertSame">
+			<description>
+				validate a same object work properly
+			</description>
+		
+			<ccg:set expression="intAttr" value="int: 10000"/>
+		
+			<ccg:assert-same actual="prop:attr.intAttr" expected="prop:attr.intAttr"/>
+		</testCase>
+	
+		<testCase name="assertNotSame">
+			<description>
+				validate a Not same object work properly
+			</description>
+		
+			<ccg:set expression="intAttr" value="10"/>
+		
+			<ccg:set expression="intAttr1" value="10"/>
+		
+			<ccg:assert-not-same actual="prop:attr.intAttr1" expected="prop:attr.intAttr"/>
+		</testCase>
+	
+		<testCase name="assertNull">
+			<description>Validate a value is null</description>
+		
+			<ccg:remove name="intAttrXyz"/>
+		
+			<ccg:assert-null value="prop:attr.intAttrXyz"/>
+		</testCase>
+	
+		<testCase name="assertNotNull">
+			<description>Validate a value is not null</description>
+		
+			<ccg:set expression="intAttr" value="someval"/>
+		
+			<ccg:assert-not-null value="attr: intAttr"/>
+		</testCase>
+	
+		<testCase name="assertTrue">
+			<description>Checking the value is true</description>
+		
+			<ccg:set expression="booleanAttr" value="boolean: true"/>
+		
+			<ccg:assert-true value="prop: attr.booleanAttr"/>
+		
+			<ccg:set expression="intAttr1" value="int: 10"/>
+		
+			<ccg:assert-true value="condition: attr.intAttr1 gt 5"/>
+		</testCase>
+	
+		<testCase name="assertFalse">
+			<description>Checking the value is false</description>
+		
+			<ccg:set expression="booleanAttr" value="boolean: false"/>
+		
+			<ccg:assert-false value="prop: attr.booleanAttr"/>
+		
+			<ccg:set expression="intAttr1" value="int: 4"/>
+		
+			<ccg:assert-false value="condition: attr.intAttr1 gt 5"/>
+		</testCase>
+	</testSuite>
+</testData>

@@ -1,0 +1,11 @@
+<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<test-suite name="spreadTestSuite">
+		<test-case name="spreadTestCase">
+			<description>Ensures when test suite is spread across multiple files, it is working properly</description>
+
+			<wrap:steps>
+				<ccg:assert-equals actual="attr: varVal" expected="int: 10"/>
+			</wrap:steps>
+		</test-case>
+	</test-suite>
+</test-file>

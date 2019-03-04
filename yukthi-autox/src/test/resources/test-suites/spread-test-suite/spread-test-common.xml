@@ -1,0 +1,11 @@
+<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+	<test-suite name="spreadTestSuite">
+		<setup>
+			<ccg:log message="Setup is getting executed..."/>
+			<ccg:set expression="varVal" value="int: 10"/>
+		</setup>
+		<cleanup>
+			<ccg:log message="Cleanup is getting executed"/>
+		</cleanup>
+	</test-suite>
+</test-file>
