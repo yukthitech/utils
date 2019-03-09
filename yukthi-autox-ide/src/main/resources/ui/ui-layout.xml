@@ -47,6 +47,14 @@
 				<short-key ctrl="true" shift="true" key="F"/>
 			</item>
 
+			<item label="To Upper Case..." mnemonic="U" action="toUpperCase">
+				<short-key ctrl="true" key="U"/>
+			</item>
+
+			<item label="To Lower Case..." mnemonic="L" action="toLowerCase">
+				<short-key ctrl="true" key="L"/>
+			</item>
+
 			<item label="-" />
 
 			<item label="Find And Replace" mnemonic="n" action="findAndReplace">

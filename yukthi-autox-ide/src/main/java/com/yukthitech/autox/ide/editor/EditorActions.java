@@ -86,4 +86,32 @@ public class EditorActions
 		init();
 		openResourceDialog.display();
 	}
+	
+	@Action
+	public void toUpperCase()
+	{
+		init();
+		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
+		
+		if(editor == null)
+		{
+			return;
+		}
+		
+		editor.changeCase(true);
+	}
+	
+	@Action
+	public void toLowerCase()
+	{
+		init();
+		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
+		
+		if(editor == null)
+		{
+			return;
+		}
+		
+		editor.changeCase(false);
+	}
 }

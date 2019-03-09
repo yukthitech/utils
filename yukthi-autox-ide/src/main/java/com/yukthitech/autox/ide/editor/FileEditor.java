@@ -710,6 +710,22 @@ public class FileEditor extends JPanel
 		return buff.toString();
 	}
 	
+	public void changeCase(boolean toUpperCase)
+	{
+		int st = syntaxTextArea.getSelectionStart();
+		int end = syntaxTextArea.getSelectionEnd();
+		
+		if(st >= end)
+		{
+			return;
+		}
+		
+		String selectedText = syntaxTextArea.getSelectedText();
+		selectedText = toUpperCase ? selectedText.toUpperCase() : selectedText.toLowerCase();
+		
+		syntaxTextArea.replaceRange(selectedText, st, end);
+	}
+	
 	public synchronized String executeFindOperation(FindCommand command, FindOperation op)
 	{
 		String fullText = syntaxTextArea.getText();
