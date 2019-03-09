@@ -75,12 +75,12 @@ public class StartSessionStep extends AbstractStep
 
 		if(StringUtils.isNoneBlank(password))
 		{
-			exeLogger.debug(this, "Starting SSH session with name '{}' [Host: {}, Port: {}, User: {}, using password]", name, host, port, user);
+			exeLogger.debug("Starting SSH session with name '{}' [Host: {}, Port: {}, User: {}, using password]", name, host, port, user);
 			remoteSession.setPassword(password);
 		}
 		else
 		{
-			exeLogger.debug(this, "Starting SSH session with name '{}' [Host: {}, Port: {}, User: {}, using private-key: {}]", name, host, port, user, privateKeyPath);
+			exeLogger.debug("Starting SSH session with name '{}' [Host: {}, Port: {}, User: {}, using private-key: {}]", name, host, port, user, privateKeyPath);
 			remoteSession.setPrivateKeyPath(privateKeyPath);
 		}
 
@@ -93,7 +93,7 @@ public class StartSessionStep extends AbstractStep
 		}
 		
 		context.setInternalAttribute(name, remoteSession);
-		exeLogger.debug(this, "Remote session is started successfully..");
+		exeLogger.debug("Remote session is started successfully..");
 		
 		return true;
 	}

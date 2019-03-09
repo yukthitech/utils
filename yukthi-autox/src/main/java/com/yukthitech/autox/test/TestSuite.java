@@ -329,4 +329,10 @@ public class TestSuite implements Validateable
 			throw new ValidateException("No name is provided for test suite.");
 		}
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "[TS: " + name + "]";
+	}
 }

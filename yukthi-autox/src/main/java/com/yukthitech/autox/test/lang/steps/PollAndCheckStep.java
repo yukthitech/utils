@@ -135,7 +135,7 @@ public class PollAndCheckStep extends AbstractValidation
 		long diff = 0;
 		boolean res = false;
 		
-		exeLogger.debug(this, "Starting time: {}. Check Condition: {}", TIME_FORMAT.format(startTime), checkCondition);
+		exeLogger.debug("Starting time: {}. Check Condition: {}", TIME_FORMAT.format(startTime), checkCondition);
 		
 		while(true)
 		{
@@ -145,7 +145,7 @@ public class PollAndCheckStep extends AbstractValidation
 			
 			if(res)
 			{
-				exeLogger.debug(this, "Check condition was successful. Finishing polling step");
+				exeLogger.debug("Check condition was successful. Finishing polling step");
 				break;
 			}
 			
@@ -153,11 +153,11 @@ public class PollAndCheckStep extends AbstractValidation
 			
 			if(diff > timeOutUnit.toMillis(timeOut))
 			{
-				exeLogger.error(this, "Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
+				exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
 				return false;
 			}
 			
-			exeLogger.trace(this, "Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
+			exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
 			
 			try
 			{

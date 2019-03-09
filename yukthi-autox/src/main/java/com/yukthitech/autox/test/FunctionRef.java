@@ -83,7 +83,7 @@ public class FunctionRef extends AbstractStep
 		function = (Function) function.clone();
 		function.setLoggingDisabled(super.isLoggingDisabled());
 		
-		logger.debug(this, "Executing function '{}' with parameters: {}", name, paramValues);
+		logger.debug("Executing function '{}' with parameters: {}", name, paramValues);
 		
 		function.setParams(paramValues);
 		function.execute(context, logger);

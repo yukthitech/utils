@@ -74,12 +74,12 @@ public class AssertNotEqualStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Comparing values for NON equlity. [Expected: {} [{}], Actual: {} [{}]]", 
+		exeLogger.debug("Comparing values for NON equlity. [Expected: {} [{}], Actual: {} [{}]]", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
 		boolean res = !Objects.equal(actual, expected);
-		exeLogger.debug(this, "Result is {}", res);
+		exeLogger.debug("Result is {}", res);
 		return res;
 	}
 }

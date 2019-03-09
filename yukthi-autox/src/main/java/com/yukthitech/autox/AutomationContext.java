@@ -45,8 +45,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class AutomationContext
 {
-	
-	/** The logger. */
 	private static Logger logger = LogManager.getLogger(AutomationContext.class);
 	
 	/**
@@ -177,6 +175,11 @@ public class AutomationContext
 	 * Used to maintain parameter stack.
 	 */
 	private Stack<Map<String, Object>> parametersStack = new Stack<>();
+	
+	/**
+	 * Manages the stack trace of execution.
+	 */
+	private ExecutionStack executionStack = new ExecutionStack();
 
 	/**
 	 * Constructor.
@@ -917,6 +920,16 @@ public class AutomationContext
 	public void setInteractiveEnvironmentContext(InteractiveEnvironmentContext interactiveEnvironmentContext)
 	{
 		this.interactiveEnvironmentContext = interactiveEnvironmentContext;
+	}
+	
+	/**
+	 * Gets the manages the stack trace of execution.
+	 *
+	 * @return the manages the stack trace of execution
+	 */
+	public ExecutionStack getExecutionStack()
+	{
+		return executionStack;
 	}
 
 	/**

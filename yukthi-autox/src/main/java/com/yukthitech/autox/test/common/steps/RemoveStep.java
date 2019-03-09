@@ -35,7 +35,7 @@ public class RemoveStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Removing context attribute '{}'", name);
+		exeLogger.debug("Removing context attribute '{}'", name);
 		context.removeAttribute(name);
 		return true;
 	}

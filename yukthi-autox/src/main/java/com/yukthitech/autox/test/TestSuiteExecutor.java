@@ -96,15 +96,19 @@ public class TestSuiteExecutor
 			context.startLogMonitoring();
 			context.setActiveTestCase(testCase, null);
 			
+			testCase.setData(null);
+			context.getExecutionStack().push(testCase);
+			
 			try
 			{
-				result = testCase.execute(context, null, exeLogger);
+				result = testCase.execute(context, exeLogger);
 			}catch(Exception ex)
 			{
-				exeLogger.error(null, ex, "An error occurred while executing test case: {}", testCase.getName());
+				exeLogger.error(ex, "An error occurred while executing test case: {}", testCase.getName());
 				result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case.");
 			} finally
 			{
+				context.getExecutionStack().pop(testCase);
 				context.clearActiveTestCase();
 			}
 			
@@ -143,17 +147,21 @@ public class TestSuiteExecutor
 			//start monitoring logs
 			context.startLogMonitoring();
 			context.setActiveTestCase(testCase, data);
+			testCase.setData(data);
+			
+			context.getExecutionStack().push(testCase);
 
 			//execute test case for current data
 			try
 			{
-				result = testCase.execute(context, data, exeLogger);
+				result = testCase.execute(context, exeLogger);
 			}catch(Exception ex)
 			{
 				exeLogger.error(null, ex, "An error occurred while executing test case '{}' with data: {}", testCase.getName(), data);
 				result = new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case with data: " + data);
 			}finally
 			{
+				context.getExecutionStack().pop(testCase);
 				context.clearActiveTestCase();
 			}
 			

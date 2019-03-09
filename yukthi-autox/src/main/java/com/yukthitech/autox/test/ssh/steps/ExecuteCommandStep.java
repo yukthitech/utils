@@ -56,7 +56,7 @@ public class ExecuteCommandStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "On session '{}' executing command: {}", session, command);
+		exeLogger.debug("On session '{}' executing command: {}", session, command);
 		
 		RemoteSession remoteSession = (RemoteSession) context.getInternalAttribute(session);
 
@@ -102,7 +102,7 @@ public class ExecuteCommandStep extends AbstractStep
 						continue;
 					}
 					
-					exeLogger.debug(this, "Command exited with status: {}", channelExec.getExitStatus());
+					exeLogger.debug("Command exited with status: {}", channelExec.getExitStatus());
 					break;
 				}
 
@@ -117,8 +117,8 @@ public class ExecuteCommandStep extends AbstractStep
 			int exitStatus = channelExec.getExitStatus();
 			String output = new String(out.toByteArray());
 
-			exeLogger.debug(this, "Got exit status as '{}' and output as:\n{}", exitStatus, output);
-			exeLogger.debug(this, "Setting exit status and output on context with names '{}' and '{}' respectively", exitStatusVar, outputVar);
+			exeLogger.debug("Got exit status as '{}' and output as:\n{}", exitStatus, output);
+			exeLogger.debug("Setting exit status and output on context with names '{}' and '{}' respectively", exitStatusVar, outputVar);
 			
 			context.setAttribute(outputVar, output);
 			context.setAttribute(exitStatusVar, exitStatusVar);

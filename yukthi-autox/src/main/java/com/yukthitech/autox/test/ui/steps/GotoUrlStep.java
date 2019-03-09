@@ -31,7 +31,7 @@ public class GotoUrlStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Going to page with url - {}", url);
+		exeLogger.debug("Going to page with url - {}", url);
 
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		

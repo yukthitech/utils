@@ -43,10 +43,10 @@ public class ExecuteStep extends AbstractStep
 	{
 		String finalExpr = enclose ? "${" + expression + "}" : expression;
 		
-		exeLogger.debug(this, "Executing expression: {}", finalExpr);
+		exeLogger.debug("Executing expression: {}", finalExpr);
 		
 		String output = AutomationUtils.replaceExpressionsInString("finalExpr", context, finalExpr);
-		exeLogger.debug(this, "Output of expression execution: {}", output);
+		exeLogger.debug("Output of expression execution: {}", output);
 		
 		return true;
 	}

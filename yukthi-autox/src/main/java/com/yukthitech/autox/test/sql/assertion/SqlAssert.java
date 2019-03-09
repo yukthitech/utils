@@ -137,7 +137,7 @@ public class SqlAssert extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
@@ -160,9 +160,9 @@ public class SqlAssert extends AbstractValidation
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, processedQuery, values);
+			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {}", dataSourceName, processedQuery, values);
 			
 			AtomicInteger recCount = new AtomicInteger(0);
 
@@ -182,14 +182,14 @@ public class SqlAssert extends AbstractValidation
 						
 						if(expectedRows.size() <= rowIdx)
 						{
-							exeLogger.error(SqlAssert.this, "Actual rows are more than expected row count: {}", expectedRows.size());
+							exeLogger.error("Actual rows are more than expected row count: {}", expectedRows.size());
 							return false;
 						}
 
 						row = expectedRows.get(rowIdx);
 						actualRow.clear();
 						
-						exeLogger.debug(SqlAssert.this, "Validating row {} values are: {}", rowIdx, row.columnToValue);
+						exeLogger.debug("Validating row {} values are: {}", rowIdx, row.columnToValue);
 
 						for(String column : row.columnToValue.keySet())
 						{
@@ -198,12 +198,12 @@ public class SqlAssert extends AbstractValidation
 
 							if(!expectedVal.equals(actualVal))
 							{
-								exeLogger.error(SqlAssert.this, "At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
+								exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
 								return false;
 							}
 						}
 						
-						exeLogger.debug(SqlAssert.this, "Found row {} to be as per expected values", rowIdx);
+						exeLogger.debug("Found row {} to be as per expected values", rowIdx);
 						
 						rowIdx ++;
 					}
@@ -216,14 +216,14 @@ public class SqlAssert extends AbstractValidation
 
 			if(recCount.get() < expectedRows.size())
 			{
-				exeLogger.error(SqlAssert.this, "Actual rows {} are less than expected row count: {}", recCount.get(), expectedRows.size());
+				exeLogger.error("Actual rows {} are less than expected row count: {}", recCount.get(), expectedRows.size());
 				return false;
 			}
 			
 			return res;
 		} catch(SQLException ex)
 		{
-			exeLogger.error(this, ex, "An error occurred while executing sql validation with query - {}", query);
+			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
 			throw new TestCaseFailedException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{

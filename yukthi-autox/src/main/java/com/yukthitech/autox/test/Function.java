@@ -13,16 +13,17 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
+import com.yukthitech.ccg.xml.IParentAware;
 
 /**
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
 @Executable(name = "function", message = "Can be used to group multiple steps into single step")
-public class Function extends AbstractLocationBased implements IStepContainer, IStep, Cloneable
+public class Function extends AbstractLocationBased implements IStepContainer, IStep, Cloneable, IEntryPoint, IParentAware
 {
 	private static final long serialVersionUID = 1L;
-
+	
 	/**
 	 * Name of this group.
 	 */
@@ -57,6 +58,21 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 	@SkipParsing
 	private IDataProvider dataProvider;
 
+	@SkipParsing
+	private Object parent;
+	
+	@Override
+	public void setParent(Object parent)
+	{
+		this.parent = parent;
+	}
+
+	@Override
+	public String toText()
+	{
+		return parent + "." + name;
+	}
+	
 	/**
 	 * Sets the name of this group.
 	 *
@@ -75,6 +91,16 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 	public String getName()
 	{
 		return name;
+	}
+	
+	/**
+	 * Sets the parent where this function is defined.
+	 *
+	 * @param parent the new parent where this function is defined
+	 */
+	public void setParent(String parent)
+	{
+		this.parent = parent;
 	}
 	
 	/**
@@ -113,18 +139,19 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		return steps;
 	}
 	
-	public boolean execute(AutomationContext context, ExecutionLogger logger, boolean withCurrentParams) throws Exception
+	public boolean execute(AutomationContext context, ExecutionLogger logger, boolean inlineExecution) throws Exception
 	{
 		/*
 		 * Note: function invocation may happen as part of other lang steps like, if, for, while etc.
 		 * In such cases, the current params should be retained and new params should not be pushed.
 		 */
 		
-		if(!withCurrentParams)
+		if(!inlineExecution)
 		{
 			context.pushParameters(params);
+			context.getExecutionStack().push(this);
 		}
-		
+
 		try
 		{
 			for(IStep step : this.steps)
@@ -136,7 +163,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 				{
 					if(functionGroup && (ex instanceof ReturnException))
 					{
-						logger.debug(this, "Exiting from current step group");
+						logger.debug("Exiting from current step group");
 						break;
 					}
 					
@@ -146,14 +173,15 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 					}
 					
 					Executable executable = step.getClass().getAnnotation(Executable.class);
-					logger.error(this, "An error occurred while executing child-step '{}'. Error: {}", executable.name()[0], ex);
+					logger.error("An error occurred while executing child-step '{}'. Error: {}", executable.name()[0], ex);
 					throw ex;
 				}
 			}
 		}finally
 		{
-			if(!withCurrentParams)
+			if(!inlineExecution)
 			{
+				context.getExecutionStack().pop(this);
 				context.popParameters();
 			}
 		}

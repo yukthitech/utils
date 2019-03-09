@@ -32,13 +32,13 @@ public class ClickStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Clicking the element specified by locator: {}", locator);
+		exeLogger.trace("Clicking the element specified by locator: {}", locator);
 
 		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 		if(webElement == null)
 		{
-			exeLogger.error(this, "Failed to find element with locator: {}", getLocatorWithParent(locator));
+			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
@@ -64,7 +64,7 @@ public class ClickStep extends AbstractUiStep
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(this, ex, "Failed to click element - {}", getLocatorWithParent(locator));
+			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
 		

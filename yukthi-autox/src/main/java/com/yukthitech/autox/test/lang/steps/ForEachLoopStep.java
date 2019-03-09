@@ -136,7 +136,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 		
 		if(exprValue == null)
 		{
-			exeLogger.debug(this, "Expression '{}' evaluated to null", expression);
+			exeLogger.debug("Expression '{}' evaluated to null", expression);
 			return true;
 		}
 		
@@ -146,17 +146,17 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 		{
 			collection = Arrays.asList( (Object[]) ((String) exprValue).split(delimiter) );
 			
-			exeLogger.debug(this, "Expression '{}' evaluated to string and after split got collection as: {}", expression, collection);
+			exeLogger.debug("Expression '{}' evaluated to string and after split got collection as: {}", expression, collection);
 		}
 		else if(exprValue instanceof Collection)
 		{
 			collection = (Collection<Object>) exprValue;
-			exeLogger.debug(this, "Expression '{}' evaluated to collection of size: {}", expression, collection.size());
+			exeLogger.debug("Expression '{}' evaluated to collection of size: {}", expression, collection.size());
 		}
 		else if(exprValue instanceof Map)
 		{
 			collection = (Collection) ((Map<Object, Object>) exprValue).entrySet();
-			exeLogger.debug(this, "Expression '{}' evaluated to map of size: {}", expression, collection.size());
+			exeLogger.debug("Expression '{}' evaluated to map of size: {}", expression, collection.size());
 		}
 		else
 		{
@@ -183,7 +183,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			{
 				if(ignoreError)
 				{
-					exeLogger.error(ForEachLoopStep.this, "Iteration resulted in error, which is being ignore.", ex);
+					exeLogger.error("Iteration resulted in error, which is being ignore.", ex);
 				}
 				
 				throw ex;

@@ -34,7 +34,7 @@ public class CloseSessionStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Closing the session - {}", session);
+		exeLogger.debug("Closing the session - {}", session);
 		
 		RemoteSession remoteSession = (RemoteSession) context.getInternalAttribute(session);
 		

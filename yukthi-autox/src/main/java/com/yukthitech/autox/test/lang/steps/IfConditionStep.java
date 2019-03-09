@@ -98,7 +98,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	{
 		boolean res = AutomationUtils.evaluateCondition(context, condition);
 		
-		exeLogger.debug(this, "Condition evaluation resulted in '{}'. Condition: {}", res, condition);
+		exeLogger.debug("Condition evaluation resulted in '{}'. Condition: {}", res, condition);
 		
 		if(res)
 		{

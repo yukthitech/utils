@@ -136,4 +136,10 @@ public class TestDataFile
 	{
 		context.addFunction(function);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "<global>";
+	}
 }

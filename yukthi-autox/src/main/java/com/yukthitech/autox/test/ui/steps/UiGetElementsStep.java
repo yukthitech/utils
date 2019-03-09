@@ -61,20 +61,20 @@ public class UiGetElementsStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Fetching ui element value for locator - {}", locator);
+		exeLogger.trace("Fetching ui element value for locator - {}", locator);
 		
 		
 		List<WebElement> webElements = UiAutomationUtils.findElements(context, parentElement, locator);
 		
 		if(webElements == null || webElements.isEmpty())
 		{
-			exeLogger.debug(this, "No webelements found with locator: {}", getLocatorWithParent(locator));
+			exeLogger.debug("No webelements found with locator: {}", getLocatorWithParent(locator));
 			context.setAttribute(name, new ArrayList<>());
 			
 			return true;
 		}
 		
-		exeLogger.debug(this, "Setting context attribute '{}' with webelements [count: {}] matching locator: {}", 
+		exeLogger.debug("Setting context attribute '{}' with webelements [count: {}] matching locator: {}", 
 				name, webElements.size(), getLocatorWithParent(locator));
 		context.setAttribute(name, webElements);
 		

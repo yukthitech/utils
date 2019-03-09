@@ -42,11 +42,11 @@ public class AssertFileExists extends AbstractValidation
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Checking for file existence: {}", path);
+		exeLogger.debug("Checking for file existence: {}", path);
 		
 		File file = new File(path);
 		
-		exeLogger.debug(this, "Found file '{}' existence status as: {}", path, file.exists());
+		exeLogger.debug("Found file '{}' existence status as: {}", path, file.exists());
 		return file.exists();
 	}
 	

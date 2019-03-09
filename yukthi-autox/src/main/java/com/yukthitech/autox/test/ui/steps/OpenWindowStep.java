@@ -58,7 +58,7 @@ public class OpenWindowStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Opening window '{}' with url: {}", name, url);
+		exeLogger.trace("Opening window '{}' with url: {}", name, url);
 
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();

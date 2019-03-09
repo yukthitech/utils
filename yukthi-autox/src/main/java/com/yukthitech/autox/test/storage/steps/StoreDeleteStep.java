@@ -42,11 +42,11 @@ public class StoreDeleteStep extends AbstractStep
 
 		if(res)
 		{
-			exeLogger.debug(this, "Successfully deleted entry with key: {}", key);
+			exeLogger.debug("Successfully deleted entry with key: {}", key);
 			return true;
 		}
 
-		exeLogger.debug(this, "No entry found with key: {}. Ignoring delete request.", key);
+		exeLogger.debug("No entry found with key: {}. Ignoring delete request.", key);
 		return true;
 	}
 }

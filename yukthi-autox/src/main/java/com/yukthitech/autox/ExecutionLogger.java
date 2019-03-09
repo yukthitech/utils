@@ -98,14 +98,9 @@ public class ExecutionLogger
 	 * @param locationBased
 	 * @return
 	 */
-	private String getSourceLocation(ILocationBased locationBased)
+	private String getSourceLocation()
 	{
-		if(locationBased == null)
-		{
-			return null;
-		}
-		
-		return locationBased.getLocation();
+		return automationContext.getExecutionStack().getCurrentLocation();
 	}
 	
 	private String buildMessage(String mssgTemplate, Object... args)
@@ -140,12 +135,12 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void error(ILocationBased source, String mssgTemplate, Object... args)
+	public void error(String mssgTemplate, Object... args)
 	{
 		String finalMssg = buildMessage(mssgTemplate, args);
 		logger.error(finalMssg);
 		
-		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
 	}
 
 	/**
@@ -155,19 +150,24 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void error(ILocationBased source, Throwable th, String mssgTemplate, Object... args)
+	public void error(Throwable th, String mssgTemplate, Object... args)
 	{
 		String finalMssg = buildMessage(mssgTemplate, args);
+		
+		String autoxStackTrace = automationContext.getExecutionStack().toStackTrace();
+		
+		logger.error(finalMssg, autoxStackTrace);
 		logger.error(finalMssg, th);
 		
 		StringWriter stringWriter = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(stringWriter);
 		
 		printWriter.println(finalMssg);
+		printWriter.println(autoxStackTrace);
 		th.printStackTrace(printWriter);
 		printWriter.flush();
 		
-		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, stringWriter.toString(), new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, stringWriter.toString(), new Date()));
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void debug(ILocationBased source, String mssgTemplate, Object... args)
+	public void debug(String mssgTemplate, Object... args)
 	{
 		if(disabled)
 		{
@@ -186,7 +186,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.debug(finalMssg);
-		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
-	public void trace(ILocationBased source, String mssgTemplate, Object... args)
+	public void trace(String mssgTemplate, Object... args)
 	{
 		if(disabled)
 		{
@@ -205,7 +205,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.trace(finalMssg);
-		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
 	}
 
 	/**
@@ -215,7 +215,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate msg template
 	 * @param args arguments for message
 	 */
-	public void log(ILocationBased source, LogLevel logLevel, String mssgTemplate, Object... args)
+	public void log(LogLevel logLevel, String mssgTemplate, Object... args)
 	{
 		if(disabled)
 		{
@@ -225,7 +225,7 @@ public class ExecutionLogger
 		String finalMssg = buildMessage(mssgTemplate, args);
 
 		logger.debug(finalMssg);
-		addMessage(new ExecutionLogData.Message( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
 	}
 
 	/**
@@ -236,7 +236,7 @@ public class ExecutionLogger
 	 * @param imageFile Image to be logged
 	 * @param logLevel level to be used.
 	 */
-	public void logImage(ILocationBased source, String name, String message, File imageFile, LogLevel logLevel)
+	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
 	{
 		if(disabled)
 		{
@@ -271,7 +271,7 @@ public class ExecutionLogger
 			name = System.currentTimeMillis() + "_" + (fileIndex++) + extension;
 		}
 		
-		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(source), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
+		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
 	}
 	
 	/**

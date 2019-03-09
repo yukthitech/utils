@@ -329,7 +329,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	public void handleError(AutomationContext context, ErrorDetails errorDetails)
 	{
 		File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
-		errorDetails.getExecutionLogger().logImage(null, "error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
+		errorDetails.getExecutionLogger().logImage("error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
 	}
 
 	/* (non-Javadoc)

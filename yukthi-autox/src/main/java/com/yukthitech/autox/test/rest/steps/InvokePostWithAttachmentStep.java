@@ -66,7 +66,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		
 		for(HttpPart partEntry : parts)
 		{
-			exeLogger.debug(this, "Adding part with name: {}", partEntry.getName());
+			exeLogger.debug("Adding part with name: {}", partEntry.getName());
 			
 			if(partEntry.getValue() instanceof String)
 			{
@@ -87,7 +87,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		
 		for(HttpAttachment attachment : attachments)
 		{
-			exeLogger.debug(this, "Adding attachment with name: {}", attachment.getName());
+			exeLogger.debug("Adding attachment with name: {}", attachment.getName());
 			
 			resource = ResourceFactory.getResource(context, attachment.getFile(), exeLogger, attachment.isParseAsTemplate());
 			
@@ -111,7 +111,7 @@ public class InvokePostWithAttachmentStep extends AbstractRestStep implements Va
 		{
 			if(!fileToDel.delete())
 			{
-				exeLogger.debug(this, "Failed to delete temp file: {}", fileToDel.getPath());
+				exeLogger.debug("Failed to delete temp file: {}", fileToDel.getPath());
 			}
 		}
 		

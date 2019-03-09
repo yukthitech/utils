@@ -59,7 +59,7 @@ public class MkDirStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Creating directory {} in work folder: {}", path, context.getWorkDirectory().getPath());
+		exeLogger.debug("Creating directory {} in work folder: {}", path, context.getWorkDirectory().getPath());
 		
 		File dirToCreate = new File(context.getWorkDirectory().getPath() + File.separator + path);
 		
@@ -67,12 +67,12 @@ public class MkDirStep extends AbstractStep
 		{
 			FileUtils.forceMkdir(dirToCreate);
 			
-			exeLogger.debug(this, "Setting created directory path {} on context with attribute - {}", dirToCreate, name);
+			exeLogger.debug("Setting created directory path {} on context with attribute - {}", dirToCreate, name);
 			
 			context.setAttribute(name, dirToCreate);
 		}catch(Exception ex)
 		{
-			exeLogger.error(this, ex, "An error occurred while creating directory - {}", path);
+			exeLogger.error(ex, "An error occurred while creating directory - {}", path);
 			throw new TestCaseFailedException(this, "An error occurred while creating directory - {}", path, ex);
 		}
 		

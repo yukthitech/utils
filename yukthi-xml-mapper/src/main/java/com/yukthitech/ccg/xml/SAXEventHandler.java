@@ -592,6 +592,12 @@ class SAXEventHandler extends DefaultHandler
 		// this will take care of throwing exception when factory returns null
 		// for non-text object
 		newNode.setBean(nextBean);
+		
+		if(nextBean instanceof IParentAware)
+		{
+			((IParentAware) nextBean).setParent(parentBean);
+		}
+		
 		setAttributeData(newNode);
 	}
 	

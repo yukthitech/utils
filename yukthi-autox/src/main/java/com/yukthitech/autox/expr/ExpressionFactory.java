@@ -16,7 +16,6 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 
-import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
@@ -31,7 +30,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Factory for parsing expressions.
  * @author akiran
  */
-public class ExpressionFactory extends AbstractLocationBased
+public class ExpressionFactory
 {
 	private static Logger logger = LogManager.getLogger(ExpressionFactory.class);
 	
@@ -241,7 +240,7 @@ public class ExpressionFactory extends AbstractLocationBased
 	{
 		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		
-		exeLogger.debug(this, "Fetching expression parser for value and parsing expression: {}", expression);
+		exeLogger.debug("Fetching expression parser for value and parsing expression: {}", expression);
 		
 		context.clearParameters();
 		
@@ -320,7 +319,7 @@ public class ExpressionFactory extends AbstractLocationBased
 			ExpressionParserDetails parser = context.getCurrentParser();
 			String exprTypeParams[] = context.getExpressionTypeParameters();
 			
-			exeLogger.trace(this, "Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
+			exeLogger.trace("Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
 	
 			if(!parser.isConversionHandled() && exprTypeParams != null)
 			{
@@ -348,7 +347,7 @@ public class ExpressionFactory extends AbstractLocationBased
 			return result;
 		}catch(Exception ex)
 		{
-			exeLogger.error(this, "Evaluation of expression {} resulted in error", expression, ex);
+			exeLogger.error("Evaluation of expression {} resulted in error", expression, ex);
 			throw new InvalidStateException("An error occurred while evaluating expression '{}'", expression, ex);
 		}
 	}
@@ -361,12 +360,12 @@ public class ExpressionFactory extends AbstractLocationBased
 		
 		if(propertyPath == null)
 		{
-			exeLogger.debug(this, "Setting attribute '{}' as value: {}", expression, value);
+			exeLogger.debug("Setting attribute '{}' as value: {}", expression, value);
 			context.setAttribute(expression, value);
 			return;
 		}
 		
-		exeLogger.debug(this, "Setting expression '{}' as value: {}", expression, value);
+		exeLogger.debug("Setting expression '{}' as value: {}", expression, value);
 		
 		ExpressionParserDetails parser = expressionParserContext.getCurrentParser();
 		String exprTypeParams[] = expressionParserContext.getExpressionTypeParameters();
@@ -399,7 +398,7 @@ public class ExpressionFactory extends AbstractLocationBased
 			propertyPath.setValue(value);
 		}catch(Exception ex)
 		{
-			exeLogger.error(this, "Failed to set specified value {} on path {}", value, expression, ex);
+			exeLogger.error("Failed to set specified value {} on path {}", value, expression, ex);
 			throw new InvalidStateException("Failed to set specified value {} on path {}", value, expression, ex);
 		}
 	}

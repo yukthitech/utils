@@ -69,7 +69,7 @@ public class SwitchWindow extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Switching to window: {}", locator);
+		exeLogger.trace("Switching to window: {}", locator);
 
 		SeleniumPlugin seleniumPlugin = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumPlugin.getWebDriver();
@@ -78,12 +78,12 @@ public class SwitchWindow extends AbstractStep
 		{
 			if(newWindow)
 			{
-				exeLogger.debug(this, "Trying to switch to new window");
+				exeLogger.debug("Trying to switch to new window");
 				locator = getNewWindowHandle(seleniumPlugin);
 			}
 			else
 			{
-				exeLogger.debug(this, "As no locator is specified switching to main window");
+				exeLogger.debug("As no locator is specified switching to main window");
 				locator = seleniumPlugin.getMainWindowHandle();
 			}
 		}

@@ -34,7 +34,7 @@ public class StartTimerStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		logger.debug(this, "Started timer with name: {}", name);
+		logger.debug("Started timer with name: {}", name);
 		context.setAttribute(name + ".startTime", System.currentTimeMillis());
 		return true;
 	}

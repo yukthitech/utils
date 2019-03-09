@@ -76,13 +76,13 @@ public class ClickAndDownloadStep extends AbstractUiStep
 		
 		plugin.cleanDownloadFolder();
 		
-		exeLogger.trace(this, "For download clicking the element specified by locator: {}", getLocatorWithParent(locator));
+		exeLogger.trace("For download clicking the element specified by locator: {}", getLocatorWithParent(locator));
 
 		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 		if(webElement == null)
 		{
-			exeLogger.error(this, "Failed to find element with locator: {}", getLocatorWithParent(locator));
+			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
@@ -129,7 +129,7 @@ public class ClickAndDownloadStep extends AbstractUiStep
 			try
 			{
 				String path = files[0].getCanonicalPath();
-				exeLogger.trace(this, "Setting downloaded file path '{}' on context with name: {}", path, pathName);
+				exeLogger.trace("Setting downloaded file path '{}' on context with name: {}", path, pathName);
 				
 				context.setAttribute(pathName, path);
 			}catch(IOException ex)
@@ -138,7 +138,7 @@ public class ClickAndDownloadStep extends AbstractUiStep
 			}
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(this, ex, "Failed to click element - {}", getLocatorWithParent(locator));
+			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
 		

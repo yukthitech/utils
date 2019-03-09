@@ -8,16 +8,17 @@ import org.apache.commons.collections.CollectionUtils;
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
-import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.ccg.xml.IParentAware;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
 /**
  * Represents list of steps that needs to be executed before executing testing unit.
  */
-public class Setup extends AbstractLocationBased implements IStepContainer, Validateable, ILocationBased
+public class Setup extends AbstractLocationBased implements IStepContainer, Validateable, IEntryPoint, IParentAware
 {
 	/**
 	 * Name for logger and other purposes.
@@ -28,6 +29,24 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 	 * Steps for the test case.
 	 */
 	private List<IStep> steps = new ArrayList<>();
+	
+	/**
+	 * Parent of this element.
+	 */
+	@SkipParsing
+	private Object parent;
+	
+	@Override
+	public void setParent(Object parent)
+	{
+		this.parent = parent;
+	}
+	
+	@Override
+	public String toText()
+	{
+		return parent + ".<setup>";
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -72,10 +91,11 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.setMode("setup");
+		context.getExecutionStack().push(this);
 		
 		try
 		{
-			exeLogger.debug(this, "Started setup process");
+			exeLogger.debug("Started setup process");
 			context.setSetupExecution(true);
 			
 			// execute the steps involved
@@ -86,16 +106,18 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 					StepExecutor.executeStep(context, exeLogger, step);
 				} catch(Exception ex)
 				{
-					exeLogger.error(this, ex, "An error occurred while executing step - " + step);
+					exeLogger.error(ex, "An error occurred while executing step - " + step);
 	
 					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 				}
 			}
 	
-			exeLogger.debug(this, "Completed setup process");
+			exeLogger.debug("Completed setup process");
 			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
+			context.getExecutionStack().pop(this);
+			
 			context.setSetupExecution(false);
 			exeLogger.clearMode();
 		}

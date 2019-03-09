@@ -21,7 +21,7 @@ public class CloseWindowStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Closing current window");
+		exeLogger.trace("Closing current window");
 
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();

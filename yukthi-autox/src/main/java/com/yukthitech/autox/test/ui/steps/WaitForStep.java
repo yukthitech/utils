@@ -56,7 +56,7 @@ public class WaitForStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Waiting for element '{}' to become {}", locators, "true".equals(hidden) ? "Invisible" : "Visible");
+		exeLogger.debug("Waiting for element '{}' to become {}", locators, "true".equals(hidden) ? "Invisible" : "Visible");
 		
 		try
 		{
@@ -71,14 +71,14 @@ public class WaitForStep extends AbstractUiStep
 					{
 						if(element == null || !element.isDisplayed())
 						{
-							exeLogger.debug(this, "Found locator '{}' to be hidden", getLocatorWithParent(locator));
+							exeLogger.debug("Found locator '{}' to be hidden", getLocatorWithParent(locator));
 							return true;
 						}
 					}
 					//if element needs to be checked for visibility
 					else if(element != null && element.isDisplayed())
 					{
-						exeLogger.debug(this, "Found locator '{}' to be visible.", getLocatorWithParent(locator));
+						exeLogger.debug("Found locator '{}' to be visible.", getLocatorWithParent(locator));
 						return true;
 					}
 				}
@@ -89,7 +89,7 @@ public class WaitForStep extends AbstractUiStep
 			
 		} catch(InvalidStateException ex)
 		{
-			exeLogger.error(this, ex, ex.getMessage());
+			exeLogger.error(ex, ex.getMessage());
 			throw new TestCaseFailedException(this, ex.getMessage(), ex);
 		}
 		

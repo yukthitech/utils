@@ -17,7 +17,7 @@ public class FailStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		exeLogger.debug(this, "Failing the current test case.");
+		exeLogger.debug("Failing the current test case.");
 		throw new FailException();
 	}
 }

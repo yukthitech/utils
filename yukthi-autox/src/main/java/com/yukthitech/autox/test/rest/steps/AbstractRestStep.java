@@ -177,7 +177,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	 */
 	protected void populate(AutomationContext context, RestRequest<?> request, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Populating {} with uri {}"
+		exeLogger.debug("Populating {} with uri {}"
 				+ "\n\tHeaders: {}"
 				+ "\n\tPath Variables: {}"
 				+ "\n\tParams: {}", request.getClass().getSimpleName(), uri, headers, pathVariables, params);
@@ -237,11 +237,11 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		if(baseUrl != null)
 		{
-			exeLogger.debug(this, "With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", baseUrl, expectedResponseType, request);
+			exeLogger.debug("With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", baseUrl, expectedResponseType, request);
 		}
 		else
 		{
-			exeLogger.debug(this, "With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", restPlugin.getBaseUrl(), expectedResponseType, request);
+			exeLogger.debug("With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", restPlugin.getBaseUrl(), expectedResponseType, request);
 		}
 		
 		RestClient client = restPlugin.getRestClient(baseUrl);
@@ -252,7 +252,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		if(handler != null)
 		{
-			exeLogger.debug(this, "Using current step handler for processing response and building the result");
+			exeLogger.debug("Using current step handler for processing response and building the result");
 			
 			result = (RestResult) client.invokeRequest( (RestRequest) request, (ResponseHandler) handler);
 		}
@@ -268,7 +268,7 @@ public abstract class AbstractRestStep extends AbstractStep
 			}
 		}
 		
-		exeLogger.debug(this, "Using context attributes [Result attribute: {}, Response attribute: {}]. Obtained result:\n{}", resultContextAttribute, responseContextAttribure, result);
+		exeLogger.debug("Using context attributes [Result attribute: {}, Response attribute: {}]. Obtained result:\n{}", resultContextAttribute, responseContextAttribure, result);
 		
 		context.setAttribute(resultContextAttribute, result);
 		

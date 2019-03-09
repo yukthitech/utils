@@ -43,9 +43,9 @@ public class AssertNotNullStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Checking the value is not null [value : {}]", value);
+		exeLogger.debug("Checking the value is not null [value : {}]", value);
 		boolean res = Objects.nonNull(value);
-		exeLogger.debug(this, "Result is {}", res);
+		exeLogger.debug("Result is {}", res);
 		return res;
 	}
 }

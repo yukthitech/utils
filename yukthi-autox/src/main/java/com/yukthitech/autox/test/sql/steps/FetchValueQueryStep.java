@@ -109,14 +109,14 @@ public class FetchValueQueryStep extends AbstractStep
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
+			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 
 			Object result = null;
 			Object valueArr[] = values.isEmpty() ? null : values.toArray();
 			
-			exeLogger.debug(this, "Loading single valued result on context attribute: {}", contextAttribute);
+			exeLogger.debug("Loading single valued result on context attribute: {}", contextAttribute);
 			
 			ResultSetHandler<Object> handler = new ResultSetHandler<Object>()
 			{
@@ -135,10 +135,10 @@ public class FetchValueQueryStep extends AbstractStep
 			result = QueryUtils.getQueryRunner().query(connection, processedQuery, handler, valueArr);
 			
 			context.setAttribute(contextAttribute, result);
-			exeLogger.debug(this, "Data loaded on context with name {}. Data: {}", contextAttribute, result);
+			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(this, ex, "An error occurred while executing query: {}", query);
+			exeLogger.error(ex, "An error occurred while executing query: {}", query);
 			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
 		} finally

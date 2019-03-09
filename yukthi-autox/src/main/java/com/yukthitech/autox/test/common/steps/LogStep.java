@@ -113,19 +113,19 @@ public class LogStep extends AbstractStep
 		
 		if(level == LogLevel.DEBUG)
 		{
-			exeLogger.debug(this, finalMssg.toString());
+			exeLogger.debug(finalMssg.toString());
 		}
 		else if(level == LogLevel.ERROR)
 		{
-			exeLogger.error(this, finalMssg.toString());
+			exeLogger.error(finalMssg.toString());
 		}
 		else if(level == LogLevel.TRACE)
 		{
-			exeLogger.trace(this, finalMssg.toString());
+			exeLogger.trace(finalMssg.toString());
 		}
 		else
 		{
-			exeLogger.log(this, level, finalMssg.toString());
+			exeLogger.log(level, finalMssg.toString());
 		}
 		
 		if(level == LogLevel.SUMMARY)

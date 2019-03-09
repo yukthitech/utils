@@ -74,12 +74,12 @@ public class AssertEqualsStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Comparing values for equlity. [Expected: {} [{}], Actual: {} [{}]]", 
+		exeLogger.debug("Comparing values for equlity. [Expected: {} [{}], Actual: {} [{}]]", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
 		boolean res = Objects.equals(expected, actual);
-		exeLogger.debug(this, "Result of comparision is: {}", res);
+		exeLogger.debug("Result of comparision is: {}", res);
 
 		return res;
 	}

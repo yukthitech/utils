@@ -17,7 +17,7 @@ public class BreakStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		exeLogger.debug(this, "Breaking current loop");
+		exeLogger.debug("Breaking current loop");
 		throw new BreakException();
 	}
 }

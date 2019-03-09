@@ -46,7 +46,7 @@ public class StoreCookiesStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Stroring current cookies into file: {}", path);
+		exeLogger.trace("Stroring current cookies into file: {}", path);
 
 		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = plugin.getWebDriver();
@@ -55,7 +55,7 @@ public class StoreCookiesStep extends AbstractUiStep
 		
 		if(cookies == null || cookies.isEmpty())
 		{
-			exeLogger.debug(this, "No cookies found for persisting.");
+			exeLogger.debug("No cookies found for persisting.");
 			return true;
 		}
 		

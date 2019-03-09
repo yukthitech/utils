@@ -46,11 +46,11 @@ public class UiAssertValue extends AbstractUiAssert
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
-		exeLogger.trace(this, "Validating if locator '{}' has value - {}", getLocatorWithParent(locator), value);
+		exeLogger.trace("Validating if locator '{}' has value - {}", getLocatorWithParent(locator), value);
 		
 		WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
 		String actualMessage = null;
@@ -66,7 +66,7 @@ public class UiAssertValue extends AbstractUiAssert
 
 		if(!value.equals(actualMessage))
 		{
-			exeLogger.error(this, "Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, getLocatorWithParent(locator));
+			exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, getLocatorWithParent(locator));
 			return false;
 		}
 

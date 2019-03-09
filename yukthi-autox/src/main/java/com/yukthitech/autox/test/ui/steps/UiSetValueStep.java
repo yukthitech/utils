@@ -74,17 +74,17 @@ public class UiSetValueStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
-		logger.debug(this, "Populating field {} with value - {}", getLocatorWithParent(locator), value);
+		logger.debug("Populating field {} with value - {}", getLocatorWithParent(locator), value);
 		
 		if(!UiAutomationUtils.populateField(context, parentElement, locator, value))
 		{
-			logger.error(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
+			logger.error("Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 			throw new TestCaseFailedException(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 		}
 
 		if(pressEnterAtEnd)
 		{
-			logger.debug(this, "User has provided enter key to be pressed");
+			logger.debug( "User has provided enter key to be pressed");
 
 			pressEnter(context, logger);
 		}

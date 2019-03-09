@@ -41,7 +41,7 @@ public class AssertFalseStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Checking the value is false [value : {}]", value);
+		exeLogger.debug("Checking the value is false [value : {}]", value);
 		boolean res = false;
 
 		if(value instanceof Boolean)
@@ -53,7 +53,7 @@ public class AssertFalseStep extends AbstractValidation
 			res = !"true".equalsIgnoreCase("" + value);
 		}
 
-		exeLogger.debug(this, "Result is: {}", res);
+		exeLogger.debug("Result is: {}", res);
 		return !res;
 
 	}

@@ -48,11 +48,11 @@ public class SwitchFrame extends AbstractStep
 	{
 		if(index != null)
 		{
-			exeLogger.trace(this, "Switching to frame with index: {}", index);
+			exeLogger.trace("Switching to frame with index: {}", index);
 		}
 		else
 		{
-			exeLogger.trace(this, "Switching to frame with locator: {}", locator);
+			exeLogger.trace("Switching to frame with locator: {}", locator);
 		}
 
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);

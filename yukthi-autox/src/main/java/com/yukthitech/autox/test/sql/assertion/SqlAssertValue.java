@@ -112,7 +112,7 @@ public class SqlAssertValue extends AbstractValidation
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
@@ -135,9 +135,9 @@ public class SqlAssertValue extends AbstractValidation
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug(this, "On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {} \nExpected Value: {}", dataSourceName, query, paramMap, expectedValue);
+			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code>\nParams: {} \nExpected Value: {}", dataSourceName, query, paramMap, expectedValue);
 			
-			exeLogger.trace(this, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {} \nExpected Value: {}", dataSourceName, processedQuery, values, expectedValue);
+			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code>\nParams: {} \nExpected Value: {}", dataSourceName, processedQuery, values, expectedValue);
 			
 			ResultSetHandler<Object> rsHandler = new ResultSetHandler<Object>()
 			{
@@ -157,15 +157,15 @@ public class SqlAssertValue extends AbstractValidation
 
 			if(!Objects.equals(expectedValue, res))
 			{
-				exeLogger.error(SqlAssertValue.this, "Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));
+				exeLogger.error("Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));
 				return false;
 			}
 			
-			exeLogger.debug(SqlAssertValue.this, "Expected value and actual value are found to be same: {}", expectedValue);
+			exeLogger.debug("Expected value and actual value are found to be same: {}", expectedValue);
 			return true;
 		} catch(SQLException ex)
 		{
-			exeLogger.error(this, ex, "An error occurred while executing sql validation with query - {}", query);
+			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
 			throw new TestCaseFailedException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{

@@ -11,13 +11,15 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.ccg.xml.IParentAware;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
 /**
  * Represents list of steps that needs to be executed after executing testing unit.
  */
-public class Cleanup extends AbstractLocationBased implements IStepContainer, Validateable, ILocationBased
+public class Cleanup extends AbstractLocationBased implements IStepContainer, Validateable, ILocationBased, IEntryPoint, IParentAware
 {
 	/**
 	 * Name for logger and other purposes.
@@ -28,6 +30,24 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 	 * Steps for the test case.
 	 */
 	private List<IStep> steps = new ArrayList<>();
+	
+	/**
+	 * Parent of this element.
+	 */
+	@SkipParsing
+	private Object parent;
+	
+	@Override
+	public void setParent(Object parent)
+	{
+		this.parent = parent;
+	}
+	
+	@Override
+	public String toText()
+	{
+		return parent + ".<cleanup>";
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -74,9 +94,11 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 		exeLogger.setMode("cleanup");
 		context.setCleanupExecution(true);
 		
+		context.getExecutionStack().push(this);
+		
 		try
 		{
-			exeLogger.debug(this, "Starting cleanup process");
+			exeLogger.debug("Starting cleanup process");
 			
 			// execute the steps involved
 			for(IStep step : steps)
@@ -86,17 +108,19 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 					StepExecutor.executeStep(context, exeLogger, step);
 				} catch(Exception ex)
 				{
-					exeLogger.error(this, ex, "An error occurred while executing step - " + step);
+					exeLogger.error(ex, "An error occurred while executing step - " + step);
 	
 					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 				}
 			}
 			
-			exeLogger.debug(this, "Completed cleanup process");
+			exeLogger.debug("Completed cleanup process");
 	
 			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
+			context.getExecutionStack().pop(this);
+			
 			context.setCleanupExecution(false);
 			exeLogger.clearMode();
 		}

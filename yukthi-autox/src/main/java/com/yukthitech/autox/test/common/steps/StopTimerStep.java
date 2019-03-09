@@ -34,7 +34,7 @@ public class StopTimerStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		logger.debug(this, "Stopped timer with name: {}", name);
+		logger.debug("Stopped timer with name: {}", name);
 		
 		Long startTime = (Long) context.getAttribute(name + ".startTime");
 		

@@ -45,13 +45,13 @@ public class SetStyleStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "On locator '{}' setting styles: {}", locator, styles);
+		exeLogger.trace("On locator '{}' setting styles: {}", locator, styles);
 
 		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 		if(webElement == null)
 		{
-			exeLogger.error(this, "Failed to find element with locator: {}", getLocatorWithParent(locator));
+			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
@@ -62,7 +62,7 @@ public class SetStyleStep extends AbstractUiStep
 		for(String style: styles.keySet())
 		{
 			code = "arguments[0].style['" + style + "']=" + styles.get(style);
-			exeLogger.debug(this, "Executing js code: {}", code);
+			exeLogger.debug("Executing js code: {}", code);
 			
 			JavascriptExecutor js = (JavascriptExecutor) driver;
 			js.executeScript(code, webElement);

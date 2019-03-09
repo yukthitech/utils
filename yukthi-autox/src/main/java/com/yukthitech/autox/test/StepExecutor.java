@@ -43,6 +43,8 @@ public class StepExecutor
 			exeLogger.setDisabled(true);
 		}
 
+		context.getExecutionStack().push(step);
+		
 		try
 		{
 			context.setExecutionLogger(exeLogger);
@@ -59,13 +61,13 @@ public class StepExecutor
 			}
 			else
 			{
-				exeLogger.debug(step, "Executing the step with data provider.");
+				exeLogger.debug("Executing the step with data provider.");
 				IDataProvider dataProvider = step.getDataProvider();
 				List<TestCaseData> dataLst = dataProvider.getStepData();
 				
 				if(dataLst == null)
 				{
-					exeLogger.debug(step, "Data provider resulted in empty data list.");
+					exeLogger.debug("Data provider resulted in empty data list.");
 				}
 				else
 				{
@@ -76,7 +78,7 @@ public class StepExecutor
 							AutomationUtils.replaceExpressions("testCaseData", context, data);
 						}
 						
-						exeLogger.debug(step, "Executing the step with [Data provider: {}, Data: {}]", dataProvider.getName(), data.getName());
+						exeLogger.debug("Executing the step with [Data provider: {}, Data: {}]", dataProvider.getName(), data.getName());
 						context.setAttribute(dataProvider.getName(), data.getValue());
 						
 						//clone the step, so that expression replacement will not affect actual step
@@ -99,12 +101,18 @@ public class StepExecutor
 					
 					String message = String.format("Validation %s failed. Validation Details: %s", executable.name()[0], step);
 					
-					exeLogger.error(step, message);
+					exeLogger.error(message);
 					throw new TestCaseValidationFailedException(step, message);
 				}
 			}
-		} finally
+		} catch(RuntimeException ex)
 		{
+			exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), context.getExecutionStack().toStackTrace());
+			throw ex;
+		}finally
+		{
+			context.getExecutionStack().pop(step);
+			
 			//re-enable logging, in case it is disabled
 			exeLogger.setDisabled(false);
 			context.setExecutionLogger(null);
@@ -215,18 +223,18 @@ public class StepExecutor
 			{
 				expectedException.validateMatch(ex);
 				
-				exeLogger.debug(step, "Expected excpetion occurred: {}", ex);
+				exeLogger.debug("Expected excpetion occurred: {}", ex);
 				return null;
 			}catch(InvalidArgumentException iex)
 			{
-				exeLogger.error(step, ex, ex.getMessage());
+				exeLogger.error(ex, ex.getMessage());
 				invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 				return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
 			}
 		}
 
 		//for unhandled exceptions log on ui
-		exeLogger.error(step, ex, "An error occurred while executing " + stepType + ": " + name);
+		exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
 		invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 		
 		return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());

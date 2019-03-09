@@ -24,7 +24,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
 /**
  * Test case with validations to be executed.
  */
-public class TestCase implements IStepContainer, Validateable
+public class TestCase implements IStepContainer, Validateable, IEntryPoint
 {
 	private static Logger logger = LogManager.getLogger(TestCase.class);
 	
@@ -77,12 +77,30 @@ public class TestCase implements IStepContainer, Validateable
 	 */
 	private Cleanup cleanup;
 	
+	private TestCaseData data;
+	
 	public TestCase()
 	{}
 	
 	public TestCase(String name)
 	{
 		this.name = name;
+	}
+	
+	public void setData(TestCaseData data)
+	{
+		this.data = data;
+	}
+	
+	@Override
+	public String toText()
+	{
+		if(data != null)
+		{
+			return "[TC: " + name + " - " + data.getName() + "]";	
+		}
+		
+		return "[TC: " + name + "]";
 	}
 
 	/**
@@ -248,15 +266,15 @@ public class TestCase implements IStepContainer, Validateable
 	 * @param context
 	 * @return
 	 */
-	public TestCaseResult execute(AutomationContext context, TestCaseData testCaseData, ExecutionLogger exeLogger)
+	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		logger.debug("Executing test case: {}", this.name);
 		
 		String name = this.name;
 		
-		if(testCaseData != null)
+		if(data != null)
 		{
-			name += " [" + testCaseData.getName() + "]";
+			name += " [" + data.getName() + "]";
 		}
 		
 		ExpectedException expectedException = null;

@@ -27,11 +27,9 @@ public class GetNewWindowHandleStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Fetching new window handle and naming it as - {}", name);
+		exeLogger.trace("Fetching new window handle and naming it as - {}", name);
 
-		String handle = UiAutomationUtils.getNewWindowHandle(context);
-		
-		
+		UiAutomationUtils.getNewWindowHandle(context);
 		return true;
 	}
 

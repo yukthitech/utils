@@ -44,7 +44,7 @@ public class StepDoubleClick extends AbstractUiStep
 		
 		if(webElement == null)
 		{
-			exeLogger.error(this, "Failed to find element with locator: {}", getLocatorWithParent(locator));
+			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 		
@@ -76,7 +76,7 @@ public class StepDoubleClick extends AbstractUiStep
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(this, ex, "Failed to click element - {}", getLocatorWithParent(locator));
+			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
 		

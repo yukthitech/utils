@@ -72,13 +72,13 @@ public class AssertSameStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(this, "Comparing values to be same. [Expected: {} [{}], Actual: {} [{}]]", 
+		exeLogger.debug("Comparing values to be same. [Expected: {} [{}], Actual: {} [{}]]", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
 		boolean res = (actual == expected);
 
-		exeLogger.debug(this, "Result is: {}", res);
+		exeLogger.debug("Result is: {}", res);
 
 		return res;
 	}

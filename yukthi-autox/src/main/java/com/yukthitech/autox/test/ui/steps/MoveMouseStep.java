@@ -38,7 +38,7 @@ public class MoveMouseStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Moving mouse by specified offset: [x: {}, y: {}]", xoffset, yoffset);
+		exeLogger.trace("Moving mouse by specified offset: [x: {}, y: {}]", xoffset, yoffset);
 
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();

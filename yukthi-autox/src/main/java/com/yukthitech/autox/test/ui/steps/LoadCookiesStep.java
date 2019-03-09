@@ -46,13 +46,13 @@ public class LoadCookiesStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Loading cookies from file: {}", path);
+		exeLogger.trace("Loading cookies from file: {}", path);
 
 		File cookieFile = new File(path);
 
 		if(!cookieFile.exists())
 		{
-			exeLogger.debug(this, "No cookie file exist at path '{}'. Ignoring load request.", path);
+			exeLogger.debug("No cookie file exist at path '{}'. Ignoring load request.", path);
 			return true;
 		}
 		
@@ -70,11 +70,11 @@ public class LoadCookiesStep extends AbstractUiStep
 
 		if(cookies == null || cookies.isEmpty())
 		{
-			exeLogger.debug(this, "No cookies found in file - {}. Ignoring load request.", path);
+			exeLogger.debug("No cookies found in file - {}. Ignoring load request.", path);
 			return true;
 		}
 		
-		exeLogger.debug(this, "Loading {} cookies from file - {}", cookies.size(), path);
+		exeLogger.debug("Loading {} cookies from file - {}", cookies.size(), path);
 		
 		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = plugin.getWebDriver();
@@ -86,7 +86,7 @@ public class LoadCookiesStep extends AbstractUiStep
 				driver.manage().addCookie(cookie);
 			}catch(Exception ex)
 			{
-				exeLogger.debug(this, "Failed to load cookie - {}\nError: {}", cookie, "" + ex);
+				exeLogger.debug("Failed to load cookie - {}\nError: {}", cookie, "" + ex);
 			}
 		}
 		

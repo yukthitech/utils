@@ -59,11 +59,11 @@ public class AssertVisibility extends AbstractUiAssert
 	{
 		if(!"true".equals(enabled))
 		{
-			exeLogger.debug(this, "Current validation is disabled. Skipping validation execution.");
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
 			return true;
 		}
 		
-		exeLogger.trace(this, "Checking for element Visibility is {}", locator, "true".equals(visible) ? "Visible" : "Invisible");
+		exeLogger.trace("Checking for element Visibility is {}", locator, "true".equals(visible) ? "Visible" : "Invisible");
 		
 		UiAutomationUtils.validateWithWait(() -> {
 			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
@@ -85,7 +85,7 @@ public class AssertVisibility extends AbstractUiAssert
 
 			if(actualMessage == null || !actualMessage.contains(message))
 			{
-				exeLogger.error(this, "Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, getLocatorWithParent(locator));
+				exeLogger.error("Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, getLocatorWithParent(locator));
 				return false;
 			}
 		}

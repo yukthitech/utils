@@ -78,7 +78,7 @@ public class LogScreenShotStep extends AbstractStep
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-		exeLogger.logImage(this, name, message, file, level);
+		exeLogger.logImage(name, message, file, level);
 		
 		return true;
 	}

@@ -60,13 +60,13 @@ public class MoveToStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace(this, "Moving to element specified by locator: {}", locator);
+		exeLogger.trace("Moving to element specified by locator: {}", locator);
 
 		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 		if(webElement == null)
 		{
-			exeLogger.error(this, "Failed to find element with locator: {}", getLocatorWithParent(locator));
+			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
@@ -77,7 +77,7 @@ public class MoveToStep extends AbstractUiStep
 				SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 				WebDriver driver = seleniumConfiguration.getWebDriver();
 				
-				exeLogger.debug(MoveToStep.this, "Aliging element to {}", alignToTop ? "Top" : "Bottom");
+				exeLogger.debug("Aliging element to {}", alignToTop ? "Top" : "Bottom");
 				//before performing move-to ensure the target element is in view port of browser
 				((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(" + alignToTop + ");", webElement);
 				
@@ -96,7 +96,7 @@ public class MoveToStep extends AbstractUiStep
 							break;
 						}
 						
-						exeLogger.debug(MoveToStep.this, "As the target is out of bounds waiting for 1.5 sec before retry!");
+						exeLogger.debug("As the target is out of bounds waiting for 1.5 sec before retry!");
 
 						//sleep for sometime before move, so that scrolling is completed
 						try
@@ -127,7 +127,7 @@ public class MoveToStep extends AbstractUiStep
 			
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(this, ex, "Failed to move to element - ", getLocatorWithParent(locator));
+			exeLogger.error(ex, "Failed to move to element - ", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to move to element - {}", getLocatorWithParent(locator), ex);
 		}
 		

@@ -328,7 +328,7 @@
 		<function name="factorialGroup1">
 			<ccg:if condition="param.value lt 2">
 				<then>
-					<ccg:set expression="result" value="int: 1"/>
+					<ccg:set expression="result" value="int: ${xyz}"/>
 					<ccg:return/>
 				</then>
 				<else>
