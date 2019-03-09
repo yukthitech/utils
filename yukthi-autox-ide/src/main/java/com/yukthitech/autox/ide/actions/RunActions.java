@@ -22,8 +22,11 @@ import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.InProgressDialog;
+import com.yukthitech.autox.monitor.IMessageCallback;
 import com.yukthitech.autox.monitor.ienv.InteractiveExecuteSteps;
 import com.yukthitech.autox.monitor.ienv.InteractiveTestCaseExecDetails;
+import com.yukthitech.autox.monitor.ienv.MessageConfirmation;
+import com.yukthitech.utils.ObjectWrapper;
 
 @ActionHolder
 public class RunActions
@@ -204,7 +207,30 @@ public class RunActions
 		executeStepCode(null, project, env -> 
 		{
 			logger.debug("Sending command to execute test case '{}' till line number: {}", testCaseName, stepLineNo);
-			env.sendDataToServer(new InteractiveTestCaseExecDetails(testCaseName, fileEditor.getFile().getPath(), stepLineNo));
+			ObjectWrapper<Boolean> testCaseExecuted = new ObjectWrapper<>(false);
+			
+			env.sendDataToServer(new InteractiveTestCaseExecDetails(testCaseName, fileEditor.getFile().getPath(), stepLineNo), new IMessageCallback()
+			{
+				@Override
+				public void onProcess(MessageConfirmation confirmation)
+				{
+					logger.debug("Interactive environment testcase execution is completed. Environment is ready to use...");
+					testCaseExecuted.setValue(true);
+				}
+			});
+			
+			logger.debug("Interactive environment is started. Waiting for test case execution to completed to come to current point...");
+			
+			while(!testCaseExecuted.getValue())
+			{
+				try
+				{
+					Thread.sleep(100);
+				}catch(Exception ex)
+				{}
+			}
+			
+			logger.debug("Test case execution completed. Environment is ready to interact...");
 		});
 	}
 	

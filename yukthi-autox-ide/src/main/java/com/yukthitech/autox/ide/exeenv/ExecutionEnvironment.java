@@ -16,6 +16,7 @@ import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.monitor.ContextAttributeEventHandler;
 import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
 import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
+import com.yukthitech.autox.monitor.IMessageCallback;
 import com.yukthitech.autox.monitor.MonitorClient;
 import com.yukthitech.autox.monitor.MonitorLogMessage;
 import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
@@ -255,15 +256,20 @@ public class ExecutionEnvironment
 	{
 		return readyToInteract;
 	}
-
+	
 	public void sendDataToServer(Serializable data)
+	{
+		this.sendDataToServer(data, null);
+	}
+
+	public void sendDataToServer(Serializable data, IMessageCallback callback)
 	{
 		if(!readyToInteract)
 		{
 			throw new InvalidStateException("This environment is not an interactive environment or not ready to interact. [Is Interactive: {}]", interactive);
 		}
 
-		monitorClient.sendDataToServer(data);
+		monitorClient.sendDataToServer(data, callback);
 	}
 
 	public synchronized void clearConsole()

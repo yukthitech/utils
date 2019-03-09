@@ -96,8 +96,13 @@ public class MonitorServer
 		writeThread = new Thread(this::sendDataToClient, "Monitor Writer");
 		readThread = new Thread(this::readDataFromClient, "Monitor Reader");
 		
-		addAsyncServerDataHandler(new InteractiveStepHandler(AutomationContext.getInstance()));
-		addAsyncServerDataHandler(new InteractiveTestCaseExecHandler(AutomationContext.getInstance()));
+		addAsyncServerDataHandler( wrap(new InteractiveStepHandler(AutomationContext.getInstance())) );
+		addAsyncServerDataHandler( wrap(new InteractiveTestCaseExecHandler(AutomationContext.getInstance())) );
+	}
+	
+	private IAsyncServerDataHandler wrap(IAsyncServerDataHandler handler)
+	{
+		return new ServerDataHandlerWrapper(this, handler);
 	}
 	
 	/**

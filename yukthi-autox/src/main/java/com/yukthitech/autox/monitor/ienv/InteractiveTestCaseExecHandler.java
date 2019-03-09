@@ -28,11 +28,11 @@ public class InteractiveTestCaseExecHandler implements IAsyncServerDataHandler
 	}
 
 	@Override
-	public void processData(Serializable data)
+	public boolean processData(Serializable data)
 	{
 		if(!(data instanceof InteractiveTestCaseExecDetails))
 		{
-			return;
+			return false;
 		}
 		
 		logger.debug("Executing interactive test case command: {}", data);
@@ -40,7 +40,7 @@ public class InteractiveTestCaseExecHandler implements IAsyncServerDataHandler
 		if(!automationContext.isReadyToInteract())
 		{
 			logger.warn("As the server is not yet ready to interact, interactive steps send to server are ignored.");
-			return;
+			return false;
 		}
 		
 		InteractiveTestCaseExecDetails details = (InteractiveTestCaseExecDetails) data;
@@ -63,5 +63,7 @@ public class InteractiveTestCaseExecHandler implements IAsyncServerDataHandler
 		{
 			interactiveEnvironmentContext.setExecutionController(null);
 		}
+		
+		return true;
 	}
 }

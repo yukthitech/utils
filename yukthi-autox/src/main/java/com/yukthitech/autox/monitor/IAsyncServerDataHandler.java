@@ -11,6 +11,7 @@ public interface IAsyncServerDataHandler
 	/**
 	 * Invoked when a data is received from client.
 	 * @param data
+	 * @return true if data is processed.
 	 */
-	public void processData(Serializable data);
+	public boolean processData(Serializable data);
 }

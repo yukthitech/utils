@@ -3,7 +3,6 @@ package com.yukthitech.autox.ide.ui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Window;
-import java.awt.Dialog.ModalityType;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -13,7 +12,6 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.IdeUtils;
 

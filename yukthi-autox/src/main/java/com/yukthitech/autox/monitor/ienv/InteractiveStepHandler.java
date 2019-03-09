@@ -51,17 +51,17 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler
 	}
 
 	@Override
-	public void processData(Serializable data)
+	public boolean processData(Serializable data)
 	{
 		if(!(data instanceof InteractiveExecuteSteps))
 		{
-			return;
+			return false;
 		}
 		
 		if(!automationContext.isReadyToInteract())
 		{
 			logger.warn("As the server is not yet ready to interact, interactive steps send to server are ignored.");
-			return;
+			return false;
 		}
 		
 		InteractiveExecuteSteps steps = (InteractiveExecuteSteps) data;
@@ -69,10 +69,11 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler
 		
 		if(stepsToExe == null)
 		{
-			return;
+			return true;
 		}
 		
 		executeSteps(stepsToExe);
+		return true;
 	}
 	
 	private List<IStep> parseSteps(String xml)

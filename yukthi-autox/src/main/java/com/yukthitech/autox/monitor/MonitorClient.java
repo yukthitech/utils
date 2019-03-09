@@ -7,13 +7,17 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.monitor.ienv.MessageConfirmation;
 import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -81,6 +85,16 @@ public class MonitorClient
 	 * Thread to invoke listeners.
 	 */
 	private Thread listenerThread;
+	
+	/**
+	 * Callback methods for messages.
+	 */
+	private Map<String, IMessageCallback> idToCallback = new HashMap<>();
+	
+	/**
+	 * Lock to be used for callbacks.
+	 */
+	private ReentrantLock callbackLock = new ReentrantLock();
 	
 	private MonitorClient(String serverHost, int serverPort)
 	{
@@ -172,8 +186,45 @@ public class MonitorClient
 			
 			for(Serializable obj : data)
 			{
+				if(obj instanceof MessageConfirmation)
+				{
+					MessageConfirmation confirm = (MessageConfirmation) obj;
+					handleConfirmMessage(confirm);
+					continue;
+				}
+				
 				this.listenerManager.get().processData(obj);
 			}
+		}
+	}
+	
+	private void handleConfirmMessage(MessageConfirmation mssg)
+	{
+		logger.debug("For message with id {} got confirmation", mssg.getRequestId());
+		IMessageCallback callback = null;
+		
+		callbackLock.lock();
+		
+		try
+		{
+			callback = idToCallback.remove(mssg.getRequestId());
+		}finally
+		{
+			callbackLock.unlock();
+		}
+		
+		if(callback == null)
+		{
+			return;
+		}
+		
+		try
+		{
+			logger.debug("For message with id {} invoking the callback", mssg.getRequestId());
+			callback.onProcess(mssg);
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while processing confirmation message: {}", mssg, ex);
 		}
 	}
 	
@@ -233,6 +284,11 @@ public class MonitorClient
 	
 	public void sendDataToServer(Serializable data)
 	{
+		sendDataToServer(data, null);
+	}
+	
+	public void sendDataToServer(Serializable data, IMessageCallback callback)
+	{
 		if(clientSocket == null)
 		{
 			throw new InvalidStateException("Client process is disconnected");
@@ -240,7 +296,28 @@ public class MonitorClient
 		
 		try
 		{
-			this.writerStream.writeObject(data);
+			if(callback != null)
+			{
+				MessageWrapper wrapper = new MessageWrapper(data, true);
+				logger.debug("For message {} generated id: {}", data, wrapper.getId());
+				
+				this.writerStream.writeObject(wrapper);
+				
+				callbackLock.lock();
+				
+				try
+				{
+					idToCallback.put(wrapper.getId(), callback);
+				}finally
+				{
+					callbackLock.unlock();
+				}
+			}
+			else
+			{
+				this.writerStream.writeObject(data);
+			}
+			
 			this.writerStream.flush();
 		}catch(Exception ex)
 		{
