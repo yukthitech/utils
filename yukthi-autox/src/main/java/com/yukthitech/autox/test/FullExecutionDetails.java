@@ -54,6 +54,12 @@ public class FullExecutionDetails
 	 * List of summary messages.
 	 */
 	private List<String> summaryMessages = new ArrayList<String>();
+	
+	/**
+	 * Keeps track of test cases which are in progress. This will help in avoiding 
+	 * recursive inter dependent test cases.
+	 */
+	private Set<String> inprogressTestCases = new HashSet<>();
 
 	/**
 	 * Gets the name of the report.
@@ -329,6 +335,17 @@ public class FullExecutionDetails
 	public void testSuiteInProgress(String testSuite)
 	{
 		this.inProgressTestSuites.add(testSuite);
+		suiteToResults.put(testSuite, new TestSuiteResults(testSuite));
+	}
+	
+	/**
+	 * Fetches test suite results with specified name.
+	 * @param testSuite
+	 * @return
+	 */
+	public TestSuiteResults getTestSuiteResults(String testSuite)
+	{
+		return suiteToResults.get(testSuite);
 	}
 	
 	/**
@@ -353,6 +370,14 @@ public class FullExecutionDetails
 		return results;
 	}
 	
+	/**
+	 * Called when no testcase is executed as part of this test suite.
+	 * @param testSuite
+	 */
+	public void removeTestSuite(TestSuite testSuite)
+	{
+		suiteToResults.remove(testSuite.getName());
+	}
 	
 	/**
 	 * Marks specified test suite as completed. 
@@ -465,5 +490,33 @@ public class FullExecutionDetails
 	public void setSummaryMessages(List<String> summaryMessages)
 	{
 		this.summaryMessages = summaryMessages;
+	}
+	
+	/**
+	 * Called when a test case execution/evaluation is started.
+	 * @param testCase
+	 */
+	public void startedTestCase(String testCase)
+	{
+		this.inprogressTestCases.add(testCase);
+	}
+	
+	/**
+	 * Called when processing test case is completed.
+	 * @param testCase
+	 */
+	public void closeTestCase(String testCase)
+	{
+		this.inprogressTestCases.remove(testCase);
+	}
+	
+	/**
+	 * Checks whether specified test case is in progress or not.
+	 * @param testCase
+	 * @return
+	 */
+	public boolean isTestCaseInProgress(String testCase)
+	{
+		return inprogressTestCases.contains(testCase);
 	}
 }

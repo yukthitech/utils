@@ -24,7 +24,6 @@ import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
 import com.yukthitech.utils.cli.OptionsFactory;
-import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -166,23 +165,6 @@ public class AutomationLauncher
 			} catch(Exception ex)
 			{
 				throw new InvalidStateException(ex, "An error occurred while loading test suite from file: {}", xmlFile.getPath());
-			}
-		}
-		
-		// validate test suites has valid dependencies
-		for(TestSuite testSuite : testSuiteGroup.getTestSuites())
-		{
-			if(testSuite.getDependencies() == null)
-			{
-				continue;
-			}
-
-			for(String dependency : testSuite.getDependencies())
-			{
-				if(!testSuiteGroup.isValidTestSuiteName(dependency))
-				{
-					throw new InvalidConfigurationException("Invalid dependency '{}' specified for test suite - {}", dependency, testSuite.getName());
-				}
 			}
 		}
 		

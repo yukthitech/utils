@@ -36,15 +36,18 @@ public class TestSuiteResults
 	private TestStatus status;
 	
 	/**
-	 * Flag indicates setup steps failed to execute.
+	 * Flag indicates setup steps are executed successfully or not.
 	 */
-	private boolean setupFailed = false;
+	private boolean setupSuccessful = false;
 	
 	/**
 	 * Status message.
 	 */
 	private String statusMessage;
 
+	/**
+	 * Instantiates a new test suite results.
+	 */
 	public TestSuiteResults()
 	{}
 
@@ -118,23 +121,23 @@ public class TestSuiteResults
 	}
 
 	/**
-	 * Gets the flag indicates setup steps failed to execute.
+	 * Gets the flag indicates setup steps are executed successfully or not.
 	 *
-	 * @return the flag indicates setup steps failed to execute
+	 * @return the flag indicates setup steps are executed successfully or not
 	 */
-	public boolean isSetupFailed()
+	public boolean isSetupSuccessful()
 	{
-		return setupFailed;
+		return setupSuccessful;
 	}
 
 	/**
-	 * Sets the flag indicates setup steps failed to execute.
+	 * Sets the flag indicates setup steps are executed successfully or not.
 	 *
-	 * @param setupFailed the new flag indicates setup steps failed to execute
+	 * @param setupSuccessful the new flag indicates setup steps are executed successfully or not
 	 */
-	public void setSetupFailed(boolean setupFailed)
+	public void setSetupSuccessful(boolean setupSuccessful)
 	{
-		this.setupFailed = setupFailed;
+		this.setupSuccessful = setupSuccessful;
 	}
 
 	/**

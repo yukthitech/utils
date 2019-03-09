@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -198,6 +199,42 @@ public class DefaultExpressionParsers
 			public Object getValue() throws Exception
 			{
 				return "true".equalsIgnoreCase(expression.trim());
+			}
+		};
+	}
+
+	@ExpressionParser(type = "date", description = "Parses specified expression into date.", example = "date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018")
+	public IPropertyPath dateParser(ExpressionParserContext parserContext, String expression)
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				String format = parserContext.getParameter("template");
+				
+				if(format == null)
+				{
+					format = "dd/MM/yyyy";
+				}
+				
+				SimpleDateFormat simpleDateFormat = null;
+				
+				try
+				{
+					simpleDateFormat = new SimpleDateFormat(format);
+				}catch(Exception ex)
+				{
+					throw new InvalidArgumentException("Invalid date format specified: {}", format, ex);
+				}
+				
+				try
+				{
+					return simpleDateFormat.parse(expression);
+				}catch(Exception ex)
+				{
+					throw new InvalidArgumentException("Specified date {} is not in specified format: {}", expression, format, ex);
+				}
 			}
 		};
 	}

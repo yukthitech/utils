@@ -42,6 +42,11 @@ public class TestCaseResult
 	 * Name of the system log of the current test case.
 	 */
 	private String systemLogName;
+	
+	/**
+	 * Flag indicating if this is accumulated result of data-provider results.
+	 */
+	private boolean accumlatedResult = false;
 
 	/**
 	 * Instantiates a new test case result.
@@ -59,12 +64,18 @@ public class TestCaseResult
 	 */
 	public TestCaseResult(String testCaseName, TestStatus status, ExecutionLogData executionLog, String message)
 	{
+		this(testCaseName, status, executionLog, message, false);
+	}
+	
+	public TestCaseResult(String testCaseName, TestStatus status, ExecutionLogData executionLog, String message, boolean accumlatedResult)
+	{
 		this.testCaseName = testCaseName;
 		this.status = status;
 		this.executionLog = executionLog;
 		this.message = message;
+		this.accumlatedResult = accumlatedResult;
 	}
-	
+
 	/**
 	 * Gets the name of the test case.
 	 *
@@ -194,5 +205,11 @@ public class TestCaseResult
 	public void setSystemLogName(String systemLogName)
 	{
 		this.systemLogName = systemLogName;
+	}
+	
+	@JsonIgnore
+	public boolean isAccumlatedResult()
+	{
+		return accumlatedResult;
 	}
 }

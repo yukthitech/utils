@@ -5,6 +5,7 @@
 
 			<wrap:steps>
 				<ccg:assert-equals actual="attr: varVal" expected="int: 10"/>
+				<ccg:set expression="spreadVarVal" value="int: 100"/>
 			</wrap:steps>
 		</test-case>
 	</test-suite>

@@ -7,6 +7,7 @@ import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -117,5 +118,44 @@ public class CommonFreeMarkerMethods
 			@FmParam(name = "key", description = "Key of value to be fetched") String key)
 	{
 		return AutomationContext.getInstance().getPersistenceStorage().get(key);
+	}
+	
+	/**
+	 * Compares the specified values and returns the comparison result as int.
+	 * @param value1
+	 * @param value2
+	 * @return
+	 */
+	@FreeMarkerMethod(
+			description = "Compares the specified values and returns the comparision result as int.",
+			returnDescription = "Comparision result."
+			)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static int compare(
+			@FmParam(name = "value1", description = "Value1 to compare") Object value1,
+			@FmParam(name = "value2", description = "Value2 to compare") Object value2
+			)
+	{
+		if(value1 == null && value2 == null)
+		{
+			return 0;
+		}
+		
+		if(value1 == value2)
+		{
+			return 0;
+		}
+		
+		if(!(value1 instanceof Comparable))
+		{
+			throw new InvalidArgumentException("Non comparable object is specified as value1: {}", value1);
+		}
+
+		if(!(value2 instanceof Comparable))
+		{
+			throw new InvalidArgumentException("Non comparable object is specified as value1: {}", value1);
+		}
+		
+		return ((Comparable)value1).compareTo(value2);
 	}
 }

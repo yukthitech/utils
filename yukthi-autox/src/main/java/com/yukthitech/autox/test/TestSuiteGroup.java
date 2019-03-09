@@ -34,7 +34,7 @@ public class TestSuiteGroup
 	{
 		return setup;
 	}
-
+	
 	/**
 	 * Sets the setup suites to be executed before any test suite.
 	 *

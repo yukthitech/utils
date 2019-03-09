@@ -2,7 +2,6 @@ package com.yukthitech.autox.test;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +35,6 @@ public class TestSuite implements Validateable
 	 * List of test cases to be executed in this test suite.
 	 */
 	private List<TestCase> testCases = new ArrayList<>();
-	
-	/**
-	 * Dependency test suites. If specified, framework will ensure the specified test suites will be executed
-	 * before this test suite.
-	 */
-	private List<String> dependencies;
 	
 	/**
 	 * Setup steps to be executed before executing test suite.
@@ -178,6 +171,24 @@ public class TestSuite implements Validateable
 	{
 		this.description = description;
 	}
+	
+	/**
+	 * Fetches the test case with specified name.
+	 * @param name
+	 * @return
+	 */
+	public TestCase getTestCase(String name)
+	{
+		for(TestCase testCase : this.testCases)
+		{
+			if(name.equals(testCase.getName()))
+			{
+				return testCase;
+			}
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Gets the list of test cases to be executed in this test suite.
@@ -224,36 +235,6 @@ public class TestSuite implements Validateable
 	public void addDataBean(String name, Object bean)
 	{
 		ApplicationConfiguration.getInstance().addDataBean(name, bean);
-	}
-
-	/**
-	 * Gets the dependency test suites. If specified, framework will ensure the specified test suites will be executed before this test suite.
-	 *
-	 * @return the dependency test suites
-	 */
-	public List<String> getDependencies()
-	{
-		return dependencies;
-	}
-
-	/**
-	 * Sets the dependency test suites. If specified, framework will ensure the specified test suites will be executed before this test suite.
-	 *
-	 * @param dependencies the new dependency test suites
-	 */
-	public void setDependencies(List<String> dependencies)
-	{
-		this.dependencies = dependencies;
-	}
-	
-	/**
-	 * Specifies the dependency test suite names as comma separated string.
-	 * @param dependencies Dependency list as comma separated string.
-	 */
-	public void setDependencyList(String dependencies)
-	{
-		String depLst[] = dependencies.split("\\s*\\,\\s*");
-		this.dependencies = new ArrayList<>(Arrays.asList(depLst));
 	}
 
 	/**

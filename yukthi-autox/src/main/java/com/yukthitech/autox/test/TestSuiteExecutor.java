@@ -174,10 +174,126 @@ public class TestSuiteExecutor
 			testCaseDatsResults.add(result);
 		}
 		
-		//return new TestCaseResult(testCase.getName(), finalStatus, null, "");
-		return null;
+		return new TestCaseResult(testCase.getName(), finalStatus, null, "", true);
 	}
 	
+	private TestCaseResult executeTestCaseWithDependencies(TestSuite testSuite, TestCase testCase)
+	{
+		//if test case execution is already in progress in 
+		if(fullExecutionDetails.isTestCaseInProgress(testCase.getName()))
+		{
+			throw new InvalidStateException("Test case is being {} is being re-executed when it is already in progress", testCase.getName());
+		}
+		
+		TestCaseResult depTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), testCase.getName());
+
+		//if test case is already executed, simply return
+		if(depTestCaseResult != null)
+		{
+			logger.warn("Skipping test case as it is already executed- [Test suite: {}, Test Case: {}]", testSuite.getName(), testCase.getName());
+			return depTestCaseResult;
+		}
+		
+		fullExecutionDetails.startedTestCase(testCase.getName());
+		
+		try
+		{
+			Set<String> dependencyTestCases = testCase.getDependenciesSet();
+			
+			//Check the dependency test cases of the test case 
+			if(dependencyTestCases != null)
+			{
+				for(String depTestCase : dependencyTestCases)
+				{
+					depTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), depTestCase);
+					
+					if(depTestCaseResult == null)
+					{
+						TestCase depTestCaseObj = testSuite.getTestCase(depTestCase);
+						
+						if(depTestCaseObj == null)
+						{
+							throw new InvalidStateException("Invalid dependency test case '{}' specified for test case - {}", depTestCase, testCase.getName());
+						}
+						
+						depTestCaseResult = executeTestCaseWithDependencies(testSuite, depTestCaseObj);
+					}
+					
+					if(depTestCaseResult.getStatus() == TestStatus.SUCCESSFUL)
+					{
+						continue;
+					}
+					
+					String skipMssg = String.format("Skipping test case '%s' as the status of dependency test case '%s' is found as - %s", 
+						testCase.getName(), depTestCase, depTestCaseResult.getStatus());
+					logger.info(skipMssg);
+					
+					TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
+					fullExecutionDetails.addTestResult(testSuite, result);
+					return result;
+				}
+			}
+			
+			TestSuiteResults currentTestSuiteResults = fullExecutionDetails.getTestSuiteResults(testSuite.getName());
+			
+			//Execute the setup before first test case is executed.
+			// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
+			if(!currentTestSuiteResults.isSetupSuccessful())
+			{
+				if( !executeSetup(testSuite.getName(), testSuite.getSetups()) )
+				{
+					TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
+					results.setSetupSuccessful(false);
+					
+					throw new ExecutionFailedException("Setup execution failed");
+				}
+				
+				currentTestSuiteResults.setSetupSuccessful(true);
+			}
+	
+			//execute the test case
+			logger.debug("Executing test case '{}' in test suite - {}", testCase.getName(), testSuite.getName());
+	
+			String testFileName = testSuite.getName() + "_" + testCase.getName();
+	
+			//execute actual test case
+			long testCaseExecutionId = 0, startTime = System.currentTimeMillis();
+			
+			//add new execution to store
+			if(context.getPersistenceStorage() != null)
+			{
+				testCaseExecutionId = context.getPersistenceStorage().testCaseStarted(testSuite.getName(), testCase.getName());
+			}
+			
+			List<TestCaseResult> testCaseDataResults = new ArrayList<>();
+			TestCaseResult testCaseResult = executeTestCase(context, testCaseDataResults, testCase, testFileName);
+			
+			//Accumulated result (Accumulated of data-provider results) should not be persisted directly.
+			if(!testCaseResult.isAccumlatedResult())
+			{
+				//update store with execution result
+				if(context.getPersistenceStorage() != null)
+				{
+					context.getPersistenceStorage().updateExecution(testCaseExecutionId, 
+							testCaseResult.getStatus() == TestStatus.SUCCESSFUL, 
+							(System.currentTimeMillis() - startTime), 
+							testCaseResult.getMessage());
+				}
+	
+				fullExecutionDetails.addTestResult(testSuite, testCaseResult);
+			}
+			
+			for(TestCaseResult dataResult : testCaseDataResults)
+			{
+				fullExecutionDetails.addTestResult(testSuite, dataResult);
+			}
+			
+			return testCaseResult;
+		}finally
+		{
+			fullExecutionDetails.closeTestCase(testCase.getName());
+		}
+	}
 
 	/**
 	 * Executes specified test suite and its dependencies recursively.
@@ -196,52 +312,12 @@ public class TestSuiteExecutor
 		logger.debug("Executing test suite - {}", testSuite.getName());
 		fullExecutionDetails.testSuiteInProgress(testSuite.getName());
 
-		// if test suite has dependencies execute them first
-		if(testSuite.getDependencies() != null)
-		{
-			TestSuite depTestSuite = null;
-
-			for(String dependencyTestSuite : testSuite.getDependencies())
-			{
-				// if dependency is already completed, ignore
-				if(fullExecutionDetails.isTestSuiteCompleted(dependencyTestSuite))
-				{
-					continue;
-				}
-
-				// if dependency is failed, skip the test case
-				if(fullExecutionDetails.isTestSuiteFailed(dependencyTestSuite))
-				{
-					fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as dependency test suite is failed/skipped - " + dependencyTestSuite);
-					return false;
-				}
-
-				// if dependency is already in progress, then it is recursion,
-				// throw error
-				if(fullExecutionDetails.isTestSuiteInProgress(dependencyTestSuite))
-				{
-					throw new InvalidStateException("Encountered circular dependency with '{}' in test suite - {}", depTestSuite, testSuite.getName());
-				}
-
-				depTestSuite = testSuiteGroup.getTestSuite(dependencyTestSuite);
-
-				if( !executeTestSuite(depTestSuite) )
-				{
-					fullExecutionDetails.testSuiteSkipped(testSuite, "Failed as the dependency test-suite '" + depTestSuite + "' failed.");
-					return false;
-				}
-			}
-		}
-		
 		this.currentTestSuite = testSuite;
-
-		TestCaseResult testCaseResult = null;
-		List<TestCaseResult> testCaseDataResults = new ArrayList<>();
-		String testFileName = null;
 
 		boolean successful = true;
 		
 		Set<String> restrictedTestCases = context.getBasicArguments().getTestCasesSet();
+		boolean testCaseExecuted = false;
 		
 		if(restrictedTestCases != null)
 		{
@@ -253,109 +329,29 @@ public class TestSuiteExecutor
 		
 		try
 		{
-			Set<String> dependencyTestCases = null;
-			TestCaseResult depTestCaseResult = null;
-			boolean setupExecuted = false;
+			TestCaseResult testCaseResult = null;
 	
-			TEST_CASE_LOOP: for(TestCase testCase : testSuite.getTestCases())
+			for(TestCase testCase : testSuite.getTestCases())
 			{
 				if(restrictedTestCases != null && !restrictedTestCases.contains(testCase.getName()))
 				{
 					continue;
 				}
-				
-				dependencyTestCases = testCase.getDependenciesSet();
-				
-				//Check the dependency test cases of the test case 
-				if(dependencyTestCases != null)
+
+				testCaseExecuted = true;
+				testCaseResult = executeTestCaseWithDependencies(testSuite, testCase);
+
+				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
 				{
-					for(String depTestCase : dependencyTestCases)
-					{
-						depTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), depTestCase);
-						
-						if(depTestCaseResult == null)
-						{
-							logger.warn("Ignoring invalid dependency '{}' of test case - {}", depTestCase, testCase.getName());
-							continue;
-						}
-						
-						if(depTestCaseResult.getStatus() == TestStatus.SUCCESSFUL)
-						{
-							continue;
-						}
-						
-						String skipMssg = String.format("Skipping test case '%s' as the status of dependency test case '%s' is found as - %s", 
-							testCase.getName(), depTestCase, depTestCaseResult.getStatus());
-						logger.info(skipMssg);
-						
-						fullExecutionDetails.addTestResult(testSuite, new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg));
-						
-						continue TEST_CASE_LOOP;
-					}
-				}
-				
-				//Execute the setup before first test case is executed.
-				// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
-				if(!setupExecuted)
-				{
-					if( !executeSetup(testSuite.getName(), testSuite.getSetups()) )
-					{
-						TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
-						results.setSetupFailed(true);
-						
-						return false;
-					}
-					
-					setupExecuted = true;
-				}
-	
-				//execute the test case
-				logger.debug("Executing test case '{}' in test suite - {}", testCase.getName(), testSuite.getName());
-	
-				testFileName = testSuite.getName() + "_" + testCase.getName();
-	
-				//execute actual test case
-				testCaseDataResults.clear();
-				
-				long testCaseExecutionId = 0, startTime = System.currentTimeMillis();
-				
-				//add new execution to store
-				if(context.getPersistenceStorage() != null)
-				{
-					testCaseExecutionId = context.getPersistenceStorage().testCaseStarted(testSuite.getName(), testCase.getName());
-				}
-				
-				testCaseResult = executeTestCase(context, testCaseDataResults, testCase, testFileName);
-				
-				//test case result can be null, in case of data provider
-				if(testCaseResult != null)
-				{
-					//update store with execution result
-					if(context.getPersistenceStorage() != null)
-					{
-						context.getPersistenceStorage().updateExecution(testCaseExecutionId, 
-								testCaseResult.getStatus() == TestStatus.SUCCESSFUL, 
-								(System.currentTimeMillis() - startTime), 
-								testCaseResult.getMessage());
-					}
-	
-					if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
-					{
-						successful = false;
-					}
-		
-					fullExecutionDetails.addTestResult(testSuite, testCaseResult);
-				}
-				
-				for(TestCaseResult dataResult : testCaseDataResults)
-				{
-					fullExecutionDetails.addTestResult(testSuite, dataResult);
+					successful = false;
 				}
 			}
 			
+			TestSuiteResults currentTestSuiteResults = fullExecutionDetails.getTestSuiteResults(testSuite.getName());
+			
 			//execute the cleanup only if setup is executed. 
 			// Note: setup will be executed only if atleast one test case is executed in current test suite
-			if(setupExecuted)
+			if(currentTestSuiteResults.isSetupSuccessful())
 			{
 				if( !executeCleanup(testSuite.getName(), testSuite.getCleanups()) )
 				{
@@ -366,6 +362,12 @@ public class TestSuiteExecutor
 		}finally
 		{
 			context.clearActiveTestSuite();
+		}
+		
+		if(!testCaseExecuted)
+		{
+			fullExecutionDetails.removeTestSuite(testSuite);
+			return successful;
 		}
 
 		if(successful)

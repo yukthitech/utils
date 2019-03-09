@@ -84,6 +84,22 @@ public class SqlAssertValue extends AbstractValidation
 		this.query = query;
 	}
 
+	/**
+	 * Gets the type.
+	 *
+	 * @param val the val
+	 * @return the type
+	 */
+	private Class<?> getType(Object val)
+	{
+		if(val == null)
+		{
+			return null;
+		}
+		
+		return val.getClass();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -141,7 +157,7 @@ public class SqlAssertValue extends AbstractValidation
 
 			if(!Objects.equals(expectedValue, res))
 			{
-				exeLogger.error(SqlAssertValue.this, "Expected value {} is not matching with actual value: {}", expectedValue, res);
+				exeLogger.error(SqlAssertValue.this, "Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));
 				return false;
 			}
 			
