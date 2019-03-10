@@ -144,7 +144,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		}
 	}
 	
-	private FileEditor openProjectFile(Project project, File file)
+	public FileEditor openProjectFile(Project project, File file)
 	{
 		if(!file.exists())
 		{

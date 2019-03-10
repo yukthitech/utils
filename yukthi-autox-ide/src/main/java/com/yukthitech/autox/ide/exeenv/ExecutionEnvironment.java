@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
+import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.monitor.ContextAttributeEventHandler;
 import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
 import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
@@ -49,12 +52,15 @@ public class ExecutionEnvironment
 
 	private boolean readyToInteract = false;
 
-	private List<ContextAttributeDetails> contextAttributes = new LinkedList<>();
+	private LinkedHashMap<String, ContextAttributeDetails> contextAttributes = new LinkedHashMap<>();
 	
 	private File reportFile;
+	
+	private Project project;
 
-	ExecutionEnvironment(String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage)
+	ExecutionEnvironment(Project project, String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage)
 	{
+		this.project = project;
 		this.name = name;
 		this.process = process;
 		this.proxyListener = proxyListener;
@@ -144,6 +150,12 @@ public class ExecutionEnvironment
 	
 	private void readConsoleStream(InputStream input, boolean error)
 	{
+		//input can be null, when error is redirected to output stream
+		if(input == null)
+		{
+			return;
+		}
+		
 		InputStreamReader inReader = new InputStreamReader(input);
 		final BufferedReader reader = new BufferedReader(inReader);
 
@@ -198,7 +210,7 @@ public class ExecutionEnvironment
 	
 	public void addContextAttribute(ContextAttributeDetails ctx)
 	{
-		this.contextAttributes.add(ctx);
+		this.contextAttributes.put(ctx.getName(), ctx);
 		proxyListener.environmentChanged(EnvironmentEvent.newContextAttributeEvent(this, ctx));
 	}
 
@@ -227,9 +239,9 @@ public class ExecutionEnvironment
 		return reportMessages;
 	}
 
-	public List<ContextAttributeDetails> getContextAttributes()
+	public Collection<ContextAttributeDetails> getContextAttributes()
 	{
-		return contextAttributes;
+		return contextAttributes.values();
 	}
 
 	public File getReportFolder()
@@ -285,6 +297,11 @@ public class ExecutionEnvironment
 	public File getReportFile()
 	{
 		return reportFile;
+	}
+	
+	public Project getProject()
+	{
+		return project;
 	}
 	
 	@Override

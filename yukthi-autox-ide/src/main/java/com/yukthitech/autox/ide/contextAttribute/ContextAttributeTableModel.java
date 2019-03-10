@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.contextAttribute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -51,7 +52,7 @@ public class ContextAttributeTableModel extends AbstractTableModel
 			return;
 		}
 		
-		List<ContextAttributeDetails> attrLst = environment.getContextAttributes();
+		Collection<ContextAttributeDetails> attrLst = environment.getContextAttributes();
 		
 		if(attrLst != null)
 		{
@@ -88,6 +89,25 @@ public class ContextAttributeTableModel extends AbstractTableModel
 	
 	public void addContextAttribute(ContextAttributeDetails attr)
 	{
+		int rowIdx = 0, rowToDel = -1;
+		
+		for(String[] row : this.attributes)
+		{
+			if(attr.getName().equals(row[0]))
+			{
+				rowToDel = rowIdx;
+				break;
+			}
+			
+			rowIdx++;
+		}
+		
+		if(rowToDel >= 0)
+		{
+			this.attributes.remove(rowToDel);
+			super.fireTableRowsDeleted(rowToDel, rowToDel);
+		}
+		
 		this.attributes.add(new String[] {attr.getName(), toString(attr.getValue())} );
 		
 		int lastIdx = this.attributes.size() - 1;

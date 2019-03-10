@@ -1,4 +1,6 @@
-Ensure step execution is capable of executing common steps and all the pre steps of current test case (should be based on user input)..
+Process should have its own file and should be openable from console tab using button
+
+
 Run menu for recently executed programs
 	
 Finalize general documentation
@@ -8,6 +10,8 @@ new project creation is not working
 	even brose dialog should be limited to project folder
 
 ==============================
+use nio to sync error and output stream
+
 Others
 	
 	maven based class path and packaging

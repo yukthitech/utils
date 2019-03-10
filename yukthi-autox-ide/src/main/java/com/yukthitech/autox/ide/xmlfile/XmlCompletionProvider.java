@@ -521,7 +521,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		}
 		else if(contentType == ParserContentType.ATTRIBUTE && ideContext.getActiveEnvironment() != null)
 		{
-			List<ContextAttributeDetails> contextAttrs = ideContext.getActiveEnvironment().getContextAttributes();
+			Collection<ContextAttributeDetails> contextAttrs = ideContext.getActiveEnvironment().getContextAttributes();
 			String complText = null, name = null;
 			
 			for(ContextAttributeDetails attr : contextAttrs)

@@ -6,6 +6,11 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JButton;
@@ -15,9 +20,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.text.Element;
 import javax.swing.text.html.HTMLDocument;
 
@@ -27,15 +32,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.awt.event.ActionEvent;
-import javax.swing.border.EtchedBorder;
+import com.yukthitech.swing.HyperLinkEvent;
+import com.yukthitech.swing.YukthiHtmlPane;
 
 @Component
 public class ConsolePanel extends JPanel implements IViewPanel
@@ -43,16 +47,21 @@ public class ConsolePanel extends JPanel implements IViewPanel
 	private static final long serialVersionUID = 1L;
 
 	private static Logger logger = LogManager.getLogger(ConsolePanel.class);
+	
+	private static Pattern LOC_PATTERN = Pattern.compile("([\\w\\-\\.]+\\.xml)\\:(\\d+)", Pattern.CASE_INSENSITIVE);
 
 	private final JPanel panel = new JPanel();
 	private final JLabel lblEnvironment = new JLabel("Environment: ");
 	private final JScrollPane scrollPane = new JScrollPane();
 	private final JPanel panel_1 = new JPanel();
 	private final JButton btnClear = new JButton("");
-	private final JTextPane consoleDisplayArea = new JTextPane();
+	private final YukthiHtmlPane consoleDisplayArea = new YukthiHtmlPane();
 
 	@Autowired
 	private IdeContext ideContext;
+	
+	@Autowired
+	private FileActions fileAction;
 
 	private JTabbedPane parentTabbedPane;
 
@@ -111,9 +120,9 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		panel.add(lblEnvironment, gbc_lblEnvironment);
 
 		add(scrollPane, BorderLayout.CENTER);
-		consoleDisplayArea.setContentType("text/html");
-
 		scrollPane.setViewportView(consoleDisplayArea);
+		
+		consoleDisplayArea.addHyperLinkListener(this::onHyperLinkClick);
 	}
 
 	@PostConstruct
@@ -175,8 +184,22 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			return;
 		}
 
-		consoleDisplayArea.setText("<html><body id=\"body\">" + activeEnvironment.getConsoleHtml() + "</body></html>");
+		consoleDisplayArea.setText("<html><body id=\"body\">" + injectLinks(activeEnvironment.getConsoleHtml()) + "</body></html>");
 		moveToEnd();
+	}
+	
+	private String injectLinks(CharSequence html)
+	{
+		Matcher matcher = LOC_PATTERN.matcher(html);
+		StringBuffer buff = new StringBuffer();
+		
+		while(matcher.find())
+		{
+			matcher.appendReplacement(buff, "<a href=\"" + matcher.group(0) + "\">" + matcher.group(0) + "</a>");
+		}
+		
+		matcher.appendTail(buff);
+		return buff.toString();
 	}
 	
 	private void moveToEnd()
@@ -198,7 +221,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 
 		try
 		{
-			htmlDoc.insertBeforeEnd(element, content);
+			htmlDoc.insertBeforeEnd(element, injectLinks(content));
 
 			moveToEnd();
 			
@@ -221,6 +244,21 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		
 		activeEnvironment.clearConsole();
 		refreshConsoleText();
+	}
+	
+	private void onHyperLinkClick(HyperLinkEvent event)
+	{
+		Matcher matcher = LOC_PATTERN.matcher(event.getHref());
+		
+		if(!matcher.matches())
+		{
+			return;
+		}
+		
+		String file = matcher.group(1);
+		int lineNo = Integer.parseInt(matcher.group(2));
+		
+		fileAction.gotoFile(activeEnvironment.getProject(), file, lineNo);
 	}
 	
 	private void openReport(ActionEvent e)

@@ -20,11 +20,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.ide.FileDetails;
+import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
+import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -61,6 +65,9 @@ public class FileActions
 
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;
+
+	@Autowired
+	private IdeIndex ideIndex;
 
 	@Action
 	public void newFolder()
@@ -444,5 +451,30 @@ public class FileActions
 	public void refreshFolder()
 	{
 		projectExplorer.reloadActiveNode();
+	}
+	
+	public void gotoFile(Project project, String file, int lineNo)
+	{
+		FileDetails selectedFile = null;
+		
+		for(FileDetails fileDet : ideIndex.getFiles())
+		{
+			if(fileDet.getProject() != project || !fileDet.getFile().getName().equals(file))
+			{
+				continue;
+			}
+
+			selectedFile = fileDet;
+			break;
+		}
+
+		FileEditor editor = fileEditorTabbedPane.openProjectFile(project, selectedFile.getFile());
+		
+		if(lineNo < 0 || editor == null)
+		{
+			return;
+		}
+		
+		editor.gotoLine(lineNo);
 	}
 }

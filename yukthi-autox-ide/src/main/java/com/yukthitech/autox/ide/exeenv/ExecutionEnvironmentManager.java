@@ -88,9 +88,12 @@ public class ExecutionEnvironmentManager
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.directory( new File(project.getBaseFolderPath()) );
 		
+		//TODO: Temp workaround to avoid swap lines between out and err streams. Need proper fix.
+		builder.redirectErrorStream(true);
+		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(envName, builder.start(), ideContext.getProxy(), monitorPort, reportFolder, initMssg.toString());
+			ExecutionEnvironment env = new ExecutionEnvironment(project, envName, builder.start(), ideContext.getProxy(), monitorPort, reportFolder, initMssg.toString());
 			ideContext.getProxy().newEnvironmentStarted(env);
 			
 			return env;
