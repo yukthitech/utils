@@ -2,6 +2,8 @@ package com.yukthitech.autox;
 
 import java.util.LinkedList;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import com.yukthitech.autox.test.IEntryPoint;
 
 /**
@@ -38,13 +40,15 @@ public class ExecutionStack
 		ILocationBased element = (ILocationBased) object;
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append(".").append(entryPoint.toText());
+		builder.append(entryPoint.toText());
 		
 		String location = element.getLocation();
 		builder.append("(").append(location).append(")");
 		
 		locationStackTrace.push(location);
 		stackTrace.push(builder.toString());
+		
+		ThreadContext.put("xmlLoc", location);
 	}
 	
 	public void pop(Object object)
@@ -57,13 +61,23 @@ public class ExecutionStack
 		
 		locationStackTrace.pop();
 		stackTrace.pop();
+		
+		if(locationStackTrace.isEmpty())
+		{
+			ThreadContext.put("xmlLoc", null);
+		}
+		else
+		{
+			ThreadContext.put("xmlLoc", locationStackTrace.peek());
+		}
+			
 	}
 	
 	public String toStackTrace()
 	{
 		StringBuilder builder = new StringBuilder("\n");
 		
-		for(String element : locationStackTrace)
+		for(String element : stackTrace)
 		{
 			builder.append("\t").append(element).append("\n");
 		}

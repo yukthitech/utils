@@ -17,6 +17,7 @@ import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -107,6 +108,11 @@ public class StepExecutor
 			}
 		} catch(RuntimeException ex)
 		{
+			if(ex instanceof LangException)
+			{
+				throw ex;
+			}
+			
 			exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), context.getExecutionStack().toStackTrace());
 			throw ex;
 		}finally

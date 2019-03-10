@@ -180,7 +180,7 @@ public class AutomationContext
 	 * Manages the stack trace of execution.
 	 */
 	private ExecutionStack executionStack = new ExecutionStack();
-
+	
 	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
