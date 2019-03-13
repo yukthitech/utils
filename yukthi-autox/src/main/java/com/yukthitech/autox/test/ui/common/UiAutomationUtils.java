@@ -144,6 +144,7 @@ public class UiAutomationUtils
 		// if no elements found with specified name
 		if(elements == null || elements.isEmpty())
 		{
+			context.getExecutionLogger().debug("No element found with final locator: {}", locator);
 			return false;
 		}
 

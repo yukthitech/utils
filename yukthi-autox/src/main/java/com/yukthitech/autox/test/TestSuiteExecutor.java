@@ -221,7 +221,13 @@ public class TestSuiteExecutor
 						
 						if(depTestCaseObj == null)
 						{
-							throw new InvalidStateException("Invalid dependency test case '{}' specified for test case - {}", depTestCase, testCase.getName());
+							String skipMssg = String.format("Invalid dependency test case '%s' specified for test case - %s", 
+									depTestCase, testCase.getName());
+							logger.info(skipMssg);
+								
+							TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
+							fullExecutionDetails.addTestResult(testSuite, result);
+							return result;
 						}
 						
 						depTestCaseResult = executeTestCaseWithDependencies(testSuite, depTestCaseObj);
