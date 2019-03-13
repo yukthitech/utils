@@ -396,5 +396,30 @@
 				<ccg:assert-equals actual="attr: setupVar" expected="int: 10"/>
 			</wrap:steps>
 		</testCase>
+
+		<testCase name="testExprAndRegex">
+			<description>
+				Tests the working of exec expression parser and regex functions
+			</description>
+
+			<wrap:steps>
+				<ccg:assert-equals actual="expr: regexParse('1,2,3,4', '(?&lt;val&gt;\\d+)')" expected="map: val=1"/>
+				<ccg:assert-equals actual="expr: regexParseAll('a=1,b=2,c=3, d=4', '(?&lt;key&gt;\\w+)\\=(?&lt;val&gt;\\d+)')">
+					<expected>json:
+						[
+							{"key": "a", "val": "1"},
+							{"key": "b", "val": "2"},
+							{"key": "c", "val": "3"},
+							{"key": "d", "val": "4"}
+						]
+					</expected>
+				</ccg:assert-equals>
+				<ccg:assert-equals actual="expr: regexParseMatch('a=b=1', '(?&lt;key1&gt;\\w+)\\=(?&lt;key2&gt;\\w+)\\=(?&lt;val&gt;\\d+)')"
+					expected="map: key1=a, key2=b, val=1"/>
+
+				<ccg:assert-true value="condition: regexMatches('a=2332', '\\w+=\\d+')"/>
+			</wrap:steps>
+		
+		</testCase>
 	</testSuite>
 </testData>

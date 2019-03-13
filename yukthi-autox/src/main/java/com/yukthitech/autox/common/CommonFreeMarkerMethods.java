@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.lang.common;
+package com.yukthitech.autox.common;
 
 import java.io.File;
 import java.util.List;
@@ -157,5 +157,15 @@ public class CommonFreeMarkerMethods
 		}
 		
 		return ((Comparable)value1).compareTo(value2);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Used to set value as content attribute. This function will always return empty string.",
+			returnDescription = "Always empty string."
+			)
+	public static String setAttr(String attrName, Object value)
+	{
+		AutomationContext.getInstance().setAttribute(attrName, value);
+		return "";
 	}
 }

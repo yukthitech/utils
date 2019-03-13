@@ -8,6 +8,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.yukthitech.autox.common.CommonFreeMarkerMethods;
+
 /**
  * Test cases for common free marker methods.
  * @author akiran

@@ -16,6 +16,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
+import org.apache.commons.jxpath.JXPathNotFoundException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.ExecutionLogger;
@@ -119,7 +120,13 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				return JXPathContext.newContext(parserContext.getEffectiveContext()).getValue(expression);
+				try
+				{
+					return JXPathContext.newContext(parserContext.getEffectiveContext()).getValue(expression);
+				}catch(JXPathNotFoundException ex)
+				{
+					return null;
+				}
 			}
 		};
 	}
@@ -336,6 +343,32 @@ public class DefaultExpressionParsers
 		};
 	}
 	
+	@ExpressionParser(type = "expr", description = "Evaluates specified expression as freemarker expression and resultant value will be returned", 
+			example = "expr: today()", contentType = ParserContentType.FM_EXPRESSION)
+	public IPropertyPath expressionParser(ExpressionParserContext parserContext, String expression)
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				String randomVarName = "tmp_" + Long.toHexString(System.currentTimeMillis());
+				String fmCode = "${setAttr('" + randomVarName + "', " + expression.trim() + ")}";
+				
+				ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
+				
+				logger.debug("Evaluating expression {} using code snippet: {}", expression, fmCode);
+				
+				AutomationUtils.replaceExpressionsInString("expression", parserContext.getAutomationContext(), fmCode);
+				
+				Object result = parserContext.getAutomationContext().removeAttribute(randomVarName);
+
+				logger.debug("From epxression {} got result as: {}", expression, result);
+				return result;
+			}
+		};
+	}
+
 	/**
 	 * Loads the specified input stream as bean.
 	 * @param is input stream to load

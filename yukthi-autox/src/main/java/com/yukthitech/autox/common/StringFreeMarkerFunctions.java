@@ -1,9 +1,12 @@
-package com.yukthitech.autox.test.lang.common;
+package com.yukthitech.autox.common;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -98,6 +101,17 @@ public class StringFreeMarkerFunctions
 	}
 	
 	@FreeMarkerMethod(
+			description = "Converts specified string to int using specified radix.",
+			returnDescription = "Result int value."
+			)
+	public static int strToInt(
+			@FmParam(name = "value", description = "String value to be converted") String value,
+			@FmParam(name = "radix", description = "Radix to be used for conversion") int radix)
+	{
+		return Integer.parseInt(value, radix);
+	}
+
+	@FreeMarkerMethod(
 			description = "Generates random int.",
 			returnDescription = "Random number"
 			)
@@ -150,5 +164,23 @@ public class StringFreeMarkerFunctions
 		{
 			throw new InvalidArgumentException("Specified date {} is not in specified format: {}", string, format, ex);
 		}
+	}
+
+	@FreeMarkerMethod(
+			description = "Splits the given string into list of strings using specified delimiter.",
+			returnDescription = "List of string resulted from spliting."
+			)
+	public static List<String> split(
+			@FmParam(name = "string", description = "String to parse") String string,
+			@FmParam(name = "delimiter", description = "Delimiter to be used for spliting") String delimiter
+			)
+	{
+		if(string == null || delimiter == null)
+		{
+			return null;
+		}
+		
+		String res[] = string.split(delimiter);
+		return new ArrayList<>(Arrays.asList(res));
 	}
 }
