@@ -259,7 +259,7 @@ public class TestSuiteExecutor
 					TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
 					results.setSetupSuccessful(false);
 					
-					throw new ExecutionFailedException("Setup execution failed");
+					throw new SetupExecutionFailedException("Setup execution failed");
 				}
 				
 				currentTestSuiteResults.setSetupSuccessful(true);
@@ -369,10 +369,18 @@ public class TestSuiteExecutor
 			{
 				if( !executeCleanup(testSuite.getName(), testSuite.getCleanups()) )
 				{
-					fullExecutionDetails.testSuiteFailed(testSuite, "Failing as cleanup of test suite is failed");
+					currentTestSuiteResults.setCleanupSuccessful(false);
+					fullExecutionDetails.testSuiteFailed(testSuite, "Cleanup execution failed.");
 					return false;
 				}
 			}
+			
+			currentTestSuiteResults.setCleanupSuccessful(true);
+		}catch(SetupExecutionFailedException ex)
+		{
+			logger.error("Setup execution failed. Marking the test suite as failed.", ex);
+			fullExecutionDetails.testSuiteFailed(testSuite, "Setup execution failed.");
+			return false;
 		}finally
 		{
 			context.clearActiveTestSuite();
@@ -406,18 +414,25 @@ public class TestSuiteExecutor
 			logger.debug("No {} setup steps found, ignoring global setup execution.", prefix);
 			return true;
 		}
-		
-		for(Setup setup : setups)
+
+		try
 		{
-			logger.debug("Executing {} setup steps specified at location: {}", prefix, setup.getLocation());
-			
-			TestCaseResult testCaseResult = setup.execute(context);
-			reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");
-			
-			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+			for(Setup setup : setups)
 			{
-				return false;
+				logger.debug("Executing {} setup steps specified at location: {}", prefix, setup.getLocation());
+				
+				TestCaseResult testCaseResult = setup.execute(context);
+				reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");
+				
+				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					return false;
+				}
 			}
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while execute global setup", ex);
+			return false;
 		}
 		
 		return true;
@@ -442,15 +457,22 @@ public class TestSuiteExecutor
 		
 		logger.debug("Executing {} cleanup steps...", prefix);
 		
-		for(Cleanup cleanup : cleanups)
+		try
 		{
-			TestCaseResult testCaseResult = cleanup.execute(context);
-			reportGenerator.createLogFiles(context, testCaseResult, prefix + "-cleanup", null, "");
-			
-			if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+			for(Cleanup cleanup : cleanups)
 			{
-				return false;
+				TestCaseResult testCaseResult = cleanup.execute(context);
+				reportGenerator.createLogFiles(context, testCaseResult, prefix + "-cleanup", null, "");
+				
+				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					return false;
+				}
 			}
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while execute global cleanup", ex);
+			return false;
 		}
 		
 		return true;

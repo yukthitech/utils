@@ -361,12 +361,11 @@ public class FullExecutionDetails
 		if(results == null)
 		{
 			results = new TestSuiteResults(testSuite.getName());
-			results.setStatusMessage(statusMessage);
-			
 			suiteToResults.put(testSuite.getName(), results);
 		}
 		
 		results.setStatus(status);
+		results.setStatusMessage(statusMessage);
 		return results;
 	}
 	

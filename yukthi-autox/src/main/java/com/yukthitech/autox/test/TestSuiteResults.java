@@ -41,6 +41,11 @@ public class TestSuiteResults
 	private boolean setupSuccessful = false;
 	
 	/**
+	 * Flag indicates cleanup steps are executed successfully or not.
+	 */
+	private boolean cleanupSuccessful = false;
+
+	/**
 	 * Status message.
 	 */
 	private String statusMessage;
@@ -238,6 +243,24 @@ public class TestSuiteResults
 	{
 		return this.nameToResult.get(testCaseName);
 	}
-	
-	
+
+	/**
+	 * Gets the flag indicates cleanup steps are executed successfully or not.
+	 *
+	 * @return the flag indicates cleanup steps are executed successfully or not
+	 */
+	public boolean isCleanupSuccessful()
+	{
+		return cleanupSuccessful;
+	}
+
+	/**
+	 * Sets the flag indicates cleanup steps are executed successfully or not.
+	 *
+	 * @param cleanupSuccessful the new flag indicates cleanup steps are executed successfully or not
+	 */
+	public void setCleanupSuccessful(boolean cleanupSuccessful)
+	{
+		this.cleanupSuccessful = cleanupSuccessful;
+	}
 }
