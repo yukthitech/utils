@@ -173,6 +173,10 @@ public class Project implements Serializable
 	{
 		finalClassPathEntries = new LinkedHashSet<>();
 
+		//add main resources and config folders
+		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
+		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
+
 		//add lib folder of project
 		File libFolder = new File(baseFolder, "lib");
 		
@@ -199,10 +203,6 @@ public class Project implements Serializable
 		{
 			throw new InvalidStateException("An error occurred while getting canonical path of lib folder: " + libFolder.getPath(), ex);
 		}
-		
-		//add main resources and config folders
-		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
-		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
 		
 		if(classPathEntriesList != null)
 		{

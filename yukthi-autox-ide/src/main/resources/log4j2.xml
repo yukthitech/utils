@@ -2,7 +2,7 @@
 <Configuration>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%5p %d [%t] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%5p %d [%t] (%F:%L) (%X{xmlLoc}) - %m%n" />
 		</Console>
 	</Appenders>
 	<Loggers>

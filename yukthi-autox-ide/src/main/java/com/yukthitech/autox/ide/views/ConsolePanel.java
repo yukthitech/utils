@@ -258,7 +258,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 		String file = matcher.group(1);
 		int lineNo = Integer.parseInt(matcher.group(2));
 		
-		fileAction.gotoFile(activeEnvironment.getProject(), file, lineNo);
+		fileAction.gotoFile(activeEnvironment.getProject(), file, lineNo, true);
 	}
 	
 	private void openReport(ActionEvent e)

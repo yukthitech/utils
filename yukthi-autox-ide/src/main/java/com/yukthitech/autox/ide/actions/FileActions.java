@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.FileDetails;
+import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeIndex;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -453,7 +454,7 @@ public class FileActions
 		projectExplorer.reloadActiveNode();
 	}
 	
-	public void gotoFile(Project project, String file, int lineNo)
+	public void gotoFile(Project project, String file, int lineNo, boolean limitToTestSuiteFolder)
 	{
 		FileDetails selectedFile = null;
 		
@@ -463,9 +464,36 @@ public class FileActions
 			{
 				continue;
 			}
+			
+			//if limitToTestSuiteFolder flag is true, consider current only if it is part of test suite folder 
+			if(limitToTestSuiteFolder)
+			{
+				boolean tsFolderFile = false;
+				
+				for(String tsFolder : project.getTestSuitesFoldersList())
+				{
+					File folder = new File(project.getBaseFolderPath(), tsFolder);
+					
+					if(IdeFileUtils.getRelativePath(folder, fileDet.getFile()) != null)
+					{
+						tsFolderFile = true;
+						break;
+					}
+				}
+				
+				if(!tsFolderFile)
+				{
+					continue;
+				}
+			}
 
 			selectedFile = fileDet;
 			break;
+		}
+		
+		if(selectedFile == null)
+		{
+			return;
 		}
 
 		FileEditor editor = fileEditorTabbedPane.openProjectFile(project, selectedFile.getFile());
