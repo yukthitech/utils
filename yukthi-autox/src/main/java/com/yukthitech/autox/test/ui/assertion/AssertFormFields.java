@@ -291,7 +291,7 @@ public class AssertFormFields extends AbstractValidation
 			if(field.getFieldOptions() != null)
 			{
 				List<FieldOption> expectedOptions = field.getFieldOptions();
-				List<FieldOption> actualOptions = fieldType.getFieldAccessor().getOptions(fieldElements.get(0));
+				List<FieldOption> actualOptions = fieldType.getFieldAccessor().getOptions(context, fieldElements.get(0));
 				FieldOption expectedOption = null, actualOption = null;
 
 				for(int i = 0; i < expectedOptions.size(); i++)
@@ -315,7 +315,7 @@ public class AssertFormFields extends AbstractValidation
 
 			if(field.getValue() != null)
 			{
-				String actValue = fieldType.getFieldAccessor().getValue(fieldElements.get(0));
+				String actValue = fieldType.getFieldAccessor().getValue(context, fieldElements.get(0));
 
 				if(field.getValue().equals(actValue))
 				{

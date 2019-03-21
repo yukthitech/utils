@@ -157,7 +157,7 @@ public class UiAutomationUtils
 		{
 			if(type.isMultiFieldAccessor())
 			{
-				type.getFieldAccessor().setValue(elements, value);
+				type.getFieldAccessor().setValue(context, elements, value);
 			}
 			else
 			{
@@ -166,7 +166,7 @@ public class UiAutomationUtils
 					logger.warn("Multiple elements found for locator '{}'. Choosing the first element for population", locator);
 				}
 				
-				type.getFieldAccessor().setValue(element, value);
+				type.getFieldAccessor().setValue(context, element, value);
 			}
 		}
 		else

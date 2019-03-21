@@ -12,6 +12,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.monitor.IAsyncServerDataHandler;
+import com.yukthitech.autox.test.IEntryPoint;
 import com.yukthitech.autox.test.StepExecutor;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestSuite;
@@ -19,7 +20,7 @@ import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class InteractiveStepHandler implements IAsyncServerDataHandler
+public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPoint
 {
 	private static Logger logger = LogManager.getLogger(InteractiveStepHandler.class);
 
@@ -102,18 +103,32 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler
 		automationContext.setActiveTestSuite(testSuite);
 		automationContext.setActiveTestCase(testCase, null);
 		
-		for(IStep step : steps)
+		automationContext.getExecutionStack().push(this);
+		
+		try
 		{
-			try
+			for(IStep step : steps)
 			{
-				StepExecutor.executeStep(automationContext, executionLogger, step);
-			} catch(Exception ex)
-			{
-				logger.error("An error occurred while executing interactive step: " + step, ex);
-				
-				StepExecutor.handleException(automationContext, testCase, step, executionLogger, ex, null);
-				break;
+				try
+				{
+					StepExecutor.executeStep(automationContext, executionLogger, step);
+				} catch(Exception ex)
+				{
+					logger.error("An error occurred while executing interactive step: " + step, ex);
+					
+					StepExecutor.handleException(automationContext, testCase, step, executionLogger, ex, null);
+					break;
+				}
 			}
+		}finally
+		{
+			automationContext.getExecutionStack().pop(this);
 		}
+	}
+	
+	@Override
+	public String toText()
+	{
+		return "[Interactive]";
 	}
 }

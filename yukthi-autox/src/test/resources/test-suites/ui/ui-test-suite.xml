@@ -25,6 +25,25 @@
 			</wrap:validations>
 		</testCase>
 
+		<testCase name="setHiddentFieldValue">
+			<description>Validates setting non visible field value is working</description>
+			
+			<wrap:steps>
+				<ccg:ui-goto-page uri="/index.html" />
+				<ccg:ui-set-value locator="id: hiddenFld" value="newValue"/>
+				
+				<ccg:ui-click locator="id: hidButton"/>
+				<ccg:sleep time="1000"/>
+				
+				<ccg:ui-log-screen-shot name="test.png" />
+				<ccg:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+			</wrap:steps>
+	
+			<wrap:validations>
+				<ccg:assert-equals actual="attr: fldValue" expected="newValue"/>
+			</wrap:validations>
+		</testCase>
+
 		<testCase name="fillForm">
 			<description>Validates form filling is working</description>
 			

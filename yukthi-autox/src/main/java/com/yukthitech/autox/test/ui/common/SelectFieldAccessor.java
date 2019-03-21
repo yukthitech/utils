@@ -52,7 +52,7 @@ public class SelectFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#getValue(org.openqa.selenium.WebElement)
 	 */
 	@Override
-	public String getValue(WebElement element)
+	public String getValue(AutomationContext context, WebElement element)
 	{
 		if(element instanceof Select)
 		{
@@ -73,7 +73,7 @@ public class SelectFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.selenium.WebElement, java.lang.String)
 	 */
 	@Override
-	public void setValue(WebElement element, Object valueObj)
+	public void setValue(AutomationContext context, WebElement element, Object valueObj)
 	{
 		if(element instanceof Select)
 		{
@@ -132,7 +132,7 @@ public class SelectFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#getOptions(org.openqa.selenium.WebElement)
 	 */
 	@Override
-	public List<FieldOption> getOptions(WebElement element)
+	public List<FieldOption> getOptions(AutomationContext context, WebElement element)
 	{
 		if(element instanceof Select)
 		{

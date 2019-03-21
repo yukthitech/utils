@@ -6,3 +6,11 @@ function changeStatusTo(status)
 	var div = document.getElementById("testLayer");
 	div.style.visibility = 'visible';
 }
+
+function setHiddenValue()
+{
+	var fld = document.getElementById("status");
+	var hiddenFld = document.getElementById("hiddenFld");
+	
+	fld.value = hiddenFld.value;
+}

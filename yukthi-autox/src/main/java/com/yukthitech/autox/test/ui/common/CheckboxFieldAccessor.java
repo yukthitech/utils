@@ -9,6 +9,8 @@ import java.util.Set;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.yukthitech.autox.AutomationContext;
+
 /**
  * Field accessor for checkboxes and radio buttons.
  */
@@ -41,7 +43,7 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 	 * selenium.WebElement)
 	 */
 	@Override
-	public String getValue(WebElement element)
+	public String getValue(AutomationContext context, WebElement element)
 	{
 		List<WebElement> elements = findGroupedElements(element);
 		StringBuilder builder = new StringBuilder();
@@ -72,7 +74,7 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 	 */
 	@SuppressWarnings({ "rawtypes"})
 	@Override
-	public void setValue(List<WebElement> webElements, Object value)
+	public void setValue(AutomationContext context, List<WebElement> webElements, Object value)
 	{
 		Set<String> valueSet = new HashSet<>();
 
@@ -115,7 +117,7 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 	 * selenium.WebElement)
 	 */
 	@Override
-	public List<FieldOption> getOptions(WebElement element)
+	public List<FieldOption> getOptions(AutomationContext context, WebElement element)
 	{
 		List<WebElement> webElements = findGroupedElements(element);
 		List<FieldOption> options = new ArrayList<>(webElements.size());
