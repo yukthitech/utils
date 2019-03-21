@@ -14,9 +14,9 @@ public class TestSuiteFolderTreeNode extends FolderTreeNode
 {
 	private static final long serialVersionUID = 1L;
 
-	public TestSuiteFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File testSuiteFolder)
+	public TestSuiteFolderTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File testSuiteFolder)
 	{
-		super(projectExplorer, project, name, testSuiteFolder);
+		super(id, projectExplorer, project, name, testSuiteFolder);
 		
 		super.setIcon(IdeUtils.loadIcon("/ui/icons/settings.png", 20));
 		reload(false);
@@ -36,8 +36,8 @@ public class TestSuiteFolderTreeNode extends FolderTreeNode
 	}
 	
 	@Override
-	protected FolderTreeNode newFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
+	protected FolderTreeNode newFolderTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File folder)
 	{
-		return new TestFolderTreeNode(projectExplorer, project, name, folder);
+		return new TestFolderTreeNode(id, projectExplorer, project, name, folder);
 	}
 }

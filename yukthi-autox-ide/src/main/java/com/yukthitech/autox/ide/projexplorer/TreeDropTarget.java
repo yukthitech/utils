@@ -9,20 +9,23 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.actions.FileActions;
-import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
 
 @Component
@@ -33,10 +36,7 @@ public class TreeDropTarget implements DropTargetListener
 	private JTree targetTree;
 
 	@Autowired
-	private FileActions fileAction;
-	
-	@Autowired
-	private IdeContext ideContext;
+	private ProjectExplorer projectExplorer;
 	
 	public TreeDropTarget()
 	{
@@ -138,15 +138,57 @@ public class TreeDropTarget implements DropTargetListener
 
 			if(!tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
 			{
+				dtde.rejectDrop();
 				return;
 			}
 
 			@SuppressWarnings("unchecked")
 			List<File> list = (List<File>) tr.getTransferData(DataFlavor.javaFileListFlavor);
 			
-			ideContext.setActiveDetails(project, activeFolder);
-			fileAction.pasteFile(activeFolder, list);
+			if(list == null || list.isEmpty())
+			{
+				dtde.rejectDrop();
+				return;
+			}
+			
+			activeFolder = activeFolder.getCanonicalFile();
+			
+			logger.debug("Dnd operation, dragging files {} and dropping to {}", list, activeFolder.getPath());
+			
+			//ensure file/folder is not replacing itself
+			for(File file : list)
+			{
+				if(file.getParentFile().equals(activeFolder))
+				{
+					logger.info("File {} is trying to replace itself, which is not allowed in DND. Hence cancelling the DnD", file.getPath());
+					dtde.rejectDrop();
+					return;
+				}
+			}
+			
+			int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(),
+						String.format("Are you sure you want to move below files/folders \n   %s \nto folder: %s", list, activeFolder),
+						"Move Files",
+						JOptionPane.YES_NO_OPTION
+					);
+			
+			if(res == JOptionPane.NO_OPTION)
+			{
+				return;
+			}
+
+			Set<File> foldersToRefresh = new HashSet<>(); 
+			foldersToRefresh.add(activeFolder);
+			
+			for(File file : list)
+			{
+				FileUtils.moveToDirectory(file, activeFolder, false);
+				foldersToRefresh.add(file.getParentFile());
+			}
+			
 			dtde.dropComplete(true);
+			
+			projectExplorer.reloadFolders(foldersToRefresh);
 		} catch(Exception ex)
 		{
 			logger.error("An error occoure during running of drop method ",ex);

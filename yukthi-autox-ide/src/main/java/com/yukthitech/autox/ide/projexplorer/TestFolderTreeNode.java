@@ -8,14 +8,14 @@ public class TestFolderTreeNode extends FolderTreeNode
 {
 	private static final long serialVersionUID = 1L;
 
-	public TestFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
+	public TestFolderTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File folder)
 	{
-		super(projectExplorer, project, name, folder);
+		super(id, projectExplorer, project, name, folder);
 	}
 
 	@Override
-	protected FolderTreeNode newFolderTreeNode(ProjectExplorer projectExplorer, Project project, String name, File folder)
+	protected FolderTreeNode newFolderTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File folder)
 	{
-		return new TestFolderTreeNode(projectExplorer, project, name, folder);
+		return new TestFolderTreeNode(id, projectExplorer, project, name, folder);
 	}
 }

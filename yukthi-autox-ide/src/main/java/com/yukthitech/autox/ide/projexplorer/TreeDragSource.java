@@ -9,19 +9,17 @@ import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.actions.TransferableFiles;
-import com.yukthitech.autox.ide.context.IdeContext;
-import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Component
 public class TreeDragSource implements DragSourceListener, DragGestureListener
@@ -32,12 +30,6 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
 
 	private JTree sourceTree;
 	
-	@Autowired
-	private IdeContext ideContext;
-	
-	@Autowired
-	private FileActions fileActions;
-
 	public TreeDragSource()
 	{
 		this.source = new DragSource();
@@ -67,17 +59,23 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
 		nodeBeingDragged = (DefaultMutableTreeNode) path.getLastPathComponent();
 		ArrayList<File> listOfFiles = new ArrayList<File>();
 		
-		if(nodeBeingDragged instanceof FileTreeNode)
+		try
 		{
-			listOfFiles.add( ((FileTreeNode) nodeBeingDragged).getFile() );
-		}
-		else if(nodeBeingDragged instanceof FolderTreeNode)
+			if(nodeBeingDragged instanceof FileTreeNode)
+			{
+				listOfFiles.add( ((FileTreeNode) nodeBeingDragged).getFile().getCanonicalFile() );
+			}
+			else if(nodeBeingDragged instanceof FolderTreeNode)
+			{
+				listOfFiles.add( ((FolderTreeNode) nodeBeingDragged).getFolder().getCanonicalFile() );
+			}
+			else
+			{
+				return;
+			}
+		}catch(IOException ex)
 		{
-			listOfFiles.add( ((FolderTreeNode) nodeBeingDragged).getFolder() );
-		}
-		else
-		{
-			return;
+			throw new InvalidStateException("An error occurred while fetching cannoical path of file being dragged", ex);
 		}
 		
 		TransferableFiles fileTransferable = new TransferableFiles(listOfFiles);
@@ -107,31 +105,5 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
 	@Override
 	public void dragDropEnd(DragSourceDropEvent dsde)
 	{
-		if(!dsde.getDropSuccess() || (dsde.getDropAction() != DnDConstants.ACTION_MOVE))
-		{
-			return;
-		}
-		
-		Project project = null;
-		File file = null;
-		
-		if(nodeBeingDragged instanceof FileTreeNode)
-		{
-			project = ((FileTreeNode) nodeBeingDragged).getProject();
-			file = ((FileTreeNode) nodeBeingDragged).getFile();
-		}
-		else if(nodeBeingDragged instanceof FolderTreeNode)
-		{
-			project = ((FolderTreeNode) nodeBeingDragged).getProject();
-			file = ((FolderTreeNode) nodeBeingDragged).getFolder();
-		}
-		else
-		{
-			return;
-		}
-		
-		ideContext.setActiveDetails(project, file);
-		fileActions.deleteFile(file);
 	}
-
 }

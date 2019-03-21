@@ -22,6 +22,11 @@ public class IdeFileUtils
 		String parentPath = getCanonicalPath(parent);
 		String childPath = getCanonicalPath(child);
 		
+		if(parentPath.equals(childPath))
+		{
+			return "";
+		}
+		
 		if(!childPath.startsWith(parentPath))
 		{
 			return null;

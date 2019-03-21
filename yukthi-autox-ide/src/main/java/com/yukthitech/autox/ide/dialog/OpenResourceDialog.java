@@ -298,13 +298,13 @@ public class OpenResourceDialog extends JDialog
 		
 		if(!filterStr.contains("*"))
 		{
-			filterStr += "*";
+			filterStr = "*" + filterStr + "*";
 		}
 		
 		if(filterStr.length() > 0)
 		{
 			filterStr = filterStr.replace("*", ".*?");
-			filter = Pattern.compile(filterStr);
+			filter = Pattern.compile(filterStr, Pattern.CASE_INSENSITIVE);
 		}
 
 		listModel = new DefaultListModel<>();

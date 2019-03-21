@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.swing.JOptionPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fife.ui.rtextarea.RTextArea;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +19,8 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 @ActionHolder
 public class FormatActions
 {
+	private static Logger logger = LogManager.getLogger(FormatActions.class);
+	
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;
 
@@ -42,7 +46,14 @@ public class FormatActions
 		
 		int caretPos = textArea.getCaretPosition(); 
 		fileEditor.getTextArea().replaceRange(currentText, 0, textArea.getText().length());
-		textArea.setCaretPosition(caretPos);
+		
+		try
+		{
+			textArea.setCaretPosition(caretPos);
+		}catch(Exception ex)
+		{
+			logger.info("Failed to set caret position post formatting. Ignoring the error: " + ex);
+		}
 	}
 	
 	private String formatFile(File file, String content)

@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -424,7 +425,7 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		projectTreeModel.addProject(new ProjectTreeNode(this, project));
+		projectTreeModel.addProject(new ProjectTreeNode(project.getName(), this, project));
 		
 		projects.add(project);
 		initDocs(project);
@@ -597,6 +598,27 @@ public class ProjectExplorer extends JPanel
 		loadFilesToIndex();
 	}
 	
+	public void reloadFolders(Set<File> folders)
+	{
+		logger.debug("Reloading folder in project tree: {}", folders);
+		
+		List<FolderTreeNode> reloadedNodes = new ArrayList<>();
+		
+		for(ProjectTreeNode projNode : projectTreeModel.getProjectNodes())
+		{
+			projNode.reloadFolders(folders, reloadedNodes);
+		}
+		
+		for(FolderTreeNode node : reloadedNodes)
+		{
+			EventQueue.invokeLater(() -> {
+				projectTreeModel.reload(node);
+			});
+		}
+		
+		loadFilesToIndex();
+	}
+	
 	public BaseTreeNode reloadActiveNode()
 	{
 		if(activeTreeNode == null)
@@ -620,12 +642,14 @@ public class ProjectExplorer extends JPanel
 			return;
 		}
 		
-		BaseTreeNode parentNode = (BaseTreeNode) activeTreeNode.getParent();
+		Object parentNodeObj = activeTreeNode.getParent();
 		
-		if(parentNode == null)
+		if(!(parentNodeObj instanceof BaseTreeNode))
 		{
 			return;
 		}
+		
+		BaseTreeNode parentNode = (BaseTreeNode) parentNodeObj;
 		
 		parentNode.reload(true);
 		projectTreeModel.reload(parentNode);

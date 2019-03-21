@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide.projexplorer;
 
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,12 +16,26 @@ public class ProjectTreeNode extends FolderTreeNode
 
 	private Project project;
 	
-	public ProjectTreeNode(ProjectExplorer projectExplorer, Project project)
+	public ProjectTreeNode(String id, ProjectExplorer projectExplorer, Project project)
 	{
-		super(projectExplorer, IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
+		super(id, projectExplorer, IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
 
 		this.project = project;
+		
+		//reload once project is set
 		reload(false);
+	}
+	
+	@Override
+	public void reload(boolean childReload)
+	{
+		//project will be during init, and when this method is called by super class <init>
+		if(project == null)
+		{
+			return;
+		}
+		
+		super.reload(childReload);
 	}
 	
 	@Override
@@ -43,7 +58,47 @@ public class ProjectTreeNode extends FolderTreeNode
 		
 		return false;
 	}
+	
+	protected List<NodeInfo> getNodes()
+	{
+		List<NodeInfo> nodes = super.getNodes();
+		
+		int index = 0;
+		Set<String> testSuitesFolders = project.getTestSuitesFoldersList();
+		
+		if(testSuitesFolders != null)
+		{
+			testSuitesFolders = new TreeSet<>( project.getTestSuitesFoldersList() );
+			
+			for(String tsf : testSuitesFolders)
+			{
+				File file = new File(project.getBaseFolderPath(), tsf);
+				String id = ":testSuite:" + tsf;
+				
+				nodes.add(index, new NodeInfo(id, file, tsf, true));
+				index++;
+			}
+		}
+		
+		// add app config file
+		if(super.getChild(":appConfig") == null)
+		{
+			File appConfigFile = new File(project.getBaseFolderPath(), project.getAppConfigFilePath());
+			nodes.add(index, new NodeInfo(":appConfig", appConfigFile, "App Configuration", false));
+			index++;
+		}
 
+		// add app prop file
+		if(super.getChild(":appProp") == null)
+		{
+			File appPropFile = new File(project.getBaseFolderPath(), project.getAppPropertyFilePath());
+			nodes.add(index, new NodeInfo(":appProp", appPropFile, "App Properties", false));
+		}
+		
+		return nodes;
+	}
+
+	/*
 	@Override
 	public void reload(boolean childReload)
 	{
@@ -55,6 +110,7 @@ public class ProjectTreeNode extends FolderTreeNode
 		
 		super.reload(childReload);
 		
+		/*
 		for(BaseTreeNode child : super.getChildNodes())
 		{
 			if(childReload)
@@ -62,6 +118,7 @@ public class ProjectTreeNode extends FolderTreeNode
 				child.reload(true);
 			}
 		}
+		* /
 
 		int index = 0;
 		Set<String> testSuitesFolders = project.getTestSuitesFoldersList();
@@ -107,6 +164,7 @@ public class ProjectTreeNode extends FolderTreeNode
 			super.insert(":appProp", new FileTreeNode(projectExplorer, project, "App Properties", appPropFile, null), index);
 		}
 	}
+	*/
 
 	public Project getProject()
 	{

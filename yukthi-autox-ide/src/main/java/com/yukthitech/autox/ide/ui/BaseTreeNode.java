@@ -2,14 +2,13 @@ package com.yukthitech.autox.ide.ui;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Base class for tree nodes.
@@ -50,14 +49,15 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 	
 	private DefaultTreeModel model;
 	
-	public BaseTreeNode(DefaultTreeModel model)
+	public BaseTreeNode(String id, DefaultTreeModel model)
 	{
+		this.id = id;
 		this.model = model;
 	}
 
-	public BaseTreeNode(DefaultTreeModel model, Icon icon, String label)
+	public BaseTreeNode(String id, DefaultTreeModel model, Icon icon, String label)
 	{
-		this(model);
+		this(id, model);
 		
 		this.icon = icon;
 		this.label = label;
@@ -213,6 +213,7 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		}
 	}
 
+	/*
 	public void addChild(String id, BaseTreeNode node)
 	{
 		if(childNodes.containsKey(id))
@@ -224,7 +225,9 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		childNodes.put(id, node);
 		super.add(node);
 	}
+	*/
 	
+	/*
 	public void insert(String id, BaseTreeNode node, int index)
 	{
 		if(childNodes.containsKey(id))
@@ -235,6 +238,18 @@ public class BaseTreeNode extends DefaultMutableTreeNode
 		node.id = id;
 		childNodes.put(id, node);
 		super.insert(node, index);
+	}
+	*/
+	
+	public void setChildNodes(List<BaseTreeNode> childNodes)
+	{
+		super.removeAllChildren();
+		
+		for(BaseTreeNode node : childNodes)
+		{
+			super.add(node);
+			this.childNodes.put(node.getId(), node);
+		}
 	}
 
 	public BaseTreeNode getChild(String id)
