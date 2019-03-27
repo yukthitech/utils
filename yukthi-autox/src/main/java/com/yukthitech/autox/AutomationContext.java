@@ -606,6 +606,12 @@ public class AutomationContext
 		return appConfiguration;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Map<String, String> getAppProperties()
+	{
+		return (Map) appConfiguration.getApplicationProperties();
+	}
+	
 	/**
 	 * Starts all registered log monitors.
 	 */

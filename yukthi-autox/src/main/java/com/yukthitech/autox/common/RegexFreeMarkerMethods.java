@@ -75,17 +75,17 @@ public class RegexFreeMarkerMethods
 			@FmParam(name = "content", description = "String in which specified regex match needs to be found") String content, 
 			@FmParam(name = "regex", description = "Regex with group names to be extracted from match") String regex)
 	{
-		//ExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
+		ExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
 		Matcher matcher = getMatcher(content, regex);
 		
 		if(!matcher.find())
 		{
-			//exeLogger.debug("No match is found with regex {} in content: {}", regex, content);
+			exeLogger.debug("No match is found with regex {} in content: {}", regex, content);
 			return null;
 		}
 
 		Set<String> grpNames = fetchGroupNames(regex);
-		//exeLogger.debug("Found the group names in regex {} as: {}", regex, grpNames);
+		exeLogger.debug("Found the group names in regex {} as: {}", regex, grpNames);
 		
 		Map<String, String> res = extractGroups(matcher, grpNames);
 		return res;
@@ -149,13 +149,5 @@ public class RegexFreeMarkerMethods
 	{
 		Matcher matcher = getMatcher(content, regex);
 		return matcher.matches();
-	}
-	
-	public static void main(String[] args)
-	{
-		String str = "a=1,b=2";
-		String regex = "(?<key>\\w+)\\=(?<val>\\d+)";
-		
-		System.out.println(regexParse(str, regex));
 	}
 }

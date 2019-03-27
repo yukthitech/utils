@@ -208,7 +208,7 @@ public class DocGenerator
 		}
 	}
 	
-	private static void loadFreeMarmerMethodDocs(DocInformation docInfo, String basePackages[])
+	private static void loadFreeMarmerMethodDocs(DocInformation docInfo, String basePackages[], ExampleCollectionFile exampleCollections)
 	{
 		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)));
 		Collection<FreeMarkerMethodDoc> methodDocs = FreeMarkerMethodManager.getRegisterMethodDocuments();
@@ -237,6 +237,8 @@ public class DocGenerator
 				}
 			}
 			
+			metInfo.addExamples(exampleCollections.getExamples("$fmethod." + doc.getName()));
+			
 			docInfo.addFreeMarkerMethod(metInfo);
 		}
 	}
@@ -260,7 +262,7 @@ public class DocGenerator
 			loadPlugins(docInformation, (Set) reflections.getSubTypesOf(IPlugin.class) );
 		}
 
-		loadFreeMarmerMethodDocs(docInformation, basePackages);
+		loadFreeMarmerMethodDocs(docInformation, basePackages, exampleCollections);
 		
 		loadUiLocators(docInformation, exampleCollections);
 		

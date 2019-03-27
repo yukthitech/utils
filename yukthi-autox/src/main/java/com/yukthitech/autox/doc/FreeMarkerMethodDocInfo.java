@@ -1,6 +1,7 @@
 package com.yukthitech.autox.doc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -129,6 +130,16 @@ public class FreeMarkerMethodDocInfo extends AbstractDocInfo
 		this.examples.add(example);
 	}
 	
+	public void addExamples(Collection<Example> examples)
+	{
+		if(examples == null)
+		{
+			return;
+		}
+		
+		this.examples.addAll(examples);
+	}
+
 	public boolean hasExamples()
 	{
 		return CollectionUtils.isNotEmpty(examples);
