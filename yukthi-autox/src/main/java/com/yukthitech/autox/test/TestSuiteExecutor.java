@@ -16,6 +16,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.event.AutomationEvent;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -83,6 +84,14 @@ public class TestSuiteExecutor
 	 */
 	public TestCaseResult executeTestCase(AutomationContext context, List<TestCaseResult> testCaseDatsResults, TestCase testCase, String testFileName)
 	{
+		ObjectWrapper<String> excludedGrp = new ObjectWrapper<>();
+		
+		if(!testCase.isExecutable(context, excludedGrp))
+		{
+			return new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, 
+					"Skipping as the test case group '" + excludedGrp.getValue() + "' is under exclusion list.");
+		}
+
 		IDataProvider dataProvider = testCase.getDataProvider();
 		
 		if(dataProvider == null)
@@ -355,7 +364,7 @@ public class TestSuiteExecutor
 				testCaseExecuted = true;
 				testCaseResult = executeTestCaseWithDependencies(testSuite, testCase);
 
-				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
+				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL && testCaseResult.getStatus() != TestStatus.SKIPPED)
 				{
 					successful = false;
 				}

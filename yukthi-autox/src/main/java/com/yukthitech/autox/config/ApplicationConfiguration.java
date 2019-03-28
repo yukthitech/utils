@@ -103,6 +103,11 @@ public class ApplicationConfiguration
 	private RepositoryFactory storageRepositoryFactory;
 	
 	/**
+	 * Groups to exclude.
+	 */
+	private Set<String> excludeGroups = new HashSet<>();
+	
+	/**
 	 * Instantiates a new application configuration.
 	 *
 	 * @param applicationProperties the application properties
@@ -490,5 +495,34 @@ public class ApplicationConfiguration
 	public void setStorageRepositoryFactory(RepositoryFactory storageRepositoryFactory)
 	{
 		this.storageRepositoryFactory = storageRepositoryFactory;
+	}
+	
+	/**
+	 * Adds groups to exclude with comma delimited values.
+	 * @param groupsStr
+	 */
+	public void addExcludedGroups(String groupsStr)
+	{
+		String groups[] = groupsStr.split("\\s*\\,\\s*");
+		
+		for(String grp : groups)
+		{
+			if(grp.trim().length() == 0)
+			{
+				continue;
+			}
+			
+			this.excludeGroups.add(grp);
+		}
+	}
+	
+	/**
+	 * Returns true if specified group name is under exclusion list.
+	 * @param name group name to check
+	 * @return true if specified group is excluded.
+	 */
+	public boolean isGroupExcluded(String name)
+	{
+		return excludeGroups.contains(name);
 	}
 }

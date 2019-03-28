@@ -84,4 +84,6 @@
 		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
 	</summaryNotificationConfig>
 	 -->
+	 
+	 <excludedGroups>download</excludedGroups>
 </app>

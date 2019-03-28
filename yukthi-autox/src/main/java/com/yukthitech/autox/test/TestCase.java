@@ -18,8 +18,10 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.InteractiveExecutionController;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.ObjectWrapper;
 
 /**
  * Test case with validations to be executed.
@@ -37,6 +39,11 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	 * Description about test case.
 	 */
 	private String description;
+	
+	/**
+	 * Groups to which this test case belong.
+	 */
+	private Set<String> groups = new HashSet<>();
 	
 	/**
 	 * Dependency test cases within the current test suite. Dependencies are considered valid only if they occur
@@ -85,6 +92,45 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	public TestCase(String name)
 	{
 		this.name = name;
+	}
+	
+	public void addGroup(String name)
+	{
+		if(name.trim().length() == 0)
+		{
+			return;
+		}
+		
+		this.groups.add(name.trim());
+	}
+	
+	/**
+	 * Checks whether this test case can be executed based on excluded groups.
+	 * @param context
+	 * @param excludedGroup in case of exclusion, this wrapper will be set with group which is excluded.
+	 * @return
+	 */
+	public boolean isExecutable(AutomationContext context, ObjectWrapper<String> excludedGroup)
+	{
+		if(groups.isEmpty())
+		{
+			return true;
+		}
+		
+		ApplicationConfiguration appConfig = context.getAppConfiguration();
+		
+		for(String grp : this.groups)
+		{
+			if(appConfig.isGroupExcluded(grp))
+			{
+				logger.debug("Test case '{}' is non-executable as its group '{}' is under exclusion list", name, grp);
+				
+				excludedGroup.setValue(grp);				
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public void setData(TestCaseData data)

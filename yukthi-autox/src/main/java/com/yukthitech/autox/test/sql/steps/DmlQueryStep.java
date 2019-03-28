@@ -139,7 +139,12 @@ public class DmlQueryStep extends AbstractStep
 	
 			if(commitAtEnd)
 			{
+				exeLogger.debug("Executing commit...");
 				connection.commit();
+			}
+			else
+			{
+				exeLogger.debug("Skipping commit execution...");
 			}
 			
 			exeLogger.debug("Number of rows affected: {}", count);

@@ -92,7 +92,7 @@
 			<ccg:assert-true value="condition: uiIsVisible(attr.locator, null)"/>
 		</testCase>
 
-		<testCase name="testDownload">
+		<testCase name="testDownload" group="download">
 			<description>Validates download functionality</description>
 			
 			<ccg:ui-goto-page uri="/form.html" />
