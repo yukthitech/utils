@@ -37,6 +37,7 @@ import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ReflectionUtils;
 import com.yukthitech.utils.annotations.Named;
+import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -338,6 +339,12 @@ public class NativeQueryExecutor extends QueryExecutor
 			//if return type is expected to be entity and field details is found
 			if(fieldDetails != null)
 			{
+				//if no matching field is found, get the field from details
+				if(field == null)
+				{
+					field = fieldDetails.getField();
+				}
+				
 				//set the value from record on field (after required conversion, if any)
 				ReflectionUtils.setFieldValue(result, field, 
 						conversionService.convertToJavaType(record.getObject(column), fieldDetails)
@@ -350,6 +357,10 @@ public class NativeQueryExecutor extends QueryExecutor
 				ReflectionUtils.setFieldValue(result, field, 
 						ConvertUtils.convert(record.getObject(column), field.getType())
 				);
+			}
+			else
+			{
+				throw new InvalidConfigurationException("No field is found matching with column '{}' for result bean: {}", column, returnType.getName());
 			}
 		}
 		

@@ -100,7 +100,8 @@ class RepositoryProxy implements InvocationHandler
 				continue;
 			}
 			
-			throw new InvalidRepositoryException("Invalid CRUD method '" + methodName + "' is specified for entity - " + entityDetails.getEntityType().getName());
+			throw new InvalidRepositoryException("Invalid CRUD method '{}()' is specified in [Repository: {}, Entity: {}]", 
+					methodName, repositoryType.getName(), entityDetails.getEntityType().getName());
 		}
 		
 	}
