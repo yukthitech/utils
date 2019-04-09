@@ -23,8 +23,6 @@
 
 package com.yukthitech.utils.exceptions;
 
-import java.util.regex.Matcher;
-
 import com.yukthitech.utils.MessageFormatter;
 
 /**
@@ -95,7 +93,6 @@ public class UtilsException extends RuntimeException
 			for(int i = 0; i < args.length; i++)
 			{
 				strArgs[i] = "" + args[i];
-				strArgs[i] = Matcher.quoteReplacement(strArgs[i]);
 			}
 		}
 		
