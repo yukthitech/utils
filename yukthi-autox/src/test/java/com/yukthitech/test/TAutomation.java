@@ -26,7 +26,7 @@ public class TAutomation
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "jobj-test-suites"
-				//"-tc", "setHiddentFieldValue"
+				"-tc", "button_Click"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

@@ -1,7 +1,10 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<testSuite name="ui-test-suites">
 		<testCase name="button_Click">
-			<description>Validates button click action is working</description>
+			<description>
+				Validates button click action is working
+				And also checks js is working or not.
+			</description>
 			
 			<wrap:steps>
 				<ccg:ui-goto-page uri="/index.html" />
@@ -14,6 +17,8 @@
 				
 				<ccg:ui-is-visible locator="id: testLayer" name="visibFlag2"/>
 				<ccg:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+				
+				<ccg:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
 			</wrap:steps>
 	
 			<wrap:validations>
@@ -23,6 +28,16 @@
 				<ccg:assert-true value="attr: visibFlag2"/>
 				<ccg:assert-equals actual="attr: fldValue" expected="button Clicked"/>
 			</wrap:validations>
+
+			<ccg:ui-execute-js>
+				<script>
+					document.getElementById("changeByJs").click()
+				</script>
+			</ccg:ui-execute-js>
+			<ccg:sleep time="2000"/>
+			
+			<ccg:ui-log-screen-shot name="test-js.png" />
+			
 		</testCase>
 
 		<testCase name="setHiddentFieldValue">
