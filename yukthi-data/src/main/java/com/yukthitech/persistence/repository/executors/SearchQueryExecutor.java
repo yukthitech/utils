@@ -135,7 +135,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		}
 		
 		//load condition values
-		conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), countQuery, conditionParams.toArray());
+		conditionQueryBuilder.loadConditionalQuery(context, countQuery, conditionParams.toArray());
 
 		logger.debug("Executing search query with params - {}", conditionParams);
 
@@ -213,7 +213,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			}
 
 			//load condition values
-			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), finderQuery, conditionParams.toArray());
+			conditionQueryBuilder.loadConditionalQuery(context, finderQuery, conditionParams.toArray());
 			conditionQueryBuilder.loadOrderByFields(finderQuery);
 			
 			IFinderRecordProcessor recordCountLimiter = null;

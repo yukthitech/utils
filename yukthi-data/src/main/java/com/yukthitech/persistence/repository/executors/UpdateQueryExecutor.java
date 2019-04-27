@@ -332,7 +332,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getDbColumnName(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND, false));
 		}
 		
-		conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), query, params);
+		conditionQueryBuilder.loadConditionalQuery(context, query, params);
 		
 		try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
 		{
@@ -388,7 +388,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			Object value = null;
 			
 			updateQuery.clearConditions();
-			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), updateQuery, params);
+			conditionQueryBuilder.loadConditionalQuery(context, updateQuery, params);
 			
 			//add order-by fields
 			if(orderByFields != null)

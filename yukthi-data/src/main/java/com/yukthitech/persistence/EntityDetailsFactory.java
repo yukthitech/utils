@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import javax.persistence.Column;
@@ -41,6 +42,7 @@ import com.yukthitech.persistence.monitor.EntityDetailsMonitor;
 import com.yukthitech.persistence.monitor.IEntityCreateTableListener;
 import com.yukthitech.persistence.query.CreateIndexQuery;
 import com.yukthitech.persistence.query.CreateTableQuery;
+import com.yukthitech.utils.CaseInsensitiveComparator;
 import com.yukthitech.utils.annotations.RecursiveAnnotationFactory;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -54,7 +56,7 @@ public class EntityDetailsFactory
 
 	private EntityDetailsMonitor entityDetailsMonitor = new EntityDetailsMonitor();
 	
-	private Map<String, Object> nameToConstraints = new HashMap<>();
+	private Map<String, Object> nameToConstraints = new TreeMap<>(new CaseInsensitiveComparator());
 	
 	private RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	

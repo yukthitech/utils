@@ -38,6 +38,7 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
+import com.yukthitech.persistence.repository.executors.QueryExecutionContext;
 import com.yukthitech.persistence.repository.executors.proxy.ProxyEntityCreator;
 import com.yukthitech.persistence.repository.search.DynamicResultField;
 import com.yukthitech.persistence.repository.search.IDynamicSearchResult;
@@ -310,12 +311,12 @@ public class ConditionQueryBuilder implements Cloneable
 	public static class ParameterContext
 	{
 		private Object parameters[];
-		private Object repositoryExecutionContext;
+		private QueryExecutionContext queryExecutionContext;
 
-		public ParameterContext(Object[] parameters, Object repositoryExecutionContext)
+		public ParameterContext(Object[] parameters, QueryExecutionContext queryExecutionContext)
 		{
 			this.parameters = parameters;
-			this.repositoryExecutionContext = repositoryExecutionContext;
+			this.queryExecutionContext = queryExecutionContext;
 		}
 
 		public Object[] getParameters()
@@ -1033,15 +1034,15 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param query
 	 * @param params
 	 */
-	public void loadConditionalQuery(Object repoExecutionContext, IConditionalQuery query, Object params[])
+	public void loadConditionalQuery(QueryExecutionContext queryExecutionContext, IConditionalQuery query, Object params[])
 	{
 		query.setDefaultTableCode(defTableCode);
 		
-		ParameterContext context = new ParameterContext(params, repoExecutionContext);
-		loadConditionalQuery(context, repoExecutionContext, query, params);
+		ParameterContext context = new ParameterContext(params, queryExecutionContext);
+		loadConditionalQuery(context, query, params);
 	}
 	
-	private void loadConditionalQuery(ParameterContext context, Object repoExecutionContext, IConditionalQuery query, Object params[])
+	private void loadConditionalQuery(ParameterContext context, IConditionalQuery query, Object params[])
 	{
 		Set<String> includedTables = new HashSet<>();
 
@@ -1067,11 +1068,11 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			if(condition instanceof Condition)
 			{
-				queryCondition = buildConditionForQueryFromCondition(repoExecutionContext, context, includedTables, query, (Condition) condition, params);
+				queryCondition = buildConditionForQueryFromCondition(context, includedTables, query, (Condition) condition, params);
 			}
 			else
 			{
-				queryCondition = buildConditionForQueryFromNested(repoExecutionContext, context, query, (InnerQuery) condition, params);
+				queryCondition = buildConditionForQueryFromNested(context, query, (InnerQuery) condition, params);
 			}
 			
 			if(queryCondition != null)
@@ -1089,7 +1090,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param condition Condition to be converted
 	 * @return Newly built query condition. If value is null, returns null.
 	 */
-	private QueryCondition buildConditionForQueryFromCondition(Object repoExecutionContext, ParameterContext context, 
+	private QueryCondition buildConditionForQueryFromCondition(ParameterContext context, 
 			Set<String> includedTables, IConditionalQuery query, Condition condition, Object params[])
 	{
 		Object value = null;
@@ -1101,6 +1102,11 @@ public class ConditionQueryBuilder implements Cloneable
 			if(condition.index >= 0)
 			{
 				value = PropertyUtils.getProperty(context, condition.getConditionExpression());
+				
+				if(condition.fieldDetails != null)
+				{
+					value = context.queryExecutionContext.getConversionService().convertToDBType(value, condition.fieldDetails);
+				}
 			}
 			//for method level conditions like null-checks and others use default value from condition
 			else
@@ -1108,7 +1114,8 @@ public class ConditionQueryBuilder implements Cloneable
 				String strValue = condition.defaultValue;
 				
 				//if no repo context is specified assume empty object
-				Object repoContext = (context.repositoryExecutionContext != null) ? context.repositoryExecutionContext : Collections.emptyMap(); 
+				Object repoContext = context.queryExecutionContext.getRepositoryExecutionContext();
+				repoContext = (repoContext != null) ? repoContext : Collections.emptyMap(); 
 				
 				//if value is present check for expressions and replace them
 				if(strValue != null)
@@ -1153,11 +1160,11 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			if(grpInternalCondition instanceof Condition)
 			{
-				grpCondition = buildConditionForQueryFromCondition(repoExecutionContext, context, includedTables, query, (Condition) grpInternalCondition, params);
+				grpCondition = buildConditionForQueryFromCondition(context, includedTables, query, (Condition) grpInternalCondition, params);
 			}
 			else
 			{
-				grpCondition = buildConditionForQueryFromNested(repoExecutionContext, context, query, (InnerQuery) grpInternalCondition, params);
+				grpCondition = buildConditionForQueryFromNested(context, query, (InnerQuery) grpInternalCondition, params);
 			}
 
 			
@@ -1180,12 +1187,12 @@ public class ConditionQueryBuilder implements Cloneable
 		return groupHead;
 	}
 
-	private QueryCondition buildConditionForQueryFromNested(Object context, ParameterContext paramContext, IConditionalQuery query, InnerQuery innerQuery, Object params[])
+	private QueryCondition buildConditionForQueryFromNested(ParameterContext paramContext, IConditionalQuery query, InnerQuery innerQuery, Object params[])
 	{
 		QueryCondition queryCondition = new QueryCondition(defTableCode, innerQuery.currentTableField.getDbColumnName(), Operator.IN, null, innerQuery.joinOperator, false);
 		queryCondition.setSubquery(new Subquery(innerQuery.subqueryBuilder.entityDetails, innerQuery.subqueryBuilder.defTableCode));
 		
-		innerQuery.subqueryBuilder.loadConditionalQuery(paramContext, context, queryCondition.getSubquery(), params);
+		innerQuery.subqueryBuilder.loadConditionalQuery(paramContext, queryCondition.getSubquery(), params);
 		
 		return queryCondition;
 	}

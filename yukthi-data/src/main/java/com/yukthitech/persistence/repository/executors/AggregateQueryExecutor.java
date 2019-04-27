@@ -117,7 +117,7 @@ public class AggregateQueryExecutor extends QueryExecutor
 			AggregateQuery query = new AggregateQuery(entityDetails, functionType, column);
 			
 			//set condition values on query
-			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), query, params);
+			conditionQueryBuilder.loadConditionalQuery(context, query, params);
 			
 			//execute the query and fetch result count
 			Double aggrValue = dataStore.fetchAggregateValue(query, entityDetails);

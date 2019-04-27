@@ -23,6 +23,8 @@
 
 package com.yukthitech.persistence.repository.executors;
 
+import com.yukthitech.persistence.conversion.ConversionService;
+
 /**
  * Encapsulation of parameters and other context sent during query executor execution.
  * @author akiran
@@ -30,9 +32,24 @@ package com.yukthitech.persistence.repository.executors;
 public class QueryExecutionContext
 {
 	/**
+	 * Conversion service to be used by query executors.
+	 */
+	private ConversionService conversionService;
+	
+	/**
 	 * Repository execution context.
 	 */
 	private Object repositoryExecutionContext;
+	
+	public QueryExecutionContext(ConversionService conversionService)
+	{
+		this.conversionService = conversionService;
+	}
+	
+	public ConversionService getConversionService()
+	{
+		return conversionService;
+	}
 	
 	public void setRepositoryExecutionContext(Object repositoryExecutionContext)
 	{

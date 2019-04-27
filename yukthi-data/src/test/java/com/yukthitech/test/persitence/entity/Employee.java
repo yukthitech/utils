@@ -24,11 +24,11 @@ public class Employee
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@UniqueConstraint(name="EmpNo")
+	@UniqueConstraint(name="EmpNo", finalName = false)
 	@Column(name = "EMP_NO")
 	private String employeeNo;
 	
-	@UniqueConstraint(name = "EmailId", message = ERROR_MESSAGE_DUPLICATE_EMAIL)
+	@UniqueConstraint(name = "EmailId", message = ERROR_MESSAGE_DUPLICATE_EMAIL, finalName = false)
 	private String emailId;
 	
 	@Indexed

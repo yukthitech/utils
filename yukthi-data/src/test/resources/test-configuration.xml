@@ -18,6 +18,15 @@
 			</dataSource>
 		</dataStore>
 	</repositoryFactory>
+
+	<repositoryFactory createTables="true" name="H2">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="h2">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>org.h2.Driver</driverClassName>
+				<url>jdbc:h2:./db-h2/test</url>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
 </configuration>
 
 	

@@ -39,7 +39,7 @@ class RepositoryProxy implements InvocationHandler
 	
 	private Set<Method> nonExecutableMethods = new HashSet<>();
 	
-	private QueryExecutionContext queryExecutionContext = new QueryExecutionContext();
+	private QueryExecutionContext queryExecutionContext;
 	
 	/**
 	 * Parent repository factory.
@@ -67,6 +67,8 @@ class RepositoryProxy implements InvocationHandler
 		this.entityDetails = entityDetails;
 		this.repositoryType = repositoryType;
 		this.repositoryFactory = repositoryFactory;
+		
+		this.queryExecutionContext = new QueryExecutionContext(dataStore.getConversionService());
 		
 		Method methods[] = repositoryType.getMethods();
 		String methodName = null;

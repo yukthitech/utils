@@ -23,20 +23,22 @@
 
 package com.yukthitech.test.persitence;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.yukthitech.persistence.ForeignConstraintViolationException;
+import com.yukthitech.persistence.ICrudRepository;
+import com.yukthitech.persistence.UniqueConstraintViolationException;
+import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.test.persitence.entity.Employee;
 import com.yukthitech.test.persitence.entity.IEmployeeRepository;
 import com.yukthitech.test.persitence.entity.IOrderRepository;
 import com.yukthitech.test.persitence.entity.Order;
 import com.yukthitech.test.persitence.entity.OrderItem;
-import com.yukthitech.persistence.ForeignConstraintViolationException;
-import com.yukthitech.persistence.ICrudRepository;
-import com.yukthitech.persistence.UniqueConstraintViolationException;
-import com.yukthitech.persistence.repository.RepositoryFactory;
 
 /**
  * @author akiran
@@ -44,6 +46,8 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
  */
 public class TConstraintExceptionHandling extends TestSuiteBase
 {
+	private static Logger logger = LogManager.getLogger(TConstraintExceptionHandling.class);
+	
 	@AfterMethod
 	public void cleanup(ITestResult result)
 	{
@@ -73,6 +77,8 @@ public class TConstraintExceptionHandling extends TestSuiteBase
 			Assert.fail("Unique constraint exception is not thrown");
 		}catch(Exception ex)
 		{
+			logger.debug("Exception occurred during unique constraint check is", ex);
+			
 			Assert.assertTrue(ex instanceof UniqueConstraintViolationException);
 			Assert.assertEquals(Employee.ERROR_MESSAGE_DUPLICATE_EMAIL, ex.getMessage());
 		}

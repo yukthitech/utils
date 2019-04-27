@@ -24,10 +24,13 @@
 package com.yukthitech.persistence.rdbms;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.persistence.EntityDetailsFactory;
 import com.yukthitech.persistence.ForeignConstraintDetails;
@@ -52,7 +55,7 @@ public class SqlExceptionHandler
 	 * @param ex
 	 * @param entityDetailsFactory
 	 */
-	public static void handleException(String defaultMessage, Exception ex, EntityDetailsFactory entityDetailsFactory, boolean duringDelete)
+	public static void handleException(String defaultMessage, Exception ex, EntityDetailsFactory entityDetailsFactory, boolean duringDelete, List<Pattern> constraintErrorPatterns)
 	{
 		if(!(ex instanceof SQLException))
 		{
@@ -67,19 +70,43 @@ public class SqlExceptionHandler
 			throw new PersistenceException(defaultMessage, ex);
 		}
 		
-		//fetch the constraint name from the message
-		Matcher matcher = WORD_PATTERN.matcher(message);
-		String word = null;
 		Object constraint = null;
+		String constraintName = null;
 		
-		while(matcher.find())
+		if(CollectionUtils.isEmpty(constraintErrorPatterns))
 		{
-			word = matcher.group(1);
-			constraint = entityDetailsFactory.getConstraint(word);
+			//fetch the constraint name from the message
+			Matcher matcher = WORD_PATTERN.matcher(message);
+			String word = null;
 			
-			if(constraint != null)
+			while(matcher.find())
 			{
-				break;
+				word = matcher.group(1);
+				constraint = entityDetailsFactory.getConstraint(word);
+				
+				if(constraint != null)
+				{
+					constraintName = word;
+					break;
+				}
+			}
+		}
+		else
+		{
+			for(Pattern constraintErrorPattern : constraintErrorPatterns)
+			{
+				Matcher matcher = constraintErrorPattern.matcher(message);
+				
+				if(matcher.find())
+				{
+					constraintName = matcher.group(RdbmsConfiguration.PATTERN_GRP_CONST_ERR_NAME);
+					constraint = entityDetailsFactory.getConstraint(constraintName);
+					
+					if(constraint != null)
+					{
+						break;
+					}
+				}
 			}
 		}
 		
@@ -116,7 +143,7 @@ public class SqlExceptionHandler
 			
 			if(message == null)
 			{
-				message = "Foreign constraint violated - " + word;
+				message = "Foreign constraint violated - " + constraintName;
 			}
 			
 			throw new ForeignConstraintViolationException(foreignConstraintDetails.getOwnerEntityDetails().getEntityType(), 

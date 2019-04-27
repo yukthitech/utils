@@ -140,7 +140,7 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 			FinderQuery finderQuery = new FinderQuery(entityDetails);
 
 			//set the result fields, conditions and tables details on finder query
-			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), finderQuery, params);
+			conditionQueryBuilder.loadConditionalQuery(context, finderQuery, params);
 			
 			//add order-by fields
 			conditionQueryBuilder.loadOrderByFields(finderQuery);

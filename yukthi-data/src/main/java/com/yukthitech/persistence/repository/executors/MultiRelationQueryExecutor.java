@@ -36,7 +36,6 @@ import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.annotations.OrderBy;
 import com.yukthitech.persistence.repository.annotations.OrderByField;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
-import com.yukthitech.persistence.repository.annotations.UpdateFunction;
 import com.yukthitech.persistence.repository.annotations.UpdateOperator;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -91,7 +90,7 @@ public class MultiRelationQueryExecutor extends AbstractPersistQueryExecutor
 					fieldName, repositoryType.getName(), method.getName());
 		}
 		
-		EntityDetails targetEntityDetails = fieldDetails.getForeignConstraintDetails().getTargetEntityDetails();
+		fieldDetails.getForeignConstraintDetails().getTargetEntityDetails();
 		
 		super.entityDetails = entityDetails;
 		super.repositoryType = repositoryType;
@@ -370,7 +369,7 @@ public class MultiRelationQueryExecutor extends AbstractPersistQueryExecutor
 			query.addCondition(new QueryCondition(null, entityDetails.getVersionField().getDbColumnName(), Operator.EQ, entityDetails.getVersionField().getValue(entity), JoinOperator.AND, false));
 		}
 		
-		conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), query, params);
+		conditionQueryBuilder.loadConditionalQuery(context, query, params);
 		
 		try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
 		{
@@ -426,7 +425,7 @@ public class MultiRelationQueryExecutor extends AbstractPersistQueryExecutor
 			Object value = null;
 			
 			updateQuery.clearConditions();
-			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), updateQuery, params);
+			conditionQueryBuilder.loadConditionalQuery(context, updateQuery, params);
 			
 			//add order-by fields
 			if(orderByFields != null)

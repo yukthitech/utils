@@ -1,15 +1,18 @@
 package com.yukthitech.persistence.rdbms;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.persistence.freemarker.ParamCollectorDirective;
 import com.yukthitech.persistence.freemarker.TrimDirective;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -32,6 +35,8 @@ public class RdbmsConfiguration implements Validateable
 	public static final String CHILDREN_EXISTENCE_QUERY = "childrenExistenceTemplate";
 	public static final String FETCH_CHILDREN_IDS_QUERY = "fetchChildrenIdsTemplate";
 	public static final String DROP_QUERY = "dropTableTemplate";
+	
+	public static final String PATTERN_GRP_CONST_ERR_NAME = "name";
 
 	public static final String MANDATORY_QUERIES[] = {
 		CREATE_TABLE, CREATE_INDEX, CREATE_EXTENDED_TABLE,
@@ -56,10 +61,38 @@ public class RdbmsConfiguration implements Validateable
 	 */
 	private boolean pagingSupported = true;
 	
+	/**
+	 * Pattern to be used to extract constraint name from constraint exception messages. This pattern must have 
+	 * group "name" which will be used to extract constraint name.
+	 */
+	private List<Pattern> constraintErrorPatterns;
+	
 	public RdbmsConfiguration()
 	{
 		configuration.setSharedVariable("trim", new TrimDirective());
 		configuration.setSharedVariable("param", paramCollectorDirective);
+	}
+	
+	public void addConstraintErrorPattern(String constraintErrorPattern)
+	{
+		constraintErrorPattern = constraintErrorPattern.trim();
+		
+		if(!constraintErrorPattern.contains("?<" + PATTERN_GRP_CONST_ERR_NAME + ">"))
+		{
+			throw new InvalidArgumentException("No group found with name 'name' in specified pattern: {}", constraintErrorPattern);
+		}
+		
+		if(this.constraintErrorPatterns == null)
+		{
+			this.constraintErrorPatterns = new ArrayList<>();
+		}
+		
+		this.constraintErrorPatterns.add( Pattern.compile(constraintErrorPattern) );
+	}
+	
+	public List<Pattern> getConstraintErrorPatterns()
+	{
+		return constraintErrorPatterns;
 	}
 	
 	public void addTemplate(String name, String template)

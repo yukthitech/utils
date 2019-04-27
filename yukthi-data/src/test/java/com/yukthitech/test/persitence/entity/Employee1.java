@@ -26,7 +26,7 @@ public class Employee1
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@UniqueConstraint(name="EmpNo")
+	@UniqueConstraint(name="EmpNo", finalName = false)
 	@Column(name = "EMP_NO")
 	private String employeeNo;
 	

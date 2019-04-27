@@ -62,6 +62,7 @@ public class RdbmsDataStore implements IDataStore
 {
 	public static final String TEMPLATE_NAME_MYSQL = "mysql";
 	public static final String TEMPLATE_NAME_DERBY = "derby";
+	public static final String TEMPLATE_NAME_H2 = "h2";
 	
 	private static Logger logger = LogManager.getLogger(RdbmsDataStore.class);
 	
@@ -626,7 +627,7 @@ public class RdbmsDataStore implements IDataStore
 			logger.debug("An error occurred while saving entity to table '{}' using query: {}. Error - " + ex, saveQuery.getTableName(), saveQuery);
 
 			SqlExceptionHandler.handleException("An error occurred while saving entity to table '" 
-					+ saveQuery.getTableName() + "'", ex, entityDetailsFactory, false);
+					+ saveQuery.getTableName() + "'", ex, entityDetailsFactory, false, rdbmsConfig.getConstraintErrorPatterns());
 			return -1;
 		}finally
 		{
@@ -715,7 +716,7 @@ public class RdbmsDataStore implements IDataStore
 					+ updateQuery.getTableName() + "' using query: " + updateQuery, ex);
 
 			SqlExceptionHandler.handleException("An error occurred while updating entity(s) to table '" 
-					+ updateQuery.getTableName() + "'", ex, entityDetailsFactory, false);
+					+ updateQuery.getTableName() + "'", ex, entityDetailsFactory, false, rdbmsConfig.getConstraintErrorPatterns());
 			return -1;
 		}finally
 		{
@@ -764,7 +765,7 @@ public class RdbmsDataStore implements IDataStore
 			logger.error("An error occurred while deleting rows from table '" + deleteQuery.getTableName() + "' using query: " + deleteQuery, ex);
 
 			SqlExceptionHandler.handleException("An error occurred while deleting rows from table '" 
-					+ deleteQuery.getTableName() + "'", ex, entityDetailsFactory, true);
+					+ deleteQuery.getTableName() + "'", ex, entityDetailsFactory, true, rdbmsConfig.getConstraintErrorPatterns());
 
 			return -1;
 		}finally
@@ -1210,7 +1211,7 @@ public class RdbmsDataStore implements IDataStore
 		{
 			logger.error("An error occurred while executing native DML - " + queryName, ex); 
 
-			SqlExceptionHandler.handleException("An error occurred while executing native DML - " + queryName, ex, entityDetailsFactory, false);
+			SqlExceptionHandler.handleException("An error occurred while executing native DML - " + queryName, ex, entityDetailsFactory, false, rdbmsConfig.getConstraintErrorPatterns());
 			return -1;
 		}finally
 		{

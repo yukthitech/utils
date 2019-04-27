@@ -173,7 +173,7 @@ public class DeleteQueryExecutor extends AbstractPersistQueryExecutor
 			}
 			
 			DeleteQuery deleteQuery = new DeleteQuery(entityDetails);
-			conditionQueryBuilder.loadConditionalQuery(context.getRepositoryExecutionContext(), deleteQuery, params);
+			conditionQueryBuilder.loadConditionalQuery(context, deleteQuery, params);
 			
 			//if datastore requires explicit child delete handling (like NOSQL DBs)
 			if(dataStore.isExplicitForeignCheckRequired())
