@@ -57,6 +57,8 @@ public class EmailTracker
 	private static final long ONE_MIN_IN_MILLIS = 60 * 1000;
 
 	private static final Flags READ_FLAGS = new Flags(Flags.Flag.SEEN);
+	
+	private static final Flags PROCESSED_FLAGS = new Flags(Flags.Flag.FLAGGED);
 
 	/**
 	 * Context object to be used while processing mails.
@@ -105,6 +107,8 @@ public class EmailTracker
 		{
 			try
 			{
+				logger.debug("Deleting mail with subject: {}", message.getSubject());
+				
 				message.setFlag(Flags.Flag.DELETED, true);
 				processed = true;
 			} catch(Exception ex)
@@ -121,6 +125,8 @@ public class EmailTracker
 
 			try
 			{
+				logger.debug("Moving to folder {} the mail with subject: {}", folder, message.getSubject());
+				
 				destFolder = sourceFolder.getFolder(folder);
 
 				if(destFolder == null || !destFolder.exists())
@@ -494,7 +500,7 @@ public class EmailTracker
 		for(int i = 0; i < count; i++)
 		{
 			final Message message = newMessages[i];
-
+			
 			scheduledExecutorService.execute(new Runnable()
 			{
 				public void run()
@@ -503,6 +509,14 @@ public class EmailTracker
 					{
 						if(lastReadTime != null && lastReadTime.after(message.getReceivedDate()))
 						{
+							return;
+						}
+						
+						boolean isProcessed = message.isSet(Flag.FLAGGED);
+						
+						if(isProcessed)
+						{
+							logger.trace("Ignoring message as it is already processed. Message subject: {}", message.getSubject());
 							return;
 						}
 
@@ -542,7 +556,10 @@ public class EmailTracker
 						{
 							logger.error("An error occurred while processing mail with subject: {}", mailMessage.getSubject(), ex);
 						}
-
+						
+						//mark message as processed
+						message.setFlags(PROCESSED_FLAGS, true);
+						
 						if(!isMailProcessed)
 						{
 							if(!mailProcessingContext.processed && !isReadEarlier)
@@ -568,12 +585,12 @@ public class EmailTracker
 
 			if(pcount % 10 == 0 || pcount < 10)
 			{
-				logger.debug("Processed {} number of messages out of {}", pcount, count);
+				logger.debug("Processed {} messages out of {}", pcount, count);
 			}
 
 			if(pcount >= count)
 			{
-				logger.debug("Processed {} number of messages out of {}", pcount, count);
+				logger.debug("Completed processing {} messages out of {}", pcount, count);
 				break;
 			}
 
