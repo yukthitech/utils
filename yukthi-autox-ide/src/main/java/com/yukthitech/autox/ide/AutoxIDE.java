@@ -16,9 +16,12 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.contextAttribute.ContextAttributesPanel;
@@ -34,7 +37,6 @@ import com.yukthitech.autox.ide.views.ConsolePanel;
 import com.yukthitech.autox.ide.views.report.ReportPanel;
 
 @ActionHolder
-@SpringBootApplication
 public class AutoxIDE extends JFrame
 {
 	private static final long serialVersionUID = 1L;
@@ -114,6 +116,7 @@ public class AutoxIDE extends JFrame
 	/**
 	 * Launch the application.
 	 */
+	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception
 	{
 		AutoxSplashScreen.display();
@@ -121,7 +124,11 @@ public class AutoxIDE extends JFrame
 		//wait for splash screen to display
 		Thread.sleep(200);
 		
-		SpringApplication.run(AutoxIDE.class, args);
+		new ClassPathXmlApplicationContext("spring-autox-context.xml");
+		//Resource resource = new ClassPathResource("/spring-autox-context.xml");  
+	    //BeanFactory factory = new XmlBeanFactory(resource); 
+		
+		//SpringApplication.run(AutoxIDE.class, args);
 	}
 	
 	@PostConstruct
