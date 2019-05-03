@@ -11,9 +11,9 @@
 	
 	<!-- Persistence related configuration -->
 	<storage-repository-factory createTables="true">
-		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="derby">
-			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.apache.derby.jdbc.EmbeddedDriver">
-				<url>jdbc:derby:.\derby-data;create=true</url>
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="java.lang.String" ccg:params="h2">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource" driverClassName="org.h2.Driver">
+				<url>jdbc:h2:.\h2-data;AUTO_SERVER=TRUE</url>
 			</dataSource>
 		</dataStore>
 	</storage-repository-factory>

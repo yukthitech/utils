@@ -647,6 +647,12 @@ public class AutomationUtils
 				}
 				else
 				{
+					//if folder is deleted, simply return
+					if(!reportFolder.exists())
+					{
+						return;
+					}
+					
 					throw ex;
 				}
 			}

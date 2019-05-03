@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -130,27 +131,30 @@ public class StepExecutor
 	{
 		logger.debug( "Invoking plugin error handling for executable: {}", Arrays.toString(executable.name()) );
 		
-		Class<? extends IPlugin<?>> pluginTypes[] = executable.requiredPluginTypes();
+		Collection< IPlugin<?> > pluginTypes = context.getPlugins();
 		
-		if(pluginTypes == null || pluginTypes.length == 0)
+		if(pluginTypes == null || pluginTypes.isEmpty())
 		{
-			logger.debug( "No associated plugins gound for executable: {}", Arrays.toString(executable.name()) );
+			logger.debug( "No associated plugins found in current context.");
 			return;
 		}
 		
-		IPlugin<?> plugin = null;
-		
-		for(Class<? extends IPlugin<?>> type : pluginTypes)
+		for(IPlugin<?>  plugin : pluginTypes)
 		{
-			plugin = context.getPlugin(type);
-			
 			if(plugin == null)
 			{
 				continue;
 			}
 			
-			logger.debug("Invoking error handling of plugin - {}", type.getName());
-			plugin.handleError(context, errorDetails);
+			logger.debug("Invoking error handling of plugin - {}", plugin.getClass().getName());
+			
+			try
+			{
+				plugin.handleError(context, errorDetails);
+			}catch(Exception ex)
+			{
+				logger.error("An error occurred during plugin-error-handling with plugin: {}", plugin, ex);
+			}
 		}
 	}
 	
