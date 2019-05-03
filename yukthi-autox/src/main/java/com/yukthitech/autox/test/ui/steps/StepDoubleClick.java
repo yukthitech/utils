@@ -40,6 +40,8 @@ public class StepDoubleClick extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception 
 	{
+		exeLogger.trace("Double-Clicking the element specified by locator: {}", locator);
+		
 		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 		
 		if(webElement == null)

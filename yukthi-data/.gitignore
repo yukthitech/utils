@@ -2,3 +2,4 @@
 /test-output/
 /db/
 /derby.log
+/db-h2/

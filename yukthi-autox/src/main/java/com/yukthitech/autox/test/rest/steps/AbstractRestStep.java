@@ -258,7 +258,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		}
 		else
 		{
-			if(expectedResponseType == null)
+			if(expectedResponseType == null || String.class.equals(expectedResponseType))
 			{
 				result = (RestResult) client.invokeRequest(request);
 			}

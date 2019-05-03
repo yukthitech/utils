@@ -18,7 +18,7 @@ public class ResetSessionStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Closing current session");
+		exeLogger.debug("Resetting current session");
 		
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		

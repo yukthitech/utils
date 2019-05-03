@@ -50,7 +50,7 @@ public class AssertFalseStep extends AbstractValidation
 		}
 		else
 		{
-			res = !"true".equalsIgnoreCase("" + value);
+			res = "true".equalsIgnoreCase("" + value);
 		}
 
 		exeLogger.debug("Result is: {}", res);
