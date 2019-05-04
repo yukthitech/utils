@@ -88,5 +88,89 @@
 		
 			<ccg:assert-false value="condition: attr.intAttr1 gt 5"/>
 		</testCase>
+
+		<testCase name="assertDeepEquals">
+			<description>
+				Validates assert deep equals work properly
+			</description>
+		
+			<ccg:set expression="attr1">
+				<value>json:
+					{
+						"fruits": [
+							{"color": "red", "name": "apple", "size": 3, "filters": [1, 2, 3]},
+							{"color": "orange", "name": "orange", "size": 3, "filters": [3, 4, 5]},
+							{"color": "green", "name": "grape", "size": 1, "filters": [3, 4, 5]}
+						],
+						
+						"config1": {
+							"count": 10,
+							"path": "/tmp/config1"
+						},
+						
+						"config2": {
+							"count": 20,
+							"path": "/tmp/config2"
+						}
+					}
+				</value>
+			</ccg:set>
+		
+			<ccg:set expression="attr2">
+				<value>json:
+					{
+						"fruits": [
+							{"color": "red", "name": "apple", "size": 3, "filters": [1, 2, 3]},
+							{"color": "orange", "name": "orange", "size": 3, "filters": [3, 4, 5]},
+							{"color": "green", "name": "grape", "size": 1, "filters": [3, 4, 5]}
+						],
+						
+						"config1": {
+							"count": 10,
+							"path": "/tmp/config1"
+						},
+						
+						"config2": {
+							"count": 20,
+							"path": "/tmp/config2"
+						}
+					}
+				</value>
+			</ccg:set>
+		
+			<ccg:set expression="attr3">
+				<value>json:
+					{
+						"fruits": [
+							{"color": "red", "name": "apple", "size": 3, "filters": [1, 2, 3, 6], "t1": 2},
+							{"color": "orange", "name": "orange", "size": 3, "filters": [3, 4, 5, 7], "t1": 3},
+							{"color": "green", "name": "grape", "size": 1, "filters": [3, 4, 5, 8], "t3": 4}
+						],
+						
+						"config1": {
+							"count": 10,
+							"path": "/tmp/config1"
+						},
+						
+						"config2": {
+							"count": 20,
+							"path": "/tmp/config2"
+						},
+						
+						"config3": "test"
+					}
+				</value>
+			</ccg:set>
+			
+			<ccg:assert-deep-equals actual="attr: attr1" expected="attr: attr2"/>
+			
+			<ccg:assert-deep-equals actual="attr: attr3" expected="attr: attr1" ignore-extra-properties="true"/>
+			
+			<ccg:assert-deep-equals actual="attr: attr3" expected="attr: attr1" check-equality="false" failed-path-attr="failedAtPath"/>
+			
+			<ccg:assert-equals actual="attr: failedAtPath" expected="$"/>
+			
+		</testCase>
+
 	</testSuite>
 </testData>
