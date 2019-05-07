@@ -6,7 +6,6 @@ import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.annotation.PostConstruct;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -16,12 +15,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.contextAttribute.ContextAttributesPanel;
@@ -124,14 +119,12 @@ public class AutoxIDE extends JFrame
 		//wait for splash screen to display
 		Thread.sleep(200);
 		
-		new ClassPathXmlApplicationContext("spring-autox-context.xml");
-		//Resource resource = new ClassPathResource("/spring-autox-context.xml");  
-	    //BeanFactory factory = new XmlBeanFactory(resource); 
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-autox-context.xml");
 		
-		//SpringApplication.run(AutoxIDE.class, args);
+		AutoxIDE ide = (AutoxIDE) context.getBean(AutoxIDE.class);
+		ide.initIde();
 	}
 	
-	@PostConstruct
 	private void initIde()
 	{
 		init();
