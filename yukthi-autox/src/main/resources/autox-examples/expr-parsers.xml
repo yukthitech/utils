@@ -141,10 +141,17 @@
 
 	<collection name="$parsers.xpath">
 		<example>
-			<description>Using xpath to access properties using xpath</description>
+			<description>Using xpath to access single property value</description>
 			
 			<content><![CDATA[
 				<ccg:set expression="xpathAttr1" value="file:./src/test/resources/data/data1.json | xpath: //bean1/prop1"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Using xpath to access multiple values matching specified path</description>
+			
+			<content><![CDATA[
+				<ccg:set expression="xpathAttr1" value="xpath(multi=true): /attr/bean1//prop1"/>
 			]]></content>
 		</example>
 	</collection>

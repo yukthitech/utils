@@ -106,7 +106,10 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "xpath", description = "Parses specified expression as xpath on context.", example = "xpath: /attr/bean/value1")
+	@ExpressionParser(type = "xpath", description = "Parses specified expression as xpath on context.", example = "xpath: /attr/bean/value1",
+			params = {
+					@ParserParam(name = "multi", type = "boolean", defaultValue = "false", description = "If true, list of matches will be returned"),
+				})
 	public IPropertyPath xpathParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -122,7 +125,14 @@ public class DefaultExpressionParsers
 			{
 				try
 				{
-					return JXPathContext.newContext(parserContext.getEffectiveContext()).getValue(expression);
+					if("true".equalsIgnoreCase(parserContext.getParameter("multi")))
+					{
+						return JXPathContext.newContext(parserContext.getEffectiveContext()).selectNodes(expression);
+					}
+					else
+					{
+						return JXPathContext.newContext(parserContext.getEffectiveContext()).getValue(expression);
+					}
 				}catch(JXPathNotFoundException ex)
 				{
 					return null;

@@ -221,6 +221,8 @@
 				<ccg:assert-equals actual="attr: xpathObj | xpath: //bean1/subbean1/sprop2" expected="value3"/>
 			
 				<ccg:assert-equals actual="res:/data/data1.json | xpath: //bean1/arrProp[1]/key1" expected="val1-1"/>
+				
+				<ccg:assert-equals actual="res:/data/data1.json | xpath(multi=true): //bean1/arrProp//key1" expected="list: val1-1, val2-1"/>
 			</wrap:validations>
 		</testCase>
 	
