@@ -557,15 +557,17 @@ public class EmailTracker
 							logger.error("An error occurred while processing mail with subject: {}", mailMessage.getSubject(), ex);
 						}
 						
-						//mark message as processed
-						message.setFlags(PROCESSED_FLAGS, true);
-						
 						if(!isMailProcessed)
 						{
 							if(!mailProcessingContext.processed && !isReadEarlier)
 							{
 								message.setFlags(READ_FLAGS, false);
 							}
+						}
+						else
+						{
+							//mark message as processed
+							message.setFlags(PROCESSED_FLAGS, true);
 						}
 					} catch(Exception ex)
 					{
