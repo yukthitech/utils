@@ -26,7 +26,7 @@ public class TAutomation
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "jobj-test-suites"
-				"-tc", "xpath_test"
+				//"-tc", "click_post_check"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

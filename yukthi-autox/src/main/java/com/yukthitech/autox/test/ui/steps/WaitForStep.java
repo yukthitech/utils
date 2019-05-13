@@ -40,13 +40,13 @@ public class WaitForStep extends AbstractUiStep
 	/**
 	 * Total wait time in seconds for element to become visible or hidden. Default: 5 sec.
 	 */
-	@Param(description = "Total wait time in seconds for element to become visible or hidden. Default: 5 sec", required = false)
+	@Param(description = "Total wait time in millis for element to become visible or hidden. Default: 60000", required = false)
 	private int waitTime = IAutomationConstants.SIXTY_SECONDS;
 	
 	/**
 	 * Gap time in seconds to wait for between each check. Default: 1 sec.
 	 */
-	@Param(description = "Gap time in seconds to wait for between each check. Default: 1 sec", required = false)
+	@Param(description = "Gap time in millis to wait for between each check. Default: 1000", required = false)
 	private int gapTime = IAutomationConstants.ONE_SECOND; 
 
 	/**

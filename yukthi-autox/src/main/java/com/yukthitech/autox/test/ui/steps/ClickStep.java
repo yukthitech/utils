@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
@@ -19,16 +20,16 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiClick", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
-public class ClickStep extends AbstractUiStep
+public class ClickStep extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * locator for button.
 	 */
-	@Param(description = "Locator of the element to be triggered. Out of located elements, first element will be clicked.", sourceType = SourceType.UI_LOCATOR)
+	@Param(description = "Locator of the element to be clicked. Out of located elements, first element will be clicked.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
-	
+
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
@@ -46,20 +47,24 @@ public class ClickStep extends AbstractUiStep
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
+				exeLogger.trace("Trying to click element specified by locator: {}", locator);
+				
 				try
 				{
 					webElement.click();
-					return true;
+					
+					//after click check the post-check and return result approp
+					return doPostCheck(exeLogger);
 				} catch(RuntimeException ex)
 				{
-					if(ex.getMessage().toLowerCase().contains("not clickable"))
+					if( (ex instanceof ElementNotInteractableException) || ex.getMessage().toLowerCase().contains("not clickable"))
 					{
 						return false;
 					}
 	
 					throw ex;
 				}
-			} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)

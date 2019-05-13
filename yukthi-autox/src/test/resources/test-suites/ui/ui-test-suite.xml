@@ -40,6 +40,18 @@
 			
 		</testCase>
 
+		<testCase name="click_post_check">
+			<description>
+				Validates post check of click functionality is working as expected.
+			</description>
+			
+			<ccg:ui-goto-page uri="/index.html" />
+			<ccg:ui-click locator="id: clickButton1" postVisibilityLocator="id: clickButton1Res"/>
+			
+			<ccg:ui-assert-visibility locator="id: clickButton1Res"/>
+			
+		</testCase>
+
 		<testCase name="setHiddentFieldValue">
 			<description>Validates setting non visible field value is working</description>
 			

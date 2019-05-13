@@ -33,11 +33,6 @@ public class UiAutomationUtils
 	private static Logger logger = LogManager.getLogger(UiAutomationUtils.class);
 
 	/**
-	 * Millis per second.
-	 */
-	private static final long MILLIS_PER_SEC = 1000;
-
-	/**
 	 * Pattern expected to be used by locator strings.
 	 */
 	private static Pattern LOCATOR_PATTERN = Pattern.compile("(\\w+)\\s*\\:\\s*(.*)");
@@ -411,7 +406,9 @@ public class UiAutomationUtils
 	 */
 	public static void validateWithWait(Supplier<Boolean> checkFunction, int waitTime, int gapTime, String waitMessage, RuntimeException ex)
 	{
-		long gapTimeInMillis = gapTime * MILLIS_PER_SEC;
+		logger.trace(waitMessage);
+		
+		long gapTimeInMillis = gapTime;
 		long iterationCount = waitTime / gapTime;
 
 		for(int i = 0; i < iterationCount; i++)
@@ -421,11 +418,34 @@ public class UiAutomationUtils
 				return;
 			}
 
-			logger.trace(waitMessage);
 			waitFor(gapTimeInMillis);
 		}
 
 		throw ex;
+	}
+
+	/**
+	 * Waits for specified checkFunction to become true. For specified amount of waitTime. gapTime represents the polling interval.
+	 * @param checkFunction
+	 * @param waitTimeInMillis
+	 * @param gapTimeInMillis
+	 * @return
+	 */
+	public static boolean waitWithPoll(Supplier<Boolean> checkFunction, int waitTimeInMillis, int gapTimeInMillis)
+	{
+		long iterationCount = waitTimeInMillis / gapTimeInMillis;
+
+		for(int i = 0; i < iterationCount; i++)
+		{
+			if(checkFunction.get())
+			{
+				return true;
+			}
+
+			waitFor(gapTimeInMillis);
+		}
+		
+		return false;
 	}
 
 	/**

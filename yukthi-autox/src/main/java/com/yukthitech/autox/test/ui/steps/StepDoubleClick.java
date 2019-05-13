@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -13,20 +14,19 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.autox.test.ui.steps.AbstractUiStep;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Executable(name = {"uiDblClick", "dblclick"}, requiredPluginTypes = SeleniumPlugin.class, message = "Double Clicks the specified target")
-public class StepDoubleClick extends AbstractUiStep
+public class StepDoubleClick extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Locator of the element to be triggered..
 	 */
-	@Param(description = "Locator of the element to be triggered.", sourceType = SourceType.UI_LOCATOR)
+	@Param(description = "Locator of the element to be double-cicked.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
-	
+
 	/**
 	 * Sets the locator of the element to be triggered..
 	 *
@@ -54,6 +54,8 @@ public class StepDoubleClick extends AbstractUiStep
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
+				exeLogger.trace("Trying to double-Click the element specified by locator: {}", locator);
+
 				try
 				{
 					SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
@@ -63,17 +65,17 @@ public class StepDoubleClick extends AbstractUiStep
 					
 					actions.doubleClick(webElement).perform();
 					
-					return true;
+					return doPostCheck(exeLogger);
 				} catch(RuntimeException ex)
 				{
-					if(ex.getMessage().toLowerCase().contains("not clickable"))
+					if( (ex instanceof ElementNotInteractableException) || ex.getMessage().toLowerCase().contains("not clickable"))
 					{
 						return false;
 					}
 	
 					throw ex;
 				}
-			} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)

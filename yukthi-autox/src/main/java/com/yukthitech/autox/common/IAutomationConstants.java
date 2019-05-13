@@ -26,19 +26,23 @@ public interface IAutomationConstants
 	
 	public Pattern KEY_VALUE_PATTERN = Pattern.compile("\\s*(?<key>\\w+)\\s*\\=\\s*(?<value>\\w+)\\s*");
 
+	public int TWO_SECONDS = 2;
+	
 	/**
 	 * Five seconds.
 	 */
-	public int FIVE_SECONDS = 5;
+	public int FIVE_SECONDS = 5000;
+	
+	public int TEN_SECONDS = 10000;
 
 
 	/**
 	 * Five seconds.
 	 */
-	public int SIXTY_SECONDS = 60;
+	public int SIXTY_SECONDS = 60000;
 
 	/**
 	 * One seconds.
 	 */
-	public int ONE_SECOND = 1;
+	public int ONE_SECOND = 1000;
 }
