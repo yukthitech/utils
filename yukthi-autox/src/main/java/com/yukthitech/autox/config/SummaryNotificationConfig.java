@@ -48,9 +48,31 @@ public class SummaryNotificationConfig
 	 */
 	private String subjectTemplate;
 	
+	/**
+	 * Header template file for summary report.
+	 */
+	private String headerTemplateFile;
+	
+	/**
+	 * Footer template file for summary report.
+	 */
+	private String footerTemplateFile;
+	
+	/**
+	 * Instantiates a new summary notification config.
+	 */
 	public SummaryNotificationConfig()
 	{}
 	
+	/**
+	 * Instantiates a new summary notification config.
+	 *
+	 * @param smptpHost the smptp host
+	 * @param userName the user name
+	 * @param password the password
+	 * @param toAddressList the to address list
+	 * @param subjectTemplate the subject template
+	 */
 	public SummaryNotificationConfig(String smptpHost, String userName, String password, String toAddressList, String subjectTemplate)
 	{
 		this.smptpHost = smptpHost;
@@ -232,5 +254,45 @@ public class SummaryNotificationConfig
 	public void setSubjectTemplate(String subjectTemplate)
 	{
 		this.subjectTemplate = subjectTemplate;
+	}
+
+	/**
+	 * Gets the header template file for summary report.
+	 *
+	 * @return the header template file for summary report
+	 */
+	public String getHeaderTemplateFile()
+	{
+		return headerTemplateFile;
+	}
+
+	/**
+	 * Sets the header template file for summary report.
+	 *
+	 * @param headerTemplateFile the new header template file for summary report
+	 */
+	public void setHeaderTemplateFile(String headerTemplateFile)
+	{
+		this.headerTemplateFile = headerTemplateFile;
+	}
+
+	/**
+	 * Gets the footer template file for summary report.
+	 *
+	 * @return the footer template file for summary report
+	 */
+	public String getFooterTemplateFile()
+	{
+		return footerTemplateFile;
+	}
+
+	/**
+	 * Sets the footer template file for summary report.
+	 *
+	 * @param footerTemplateFile the new footer template file for summary report
+	 */
+	public void setFooterTemplateFile(String footerTemplateFile)
+	{
+		this.footerTemplateFile = footerTemplateFile;
 	}
 }

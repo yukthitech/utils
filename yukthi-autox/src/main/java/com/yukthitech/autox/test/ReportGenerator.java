@@ -104,6 +104,15 @@ public class ReportGenerator
 		{
 			Map<String, Object> context = new HashMap<>();
 			context.put("report", fullExecutionDetails);
+			context.put("reportFolder", reportFolder.getPath());
+			context.put("reportFolderName", reportFolder.getName());
+			context.put("context", automationContext);
+			
+			//generate header and footer content and place in context which in turn will be used in summary report template
+			if(applicationConfiguration.getSummaryNotificationConfig() != null)
+			{
+				generateHeaderAndFooter(context, applicationConfiguration.getSummaryNotificationConfig());
+			}
 
 			String reportTemplate = IOUtils.toString(ReportGenerator.class.getResourceAsStream(SUMMARY_REPORT_TEMPLATE));
 			String summaryResult = FreeMarkerMethodManager.replaceExpressions("reportTemplate", context, reportTemplate);
@@ -121,6 +130,32 @@ public class ReportGenerator
 			throw new InvalidStateException(ex, "An error occurred while generating summary report");
 		}
 		
+	}
+	
+	private void generateHeaderAndFooter(Map<String, Object> context, SummaryNotificationConfig notificationConfig) throws IOException
+	{
+		File headerFile = notificationConfig.getHeaderTemplateFile() != null ? new File(notificationConfig.getHeaderTemplateFile()) : null;
+		File footerFile = notificationConfig.getHeaderTemplateFile() != null ? new File(notificationConfig.getFooterTemplateFile()) : null;
+		
+		context.put("headerContent", processTemplateFile(context, headerFile, "header"));
+		context.put("footerContent", processTemplateFile(context, footerFile, "footer"));
+	}
+	
+	private String processTemplateFile(Map<String, Object> context, File file, String name) throws IOException
+	{
+		if(file == null)
+		{
+			return "";
+		}
+		
+		if(!file.exists())
+		{
+			logger.warn("For summary-report specified {} template file does not exist: {}", name, file.getPath());
+			return "";
+		}
+		
+		String content = FileUtils.readFileToString(file);
+		return FreeMarkerMethodManager.replaceExpressions("summary-" + name + "-template", context, content);
 	}
 
 	private void sendSummaryMail(final SummaryNotificationConfig notificationConfig, File summaryHtml, Object freeMarkerContext) throws MessagingException, IOException
