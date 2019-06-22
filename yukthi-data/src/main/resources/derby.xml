@@ -60,7 +60,7 @@
 			<#if condition.groupedConditions??>
 				<#list condition.groupedConditions as grpCondition>
 					<#assign res> ${res} 
-					${addCondition(grpCondition, grpCondition_index, includeTableCode)}</#assign>
+					${addCondition(grpCondition, grpCondition_index + 1, includeTableCode)}</#assign>
 				</#list>
 				
 				<#assign res> ${res} ) </#assign>

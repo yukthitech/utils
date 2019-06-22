@@ -10,11 +10,6 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
  */
 public class TForeignConstraintLoading extends TestSuiteBase
 {
-	private void test(Class<?> entityType, RepositoryFactory factory, String field)
-	{
-		
-	}
-	
 	/**
 	 * Tests positive cases for relation loading for all types
 	 * 		One to One

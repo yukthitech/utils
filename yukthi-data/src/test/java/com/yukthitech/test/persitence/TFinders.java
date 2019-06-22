@@ -420,4 +420,45 @@ public class TFinders extends TestSuiteBase
 		
 		Assert.assertEquals(results.size(), 2);
 	}
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testSearchWithConditionsAnnot(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		//find employees who has user1 in their name or email id
+		List<Employee> results = repo.findEmpByMulti("%user1%");
+		
+		Assert.assertEquals(results.size(), 2);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()) , 
+				CommonUtils.toSet("1230", "1231"));
+	}
+
+
+	@Test(dataProvider = "repositoryFactories")
+	public void testSearchWithConditionsParam(RepositoryFactory factory)
+	{
+		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		
+		//find employees who has user1 in their name or email id
+		List<Employee> results = repo.find(new EmpSearchQuery(null, "%user1%"));
+		
+		Assert.assertEquals(results.size(), 2);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo()) , 
+				CommonUtils.toSet("1230", "1231"));
+
+		//find employees who has user1 in their name or email id or who age is min 46
+		results = repo.find(new EmpSearchQuery(46, "%user1%"));
+		
+		Assert.assertEquals(results.size(), 3);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo(), results.get(1).getEmployeeNo(), results.get(2).getEmployeeNo()) , 
+				CommonUtils.toSet("1230", "1231", "1236"));
+		
+		//find employees who has age is min 46
+		results = repo.find(new EmpSearchQuery(46, null));
+		
+		Assert.assertEquals(results.size(), 1);
+		Assert.assertEquals(CommonUtils.toSet(results.get(0).getEmployeeNo()) , 
+				CommonUtils.toSet("1236"));
+	}
 }

@@ -19,6 +19,7 @@ import com.yukthitech.persistence.repository.PersistenceExecutionContext;
 import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.ConditionBean;
+import com.yukthitech.persistence.repository.annotations.Conditions;
 import com.yukthitech.persistence.repository.annotations.DefaultCondition;
 import com.yukthitech.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
@@ -74,62 +75,78 @@ public abstract class QueryExecutor
 	
 	public abstract Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params);
 	
+	private ConditionQueryBuilder.ICondition addFieldCondition(Field field, String methodDesc, boolean allowNested, 
+			Condition conditionAnnot, ConditionQueryBuilder conditionQueryBuilder, int index, 
+			ConditionQueryBuilder.ICondition condGroup, JoinOperator joinOp)
+	{
+		//fetch entity field name
+		String fieldName = conditionAnnot.value();
+		
+		//if name is not specified in condition
+		if(fieldName.trim().length() == 0)
+		{
+			//use field name
+			fieldName = field.getName();
+		}
+		
+		if(!allowNested && fieldName.contains("."))
+		{
+			throw new InvalidRepositoryException("Nested expression '{}' when plain properties are expected in {}", fieldName, methodDesc);
+		}
+
+		boolean ignoreCase = (String.class.equals(field.getType()) && conditionAnnot.ignoreCase());
+		joinOp = (joinOp == null) ? conditionAnnot.joinWith() : joinOp;
+		
+		if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
+		{
+			return conditionQueryBuilder.addFieldSubquery(condGroup, conditionAnnot.op(), index, field.getName(), fieldName.trim(), 
+					joinOp, methodDesc, conditionAnnot.nullable(), ignoreCase, null);
+		}
+
+		return conditionQueryBuilder.addCondition(condGroup, conditionAnnot.op(), index, field.getName(), fieldName, 
+				joinOp, methodDesc, conditionAnnot.nullable(), ignoreCase, null);
+	}
+	
 	private boolean fetchConditionsFromObject(String methodName, Class<?> queryobjType,  
 			int index, ConditionQueryBuilder conditionQueryBuilder, String methodDesc, boolean allowNested)
 	{
 		Field fields[] = queryobjType.getDeclaredFields();
 		Condition condition = null;
-		String fieldName = null;
+		Conditions conditions = null;
 		boolean found = false;
-		boolean ignoreCase = false;
 		
 		//loop through query object type fields 
 		for(Field field : fields)
 		{
 			condition = field.getAnnotation(Condition.class);
+			conditions = field.getAnnotation(Conditions.class);
 			
+			if(condition != null)
+			{
+				addFieldCondition(field, methodDesc, allowNested, condition, conditionQueryBuilder, index, null, null);
+			}
+			else if(conditions != null)
+			{
+				ConditionQueryBuilder.ICondition groupCond = null, cond = null;
+				
+				for(Condition subcond : conditions.value())
+				{
+					cond = addFieldCondition(field, methodDesc, allowNested, subcond, conditionQueryBuilder, index, 
+							groupCond, 
+							//for first condition pass conditions join with op, for following condition itself will specify
+							(groupCond == null ? conditions.joinWith() : null) 
+							);
+					
+					if(groupCond == null)
+					{
+						groupCond = cond;
+					}
+				}
+			}
 			//if field is not marked as condition
-			if(condition == null)
-			{
-				continue;
-			}
-			
-			//fetch entity field name
-			fieldName = condition.value();
-			
-			//if name is not specified in condition
-			if(fieldName.trim().length() == 0)
-			{
-				//use field name
-				fieldName = field.getName();
-			}
-			
-			if(!allowNested && fieldName.contains("."))
-			{
-				throw new InvalidRepositoryException("Nested expression '{}' when plain properties are expected in {}", fieldName, methodDesc);
-			}
-
-			/*
-			//fetch corresponding field details
-			fieldDetails = this.entityDetails.getFieldDetailsByField(fieldName);
-			
-			if(fieldDetails == null)
-			{
-				throw new InvalidRepositoryException("Invalid @Condition field '{}'[{}] is specified for finder method '{}' of repository: {}", 
-						fieldName, queryobjType.getName(), methodName, repositoryType.getName());
-			}
-			*/
-			
-			ignoreCase = (String.class.equals(field.getType()) && condition.ignoreCase());
-			
-			if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
-			{
-				conditionQueryBuilder.addFieldSubquery(null, condition.op(), index, field.getName(), fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
-				//throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
-			}
 			else
 			{
-				conditionQueryBuilder.addCondition(null, condition.op(), index, field.getName(), fieldName, condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+				continue;
 			}
 			
 			found = true;
@@ -147,17 +164,17 @@ public abstract class QueryExecutor
 		
 		ConditionBean conditionBean = null;
 		Condition condition = null;
+		Conditions conditions = null;
 		boolean found = false;
-		String fieldName = null;
-		boolean ignoreCase = false;
 		
 		//fetch conditions for each argument
 		for(int i = 0; i < parameters.length; i++)
 		{
 			condition = parameters[i].getAnnotation(Condition.class); 
+			conditions = parameters[i].getAnnotation(Conditions.class);
 			
 			//if condition is not found on attr
-			if(condition == null)
+			if(condition == null && conditions == null)
 			{
 				//check for query object annotation
 				conditionBean = parameters[i].getAnnotation(ConditionBean.class); 
@@ -198,30 +215,52 @@ public abstract class QueryExecutor
 				return false;
 			}
 			
-			fieldName = condition.value();
-			
-			if(fieldName.trim().length() == 0)
+			if(condition != null)
 			{
-				throw new InvalidRepositoryException("No name is specified in @Condition parameter of method '" 
-						+ method.getName() + "' of repository: " + repositoryType.getName());
+				addParamCondition(condition, conditionQueryBuilder, methodDesc, method, allowNested, i, null);
 			}
-
-			ignoreCase = condition.ignoreCase();
-			
-			if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
+			else if(conditions != null)
 			{
-				conditionQueryBuilder.addFieldSubquery(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
-				//throw new InvalidRepositoryException(String.format("Encountered nested expression '%s' when plain properties are expected in %s", fieldName, methodDesc));
-			}
-			else
-			{
-				conditionQueryBuilder.addCondition(null, condition.op(), i, null, fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+				ConditionQueryBuilder.ICondition groupCond = null, cond = null;
+				
+				for(Condition subcond : conditions.value())
+				{
+					cond = addParamCondition(subcond, conditionQueryBuilder, methodDesc, method, allowNested, i, groupCond);
+					
+					if(groupCond == null)
+					{
+						groupCond = cond;
+					}
+				}
 			}
 			
 			found = true;
 		}
 
 		return found;
+	}
+	
+	private ConditionQueryBuilder.ICondition addParamCondition(Condition condition, ConditionQueryBuilder conditionQueryBuilder, String methodDesc, 
+			Method method, boolean allowNested, int paramIdx, ConditionQueryBuilder.ICondition groupHead)
+	{
+		String fieldName = condition.value();
+		
+		if(fieldName.trim().length() == 0)
+		{
+			throw new InvalidRepositoryException("No name is specified in @Condition parameter of method '" 
+					+ method.getName() + "' of repository: " + repositoryType.getName());
+		}
+
+		boolean ignoreCase = condition.ignoreCase();
+		
+		if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
+		{
+			return conditionQueryBuilder.addFieldSubquery(groupHead, condition.op(), paramIdx, null, 
+					fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+		}
+		
+		return conditionQueryBuilder.addCondition(groupHead, condition.op(), paramIdx, null, fieldName.trim(), 
+				condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
 	}
 	
 	protected boolean fetchConditionsByName(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc)

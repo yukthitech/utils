@@ -5,13 +5,12 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.test.persitence.entity.Address;
 import com.yukthitech.test.persitence.entity.Employee;
 import com.yukthitech.test.persitence.entity.Employee1;
 import com.yukthitech.test.persitence.entity.IEmployee1Repository;
 import com.yukthitech.test.persitence.entity.IEmployeeRepository;
-import com.yukthitech.persistence.ICrudRepository;
-import com.yukthitech.persistence.repository.RepositoryFactory;
 
 /**
  * Test cases to test basic CRUD functionality

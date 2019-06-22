@@ -346,7 +346,7 @@ public class RdbmsDataStore implements IDataStore
 	 * @param pstmt statement to be executed
 	 * @param index starting index to be used
 	 * @return end index that can be used to add more params
-	 */
+	 * /
 	private int addConditionsParams(List<QueryCondition> conditions, List<Object> params, PreparedStatement pstmt, int index) throws SQLException
 	{
 		if(conditions == null)
@@ -377,20 +377,12 @@ public class RdbmsDataStore implements IDataStore
 		
 		return index;
 	}
+	*/
 
 	@Override
 	public Double fetchAggregateValue(AggregateQuery countQuery, EntityDetails entityDetails)
 	{
 		logger.trace("Started method: fetchAggregateValue");
-		
-		List<QueryCondition> conditions = countQuery.getConditions();
-		
-		/*
-		if(conditions == null || conditions.isEmpty())
-		{
-			throw new IllegalStateException("Existence query is requested without conditions: " + existenceQuery);
-		}
-		*/
 		
 		logger.debug("Fetching aggregate value of records from table '{}' using query: {}", countQuery.getTableName(), countQuery);
 		
@@ -407,8 +399,13 @@ public class RdbmsDataStore implements IDataStore
 			pstmt = connection.prepareStatement(query);
 			List<Object> params = new ArrayList<>();
 			
-			addConditionsParams(conditions, params, pstmt, 1);
-			
+			for(QueryCondition condition: countQuery.getConditions())
+			{
+				addParamsRecursively(condition, pstmt, params);
+			}
+
+			logParams(params);
+
 			logger.debug("Executing using params: {}", params);
 			
 			rs = pstmt.executeQuery();
@@ -454,14 +451,20 @@ public class RdbmsDataStore implements IDataStore
 			
 			Connection connection = transaction.getTransaction().getConnection();
 			pstmt = connection.prepareStatement(query);
-			int index = 1;
 			List<Object> params = new ArrayList<>();
 			
-			index = addConditionsParams(childrenExistenceQuery.getParentConditions(), params, pstmt, index);
-			addConditionsParams(childrenExistenceQuery.getChildConditions(), params, pstmt, index);
-			
-			logger.debug("Executing using params: " + params);
-			
+			for(QueryCondition condition: childrenExistenceQuery.getParentConditions())
+			{
+				addParamsRecursively(condition, pstmt, params);
+			}
+
+			for(QueryCondition condition: childrenExistenceQuery.getChildConditions())
+			{
+				addParamsRecursively(condition, pstmt, params);
+			}
+
+			logParams(params);
+
 			rs = pstmt.executeQuery();
 			
 			if(!rs.next())
@@ -504,14 +507,20 @@ public class RdbmsDataStore implements IDataStore
 			
 			Connection connection = transaction.getTransaction().getConnection();
 			pstmt = connection.prepareStatement(query);
-			int index = 1;
 			List<Object> params = new ArrayList<>();
 			
-			index = addConditionsParams(fetchChildrenIdsQuery.getParentConditions(), params, pstmt, index);
-			addConditionsParams(fetchChildrenIdsQuery.getChildConditions(), params, pstmt, index);
+			for(QueryCondition condition: fetchChildrenIdsQuery.getParentConditions())
+			{
+				addParamsRecursively(condition, pstmt, params);
+			}
 
-			logger.debug("Executing using params: " + params);
-			
+			for(QueryCondition condition: fetchChildrenIdsQuery.getChildConditions())
+			{
+				addParamsRecursively(condition, pstmt, params);
+			}
+
+			logParams(params);
+
 			rs = pstmt.executeQuery();
 			
 			List<Object> ids = new LinkedList<Object>();

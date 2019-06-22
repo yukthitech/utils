@@ -13,6 +13,7 @@ import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IDataFilter;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.ConditionBean;
+import com.yukthitech.persistence.repository.annotations.Conditions;
 import com.yukthitech.persistence.repository.annotations.AggregateFunction;
 import com.yukthitech.persistence.repository.annotations.DefaultCondition;
 import com.yukthitech.persistence.repository.annotations.Field;
@@ -36,6 +37,12 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	public long findIdByEmail(@Condition("emailId") String mail);
 	
 	public Employee findEmpByEmail(@Condition("emailId") String mail);
+	
+	public List<Employee> findEmpByMulti(
+			@Conditions( { 
+				@Condition(value = "emailId", op = Operator.LIKE), 
+				@Condition(value = "name", op = Operator.LIKE, joinWith = JoinOperator.OR)} ) 
+			String mail);
 
 	public Employee findEmpByEmailIgnoreCase(@Condition(value = "emailId", ignoreCase = true) String mail);
 	

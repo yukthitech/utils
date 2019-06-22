@@ -419,6 +419,12 @@ public class QueryCondition implements Cloneable
 		StringBuilder builder = new StringBuilder("[");
 
 		builder.append(joinOperator).append(" ");
+		
+		if(groupedConditions != null)
+		{
+			builder.append("( ");
+		}
+		
 		builder.append(tableCode).append(".").append(column).append(" ");
 		
 		if(subquery != null)
@@ -428,6 +434,16 @@ public class QueryCondition implements Cloneable
 		else
 		{
 			builder.append(operator).append(" ").append(value);
+		}
+		
+		if(groupedConditions != null)
+		{
+			for(QueryCondition subcond : groupedConditions)
+			{
+				builder.append(" ").append(subcond.getJoinOperator()).append(" ").append(subcond);
+			}
+			
+			builder.append(" )");
 		}
 
 		return builder.toString();

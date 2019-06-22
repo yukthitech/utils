@@ -1,6 +1,8 @@
 package com.yukthitech.test.persitence.queries;
 
 import com.yukthitech.persistence.repository.annotations.Condition;
+import com.yukthitech.persistence.repository.annotations.Conditions;
+import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
 
 /**
@@ -20,6 +22,12 @@ public class EmpSearchQuery
 
 	@Condition(value = "age", op = Operator.LE)
 	private Integer maxAge;
+	
+	@Conditions(value = {
+		@Condition(value = "name", op = Operator.LIKE),
+		@Condition(value = "emailId", op = Operator.LIKE, joinWith = JoinOperator.OR)
+	}, joinWith = JoinOperator.OR)
+	private String multiField;
 
 	public EmpSearchQuery(String name, String phoneNo, Integer minAge, Integer maxAge)
 	{
@@ -27,6 +35,12 @@ public class EmpSearchQuery
 		this.phoneNo = phoneNo;
 		this.minAge = minAge;
 		this.maxAge = maxAge;
+	}
+	
+	public EmpSearchQuery(Integer minAge, String multiField)
+	{
+		this.minAge = minAge;
+		this.multiField = multiField;
 	}
 
 	/**
@@ -97,4 +111,13 @@ public class EmpSearchQuery
 		this.maxAge = maxAge;
 	}
 
+	public String getMultiField()
+	{
+		return multiField;
+	}
+
+	public void setMultiField(String multiField)
+	{
+		this.multiField = multiField;
+	}
 }

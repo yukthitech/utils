@@ -111,13 +111,20 @@ public class ConditionQueryBuilder implements Cloneable
 			this.nullable = nullable;
 		}
 	}
+	
+	public static interface ICondition
+	{
+		public void addCondition(Object condition);
+		
+		public List<Object> getGroupedConditions();
+	}
 
 	/**
 	 * Condition details to be used in the query
 	 * 
 	 * @author akiran
 	 */
-	public static class Condition
+	public static class Condition implements ICondition
 	{
 		/**
 		 * Condition operator
@@ -214,7 +221,12 @@ public class ConditionQueryBuilder implements Cloneable
 
 			groupedConditions.add(condition);
 		}
-
+		
+		@Override
+		public List<Object> getGroupedConditions()
+		{
+			return groupedConditions;
+		}
 	}
 
 	/**
@@ -222,7 +234,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @author akiran
 	 *
 	 */
-	public static class InnerQuery
+	public static class InnerQuery implements ICondition
 	{
 		/**
 		 * Current field table to which sub query result should be compared.
@@ -241,6 +253,11 @@ public class ConditionQueryBuilder implements Cloneable
 		
 		JoinOperator joinOperator;
 		
+		/**
+		 * Conditions grouped with current condition
+		 */
+		List<Object> groupedConditions;
+
 		public InnerQuery(FieldDetails currentTableField, FieldDetails subqueryField, EntityDetails subqueryEntity, JoinOperator joinOperator, ConditionQueryBuilder conditionQueryBuilder)
 		{
 			this.currentTableField = currentTableField;
@@ -258,6 +275,22 @@ public class ConditionQueryBuilder implements Cloneable
 		public ConditionQueryBuilder getSubqueryBuilder()
 		{
 			return subqueryBuilder;
+		}
+
+		public void addCondition(Object condition)
+		{
+			if(groupedConditions == null)
+			{
+				groupedConditions = new ArrayList<>();
+			}
+
+			groupedConditions.add(condition);
+		}
+		
+		@Override
+		public List<Object> getGroupedConditions()
+		{
+			return groupedConditions;
 		}
 	}
 	
@@ -678,7 +711,7 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @return Returns newly added condition which in turn can be used to add
 	 *         group conditions
 	 */
-	public Condition addCondition(Condition groupHead, Operator operator, int index, String embeddedProperty, 
+	public Condition addCondition(ICondition groupHead, Operator operator, int index, String embeddedProperty, 
 			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, 
 			String defaultValue)
 	{
@@ -760,7 +793,7 @@ public class ConditionQueryBuilder implements Cloneable
 		return condition;
 	}
 	
-	public InnerQuery addFieldSubquery(Condition groupHead, Operator operator, int index, String embeddedProperty, 
+	public InnerQuery addFieldSubquery(ICondition groupHead, Operator operator, int index, String embeddedProperty, 
 			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, 
 			String defaultValue)
 	{
@@ -1072,7 +1105,7 @@ public class ConditionQueryBuilder implements Cloneable
 			}
 			else
 			{
-				queryCondition = buildConditionForQueryFromNested(context, query, (InnerQuery) condition, params);
+				queryCondition = buildConditionForQueryFromNested(context, query, (InnerQuery) condition, params, includedTables);
 			}
 			
 			if(queryCondition != null)
@@ -1148,15 +1181,22 @@ public class ConditionQueryBuilder implements Cloneable
 		}
 
 		//if no group conditions are present on this query
-		if(condition.groupedConditions == null)
+		if(condition.getGroupedConditions() == null)
 		{
 			return groupHead;
 		}
 		
+		addGroupConditions(groupHead, condition.getGroupedConditions(), context, includedTables, query, params);
+		return groupHead;
+	}
+	
+	private QueryCondition addGroupConditions(QueryCondition groupHead, List<Object> groupConditions, ParameterContext context, 
+			Set<String> includedTables, IConditionalQuery query, Object params[])
+	{
 		//if group conditions are present add them recursively to current condition
 		QueryCondition grpCondition = null;
 		
-		for(Object grpInternalCondition : condition.groupedConditions)
+		for(Object grpInternalCondition : groupConditions)
 		{
 			if(grpInternalCondition instanceof Condition)
 			{
@@ -1164,7 +1204,7 @@ public class ConditionQueryBuilder implements Cloneable
 			}
 			else
 			{
-				grpCondition = buildConditionForQueryFromNested(context, query, (InnerQuery) grpInternalCondition, params);
+				grpCondition = buildConditionForQueryFromNested(context, query, (InnerQuery) grpInternalCondition, params, includedTables);
 			}
 
 			
@@ -1187,14 +1227,19 @@ public class ConditionQueryBuilder implements Cloneable
 		return groupHead;
 	}
 
-	private QueryCondition buildConditionForQueryFromNested(ParameterContext paramContext, IConditionalQuery query, InnerQuery innerQuery, Object params[])
+	private QueryCondition buildConditionForQueryFromNested(ParameterContext paramContext, IConditionalQuery query, InnerQuery innerQuery, Object params[], Set<String> includedTables)
 	{
 		QueryCondition queryCondition = new QueryCondition(defTableCode, innerQuery.currentTableField.getDbColumnName(), Operator.IN, null, innerQuery.joinOperator, false);
 		queryCondition.setSubquery(new Subquery(innerQuery.subqueryBuilder.entityDetails, innerQuery.subqueryBuilder.defTableCode));
 		
 		innerQuery.subqueryBuilder.loadConditionalQuery(paramContext, queryCondition.getSubquery(), params);
 		
-		return queryCondition;
+		if(innerQuery.getGroupedConditions() == null)
+		{
+			return queryCondition;
+		}
+		
+		return addGroupConditions(queryCondition, innerQuery.getGroupedConditions(), paramContext, includedTables, query, params);
 	}
 
 	/**
