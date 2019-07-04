@@ -454,7 +454,7 @@ public class AutomationContext
 	 */
 	public Map<String, Object> getAttributeMap()
 	{
-		return Collections.unmodifiableMap(nameToAttr);
+		return nameToAttr;
 	}
 	
 	/**
@@ -463,7 +463,7 @@ public class AutomationContext
 	 */
 	public Map<String, Object> getAttr()
 	{
-		return Collections.unmodifiableMap(nameToAttr);
+		return nameToAttr;
 	}
 	
 	/**

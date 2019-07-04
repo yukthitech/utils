@@ -20,6 +20,11 @@ public interface IPropertyPath
 	 */
 	public default void setValue(Object value) throws Exception
 	{
-		throw new UnsupportedOperationException("Write is not supported on this property path");
+		throw new UnsupportedOperationException("Write is not supported with this expression type");
+	}
+
+	public default void removeValue() throws Exception
+	{
+		throw new UnsupportedOperationException("Remove is not supported with this expression type");
 	}
 }

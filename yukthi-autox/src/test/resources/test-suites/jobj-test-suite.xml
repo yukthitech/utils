@@ -400,5 +400,41 @@
 				<ccg:assert-equals actual="attr: attr2" expected="svalue2"/>
 			</wrap:validations>
 		</testCase>
+
+		<testCase name="testRemoveWithExpressions">
+			<description>
+				Tests the remove operations with different expression is working as expected.
+			</description>
+		
+			<wrap:steps>
+				<ccg:set expression="bean">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2",
+							"key3" : {
+								"skey1": "svalue1",
+								"skey2": "svalue2"
+							},
+							"arr": [1, 2, 3, 4, 5]
+						}
+					</value>
+				</ccg:set>
+
+				<!-- Test removal of key from map -->				
+				<!-- Ensure before removal path is accessible -->
+				<ccg:assert-equals actual="xpath: /attr/bean/key2" expected="value2"/>
+				
+				<ccg:remove expression="xpath: /attr/bean/key2"/>
+				<ccg:assert-null value="xpath: /attr/bean/key2"/>
+			
+				<!-- Test removal of value from list -->				
+				<ccg:assert-equals actual="xpath: /attr/bean/arr[2]" expected="int: 2"/>
+				
+				<ccg:remove expression="xpath: /attr/bean/arr[2]"/>
+				<ccg:assert-equals actual="xpath: /attr/bean/arr[2]" expected="int: 3"/>
+			</wrap:steps>
+		</testCase>
 	</testSuite>
 </testData>

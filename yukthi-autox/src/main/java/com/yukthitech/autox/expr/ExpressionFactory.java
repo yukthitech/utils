@@ -352,6 +352,31 @@ public class ExpressionFactory
 		}
 	}
 	
+	public void removeByExpression(AutomationContext context, String expression)
+	{
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
+		ExecutionLogger exeLogger = context.getExecutionLogger();
+		
+		if(propertyPath == null)
+		{
+			exeLogger.debug("Removing attribute with name'{}'", expression);
+			context.removeAttribute(expression);
+			return;
+		}
+		
+		exeLogger.debug("Removing expression '{}'", expression);
+		
+		try
+		{
+			propertyPath.removeValue();
+		}catch(Exception ex)
+		{
+			exeLogger.error("Failed to remove using expression - {}", expression, ex);
+			throw new InvalidStateException("Failed to remove using expression - {}", expression, ex);
+		}
+	}
+	
 	public void setExpressionValue(AutomationContext context, String expression, Object value)
 	{
 		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);

@@ -71,6 +71,12 @@ public class DefaultExpressionParsers
 			{
 				return parserContext.getAutomationContext().getPersistenceStorage().get(expression);
 			}
+			
+			@Override
+			public void removeValue() throws Exception
+			{
+				parserContext.getAutomationContext().getPersistenceStorage().remove(expression);
+			}
 		};
 	}
 
@@ -89,6 +95,12 @@ public class DefaultExpressionParsers
 			public Object getValue() throws Exception
 			{
 				return parserContext.getAutomationContext().getAttribute(expression);
+			}
+			
+			@Override
+			public void removeValue() throws Exception
+			{
+				parserContext.getAutomationContext().removeAttribute(expression);
 			}
 		};
 	}
@@ -136,6 +148,24 @@ public class DefaultExpressionParsers
 				}catch(JXPathNotFoundException ex)
 				{
 					return null;
+				}
+			}
+			
+			@Override
+			public void removeValue() throws Exception
+			{
+				try
+				{
+					if("true".equalsIgnoreCase(parserContext.getParameter("multi")))
+					{
+						JXPathContext.newContext(parserContext.getEffectiveContext()).removeAll(expression);
+					}
+					else
+					{
+						JXPathContext.newContext(parserContext.getEffectiveContext()).removePath(expression);
+					}
+				}catch(JXPathNotFoundException ex)
+				{
 				}
 			}
 		};
