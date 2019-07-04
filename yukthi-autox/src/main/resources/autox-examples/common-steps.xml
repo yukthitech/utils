@@ -48,6 +48,42 @@
 				<ccg:remove name="tmpDir"/>
 			]]></content>
 		</example>
+		<example>
+			<description>
+				Removing using xpath expression - key in a map.
+			</description>
+			<content><![CDATA[
+				<ccg:set expression="bean">
+					<value>
+						json:
+						{
+							"key1" : "value1",
+							"key2" : "value2",
+							"arr": [1, 2, 3, 4, 5],
+							"strArr": ["one", "two", "three"]
+						}
+					</value>
+				</ccg:set>
+
+				<ccg:remove expression="xpath: /attr/bean/key2"/>
+			]]></content>
+		</example>
+		<example>
+			<description>
+				Removing using xpath expression - to remove element in a list using index. Note: In xpath idex starts with 1 (not zero). 
+			</description>
+			<content><![CDATA[
+				<ccg:remove expression="xpath: /attr/bean/arr[2]"/>
+			]]></content>
+		</example>
+		<example>
+			<description>
+				Removing using xpath expression - to remove element in a list using value. 
+			</description>
+			<content><![CDATA[
+				<ccg:remove expression="xpath: /attr/bean/strArr[contains(., 'two')]"/>
+			]]></content>
+		</example>
 	</collection>
 
 	<collection name="com.yukthitech.autox.test.common.steps.SetStep">

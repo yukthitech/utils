@@ -417,7 +417,8 @@
 								"skey1": "svalue1",
 								"skey2": "svalue2"
 							},
-							"arr": [1, 2, 3, 4, 5]
+							"arr": [1, 2, 3, 4, 5],
+							"strArr": ["one", "two", "three"]
 						}
 					</value>
 				</ccg:set>
@@ -434,6 +435,10 @@
 				
 				<ccg:remove expression="xpath: /attr/bean/arr[2]"/>
 				<ccg:assert-equals actual="xpath: /attr/bean/arr[2]" expected="int: 3"/>
+				
+				<!--  Test removal by value -->
+				<ccg:remove expression="xpath: /attr/bean/strArr[contains(., 'two')]"/>
+				<ccg:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, three"/>
 			</wrap:steps>
 		</testCase>
 	</testSuite>
