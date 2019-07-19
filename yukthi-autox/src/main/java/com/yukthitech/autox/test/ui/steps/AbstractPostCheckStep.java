@@ -13,14 +13,16 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 	/**
 	 * Post click the locator to be used to check for visibility. If this locator is not visible, click will be retried till this locator is visible or timeout.
 	 */
-	@Param(description = "Post click the locator to be used to check for visibility. If this locator is not visible, click will be retried till this locator is visible or timeout.", 
+	@Param(description = "Post click the locator to be used to check for visibility. If this locator is not visible, click will be retried till this locator is visible or timeout. "
+			+ "Note: Polling for visibility will be done every 100 millis.", 
 			sourceType = SourceType.UI_LOCATOR, required = false)
 	private String postVisibilityLocator;
 	
 	/**
 	 * Post click the locator to be used to check for invisibility. If this locator is not visible, click will be retried till this locator is visible or timeout.
 	 */
-	@Param(description = "Post click the locator to be used to check for hidden. If this locator is visible, click will be retried till this locator is visible or timeout.", 
+	@Param(description = "Post click the locator to be used to check for hidden. If this locator is visible, click will be retried till this locator is visible or timeout. "
+			+ "Note: Polling for visibility will be done every 100 millis.", 
 			sourceType = SourceType.UI_LOCATOR, required = false)
 	private String postHideLocator;
 	

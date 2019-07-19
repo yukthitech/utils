@@ -20,6 +20,18 @@ public interface IFieldAccessor
 	public String getValue(AutomationContext context, WebElement element);
 	
 	/**
+	 * Fetches the default value of the specified element. This may represent lable for some elements like - Select, checkbox, etc.
+	 * For others this will return the value of the element.
+	 * @param context
+	 * @param element
+	 * @return
+	 */
+	public default String getDisplayValue(AutomationContext context, WebElement element)
+	{
+		return getValue(context, element);
+	}
+	
+	/**
 	 * Sets the specified value on specified element.
 	 * @param element Element on which value needs to be set.
 	 * @param value Value to set.

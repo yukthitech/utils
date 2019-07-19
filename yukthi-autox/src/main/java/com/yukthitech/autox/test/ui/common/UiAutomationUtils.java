@@ -12,7 +12,9 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -85,6 +87,8 @@ public class UiAutomationUtils
 					return FormFieldType.CHECK_BOX;
 				case "date":
 					return FormFieldType.DATE;
+				case "hidden":
+					return FormFieldType.HIDDEN_FIELD;
 				default:
 					return FormFieldType.TEXT;
 			}
@@ -521,5 +525,25 @@ public class UiAutomationUtils
 		}
 		
 		return newHandles.iterator().next();
+	}
+	
+	public static boolean isElementNotAvailableException(Exception ex)
+	{
+		if(ex instanceof ElementNotInteractableException)
+		{
+			return true;
+		}
+		
+		if(ex instanceof StaleElementReferenceException)
+		{
+			return true;
+		}
+
+		if(ex.getMessage() != null && ex.getMessage().toLowerCase().contains("not clickable"))
+		{
+			return true;
+		}
+		
+		return false;
 	}
 }

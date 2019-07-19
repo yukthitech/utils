@@ -108,7 +108,7 @@ public class CheckboxFieldAccessor implements IFieldAccessor
 			}
 		}
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

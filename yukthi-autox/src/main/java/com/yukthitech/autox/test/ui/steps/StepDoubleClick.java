@@ -1,6 +1,5 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -68,7 +67,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 					return doPostCheck(exeLogger);
 				} catch(RuntimeException ex)
 				{
-					if( (ex instanceof ElementNotInteractableException) || ex.getMessage().toLowerCase().contains("not clickable"))
+					if(UiAutomationUtils.isElementNotAvailableException(ex))
 					{
 						return false;
 					}

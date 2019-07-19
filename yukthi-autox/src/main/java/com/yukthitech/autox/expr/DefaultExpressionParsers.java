@@ -156,6 +156,11 @@ public class DefaultExpressionParsers
 			{
 				try
 				{
+					//get the value of expression. Which would throw JXPathNotFoundException if path is not found
+					// Note: removePath() or removeAll() will not throw JXPathNotFoundException when path is not found
+					
+					JXPathContext.newContext(parserContext.getEffectiveContext()).getValue(expression);
+					
 					if("true".equalsIgnoreCase(parserContext.getParameter("multi")))
 					{
 						JXPathContext.newContext(parserContext.getEffectiveContext()).removeAll(expression);

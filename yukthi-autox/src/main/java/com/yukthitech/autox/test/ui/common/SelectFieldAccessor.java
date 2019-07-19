@@ -68,6 +68,24 @@ public class SelectFieldAccessor implements IFieldAccessor
 		
 		return selectedOption.getAttribute(BY_VALUE );
 	}
+	
+	@Override
+	public String getDisplayValue(AutomationContext context, WebElement element)
+	{
+		if(element instanceof Select)
+		{
+			throw new InvalidArgumentException(INVALID_MESSAGE, element);
+		}
+
+		WebElement selectedOption =  new Select(element).getFirstSelectedOption();
+		
+		if(selectedOption == null)
+		{
+			return null;
+		}
+		
+		return selectedOption.getText();
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.selenium.WebElement, java.lang.String)

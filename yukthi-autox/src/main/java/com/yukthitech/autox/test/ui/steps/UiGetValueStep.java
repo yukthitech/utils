@@ -29,6 +29,9 @@ public class UiGetValueStep extends AbstractUiStep
 	@Param(description = "Name of the attribute to set.")
 	private String name;
 
+	@Param(description = "If set to true, instead of value display value will be fetched (currently non-select fields will return value itself).", required = false)
+	private boolean displayValue = false;
+	
 	/**
 	 * Sets the locator of the element for which value needs to be fetched.
 	 *
@@ -48,6 +51,16 @@ public class UiGetValueStep extends AbstractUiStep
 	{
 		this.name = name;
 	}
+	
+	/**
+	 * Sets the display value.
+	 *
+	 * @param displayValue the new display value
+	 */
+	public void setDisplayValue(boolean displayValue)
+	{
+		this.displayValue = displayValue;
+	}
 
 	/**
 	 * Simulates the click event on the specified button.
@@ -56,9 +69,9 @@ public class UiGetValueStep extends AbstractUiStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.trace("Fetching ui element value for locator - {}", getLocatorWithParent(locator));
+		exeLogger.trace("Fetching ui element value for locator - {} [Display Value Flag: {}]", getLocatorWithParent(locator), displayValue);
 		
-		String elementValue = UiFreeMarkerMethods.uiValue(locator, parentElement);
+		String elementValue = displayValue? UiFreeMarkerMethods.uiDisplayValue(locator, parentElement) : UiFreeMarkerMethods.uiValue(locator, parentElement);
 		
 		exeLogger.debug("Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
 		context.setAttribute(name, elementValue);

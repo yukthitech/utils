@@ -44,7 +44,14 @@ public enum FormFieldType
 	/**
 	 * Radio button field. 
 	 */
-	RADIO_BUTTON(new CheckboxFieldAccessor());
+	RADIO_BUTTON(new CheckboxFieldAccessor()),
+	
+	/**
+	 * Hidden field.
+	 */
+	HIDDEN_FIELD(new ValueAttrAccessor())
+	
+	;
 	
 	/**
 	 * Accessor for current field type.

@@ -21,7 +21,12 @@ public class SimpleFieldAccessor implements IFieldAccessor
 	@Override
 	public String getValue(AutomationContext context, WebElement element)
 	{
-		return element.getText();
+		if("input".equals(element.getTagName().toLowerCase()) || "textarea".equals(element.getTagName().toLowerCase()))
+		{
+			return element.getAttribute("value").trim();
+		}
+		
+		return element.getText().trim();
 	}
 
 	/* (non-Javadoc)

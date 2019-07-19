@@ -63,24 +63,53 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
 		WebElement element = getElementByLocator(locator, parent);
-		String elementValue = null;
 
 		if(element == null)
 		{
-			elementValue = null;
-		}
-		else if("input".equals(element.getTagName().toLowerCase()) || "textarea".equals(element.getTagName().toLowerCase()))
-		{
-			elementValue = element.getAttribute("value").trim();
-		}
-		else
-		{
-			elementValue = element.getText().trim();
+			return null;
 		}
 		
-		return elementValue;
+		FormFieldType fieldType = UiAutomationUtils.getFormFieldType(element);
+		
+		if(fieldType != null)
+		{
+			return fieldType.getFieldAccessor().getValue(AutomationContext.getInstance(), element);
+		}
+		
+		return element.getText().trim();
 	}
 	
+	/**
+	 * Fetches display value of specified locator.
+	 * @param locator locator whose value needs to be fetched
+	 * @param parent parent under which locator should be searched
+	 * @return locator value
+	 */
+	@FreeMarkerMethod(
+			description = "Fetches display value of specified locator. For select, option label will be fetched. If element is not Select, its ui value will be fetched.",
+			returnDescription = "Value of the ui element"
+			)
+	public static String uiDisplayValue(
+			@FmParam(name = "locator", description = "Locator of the ui element whose display value needs to be fetched.") Object locator, 
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
+	{
+		WebElement element = getElementByLocator(locator, parent);
+
+		if(element == null)
+		{
+			return null;
+		}
+		
+		FormFieldType fieldType = UiAutomationUtils.getFormFieldType(element);
+		
+		if(fieldType != null)
+		{
+			return fieldType.getFieldAccessor().getDisplayValue(AutomationContext.getInstance(), element);
+		}
+		
+		return element.getText().trim();
+	}
+
 	/**
 	 * Fetches the specified attribute value of specified element.
 	 * @param attrName name of attribute to fetch
