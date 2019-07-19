@@ -1,3 +1,20 @@
+19/07/2019
+
+Return value from function
+Making <set> specific to function/test cases (stack wise)
+Multi threaded execution.
+On going report generation
+external framework integration ( code coverage tool )
+
+In  IDE
+	JX path play area (ability to evaluate jx path on input json, add, get and remove)
+		with docs (from online? )
+	Recently executed menu
+		
+
+
+
+==================================
 exec step to execute freemarker code
 
 step to execute substeps in parallel
