@@ -82,7 +82,7 @@ public class UtilsException extends RuntimeException
 	 * @param args Values to be used
 	 * @return Processed message
 	 */
-	static String buildMessage(String message, Object... args)
+	public static String buildMessage(String message, Object... args)
 	{
 		String strArgs[] = null;
 		
