@@ -7,6 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.yukthitech.autox.ide.IdeUtils;
 
 /**
@@ -16,6 +19,8 @@ import com.yukthitech.autox.ide.IdeUtils;
 public class IdeState implements Serializable
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(IdeState.class);
 
 	/**
 	 * File in which ide state will be persisted.
@@ -63,6 +68,8 @@ public class IdeState implements Serializable
 	 */
 	public ProjectState addOpenProject(Project project)
 	{
+		logger.debug("Adding project to ide state: {}", project.getName());
+		
 		ProjectState state = projectIndex.get(project.getName());
 		
 		if(state != null)

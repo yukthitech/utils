@@ -1,3 +1,13 @@
+22/07
+=====
+While starting ide, classes should be scanned only if jar are changed or on some other basis. This will start the ide quicker. Is this possible??
+	Prev loaded classes should be persisted somwhere and should be reused in next start
+	
+	one approach might be, get all jar files in classpath and store with their timestamp. Next time if there is no change in timestamps
+		simply load the data from the cache. 
+
+
+===========================
 Process should have its own file and should be openable from console tab using button
 
 

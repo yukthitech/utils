@@ -6,11 +6,16 @@ import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.yukthitech.autox.ide.model.Project;
 
 public class ProjectsTreeModel extends DefaultTreeModel
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(ProjectsTreeModel.class);
 	
 	DefaultMutableTreeNode rootNode;
 	
@@ -41,6 +46,20 @@ public class ProjectsTreeModel extends DefaultTreeModel
 		}
 		
 		return null;
+	}
+	
+	public void deleteProject(Project project)
+	{
+		ProjectTreeNode node = getProjectNode(project);
+		
+		if(node == null)
+		{
+			logger.debug("As no node found for project '{}' ignoring project node delete request", project.getName());
+			return;
+		}
+	
+		logger.debug("Deleting project node for project '{}' from project explorer.", project.getName());
+		super.removeNodeFromParent(node);
 	}
 	
 	public List<ProjectTreeNode> getProjectNodes()

@@ -15,6 +15,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -35,6 +37,8 @@ import com.yukthitech.autox.ide.views.report.ReportPanel;
 public class AutoxIDE extends JFrame
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(AutoxIDE.class);
 	
 	private static final String PANEL_MAIN = "mainPanel";
 	
@@ -278,6 +282,8 @@ public class AutoxIDE extends JFrame
 		IdeState ideState = new IdeState();
 		ideContext.getProxy().saveState(ideState);
 		ideState.save();
+		
+		logger.debug("Saving ide state..");
 		
 		System.exit(-1);
 	}

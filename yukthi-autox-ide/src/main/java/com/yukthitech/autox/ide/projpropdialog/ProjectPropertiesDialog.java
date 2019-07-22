@@ -135,7 +135,7 @@ public class ProjectPropertiesDialog extends JDialog
 	{
 		try
 		{
-			project.setTestSuitesFolders(projectPropertiesTestSuiteFolders.saveChanges());
+			project.setTestSuiteFolders(projectPropertiesTestSuiteFolders.saveChanges());
 			project.setClassPathEntries(projectPropertiesClassPath.saveChanges());
 		}catch(InvalidStateException ex)
 		{

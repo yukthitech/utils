@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.NewProjectDialog;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.dialog.DeleteProjectDialog;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
@@ -19,6 +20,7 @@ import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
 import com.yukthitech.autox.ide.projpropdialog.ProjectPropertiesDialog;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
+import com.yukthitech.autox.ide.ui.InProgressDialog;
 
 @ActionHolder
 public class ProjectActions
@@ -30,18 +32,21 @@ public class ProjectActions
 
 	@Autowired
 	private ProjectExplorer projectExplorer;
-
+	
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	private NewProjectDialog newProjDialog;
 
 	private ProjectPropertiesDialog projtPropertiesDialog;
+	
+	private DeleteProjectDialog deleteProjectDialog;
 
 	@PostConstruct
 	private void init()
 	{
 		newProjDialog = new NewProjectDialog(IdeUtils.getCurrentWindow());
+		deleteProjectDialog = new DeleteProjectDialog(projectExplorer);
 
 		projectChooser.setDialogTitle("Open Project");
 		projectChooser.setAcceptAllFileFilterUsed(false);
@@ -70,7 +75,18 @@ public class ProjectActions
 	public void newProject()
 	{
 		Project project = newProjDialog.display();
-		projectExplorer.openProject(project.getProjectFilePath());
+		
+		if(project != null)
+		{
+			InProgressDialog.getInstance().display("Opening new project. Please wait...", new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					projectExplorer.openProject(project.getProjectFilePath());
+				}
+			});
+		}
 	}
 
 	@Action
@@ -78,14 +94,29 @@ public class ProjectActions
 	{
 		if(projectChooser.showOpenDialog(IdeUtils.getCurrentWindow()) == JFileChooser.APPROVE_OPTION)
 		{
-			projectExplorer.openProject(projectChooser.getSelectedFile().getPath());
+			InProgressDialog.getInstance().display("Opening project. Please wait...", new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					projectExplorer.openProject(projectChooser.getSelectedFile().getPath());					
+				}
+			});
 		}
 	}
 
 	@Action
 	public void deleteProject()
 	{
-
+		BaseTreeNode selectedNode = projectExplorer.getActiveNode();
+		
+		if(!(selectedNode instanceof ProjectTreeNode))
+		{
+			return;
+		}
+		
+		Project proj = ((ProjectTreeNode) selectedNode).getProject();
+		deleteProjectDialog.displayFor(proj);
 	}
 
 	@Action

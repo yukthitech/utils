@@ -631,6 +631,11 @@ public class Element implements INode
 			
 			BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(attr.getName());
 			
+			if(propInfo == null && attr.getName().contains("-"))
+			{
+				propInfo =  beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(IdeUtils.removeHyphens(attr.getName()));
+			}
+			
 			if(propInfo == null)
 			{
 				//if this id based node ignore it

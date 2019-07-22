@@ -17,6 +17,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -714,5 +715,41 @@ public class ProjectExplorer extends JPanel
 		{
 			loadFilesFromNode(projNode, cnode);
 		}
+	}
+	
+	public void deleteProject(Project project, boolean deleteContent)
+	{
+		if(!projects.contains(project))
+		{
+			logger.debug("Specified project is not found in open list. Ignoring project delete request: {}", project.getName());
+			return;
+		}
+		
+		projectTreeModel.deleteProject(project);
+		fileEditorTabbedPane.filePathRemoved(project.getBaseFolder());
+		projects.remove(project);
+		
+		if(deleteContent)
+		{
+			try
+			{
+				project.deleteProjectContents();
+			}catch(Exception ex)
+			{
+				JOptionPane.showMessageDialog(this, "Failed to delete project '" + project.getName() +"'. \nError: " + ex);
+			}
+		}
+	}
+	
+	public BaseTreeNode getActiveNode()
+	{
+		TreePath selectedPath = tree.getSelectionPath();
+		
+		if(selectedPath == null)
+		{
+			return null;
+		}
+		
+		return (BaseTreeNode) selectedPath.getLastPathComponent();
 	}
 }

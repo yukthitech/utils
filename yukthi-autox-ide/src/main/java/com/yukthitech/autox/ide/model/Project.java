@@ -2,11 +2,14 @@ package com.yukthitech.autox.ide.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -144,7 +147,7 @@ public class Project implements Serializable
 		return testSuitesFoldersList;
 	}
 
-	public void setTestSuitesFolders(Set<String> testSuitesFoldersList)
+	public void setTestSuiteFolders(Set<String> testSuitesFoldersList)
 	{
 		this.testSuitesFoldersList = testSuitesFoldersList;
 	}
@@ -198,7 +201,7 @@ public class Project implements Serializable
 		try
 		{
 			libJarPath = libFolder.getCanonicalPath() + File.separator + "*";
-			classPathEntriesList.add(libJarPath);
+			finalClassPathEntries.add(libJarPath);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while getting canonical path of lib folder: " + libFolder.getPath(), ex);
@@ -234,42 +237,56 @@ public class Project implements Serializable
 
 		if(!baseFolder.exists())
 		{
-			baseFolder.mkdirs();
+			FileUtils.forceMkdir(baseFolder);
 		}
 
 		logger.trace("Creating project with path: {}", testSuitesFoldersList);
 		
 		for(String testsuiteFolderPath : testSuitesFoldersList)
 		{
-			String testsuitePath = testsuiteFolderPath.replace("./", baseFolder.getPath() + "/");
-	
-			File testSuiteFolder = new File(testsuitePath);
+			File testSuiteFolder = new File(baseFolder, testsuiteFolderPath);
 	
 			if(!testSuiteFolder.exists())
 			{
-				testSuiteFolder.mkdirs();
+				FileUtils.forceMkdir(testSuiteFolder);
 			}
 		}
 
-		String appPropPath = appPropertyFilePath.replace("./", baseFolder.getPath() + "/");
-
-		File appProp = new File(appPropPath);
+		File appProp = new File(baseFolder, appPropertyFilePath);
+		
+		if(appProp.getParentFile().exists())
+		{
+			FileUtils.forceMkdir(appProp.getParentFile());
+		}
 
 		if(!appProp.exists())
 		{
+			createFile(appProp, "/templates/app-prop-template.properties");
 			appProp.createNewFile();
 		}
 
-		String appConfFilePath = appConfigFilePath.replace("./", baseFolder.getPath() + "/");
+		File appConfig = new File(baseFolder, appConfigFilePath);
 
-		File appConfig = new File(appConfFilePath);
+		if(appConfig.getParentFile().exists())
+		{
+			FileUtils.forceMkdir(appConfig.getParentFile());
+		}
 
 		if(!appConfig.exists())
 		{
-			appConfig.createNewFile();
+			createFile(appConfig, "/templates/app-config-template.xml");
 		}
 
 		save();
+	}
+	
+	private void createFile(File file, String templateFile) throws IOException
+	{
+		InputStream is = Project.class.getResourceAsStream(templateFile);
+		String content = IOUtils.toString(is);
+		is.close();
+		
+		FileUtils.write(file, content);
 	}
 
 	/**
@@ -385,6 +402,12 @@ public class Project implements Serializable
 		}
 		
 		return reservedFiles.contains(file);
+	}
+	
+	public void deleteProjectContents() throws IOException
+	{
+		logger.debug("Deleting project contents from base folder: {}", baseFolder);
+		FileUtils.forceDelete(baseFolder);
 	}
 
 	/*

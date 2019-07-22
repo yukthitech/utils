@@ -480,7 +480,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		for(FileEditorTab tab : tabs)
 		{
 			//if the current file path is not modified
-			if(tab.getFile().exists())
+			if(newFolder != null && tab.getFile().exists())
 			{
 				//continue to next file
 				continue;
@@ -494,16 +494,19 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				continue;
 			}
 			
-			if("".equals(relativePath))
+			if(newFolder != null)
 			{
-				relativeFile = newFolder;
-			}
-			else
-			{
-				relativeFile = new File(newFolder, relativePath);
+				if("".equals(relativePath))
+				{
+					relativeFile = newFolder;
+				}
+				else
+				{
+					relativeFile = new File(newFolder, relativePath);
+				}
 			}
 			
-			if(!relativeFile.exists())
+			if(newFolder == null || !relativeFile.exists())
 			{
 				logger.debug("As the file does not exist anymore, closing tab with file: [old path: {}, Modified Path: {}]", tab.getFile().getPath(), relativeFile.getPath());
 				
@@ -516,6 +519,29 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			pathToEditor.put(relativePath, tab.getFileEditor());
 			tab.setFile(relativeFile);
 			tab.getFileEditor().setFile(relativeFile);
+		}
+	}
+
+	public void filePathRemoved(File folder)
+	{
+		List<FileEditorTab> tabs = getAllTabs();
+		String relativePath = null;
+		
+		for(FileEditorTab tab : tabs)
+		{
+			relativePath = IdeFileUtils.getRelativePath(folder, tab.getFile());
+			
+			//if the file is not part of modified path
+			if(relativePath == null)
+			{
+				continue;
+			}
+			
+			logger.debug("Closing file from folder being removed: [Path: {}]", 
+					tab.getFile().getPath());
+			
+			pathToEditor.remove(tab.getFile().getPath());
+			super.remove(tab.getFileEditor());
 		}
 	}
 }
