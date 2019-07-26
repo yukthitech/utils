@@ -1,6 +1,8 @@
 package com.yukthitech.autox.config;
 
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
@@ -45,6 +47,11 @@ public class SeleniumDriverConfig implements Validateable
 	 * Folder in which downloaded files can be expected.
 	 */
 	private String downloadFolder;
+	
+	/**
+	 * Profile options to be used by drivers.
+	 */
+	private LinkedHashMap<String, Object> profileOptions = new LinkedHashMap<>();
 
 	/**
 	 * Gets the name of the driver.
@@ -182,6 +189,26 @@ public class SeleniumDriverConfig implements Validateable
 		{
 			throw new InvalidStateException("An error occurred while getting cannoical path of download folder: {}", downloadFolder, ex);
 		}
+	}
+	
+	public void addBooleanProfileOption(String name, boolean value)
+	{
+		this.profileOptions.put(name, value);
+	}
+	
+	public void addIntProfileOption(String name, Integer value)
+	{
+		this.profileOptions.put(name, value);
+	}
+
+	public void addProfileOption(String name, String value)
+	{
+		this.profileOptions.put(name, value);
+	}
+	
+	public Map<String, Object> getProfileOptions()
+	{
+		return profileOptions;
 	}
 
 	/* (non-Javadoc)

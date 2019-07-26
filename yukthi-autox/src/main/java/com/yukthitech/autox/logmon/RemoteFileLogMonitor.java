@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpProgressMonitor;
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.test.ssh.steps.RemoteSession;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -115,7 +116,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void startMonitoring()
+	public void startMonitoring(AutomationContext context)
 	{
 		String paths[] = this.remoteFilePaths.split("\\s*\\,\\s*");
 		
@@ -154,7 +155,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 * @see com.yukthitech.autox.logmon.ILogMonitor#stopMonitoring()
 	 */
 	@Override
-	public List<LogFile> stopMonitoring()
+	public List<LogFile> stopMonitoring(AutomationContext context)
 	{
 		List<LogFile> logFiles = new ArrayList<>(pathToSession.size());
 		

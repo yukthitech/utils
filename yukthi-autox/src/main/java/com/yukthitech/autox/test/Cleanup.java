@@ -110,6 +110,13 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 				{
 					exeLogger.error(ex, "An error occurred while executing step - " + step);
 	
+					TestCaseResult result = StepExecutor.handleException(context, new TestCase(NAME), step, exeLogger, ex, null);
+					
+					if(result != null)
+					{
+						return result;
+					}
+					
 					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 				}
 			}

@@ -64,7 +64,16 @@ public class WaitForStep extends AbstractUiStep
 			{
 				for(String locator : this.locators)
 				{
-					WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
+					WebElement element = null;
+					
+					try
+					{
+						element = UiAutomationUtils.findElement(context, parentElement, locator);
+					}catch(Exception ex)
+					{
+						exeLogger.error("An error occurred while trying to find element with locator - {}. Error: {}", locator, "" + ex);
+						return false;
+					}
 					
 					//if element needs to be checked for invisibility
 					if("true".equals(hidden))

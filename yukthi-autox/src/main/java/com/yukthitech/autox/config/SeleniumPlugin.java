@@ -1,6 +1,7 @@
 package com.yukthitech.autox.config;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -184,7 +185,16 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			}
 			else
 			{
-				activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
+				Class<?> driverClass = Class.forName(driverConfig.getClassName());
+				
+				try
+				{
+					Constructor<?> configConstr = driverClass.getConstructor(SeleniumDriverConfig.class);
+					activeDriver = (WebDriver) configConstr.newInstance(driverConfig);
+				}catch(NoSuchMethodException ex)
+				{
+					activeDriver = (WebDriver) driverClass.newInstance();					
+				}
 			}
 			
 			if(driverConfig.getDefaultPage() != null)

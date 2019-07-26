@@ -108,6 +108,13 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 				{
 					exeLogger.error(ex, "An error occurred while executing step - " + step);
 	
+					TestCaseResult result = StepExecutor.handleException(context, new TestCase(NAME), step, exeLogger, ex, null);
+					
+					if(result != null)
+					{
+						return result;
+					}
+					
 					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 				}
 			}

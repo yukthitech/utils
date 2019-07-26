@@ -36,18 +36,18 @@ public class RightClickStep extends AbstractUiStep
 	{
 		exeLogger.trace("Right-Clicking the element specified by locator: {}", locator);
 
-		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
-
-		if(webElement == null)
-		{
-			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
-		}
-
 		try
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
+				WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+
+				if(webElement == null)
+				{
+					exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
+					throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+				}
+
 				try
 				{
 					SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);

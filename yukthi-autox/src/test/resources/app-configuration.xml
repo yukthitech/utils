@@ -40,9 +40,14 @@
 			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>
+				<driver name="autoxChrome" class-name="com.yukthitech.autox.config.selenium.AutoxChromeDriver">
+					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
+					<profile-option name="enable.console.logs">true</profile-option>
+				</driver>
+
 				<driver name="firefox" class-name="org.openqa.selenium.firefox.FirefoxDriver">
 					<system-property name="webdriver.gecko.driver">./drivers/geckodriver.exe</system-property>
-				</driver>
+				</driver>
 				
 				<driver name="chrome" class-name="org.openqa.selenium.chrome.ChromeDriver">
 					<system-property name="webdriver.chrome.driver">./drivers/chromedriver.exe</system-property>
@@ -76,6 +81,7 @@
 	<!-- Specify log monitors -->
 	<wrap:logMonitors>
 		<file-log-monitor name="client-output" path="c:\automation.log"/>
+		<browser-log-monitor name="browser-console"/>
 	</wrap:logMonitors>
 
 	<!-- 

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -43,7 +44,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 	}
 	
 	@Override
-	public void startMonitoring()
+	public void startMonitoring(AutomationContext context)
 	{
 		File file = new File(path);
 		
@@ -58,7 +59,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 	}
 
 	@Override
-	public List<LogFile> stopMonitoring()
+	public List<LogFile> stopMonitoring(AutomationContext context)
 	{
 		File file = new File(path);
 		

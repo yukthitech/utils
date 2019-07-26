@@ -78,18 +78,18 @@ public class ClickAndDownloadStep extends AbstractUiStep
 		
 		exeLogger.trace("For download clicking the element specified by locator: {}", getLocatorWithParent(locator));
 
-		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
-
-		if(webElement == null)
-		{
-			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
-		}
-
 		try
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
+				WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+
+				if(webElement == null)
+				{
+					exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
+					throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+				}
+
 				try
 				{
 					webElement.click();

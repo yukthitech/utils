@@ -624,7 +624,7 @@ public class AutomationContext
 		
 		for(ILogMonitor monitor : logMonitors.values())
 		{
-			monitor.startMonitoring();
+			monitor.startMonitoring(this);
 		}
 	}
 	
@@ -643,7 +643,7 @@ public class AutomationContext
 		
 		for(Map.Entry<String, ILogMonitor> entry : this.logMonitors.entrySet())
 		{
-			List<LogFile> monitorLogFiles = entry.getValue().stopMonitoring();
+			List<LogFile> monitorLogFiles = entry.getValue().stopMonitoring(this);
 			
 			if(monitorLogFiles == null)
 			{

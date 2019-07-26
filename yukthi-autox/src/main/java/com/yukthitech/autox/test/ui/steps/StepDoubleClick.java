@@ -13,6 +13,7 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Executable(name = {"uiDblClick", "dblclick"}, requiredPluginTypes = SeleniumPlugin.class, message = "Double Clicks the specified target")
@@ -41,22 +42,33 @@ public class StepDoubleClick extends AbstractPostCheckStep
 	{
 		exeLogger.trace("Double-Clicking the element specified by locator: {}", locator);
 		
-		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
-		
-		if(webElement == null)
-		{
-			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
-		}
-		
 		try
 		{
+			ObjectWrapper<Boolean> clickedAtleastOnce = new ObjectWrapper<>(false);
+			
 			UiAutomationUtils.validateWithWait(() -> 
 			{
-				exeLogger.trace("Trying to double-Click the element specified by locator: {}", locator);
+				WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+				
+				if(webElement == null)
+				{
+					exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
+					throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+				}
+
+				if(clickedAtleastOnce.getValue())
+				{
+					if(super.isPostCheckAvailable() && doPostCheck(exeLogger, "Before Re-dbl-click"))
+					{
+						exeLogger.trace("Before re-click as post check is successful, skipping re-dbl-click");
+						return true;
+					}
+				}
 
 				try
 				{
+					exeLogger.trace("Trying to double-click element specified by locator: {}", locator);
+
 					SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 					WebDriver driver = seleniumConfiguration.getWebDriver();
 
@@ -64,9 +76,11 @@ public class StepDoubleClick extends AbstractPostCheckStep
 					
 					actions.doubleClick(webElement).perform();
 					
-					return doPostCheck(exeLogger);
+					return doPostCheck(exeLogger, "Post Dbl-click");
 				} catch(RuntimeException ex)
 				{
+					exeLogger.debug("IGNORED: An error occurred while dbl-clicking locator - {}. Error: {}", locator,  "" + ex);
+					
 					if(UiAutomationUtils.isElementNotAvailableException(ex))
 					{
 						return false;
@@ -74,7 +88,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 	
 					throw ex;
 				}
-			} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , IAutomationConstants.SIXTY_SECONDS, IAutomationConstants.ONE_SECOND,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)

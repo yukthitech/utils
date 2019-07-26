@@ -44,12 +44,17 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 	{
 		this.postVerificationDelay = postVerificationDelay;
 	}
+	
+	protected boolean isPostCheckAvailable()
+	{
+		return (postVisibilityLocator != null || postHideLocator != null);
+	}
 
-	protected boolean doPostCheck(ExecutionLogger exeLogger)
+	protected boolean doPostCheck(ExecutionLogger exeLogger, String purpose)
 	{
 		if(postVisibilityLocator != null)
 		{
-			exeLogger.debug("Performing post check, checking if specified locator is visible. Locator: {}", postVisibilityLocator);
+			exeLogger.debug("{} - Performing post check, checking if specified locator is visible. Locator: {}", purpose, postVisibilityLocator);
 			
 			boolean isVisible = UiAutomationUtils.waitWithPoll(() ->
 			{
@@ -59,18 +64,18 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 			//if visible locator is not visible, return false
 			if(!isVisible)
 			{
-				exeLogger.debug("Post check failed. Specified locator is not visible yet. Locator: {}", postVisibilityLocator);
+				exeLogger.debug("{} - Post check failed. Specified locator is not visible yet. Locator: {}", purpose, postVisibilityLocator);
 				return false;
 			}
 			else
 			{
-				exeLogger.debug("Post check Successful. Specified locator is visible. Locator: {}", postVisibilityLocator);
+				exeLogger.debug("{} - Post check Successful. Specified locator is visible. Locator: {}", purpose, postVisibilityLocator);
 			}
 		}
 		
 		if(postHideLocator != null)
 		{
-			exeLogger.debug("Performing post check, checking if specified locator is hidden. Locator: {}", postHideLocator);
+			exeLogger.debug("{} - Performing post check, checking if specified locator is hidden. Locator: {}", purpose, postHideLocator);
 			
 			boolean isVisible = UiAutomationUtils.waitWithPoll(() ->
 			{
@@ -80,12 +85,12 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 			//if hide locator is visible 
 			if(isVisible)
 			{
-				exeLogger.debug("Post check failed. Specified locator is not hidden yet. Locator: {}", postHideLocator);
+				exeLogger.debug("{} - Post check failed. Specified locator is not hidden yet. Locator: {}", purpose, postHideLocator);
 				return false;
 			}
 			else
 			{
-				exeLogger.debug("Post check Successful. Specified locator is hidden. Locator: {}", postHideLocator);
+				exeLogger.debug("{} - Post check Successful. Specified locator is hidden. Locator: {}", purpose, postHideLocator);
 			}
 		}
 

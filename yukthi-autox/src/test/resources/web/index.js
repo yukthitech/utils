@@ -1,5 +1,7 @@
 function changeStatusTo(status)
 {
+	console.log("Changing status to: ", status);
+	
 	var fld = document.getElementById("status");
 	fld.value = status;
 	
@@ -9,6 +11,8 @@ function changeStatusTo(status)
 
 function setHiddenValue()
 {
+	console.log("Setting hidden field value...");
+	
 	var fld = document.getElementById("status");
 	var hiddenFld = document.getElementById("hiddenFld");
 	
@@ -19,6 +23,7 @@ var clickCount = 0;
 
 function onClickOfClickButton1()
 {
+	console.log("Buttong is clicked. Current click count: ", clickCount);
 	if(clickCount < 2)
 	{
 		clickCount ++;

@@ -14,6 +14,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.BasicArguments;
+import com.yukthitech.autox.logmon.BrowserLogMonitor;
 import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.RemoteFileLogMonitor;
@@ -338,6 +339,16 @@ public class ApplicationConfiguration
 	 * @param monitor monitor to add
 	 */
 	public void addRemoteLogMonitor(RemoteFileLogMonitor monitor)
+	{
+		addLogMonitor(monitor);
+	}
+	
+	/**
+	 * Adds the browser log monitor.
+	 *
+	 * @param monitor the monitor
+	 */
+	public void addBrowserLogMonitor(BrowserLogMonitor monitor)
 	{
 		addLogMonitor(monitor);
 	}

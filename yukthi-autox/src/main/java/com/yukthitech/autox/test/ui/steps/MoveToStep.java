@@ -62,18 +62,18 @@ public class MoveToStep extends AbstractUiStep
 	{
 		exeLogger.trace("Moving to element specified by locator: {}", locator);
 
-		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
-
-		if(webElement == null)
-		{
-			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
-		}
-
 		try
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
+				WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+
+				if(webElement == null)
+				{
+					exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
+					throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+				}
+
 				SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 				WebDriver driver = seleniumConfiguration.getWebDriver();
 				
@@ -104,7 +104,7 @@ public class MoveToStep extends AbstractUiStep
 							Thread.sleep(1500);
 						}catch(Exception iex)
 						{}
-}
+					}
 				}
 				
 				return true;
@@ -123,6 +123,14 @@ public class MoveToStep extends AbstractUiStep
 			}catch(Exception ex)
 			{}
 			
+			WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+
+			if(webElement == null)
+			{
+				exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
+				throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+			}
+
 			webElement.click();
 			
 		}catch(InvalidStateException ex)

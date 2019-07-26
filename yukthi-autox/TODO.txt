@@ -4,7 +4,24 @@ Return value from function
 Making <set> specific to function/test cases (stack wise)
 Multi threaded execution.
 On going report generation
+	should append data to text or some struct file
+	Html should be able to read from this file
+	should reload the file every few secs... till the status is completed or errored
+May have to display the log page wise
+Fix the filter problem in log files
 external framework integration ( code coverage tool )
+	Jacoco integration 
+		The target jvm should run with jacoco agent and should start in output=tcpserver mode (https://www.eclemma.org/jacoco/trunk/doc/agent.html)
+		
+		To get coverage dump use following option:
+			1) Use ExecDumpClient (https://www.jacoco.org/jacoco/trunk/doc/api/index.html) to dump the coverage from remote machine.
+			
+		Report can be generated with code similar to https://github.com/jacoco/jacoco/blob/master/org.jacoco.cli/src/org/jacoco/cli/internal/commands/Report.java
+		
+		Other imp docs
+			Java docs - https://www.jacoco.org/jacoco/trunk/doc/api/index.html
+			CLI Utils docs - https://www.jacoco.org/jacoco/trunk/doc/cli.html
+			Githib source - https://github.com/jacoco/jacoco
 
 In  IDE
 	JX path play area (ability to evaluate jx path on input json, add, get and remove)
@@ -12,6 +29,10 @@ In  IDE
 	Recently executed menu
 		
 
+Click step - 
+	Wait time should be configurable
+	
+All ui files should 
 
 
 ==================================

@@ -1,6 +1,5 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
@@ -12,6 +11,7 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -35,36 +35,50 @@ public class ClickStep extends AbstractPostCheckStep
 	{
 		exeLogger.trace("Clicking the element specified by locator: {}", locator);
 
-		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
-
-		if(webElement == null)
-		{
-			exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
-		}
-
 		try
 		{
+			ObjectWrapper<Boolean> clickedAtleastOnce = new ObjectWrapper<>(false);
+			
 			UiAutomationUtils.validateWithWait(() -> 
 			{
-				exeLogger.trace("Trying to click element specified by locator: {}", locator);
-				
 				try
 				{
+					WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+
+					if(webElement == null)
+					{
+						exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
+						throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+					}
+
+					if(clickedAtleastOnce.getValue())
+					{
+						if(super.isPostCheckAvailable() && doPostCheck(exeLogger, "Before re-click"))
+						{
+							exeLogger.trace("Before re-click as post check is successful, skipping re-click");
+							return true;
+						}
+					}
+					
+					exeLogger.trace("Trying to click element specified by locator: {}", locator);
+					
 					webElement.click();
+					clickedAtleastOnce.setValue(true);
 					
 					//after click check the post-check and return result approp
-					return doPostCheck(exeLogger);
+					return doPostCheck(exeLogger, "Post Click");
 				} catch(RuntimeException ex)
 				{
-					if( (ex instanceof ElementNotInteractableException) || ex.getMessage().toLowerCase().contains("not clickable"))
+					exeLogger.debug("IGNORED: An error occurred while clicking locator - {}. Error: {}", locator,  "" + ex);
+					
+					if(UiAutomationUtils.isElementNotAvailableException(ex))
 					{
 						return false;
 					}
 	
 					throw ex;
 				}
-			} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , IAutomationConstants.SIXTY_SECONDS, IAutomationConstants.ONE_SECOND,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)

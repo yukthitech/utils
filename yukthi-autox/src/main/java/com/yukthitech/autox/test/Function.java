@@ -163,7 +163,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 				{
 					if(functionGroup && (ex instanceof ReturnException))
 					{
-						logger.debug("Exiting from current step group");
+						logger.debug("Exiting from current function invocation");
 						break;
 					}
 					
