@@ -1,22 +1,16 @@
 <testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
 	<function name="condSimpleGroup">
 		<ccg:if condition="attr.returnFlag??">
-			<ccg:set expression="ifExec">
-				<value>
-					string: returnFlag: ${attr.returnFlag}
-				</value>
-			</ccg:set>
-		
-			<ccg:return/>
+			<ccg:return value="string: returnFlag: ${attr.returnFlag}"/>
 		</ccg:if>
 	
 		<ccg:if condition="attr.flag == 1">
 			<then>
-				<ccg:set expression="ifExec" value="if-then"/>
+				<ccg:return value="if-then"/>
 			</then>
 		
 			<else>
-				<ccg:set expression="ifExec" value="if-else"/>
+				<ccg:return value="if-else"/>
 			</else>
 		</ccg:if>
 	</function>
@@ -58,7 +52,7 @@
 			<wrap:steps>
 				<ccg:set expression="flag" value="int: 1"/>
 			
-				<ccg:function-ref name="condSimpleGroup"/>
+				<ccg:function-ref name="condSimpleGroup" return-attr="ifExec"/>
 			
 				<ccg:assert-equals actual="attr: ifExec" expected="if-then"/>
 			</wrap:steps>
@@ -72,7 +66,7 @@
 			
 				<ccg:set expression="ifExec" value="test"/>
 			
-				<ccg:function-ref name="condSimpleGroup"/>
+				<ccg:function-ref name="condSimpleGroup" return-attr="ifExec"/>
 			
 				<ccg:remove name="returnFlag"/>
 			
@@ -88,7 +82,7 @@
 			<wrap:steps>
 				<ccg:set expression="flag" value="int: 2"/>
 			
-				<ccg:function-ref name="condSimpleGroup"/>
+				<ccg:function-ref name="condSimpleGroup"  return-attr="ifExec"/>
 			
 				<ccg:assert-equals actual="attr: ifExec" expected="if-else"/>
 			</wrap:steps>

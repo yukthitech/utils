@@ -1,6 +1,14 @@
+26/07
+	fix search in reports
+	output html tags should be escaped. Internal html should not be escaped.
+	
+	Externalize a value to app properties
+		should have ability to find this value in all test cases externalize it
+		
+
+
 19/07/2019
 
-Return value from function
 Making <set> specific to function/test cases (stack wise)
 Multi threaded execution.
 On going report generation

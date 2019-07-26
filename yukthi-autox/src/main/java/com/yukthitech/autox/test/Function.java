@@ -139,7 +139,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		return steps;
 	}
 	
-	public boolean execute(AutomationContext context, ExecutionLogger logger, boolean inlineExecution) throws Exception
+	public Object execute(AutomationContext context, ExecutionLogger logger, boolean inlineExecution) throws Exception
 	{
 		/*
 		 * Note: function invocation may happen as part of other lang steps like, if, for, while etc.
@@ -164,7 +164,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 					if(functionGroup && (ex instanceof ReturnException))
 					{
 						logger.debug("Exiting from current function invocation");
-						break;
+						return ((ReturnException) ex).getValue();
 					}
 					
 					if(ex instanceof LangException)
@@ -186,13 +186,14 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 			}
 		}
 		
-		return true;
+		return null;
 	}
 	
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		return execute(context, logger, false);
+		execute(context, logger, false);
+		return true;
 	}
 
 	@Override

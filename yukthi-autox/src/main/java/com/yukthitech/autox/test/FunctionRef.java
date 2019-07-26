@@ -3,6 +3,8 @@ package com.yukthitech.autox.test;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
@@ -34,6 +36,12 @@ public class FunctionRef extends AbstractStep
 	private Map<String, FunctionParam> params;
 	
 	/**
+	 * Attribute name to be used to specify return value. If not specified, return value will be ignored. Default: null.
+	 */
+	@Param(description = "Attribute name to be used to specify return value. If not specified, return value will be ignored. Default: null", required = false)
+	private String returnAttr;
+	
+	/**
 	 * Sets the name of the step group to execute.
 	 *
 	 * @param name the new name of the step group to execute
@@ -41,6 +49,21 @@ public class FunctionRef extends AbstractStep
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+	
+	/**
+	 * Sets the attribute name to be used to specify return value. If not specified, return value will be ignored. Default: null.
+	 *
+	 * @param returnAttr the new attribute name to be used to specify return value
+	 */
+	public void setReturnAttr(String returnAttr)
+	{
+		if(StringUtils.isEmpty(returnAttr))
+		{
+			return;
+		}
+		
+		this.returnAttr = returnAttr;
 	}
 	
 	/**
@@ -86,7 +109,17 @@ public class FunctionRef extends AbstractStep
 		logger.debug("Executing function '{}' with parameters: {}", name, paramValues);
 		
 		function.setParams(paramValues);
-		function.execute(context, logger);
+		Object resVal = function.execute(context, logger, false);
+	
+		if(returnAttr != null)
+		{
+			logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
+			context.setAttribute(returnAttr, resVal);
+		}
+		else if(resVal != null)
+		{
+			logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
+		}
 		
 		return true;
 	}
