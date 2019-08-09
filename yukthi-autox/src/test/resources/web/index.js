@@ -36,3 +36,36 @@ function onClickOfClickButton1()
 	}, 1600);
 }
 
+function showConfirm()
+{
+	var div = document.getElementById("alertRes");
+	div.innerHTML = "Clicking...";
+	
+	var res = confirm("Choose your button...");
+	
+	if(res)
+	{
+		div.innerHTML = "Okay";
+	}
+	else
+	{
+		div.innerHTML = "Cancel";
+	}
+}
+
+function showPrompt()
+{
+	var div = document.getElementById("alertRes");
+	div.innerHTML = "Promting...";
+	
+	var res = prompt("Provide a value...");
+	
+	if(res)
+	{
+		div.innerHTML = res;
+	}
+	else
+	{
+		div.innerHTML = "NoVal";
+	}
+}

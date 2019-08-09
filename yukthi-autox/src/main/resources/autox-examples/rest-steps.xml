@@ -56,6 +56,16 @@
 				<ccg:set expression="emp2_id" value="attr: response | xpath: //id"/>
 			]]></content>
 		</example>
+		<example>
+			<description>Invoking post api as a Form</description>
+			
+			<content><![CDATA[
+				<ccg:rest-invoke-post uri="/emp/saveForm">
+					<param name="name">Emp1</param>
+					<param name="address">some address</param>
+				</ccg:rest-invoke-post>
+			]]></content>
+		</example>
 	</collection>
 	
 	<collection name="com.yukthitech.autox.test.rest.steps.InvokePostWithAttachmentStep">

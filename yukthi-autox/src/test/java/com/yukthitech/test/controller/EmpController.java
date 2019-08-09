@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +46,44 @@ public class EmpController
 		return empMap.get(id);
 	}
 	
+	@RequestMapping(value = "/saveForm", method = RequestMethod.POST)
+	public SaveResult saveEmployeeForm(Employee emp)
+	{
+		if(StringUtils.isBlank(emp.getName()))
+		{
+			throw new IllegalArgumentException("Name is empty");
+		}
+		
+		if(StringUtils.isBlank(emp.getAddress()))
+		{
+			throw new IllegalArgumentException("Address is empty");
+		}
+		
+		emp.setId(empMap.size() + 1);
+		empMap.put(emp.getId(), emp);
+		
+		return new SaveResult("" + emp.getId());
+	}
+
+	@RequestMapping(value = "/saveEncodedForm", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	public SaveResult saveEmployeeEncodedForm(Employee emp)
+	{
+		if(StringUtils.isBlank(emp.getName()))
+		{
+			throw new IllegalArgumentException("Name is empty");
+		}
+		
+		if(StringUtils.isBlank(emp.getAddress()))
+		{
+			throw new IllegalArgumentException("Address is empty");
+		}
+		
+		emp.setId(empMap.size() + 1);
+		empMap.put(emp.getId(), emp);
+		
+		return new SaveResult("" + emp.getId());
+	}
+
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public SaveResult saveEmployee(@RequestBody Employee emp)
 	{

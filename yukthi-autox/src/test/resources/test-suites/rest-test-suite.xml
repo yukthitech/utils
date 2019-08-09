@@ -32,6 +32,36 @@
 			</wrap:steps>
 		</testCase>
 	
+		<testCase name="testPostForm">
+			<description>Test post Form api invocation</description>
+		
+			<wrap:steps>
+				<ccg:rest-invoke-post uri="/emp/saveForm">
+					<param name="name">Emp1</param>
+					<param name="address">some address</param>
+				</ccg:rest-invoke-post>
+			
+				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
+			
+				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			</wrap:steps>
+		</testCase>
+
+		<testCase name="testPostEncodedForm">
+			<description>Test post Form url-encoded api invocation</description>
+		
+			<wrap:steps>
+				<ccg:rest-invoke-post uri="/emp/saveEncodedForm">
+					<param name="name">Emp1</param>
+					<param name="address">some address</param>
+				</ccg:rest-invoke-post>
+			
+				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
+			
+				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			</wrap:steps>
+		</testCase>
+
 		<testCase dependencies="testPost" name="testGet">
 			<description>Tests get api invocation</description>
 		

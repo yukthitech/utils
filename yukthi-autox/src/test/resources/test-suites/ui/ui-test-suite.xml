@@ -40,6 +40,43 @@
 			
 		</testCase>
 
+		<testCase name="alert_test">
+			<description>
+				Used to validate alert boxes.
+			</description>
+			
+			<wrap:steps>
+				<ccg:ui-goto-page uri="/index.html" />
+				
+				<ccg:ui-click locator="id: alertBut"/>
+				<ccg:sleep time="100"/>
+				
+				<ccg:ui-handle-alert expectedMessage="Test Alert Message!!!"/>
+				
+				<!-- Now validate confirm box -->
+				<ccg:ui-click locator="id: confirmBut"/>
+				<ccg:sleep time="100"/>
+				
+				<ccg:ui-handle-confirm expectedMessage="Choose your button..." accept="true"/>
+				<ccg:assert-equals actual="${uiValue('id:alertRes', null)}" expected="Okay"/>
+
+				<ccg:ui-click locator="id: confirmBut"/>
+				<ccg:sleep time="100"/>
+				
+				<ccg:ui-handle-confirm expectedMessage="Choose your button..." accept="false"/>
+				<ccg:assert-equals actual="${uiValue('id:alertRes', null)}" expected="Cancel"/>
+
+				<!-- Now validate the prompt box -->
+				<ccg:ui-click locator="id: promptBut"/>
+				<ccg:sleep time="100"/>
+				
+				<ccg:ui-handle-prompt expectedMessage="Provide a value..." accept="true" text="Kranthi"/>
+				<ccg:assert-equals actual="${uiValue('id:alertRes', null)}" expected="Kranthi"/>
+
+			</wrap:steps>
+			
+		</testCase>
+
 		<testCase name="click_post_check">
 			<description>
 				Validates post check of click functionality is working as expected.

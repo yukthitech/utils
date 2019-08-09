@@ -230,6 +230,11 @@ public class ExpressionFactory
 				return expressionObj;
 			}
 			
+			if(result == null)
+			{
+				return null;
+			}
+			
 			expressionParserContext.setCurrentValue(result);
 		}
 		
