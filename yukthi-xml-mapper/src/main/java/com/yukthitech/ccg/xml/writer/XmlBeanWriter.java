@@ -170,8 +170,8 @@ public class XmlBeanWriter
 
 			if(!writerConfig.isExcludeNameSpace())
 			{
-				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ccg", XMLConstants.CCG_URI);
-				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", XMLConstants.CCG_WRAP_URI);
+				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ccg", XMLConstants.NEW_CCG_URI);
+				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", XMLConstants.NEW_CCG_WRAP_URI);
 				
 				rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_DATE_FORMAT, DEF_DATE_FORMAT_STR);
 				rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_BEAN_TYPE, bean.getClass().getName());

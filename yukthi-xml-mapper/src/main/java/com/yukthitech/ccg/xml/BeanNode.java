@@ -14,6 +14,7 @@ public class BeanNode implements Cloneable
 	private Object bean;
 	private BeanNode parentNode;
 	private String nameSpace;
+	private boolean reserved;
 	private Class<?> type;
 	private Class<?> actualType;
 	private XMLAttributeMap attributeMap;
@@ -31,37 +32,24 @@ public class BeanNode implements Cloneable
 	 */
 	private Type genericType;
 
-	public BeanNode(String name)
+	public BeanNode(String nameSpace, String name, IParserHandler parserHandler)
 	{
-		this(null, name, null, null);
+		this(nameSpace, name, null, null, parserHandler);
 	}
 
-	public BeanNode(String nameSpace, String name)
+	public BeanNode(String nameSpace, String name, Object bean, BeanNode parent, IParserHandler parserHandler)
 	{
-		this(nameSpace, name, null, null);
-	}
-
-	public BeanNode(String name, Object bean)
-	{
-		this(null, name, bean, null);
-	}
-
-	public BeanNode(String nameSpace, String name, BeanNode bean)
-	{
-		this(nameSpace, name, bean, null);
-	}
-
-	public BeanNode(String name, Object bean, BeanNode parent)
-	{
-		this(null, name, bean, parent);
-	}
-
-	public BeanNode(String nameSpace, String name, Object bean, BeanNode parent)
-	{
-		if(XMLConstants.CCG_URI.equals(nameSpace))
-			nameSpace = XMLConstants.CCG_URI;
-
 		this.nameSpace = (nameSpace == null || nameSpace.trim().length() == 0) ? null : nameSpace.trim();
+		this.reserved = parserHandler.isReserveUri(this.nameSpace);
+		this.name = name;
+		this.bean = bean;
+		this.parentNode = parent;
+	}
+
+	private BeanNode(String nameSpace, String name, Object bean, BeanNode parent, boolean reserved)
+	{
+		this.nameSpace = (nameSpace == null || nameSpace.trim().length() == 0) ? null : nameSpace.trim();
+		this.reserved = reserved;
 		this.name = name;
 		this.bean = bean;
 		this.parentNode = parent;
@@ -209,7 +197,7 @@ public class BeanNode implements Cloneable
 
 	public boolean isReserved()
 	{
-		return (XMLConstants.CCG_URI == nameSpace);
+		return reserved;
 	}
 
 	public boolean isSkipNode()
@@ -248,7 +236,7 @@ public class BeanNode implements Cloneable
 
 	public Object clone()
 	{
-		BeanNode newObj = new BeanNode(nameSpace, name, bean, parentNode);
+		BeanNode newObj = new BeanNode(nameSpace, name, bean, parentNode, reserved);
 		newObj.setDescription(description);
 		newObj.setAttributeMap(attributeMap);
 		newObj.setType(type);

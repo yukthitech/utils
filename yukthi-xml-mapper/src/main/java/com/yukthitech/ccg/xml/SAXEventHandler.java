@@ -153,7 +153,7 @@ class SAXEventHandler extends DefaultHandler
 			return;
 		}
 
-		if(XMLConstants.CCG_WRAP_URI.equals(uri))
+		if(parserHandler.isWrapUri(uri))
 		{
 			return;
 		}
@@ -328,8 +328,8 @@ class SAXEventHandler extends DefaultHandler
 
 	private BeanNode buildNewNode(String uri, String name, Attributes att)
 	{
-		BeanNode newNode = new BeanNode(uri, name);
-		XMLAttributeMap attrMap = new XMLAttributeMap(att);
+		BeanNode newNode = new BeanNode(uri, name, parserHandler);
+		XMLAttributeMap attrMap = new XMLAttributeMap(att, parserHandler);
 		newNode.setAttributeMap(attrMap);
 
 		Set<String> attrs = attrMap.getKeySet(false);
@@ -372,7 +372,7 @@ class SAXEventHandler extends DefaultHandler
 			return;
 		}
 
-		if(XMLConstants.CCG_WRAP_URI.equals(uri))
+		if(parserHandler.isWrapUri(uri))
 		{
 			return;
 		}

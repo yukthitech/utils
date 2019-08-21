@@ -247,4 +247,24 @@ public interface IParserHandler extends XMLConstants
 	 * @return the string
 	 */
 	public String processText(Object rootBean, String text);
+	
+	public default boolean isReserveUri(String uri)
+	{
+		if(uri == null)
+		{
+			return false;
+		}
+		
+		return XMLConstants.CCG_URI.equals(uri) || XMLConstants.NEW_CCG_URI.equals(uri) ;
+	}
+
+	public default boolean isWrapUri(String uri)
+	{
+		if(uri == null)
+		{
+			return false;
+		}
+		
+		return XMLConstants.CCG_WRAP_URI.equals(uri) || XMLConstants.NEW_CCG_WRAP_URI.equals(uri) ;
+	}
 }

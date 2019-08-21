@@ -50,7 +50,7 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 	 * @param att
 	 *            SAX attributes object.
 	 */
-	public XMLAttributeMap(final Attributes att)
+	public XMLAttributeMap(final Attributes att, IParserHandler parserHandler)
 	{
 		this();
 
@@ -65,7 +65,7 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 			name = XMLUtil.replaceHyphens(name);
 
 			value = att.getValue(i);
-			isReserved = XMLConstants.CCG_URI.equals(att.getURI(i));
+			isReserved = parserHandler.isReserveUri(att.getURI(i));
 			super.put(name, new Attribute(value, isReserved));
 			
 			if(!hasReserveAttributes && isReserved)
