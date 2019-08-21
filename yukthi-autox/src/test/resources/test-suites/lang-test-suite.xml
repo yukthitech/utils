@@ -1,4 +1,4 @@
-<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
 	<function name="condSimpleGroup">
 		<s:if condition="attr.returnFlag??">
 			<s:return value="string: returnFlag: ${attr.returnFlag}"/>

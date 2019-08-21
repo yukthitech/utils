@@ -1,4 +1,4 @@
-<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
+<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
 	<test-suite name="spreadTestSuite">
 		<setup>
 			<s:log message="Setup is getting executed..."/>

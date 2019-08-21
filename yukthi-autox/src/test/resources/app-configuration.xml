@@ -1,4 +1,4 @@
-<app xmlns:ccg="https://xmlbeanparser.yukthitech.com/reserved" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
+<app xmlns:ccg="http://xmlbeanparser.yukthitech.com/reserved" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
 	<report-name>Automation Test</report-name>
 	
 	<dateFomat>dd-MMM-yyyy</dateFomat>
