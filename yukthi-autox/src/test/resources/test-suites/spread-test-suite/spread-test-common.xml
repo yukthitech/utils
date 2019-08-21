@@ -1,11 +1,11 @@
-<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
 	<test-suite name="spreadTestSuite">
 		<setup>
-			<ccg:log message="Setup is getting executed..."/>
-			<ccg:set expression="varVal" value="int: 10"/>
+			<s:log message="Setup is getting executed..."/>
+			<s:set expression="varVal" value="int: 10"/>
 		</setup>
 		<cleanup>
-			<ccg:log message="Cleanup is getting executed"/>
+			<s:log message="Cleanup is getting executed"/>
 		</cleanup>
 	</test-suite>
 </test-file>

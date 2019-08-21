@@ -1,4 +1,4 @@
-<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
 	<testSuite name="dml-test-suites">
 		<testCase name="insert_query">
 			<description>
@@ -9,15 +9,15 @@
 				This comment is to test formatting
 			-->
 			<wrap:steps>
-				<ccg:sql-dml-query countAttribute="countAttr" dataSourceName="dataSource" failOnNoUpdate="true">
+				<s:sql-dml-query countAttribute="countAttr" dataSourceName="dataSource" failOnNoUpdate="true">
 					<query>
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
-				</ccg:sql-dml-query>
+				</s:sql-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:sql-assert dataSourceName="dataSource">
+				<s:sql-assert dataSourceName="dataSource">
 					<query>
 						SELECT * FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>
@@ -25,13 +25,13 @@
 					<expectedRow>
 						<column name="NAME">employee1</column>
 					</expectedRow>
-				</ccg:sql-assert>
+				</s:sql-assert>
 
-				<ccg:sql-assert-value dataSourceName="dataSource" expectedValue="int: 1">
+				<s:sql-assert-value dataSourceName="dataSource" expectedValue="int: 1">
 					<query>
 						SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>
-				</ccg:sql-assert-value>
+				</s:sql-assert-value>
 			</wrap:validations>
 		</testCase>
 	
@@ -41,17 +41,17 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="empId" value="1"/>
+				<s:set expression="empId" value="1"/>
 			
-				<ccg:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
+				<s:sql-dml-query countAttribute="updateCount" dataSourceName="dataSource">
 					<query>
 						UPDATE EMPLOYEE SET NAME = 'employee2' WHERE ID = ${attr.empId}
 					</query>
-				</ccg:sql-dml-query>
+				</s:sql-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals actual="attr: updateCount" expected="int: 1"/>
+				<s:assert-equals actual="attr: updateCount" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -61,17 +61,17 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="empId" value="int: 1"/>
+				<s:set expression="empId" value="int: 1"/>
 			
-				<ccg:sql-dml-query countAttribute="deleteCount" dataSourceName="dataSource">
+				<s:sql-dml-query countAttribute="deleteCount" dataSourceName="dataSource">
 					<query>
 						DELETE FROM EMPLOYEE WHERE ID = ?{attr.empId}
 					</query>
-				</ccg:sql-dml-query>
+				</s:sql-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals actual="attr: deleteCount" expected="int: 1"/>
+				<s:assert-equals actual="attr: deleteCount" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -81,7 +81,7 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:sql-multi-dml-query dataSourceName="dataSource">
+				<s:sql-multi-dml-query dataSourceName="dataSource">
 					<query>
 						INSERT INTO EMPLOYEE VALUES (1, 'employee1')
 					</query>
@@ -89,11 +89,11 @@
 					<query>
 						INSERT INTO EMPLOYEE VALUES (3, 'employee2')
 					</query>
-				</ccg:sql-multi-dml-query>
+				</s:sql-multi-dml-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:sql-assert dataSourceName="dataSource">
+				<s:sql-assert dataSourceName="dataSource">
 					<query>
 						SELECT COUNT(*) COUNT FROM EMPLOYEE WHERE ID &gt;= 1
 					</query>
@@ -101,7 +101,7 @@
 					<expectedRow>
 						<column name="COUNT">2</column>
 					</expectedRow>
-				</ccg:sql-assert>
+				</s:sql-assert>
 			</wrap:validations>
 		</testCase>
 	
@@ -111,18 +111,18 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:sql-load-query-column-list contextAttribute="empNames" dataSourceName="dataSource">
+				<s:sql-load-query-column-list contextAttribute="empNames" dataSourceName="dataSource">
 					<query>
 						SELECT NAME
 						FROM EMPLOYEE
 						WHERE NAME IN ('employee1', 'employee2')
 						ORDER BY NAME
 					</query>
-				</ccg:sql-load-query-column-list>
+				</s:sql-load-query-column-list>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
+				<s:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
 			</wrap:validations>
 		</testCase>
 	
@@ -132,17 +132,17 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:sql-fetch-value-query contextAttribute="empId" dataSourceName="dataSource">
+				<s:sql-fetch-value-query contextAttribute="empId" dataSourceName="dataSource">
 					<query>
 						SELECT ID
 						FROM EMPLOYEE
 						WHERE NAME = 'employee1'
 					</query>
-				</ccg:sql-fetch-value-query>
+				</s:sql-fetch-value-query>
 			</wrap:steps>
 		
 			<wrap:validations>
-				<ccg:assert-equals actual="attr: empId" expected="int: 1"/>
+				<s:assert-equals actual="attr: empId" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
 	</testSuite>

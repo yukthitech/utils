@@ -1,3 +1,13 @@
+12/08/2019
+=========
+In the fetch queries we should be able to return sub entities
+	For example from order item repo we should be able to return list of orders which has order-item with specified property
+		The sub entity collection should be lazily loadable
+	
+	On same lines if the result bean is having sub beans, those also should be loaded recursively to build required tree directly from result
+	
+Support for upsert / merge
+
 26/11/2017
 =========
 In order to improve performance, while mapping record data to beans, the execution plan has to be created once (how to map columns to fields)

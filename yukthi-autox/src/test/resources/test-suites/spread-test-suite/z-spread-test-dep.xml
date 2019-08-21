@@ -1,10 +1,10 @@
-<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
 	<test-suite name="spreadTestSuite">
 		<test-case name="crossDepTestCase" dependencies="spreadTestCase">
 			<description>Ensures dependency test case from other file is executed first</description>
 
 			<wrap:steps>
-				<ccg:assert-equals actual="attr: spreadVarVal" expected="int: 100"/>
+				<s:assert-equals actual="attr: spreadVarVal" expected="int: 100"/>
 			</wrap:steps>
 		</test-case>
 
@@ -12,7 +12,7 @@
 			<description>Ensures dependency test case is executed before this test case</description>
 
 			<wrap:steps>
-				<ccg:assert-equals actual="attr: spreadVarVal" expected="int: 200"/>
+				<s:assert-equals actual="attr: spreadVarVal" expected="int: 200"/>
 			</wrap:steps>
 		</test-case>
 
@@ -20,7 +20,7 @@
 			<description>Simple test case which will used as dependency</description>
 
 			<wrap:steps>
-				<ccg:set expression="spreadVarVal" value="int: 200"/>
+				<s:set expression="spreadVarVal" value="int: 200"/>
 			</wrap:steps>
 		</test-case>
 	</test-suite>

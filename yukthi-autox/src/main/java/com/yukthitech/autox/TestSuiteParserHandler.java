@@ -1,7 +1,11 @@
 package com.yukthitech.autox;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.beanutils.BeanUtils;
 
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
 import com.yukthitech.autox.config.ApplicationConfiguration;
@@ -10,6 +14,7 @@ import com.yukthitech.autox.ref.ContextAttributeXpathReference;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
+import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.util.StringUtil;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -26,6 +31,17 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	private static final String ATTR_CONTEXT_ATTR_REF = "attrRef";
 	
 	private static final String ATTR_CONTEXT_ATTR_XPATH_REF = "attrXpathRef";
+	
+	private static Set<String> reservedNameSpaces = new HashSet<>();
+	
+	static
+	{
+		reservedNameSpaces.add(IAutomationConstants.STEP_NAME_SPACE);
+		reservedNameSpaces.add(IAutomationConstants.FUNC_NAME_SPACE);
+		
+		reservedNameSpaces.add(XMLConstants.CCG_URI);
+		reservedNameSpaces.add(XMLConstants.NEW_CCG_URI);
+	}
 	
 	/**
 	 * Application configuration.
@@ -142,4 +158,11 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	{
 		return StringUtil.getPatternString(text, appConfigValueProvider, AppConfigParserHandler.EXPR_PATTERN, AppConfigParserHandler.EXPR_ESCAPE_PREFIX, AppConfigParserHandler.EXPR_ESCAPE_REPLACE);
 	}
+	
+	@Override
+	public boolean isReserveUri(String uri)
+	{
+		return reservedNameSpaces.contains(uri);
+	}
+	
 }

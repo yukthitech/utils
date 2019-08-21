@@ -1,17 +1,17 @@
-<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
 	<test-suite name="spreadTestSuite">
 		<test-case name="spreadTestCase">
 			<description>Ensures when test suite is spread across multiple files, it is working properly</description>
 
 			<wrap:steps>
-				<ccg:assert-equals actual="attr: varVal" expected="int: 10"/>
-				<ccg:set expression="spreadVarVal" value="int: 100"/>
+				<s:assert-equals actual="attr: varVal" expected="int: 10"/>
+				<s:set expression="spreadVarVal" value="int: 100"/>
 
-				<ccg:sleep time="2" timeUnit="SECONDS"/>
+				<s:sleep time="2" timeUnit="SECONDS"/>
 
-				<ccg:log message="Sleep is completed..."/>
+				<s:log message="Sleep is completed..."/>
 
-				<ccg:log message="Test message..."/>
+				<s:log message="Test message..."/>
 			</wrap:steps>
 		</test-case>
 	</test-suite>

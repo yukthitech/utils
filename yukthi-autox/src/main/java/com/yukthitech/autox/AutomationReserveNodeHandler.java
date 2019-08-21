@@ -15,8 +15,10 @@ import org.reflections.util.ConfigurationBuilder;
 import org.xml.sax.Locator;
 
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.test.FunctionRef;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
@@ -157,6 +159,14 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		
 		if(parent instanceof IStepContainer)
 		{
+			if(IAutomationConstants.FUNC_NAME_SPACE.equals(beanNode.getNameSpace()))
+			{
+				FunctionRef funcRef = new FunctionRef();
+				funcRef.setName(beanNode.getName());
+				
+				return funcRef;
+			}
+			
 			IStep step = newStep(beanNode.getName());
 
 			if(step != null)

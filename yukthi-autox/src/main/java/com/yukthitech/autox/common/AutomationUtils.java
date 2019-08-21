@@ -39,6 +39,7 @@ import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -740,5 +741,17 @@ public class AutomationUtils
 		}
 		
 		return value;
+	}
+
+	public static boolean isReserveNamespace(String namespace)
+	{
+		if(namespace == null)
+		{
+			return false;
+		}
+		
+		return XMLConstants.CCG_URI.equals(namespace)
+				|| XMLConstants.NEW_CCG_URI.equals(namespace)
+				|| IAutomationConstants.STEP_NAME_SPACE.equals(namespace);
 	}
 }

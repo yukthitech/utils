@@ -12,6 +12,8 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.ccg.xml.DynamicDataAcceptor;
+import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -19,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "functionRef", message = "Reference step to execute target function with specified parameters.")
-public class FunctionRef extends AbstractStep
+public class FunctionRef extends AbstractStep implements IDynamicAttributeAcceptor, DynamicDataAcceptor
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -78,6 +80,30 @@ public class FunctionRef extends AbstractStep
 		}
 		
 		this.params.put(param.getName(), param);
+	}
+	
+	@Override
+	public void set(String attrName, String value)
+	{
+		addParam(new FunctionParam(attrName, value));
+	}
+	
+	@Override
+	public void add(String propName, Object obj)
+	{
+		addParam(new FunctionParam(propName, obj));
+	}
+	
+	@Override
+	public void add(String propName, String id, Object obj)
+	{
+		throw new UnsupportedOperationException("This method is not expected to be called.");
+	}
+	
+	@Override
+	public boolean isIdBased(String propName)
+	{
+		return false;
 	}
 	
 	@Override

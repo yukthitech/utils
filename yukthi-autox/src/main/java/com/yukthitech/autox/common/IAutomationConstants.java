@@ -10,6 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public interface IAutomationConstants
 {
+	public String STEP_NAME_SPACE = "http://autox.yukthitech.com/steps";
+	
+	public String FUNC_NAME_SPACE = "http://autox.yukthitech.com/functions";
+
 	/**
 	 * Object mapper for parsing and formatting json.
 	 */

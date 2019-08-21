@@ -1,34 +1,34 @@
-<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
 	<testSuite name="rest-test-suites">
 		<testCase name="testPost">
 			<description>Test post api invocation</description>
 		
 			<wrap:steps>
-				<ccg:rest-invoke-post uri="/emp/save">
+				<s:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
 						{
 							"name" : "Emp1",
 							"address": "some address"
 						}
 					]]></body>
-				</ccg:rest-invoke-post>
+				</s:rest-invoke-post>
 			
-				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
+				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
 			
-				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 
-				<ccg:rest-invoke-post uri="/emp/save">
+				<s:rest-invoke-post uri="/emp/save">
 					<body><![CDATA[
 						{
 							"name" : "Emp2",
 							"address": "some address"
 						}
 					]]></body>
-				</ccg:rest-invoke-post>
+				</s:rest-invoke-post>
 			
-				<ccg:set expression="emp2_id" value="attr: response | xpath: //id"/>
+				<s:set expression="emp2_id" value="attr: response | xpath: //id"/>
 			
-				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -36,14 +36,14 @@
 			<description>Test post Form api invocation</description>
 		
 			<wrap:steps>
-				<ccg:rest-invoke-post uri="/emp/saveForm">
+				<s:rest-invoke-post uri="/emp/saveForm">
 					<param name="name">Emp1</param>
 					<param name="address">some address</param>
-				</ccg:rest-invoke-post>
+				</s:rest-invoke-post>
 			
-				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
+				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
 			
-				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			</wrap:steps>
 		</testCase>
 
@@ -51,50 +51,50 @@
 			<description>Test post Form url-encoded api invocation</description>
 		
 			<wrap:steps>
-				<ccg:rest-invoke-post uri="/emp/saveEncodedForm">
+				<s:rest-invoke-post uri="/emp/saveEncodedForm">
 					<param name="name">Emp1</param>
 					<param name="address">some address</param>
-				</ccg:rest-invoke-post>
+				</s:rest-invoke-post>
 			
-				<ccg:set expression="emp1_id" value="attr: response | xpath: //id"/>
+				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
 			
-				<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			</wrap:steps>
 		</testCase>
 
 		<testCase dependencies="testPost" name="testGet">
 			<description>Tests get api invocation</description>
 		
-			<ccg:rest-invoke-get uri="/emp/get/{id}">
+			<s:rest-invoke-get uri="/emp/get/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
-			</ccg:rest-invoke-get>
+			</s:rest-invoke-get>
 		
-			<ccg:assert-equals actual="xpath: /attr/response//name" expected="Emp2"/>
+			<s:assert-equals actual="xpath: /attr/response//name" expected="Emp2"/>
 		</testCase>
 	
 		<testCase dependencies="testPost" name="testDelete">
 			<description>Tests delete api invocation</description>
 		
-			<ccg:rest-invoke-delete uri="/emp/delete/{id}">
+			<s:rest-invoke-delete uri="/emp/delete/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
-			</ccg:rest-invoke-delete>
+			</s:rest-invoke-delete>
 		
-			<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 		
-			<ccg:rest-invoke-get uri="/emp/get/{id}">
+			<s:rest-invoke-get uri="/emp/get/{id}">
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
-			</ccg:rest-invoke-get>
+			</s:rest-invoke-get>
 		
 			<!--
 				As emp2 is deleted, get should result in 400 error
 			-->
-			<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 400"/>
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 400"/>
 		</testCase>
 	
 		<testCase dependencies="testPost" name="testMultiPart">
 			<description>Tests multi part post request</description>
 		
-			<ccg:rest-invoke-multipart-post uri="/emp/saveWithFile">
+			<s:rest-invoke-multipart-post uri="/emp/saveWithFile">
 				<part name="details">
 					<value>
 						{
@@ -105,19 +105,19 @@
 				</part>
 			
 				<attachment file="file:./src/test/resources/testFile.txt" name="file"/>
-			</ccg:rest-invoke-multipart-post>
+			</s:rest-invoke-multipart-post>
 		
-			<ccg:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
+			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 		
-			<ccg:set expression="emp3_id" value="attr: response | xpath: //id"/>
+			<s:set expression="emp3_id" value="attr: response | xpath: //id"/>
 		
-			<ccg:rest-invoke-get-file uri="/emp/getFile/{id}">
+			<s:rest-invoke-get-file uri="/emp/getFile/{id}">
 				<pathVariable name="id">${attr.emp3_id}</pathVariable>
-			</ccg:rest-invoke-get-file>
+			</s:rest-invoke-get-file>
 		
-			<ccg:set expression="outputContent" value="file(text=true): ${attr.response}"/>
+			<s:set expression="outputContent" value="file(text=true): ${attr.response}"/>
 		
-			<ccg:assert-equals actual="attr: outputContent" expected="This is simple test file for upload."/>
+			<s:assert-equals actual="attr: outputContent" expected="This is simple test file for upload."/>
 		</testCase>
 	</testSuite>
 </testData>

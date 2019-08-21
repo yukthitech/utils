@@ -1,18 +1,18 @@
-<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
 	<function name="condSimpleGroup">
-		<ccg:if condition="attr.returnFlag??">
-			<ccg:return value="string: returnFlag: ${attr.returnFlag}"/>
-		</ccg:if>
+		<s:if condition="attr.returnFlag??">
+			<s:return value="string: returnFlag: ${attr.returnFlag}"/>
+		</s:if>
 	
-		<ccg:if condition="attr.flag == 1">
+		<s:if condition="attr.flag == 1">
 			<then>
-				<ccg:return value="if-then"/>
+				<s:return value="if-then"/>
 			</then>
 		
 			<else>
-				<ccg:return value="if-else"/>
+				<s:return value="if-else"/>
 			</else>
-		</ccg:if>
+		</s:if>
 	</function>
 
 	<testSuite name="lang-test-suites">
@@ -21,27 +21,27 @@
 				Tests expressions are replaced in test suite files properly
 			</description>
 		
-			<ccg:set expression="testAttr" value="SimpleValue"/>
+			<s:set expression="testAttr" value="SimpleValue"/>
 		
-			<ccg:set expression="testAttr2" value="string: Value: #{test.app.prop}"/>
+			<s:set expression="testAttr2" value="string: Value: #{test.app.prop}"/>
 		
-			<ccg:set expression="testAttr3">
+			<s:set expression="testAttr3">
 				<value>
 					string: Value: #{test.app.prop} ${attr.testAttr}
 				</value>
-			</ccg:set>
+			</s:set>
 		
-			<ccg:set expression="testAttr4">
+			<s:set expression="testAttr4">
 				<value>
 					string: Value: ${attr.testAttr + ' #{test.app.prop}'}
 				</value>
-			</ccg:set>
+			</s:set>
 		
-			<ccg:assert-equals actual="attr: testAttr2" expected="string: Value: TestValue"/>
+			<s:assert-equals actual="attr: testAttr2" expected="string: Value: TestValue"/>
 		
-			<ccg:assert-equals actual="attr: testAttr3" expected="string: Value: TestValue SimpleValue"/>
+			<s:assert-equals actual="attr: testAttr3" expected="string: Value: TestValue SimpleValue"/>
 		
-			<ccg:assert-equals actual="attr: testAttr4" expected="string: Value: SimpleValue TestValue"/>
+			<s:assert-equals actual="attr: testAttr4" expected="string: Value: SimpleValue TestValue"/>
 		</testCase>
 	
 		<testCase name="testIfThenCondition">
@@ -50,11 +50,11 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="flag" value="int: 1"/>
+				<s:set expression="flag" value="int: 1"/>
 			
-				<ccg:function-ref name="condSimpleGroup" return-attr="ifExec"/>
+				<s:function-ref name="condSimpleGroup" return-attr="ifExec"/>
 			
-				<ccg:assert-equals actual="attr: ifExec" expected="if-then"/>
+				<s:assert-equals actual="attr: ifExec" expected="if-then"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -62,15 +62,15 @@
 			<description>Tests return step</description>
 		
 			<wrap:steps>
-				<ccg:set expression="returnFlag" value="true"/>
+				<s:set expression="returnFlag" value="true"/>
 			
-				<ccg:set expression="ifExec" value="test"/>
+				<s:set expression="ifExec" value="test"/>
 			
-				<ccg:function-ref name="condSimpleGroup" return-attr="ifExec"/>
+				<s:function-ref name="condSimpleGroup" return-attr="ifExec"/>
 			
-				<ccg:remove name="returnFlag"/>
+				<s:remove name="returnFlag"/>
 			
-				<ccg:assert-equals actual="attr: ifExec" expected="string: returnFlag: true"/>
+				<s:assert-equals actual="attr: ifExec" expected="string: returnFlag: true"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -80,11 +80,11 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="flag" value="int: 2"/>
+				<s:set expression="flag" value="int: 2"/>
 			
-				<ccg:function-ref name="condSimpleGroup"  return-attr="ifExec"/>
+				<s:function-ref name="condSimpleGroup"  return-attr="ifExec"/>
 			
-				<ccg:assert-equals actual="attr: ifExec" expected="if-else"/>
+				<s:assert-equals actual="attr: ifExec" expected="if-else"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -94,13 +94,13 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:for end="5" start="1">
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
-				</ccg:for>
+				<s:for end="5" start="1">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for>
 			
-				<ccg:assert-equals actual="attr: res" expected="|1|2|3|4|5"/>
+				<s:assert-equals actual="attr: res" expected="|1|2|3|4|5"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -110,21 +110,21 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:for end="20" start="1">
-					<ccg:if condition="attr.loopVar % 2 != 0">
-						<ccg:continue/>
-					</ccg:if>
+				<s:for end="20" start="1">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
 				
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 				
-					<ccg:if condition="attr.loopVar gte 10">
-						<ccg:break/>
-					</ccg:if>
-				</ccg:for>
+					<s:if condition="attr.loopVar gte 10">
+						<s:break/>
+					</s:if>
+				</s:for>
 			
-				<ccg:assert-equals actual="attr: res" expected="|2|4|6|8|10"/>
+				<s:assert-equals actual="attr: res" expected="|2|4|6|8|10"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -134,17 +134,17 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="i" value="int: 1"/>
+				<s:set expression="i" value="int: 1"/>
 			
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:while condition="attr.i lt 5">
-					<ccg:set expression="res" value="${attr.res}|${attr.i}"/>
+				<s:while condition="attr.i lt 5">
+					<s:set expression="res" value="${attr.res}|${attr.i}"/>
 				
-					<ccg:set expression="i" value="int: ${attr.i + 1}"/>
-				</ccg:while>
+					<s:set expression="i" value="int: ${attr.i + 1}"/>
+				</s:while>
 			
-				<ccg:assert-equals actual="attr: res" expected="|1|2|3|4"/>
+				<s:assert-equals actual="attr: res" expected="|1|2|3|4"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -154,25 +154,25 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="i" value="int: 0"/>
+				<s:set expression="i" value="int: 0"/>
 			
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:while condition="attr.i lt 20">
-					<ccg:set expression="i" value="int: ${attr.i + 1}"/>
+				<s:while condition="attr.i lt 20">
+					<s:set expression="i" value="int: ${attr.i + 1}"/>
 				
-					<ccg:if condition="attr.i % 2 != 0">
-						<ccg:continue/>
-					</ccg:if>
+					<s:if condition="attr.i % 2 != 0">
+						<s:continue/>
+					</s:if>
 				
-					<ccg:set expression="res" value="${attr.res}|${attr.i}"/>
+					<s:set expression="res" value="${attr.res}|${attr.i}"/>
 				
-					<ccg:if condition="attr.i gte 10">
-						<ccg:break/>
-					</ccg:if>
-				</ccg:while>
+					<s:if condition="attr.i gte 10">
+						<s:break/>
+					</s:if>
+				</s:while>
 			
-				<ccg:assert-equals actual="attr: res" expected="|2|4|6|8|10"/>
+				<s:assert-equals actual="attr: res" expected="|2|4|6|8|10"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -187,15 +187,15 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="loopExpr" value="a,b,  c, d,e, f"/>
+				<s:set expression="loopExpr" value="a,b,  c, d,e, f"/>
 			
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:forEach expression="attr: loopExpr">
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
-				</ccg:forEach>
+				<s:forEach expression="attr: loopExpr">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:forEach>
 			
-				<ccg:assert-equals actual="attr: res" expected="|a|b|c|d|e|f"/>
+				<s:assert-equals actual="attr: res" expected="|a|b|c|d|e|f"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -205,22 +205,22 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:forEach expression="prop: data.dataList">
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
-				</ccg:forEach>
+				<s:forEach expression="prop: data.dataList">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:forEach>
 			
-				<ccg:assert-equals actual="attr: res" expected="|a|b|c"/>
+				<s:assert-equals actual="attr: res" expected="|a|b|c"/>
 			</wrap:steps>
 		</testCase>
 	
-		<data-bean ccg:beanType="java.util.ArrayList" id="dataList">
-			<ccg:element>a</ccg:element>
+		<data-bean s:beanType="java.util.ArrayList" id="dataList">
+			<s:element>a</s:element>
 		
-			<ccg:element>b</ccg:element>
+			<s:element>b</s:element>
 		
-			<ccg:element>c</ccg:element>
+			<s:element>c</s:element>
 		</data-bean>
 	
 		<testCase name="testSimpleForEachLoopWithList">
@@ -229,22 +229,22 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:forEach expression="prop: data.dataList">
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
-				</ccg:forEach>
+				<s:forEach expression="prop: data.dataList">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:forEach>
 			
-				<ccg:assert-equals actual="attr: res" expected="|a|b|c"/>
+				<s:assert-equals actual="attr: res" expected="|a|b|c"/>
 			</wrap:steps>
 		</testCase>
 	
-		<data-bean ccg:beanType="java.util.HashMap" id="dataMap">
-			<ccg:entry key="key1">Value1</ccg:entry>
+		<data-bean s:beanType="java.util.HashMap" id="dataMap">
+			<s:entry key="key1">Value1</s:entry>
 		
-			<ccg:entry key="key2">Value2</ccg:entry>
+			<s:entry key="key2">Value2</s:entry>
 		
-			<ccg:entry key="key3">Value3</ccg:entry>
+			<s:entry key="key3">Value3</s:entry>
 		</data-bean>
 	
 		<testCase name="testSimpleForEachLoopWithMap">
@@ -253,13 +253,13 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:forEach expression="prop: data.dataMap">
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
-				</ccg:forEach>
+				<s:forEach expression="prop: data.dataMap">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
+				</s:forEach>
 			
-				<ccg:assert-equals actual="attr: res" expected="|key1=Value1|key2=Value2|key3=Value3"/>
+				<s:assert-equals actual="attr: res" expected="|key1=Value1|key2=Value2|key3=Value3"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -269,23 +269,23 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:set expression="loopExpr" value="a,b,  c, d,e, f"/>
+				<s:set expression="loopExpr" value="a,b,  c, d,e, f"/>
 			
-				<ccg:set expression="res" value=""/>
+				<s:set expression="res" value=""/>
 			
-				<ccg:forEach expression="attr: loopExpr">
-					<ccg:if condition="attr.loopVar == 'b'">
-						<ccg:continue/>
-					</ccg:if>
+				<s:forEach expression="attr: loopExpr">
+					<s:if condition="attr.loopVar == 'b'">
+						<s:continue/>
+					</s:if>
 				
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 				
-					<ccg:if condition="attr.loopVar == 'e'">
-						<ccg:break/>
-					</ccg:if>
-				</ccg:forEach>
+					<s:if condition="attr.loopVar == 'e'">
+						<s:break/>
+					</s:if>
+				</s:forEach>
 			
-				<ccg:assert-equals actual="attr: res" expected="|a|c|d|e"/>
+				<s:assert-equals actual="attr: res" expected="|a|c|d|e"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -294,13 +294,13 @@
 				Ensures polling step works properly
 			</description>
 		
-			<ccg:set expression="checkVar" value="int: 0"/>
+			<s:set expression="checkVar" value="int: 0"/>
 		
-			<ccg:pollAndCheck checkCondition="attr.checkVar gte 5" pollingInterval="500" timeOut="20" timeOutUnit="SECONDS">
+			<s:pollAndCheck checkCondition="attr.checkVar gte 5" pollingInterval="500" timeOut="20" timeOutUnit="SECONDS">
 				<poll>
-					<ccg:set expression="checkVar" value="int: ${attr.checkVar + 1}"/>
+					<s:set expression="checkVar" value="int: ${attr.checkVar + 1}"/>
 				</poll>
-			</ccg:pollAndCheck>
+			</s:pollAndCheck>
 		</testCase>
 	
 		<testCase name="testTimerAndSummaryMssg">
@@ -308,57 +308,55 @@
 				Tests timer step and summary message
 			</description>
 		
-			<ccg:startTimer name="timeTaken"/>
+			<s:startTimer name="timeTaken"/>
 		
-			<ccg:sleep time="10" timeUnit="SECONDS"/>
+			<s:sleep time="10" timeUnit="SECONDS"/>
 		
-			<ccg:stopTimer name="timeTaken"/>
+			<s:stopTimer name="timeTaken"/>
 		
-			<ccg:log level="SUMMARY" message="Time taken during test was: ${attr.timeTaken}"/>
+			<s:log level="SUMMARY" message="Time taken during test was: ${attr.timeTaken}"/>
 		
-			<ccg:assert-not-null value="attr.timeTaken"/>
+			<s:assert-not-null value="attr.timeTaken"/>
 		</testCase>
 	
 		<function name="factorialGroup1">
-			<ccg:if condition="param.value lt 2">
+			<s:if condition="param.value lt 2">
 				<then>
-					<ccg:set expression="result" value="int: 1"/>
-					<ccg:return/>
+					<s:set expression="result" value="int: 1"/>
+					<s:return/>
 				</then>
 				<else>
-					<ccg:log message="Executing factorial for ${param.value}"/>
+					<s:log message="Executing factorial for ${param.value}"/>
 				</else>
-			</ccg:if>
+			</s:if>
 		
-			<ccg:function-ref name="factorialGroup1">
-				<param name="value" value="int: ${param.value - 1}"/>
-			</ccg:function-ref>
+			<f:factorialGroup1>
+				<value>int: ${param.value - 1}</value>
+			</f:factorialGroup1>
 		
-			<ccg:set expression="result" value="int: ${param.value * attr.result}"/>
+			<s:set expression="result" value="int: ${param.value * attr.result}"/>
 		</function>
 	
 		<testCase name="testGroupRecursion">
 			<description>
 				Tests recursion working within the group
 			</description>
+
+			<f:factorialGroup1 value="int: 4"/>
 		
-			<ccg:function-ref name="factorialGroup1">
-				<param name="value" value="int: 4"/>
-			</ccg:function-ref>
-		
-			<ccg:assert-equals actual="attr: result" expected="int: 24"/>
+			<s:assert-equals actual="attr: result" expected="int: 24"/>
 		</testCase>
 	
 		<testCase name="testExecute">
 			<description>Tests execute step</description>
 		
-			<ccg:set expression="checkVar" value="int: 1"/>
+			<s:set expression="checkVar" value="int: 1"/>
 		
-			<ccg:function-ref name="factorialGroup1">
+			<s:function-ref name="factorialGroup1">
 				<param name="value" value="int: 4"/>
-			</ccg:function-ref>
+			</s:function-ref>
 		
-			<ccg:assert-equals actual="attr: result" expected="int: 24"/>
+			<s:assert-equals actual="attr: result" expected="int: 24"/>
 		</testCase>
 	
 		<testCase name="testCaseSetupCleanup">
@@ -367,17 +365,17 @@
 			</description>
 		
 			<setup>
-				<ccg:set expression="setupVar" value="int: 1"/>
+				<s:set expression="setupVar" value="int: 1"/>
 			</setup>
 		
 			<wrap:steps>
-				<ccg:set expression="setupVar" value="int: ${attr.setupVar + 1}"/>
+				<s:set expression="setupVar" value="int: ${attr.setupVar + 1}"/>
 			
-				<ccg:assert-equals actual="attr: setupVar" expected="int: 2"/>
+				<s:assert-equals actual="attr: setupVar" expected="int: 2"/>
 			</wrap:steps>
 		
 			<cleanup>
-				<ccg:set expression="setupVar" value="int: 10"/>
+				<s:set expression="setupVar" value="int: 10"/>
 			</cleanup>
 		</testCase>
 	
@@ -387,7 +385,7 @@
 			</description>
 		
 			<wrap:steps>
-				<ccg:assert-equals actual="attr: setupVar" expected="int: 10"/>
+				<s:assert-equals actual="attr: setupVar" expected="int: 10"/>
 			</wrap:steps>
 		</testCase>
 
@@ -397,8 +395,8 @@
 			</description>
 
 			<wrap:steps>
-				<ccg:assert-equals actual="expr: regexParse('1,2,3,4', '(?&lt;val&gt;\\d+)')" expected="map: val=1"/>
-				<ccg:assert-equals actual="expr: regexParseAll('a=1,b=2,c=3, d=4', '(?&lt;key&gt;\\w+)\\=(?&lt;val&gt;\\d+)')">
+				<s:assert-equals actual="expr: regexParse('1,2,3,4', '(?&lt;val&gt;\\d+)')" expected="map: val=1"/>
+				<s:assert-equals actual="expr: regexParseAll('a=1,b=2,c=3, d=4', '(?&lt;key&gt;\\w+)\\=(?&lt;val&gt;\\d+)')">
 					<expected>json:
 						[
 							{"key": "a", "val": "1"},
@@ -407,11 +405,11 @@
 							{"key": "d", "val": "4"}
 						]
 					</expected>
-				</ccg:assert-equals>
-				<ccg:assert-equals actual="expr: regexParseMatch('a=b=1', '(?&lt;key1&gt;\\w+)\\=(?&lt;key2&gt;\\w+)\\=(?&lt;val&gt;\\d+)')"
+				</s:assert-equals>
+				<s:assert-equals actual="expr: regexParseMatch('a=b=1', '(?&lt;key1&gt;\\w+)\\=(?&lt;key2&gt;\\w+)\\=(?&lt;val&gt;\\d+)')"
 					expected="map: key1=a, key2=b, val=1"/>
 
-				<ccg:assert-true value="condition: regexMatches('a=2332', '\\w+=\\d+')"/>
+				<s:assert-true value="condition: regexMatches('a=2332', '\\w+=\\d+')"/>
 			</wrap:steps>
 		
 		</testCase>

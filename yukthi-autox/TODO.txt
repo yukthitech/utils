@@ -44,8 +44,6 @@ All ui files should
 
 
 ==================================
-exec step to execute freemarker code
-
 step to execute substeps in parallel
 	step to simply group the steps. So that multiple groups can be executed in parallel
 	
@@ -53,10 +51,6 @@ To store analytics data in a execution or across the execution
 	generate graphs using this analytics data
 	
 Ability to include graphs within summary mails and reports
-
-Special xml namespace for functions
-	function-ref should be invokable directly and should be able to pass params directly something like below
-		<func:factorial value="4" />
 
 ======================
 Collection/map steps

@@ -1,4 +1,4 @@
-<testData xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="https://xmlbeanparser.yukthitech.com/wrap">
 	<testSuite name="assert-test-suites">
 		<!--
 			================================= Test with properties file -=======================================
@@ -8,13 +8,13 @@
 				Validates assert equals work properly
 			</description>
 		
-			<ccg:set expression="intAttr" value="int: 10"/>
+			<s:set expression="intAttr" value="int: 10"/>
 		
-			<ccg:set expression="attr(int): intAttr1" value="10"/>
+			<s:set expression="attr(int): intAttr1" value="10"/>
 		
-			<ccg:assert-equals actual="string:value" expected="string:value"/>
+			<s:assert-equals actual="string:value" expected="string:value"/>
 		
-			<ccg:assert-equals actual="prop: attr.intAttr" expected="int:10"/>
+			<s:assert-equals actual="prop: attr.intAttr" expected="int:10"/>
 		</testCase>
 	
 		<testCase name="assertNotEquals">
@@ -22,9 +22,9 @@
 				Validate assert not equals work properly
 			</description>
 		
-			<ccg:set expression="intAttr" value="int: 10"/>
+			<s:set expression="intAttr" value="int: 10"/>
 		
-			<ccg:assert-not-equals actual="prop:attr.intAttr" expected="int:11"/>
+			<s:assert-not-equals actual="prop:attr.intAttr" expected="int:11"/>
 		</testCase>
 	
 		<testCase name="assertSame">
@@ -32,9 +32,9 @@
 				validate a same object work properly
 			</description>
 		
-			<ccg:set expression="intAttr" value="int: 10000"/>
+			<s:set expression="intAttr" value="int: 10000"/>
 		
-			<ccg:assert-same actual="prop:attr.intAttr" expected="prop:attr.intAttr"/>
+			<s:assert-same actual="prop:attr.intAttr" expected="prop:attr.intAttr"/>
 		</testCase>
 	
 		<testCase name="assertNotSame">
@@ -42,51 +42,51 @@
 				validate a Not same object work properly
 			</description>
 		
-			<ccg:set expression="intAttr" value="10"/>
+			<s:set expression="intAttr" value="10"/>
 		
-			<ccg:set expression="intAttr1" value="10"/>
+			<s:set expression="intAttr1" value="10"/>
 		
-			<ccg:assert-not-same actual="prop:attr.intAttr1" expected="prop:attr.intAttr"/>
+			<s:assert-not-same actual="prop:attr.intAttr1" expected="prop:attr.intAttr"/>
 		</testCase>
 	
 		<testCase name="assertNull">
 			<description>Validate a value is null</description>
 		
-			<ccg:remove name="intAttrXyz"/>
+			<s:remove name="intAttrXyz"/>
 		
-			<ccg:assert-null value="prop:attr.intAttrXyz"/>
+			<s:assert-null value="prop:attr.intAttrXyz"/>
 		</testCase>
 	
 		<testCase name="assertNotNull">
 			<description>Validate a value is not null</description>
 		
-			<ccg:set expression="intAttr" value="someval"/>
+			<s:set expression="intAttr" value="someval"/>
 		
-			<ccg:assert-not-null value="attr: intAttr"/>
+			<s:assert-not-null value="attr: intAttr"/>
 		</testCase>
 	
 		<testCase name="assertTrue">
 			<description>Checking the value is true</description>
 		
-			<ccg:set expression="booleanAttr" value="boolean: true"/>
+			<s:set expression="booleanAttr" value="boolean: true"/>
 		
-			<ccg:assert-true value="prop: attr.booleanAttr"/>
+			<s:assert-true value="prop: attr.booleanAttr"/>
 		
-			<ccg:set expression="intAttr1" value="int: 10"/>
+			<s:set expression="intAttr1" value="int: 10"/>
 		
-			<ccg:assert-true value="condition: attr.intAttr1 gt 5"/>
+			<s:assert-true value="condition: attr.intAttr1 gt 5"/>
 		</testCase>
 	
 		<testCase name="assertFalse">
 			<description>Checking the value is false</description>
 		
-			<ccg:set expression="booleanAttr" value="boolean: false"/>
+			<s:set expression="booleanAttr" value="boolean: false"/>
 		
-			<ccg:assert-false value="prop: attr.booleanAttr"/>
+			<s:assert-false value="prop: attr.booleanAttr"/>
 		
-			<ccg:set expression="intAttr1" value="int: 4"/>
+			<s:set expression="intAttr1" value="int: 4"/>
 		
-			<ccg:assert-false value="condition: attr.intAttr1 gt 5"/>
+			<s:assert-false value="condition: attr.intAttr1 gt 5"/>
 		</testCase>
 
 		<testCase name="assertDeepEquals">
@@ -94,7 +94,7 @@
 				Validates assert deep equals work properly
 			</description>
 		
-			<ccg:set expression="attr1">
+			<s:set expression="attr1">
 				<value>json:
 					{
 						"fruits": [
@@ -114,9 +114,9 @@
 						}
 					}
 				</value>
-			</ccg:set>
+			</s:set>
 		
-			<ccg:set expression="attr2">
+			<s:set expression="attr2">
 				<value>json:
 					{
 						"fruits": [
@@ -136,9 +136,9 @@
 						}
 					}
 				</value>
-			</ccg:set>
+			</s:set>
 		
-			<ccg:set expression="attr3">
+			<s:set expression="attr3">
 				<value>json:
 					{
 						"fruits": [
@@ -160,15 +160,15 @@
 						"config3": "test"
 					}
 				</value>
-			</ccg:set>
+			</s:set>
 			
-			<ccg:assert-deep-equals actual="attr: attr1" expected="attr: attr2"/>
+			<s:assert-deep-equals actual="attr: attr1" expected="attr: attr2"/>
 			
-			<ccg:assert-deep-equals actual="attr: attr3" expected="attr: attr1" ignore-extra-properties="true"/>
+			<s:assert-deep-equals actual="attr: attr3" expected="attr: attr1" ignore-extra-properties="true"/>
 			
-			<ccg:assert-deep-equals actual="attr: attr3" expected="attr: attr1" check-equality="false" failed-path-attr="failedAtPath"/>
+			<s:assert-deep-equals actual="attr: attr3" expected="attr: attr1" check-equality="false" failed-path-attr="failedAtPath"/>
 			
-			<ccg:assert-equals actual="attr: failedAtPath" expected="$"/>
+			<s:assert-equals actual="attr: failedAtPath" expected="$"/>
 			
 		</testCase>
 

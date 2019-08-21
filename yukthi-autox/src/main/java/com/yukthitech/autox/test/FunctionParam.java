@@ -23,6 +23,15 @@ public class FunctionParam implements Serializable
 	 */
 	@Param(description = "Value of the parameter", sourceType = SourceType.EXPRESSION)
 	private Object value;
+	
+	public FunctionParam()
+	{}
+	
+	public FunctionParam(String name, Object value)
+	{
+		this.name = name;
+		this.value = value;
+	}
 
 	/**
 	 * Gets the name of the group param.
