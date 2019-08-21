@@ -38,6 +38,11 @@ public class ExecuteStep extends AbstractStep
 		this.expression = expression;
 	}
 	
+	public void setEnclose(boolean enclose)
+	{
+		this.enclose = enclose;
+	}
+	
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{

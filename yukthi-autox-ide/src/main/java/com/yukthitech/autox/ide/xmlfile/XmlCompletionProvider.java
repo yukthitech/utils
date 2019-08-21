@@ -21,6 +21,8 @@ import org.fife.ui.autocomplete.ParameterizedCompletion;
 
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ExpressionParserDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
@@ -83,12 +85,20 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		if(location.getCurrentToken() == null)
 		{
 			nodeName = step.getNameWithHyphens();
-			builder.append("<").append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(" ");
+			builder.append("<")
+				.append(location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI))
+				.append(":")
+				.append(nodeName)
+				.append(" ");
 		}
 		else
 		{
 			nodeName = step.getNameWithHyphens().startsWith(location.getName()) ? step.getNameWithHyphens() : step.getName();
-			builder.append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(" ");
+			builder
+				.append(location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI))
+				.append(":")
+				.append(nodeName)
+				.append(" ");
 			
 			if(builder.toString().startsWith(location.getCurrentToken()))
 			{
@@ -220,7 +230,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		String curToken = location.getName() != null ? location.getName().toLowerCase().trim() : null;
 		
 		if(IStepContainer.class.isAssignableFrom(parentType) && 
-				( namespace == null || XMLConstants.CCG_URI.equals(namespace) )
+				( namespace == null || AutomationUtils.isReserveNamespace(namespace))
 				)
 		{
 			Collection<StepInfo> steps = project.getDocInformation().getSteps();

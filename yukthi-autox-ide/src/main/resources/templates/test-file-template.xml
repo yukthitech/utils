@@ -1,4 +1,8 @@
-<test-file xmlns:ccg="/fw/ccg/XMLBeanParser" xmlns:wrap="/fw/ccg/XMLBeanParser/wrap">
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
 	<test-suite name="">
 		<test-case name="">
 			<description></description>
@@ -10,4 +14,5 @@
 			</wrap:validations>
 		</test-case>
 	</test-suite>
+
 </test-file>

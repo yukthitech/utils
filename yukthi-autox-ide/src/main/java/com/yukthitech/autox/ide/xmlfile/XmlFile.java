@@ -94,9 +94,19 @@ public class XmlFile
 		return rootElement.getNamespaceWithPrefix(prefix);
 	}
 	
-	public String getPrefixForNamespace(String namespace)
+	public String getPrefixForNamespace(String... namespaces)
 	{
-		return rootElement.getPrefixForNamespace(namespace);
+		for(String namespace : namespaces)
+		{
+			String val = rootElement.getPrefixForNamespace(namespace);
+			
+			if(val != null)
+			{
+				return val;
+			}
+		}
+		
+		return null;
 	}
 	
 	@Override

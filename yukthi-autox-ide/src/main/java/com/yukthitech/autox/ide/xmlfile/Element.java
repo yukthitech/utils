@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.StepInfo;
@@ -373,7 +375,7 @@ public class Element implements INode
 			return null;
 		}
 		
-		if(!XMLConstants.CCG_URI.equals(attr.getNamespace()))
+		if(!AutomationUtils.isReserveNamespace(attr.getNamespace()))
 		{
 			return null;
 		}
@@ -494,11 +496,15 @@ public class Element implements INode
 	{
 		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
 		
-		if(XMLConstants.CCG_WRAP_URI.equals(namespace))
+		if(XMLConstants.CCG_WRAP_URI.equals(namespace) || XMLConstants.NEW_CCG_WRAP_URI.equals(namespace))
 		{
 			this.elementType = parentElementType;
 		}
-		else if(XMLConstants.CCG_URI.equals(namespace))
+		else if(IAutomationConstants.FUNC_NAME_SPACE.equals(namespace))
+		{
+			this.elementType = null;
+		}
+		else if(AutomationUtils.isReserveNamespace(namespace))
 		{
 			populateTypesForReserved(project, collector, recursive);
 		}
@@ -624,7 +630,7 @@ public class Element implements INode
 
 		for(Attribute attr : this.attributes.values())
 		{
-			if(XMLConstants.CCG_URI.equals(attr.getNamespace()))
+			if(AutomationUtils.isReserveNamespace(attr.getNamespace()))
 			{
 				continue;
 			}
