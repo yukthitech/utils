@@ -63,7 +63,7 @@ public class ObjectPool<T>
 		}
 		
 		this.type = type;
-		this.poolSizeLimit = 1;
+		this.poolSizeLimit = 0;
 		addToPool(initObjects);
 	}
 	
