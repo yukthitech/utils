@@ -6,6 +6,7 @@ import java.awt.Window;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yukthitech.autox.ide.IdeUtils;
+import com.yukthitech.autox.ide.dialog.AboutAutoxDialog;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.Action;
@@ -16,6 +17,11 @@ public class HelpActions
 {
 	@Autowired
 	private HelpPanel helpPanel;
+	
+	/**
+	 * Used to display about autox info.
+	 */
+	private AboutAutoxDialog aboutAutoxDialog = new AboutAutoxDialog();
 	
 	private FileEditor getActiveFileEditor()
 	{
@@ -61,5 +67,12 @@ public class HelpActions
 		String currentWord = fileEditor.getCursorWord();
 		
 		helpPanel.activatePanel(currentWord);
+	}
+	
+	@Action
+	public void aboutAutoxIde()
+	{
+		IdeUtils.centerOnScreen(aboutAutoxDialog);
+		aboutAutoxDialog.display();
 	}
 }

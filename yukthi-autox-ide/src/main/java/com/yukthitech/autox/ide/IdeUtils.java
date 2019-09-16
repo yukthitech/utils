@@ -247,6 +247,12 @@ public class IdeUtils
 	public static ImageIcon loadIconWithoutBorder(String resource, int size)
 	{
 		ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+		
+		if(size <= 0)
+		{
+			return icon;
+		}
+		
 		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 		img.getGraphics().drawImage(icon.getImage(), 0, 0, size, size, null);
 		
@@ -394,6 +400,15 @@ public class IdeUtils
 		c.setLocation(x, y);
 	}
 	
+	public static void maximize(Component c, int gap)
+	{
+		//double the gap, so that gap is maintained in all directions
+		gap = gap * 2;
+		
+		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		c.setSize(screenSize.width - gap, screenSize.height - gap);
+	}
+
 	public static void autowireBean(ApplicationContext applicationContext, Object bean)
 	{
 		applicationContext.getAutowireCapableBeanFactory().autowireBean(bean);

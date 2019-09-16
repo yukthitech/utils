@@ -91,6 +91,11 @@
 			</item>
 		</menu>
 
+		<menu label="Tools" mnemonic="T">
+			<item label="JXPath Sandbox" mnemonic="J" action="displayXpathSandbox" icon="/ui/icons/xpath-sandbox.png">
+			</item>
+		</menu>
+
 		<menu label="Help" mnemonic="H">
 			<item label="Help" mnemonic="F" icon="/ui/icons/new.png" action="help">
 				<short-key key="F1" />
@@ -98,6 +103,11 @@
 
 			<item label="Context Help" mnemonic="C" icon="/ui/icons/new.png" action="contextHelp">
 				<short-key key="F1" shift="true"/>
+			</item>
+			
+			<item label="-" />
+			
+			<item label="About Autox..." action="aboutAutoxIde">
 			</item>
 		</menu>
 	</menuBar>
@@ -109,6 +119,10 @@
 		<item icon="-" />
 
 		<item icon="/ui/icons/save.png" tooltip="Save File" action="saveFile" />
+		
+		<item icon="-" />
+		
+		<item icon="/ui/icons/xpath-sandbox.png" tooltip="JXPath Sandbox" action="displayXpathSandbox" />
 	</toolBar>
 
 	<popup-menu label="folderPopup">
