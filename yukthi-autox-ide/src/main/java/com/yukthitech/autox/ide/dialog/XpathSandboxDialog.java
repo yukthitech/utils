@@ -1,7 +1,6 @@
 package com.yukthitech.autox.ide.dialog;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -17,10 +16,14 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.lang3.StringUtils;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -52,12 +55,34 @@ public class XpathSandboxDialog extends JDialog
 	private final JTextField xpathFld = new JTextField();
 	private final JButton btnEvaluate = new JButton("Evaluate");
 	private final JCheckBox multiValuedCbox = new JCheckBox("Multi Valued");
+	private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+	private final JPanel panel_5 = new JPanel();
+	private final JScrollPane scrollPane = new JScrollPane();
+	private final JTextPane helpPane = new JTextPane();
+	
+	private String htmlContent;
 
 	/**
 	 * Create the dialog.
 	 */
 	public XpathSandboxDialog()
 	{
+		try
+		{
+			htmlContent = IOUtils.toString( XpathSandboxDialog.class.getResourceAsStream("/help/xpath-help.html") );
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while loading help content", ex);
+		}
+		
+		setTitle("JXPath Sandbox");
+		setBounds(100, 100, 958, 597);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(new BorderLayout(0, 0));
+
+		contentPanel.add(tabbedPane, BorderLayout.CENTER);
 		xpathFld.setMargin(new Insets(5, 5, 5, 5));
 		xpathFld.addKeyListener(new KeyAdapter()
 		{
@@ -72,15 +97,8 @@ public class XpathSandboxDialog extends JDialog
 		});
 		xpathFld.setFont(new Font("Tahoma", Font.BOLD, 11));
 		xpathFld.setColumns(10);
-		setTitle("JXPath Sandbox");
-		setBounds(100, 100, 958, 597);
-		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		contentPanel.setLayout(new BorderLayout(0, 0));
+		tabbedPane.addTab("Evaluator", null, splitPane, null);
 		splitPane.setResizeWeight(0.3);
-
-		contentPanel.add(splitPane, BorderLayout.CENTER);
 
 		splitPane.setLeftComponent(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -194,24 +212,16 @@ public class XpathSandboxDialog extends JDialog
 		outputJsonFld.setCodeFoldingEnabled(true);
 
 		textScrollPane_1.setViewportView(outputJsonFld);
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				JButton okButton = new JButton("Close");
-				okButton.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						closeDialog();
-					}
-				});
-				okButton.setActionCommand("OK");
-				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
-			}
-		}
+
+		tabbedPane.addTab("Help", null, panel_5, null);
+		panel_5.setLayout(new BorderLayout(0, 0));
+
+		panel_5.add(scrollPane, BorderLayout.CENTER);
+		helpPane.setContentType("text/html");
+		helpPane.setEditable(false);
+		helpPane.setText(htmlContent);
+
+		scrollPane.setViewportView(helpPane);
 	}
 
 	private void evaluateXpath()
@@ -302,10 +312,5 @@ public class XpathSandboxDialog extends JDialog
 	public void display()
 	{
 		super.setVisible(true);
-	}
-	
-	private void closeDialog()
-	{
-		super.setVisible(false);
 	}
 }

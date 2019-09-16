@@ -16,7 +16,7 @@ public class ToolActions
 	@Action
 	public void displayXpathSandbox()
 	{
-		IdeUtils.maximize(xpathSandboxDialog, 20);
+		IdeUtils.maximize(xpathSandboxDialog, 50);
 		IdeUtils.centerOnScreen(xpathSandboxDialog);
 		xpathSandboxDialog.display();
 	}
