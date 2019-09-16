@@ -38,9 +38,10 @@ public class ExpressionParserContext
 	 *
 	 * @param context the context
 	 */
-	public ExpressionParserContext(AutomationContext context)
+	public ExpressionParserContext(AutomationContext context, Object currentValue)
 	{
 		this.automationContext = context;
+		this.currentValue = currentValue;
 	}
 
 	/**

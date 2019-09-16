@@ -11,6 +11,17 @@
 				)
 			</query>
 		</s:sql-ddl-query>
+
+		<s:sql-ddl-query dataSourceName="dataSource">
+			<query>
+				CREATE TABLE LOB_TABLE
+				(
+					NAME	VARCHAR(100),
+					BDATA	BLOB,
+					CDATA	CLOB
+				)
+			</query>
+		</s:sql-ddl-query>
 	</setup>
 
 	<cleanup>
@@ -18,6 +29,9 @@
 	
 		<s:sql-ddl-query dataSourceName="dataSource">
 			<query>DROP TABLE EMPLOYEE</query>
+		</s:sql-ddl-query>
+		<s:sql-ddl-query dataSourceName="dataSource">
+			<query>DROP TABLE LOB_TABLE</query>
 		</s:sql-ddl-query>
 	</cleanup>
 </testData>

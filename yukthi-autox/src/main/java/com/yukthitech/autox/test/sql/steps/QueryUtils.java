@@ -11,6 +11,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.dbutils.QueryRunner;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.expr.ExpressionFactory;
 
 /**
  * Common query utility methods.
@@ -43,15 +45,27 @@ public class QueryUtils
 		Object value = null;
 		
 		StringBuffer buffer = new StringBuffer();
+		String expression = null;
 		
 		while(matcher.find())
 		{
-			try
+			expression = matcher.group(1);
+			
+			if(IAutomationConstants.EXPRESSION_PATTERN.matcher(expression).find() ||
+					IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(expression).find()
+					)
 			{
-				value = PropertyUtils.getProperty(context, matcher.group(1));
-			}catch(Exception ex)
+				value = ExpressionFactory.getExpressionFactory().parseExpression(context, expression);
+			}
+			else
 			{
-				value = null;
+				try
+				{
+					value = PropertyUtils.getProperty(context, expression);
+				}catch(Exception ex)
+				{
+					value = null;
+				}
 			}
 			
 			paramMap.put(matcher.group(1), value);

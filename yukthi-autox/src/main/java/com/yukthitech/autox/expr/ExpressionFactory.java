@@ -201,6 +201,11 @@ public class ExpressionFactory
 	
 	public Object parseExpression(AutomationContext context, Object expressionObj)
 	{
+		return parseExpression(context, expressionObj, null);
+	}
+	
+	public Object parseExpression(AutomationContext context, Object expressionObj, Object initValue)
+	{
 		if(!(expressionObj instanceof String))
 		{
 			return expressionObj;
@@ -215,7 +220,7 @@ public class ExpressionFactory
 			
 		
 		Object result = null;
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, initValue);
 		ObjectWrapper<Boolean> expressionParsed = new ObjectWrapper<Boolean>(true);
 		
 		List<String> lst = parseExpressionTokens(expression);
@@ -359,7 +364,12 @@ public class ExpressionFactory
 	
 	public void removeByExpression(AutomationContext context, String expression)
 	{
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		this.removeByExpression(context, expression, null);
+	}
+	
+	public void removeByExpression(AutomationContext context, String expression, Object initValue)
+	{
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, initValue);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		ExecutionLogger exeLogger = context.getExecutionLogger();
 		
@@ -384,7 +394,12 @@ public class ExpressionFactory
 	
 	public void setExpressionValue(AutomationContext context, String expression, Object value)
 	{
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context);
+		this.setExpressionValue(context, expression, value, null);
+	}
+	
+	public void setExpressionValue(AutomationContext context, String expression, Object value, Object initValue)
+	{
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, initValue);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		ExecutionLogger exeLogger = context.getExecutionLogger();
 		

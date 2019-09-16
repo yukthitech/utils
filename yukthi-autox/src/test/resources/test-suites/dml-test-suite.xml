@@ -145,5 +145,32 @@
 				<s:assert-equals actual="attr: empId" expected="int: 1"/>
 			</wrap:validations>
 		</testCase>
+
+		<testCase name="lobTest">
+			<description>
+				Checks wether insertion of clob and blob is working as expected or not
+			</description>
+		
+			<s:sql-multi-dml-query dataSourceName="dataSource">
+				<query>
+					INSERT INTO LOB_TABLE(NAME, BDATA) VALUES ('bdata1', ?{expr: resBlob('/data/data.json')})
+				</query>
+				<query>
+					INSERT INTO LOB_TABLE(NAME, CDATA) VALUES ('cdata1', ?{expr: resClob('/data/data.json')})
+				</query>
+			</s:sql-multi-dml-query>
+
+			<s:sql-assert-value dataSourceName="dataSource" expectedValue="res(template=false): /data/data.json" convertExpression="json: $">
+				<query>
+					SELECT BDATA FROM LOB_TABLE WHERE NAME = 'bdata1'
+				</query>
+			</s:sql-assert-value>
+
+			<s:sql-assert-value dataSourceName="dataSource" expectedValue="res(template=false): /data/data.json" convertExpression="json: $">
+				<query>
+					SELECT CDATA FROM LOB_TABLE WHERE NAME = 'cdata1'
+				</query>
+			</s:sql-assert-value>
+		</testCase>
 	</testSuite>
 </testData>

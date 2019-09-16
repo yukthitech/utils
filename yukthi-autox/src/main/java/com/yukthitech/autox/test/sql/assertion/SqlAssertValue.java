@@ -23,6 +23,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.DbPlugin;
+import com.yukthitech.autox.expr.ExpressionFactory;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.steps.QueryUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -52,7 +53,15 @@ public class SqlAssertValue extends AbstractValidation
 	 */
 	@Param(description = "Expected value. Which will compared with value from db.", sourceType = SourceType.EXPRESSION)
 	private Object expectedValue;
+	
+	@Param(description = "Expression to be used on query result, before comparision. Default: null", required = false)
+	private String convertExpression;
 
+	public void setConvertExpression(String convertExpression)
+	{
+		this.convertExpression = convertExpression;
+	}
+	
 	/**
 	 * Sets the name of the data source to use.
 	 *
@@ -149,12 +158,19 @@ public class SqlAssertValue extends AbstractValidation
 						return null;
 					}
 					
-					return rs.getObject(1);
+					Object res = rs.getObject(1);
+
+					if(convertExpression != null)
+					{
+						res = ExpressionFactory.getExpressionFactory().parseExpression(context, convertExpression, res);
+					}
+					
+					return res;
 				}
 			};
 			
 			Object res = QueryUtils.getQueryRunner().query(connection, processedQuery, rsHandler);
-
+			
 			if(!Objects.equals(expectedValue, res))
 			{
 				exeLogger.error("Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));

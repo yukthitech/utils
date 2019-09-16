@@ -1,6 +1,11 @@
 package com.yukthitech.autox.common;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import org.apache.commons.jxpath.JXPathContext;
@@ -167,5 +172,43 @@ public class CommonFreeMarkerMethods
 	{
 		AutomationContext.getInstance().setAttribute(attrName, value);
 		return "";
+	}
+	
+	@FreeMarkerMethod(
+			description = "Used to convert specified data into a input stream. Supported parameter types - CharSequence, byte[].",
+			returnDescription = "Converted input stream."
+			)
+	public static InputStream toStream(Object val)
+	{
+		if(val instanceof byte[])
+		{
+			return new ByteArrayInputStream((byte[]) val);
+		}
+		
+		if(val instanceof CharSequence)
+		{
+			return new ByteArrayInputStream( val.toString().getBytes() );
+		}
+		
+		throw new InvalidArgumentException("Invalid object (%s) specified for conversion to stream", val.getClass().getName());
+	}
+
+	@FreeMarkerMethod(
+			description = "Used to convert specified data into a reader. Supported parameter types - CharSequence, byte[].",
+			returnDescription = "Converted input stream."
+			)
+	public static Reader toReader(Object val)
+	{
+		if(val instanceof byte[])
+		{
+			return new InputStreamReader( new ByteArrayInputStream((byte[]) val) );
+		}
+		
+		if(val instanceof CharSequence)
+		{
+			return new StringReader( val.toString() );
+		}
+		
+		throw new InvalidArgumentException("Invalid object (%s) specified for conversion to reader", val.getClass().getName());
 	}
 }

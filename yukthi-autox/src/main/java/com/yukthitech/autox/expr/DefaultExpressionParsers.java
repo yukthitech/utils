@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +38,7 @@ public class DefaultExpressionParsers
 {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
-	@ExpressionParser(type = "prop", description = "Parses specified expression as bean property on context.", example = "prop: attr.bean.value1")
+	@ExpressionParser(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", example = "prop: attr.bean.value1")
 	public IPropertyPath propertyParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -118,7 +120,7 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "xpath", description = "Parses specified expression as xpath on context.", example = "xpath: /attr/bean/value1",
+	@ExpressionParser(type = "xpath", description = "Parses specified expression as xpath on effective-context (context or current object in case of piping).", example = "xpath: /attr/bean/value1",
 			params = {
 					@ParserParam(name = "multi", type = "boolean", defaultValue = "false", description = "If true, list of matches will be returned"),
 				})
@@ -175,8 +177,39 @@ public class DefaultExpressionParsers
 			}
 		};
 	}
+	
+	private String getStringValue(ExpressionParserContext parserContext, String expression) throws Exception
+	{
+		if("$".equals(expression.trim()))
+		{
+			Object curVal = parserContext.getCurrentValue();
+			
+			if(curVal == null)
+			{
+				return null;
+			}
+			
+			if(curVal instanceof Clob)
+			{
+				Clob clob = (Clob) curVal;
+				return IOUtils.toString(clob.getAsciiStream());
+			}
+			
+			if(curVal instanceof Blob)
+			{
+				Blob clob = (Blob) curVal;
+				return IOUtils.toString(clob.getBinaryStream());
+			}
 
-	@ExpressionParser(type = "string", description = "Returns specified expression as stirng value after trimming.", example = "sring: str")
+			return curVal.toString().trim();
+		}
+		
+		return expression.trim();
+	}
+
+	@ExpressionParser(type = "string", description = "Returns specified expression as stirng value after triming. In case of '$', current value will be converted to string. "
+			+ "In case input object Blob/Clob, string value will be extracted from it.", 
+			example = "string: str")
 	public IPropertyPath strParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -184,12 +217,12 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				return expression.trim();
+				return getStringValue(parserContext, expression);
 			}
 		};
 	}
 
-	@ExpressionParser(type = "int", description = "Parses specified expression into int.", example = "int: 10")
+	@ExpressionParser(type = "int", description = "Parses specified expression into int. In case of '$', current value's string value will be parsed.", example = "int: 10")
 	public IPropertyPath intParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -197,13 +230,13 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				String expr = expression.trim();
+				String expr = getStringValue(parserContext, expression);
 				return Integer.parseInt(expr);
 			}
 		};
 	}
 
-	@ExpressionParser(type = "long", description = "Parses specified expression into long.", example = "long: 10")
+	@ExpressionParser(type = "long", description = "Parses specified expression into long. In case of '$', current value's string value will be parsed.", example = "long: 10")
 	public IPropertyPath longParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -211,12 +244,12 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				return Long.parseLong(expression.trim());
+				return Long.parseLong(getStringValue(parserContext, expression));
 			}
 		};
 	}
 
-	@ExpressionParser(type = "float", description = "Parses specified expression into float.", example = "float: 10.2")
+	@ExpressionParser(type = "float", description = "Parses specified expression into float. In case of '$', current value's string value will be parsed.", example = "float: 10.2")
 	public IPropertyPath floatParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -224,12 +257,12 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				return Float.parseFloat(expression.trim());
+				return Float.parseFloat(getStringValue(parserContext, expression));
 			}
 		};
 	}
 
-	@ExpressionParser(type = "double", description = "Parses specified expression into double.", example = "double: 10.2")
+	@ExpressionParser(type = "double", description = "Parses specified expression into double. In case of '$', current value's string value will be parsed.", example = "double: 10.2")
 	public IPropertyPath doubleParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -237,12 +270,14 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				return Double.parseDouble(expression.trim());
+				return Double.parseDouble(getStringValue(parserContext, expression));
 			}
 		};
 	}
 
-	@ExpressionParser(type = "boolean", description = "Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.", example = "boolean: True")
+	@ExpressionParser(type = "boolean", description = "Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.  "
+			+ "In case of '$', current value's string value will be parsed.", 
+			example = "boolean: True")
 	public IPropertyPath booleanParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -250,12 +285,14 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				return "true".equalsIgnoreCase(expression.trim());
+				return "true".equalsIgnoreCase(getStringValue(parserContext, expression));
 			}
 		};
 	}
 
-	@ExpressionParser(type = "date", description = "Parses specified expression into date.", example = "date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018")
+	@ExpressionParser(type = "date", description = "Parses specified expression into date. "
+			+ "In case of '$', current value's string value will be parsed.", 
+			example = "date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018")
 	public IPropertyPath dateParser(ExpressionParserContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -282,7 +319,7 @@ public class DefaultExpressionParsers
 				
 				try
 				{
-					return simpleDateFormat.parse(expression);
+					return simpleDateFormat.parse(getStringValue(parserContext, expression));
 				}catch(Exception ex)
 				{
 					throw new InvalidArgumentException("Specified date {} is not in specified format: {}", expression, format, ex);
@@ -291,7 +328,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type.", 
+	@ExpressionParser(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
+			+ "In case of '$', current value's string value will be parsed.", 
 			example = "list: val1, val2, val3")
 	public IPropertyPath listParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
@@ -300,7 +338,7 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				String parts[] = expression.trim().split("\\s*\\,\\s*");
+				String parts[] = getStringValue(parserContext, expression).split("\\s*\\,\\s*");
 				
 				if(exprType == null)
 				{
@@ -326,7 +364,8 @@ public class DefaultExpressionParsers
 	}
 
 	@ExpressionParser(type = "map", description = "Parses specified expression into map of strings (using comma as delimiter and = as delimiter for key and value). "
-			+ "If types specified, strings will be converted to specified type.", 
+			+ "If types specified, strings will be converted to specified type. "
+			+ "In case of '$', current value's string value will be parsed.", 
 			example = "map: key1 = val1, key2=val2, key3=val3")
 	public IPropertyPath mapParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
@@ -335,7 +374,7 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				String parts[] = expression.trim().split("\\s*\\,\\s*");
+				String parts[] = getStringValue(parserContext, expression).split("\\s*\\,\\s*");
 				Class<?> keyType = String.class;
 				Class<?> valType = String.class;
 				
@@ -427,14 +466,14 @@ public class DefaultExpressionParsers
 		//if the input stream needs to be loaded as template, parse the expressions
 		if("true".equalsIgnoreCase(parserContext.getParameter("template")))
 		{
-			logger.debug(null, "Processing input data as template: {}", name);
+			logger.debug("Processing input data as template: {}", name);
 			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
 		}
 		
 		//if input stream has to be loaded as simple text, simply return the current data string
 		if("true".equalsIgnoreCase(parserContext.getParameter("text")))
 		{
-			logger.debug(null, "Returning input data as string: {}", name);
+			logger.debug("Returning input data as string: {}", name);
 			return data;
 		}
 		
@@ -455,7 +494,7 @@ public class DefaultExpressionParsers
 		
 		if(name.toLowerCase().endsWith(".properties"))
 		{
-			logger.debug(null, "Processing input file as properties file: {}", name);
+			logger.debug("Processing input file as properties file: {}", name);
 			Properties prop = new Properties();
 			prop.load(is);
 			
@@ -464,7 +503,7 @@ public class DefaultExpressionParsers
 		
 		if(name.toLowerCase().endsWith(".json"))
 		{
-			logger.debug(null, "Processing input file as json file: {} [Type: {}]", name, type);
+			logger.debug("Processing input file as json file: {} [Type: {}]", name, type);
 			
 			if(type == null)
 			{
@@ -478,7 +517,7 @@ public class DefaultExpressionParsers
 		
 		if(name.toLowerCase().endsWith(".xml"))
 		{
-			logger.debug(null, "Processing input file as xml file: {} [Type: {}]", name, type);
+			logger.debug("Processing input file as xml file: {} [Type: {}]", name, type);
 			
 			Object res = null;
 			
@@ -559,7 +598,7 @@ public class DefaultExpressionParsers
 			{
 				String data = null;
 				
-				if("$".equals(expression))
+				if("$".equals(expression.trim()))
 				{
 					Object curVal = parserContext.getCurrentValue();
 					
@@ -600,7 +639,7 @@ public class DefaultExpressionParsers
 			{
 				byte data[] = null;
 				
-				if("$".equals(expression))
+				if("$".equals(expression.trim()))
 				{
 					Object curVal = parserContext.getCurrentValue();
 					
@@ -636,7 +675,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "json", description = "Parses specified expression as json string and loads it as object.", 
+	@ExpressionParser(type = "json", description = "Parses specified expression as json string and loads it as object. "
+			+ "In case of '$', current value's string value will be parsed.", 
 			example = "json: {\"a\": 2, \"b\": 3}")
 	public IPropertyPath jsonParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
@@ -645,24 +685,7 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
-				String data = null;
-				
-				if("$".equals(expression))
-				{
-					Object curVal = parserContext.getCurrentValue();
-					
-					if(curVal == null || !(curVal instanceof String))
-					{
-						throw new InvalidStateException("No/incompatible data found on the pipe input. Piped Input: {}", curVal);
-					}
-					
-					data = curVal.toString();
-				}
-				else
-				{
-					data = expression;
-				}
-				
+				String data = getStringValue(parserContext, expression);
 				Object object = loadInputStream(data, ".json", exprType, parserContext);
 				return object;
 			}
