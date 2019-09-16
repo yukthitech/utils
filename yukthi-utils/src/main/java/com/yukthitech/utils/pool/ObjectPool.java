@@ -55,7 +55,35 @@ public class ObjectPool<T>
 		this(type, Integer.MAX_VALUE);
 	}
 	
+	public ObjectPool(Class<T> type, T... initObjects)
+	{
+		if(initObjects == null || initObjects.length == 0)
+		{
+			throw new NullPointerException("No init objects specified for pooling.");
+		}
+		
+		this.type = type;
+		this.poolSizeLimit = 1;
+		addToPool(initObjects);
+	}
 	
+	public void addToPool(T... objects)
+	{
+		poolLock.lock();
+		
+		try
+		{
+			for(T object : objects)
+			{
+				this.freeObjects.add(object);
+				this.poolSizeLimit++;
+			}
+		}finally
+		{
+			poolLock.unlock();
+		}
+	}
+
 	/**
 	 * Creates and return new object of underlying type. 
 	 * 
