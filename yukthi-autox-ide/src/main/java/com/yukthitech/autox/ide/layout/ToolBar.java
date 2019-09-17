@@ -31,6 +31,11 @@ public class ToolBar
 		this.items.add(item);
 	}
 	
+	public void addDropDownItem(ToolBarDropDownIcon item)
+	{
+		this.items.add(item);
+	}
+
 	public JToolBar toJToolBar(ActionCollection actionCollection)
 	{
 		JToolBar toolBar = new JToolBar();

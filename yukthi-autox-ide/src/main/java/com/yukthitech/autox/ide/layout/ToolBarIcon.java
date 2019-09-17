@@ -1,12 +1,14 @@
 package com.yukthitech.autox.ide.layout;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.swing.ToolbarButton;
 
 /**
  * Toolbar icon.
@@ -15,19 +17,44 @@ import com.yukthitech.ccg.xml.util.Validateable;
 public class ToolBarIcon implements Validateable
 {
 	/**
+	 * Used to access this icon directly.
+	 */
+	private String id;
+	
+	/**
 	 * Icon to be displayed.
 	 */
-	private String icon;
+	protected String icon;
 	
 	/**
 	 * Tooltip for the button.
 	 */
-	private String tooltip;
+	protected String tooltip;
 	
 	/**
 	 * Action to be invoked.
 	 */
-	private String action;
+	protected String action;
+	
+	/**
+	 * Gets the used to access this icon directly.
+	 *
+	 * @return the used to access this icon directly
+	 */
+	public String getId()
+	{
+		return id;
+	}
+
+	/**
+	 * Sets the used to access this icon directly.
+	 *
+	 * @param id the new used to access this icon directly
+	 */
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
 	/**
 	 * Gets the icon to be displayed.
@@ -89,6 +116,9 @@ public class ToolBarIcon implements Validateable
 		this.action = action;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{
@@ -98,10 +128,17 @@ public class ToolBarIcon implements Validateable
 		}
 	}
 	
-	public JButton toButton(ActionCollection actionCollection)
+	/**
+	 * To button.
+	 *
+	 * @param actionCollection the action collection
+	 * @return the j component
+	 */
+	public JComponent toButton(ActionCollection actionCollection)
 	{
-		JButton button = new JButton();
+		JButton button = new ToolbarButton();
 		button.setIcon(IdeUtils.loadIcon(icon, 20));
+		button.setBackground(null);
 		button.setToolTipText(tooltip);
 		button.setBorder(null);
 

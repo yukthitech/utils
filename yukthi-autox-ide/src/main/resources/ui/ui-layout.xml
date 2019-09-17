@@ -123,6 +123,12 @@
 		<item icon="-" />
 		
 		<item icon="/ui/icons/xpath-sandbox.png" tooltip="JXPath Sandbox" action="displayXpathSandbox" />
+		
+		<item icon="-" />
+		
+		<drop-down-item id="runList" icon="/ui/icons/run.png" tooltip="Run..."/>
+		
+		<item icon="-" />
 	</toolBar>
 
 	<popup-menu label="folderPopup">
