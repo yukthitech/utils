@@ -12,7 +12,7 @@ public class TXmlFileParser
 				+ "\n<child>"
 				+ "\n </child>"
 				+ "\n</parent></root>";
-		XmlFile file = XmlFileParser.parse(content);
+		XmlFile file = XmlFileParser.parse(content, null);
 		
 		Element root = file.getRootElement();
 		Assert.assertEquals(root.getStartLocation().getStartLineNumber(), 1);

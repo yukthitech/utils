@@ -101,7 +101,7 @@ public class XmlLoctionAnalyzer
 		
 		try
 		{
-			xmlFile = XmlFile.parse(contentWithoutToken + "\n\n", validPos);
+			xmlFile = XmlFile.parse(contentWithoutToken + "\n\n", validPos, null);
 		}catch(Exception ex)
 		{
 			return null;
@@ -164,7 +164,7 @@ public class XmlLoctionAnalyzer
 	private static XmlFileLocation getAttributeLocation(String xmlContent, char chArr[], int pos, int elemStart, int elemEnd, String lastToken) throws Exception
 	{
 		//int parentLineCount = IdeUtils.getLineCount(chArr, elemStart);
-		XmlFile xmlFile = XmlFile.parse(xmlContent.substring(0, elemStart - 1) + "\n\n", elemStart);
+		XmlFile xmlFile = XmlFile.parse(xmlContent.substring(0, elemStart - 1) + "\n\n", elemStart, null);
 		Element parentElement = xmlFile.getLastElement( elemStart );
 		
 		String elementContent = xmlContent.substring(elemStart + 1, pos);

@@ -19,7 +19,7 @@ public class ErrorHighLigherPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 	
 	private static Color WARNING_BG = new Color(252, 241, 202);
-	private static Color WARNING_BORDER = new Color(246, 211, 87);
+	public static Color WARNING_BORDER = new Color(0, 193, 0);
 	
 	private static Color ERROR_BG = new Color(249, 186, 218);
 	private static Color ERROR_BORDER = new Color(253, 49, 152);

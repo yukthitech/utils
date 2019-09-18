@@ -1,8 +1,6 @@
 package com.yukthitech.autox.ide.xmlfile;
 
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
+import com.yukthitech.autox.ide.FileParseCollector;
 
 public class XmlFile
 {
@@ -33,13 +31,13 @@ public class XmlFile
 		return rootElement.getElement(withName.toLowerCase(), curLineNo);
 	}
 	
-	public static XmlFile parse(String content, int validPosition) throws Exception
+	public static XmlFile parse(String content, int validPosition, FileParseCollector collector) throws Exception
 	{
 		boolean partial = (validPosition > 0);
 		
 		try
 		{
-			return XmlFileParser.parse(content);
+			return XmlFileParser.parse(content, collector);
 		}catch(XmlParseException ex)
 		{
 			if(!partial)
@@ -113,10 +111,5 @@ public class XmlFile
 	public String toString()
 	{
 		return super.toString() + " - " + rootElement.toString();
-	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		XmlFile.parse(FileUtils.readFileToString(new File("./dml-test-suite.xml")), -1);
 	}
 }

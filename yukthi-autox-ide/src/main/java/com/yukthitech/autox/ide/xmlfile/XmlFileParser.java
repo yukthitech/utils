@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.ide.FileParseCollector;
+import com.yukthitech.autox.ide.editor.FileParseMessage;
 import com.yukthitech.autox.ide.xmlfile.PatternScanner.ScannerMatch;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -114,12 +116,25 @@ public class XmlFileParser
 	
 	private String content;
 	
-	private XmlFileParser(String content)
+	private FileParseCollector collector;
+	
+	private XmlFileParser(String content, FileParseCollector collector)
 	{
 		this.content = content;
+		this.collector = collector;
 		this.chArr = content.toCharArray();
 		this.lineRanges = fetchLineRanges(chArr);
 		this.scanner = new PatternScanner(content);
+	}
+	
+	private boolean isXmlChar(char ch)
+	{
+		if(ch == '\n' || ch == '\r' || ch == '\t')
+		{
+			return true;
+		}
+		
+		return (ch >= 32 && ch <= 126);
 	}
 	
 	private Range[] fetchLineRanges(char content[])
@@ -135,6 +150,12 @@ public class XmlFileParser
 				ranges.add(new Range(line, start, i));
 				start = i + 1;
 				line++;
+				continue;
+			}
+			
+			if(collector != null && !isXmlChar(content[i]))
+			{
+				collector.addMessage(new FileParseMessage(MessageType.WARNING, "Non ASCII or non-printable character is used.", line, i, i + 1));
 			}
 		}
 		
@@ -444,14 +465,14 @@ public class XmlFileParser
 		return rootElement;
 	}
 	
-	public static XmlFile parse(String content)
+	public static XmlFile parse(String content, FileParseCollector collector)
 	{
 		if(StringUtils.isBlank(content))
 		{
 			return null;
 		}
 		
-		XmlFileParser parser = new XmlFileParser(content);
+		XmlFileParser parser = new XmlFileParser(content, collector);
 		Element rootElement = parser.parseElement();
 		return new XmlFile(rootElement);
 	}
@@ -459,7 +480,7 @@ public class XmlFileParser
 	public static void main(String[] args) throws Exception
 	{
 		String content = FileUtils.readFileToString(new File("./dml-test-suite.xml"));
-		XmlFile xmlFile = XmlFileParser.parse(content);
+		XmlFile xmlFile = XmlFileParser.parse(content, new FileParseCollector());
 		
 		StringBuilder builder = new StringBuilder();
 		xmlFile.getRootElement().toText("", builder);

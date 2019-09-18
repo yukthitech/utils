@@ -61,7 +61,7 @@ public class XmlIdeFileManager extends AbstractIdeFileManager
 		
 		try
 		{
-			xmlFile = XmlFile.parse(content, -1);
+			xmlFile = XmlFile.parse(content, -1, collector);
 		}catch(XmlParseException ex)
 		{
 			xmlFile = ex.getXmlFile();

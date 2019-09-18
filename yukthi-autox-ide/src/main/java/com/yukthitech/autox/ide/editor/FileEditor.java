@@ -93,8 +93,6 @@ public class FileEditor extends JPanel
 	
 	private ErrorHighLigherPanel errorHighLigherPanel;
 	
-	private AutoCompletion autoCompletion = null;
-	
 	public FileEditor(Project project, File file)
 	{
 		scrollPane = new RTextScrollPane(new RSyntaxTextArea());
@@ -219,8 +217,6 @@ public class FileEditor extends JPanel
 				// show documentation dialog box
 				ac.setShowDescWindow(true);
 				ac.install(syntaxTextArea);
-				
-				this.autoCompletion = ac;
 				
 				logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
 			}
@@ -373,7 +369,7 @@ public class FileEditor extends JPanel
 				
 				if(message.hasValidOffsets())
 				{
-					highlighter.addHighlight(message.getStartOffset(), message.getEndOffset(), new SquiggleUnderlineHighlightPainter(Color.yellow));
+					highlighter.addHighlight(message.getStartOffset(), message.getEndOffset(), new SquiggleUnderlineHighlightPainter(ErrorHighLigherPanel.WARNING_BORDER));
 				}
 			}
 			

@@ -72,7 +72,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 		
 		try
 		{
-			xmlFile = XmlFile.parse(content, -1);
+			xmlFile = XmlFile.parse(content, -1, collector);
 		}catch(XmlParseException ex)
 		{
 			xmlFile = ex.getXmlFile();
@@ -189,7 +189,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 
 		try
 		{
-			XmlFile xmlFile = XmlFile.parse(content, -1);
+			XmlFile xmlFile = XmlFile.parse(content, -1, new FileParseCollector());
 			return xmlFile;
 		} catch(Exception ex)
 		{
