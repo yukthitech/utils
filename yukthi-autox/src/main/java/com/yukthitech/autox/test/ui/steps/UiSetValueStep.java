@@ -39,7 +39,7 @@ public class UiSetValueStep extends AbstractUiStep
 	/**
 	 * Value to be filled. 
 	 */
-	@Param(description = "Value to be filled with")
+	@Param(description = "Value to be filled with. Defaults to empty string.", required = false)
 	private String value;
 
 	/**
@@ -75,6 +75,11 @@ public class UiSetValueStep extends AbstractUiStep
 	public boolean execute(AutomationContext context, ExecutionLogger logger)
 	{
 		logger.debug("Populating field {} with value - {}", getLocatorWithParent(locator), value);
+		
+		if(value == null)
+		{
+			value = "";
+		}
 		
 		if(!UiAutomationUtils.populateField(context, parentElement, locator, value))
 		{

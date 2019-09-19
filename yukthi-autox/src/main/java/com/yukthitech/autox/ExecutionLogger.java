@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.monitor.MonitorLogMessage;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.autox.test.log.LogLevel;
-import com.yukthitech.utils.MessageFormatter;
 
 /**
  * A simple internal logger to consolidate execution messages in test result.
@@ -23,6 +24,8 @@ public class ExecutionLogger
 	private static Logger logger = LogManager.getLogger(ExecutionLogger.class);
 
 	private static int fileIndex = 1;
+	
+	private static final Pattern PARAM_PATTERN = Pattern.compile("\\{(\\d*)\\}");
 	
 	/**
 	 * Context as part of which this logger is created.
@@ -103,9 +106,88 @@ public class ExecutionLogger
 		return automationContext.getExecutionStack().getCurrentLocation();
 	}
 	
+	/**
+	 * Replaces the args values in "message" using patterns mentioned below and same will be returned. 
+	 * 
+	 * {} will match with the current index argument. If index is greater than provided values then &lt;undefined&gt; string will be used.
+	 * {&lt;idx&gt;} can be used to refer to argument at particular index. Helpful in building messages which uses same argument multiple times.
+	 * 
+	 * @param message Message string with expressions
+	 * @param args Values for expression
+	 * @return Formatted string
+	 */
+	public static String format(String message, Object... args)
+	{
+		//when message is null, return null
+		if(message == null)
+		{
+			return null;
+		}
+		
+		//when args is null, assume empty values
+		if(args == null)
+		{
+			args = new Object[0];
+		}
+		
+		Matcher matcher = PARAM_PATTERN.matcher(message);
+		StringBuffer buffer = new StringBuffer();
+		
+		int loopIndex = 0;
+		int argIndex = 0;
+		Object arg = null;
+		
+		//loop through pattern matches
+		while(matcher.find())
+		{
+			//if index is mentioned in pattern
+			if(org.apache.commons.lang3.StringUtils.isNotBlank(matcher.group(1)))
+			{
+				argIndex = Integer.parseInt(matcher.group(1));
+			}
+			//if index is not specified, use current loop index
+			else
+			{
+				argIndex = loopIndex;
+			}
+			
+			//if the index is within provided arguments length
+			if(argIndex < args.length)
+			{
+				arg = args[argIndex];
+			}
+			//if the index is greater than available values
+			else
+			{
+				arg = "<undefined>";
+			}
+			
+			String argStr = null;
+			
+			//if argument value is null
+			if(arg == null)
+			{
+				argStr = "null";
+			}
+			else
+			{
+				argStr = arg.toString();
+				argStr = (argStr.length() > 1000) ? (argStr.substring(0, 1000) + "...") : argStr;
+			}
+
+			argStr = Matcher.quoteReplacement(argStr);
+			
+			matcher.appendReplacement(buffer, argStr);
+			loopIndex++;
+		}
+		
+		matcher.appendTail(buffer);
+		return buffer.toString();
+	}
+
 	private String buildMessage(String mssgTemplate, Object... args)
 	{
-		String finalMssg = MessageFormatter.format(mssgTemplate, args);
+		String finalMssg = format(mssgTemplate, args);
 		
 		if(mode != null)
 		{
