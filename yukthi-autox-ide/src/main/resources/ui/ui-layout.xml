@@ -68,6 +68,11 @@
 			<item label="Open Resource" action="openResource">
 				<short-key ctrl="true" shift="true" key="O"/>
 			</item>
+
+			<item label="-" />
+
+			<item label="Change Editor Font..." action="changeEditorFont">
+			</item>
 		</menu>
 
 		<menu label="Run" mnemonic="R">

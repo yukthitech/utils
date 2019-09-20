@@ -2,6 +2,7 @@ package com.yukthitech.autox.ide.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -226,6 +227,11 @@ public class FileEditor extends JPanel
 		syntaxTextArea.setCodeFoldingEnabled(true);
 
 		fileContentChanged(false);
+	}
+	
+	public void setEditorFont(Font font)
+	{
+		syntaxTextArea.setFont(font);
 	}
 	
 	public RSyntaxTextArea getTextArea()

@@ -324,6 +324,7 @@ public class FindAndReplaceDialog extends JDialog
 			fldFindStr.setText(defText);
 		}
 		
+		fldFindStr.selectAll();
 		fldFindStr.requestFocus();
 		fldReplaceStr.setText("");
 		this.setVisible(true);

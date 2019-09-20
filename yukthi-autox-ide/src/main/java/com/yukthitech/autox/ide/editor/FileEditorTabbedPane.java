@@ -1,5 +1,6 @@
 package com.yukthitech.autox.ide.editor;
 
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -33,6 +34,8 @@ import com.yukthitech.autox.ide.model.FileState;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
+import com.yukthitech.autox.ide.services.IdeSettingChangedEvent;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -55,6 +58,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	private Map<String, FileEditor> pathToEditor = new HashMap<>();
 	
 	private int currentTabIndex = -1;
+	
+	private Font editorFont = null;
 	
 	@PostConstruct
 	private void init()
@@ -97,6 +102,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 						fileEditor.setCaretPosition(fileState.getCursorPositon());
 					}
 				}
+				
+				changeEditorFont(state.getIdeSettings().getEditorFont());
 			}
 			
 			@Override
@@ -128,6 +135,30 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				ideContext.getProxy().activeFileChanged(editor.getFile(), FileEditorTabbedPane.this);
 			}
 		});
+	}
+	
+	@IdeEventHandler
+	public void onIdeSettingsChanged(IdeSettingChangedEvent event)
+	{
+		if(event.getIdeSettings().getEditorFont() != editorFont)
+		{
+			changeEditorFont(event.getIdeSettings().getEditorFont());
+		}
+	}
+	
+	private void changeEditorFont(Font font)
+	{
+		if(font == null)
+		{
+			return;
+		}
+		
+		this.editorFont = font;
+		
+		for(FileEditor editor : pathToEditor.values())
+		{
+			editor.setEditorFont(editorFont);
+		}
 	}
 	
 	private void saveFilesState(IdeState state) throws IOException
@@ -188,6 +219,10 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		fileEditor = new FileEditor(project, file);
 		IdeUtils.autowireBean(applicationContext, fileEditor);
 		
+		if(editorFont != null)
+		{
+			fileEditor.setEditorFont(editorFont);
+		}
 		
 		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
 		IdeUtils.autowireBean(applicationContext, fileEditorTab);

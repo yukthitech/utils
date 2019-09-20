@@ -30,6 +30,10 @@ import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.services.IdeClosingEvent;
+import com.yukthitech.autox.ide.services.IdeEventManager;
+import com.yukthitech.autox.ide.services.IdeOpeningEvent;
+import com.yukthitech.autox.ide.services.IdeStateManager;
 import com.yukthitech.autox.ide.views.ConsolePanel;
 import com.yukthitech.autox.ide.views.report.ReportPanel;
 
@@ -82,6 +86,12 @@ public class AutoxIDE extends JFrame
 	@Autowired
 	private ContextAttributesPanel contextAttributePanel;
 	
+	@Autowired
+	private IdeEventManager ideEventManager;
+	
+	@Autowired
+	private IdeStateManager ideStateManager;
+
 	/**
 	 * Top panel to hold tool bar and env panel.
 	 */
@@ -132,7 +142,15 @@ public class AutoxIDE extends JFrame
 	private void initIde()
 	{
 		init();
-		loadState();
+		
+		//load previous state from file
+		IdeState ideState = ideStateManager.getState();
+		
+		//old way of setting loaded distributed state
+		ideContext.getProxy().loadState(ideState);
+		
+		//sent the opening event
+		ideEventManager.processEvent(new IdeOpeningEvent(ideState));
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -279,25 +297,20 @@ public class AutoxIDE extends JFrame
 	@Action
 	public void closeIde()
 	{
-		IdeState ideState = new IdeState();
-		ideContext.getProxy().saveState(ideState);
-		ideState.save();
+		logger.debug("Closing the ide..");
 		
-		logger.debug("Saving ide state..");
+		IdeState ideState = ideStateManager.getState();
+
+		//send the closing event
+		ideEventManager.processEvent(new IdeClosingEvent(ideState));
+		
+		//old way of getting distributed state
+		ideContext.getProxy().saveState(ideState);
+		
+		//save the final state
+		ideStateManager.saveState(ideState);
 		
 		System.exit(-1);
-	}
-	
-	private void loadState()
-	{
-		IdeState ideState = IdeState.load();
-		
-		if(ideState == null)
-		{
-			return;
-		}
-		
-		ideContext.getProxy().loadState(ideState);
 	}
 	
 	private synchronized void minimizeTabPane(MaximizableTabbedPane tabPane)

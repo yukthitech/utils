@@ -38,6 +38,11 @@ public class IdeState implements Serializable
 	private Map<String, Object> attributes = new HashMap<>();
 	
 	/**
+	 * Ide settings.
+	 */
+	private IdeSettings ideSettings = new IdeSettings();
+	
+	/**
 	 * Used for internal indexing.
 	 */
 	private transient Map<String, ProjectState> projectIndex = new HashMap<>();
@@ -69,6 +74,12 @@ public class IdeState implements Serializable
 	public ProjectState addOpenProject(Project project)
 	{
 		logger.debug("Adding project to ide state: {}", project.getName());
+		
+		//project index can be null, when the state is loaded from file
+		if(projectIndex == null)
+		{
+			projectIndex = new HashMap<>();
+		}
 		
 		ProjectState state = projectIndex.get(project.getName());
 		
@@ -103,6 +114,11 @@ public class IdeState implements Serializable
 		return this.attributes.get(name);
 	}
 	
+	public IdeSettings getIdeSettings()
+	{
+		return ideSettings;
+	}
+	
 	/**
 	 * Saves the current state of ide.
 	 */
@@ -118,6 +134,17 @@ public class IdeState implements Serializable
 	public static IdeState load()
 	{
 		IdeState savedState = (IdeState) IdeUtils.deserialize(IDE_STATE_FILE);
+		
+		if(savedState == null)
+		{
+			savedState = new IdeState();
+		}
+		
+		if(savedState.ideSettings == null)
+		{
+			savedState.ideSettings = new IdeSettings();
+		}
+		
 		return savedState;
 	}
 }
