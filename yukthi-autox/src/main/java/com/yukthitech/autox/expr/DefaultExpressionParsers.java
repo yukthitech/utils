@@ -9,10 +9,13 @@ import java.sql.Clob;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
@@ -329,15 +332,23 @@ public class DefaultExpressionParsers
 	}
 
 	@ExpressionParser(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
-			+ "In case of '$', current value's string value will be parsed.", 
+			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to list directly.", 
 			example = "list: val1, val2, val3")
 	public IPropertyPath listParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public Object getValue() throws Exception
 			{
+				Object curVal = parserContext.getCurrentValue();
+				
+				if(curVal instanceof Collection)
+				{
+					return new ArrayList<>((Collection) curVal);
+				}
+				
 				String parts[] = getStringValue(parserContext, expression).split("\\s*\\,\\s*");
 				
 				if(exprType == null)
@@ -352,6 +363,49 @@ public class DefaultExpressionParsers
 				
 				Class<?> elemType = CommonUtils.getClass(exprType[0]);
 				List<Object> resultLst = new ArrayList<>(parts.length);
+				
+				for(String part : parts)
+				{
+					resultLst.add( ConvertUtils.convert(part, elemType) );
+				}
+				
+				return resultLst;
+			}
+		};
+	}
+
+	@ExpressionParser(type = "set", description = "Parses specified expression into set of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
+			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to set directly.", 
+			example = "set: val1, val2, val3")
+	public IPropertyPath setParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			public Object getValue() throws Exception
+			{
+				Object curVal = parserContext.getCurrentValue();
+				
+				if(curVal instanceof Collection)
+				{
+					return new HashSet<>((Collection) curVal);
+				}
+				
+				String parts[] = getStringValue(parserContext, expression).split("\\s*\\,\\s*");
+				
+				if(exprType == null)
+				{
+					return CommonUtils.toSet(parts);
+				}
+				
+				if(exprType.length > 1)
+				{
+					throw new InvalidArgumentException("Multiple type parameters are specified for list conversion: {}", Arrays.toString(exprType));
+				}
+				
+				Class<?> elemType = CommonUtils.getClass(exprType[0]);
+				Set<Object> resultLst = new HashSet<>(parts.length);
 				
 				for(String part : parts)
 				{
