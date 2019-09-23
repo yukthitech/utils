@@ -23,6 +23,8 @@ import com.yukthitech.autox.test.log.LogLevel;
 public class ExecutionLogger
 {
 	private static Logger logger = LogManager.getLogger(ExecutionLogger.class);
+	
+	private static final String PROP_LOG_MAX_PROP_LEN = "autox.log.max.param.len";
 
 	private static int fileIndex = 1;
 	
@@ -47,11 +49,42 @@ public class ExecutionLogger
 	 * Mode to be prepended for every log message.
 	 */
 	private String mode;
+	
+	/**
+	 * Maximum parameter length to be allowed in log messages.
+	 */
+	private int maxParamLength = 1000;
 
 	public ExecutionLogger(AutomationContext automationContext, String executorName, String executorDescription)
 	{
 		this.automationContext = automationContext;
 		this.executionLogData = new ExecutionLogData(executorName, executorDescription);
+		
+		if(automationContext.getAppConfiguration() != null && automationContext.getAppConfiguration().getApplicationProperties() != null)
+		{
+			String logMaxParamLenStr = automationContext.getAppConfiguration().getApplicationProperties().getProperty(PROP_LOG_MAX_PROP_LEN);
+			
+			if(logMaxParamLenStr != null)
+			{
+				try
+				{
+					int maxLen = Integer.parseInt(logMaxParamLenStr);
+					
+					//max length should be min of 100
+					if(maxLen > 100)
+					{
+						this.maxParamLength = maxLen;
+					}
+					else
+					{
+						logger.warn("IGNORED: As the value specified by {} property is less than 100, it is ignored. Value specified: {}", PROP_LOG_MAX_PROP_LEN, maxLen);
+					}
+				}catch(Exception ex)
+				{
+					logger.warn("IGNORED ERROR: Invalid numerical value specified for {} property", PROP_LOG_MAX_PROP_LEN, ex);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -117,7 +150,7 @@ public class ExecutionLogger
 	 * @param args Values for expression
 	 * @return Formatted string
 	 */
-	public static String format(String message, Object... args)
+	private String format(String message, Object... args)
 	{
 		//when message is null, return null
 		if(message == null)
@@ -173,7 +206,7 @@ public class ExecutionLogger
 			else
 			{
 				argStr = arg.toString();
-				argStr = (argStr.length() > 1000) ? (argStr.substring(0, 1000) + "...") : argStr;
+				argStr = (argStr.length() > maxParamLength) ? (argStr.substring(0, maxParamLength) + "...") : argStr;
 			}
 
 			argStr = Matcher.quoteReplacement(argStr);
