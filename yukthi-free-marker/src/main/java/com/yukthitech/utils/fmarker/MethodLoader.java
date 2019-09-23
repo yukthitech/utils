@@ -94,7 +94,7 @@ class MethodLoader
 			{
 				if(!Arrays.equals(DIR_ATTR_TYPES, method.getParameterTypes()))
 				{
-					throw new InvalidStateException("For directive method {}.{} argument types are not as not expected. Expected argument types: {}", cls.getName(), method.getName(), DIR_ATTR_TYPES_STR);
+					throw new InvalidStateException("For directive method {}.{} argument types are not as expected. Expected argument types: {}", cls.getName(), method.getName(), DIR_ATTR_TYPES_STR);
 				}
 				
 				name = freeMarkerDirective.value();

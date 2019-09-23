@@ -143,9 +143,9 @@ public class LoadQueryRowBeanStep extends AbstractStep
 
 			String processedQuery = QueryUtils.extractQueryParams(query, context, paramMap, values);
 			
-			exeLogger.debug("On data-source '{}' executing query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, query, paramMap);
+			exeLogger.debug(false, "On data-source '{}' executing query: \n<code class='SQL'>{}</code> \n\nParams: {}", dataSourceName, query, paramMap);
 			
-			exeLogger.trace("On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
+			exeLogger.trace(false, "On data-source '{}' executing processed query: \n<code class='SQL'>{}</code> \nParams: {}", dataSourceName, processedQuery, values);
 
 			Object result = null;
 			Object valueArr[] = values.isEmpty() ? null : values.toArray();

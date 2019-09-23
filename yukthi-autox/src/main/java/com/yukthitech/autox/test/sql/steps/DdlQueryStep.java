@@ -76,7 +76,7 @@ public class DdlQueryStep extends AbstractStep
 			connection = dataSource.getConnection();
 			statement = connection.createStatement();
 			
-			exeLogger.debug("On data-source '{}' executing DDL query: \n <code class='SQL'>{}</code>", dataSourceName, query);
+			exeLogger.debug(false, "On data-source '{}' executing DDL query: \n <code class='SQL'>{}</code>", dataSourceName, query);
 			
 			statement.execute(query);
 		} catch(SQLException ex)

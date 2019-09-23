@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
@@ -210,5 +211,26 @@ public class CommonFreeMarkerMethods
 		}
 		
 		throw new InvalidArgumentException("Invalid object (%s) specified for conversion to reader", val.getClass().getName());
+	}
+	
+	@FreeMarkerMethod(
+			description = "Used to compare specified attribute with specified value and return appropiate result.",
+			returnDescription = "True or false value based on match."
+			)
+	public String compareAndGet(
+			@FmParam(name = "name", description = "Name of the attribute to check") String name, 
+			@FmParam(name = "value", description = "Expected value of the attribute") String value, 
+			@FmParam(name = "trueVal", description = "Value to be returned when the attribute value match with specified value") String trueVal, 
+			@FmParam(name = "falseVal", description = "Value to be returned when the attribute value DOES NOT match with specified value") String falseVal)
+	{
+		AutomationContext context = AutomationContext.getInstance();
+		String curVal = (String) context.getAttribute(name);
+		
+		if(Objects.equals(curVal, value))
+		{
+			return trueVal;
+		}
+		
+		return falseVal;
 	}
 }
