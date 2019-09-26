@@ -217,7 +217,7 @@ public class CommonFreeMarkerMethods
 			description = "Used to compare specified attribute with specified value and return appropiate result.",
 			returnDescription = "True or false value based on match."
 			)
-	public String compareAndGet(
+	public static String compareAndGet(
 			@FmParam(name = "name", description = "Name of the attribute to check") String name, 
 			@FmParam(name = "value", description = "Expected value of the attribute") String value, 
 			@FmParam(name = "trueVal", description = "Value to be returned when the attribute value match with specified value") String trueVal, 
