@@ -3,12 +3,8 @@ package com.yukthitech.autox.common;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
@@ -20,16 +16,6 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class StringFreeMarkerFunctions
 {
-	/**
-	 * Used to generate random numbers.
-	 */
-	private static Random random = new Random(System.currentTimeMillis());
-	
-	/**
-	 * Used to generate unique strings.
-	 */
-	private static AtomicInteger UQ_NUMBER_TRACKER = new AtomicInteger(1);
-	
 	@FreeMarkerMethod(
 			description = "Finds the first index of specified substring in specified string.",
 			returnDescription = "index of subbstring. If not found -1."
@@ -109,33 +95,6 @@ public class StringFreeMarkerFunctions
 			@FmParam(name = "radix", description = "Radix to be used for conversion") int radix)
 	{
 		return Integer.parseInt(value, radix);
-	}
-
-	@FreeMarkerMethod(
-			description = "Generates random int.",
-			returnDescription = "Random number"
-			)
-	public static int random()
-	{
-		return random.nextInt();
-	}
-
-	@FreeMarkerMethod(
-			description = "Generates random string with specified prefix.",
-			returnDescription = "Random string"
-			)
-	public static String randomString(
-			@FmParam(name = "prefix", description = "Prefix that will added to generated random string") String prefix)
-	{
-		GregorianCalendar today = new GregorianCalendar();
-		int dayOfYear = today.get(Calendar.DAY_OF_YEAR);
-		int minOfDay = today.get(Calendar.HOUR_OF_DAY) * 60 + today.get(Calendar.MINUTE);
-		int minOfYear = dayOfYear * (24 * 60) + minOfDay;
-
-		prefix = prefix + Long.toHexString(minOfYear + random.nextInt(10000)) + Long.toHexString(UQ_NUMBER_TRACKER.incrementAndGet());
-		prefix = prefix.toLowerCase();
-
-		return prefix;
 	}
 
 	@FreeMarkerMethod(

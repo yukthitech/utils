@@ -26,7 +26,7 @@ public class HttpPart implements Serializable, Validateable
 	/**
 	 * Value for the part.
 	 */
-	@Param(name = "value", description = "Value for the part. Can be object or resource source.", required = true, sourceType = SourceType.RESOURCE)
+	@Param(name = "value", description = "Value for the part. Can be object or resource source.", required = true, sourceType = SourceType.EXPRESSION)
 	private Object value;
 	
 	/**

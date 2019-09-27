@@ -40,7 +40,7 @@ public class FillFormStep extends AbstractStep
 	 * Data to be filled. All the fields matching with the property names of
 	 * specified bean will be searched and populated with corresponding data.
 	 */
-	@Param(description = "Data to populate in the form", sourceType = SourceType.OBJECT)
+	@Param(description = "Data to populate in the form", sourceType = SourceType.EXPRESSION)
 	private Object data;
 	
 	/**

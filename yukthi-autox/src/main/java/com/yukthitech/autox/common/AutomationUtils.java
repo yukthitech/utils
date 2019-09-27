@@ -279,12 +279,6 @@ public class AutomationUtils
 				
 				param = field.getAnnotation(Param.class);
 				
-				//skip field parsing if object type parameters, as they will processed as part of step execution
-				if(param != null && param.sourceType() == SourceType.OBJECT)
-				{
-					continue;
-				}
-				
 				fieldValue = replaceExpressions(templateName + "." + field.getName(), context, fieldValue);
 				field.set(object, fieldValue);
 				

@@ -17,11 +17,6 @@ public enum SourceType
 	RESOURCE,
 	
 	/**
-	 * Indicates param is object resource.
-	 */
-	OBJECT,
-	
-	/**
 	 * Indicates param is expression type. And will be processed by framework before
 	 * step execution.
 	 */
