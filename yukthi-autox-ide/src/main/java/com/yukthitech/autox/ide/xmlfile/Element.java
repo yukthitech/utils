@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -29,6 +31,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class Element implements INode
 {
+	private static Logger logger = LogManager.getLogger(Element.class);
+	
 	private static DefaultParserHandler defaultParserHandler = new DefaultParserHandler();
 	
 	private Element parentElement;
@@ -428,6 +432,8 @@ public class Element implements INode
 				}
 			}catch(Exception ex)
 			{
+				logger.error("An error occurred while loading step type class: " + stepInfo.getJavaType(), ex);
+				
 				collector.addMessage(
 						new FileParseMessage(
 								MessageType.ERROR, 
