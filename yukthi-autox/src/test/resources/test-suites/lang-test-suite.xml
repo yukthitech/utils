@@ -101,6 +101,16 @@
 				</s:for>
 			
 				<s:assert-equals actual="attr: res" expected="|1|2|3|4|5"/>
+				
+				<!-- Test with expressions -->
+				<s:set expression="attrSt" value="1"/>
+				<s:set expression="res" value=""/>
+				
+				<s:for start="attr: attrSt" end="int: 5">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for>
+			
+				<s:assert-equals actual="attr: res" expected="|1|2|3|4|5"/>
 			</wrap:steps>
 		</testCase>
 	
@@ -410,6 +420,31 @@
 					expected="map: key1=a, key2=b, val=1"/>
 
 				<s:assert-true value="condition: regexMatches('a=2332', '\\w+=\\d+')"/>
+			</wrap:steps>
+		
+		</testCase>
+
+		<testCase name="testJsonWithTypeParser">
+			<description>
+				Tests the working of jsonWithType expression parser
+			</description>
+			
+			<s:set expression="attrJson">
+				<value>[
+							"java.util.HashSet",
+							[
+								"value1",
+								"value2"
+							]
+				]</value>
+			</s:set>
+
+			<wrap:steps>
+				<s:assert-equals expected="jsonWithType: ${attr.attrJson}" actual="set: value1, value2">
+				</s:assert-equals>
+
+				<s:assert-equals expected="attr: attrJson | jsonWithType: $" actual="set: value1, value2">
+				</s:assert-equals>
 			</wrap:steps>
 		
 		</testCase>

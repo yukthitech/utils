@@ -23,7 +23,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
@@ -40,6 +42,13 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class DefaultExpressionParsers
 {
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	private static ObjectMapper objectMapperWithType = new ObjectMapper();
+	
+	static
+	{
+		objectMapperWithType.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
+	}
 	
 	@ExpressionParser(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", example = "prop: attr.bean.value1")
 	public IPropertyPath propertyParser(ExpressionParserContext parserContext, String expression)
@@ -569,6 +578,20 @@ public class DefaultExpressionParsers
 			return res;
 		}
 		
+		if(name.toLowerCase().endsWith(".jsonwithtype"))
+		{
+			logger.debug("Processing input file as jsonWithType file: {} [Type: {}]", name, type);
+			
+			if(type == null)
+			{
+				type = Object.class;
+			}
+			
+			Object res = AutomationUtils.convertToWriteable( objectMapperWithType.readValue(is, type) );
+			
+			return res;
+		}
+
 		if(name.toLowerCase().endsWith(".xml"))
 		{
 			logger.debug("Processing input file as xml file: {} [Type: {}]", name, type);
@@ -741,6 +764,23 @@ public class DefaultExpressionParsers
 			{
 				String data = getStringValue(parserContext, expression);
 				Object object = loadInputStream(data, ".json", exprType, parserContext);
+				return object;
+			}
+		};
+	}
+
+	@ExpressionParser(type = "jsonWithType", description = "Parses specified expression as json (with types) string and loads it as object. "
+			+ "In case of '$', current value's string value will be parsed.", 
+			example = "jsonWithType: {\"a\": 2, \"b\": 3}")
+	public IPropertyPath jsonWithTypeParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				String data = getStringValue(parserContext, expression);
+				Object object = loadInputStream(data, ".jsonWithType", exprType, parserContext);
 				return object;
 			}
 		};

@@ -7,9 +7,11 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.Function;
-import com.yukthitech.ccg.xml.util.ValidateException;
+import com.yukthitech.autox.test.log.LogLevel;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Loops through specified range of values and for each iteration executed underlying steps
@@ -32,14 +34,14 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	/**
 	 * Inclusive start of range.
 	 */
-	@Param(description = "Inclusive start of range.")
-	private int start;
+	@Param(description = "Inclusive start of range.", sourceType = SourceType.EXPRESSION)
+	private Object start;
 	
 	/**
 	 * Inclusive end of range.
 	 */
-	@Param(description = "Inclusive end of range.")
-	private int end;
+	@Param(description = "Inclusive end of range.", sourceType = SourceType.EXPRESSION)
+	private Object end;
 
 	/**
 	 * Loop variable that will be used to set loop iteration object on context. Default: loopVar.
@@ -52,7 +54,7 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	 *
 	 * @param start the new inclusive start of range
 	 */
-	public void setStart(int start)
+	public void setStart(Object start)
 	{
 		this.start = start;
 	}
@@ -62,7 +64,7 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	 *
 	 * @param end the new inclusive end of range
 	 */
-	public void setEnd(int end)
+	public void setEnd(Object end)
 	{
 		this.end = end;
 	}
@@ -94,6 +96,32 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
+		int start = 0, end = 0;
+		
+		try
+		{
+			start = Integer.parseInt(this.start.toString());
+		}catch(Exception ex)
+		{
+			exeLogger.log(LogLevel.ERROR, "Invalid/non-int-convertable start value specified: {}", this.start);
+			throw new InvalidArgumentException("Invalid/non-int-convertable start value specified: {}", this.start);
+		}
+		
+		try
+		{
+			end = Integer.parseInt(this.end.toString());
+		}catch(Exception ex)
+		{
+			exeLogger.log(LogLevel.ERROR, "Invalid/non-int-convertable end value specified: {}", this.end);
+			throw new InvalidArgumentException("Invalid/non-int-convertable end value specified: {}", this.end);
+		}
+		
+		if(start > end)
+		{
+			exeLogger.log(LogLevel.ERROR, "Start value '{}' is greater than end value- {}", start, end);
+			throw new InvalidArgumentException("Start value '{}' is greater than end value- {}", start, end);
+		}
+
 		for(int i = start; i <= end; i++)
 		{
 			context.setAttribute(loopVar, i);
@@ -111,16 +139,5 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 		}
 		
 		return true;
-	}
-	
-	@Override
-	public void validate() throws ValidateException
-	{
-		super.validate();
-		
-		if(start > end)
-		{
-			throw new ValidateException(String.format("Start value is greater than end value. [Start: %s, End: %s]", start, end));
-		}
 	}
 }
