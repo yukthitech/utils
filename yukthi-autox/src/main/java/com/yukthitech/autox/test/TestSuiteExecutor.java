@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.config.Command;
 import com.yukthitech.autox.event.AutomationEvent;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
@@ -577,6 +578,15 @@ public class TestSuiteExecutor
 		{
 			logger.debug("As this is interactive environment, skipping the report generation");
 			return successful;
+		}
+		
+		//execute post commands if any
+		List<Command> postCommands = context.getAppConfiguration().getPostCommands();
+		
+		for(Command command : postCommands)
+		{
+			logger.debug("Executing post-command: {}", command.getName());
+			command.execute(context);
 		}
 		
 		//create final report files

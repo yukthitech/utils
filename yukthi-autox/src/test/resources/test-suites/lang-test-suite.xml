@@ -439,13 +439,11 @@
 				]</value>
 			</s:set>
 
-			<wrap:steps>
-				<s:assert-equals expected="jsonWithType: ${attr.attrJson}" actual="set: value1, value2">
-				</s:assert-equals>
+			<s:assert-equals expected="jsonWithType: ${attr.attrJson}" actual="set: value1, value2">
+			</s:assert-equals>
 
-				<s:assert-equals expected="attr: attrJson | jsonWithType: $" actual="set: value1, value2">
-				</s:assert-equals>
-			</wrap:steps>
+			<s:assert-equals expected="attr: attrJson | jsonWithType: $" actual="set: value1, value2">
+			</s:assert-equals>
 		
 		</testCase>
 	</testSuite>

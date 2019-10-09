@@ -83,6 +83,19 @@
 		<file-log-monitor name="client-output" path="c:\automation.log"/>
 		<browser-log-monitor name="browser-console"/>
 	</wrap:logMonitors>
+	
+	<!-- 
+		Post commands that needs to be executed post the automation execution.
+		This can include commands to generate coverage report, send custom mail, etc.
+	 -->
+	 <!--  
+		 <wrap:post-commands>
+		 	<post-command name="testJavaCommand">
+		 		<command>C:\\Java\\jdk1.8.0_92\\bin\\java -version</command>
+		 		<resource-file>C:\\Users\\akiran\\git\\utils\\yukthi-autox\\src\\test\\resources\\test-suites\\dml-test-suite.xml</resource-file>
+		 	</post-command>
+		 </wrap:post-commands>
+	 -->
 
 	<!-- 
 	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kranthi@mail">

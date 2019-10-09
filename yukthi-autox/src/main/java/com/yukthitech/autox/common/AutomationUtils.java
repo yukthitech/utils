@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
@@ -18,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Stack;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -28,7 +30,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
@@ -38,6 +43,7 @@ import com.yukthitech.autox.expr.ExpressionFactory;
 import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
+import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.utils.CommonUtils;
@@ -55,6 +61,15 @@ public class AutomationUtils
 	 * Pattern to parse java type.
 	 */
 	private static final Pattern TYPE_STR_PATTERN = Pattern.compile("([\\w\\.\\$]+)\\s*\\<\\s*([\\w\\.\\$\\,\\ ]+\\s*)\\>\\s*");
+	
+	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	private static ObjectMapper objectMapperWithType = new ObjectMapper();
+	
+	static
+	{
+		objectMapperWithType.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
+	}
 	
 	/**
 	 * Loads the xml files from specified folder. Returned set will be ordered by their relative paths.
@@ -747,5 +762,94 @@ public class AutomationUtils
 		return XMLConstants.CCG_URI.equals(namespace)
 				|| XMLConstants.NEW_CCG_URI.equals(namespace)
 				|| IAutomationConstants.STEP_NAME_SPACE.equals(namespace);
+	}
+	
+	/**
+	 * Loads the specified content as object and returns the same. The way it is loaded based on extension specified in the
+	 * name.
+	 * 
+	 * @param data
+	 * @param name
+	 * @param type
+	 * @param logger
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object loadObjectContent(String data, String name, Class<?> type, ExecutionLogger logger) throws Exception
+	{
+		InputStream is = new ByteArrayInputStream(data.getBytes());
+		
+		if(name.toLowerCase().endsWith(".properties"))
+		{
+			if(logger != null)
+			{
+				logger.debug("Processing input file as properties file: {}", name);
+			}
+			
+			Properties prop = new Properties();
+			prop.load(is);
+			
+			return new HashMap<>(prop);
+		}
+		
+		if(name.toLowerCase().endsWith(".json"))
+		{
+			if(logger != null)
+			{
+				logger.debug("Processing input file as json file: {} [Type: {}]", name, type);
+			}
+			
+			if(type == null)
+			{
+				type = Object.class;
+			}
+			
+			Object res = AutomationUtils.convertToWriteable( objectMapper.readValue(is, type) );
+			
+			return res;
+		}
+		
+		if(name.toLowerCase().endsWith(".jsonwithtype"))
+		{
+			if(logger != null)
+			{
+				logger.debug("Processing input file as jsonWithType file: {} [Type: {}]", name, type);
+			}
+			
+			if(type == null)
+			{
+				type = Object.class;
+			}
+			
+			Object res = AutomationUtils.convertToWriteable( objectMapperWithType.readValue(is, type) );
+			
+			return res;
+		}
+
+		if(name.toLowerCase().endsWith(".xml"))
+		{
+			if(logger != null)
+			{
+				logger.debug("Processing input file as xml file: {} [Type: {}]", name, type);
+			}
+			
+			Object res = null;
+			
+			if(type != null)
+			{
+				res = type.newInstance();
+			}
+			
+			res = XMLBeanParser.parse(is, res);
+			
+			if(res instanceof DynamicBean)
+			{
+				return ((DynamicBean) res).toSimpleMap();
+			}
+			
+			return res;
+		}
+		
+		throw new com.yukthitech.utils.exceptions.UnsupportedOperationException("Unsupported input specified for bean loading: '{}'", name);
 	}
 }

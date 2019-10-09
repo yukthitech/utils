@@ -1,6 +1,5 @@
 package com.yukthitech.autox.expr;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -23,13 +21,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.ccg.xml.DynamicBean;
-import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -41,15 +34,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class DefaultExpressionParsers
 {
-	private static ObjectMapper objectMapper = new ObjectMapper();
-	
-	private static ObjectMapper objectMapperWithType = new ObjectMapper();
-	
-	static
-	{
-		objectMapperWithType.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
-	}
-	
 	@ExpressionParser(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", example = "prop: attr.bean.value1")
 	public IPropertyPath propertyParser(ExpressionParserContext parserContext, String expression)
 	{
@@ -540,8 +524,6 @@ public class DefaultExpressionParsers
 			return data;
 		}
 		
-		InputStream is = new ByteArrayInputStream(data.getBytes());
-		
 		Class<?> type = null;
 		name = name.trim();
 		
@@ -555,65 +537,7 @@ public class DefaultExpressionParsers
 			type = Class.forName(exprType[0]);
 		}
 		
-		if(name.toLowerCase().endsWith(".properties"))
-		{
-			logger.debug("Processing input file as properties file: {}", name);
-			Properties prop = new Properties();
-			prop.load(is);
-			
-			return new HashMap<>(prop);
-		}
-		
-		if(name.toLowerCase().endsWith(".json"))
-		{
-			logger.debug("Processing input file as json file: {} [Type: {}]", name, type);
-			
-			if(type == null)
-			{
-				type = Object.class;
-			}
-			
-			Object res = AutomationUtils.convertToWriteable( objectMapper.readValue(is, type) );
-			
-			return res;
-		}
-		
-		if(name.toLowerCase().endsWith(".jsonwithtype"))
-		{
-			logger.debug("Processing input file as jsonWithType file: {} [Type: {}]", name, type);
-			
-			if(type == null)
-			{
-				type = Object.class;
-			}
-			
-			Object res = AutomationUtils.convertToWriteable( objectMapperWithType.readValue(is, type) );
-			
-			return res;
-		}
-
-		if(name.toLowerCase().endsWith(".xml"))
-		{
-			logger.debug("Processing input file as xml file: {} [Type: {}]", name, type);
-			
-			Object res = null;
-			
-			if(type != null)
-			{
-				res = type.newInstance();
-			}
-			
-			res = XMLBeanParser.parse(is, res);
-			
-			if(res instanceof DynamicBean)
-			{
-				return ((DynamicBean) res).toSimpleMap();
-			}
-			
-			return res;
-		}
-		
-		throw new com.yukthitech.utils.exceptions.UnsupportedOperationException("Unsupported input specified for bean loading: '{}'", name);
+		return AutomationUtils.loadObjectContent(data, name, type, logger);
 	}
 	
 	private String loadFile(String filePath) throws IOException

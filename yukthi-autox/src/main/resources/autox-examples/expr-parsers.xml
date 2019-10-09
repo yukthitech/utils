@@ -59,7 +59,7 @@
 
 	<collection name="$parsers.json">
 		<example>
-			<description>Converting json into object and setting it on context</description>
+			<description>Converting json into object</description>
 			
 			<content><![CDATA[
 				<ccg:set expression="beanForTest">
@@ -70,6 +70,30 @@
 						}
 					</value>
 				</ccg:set>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.jsonWithType">
+		<example>
+			<description>Converting json with type definitions into object (of specified type)</description>
+			
+			<content><![CDATA[
+				<s:set expression="attrJson">
+					<value>[
+						"java.util.HashSet",
+						[
+							"value1",
+							"value2"
+						]
+					]</value>
+				</s:set>
+	
+				<s:assert-equals expected="jsonWithType: ${attr.attrJson}" actual="set: value1, value2">
+				</s:assert-equals>
+	
+				<s:assert-equals expected="attr: attrJson | jsonWithType: $" actual="set: value1, value2">
+				</s:assert-equals>
 			]]></content>
 		</example>
 	</collection>

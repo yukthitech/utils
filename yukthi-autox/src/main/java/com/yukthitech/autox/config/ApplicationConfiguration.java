@@ -87,6 +87,7 @@ public class ApplicationConfiguration
 	 */
 	private Properties applicationProperties;
 	
+	
 	/**
 	 * Defines the summary notification configuration. This is optional.
 	 */
@@ -107,6 +108,12 @@ public class ApplicationConfiguration
 	 * Groups to exclude.
 	 */
 	private Set<String> excludeGroups = new HashSet<>();
+	
+	/**
+	 * List of commands to be executed post automation execution. 
+	 * This can include commands like code coverage report generation, sending mail etc.
+	 */
+	private List<Command> postCommands = new ArrayList<>();
 	
 	/**
 	 * Instantiates a new application configuration.
@@ -535,5 +542,24 @@ public class ApplicationConfiguration
 	public boolean isGroupExcluded(String name)
 	{
 		return excludeGroups.contains(name);
+	}
+	
+	/**
+	 * Adds the specified post command.
+	 * @param command
+	 */
+	public void addPostCommand(Command command)
+	{
+		this.postCommands.add(command);
+	}
+	
+	/**
+	 * Gets the list of commands to be executed post automation execution. This can include commands like code coverage report generation, sending mail etc.
+	 *
+	 * @return the list of commands to be executed post automation execution
+	 */
+	public List<Command> getPostCommands()
+	{
+		return postCommands;
 	}
 }
