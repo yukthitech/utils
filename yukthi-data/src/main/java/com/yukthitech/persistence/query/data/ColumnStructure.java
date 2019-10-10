@@ -18,12 +18,20 @@ public class ColumnStructure
 	private boolean sequenceIncrement;
 	private boolean idField;
 	
+	private String sequenceName;
+	
 	public ColumnStructure(Class<?> entityType, FieldDetails fieldDetails)
 	{
 		Field field = fieldDetails.getField();
 		
 		this.autoIncrement = (fieldDetails.isIdField() && fieldDetails.getGenerationType() == GenerationType.IDENTITY);
 		this.sequenceIncrement = (fieldDetails.isIdField() && fieldDetails.getGenerationType() == GenerationType.SEQUENCE);
+		
+		if(this.sequenceIncrement)
+		{
+			this.sequenceName = fieldDetails.getSequenceName();
+		}
+		
 		this.idField = fieldDetails.isIdField();
 		this.name = fieldDetails.getDbColumnName();
 		
@@ -129,5 +137,10 @@ public class ColumnStructure
 	public boolean isIdField()
 	{
 		return idField;
+	}
+	
+	public String getSequenceName()
+	{
+		return sequenceName;
 	}
 }

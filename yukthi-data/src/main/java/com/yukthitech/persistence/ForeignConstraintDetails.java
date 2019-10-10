@@ -24,6 +24,11 @@ public class ForeignConstraintDetails
 	public static final String FOREIGN_CONSTRAINT_PREFIX = "FK_";
 	
 	/**
+	 * Name of this constraint.
+	 */
+	private String name;
+	
+	/**
 	 * Field name of target entity which maintains this relation (foreign key).
 	 * And also indicates this entity does not maintain any direct relation
 	 */
@@ -77,8 +82,9 @@ public class ForeignConstraintDetails
 	 */
 	private String deleteMessage;
 	
-	private ForeignConstraintDetails(String mappedBy, RelationType relationType, Field ownerField)
+	private ForeignConstraintDetails(String name, String mappedBy, RelationType relationType, Field ownerField)
 	{
+		this.name = name;
 		this.mappedBy = mappedBy;
 		this.relationType = relationType;
 		this.ownerField = ownerField;
@@ -99,8 +105,9 @@ public class ForeignConstraintDetails
 	 * @param ownerField
 	 * @param ownerEntityDetails
 	 */
-	public ForeignConstraintDetails(EntityDetails targetEntityDetails, Field ownerField, EntityDetails ownerEntityDetails)
+	public ForeignConstraintDetails(String name, EntityDetails targetEntityDetails, Field ownerField, EntityDetails ownerEntityDetails)
 	{
+		this.name = name;
 		this.isDeleteCascaded = true;
 		this.relationType = RelationType.ONE_TO_ONE;
 		
@@ -142,6 +149,11 @@ public class ForeignConstraintDetails
 	 */
 	public String getConstraintName()
 	{
+		if(name != null)
+		{
+			return name;
+		}
+		
 		String ownerCol = ownerEntityDetails.getFieldDetailsByField(ownerField.getName()).getDbColumnName().toUpperCase();
 		return FOREIGN_CONSTRAINT_PREFIX + ownerEntityDetails.getTableName().toUpperCase() + "_" + ownerCol;
 	}
@@ -325,7 +337,8 @@ public class ForeignConstraintDetails
 		// into null
 		mappedBy = StringUtils.isBlank(mappedBy) ? null : mappedBy.trim();
 
-		ForeignConstraintDetails details = new ForeignConstraintDetails(mappedBy, relationType, sourceField);
+		//TODO: Need to find means of getting constraint name, so that errors can be handled properly.
+		ForeignConstraintDetails details = new ForeignConstraintDetails(null, mappedBy, relationType, sourceField);
 		details.isDeleteCascaded = (sourceField.getAnnotation(DeleteWithParent.class) != null);
 		details.isSaveCascaded = isCascaded(cascadedTypes, CascadeType.PERSIST);
 

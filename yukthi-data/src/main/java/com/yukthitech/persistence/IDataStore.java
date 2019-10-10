@@ -46,8 +46,6 @@ public interface IDataStore
 	
 	public Set<String> getColumnNames(String tableName);
 	
-	public void checkAndCreateSequence(String name);
-	
 	public void createTable(CreateTableQuery query);
 	
 	public void createExtendedTable(CreateExtendedTableQuery query);
@@ -124,6 +122,12 @@ public interface IDataStore
 	 * @return true if paging is supported
 	 */
 	public boolean isPagingSupported();
+	
+	/**
+	 * Specified wether unique id column has to be added for fetching actual id.
+	 * @return
+	 */
+	public boolean isUniqueIdColumnRequired();
 }
 
 

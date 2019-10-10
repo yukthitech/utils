@@ -695,15 +695,7 @@ public class EntityDetailsFactory
 					return;
 				}
 				
-				FieldDetails idFieldDetails = entityDetails.getIdField();
-				
-				//check if sequence needs to be created for id field, if yes, create it
-				if(idFieldDetails != null && idFieldDetails.getGenerationType() == GenerationType.SEQUENCE)
-				{
-					dataStore.checkAndCreateSequence(idFieldDetails.getSequenceName());
-				}
-				
-				createEntityTable(entityDetails, dataStore, false);
+				createEntityTable(entityDetails, dataStore, !dataStore.isUniqueIdColumnRequired());
 				
 				for(JoinTableDetails joinTable : joinTableList)
 				{

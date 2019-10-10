@@ -14,7 +14,7 @@ import com.yukthitech.persistence.annotations.UniqueConstraint;
 
 @Table(name = "EMPLOYEE")
 @Indexes({
-	@Index(fields={"phoneNo", "name"})
+	@Index(name = "E1_PH_NAME",  fields={"phoneNo", "name"})
 })
 public class Employee
 {

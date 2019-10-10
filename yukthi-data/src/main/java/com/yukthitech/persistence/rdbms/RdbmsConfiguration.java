@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.persistence.freemarker.ParamCollectorDirective;
 import com.yukthitech.persistence.freemarker.TrimDirective;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -21,8 +20,6 @@ public class RdbmsConfiguration implements Validateable
 {
 	public static final String COMMON_CODE = "#commonCode";
 	
-	public static final String CHECK_SEQUENCE_QUERY = "checkSequenceTemplate";
-	public static final String CREATE_SEQUENCE_QUERY = "createSequenceTemplate";
 	public static final String CREATE_TABLE = "createTableTemplate";
 	public static final String CREATE_EXTENDED_TABLE = "createExtendedTableTemplate";
 	public static final String CREATE_INDEX = "createIndexTemplate";
@@ -35,7 +32,9 @@ public class RdbmsConfiguration implements Validateable
 	public static final String CHILDREN_EXISTENCE_QUERY = "childrenExistenceTemplate";
 	public static final String FETCH_CHILDREN_IDS_QUERY = "fetchChildrenIdsTemplate";
 	public static final String DROP_QUERY = "dropTableTemplate";
-	
+
+	public static final String AUTO_ID_COVERSION_QUERY = "autoIdConversionQuery";
+
 	public static final String PATTERN_GRP_CONST_ERR_NAME = "name";
 
 	public static final String MANDATORY_QUERIES[] = {
@@ -47,14 +46,142 @@ public class RdbmsConfiguration implements Validateable
 		
 		DROP_QUERY
 	};
+	
+	private static Configuration configuration = new Configuration(Configuration.getVersion());
+	
+	static
+	{
+		configuration.setSharedVariable("trim", new TrimDirective());
+	}
+	
+	/**
+	 * Represents step of a query.
+	 * @author akiran
+	 */
+	public static class QueryStep
+	{
+		/**
+		 * Query template.
+		 */
+		private String template;
+		
+		/**
+		 * Flag indicating if error by this query step can be ignored.
+		 */
+		private boolean ignoreOnError = false;
+		
+		private Template freemarkerTemplate;
 
-	private Map<String, String> queryMap = new HashMap<>();
-	private Map<String, Template> templateMap = new HashMap<>();
+		public QueryStep()
+		{}
+		
+		public QueryStep(String template)
+		{
+			this.template = template;
+		}
+		
+		public void setTemplate(String template)
+		{
+			this.template = template;
+		}
+		
+		public void setIgnoreOnError(boolean ignoreOnError)
+		{
+			this.ignoreOnError = ignoreOnError;
+		}
+		
+		public String getTemplate()
+		{
+			return template;
+		}
+		
+		public boolean isIgnoreOnError()
+		{
+			return ignoreOnError;
+		}
+		
+		private void addCommonCode(String code)
+		{
+			this.template = code + "\n" + template;
+		}
+
+		public String buildQuery(String name, Object... contextEntries)
+		{
+			if(freemarkerTemplate == null)
+			{
+				try
+				{
+					freemarkerTemplate = new Template(name, template, configuration);
+				}catch(Exception ex)
+				{
+					throw new IllegalStateException("An error occurred while loading query template", ex);
+				}
+			}
+			
+			try
+			{
+				Map<String, Object> context = CommonUtils.toMap(contextEntries);
+				StringWriter writer = new StringWriter();
+				freemarkerTemplate.process(context, writer);
+				
+				writer.flush();
+				return writer.toString();
+			}catch(Exception ex)
+			{
+				throw new IllegalStateException("An exception occurred while building query: " + name, ex);
+			}
+		}
+	}
 	
-	@SuppressWarnings("deprecation")
-	private Configuration configuration = new Configuration();
-	
-	private ParamCollectorDirective paramCollectorDirective = new ParamCollectorDirective();
+	/**
+	 * Represents a query with steps.
+	 * @author akiran
+	 */
+	public static class Query
+	{
+		private String name;
+		
+		private List<QueryStep> steps = new ArrayList<>();
+		
+		public Query()
+		{}
+		
+		public Query(String name, String template)
+		{
+			this.name = name;
+			this.steps.add(new QueryStep(template));
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+		
+		public String getName()
+		{
+			return name;
+		}
+		
+		public void addStep(QueryStep step)
+		{
+			this.steps.add(step);
+		}
+		
+		public List<QueryStep> getSteps()
+		{
+			return steps;
+		}
+		
+		private void addCommonCode(String code)
+		{
+			for(QueryStep step : steps)
+			{
+				step.addCommonCode(code);
+			}
+		}
+	}
+
+	private Map<String, Query> queryMap = new HashMap<>();
 	
 	/**
 	 * Indicates whether the target DB supports paging or not
@@ -62,16 +189,15 @@ public class RdbmsConfiguration implements Validateable
 	private boolean pagingSupported = true;
 	
 	/**
+	 * Flag indicating if unique id column generation is required, which in turn is used for id value fetching.
+	 */
+	private boolean uniqueIdColumnRequired = false;
+	
+	/**
 	 * Pattern to be used to extract constraint name from constraint exception messages. This pattern must have 
 	 * group "name" which will be used to extract constraint name.
 	 */
 	private List<Pattern> constraintErrorPatterns;
-	
-	public RdbmsConfiguration()
-	{
-		configuration.setSharedVariable("trim", new TrimDirective());
-		configuration.setSharedVariable("param", paramCollectorDirective);
-	}
 	
 	public void addConstraintErrorPattern(String constraintErrorPattern)
 	{
@@ -90,6 +216,11 @@ public class RdbmsConfiguration implements Validateable
 		this.constraintErrorPatterns.add( Pattern.compile(constraintErrorPattern) );
 	}
 	
+	public boolean isUniqueIdColumnRequired()
+	{
+		return uniqueIdColumnRequired;
+	}
+	
 	public List<Pattern> getConstraintErrorPatterns()
 	{
 		return constraintErrorPatterns;
@@ -97,13 +228,12 @@ public class RdbmsConfiguration implements Validateable
 	
 	public void addTemplate(String name, String template)
 	{
-		queryMap.put(name, template);
+		queryMap.put(name, new Query(name, template));
 	}
 	
-	private boolean isEmptyQuery(String name)
+	public void addQuery(Query query)
 	{
-		String query = queryMap.get(name);
-		return (query == null || query.trim().length() == 0);
+		queryMap.put(query.getName(), query);
 	}
 	
 	/**
@@ -131,21 +261,21 @@ public class RdbmsConfiguration implements Validateable
 	{
 		for(String query: MANDATORY_QUERIES)
 		{
-			if(isEmptyQuery(query))
+			if(!queryMap.containsKey(query))
 			{
 				throw new ValidateException("'" + query + "' template can not be null or empty");
 			}
 		}
 		
-		String commonCode = queryMap.remove(COMMON_CODE);
+		Query commonCode = queryMap.remove(COMMON_CODE);
 		
 		if(commonCode != null)
 		{
-			String names[] = queryMap.keySet().toArray(new String[0]);
+			String commonCodeTemplate = commonCode.getSteps().get(0).getTemplate();
 			
-			for(String name : names)
+			for(Query query : queryMap.values())
 			{
-				queryMap.put(name, commonCode + "\n" + queryMap.get(name));
+				query.addCommonCode(commonCodeTemplate);
 			}
 		}
 	}
@@ -162,47 +292,17 @@ public class RdbmsConfiguration implements Validateable
 	
 	public String buildQuery(String name, Object... contextEntries)
 	{
-		return buildQuery(name, null, CommonUtils.toMap(contextEntries));
+		Query query = queryMap.get(name);
+		return query.steps.get(0).buildQuery(name, contextEntries);
 	}
 	
-	public String buildQuery(String name, List<Object> paramValues, Object... contextEntries)
+	/**
+	 * Fetches query with specified name.
+	 * @param name
+	 * @return
+	 */
+	public Query getQuery(String name)
 	{
-		return buildQuery(name, paramValues, CommonUtils.toMap(contextEntries));
-	}
-	
-	public String buildQuery(String name, List<Object> paramValues, Map<String, Object> context)
-	{
-		Template template = templateMap.get(name);
-		
-		if(template == null)
-		{
-			try
-			{
-				template = new Template(name, queryMap.get(name), configuration);
-				templateMap.put(name, template);
-			}catch(Exception ex)
-			{
-				throw new IllegalStateException("An error occurred while loading delete query template", ex);
-			}
-		}
-		
-		try
-		{
-			paramCollectorDirective.reset(context);
-			
-			StringWriter writer = new StringWriter();
-			template.process(context, writer);
-			
-			if(paramValues != null)
-			{
-				paramValues.addAll(paramCollectorDirective.getParamValues());
-			}
-			
-			writer.flush();
-			return writer.toString();
-		}catch(Exception ex)
-		{
-			throw new IllegalStateException("An exception occurred while building query: " + name, ex);
-		}
+		return queryMap.get(name);
 	}
 }

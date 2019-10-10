@@ -22,6 +22,8 @@ public class TableStructure
 	 */
 	private Map<String, String> fieldMapping = new HashMap<>();
 	
+	private ColumnStructure idColumn;
+	
 	public TableStructure(EntityDetails entityDetails)
 	{
 		Class<?> entityType = entityDetails.getEntityType();
@@ -36,6 +38,8 @@ public class TableStructure
 			
 			columns.add(column);
 			fieldMapping.put(entityDetails.getIdField().getName(), column.getName());
+			
+			idColumn = column;
 		}		
 		
 		for(FieldDetails field: entityDetails.getFieldDetails())
@@ -131,5 +135,20 @@ public class TableStructure
 	public Map<String, String> getFieldMapping()
 	{
 		return fieldMapping;
+	}
+	
+	public ColumnStructure getIdColumn()
+	{
+		return idColumn;
+	}
+	
+	public boolean isSequnceBasedIdColumn()
+	{
+		return (idColumn != null && idColumn.isSequenceIncrement());
+	}
+
+	public boolean isAutoIdColumn()
+	{
+		return (idColumn != null && idColumn.isAutoIncrement());
 	}
 }

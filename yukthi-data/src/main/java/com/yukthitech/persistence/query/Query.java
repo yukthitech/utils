@@ -23,7 +23,7 @@ public abstract class Query
 	{
 		return entityDetails.getTableName();
 	}
-
+	
 	public static void toString(List<QueryCondition> conditions, StringBuilder builder)
 	{
 		if(conditions == null || conditions.isEmpty())

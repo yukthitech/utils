@@ -15,6 +15,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,11 +40,10 @@ import com.yukthitech.persistence.NativeQueryFactory;
 import com.yukthitech.persistence.PersistenceException;
 import com.yukthitech.persistence.Record;
 import com.yukthitech.persistence.TransactionWrapper;
-import com.yukthitech.persistence.UnsupportedOperationException;
 import com.yukthitech.persistence.conversion.ConversionService;
+import com.yukthitech.persistence.query.AggregateQuery;
 import com.yukthitech.persistence.query.ChildrenExistenceQuery;
 import com.yukthitech.persistence.query.ColumnParam;
-import com.yukthitech.persistence.query.AggregateQuery;
 import com.yukthitech.persistence.query.CreateExtendedTableQuery;
 import com.yukthitech.persistence.query.CreateIndexQuery;
 import com.yukthitech.persistence.query.CreateTableQuery;
@@ -54,6 +54,7 @@ import com.yukthitech.persistence.query.FinderQuery;
 import com.yukthitech.persistence.query.QueryCondition;
 import com.yukthitech.persistence.query.SaveQuery;
 import com.yukthitech.persistence.query.UpdateQuery;
+import com.yukthitech.persistence.rdbms.RdbmsConfiguration.QueryStep;
 import com.yukthitech.persistence.rdbms.converters.BlobConverter;
 import com.yukthitech.persistence.rdbms.converters.ClobConverter;
 import com.yukthitech.utils.ObjectWrapper;
@@ -74,12 +75,9 @@ public class RdbmsDataStore implements IDataStore
 	
 	private NativeQueryFactory nativeQueryFactory;
 	
-	private String templatesName;
-	
 	public RdbmsDataStore(String templatesName)
 	{
 		rdbmsConfig = new RdbmsConfiguration();
-		this.templatesName = templatesName;
 		
 		try
 		{
@@ -95,6 +93,12 @@ public class RdbmsDataStore implements IDataStore
 		//add blob and clob converters as default converters
 		conversionService.addConverter(new BlobConverter());
 		conversionService.addConverter(new ClobConverter());
+	}
+	
+	@Override
+	public boolean isUniqueIdColumnRequired()
+	{
+		return rdbmsConfig.isUniqueIdColumnRequired();
 	}
 	
 	/* (non-Javadoc)
@@ -170,7 +174,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public Set<String> getColumnNames(String tableName)
 	{
-		logger.trace("Started method: getColumnNames");
 		logger.trace("Fetching columns for table {}", tableName);
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
@@ -204,59 +207,8 @@ public class RdbmsDataStore implements IDataStore
 	}
 
 	@Override
-	public void checkAndCreateSequence(String name)
-	{
-		logger.trace("Started method: checkAndCreateSequence");
-		
-		if(!rdbmsConfig.hasQuery(RdbmsConfiguration.CREATE_SEQUENCE_QUERY) || !rdbmsConfig.hasQuery(RdbmsConfiguration.CHECK_SEQUENCE_QUERY))
-		{
-			throw new UnsupportedOperationException("Create sequence is not supported by this data-store: " + templatesName);
-		}
-		
-		Statement statement = null;
-		ResultSet rs = null;
-		
-		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
-		{
-			Connection connection = transaction.getTransaction().getConnection();
-
-			statement = connection.createStatement();
-			
-			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CHECK_SEQUENCE_QUERY, "name", name);
-			logger.debug("Built check sequence query as:\n\t {}", query);
-			
-			rs = statement.executeQuery(query);
-
-			//if any row is returned by CHECK_SEQUENCE_QUERY, assume sequence already exists
-			if(rs.next())
-			{
-				logger.debug("Found sequence '" + name + "' to be already existing one.");
-				return;
-			}
-			
-			logger.debug("Found sequence '" + name + "' does not exits. Creating new sequence");
-			
-			query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_SEQUENCE_QUERY, "name", name);
-			logger.debug("Built create sequence query as:\n\t {}", query);			
-			
-			statement.execute(query);
-			
-			transaction.commit();
-		}catch(Exception ex)
-		{
-			logger.error("An error occurred while executing create-sequence-query", ex);
-			throw new PersistenceException("An error occurred while executing create-sequence-query", ex);
-		}finally
-		{
-			closeResources(rs, statement);
-		}
-	}
-
-	@Override
 	public void createTable(CreateTableQuery createQuery)
 	{
-		logger.trace("Started method: createTable");
-		
 		Statement statement = null;
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
@@ -265,11 +217,40 @@ public class RdbmsDataStore implements IDataStore
 
 			statement = connection.createStatement();
 			
-			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.CREATE_TABLE, "query", createQuery);
+			RdbmsConfiguration.Query queryObj = rdbmsConfig.getQuery(RdbmsConfiguration.CREATE_TABLE);
 			
-			logger.debug("Built create-table query as: \n\t{}", query);
+			int index = 0;
+			int len = queryObj.getSteps().size();
 			
-			statement.execute(query);
+			for(QueryStep queryStep : queryObj.getSteps())
+			{
+				index++;
+				
+				String query = queryStep.buildQuery(RdbmsConfiguration.CREATE_TABLE, "query", createQuery);
+				
+				if(query.trim().length() == 0)
+				{
+					logger.debug("Skipping step {} of create-table-query as the result query was empty", index);
+					continue;
+				}
+				
+				logger.debug("Executing create-table query-step ({} of {}) as: \n\t{}", index, len, query);
+				
+				try
+				{
+					statement.execute(query.trim());
+				}catch(Exception ex)
+				{
+					if(queryStep.isIgnoreOnError())
+					{
+						logger.warn("An error occurred while executing create-table query-step ({} of {}) as: \n\t{}", index, len, query, ex);
+						continue;
+					}
+					
+					throw ex;
+				}
+			}
+			
 			transaction.commit();
 		}catch(Exception ex)
 		{
@@ -284,8 +265,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public void createExtendedTable(CreateExtendedTableQuery createExtendedTableQuery)
 	{
-		logger.trace("Started method: createExtendedTable");
-		
 		Statement statement = null;
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
@@ -313,8 +292,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public void createIndex(CreateIndexQuery creatIndexQuery)
 	{
-		logger.trace("Started method: createIndex");
-		
 		Statement statement = null;
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
@@ -382,8 +359,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public Double fetchAggregateValue(AggregateQuery countQuery, EntityDetails entityDetails)
 	{
-		logger.trace("Started method: fetchAggregateValue");
-		
 		logger.debug("Fetching aggregate value of records from table '{}' using query: {}", countQuery.getTableName(), countQuery);
 		
 		PreparedStatement pstmt = null;
@@ -437,7 +412,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public int checkChildrenExistence(ChildrenExistenceQuery childrenExistenceQuery)
 	{
-		logger.trace("Started method: checkChildrenExistence");
 		logger.debug("Checking children records from table '{}' using query: {}", childrenExistenceQuery.getChildTableName(), childrenExistenceQuery);
 		
 		PreparedStatement pstmt = null;
@@ -493,7 +467,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public List<Object> fetchChildrenIds(FetchChildrenIdsQuery fetchChildrenIdsQuery)
 	{
-		logger.trace("Started method: fetchChildrenIds");
 		logger.debug("Fetching children records from table '{}' using query: {}", fetchChildrenIdsQuery.getChildTableName(), fetchChildrenIdsQuery);
 		
 		PreparedStatement pstmt = null;
@@ -545,11 +518,76 @@ public class RdbmsDataStore implements IDataStore
 			closeResources(rs, pstmt);
 		}
 	}
+	
+	/**
+	 * In some RDBMS like oracle, the generated id obtained from save will be ROWID. But in ORM the expected value
+	 * to be fetched is primary key value of the entity.
+	 * 
+	 * This method checks if target rdbms config needs (or configured with) auto-id conversion, if yes, then that query
+	 * will be executed to map auto-id to actual id.
+	 * 
+	 * @param saveQuery
+	 * @param autoId
+	 * @return
+	 */
+	private Object convertAutoId(SaveQuery saveQuery, Object autoId)
+	{
+		if(autoId == null || !rdbmsConfig.hasQuery(RdbmsConfiguration.AUTO_ID_COVERSION_QUERY))
+		{
+			return autoId;
+		}
+		
+		//for join tables id field will be null
+		if(saveQuery.getEntityDetails().getIdField() == null)
+		{
+			return autoId;
+		}
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
+		{
+			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.AUTO_ID_COVERSION_QUERY, "query", saveQuery);
+			
+			logger.debug("Built auto-id-conversion query as: \n\t{}", query);
+			
+			Connection connection = transaction.getTransaction().getConnection();
+			pstmt = connection.prepareStatement(query);
+			List<Object> params = Arrays.asList(autoId);
+			
+			logParams(params);
+			
+			pstmt.setObject(1, autoId);
+
+			rs = pstmt.executeQuery();
+			
+			if(!rs.next())
+			{
+				transaction.commit();
+				return 0.0;
+			}
+			
+			Object newId = rs.getObject(1);
+			
+			logger.debug("Auto-id value {} got converted as: {}", autoId, newId);
+			
+			transaction.commit();
+			return newId;
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while converting auto-id from table '{}' using query: {}", saveQuery.getTableName(), saveQuery, ex);
+			throw new PersistenceException("An error occurred while converting auto-id from table '{}' using query: {}", saveQuery.getTableName(), saveQuery, ex); 
+		}finally
+		{
+			closeResources(rs, pstmt);
+		}
+		
+	}
 
 	@Override
 	public int save(SaveQuery saveQuery, EntityDetails entityDetails, ObjectWrapper<Object> idGenerated)
 	{
-		logger.trace("Started method: save");
 		logger.debug("Trying to save entity to table '{}' using query: {}", saveQuery.getTableName(), saveQuery);
 		
 		PreparedStatement pstmt = null;
@@ -619,7 +657,9 @@ public class RdbmsDataStore implements IDataStore
 				//if keys are found to be generated
 				if(keysRs != null && keysRs.next())
 				{
-					idGenerated.setValue(keysRs.getObject(1));
+					Object autoId = keysRs.getObject(1);
+					
+					idGenerated.setValue(convertAutoId(saveQuery, autoId));
 				}
 				else
 				{
@@ -647,7 +687,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public int update(UpdateQuery updateQuery, EntityDetails entityDetails)
 	{
-		logger.trace("Started method: update");
 		logger.debug("Trying to update entity in table '{}' using query: ", updateQuery.getTableName(), updateQuery);
 		
 		PreparedStatement pstmt = null;
@@ -737,7 +776,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public int delete(DeleteQuery deleteQuery, EntityDetails entityDetails)
 	{
-		logger.trace("Started method: delete");
 		logger.debug("Deleting rows from table '{}' using query: {}", deleteQuery.getTableName(), deleteQuery);
 		
 		PreparedStatement pstmt = null;
@@ -787,7 +825,7 @@ public class RdbmsDataStore implements IDataStore
 	{
 		List<Object> paramValues = new ArrayList<>();
 		
-		String query = rdbmsConfig.buildQuery(queryName, paramValues, params);
+		String query = rdbmsConfig.buildQuery(queryName, params);
 		
 		logger.debug("Built query as: \n\t{}", query);
 		
@@ -933,7 +971,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public List<Record> executeFinder(FinderQuery findQuery, EntityDetails entityDetails, IFinderRecordProcessor recordProcessor)
 	{
-		logger.trace("Started method: executeFinder");
 		logger.debug("Fetching records from table '{}' using query: {}", findQuery.getTableName(), findQuery);
 		
 		PreparedStatement pstmt = null;
@@ -1234,7 +1271,6 @@ public class RdbmsDataStore implements IDataStore
 	@Override
 	public void dropTable(DropTableQuery dropQuery)
 	{
-		logger.trace("Started method: dropTable");
 		logger.debug("Trying to drop table '{}' using query: {}", dropQuery.getTableName(), dropQuery);
 		
 		Statement stmt = null;
@@ -1254,15 +1290,42 @@ public class RdbmsDataStore implements IDataStore
 				return;
 			}
 			
+			RdbmsConfiguration.Query queryObj = rdbmsConfig.getQuery(RdbmsConfiguration.DROP_QUERY);
 			
-			//execute drop query
-			String query = rdbmsConfig.buildQuery(RdbmsConfiguration.DROP_QUERY, "query", dropQuery);
-			
-			logger.debug("Built drop query as: \n\t{}", query);
+			int index = 0;
+			int len = queryObj.getSteps().size();
 			
 			stmt = connection.createStatement();
-			
-			stmt.execute(query);
+
+			for(QueryStep queryStep : queryObj.getSteps())
+			{
+				index++;
+				
+				String query = queryStep.buildQuery(RdbmsConfiguration.DROP_QUERY, "query", dropQuery);
+				
+				if(query.trim().length() == 0)
+				{
+					logger.debug("Skipping step {} of drop-table-query as the result query was empty", index);
+					continue;
+				}
+
+				logger.debug("Executing drop-table query-step ({} of {}) as: \n\t{}", index, len, query);
+				
+				try
+				{
+					stmt.execute(query.trim());
+				}catch(Exception ex)
+				{
+					if(queryStep.isIgnoreOnError())
+					{
+						logger.warn("An error occurred while executing drop-table query-step ({} of {}) as: \n\t{}", index, len, query, ex);
+						continue;
+					}
+					
+					throw ex;
+				}
+			}
+
 			connection.commit();
 		}catch(Exception ex)
 		{

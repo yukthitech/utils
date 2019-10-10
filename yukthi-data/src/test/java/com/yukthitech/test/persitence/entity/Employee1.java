@@ -16,7 +16,7 @@ import com.yukthitech.persistence.conversion.impl.JsonConverter;
 
 @Table(name = "EMPLOYEE1")
 @Indexes({
-	@Index(fields={"phoneNo", "name"})
+	@Index(name = "E1_PH_NAME", fields={"phoneNo", "name"})
 })
 public class Employee1
 {

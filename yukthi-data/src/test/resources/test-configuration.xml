@@ -27,6 +27,17 @@
 			</dataSource>
 		</dataStore>
 	</repositoryFactory>
+	
+	<repositoryFactory createTables="true" name="ORACLE">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="oracle">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>oracle.jdbc.driver.OracleDriver</driverClassName>
+				<url>jdbc:oracle:thin:@localhost:1521/xe</url>
+				<username>sdp_owner</username>
+				<password>sdp_owner</password>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
 </configuration>
 
 	

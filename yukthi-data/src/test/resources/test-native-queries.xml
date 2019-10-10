@@ -21,8 +21,8 @@
 	]]></query>
 	
 	<query name="insertQuery"><![CDATA[
-		INSERT INTO EMPLOYEE(EMP_NO, EMAIL_ID, ENAME, PHONE_NO, AGE, UQ_ENTITY_ID)
-		VALUES(?{emp.employeeNo}, ?{emp.emailId}, ?{emp.name}, ?{emp.phoneNo}, ?{emp.age}, ?{emp.time})
+		INSERT INTO EMPLOYEE(EMP_NO, EMAIL_ID, ENAME, PHONE_NO, AGE)
+		VALUES(?{emp.employeeNo}, ?{emp.emailId}, ?{emp.name}, ?{emp.phoneNo}, ?{emp.age})
 	]]></query>
 
 	<query name="updateQuery"><![CDATA[

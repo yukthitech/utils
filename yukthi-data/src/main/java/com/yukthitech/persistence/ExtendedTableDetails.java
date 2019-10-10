@@ -250,13 +250,13 @@ public class ExtendedTableDetails
 		
 		//add unique constraint on entity id field.
 		UniqueConstraintDetails uniqueConstraintDetails = new UniqueConstraintDetails(entityDetails, 
-			actualEntityDetails.getTableName() + "_ENTITY_ID", 
-			new String[]{ExtendedTableEntity.FIELD_ENTITY_ID}, null, false, false);
+			"UQ_" + actualEntityDetails.getTableName() + "_EXT_ID", 
+			new String[]{ExtendedTableEntity.FIELD_ENTITY_ID}, null, false, true);
 		
 		entityDetails.addUniqueKeyConstraint(uniqueConstraintDetails);
 		
 		//add foreign constraint details
-		ForeignConstraintDetails foreignConstraintDetails = new ForeignConstraintDetails(actualEntityDetails, entityIdFld, entityDetails);
+		ForeignConstraintDetails foreignConstraintDetails = new ForeignConstraintDetails(null, actualEntityDetails, entityIdFld, entityDetails);
 		entityDetails.addForeignConstraintDetails(foreignConstraintDetails);
 		
 		this.extendedEntityDetails = entityDetails;

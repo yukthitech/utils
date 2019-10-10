@@ -184,14 +184,17 @@ public class JoinTableDetails
 			entityDetails.addFieldDetails(joinFieldDetails);
 			entityDetails.addFieldDetails(invJoinFieldDetails);
 			
-			entityDetails.addUniqueKeyConstraint(new UniqueConstraintDetails(entityDetails, "JOIN_INV_JOIN", 
-					new String[]{"joinColumn", "inverseJoinColumn"}, "Specified relation already exist", true, false));
-		
-			entityDetails.addForeignConstraintDetails(new ForeignConstraintDetails(ownerEntityDetails, joinColumnField, entityDetails));
-			entityDetails.addForeignConstraintDetails(new ForeignConstraintDetails(targetEntityDetails, invJoinColField, entityDetails));
+			//TODO: Check how to fetch join-table uq constraint name for already existing tables
+			entityDetails.addUniqueKeyConstraint(new UniqueConstraintDetails(entityDetails, "UQ_" + entityDetails.getTableName(), 
+					new String[]{"joinColumn", "inverseJoinColumn"}, "Specified relation already exist", true, true));
 			
-			entityDetails.addIndexDetails(new IndexDetails(tableName.toUpperCase() + "_JOIN_COL", new String[]{"joinColumn"}));
-			entityDetails.addIndexDetails(new IndexDetails(tableName.toUpperCase() + "_INV_JOIN_COL", new String[]{"inverseJoinColumn"}));
+			String FK_PREFIX = ForeignConstraintDetails.FOREIGN_CONSTRAINT_PREFIX + entityDetails.getTableName() + "_";
+		
+			entityDetails.addForeignConstraintDetails(new ForeignConstraintDetails(FK_PREFIX + "SRC", ownerEntityDetails, joinColumnField, entityDetails));
+			entityDetails.addForeignConstraintDetails(new ForeignConstraintDetails(FK_PREFIX + "TGT", targetEntityDetails, invJoinColField, entityDetails));
+			
+			entityDetails.addIndexDetails(new IndexDetails("JOIN_COL", new String[]{"joinColumn"}));
+			entityDetails.addIndexDetails(new IndexDetails("INV_JOIN_COL", new String[]{"inverseJoinColumn"}));
 			
 			this.entityDetailsForm = entityDetails;
 			
