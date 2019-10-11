@@ -658,13 +658,22 @@ public class ProjectExplorer extends JPanel
 		loadFilesToIndex();
 	}
 	
-	public void checkFile(FileTreeNode fileNode)
+	void checkFile(FileTreeNode fileNode)
 	{
 		File file = fileNode.getFile();
+		
+		//ignore files which are outside test suite folders
+		if(!fileNode.getProject().isTestSuiteFolderFile(file))
+		{
+			return;
+		}
+
 		IIdeFileManager fileManager = ideFileManagerFactory.getFileManager(fileNode.getProject(), file);
 		
 		if(fileManager != null)
 		{
+			logger.debug("Parsing and loading file: {}", file.getPath());
+			
 			FileParseCollector collector = new FileParseCollector();
 		
 			try

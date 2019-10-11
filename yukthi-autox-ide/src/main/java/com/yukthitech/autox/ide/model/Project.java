@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
+import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanPropertyInfoFactory;
@@ -145,6 +146,23 @@ public class Project implements Serializable
 	public Set<String> getTestSuitesFoldersList()
 	{
 		return testSuitesFoldersList;
+	}
+	
+	public boolean isTestSuiteFolderFile(File file)
+	{
+		String baseFolderPath = getBaseFolderPath();
+				
+		for(String path : testSuitesFoldersList)
+		{
+			File folder = new File(baseFolderPath, path);
+			
+			if(IdeFileUtils.getRelativePath(folder, file) != null)
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	public void setTestSuiteFolders(Set<String> testSuitesFoldersList)

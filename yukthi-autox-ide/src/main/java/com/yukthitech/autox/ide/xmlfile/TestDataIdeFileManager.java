@@ -1,7 +1,6 @@
 package com.yukthitech.autox.ide.xmlfile;
 
 import java.io.File;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.ide.AbstractIdeFileManager;
 import com.yukthitech.autox.ide.FileParseCollector;
-import com.yukthitech.autox.ide.IdeFileUtils;
 import com.yukthitech.autox.ide.IdeNotificationPanel;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
@@ -42,17 +40,10 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 		{
 			return false;
 		}
-		
-		Set<String> tsFolders = project.getTestSuitesFoldersList();
-		
-		for(String path : tsFolders)
+
+		if(project.isTestSuiteFolderFile(file))
 		{
-			File folder = new File(project.getBaseFolderPath(), path);
-			
-			if(IdeFileUtils.getRelativePath(folder, file) != null)
-			{
-				return true;
-			}
+			return true;
 		}
 		
 		return false;
