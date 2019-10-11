@@ -208,6 +208,50 @@ public class ExecutionLogData
 		}
 	}
 	
+	public static class FileMessage extends Message
+	{
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * file.
+		 */
+		private File file;
+		
+		/**
+		 * Instantiates a new image message.
+		 *
+		 * @param logLevel the log level
+		 * @param message the message
+		 * @param time the time
+		 * @param imageFile the image file
+		 */
+		public FileMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, File file)
+		{
+			super(source, javaSource, logLevel, message, time);
+			this.file = file;
+		}
+		
+		/**
+		 * Gets the image file.
+		 *
+		 * @return the image file
+		 */
+		@JsonIgnore
+		public File getFile()
+		{
+			return file;
+		}
+		
+		/**
+		 * Fetches the target file name.
+		 * @return file name.
+		 */
+		public String getFileName()
+		{
+			return file.getName();
+		}
+	}
+
 	/**
 	 * Name of the executor.
 	 */

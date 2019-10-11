@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -21,11 +19,16 @@ import com.yukthitech.autox.common.AutomationUtils;
  */
 public class Command
 {
-	
-	/**
-	 * The logger.
-	 */
-	private static Logger logger = LogManager.getLogger(Command.class);
+	public static interface ICommandLogger
+	{
+		public void debug(String mssg, Object... args);
+		
+		public void warn(String mssg, Object... args);
+		
+		public void info(String mssg, Object... args);
+		
+		public void output(String line);
+	}
 	
 	/**
 	 * Name for this command.
@@ -46,6 +49,16 @@ public class Command
 	 * Resource file to load on context with this command name. The resource can be properties file, map file or xml file.
 	 */
 	private String resourceFile;
+	
+	public Command()
+	{}
+	
+	public Command(String name, String command, String workingDir)
+	{
+		this.name = name;
+		this.command = command;
+		this.workingDir = workingDir;
+	}
 
 	/**
 	 * Gets the name for this command.
@@ -207,9 +220,9 @@ public class Command
 	 * @param cmd the cmd
 	 * @param workDir the work dir
 	 */
-	private void executeCommand(String cmd, String workDir)
+	private int executeCommand(String cmd, String workDir, ICommandLogger logger)
 	{
-		logger.info("Executing command with name {} and with command: {}", name, cmd);
+		logger.info("Executing command with name {} and with command: \n\t{}", name, cmd);
 		
 		String cmdArgs[] = splitArgs(cmd);
 		
@@ -236,18 +249,21 @@ public class Command
 			
 			while((line = reader.readLine()) != null)
 			{
-				logger.debug("[CMDLOG] [{}] - {}", name, line);
+				logger.output(line);
 			}
 			
 			is.close();
 	
 			int exitCode = process.waitFor();
 			
-			logger.debug("Command {} exited with code: {}", exitCode);
+			logger.debug("Command {} exited with code: {}", name, exitCode);
+			return exitCode;
 		}catch(Exception ex)
 		{
 			logger.warn("IGNORED ERROR: An error occurred while executing command {}", name, ex);
 		}
+		
+		return -1;
 	}
 
 	/**
@@ -255,14 +271,15 @@ public class Command
 	 *
 	 * @param context the context
 	 */
-	public void execute(AutomationContext context)
+	public int execute(AutomationContext context, ICommandLogger logger)
 	{
 		String workDir = (workingDir != null) ? AutomationUtils.replaceExpressionsInString("cmd.workDir", context, workingDir) : null;
 		String cmd = (command != null) ? AutomationUtils.replaceExpressionsInString("cmd.cmd", context, command) : null;
+		int exitCode = 0;
 	
 		if(cmd != null)
 		{
-			executeCommand(cmd, workDir);
+			exitCode = executeCommand(cmd, workDir, logger);
 		}
 		else
 		{
@@ -273,7 +290,7 @@ public class Command
 		
 		if(res == null)
 		{
-			return;
+			return exitCode;
 		}
 		
 		logger.debug("As part of command '{}' loading resource file: {}", name, res);
@@ -283,7 +300,7 @@ public class Command
 		if(resFile.exists())
 		{
 			logger.warn("IGNORED ERROR: As part of command '{}' specified resource file is not found for loading: {}", name, res);
-			return;
+			return exitCode;
 		}
 		
 		try
@@ -296,5 +313,7 @@ public class Command
 		{
 			logger.warn("IGNORED ERROR: An error occurred in command '{}' while loading resource file: {}", name, res, ex);
 		}
+		
+		return exitCode;
 	}
 }

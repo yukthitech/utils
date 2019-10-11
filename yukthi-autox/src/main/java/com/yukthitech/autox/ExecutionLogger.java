@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,7 @@ public class ExecutionLogger
 	
 	private static final String PROP_LOG_MAX_PROP_LEN = "autox.log.max.param.len";
 
-	private static int fileIndex = 1;
+	private static AtomicInteger fileIndex = new AtomicInteger(1);
 	
 	private static final Pattern PARAM_PATTERN = Pattern.compile("\\{(\\d*)\\}");
 	
@@ -450,14 +451,42 @@ public class ExecutionLogger
 		
 		if(name != null)
 		{
-			name = name + "_" + System.currentTimeMillis() + "_" + (fileIndex++) + extension;
+			name = name + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + extension;
 		}
 		else
 		{
-			name = System.currentTimeMillis() + "_" + (fileIndex++) + extension;
+			name = System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + extension;
 		}
 		
 		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
+	}
+	
+	public File logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
+	{
+		if(disabled)
+		{
+			return null;
+		}
+		
+		if(logLevel == null)
+		{
+			logLevel = LogLevel.DEBUG;
+		}
+		
+		if(mode != null)
+		{
+			message = (message != null) ? "" : message;
+			message = "<b>[" + mode + "]</b> " + message;
+		}
+		
+		File logsFolder = new File(automationContext.getReportFolder(), "logs");
+		String fileName = filePrefix + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + fileSuffix;
+
+		File tempFile = new File(logsFolder, fileName);
+		
+		addMessage(new ExecutionLogData.FileMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), tempFile));
+		
+		return tempFile;
 	}
 	
 	/**

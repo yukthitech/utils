@@ -446,5 +446,15 @@
 			</s:assert-equals>
 		
 		</testCase>
+
+		<testCase name="testExtCommandExecution">
+			<description>
+				Test wether external command execution is working properly or not.
+			</description>
+			
+			<s:execute-command name="javaVersion" expected-exit-code="0">
+				<command>java -version</command>
+			</s:execute-command>
+		</testCase>
 	</testSuite>
 </testData>

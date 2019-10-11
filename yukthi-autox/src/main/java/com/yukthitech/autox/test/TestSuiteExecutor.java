@@ -586,7 +586,33 @@ public class TestSuiteExecutor
 		for(Command command : postCommands)
 		{
 			logger.debug("Executing post-command: {}", command.getName());
-			command.execute(context);
+			
+			command.execute(context, new Command.ICommandLogger()
+			{
+				@Override
+				public void warn(String mssg, Object... args)
+				{
+					logger.warn(mssg, args);
+				}
+				
+				@Override
+				public void info(String mssg, Object... args)
+				{
+					logger.info(mssg, args);
+				}
+				
+				@Override
+				public void debug(String mssg, Object... args)
+				{
+					logger.debug(mssg, args);
+				}
+				
+				@Override
+				public void output(String line)
+				{
+					logger.debug("[CMDLOG] [{}] - {}", command.getName(), line);
+				}
+			});
 		}
 		
 		//create final report files

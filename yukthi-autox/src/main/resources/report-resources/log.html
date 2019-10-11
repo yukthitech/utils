@@ -110,6 +110,10 @@
 					       <img alt="{{message.imageFileName}}" src="./logs/{{message.imageFileName}}" 
 					       	style="width: 50em; border: 1px solid black;"/>
 					    </a>
+						<a ng-if="message.fileName" href="./logs/{{message.fileName}}">
+					       <img alt="Log" src="./img/log-file.png" 
+					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
+					    </a>
 					</td>
 					<td style="white-space: nowrap;" ng-class="message.logLevel == 'ERROR' ? 'errorVal' : 'defaultVal'">
 						{{message.timeStr}}
