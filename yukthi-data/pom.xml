@@ -113,6 +113,7 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.oracle/ojdbc14 -->
+		<!--
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
@@ -120,6 +121,7 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/db-drivers/ojdbc8-12.2.0.1.jar</systemPath>
 		</dependency>
+		-->
 		<!-- End of db drivers -->
 
 		<dependency>
