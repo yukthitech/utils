@@ -44,6 +44,7 @@ import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.DynamicBean;
+import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.utils.CommonUtils;
@@ -840,7 +841,7 @@ public class AutomationUtils
 				res = type.newInstance();
 			}
 			
-			res = XMLBeanParser.parse(is, res);
+			res = XMLBeanParser.parse(is, res, new DynamicBeanParserHandler());
 			
 			if(res instanceof DynamicBean)
 			{

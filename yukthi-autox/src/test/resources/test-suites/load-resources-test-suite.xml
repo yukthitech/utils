@@ -84,6 +84,26 @@
 	
 		<!--
 			=================================
+			Test with xml file
+			-=======================================
+		-->
+		<testCase name="load_xml">
+			<description>
+				Loads xml on to context and validates the same.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="xmlObj" value="res(template=true):/data/xml-parser-dynamic-bean-1.xml"/>
+			</wrap:steps>
+		
+			<wrap:validations>
+				<s:assert-equals actual="prop: attr.xmlObj.attr1" expected="val1"/>
+				<s:assert-equals actual="prop: attr.xmlObj.node3.intVal" expected="100"/>
+			</wrap:validations>
+		</testCase>
+
+		<!--
+			=================================
 			Test with text file
 			-=======================================
 		-->
