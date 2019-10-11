@@ -1,15 +1,16 @@
 package com.yukthitech.autox.ide.layout;
 
 import javax.swing.JComponent;
+import javax.swing.JToggleButton;
 
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.swing.DropDownButton;
+import com.yukthitech.swing.ToolbarToggleButton;
 
 /**
  * Toolbar icon.
  * @author akiran
  */
-public class ToolBarDropDownIcon extends ToolBarIcon
+public class ToolBarToggleIcon extends ToolBarIcon
 {
 	/**
 	 * To button.
@@ -19,7 +20,7 @@ public class ToolBarDropDownIcon extends ToolBarIcon
 	 */
 	public JComponent toButton(ActionCollection actionCollection)
 	{
-		DropDownButton button = new DropDownButton();
+		JToggleButton button = new ToolbarToggleButton();
 		button.setIcon(IdeUtils.loadIcon(icon, 20));
 		button.setToolTipText(tooltip);
 		button.setBorder(null);

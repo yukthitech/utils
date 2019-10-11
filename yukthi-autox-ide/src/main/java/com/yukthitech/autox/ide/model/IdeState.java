@@ -90,6 +90,11 @@ public class IdeState implements Serializable
 		
 		state = new ProjectState(project.getProjectFilePath());
 		projectIndex.put(project.getName(), state);
+		
+		//remove existing stale state, if any (which may exist because of loading from cache file)
+		this.openProjects.remove(state);
+		
+		//add the fresh state
 		this.openProjects.add(state);
 		return state;
 	}

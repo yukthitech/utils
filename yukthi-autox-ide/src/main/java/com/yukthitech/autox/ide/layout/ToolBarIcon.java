@@ -147,6 +147,11 @@ public class ToolBarIcon implements Validateable
 			button.addActionListener(actionCollection.getActionListener(action));
 		}
 		
+		if(id != null)
+		{
+			UiIdElementsManager.registerElement(id, button);
+		}
+		
 		return button;
 	}
 }

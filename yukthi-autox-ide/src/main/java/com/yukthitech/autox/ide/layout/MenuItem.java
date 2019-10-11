@@ -14,6 +14,11 @@ import com.yukthitech.ccg.xml.util.Validateable;
 public class MenuItem implements Validateable
 {
 	/**
+	 * Id of this item.
+	 */
+	private String id;
+	
+	/**
 	 * Label to be used.
 	 */
 	private String label;
@@ -37,6 +42,26 @@ public class MenuItem implements Validateable
 	 * Action to be invoked.
 	 */
 	private String action;
+	
+	/**
+	 * Gets the id of this item.
+	 *
+	 * @return the id of this item
+	 */
+	public String getId()
+	{
+		return id;
+	}
+
+	/**
+	 * Sets the id of this item.
+	 *
+	 * @param id the new id of this item
+	 */
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
 	/**
 	 * Gets the label to be used.
@@ -178,6 +203,11 @@ public class MenuItem implements Validateable
 		if(icon != null)
 		{
 			menuItem.setIcon(IdeUtils.loadIcon(this.icon, 16));
+		}
+		
+		if(id != null)
+		{
+			UiIdElementsManager.registerElement(id, menuItem);
 		}
 		
 		return menuItem;

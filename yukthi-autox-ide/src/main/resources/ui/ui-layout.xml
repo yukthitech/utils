@@ -134,6 +134,8 @@
 		<drop-down-item id="runList" icon="/ui/icons/run.png" tooltip="Run..."/>
 		
 		<item icon="-" />
+
+		<toggle-item id="ideSettings_enableTextWrapping" icon="/ui/icons/word-wrap.png" tooltip="Word Wrap" action="toogleWordWrap"/>
 	</toolBar>
 
 	<popup-menu label="folderPopup">

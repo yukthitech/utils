@@ -234,6 +234,12 @@ public class FileEditor extends JPanel
 		syntaxTextArea.setFont(font);
 	}
 	
+	public void setEnableTextWrapping(boolean wrap)
+	{
+		syntaxTextArea.setLineWrap(wrap);
+		syntaxTextArea.setWrapStyleWord(wrap);
+	}
+	
 	public RSyntaxTextArea getTextArea()
 	{
 		return syntaxTextArea;

@@ -31,6 +31,7 @@ import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.FileState;
+import com.yukthitech.autox.ide.model.IdeSettings;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
@@ -60,6 +61,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	private int currentTabIndex = -1;
 	
 	private Font editorFont = null;
+	
+	private boolean enableTextWrapping = false;
 	
 	@PostConstruct
 	private void init()
@@ -103,7 +106,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 					}
 				}
 				
-				changeEditorFont(state.getIdeSettings().getEditorFont());
+				changeEditorSettings(state.getIdeSettings());
 			}
 			
 			@Override
@@ -140,26 +143,57 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	@IdeEventHandler
 	public void onIdeSettingsChanged(IdeSettingChangedEvent event)
 	{
-		if(event.getIdeSettings().getEditorFont() != editorFont)
-		{
-			changeEditorFont(event.getIdeSettings().getEditorFont());
-		}
+		changeEditorSettings(event.getIdeSettings());
 	}
 	
-	private void changeEditorFont(Font font)
+	private void changeEditorSettings(IdeSettings ideSettings)
 	{
-		if(font == null)
+		boolean changesPresent = false;
+		Font font = ideSettings.getEditorFont();
+		
+		if(font != null && font != this.editorFont)
+		{
+			changesPresent = true;
+			this.editorFont = font;
+		}
+		else
+		{
+			font = null;
+		}
+		
+		Boolean wrap = ideSettings.isEnableTextWrapping();
+		
+		if(wrap != this.enableTextWrapping)
+		{
+			this.enableTextWrapping = wrap;
+			changesPresent = true;
+		}
+		else
+		{
+			wrap = null;
+		}
+		
+		if(!changesPresent)
 		{
 			return;
 		}
 		
-		this.editorFont = font;
-		
 		for(FileEditor editor : pathToEditor.values())
 		{
-			editor.setEditorFont(editorFont);
+			if(font != null)
+			{
+				editor.setEditorFont(editorFont);
+				editor.setEnableTextWrapping(enableTextWrapping);
+			}
+			
+			if(wrap != null)
+			{
+				editor.setEnableTextWrapping(wrap);
+			}
 		}
 	}
+	
+	
 	
 	private void saveFilesState(IdeState state) throws IOException
 	{
@@ -223,6 +257,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		{
 			fileEditor.setEditorFont(editorFont);
 		}
+		
+		fileEditor.setEnableTextWrapping(enableTextWrapping);
 		
 		FileEditorTab fileEditorTab = new FileEditorTab(project, file, fileEditor, this, maximizationListener);
 		IdeUtils.autowireBean(applicationContext, fileEditorTab);

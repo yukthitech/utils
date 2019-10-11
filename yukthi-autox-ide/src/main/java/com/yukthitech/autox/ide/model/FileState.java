@@ -106,4 +106,20 @@ public class FileState implements Serializable
 	{
 		return path.hashCode();
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append(path);
+		
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

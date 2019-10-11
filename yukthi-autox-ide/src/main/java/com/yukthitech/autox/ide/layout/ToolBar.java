@@ -36,6 +36,11 @@ public class ToolBar
 		this.items.add(item);
 	}
 
+	public void addToggleItem(ToolBarToggleIcon item)
+	{
+		this.items.add(item);
+	}
+
 	public JToolBar toJToolBar(ActionCollection actionCollection)
 	{
 		JToolBar toolBar = new JToolBar();

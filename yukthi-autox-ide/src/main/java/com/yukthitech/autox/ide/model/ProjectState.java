@@ -10,6 +10,9 @@ import java.util.Set;
  */
 public class ProjectState implements Serializable
 {
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -129,4 +132,20 @@ public class ProjectState implements Serializable
 	{
 		return path.hashCode();
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append(path);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }
