@@ -381,7 +381,8 @@ public class FileEditor extends JPanel
 				
 				if(message.hasValidOffsets())
 				{
-					highlighter.addHighlight(message.getStartOffset(), message.getEndOffset(), new SquiggleUnderlineHighlightPainter(ErrorHighLigherPanel.WARNING_BORDER));
+					highlighter.addHighlight(message.getStartOffset(), message.getEndOffset(), 
+							new RectangleHighlighter(ErrorHighLigherPanel.WARNING_BORDER));
 				}
 			}
 			
