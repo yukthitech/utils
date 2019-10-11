@@ -1,5 +1,7 @@
 package com.yukthitech.ccg.xml;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -10,7 +12,9 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.yukthitech.utils.ReflectionUtils;
@@ -882,6 +886,12 @@ class SAXEventHandler extends DefaultHandler
 		
 		this.saxLocator = locator;
 		parserHandler.setLocator(saxLocator);
+	}
+	
+	@Override
+	public InputSource resolveEntity(String publicId, String systemId) throws IOException, SAXException
+	{
+		return new InputSource(new StringReader(""));
 	}
 
 }
