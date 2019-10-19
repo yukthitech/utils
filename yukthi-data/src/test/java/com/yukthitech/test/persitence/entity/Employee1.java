@@ -45,6 +45,9 @@ public class Employee1
 	@DataTypeMapping(type = DataType.STRING, converterType = JsonConverter.class)
 	private Address address;
 	
+	@Column(name = "IS_MARRIED")
+	private boolean married;
+	
 	public Employee1()
 	{}
 	
@@ -139,6 +142,14 @@ public class Employee1
 		this.address = address;
 	}
 
-	
+	public boolean isMarried()
+	{
+		return married;
+	}
+
+	public void setMarried(boolean married)
+	{
+		this.married = married;
+	}
 	
 }

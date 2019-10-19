@@ -104,6 +104,8 @@
 						
 						<#if columnType == "STRING">
 							<#assign dataType="VARCHAR(${column.length?c})">
+						<#elseif columnType == "BOOLEAN">
+							<#assign dataType="Number(1)">
 						<#elseif columnType == "INT">
 							<#assign dataType="Number(10,0)">
 						<#elseif columnType == "LONG">

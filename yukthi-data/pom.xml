@@ -113,7 +113,7 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.oracle/ojdbc14 -->
-		<!--
+		<!--  
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
