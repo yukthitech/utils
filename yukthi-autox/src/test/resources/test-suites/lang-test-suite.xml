@@ -447,6 +447,31 @@
 		
 		</testCase>
 
+		<testCase name="testSubmapFunction">
+			<description>
+				Tests the submap function is working properly.
+			</description>
+			
+			<s:set expression="map1">
+				<value>json: {
+					"key1": "val1",
+					"key2": "val2",
+					"key3": "val3",
+					"key4": "val4"
+				}</value>
+			</s:set>
+
+			<s:set expression="map2">
+				<value>json: {
+					"key1": "val1",
+					"key2": "val2"
+				}</value>
+			</s:set>
+
+			<s:assert-true value="expr: isSubmap(attr.map1, attr.map2)"/>
+			<s:assert-false value="expr: isSubmap(attr.map2, attr.map1)"/>
+		</testCase>
+
 		<testCase name="testExtCommandExecution">
 			<description>
 				Test wether external command execution is working properly or not.

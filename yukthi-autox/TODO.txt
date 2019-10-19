@@ -6,6 +6,10 @@
 			generate graph image - store generated path to context
 			send mail (with fmarker template) with support of embedding images
 			
+	SEARCH
+	=====
+		ability to search multiple files in proj explorer
+
 	DEBUG
 	=======
 		In interactive environment 
@@ -27,10 +31,6 @@
 			class path etc
 			
 		upto date running report should be generated
-		
-	SEARCH
-	=====
-		ability to search multiple files in proj explorer
 		
 	Ability to do performance related testing
 	

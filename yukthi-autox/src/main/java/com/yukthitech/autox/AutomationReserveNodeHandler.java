@@ -114,16 +114,21 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		
 		if(customLoader == null)
 		{
+			logger.debug("Using system class loader for scanning the steps..");
 			customLoader = AutomationReserveNodeHandler.class.getClassLoader();
 		}
 		
 		for(String pack : basePackages)
 		{
+			logger.debug("Scanning for steps in package: {}", pack);
+			
 			reflections = new Reflections(
 					ConfigurationBuilder.build(pack, new TypeAnnotationsScanner(), new SubTypesScanner(), customLoader)
 				);
 
 			stepTypes = reflections.getSubTypesOf(IStep.class);
+			
+			logger.debug("Number of steps found in package {} to be: {}", pack, stepTypes.size());
 
 			for(Class<? extends IStep> stepType : stepTypes)
 			{
@@ -136,6 +141,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 
 				if(executable == null)
 				{
+					logger.debug("Skipping class {} as @Executable annotation is not found on the class", stepType.getName());
 					continue;
 				}
 
