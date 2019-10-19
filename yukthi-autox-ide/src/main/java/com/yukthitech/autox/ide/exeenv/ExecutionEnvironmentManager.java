@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.ide.context.IdeContext;
+import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -32,6 +33,9 @@ public class ExecutionEnvironmentManager
 	
 	@Autowired
 	private IdeContext ideContext;
+	
+	@Autowired
+	private UiLayout uiLayout;
 	
 	/**
 	 * Mapping from project to execution environment.
@@ -93,7 +97,9 @@ public class ExecutionEnvironmentManager
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(project, envName, builder.start(), ideContext.getProxy(), monitorPort, reportFolder, initMssg.toString());
+			ExecutionEnvironment env = new ExecutionEnvironment(project, envName, builder.start(), ideContext.getProxy(), monitorPort, 
+					reportFolder, initMssg.toString(), uiLayout);
+			
 			ideContext.getProxy().newEnvironmentStarted(env);
 			
 			return env;

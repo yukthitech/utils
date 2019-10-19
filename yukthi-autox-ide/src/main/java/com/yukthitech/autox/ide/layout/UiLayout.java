@@ -1,6 +1,8 @@
 package com.yukthitech.autox.ide.layout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +33,11 @@ public class UiLayout
 	 * Popup menu map.
 	 */
 	private Map<String, Menu> nameToPopup = new HashMap<>();
+	
+	/**
+	 * Console line patterns for console text rendering.
+	 */
+	private List<ConsoleLinePattern> consoleLinePatterns = new ArrayList<>();
 	
 	@PostConstruct
 	private void init()
@@ -86,5 +93,15 @@ public class UiLayout
 	public Menu getPopupMenu(String name)
 	{
 		return this.nameToPopup.get(name);
+	}
+	
+	public void addConsoleLinePattern(ConsoleLinePattern pattern)
+	{
+		this.consoleLinePatterns.add(pattern);
+	}
+	
+	public List<ConsoleLinePattern> getConsoleLinePatterns()
+	{
+		return consoleLinePatterns;
 	}
 }

@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
+import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
+import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.monitor.ContextAttributeEventHandler;
 import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
@@ -57,14 +59,17 @@ public class ExecutionEnvironment
 	private File reportFile;
 	
 	private Project project;
+	
+	private UiLayout uiLayout;
 
-	ExecutionEnvironment(Project project, String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage)
+	ExecutionEnvironment(Project project, String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage, UiLayout uiLayout)
 	{
 		this.project = project;
 		this.name = name;
 		this.process = process;
 		this.proxyListener = proxyListener;
 		this.reportFolder = reportFolder;
+		this.uiLayout = uiLayout;
 		
 		logOnConsole(initialMessage, false);
 
@@ -138,11 +143,29 @@ public class ExecutionEnvironment
 		
 		if(error)
 		{
-			lineHtml = "<div style=\"color:red;\">" + lineText + "</div>";
+			lineHtml = String.format("<div style=\"color:red;\">%s</div>", lineText);
 		}
 		else
 		{
-			lineHtml = "<div>" + lineText + "</div>";
+			String color = null;
+			
+			for(ConsoleLinePattern linePattern : uiLayout.getConsoleLinePatterns())
+			{
+				if(linePattern.getPattern().matcher(lineText).find())
+				{
+					color = linePattern.getColor();
+					break;
+				}
+			}
+			
+			if(color == null)
+			{
+				lineHtml = "<div>" + lineText + "</div>";
+			}
+			else
+			{
+				lineHtml = String.format("<div style=\"color:%s;\">%s</div>", color, lineText);
+			}
 		}
 
 		appenConsoleHtml(lineHtml);

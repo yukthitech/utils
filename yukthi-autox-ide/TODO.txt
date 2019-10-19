@@ -1,6 +1,8 @@
+
+
 11/10
 =====
-After delete, in proj explorer file list is not getting refreshed
+After delete / paste, in proj explorer file list is not getting refreshed
 Big xml is taking lot of time to parse.
 
 For interaction steps, namespace for step-holder-template.xml should be picked from the current xml
