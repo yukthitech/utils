@@ -1,5 +1,7 @@
 package com.yukthitech.test.persitence.entity;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,6 +49,9 @@ public class Employee1
 	
 	@Column(name = "IS_MARRIED")
 	private boolean married;
+	
+	@Column(name = "DOB")
+	private Date dob;
 	
 	public Employee1()
 	{}
@@ -151,5 +156,14 @@ public class Employee1
 	{
 		this.married = married;
 	}
-	
+
+	public Date getDob()
+	{
+		return dob;
+	}
+
+	public void setDob(Date dob)
+	{
+		this.dob = dob;
+	}
 }

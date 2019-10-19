@@ -68,7 +68,7 @@ public class RdbmsDataStore implements IDataStore
 	private static Logger logger = LogManager.getLogger(RdbmsDataStore.class);
 	
 	private RdbmsConfiguration rdbmsConfig;
-	private ConversionService conversionService = new ConversionService();
+	private ConversionService conversionService;
 	private RdbmsTransactionManager transactionManager = new RdbmsTransactionManager();
 	
 	private EntityDetailsFactory entityDetailsFactory;
@@ -78,6 +78,7 @@ public class RdbmsDataStore implements IDataStore
 	public RdbmsDataStore(String templatesName)
 	{
 		rdbmsConfig = new RdbmsConfiguration();
+		conversionService = new ConversionService(rdbmsConfig);
 		
 		try
 		{
@@ -316,46 +317,6 @@ public class RdbmsDataStore implements IDataStore
 		}
 	}
 	
-	/**
-	 * Adds the parameters from specified condition to specified prepared statement and params.
-	 * @param conditions conditions whose params needs to be added
-	 * @param params collection to collect params set on statement.
-	 * @param pstmt statement to be executed
-	 * @param index starting index to be used
-	 * @return end index that can be used to add more params
-	 * /
-	private int addConditionsParams(List<QueryCondition> conditions, List<Object> params, PreparedStatement pstmt, int index) throws SQLException
-	{
-		if(conditions == null)
-		{
-			return index;
-		}
-		
-		for(QueryCondition condition: conditions)
-		{
-			if(condition.isMultiValued())
-			{
-				for(Object value : condition.getMultiValues())
-				{
-					pstmt.setObject(index, value);
-					params.add(value);
-					
-					index++;
-				}
-				
-				continue;
-			}
-			
-			pstmt.setObject(index, condition.getValue());
-			params.add(condition.getValue());
-			
-			index++;
-		}
-		
-		return index;
-	}
-	*/
-
 	@Override
 	public Double fetchAggregateValue(AggregateQuery countQuery, EntityDetails entityDetails)
 	{
@@ -615,23 +576,32 @@ public class RdbmsDataStore implements IDataStore
 				
 				value = column.getValue();
 				
-				if(value instanceof LobData)
+				try
 				{
-					LobData lobData = (LobData)value;
-					closeables.add(lobData);
-					
-					if(lobData.isTextStream())
+					if(value instanceof LobData)
 					{
-						pstmt.setCharacterStream(index, lobData.openReader() );
+						LobData lobData = (LobData)value;
+						closeables.add(lobData);
+						
+						if(lobData.isTextStream())
+						{
+							pstmt.setCharacterStream(index, lobData.openReader() );
+						}
+						else
+						{
+							pstmt.setBinaryStream(index,  lobData.openStream() );
+						}
 					}
 					else
 					{
-						pstmt.setBinaryStream(index,  lobData.openStream() );
+						pstmt.setObject(index, value);
 					}
-				}
-				else
+				}catch(Exception ex)
 				{
-					pstmt.setObject(index, value);
+					logger.error("An error occurred while setting parameter [Index: {}, Column: {}, Value-type: {}, Value: {}]", index, column.getName(), 
+							(value != null) ? value.getClass().getName() : "null",
+							value);
+					throw ex;
 				}
 				
 				params.add(value);
@@ -708,23 +678,32 @@ public class RdbmsDataStore implements IDataStore
 			{
 				value = column.getValue();
 				
-				if(value instanceof LobData)
+				try
 				{
-					LobData lobData = (LobData)value;
-					closeables.add(lobData);
-					
-					if(lobData.isTextStream())
+					if(value instanceof LobData)
 					{
-						pstmt.setCharacterStream(index, lobData.openReader() );
+						LobData lobData = (LobData)value;
+						closeables.add(lobData);
+						
+						if(lobData.isTextStream())
+						{
+							pstmt.setCharacterStream(index, lobData.openReader() );
+						}
+						else
+						{
+							pstmt.setBinaryStream(index,  lobData.openStream() );
+						}
 					}
 					else
 					{
-						pstmt.setBinaryStream(index,  lobData.openStream() );
+						pstmt.setObject(index, value);
 					}
-				}
-				else
+				}catch(Exception ex)
 				{
-					pstmt.setObject(index, value);
+					logger.error("An error occurred while setting parameter [Index: {}, Column: {}, Value-type: {}, Value: {}]", index, column.getName(), 
+							(value != null) ? value.getClass().getName() : "null",
+							value);
+					throw ex;
 				}
 
 				params.add(value);
@@ -948,7 +927,7 @@ public class RdbmsDataStore implements IDataStore
 		
 		for(Object param : params)
 		{
-			if(builder.length() > 0)
+			if(builder.length() > 1)
 			{
 				builder.append(", ");
 			}

@@ -1,6 +1,9 @@
 <configuration xmlns:ccg="/fw/ccg/XMLBeanParser" pagingSupported="true">
 	<ccg:exprPattern enabled="false"/>
 	
+	<implicit-converter type="DATE_TIME" ccg:beanType="com.yukthitech.persistence.rdbms.converters.OracleDateConverter"/>
+	<implicit-converter type="DATE" ccg:beanType="com.yukthitech.persistence.rdbms.converters.OracleDateConverter"/>
+	
 	<template name="#commonCode"><![CDATA[
 		<#function conditionToStr condition tableCode>
 			<#if condition.value??>
@@ -15,7 +18,7 @@
 						<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} (<#list condition.multiValues as item>?<#sep>,</#sep></#list>)</#assign>
 					<#else>
 						<#if condition.dataTypeName == 'DATE'>
-							<#assign conditionStrRes> DATE(${tableCode}${condition.column}) ${condition.operator} DATE(?)</#assign>
+							<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
 						<#else>
 							<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
 						</#if>
@@ -115,6 +118,8 @@
 						<#elseif columnType == "DOUBLE">
 							<#assign dataType="NUMBER(19, 4)">
 						<#elseif columnType == "DATE_TIME">
+							<#assign dataType="TIMESTAMP">
+						<#elseif columnType == "DATE">
 							<#assign dataType="DATE">
 						<#elseif columnType == "CLOB">
 							<#assign dataType="CLOB">

@@ -423,7 +423,12 @@ public class EntityDetailsFactory
 			}
 			
 			columnName = (column != null && column.name().length() > 0) ? column.name().trim() : field.getName();
-			dbType = (dataTypeMapping != null) ? dataTypeMapping.type() : DataType.UNKNOWN;
+			dbType = (dataTypeMapping != null) ? dataTypeMapping.type() : DataType.getDataType(field.getType());
+			
+			if(dbType == null)
+			{
+				dbType = DataType.UNKNOWN;
+			}
 			
 			//flatten the column name
 			String flatColumnName = columnName.replaceAll(SPECIAL_CHAR_PATTERN, "");

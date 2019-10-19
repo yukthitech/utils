@@ -1,16 +1,14 @@
 package com.yukthitech.persistence.repository.executors.proxy;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.repository.search.SearchCondition;
 import com.yukthitech.persistence.repository.search.SearchQuery;
+import com.yukthitech.persistence.utils.OrmUtils;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
@@ -60,7 +58,6 @@ public class ProxyEntityCollection
 	 * @param condition
 	 * @param actualCollection
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private ProxyEntityCollection(EntityDetails entityDetails, ICrudRepository<?> repository, SearchCondition condition, Class<?> collectionType)
 	{
 		if(condition == null)
@@ -71,29 +68,7 @@ public class ProxyEntityCollection
 		this.repository = repository;
 		this.searchCondition = condition;
 		
-		//if target collection is list type
-		if(collectionType.isAssignableFrom(ArrayList.class))
-		{
-			collectionType = ArrayList.class;
-		}
-		//if target collection is set type
-		else if(collectionType.isAssignableFrom(HashSet.class))
-		{
-			collectionType = HashSet.class;
-		}
-		//if target collection is sorted set type
-		else if(collectionType.isAssignableFrom(TreeSet.class))
-		{
-			collectionType = TreeSet.class;
-		}
-		
-		try
-		{
-			this.actualCollection = (Collection) collectionType.newInstance();
-		}catch(Exception ex)
-		{
-			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);
-		}
+		this.actualCollection = OrmUtils.createCollection(collectionType);
 		
 		//create ccg lib handler which will handle method calls on proxy
 		Enhancer enhancer = new Enhancer();

@@ -21,12 +21,15 @@ public class ConversionService
 {
 	private static Logger logger = LogManager.getLogger(ConversionService.class);
 	
+	private IImplicitCoverterProvider implicitCoverterProvider;
+	
 	private List<IPersistenceConverter> converters = new ArrayList<>();
 	
 	private Map<Class<?>, IPersistenceConverter> typeToConverter = new HashMap<>();
 	
-	public ConversionService()
+	public ConversionService(IImplicitCoverterProvider coverterProvider)
 	{
+		this.implicitCoverterProvider = coverterProvider;
 		addConverter(new StringDbConverter());
 	}
 	
@@ -62,7 +65,7 @@ public class ConversionService
 		
 		if(typeMapping == null)
 		{
-			return null;
+			return implicitCoverterProvider.getImplicitConverter(fieldDetails.getDbDataType());
 		}
 		
 		Class<?> converterType = typeMapping.converterType();
@@ -70,8 +73,8 @@ public class ConversionService
 		//if no converter is specified in annotation
 		if(IPersistenceConverter.class.equals(converterType))
 		{
-			//dont use any converter
-			return null;
+			// use implicit converter, if any
+			return implicitCoverterProvider.getImplicitConverter(fieldDetails.getDbDataType());
 		}
 		
 		IPersistenceConverter converter = typeToConverter.get(converterType);
@@ -155,7 +158,7 @@ public class ConversionService
 		for(IPersistenceConverter converter: converters)
 		{
 			result = converter.convertToDBType(javaObj, fieldDetails.getDbDataType());
-			
+
 			//if conversion was successful
 			if(result != null)
 			{

@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.persistence.annotations.DataType;
+import com.yukthitech.persistence.conversion.IImplicitCoverterProvider;
+import com.yukthitech.persistence.conversion.IPersistenceConverter;
 import com.yukthitech.persistence.freemarker.TrimDirective;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -16,7 +19,7 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
-public class RdbmsConfiguration implements Validateable
+public class RdbmsConfiguration implements Validateable, IImplicitCoverterProvider
 {
 	public static final String COMMON_CODE = "#commonCode";
 	
@@ -199,6 +202,11 @@ public class RdbmsConfiguration implements Validateable
 	 */
 	private List<Pattern> constraintErrorPatterns;
 	
+	/**
+	 * Implicit converters to be used for this db configuration to interact with db. 
+	 */
+	private Map<DataType, IPersistenceConverter> dbImplicitConverters = new HashMap<>();
+	
 	public void addConstraintErrorPattern(String constraintErrorPattern)
 	{
 		constraintErrorPattern = constraintErrorPattern.trim();
@@ -214,6 +222,16 @@ public class RdbmsConfiguration implements Validateable
 		}
 		
 		this.constraintErrorPatterns.add( Pattern.compile(constraintErrorPattern) );
+	}
+	
+	public void addImplicitConverter(DataType dataType, IPersistenceConverter converter)
+	{
+		this.dbImplicitConverters.put(dataType, converter);
+	}
+	
+	public IPersistenceConverter getImplicitConverter(DataType javaType)
+	{
+		return this.dbImplicitConverters.get(javaType);
 	}
 	
 	public boolean isUniqueIdColumnRequired()

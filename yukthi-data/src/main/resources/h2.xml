@@ -23,7 +23,7 @@
 						<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} (<#list condition.multiValues as item>?<#sep>,</#sep></#list>)</#assign>
 					<#else>
 						<#if condition.dataTypeName == 'DATE'>
-							<#assign conditionStrRes> DATE(${tableCode}${condition.column}) ${condition.operator} DATE(?)</#assign>
+							<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
 						<#else>
 							<#assign conditionStrRes> ${tableCode}${condition.column} ${condition.operator} ?</#assign>
 						</#if>
@@ -118,6 +118,8 @@
 					<#assign dataType="REAL">
 				<#elseif columnType == "DOUBLE">
 					<#assign dataType="DOUBLE">
+				<#elseif columnType == "DATE">
+					<#assign dataType="DATE">
 				<#elseif columnType == "DATE_TIME">
 					<#assign dataType="TIMESTAMP">
 				<#elseif columnType == "CLOB">

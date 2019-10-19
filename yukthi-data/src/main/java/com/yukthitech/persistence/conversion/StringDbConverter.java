@@ -1,6 +1,9 @@
 package com.yukthitech.persistence.conversion;
 
+import java.util.Collection;
+
 import com.yukthitech.persistence.annotations.DataType;
+import com.yukthitech.persistence.utils.OrmUtils;
 
 /**
  * Converts different data types into string, for string db data type
@@ -25,7 +28,25 @@ public class StringDbConverter implements IPersistenceConverter
 		}
 		
 		//simple convert java object to string using to-string
-		return javaObject.toString();
+		return convertToString(javaObject);
 	}
 
+	@SuppressWarnings("unchecked")
+	private Object convertToString(Object javaObj)
+	{
+		if(!(javaObj instanceof Collection))
+		{
+			return javaObj.toString();
+		}
+		
+		Collection<Object> inCollection = (Collection<Object>) javaObj;
+		Collection<Object> resCollection = OrmUtils.createCollection(javaObj.getClass());
+		
+		for(Object obj : inCollection)
+		{
+			resCollection.add(obj.toString());
+		}
+		
+		return resCollection;
+	}
 }

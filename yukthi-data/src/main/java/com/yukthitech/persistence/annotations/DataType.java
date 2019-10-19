@@ -12,7 +12,7 @@ public enum DataType
 	FLOAT(float.class, Float.class), 
 	DOUBLE(double.class, Double.class),
 	BOOLEAN(boolean.class, Boolean.class),
-	DATE, 
+	DATE,
 	BLOB,
 	ZIP_BLOB,
 	CLOB,
