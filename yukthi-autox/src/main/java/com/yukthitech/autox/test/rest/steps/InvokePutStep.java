@@ -4,6 +4,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.rest.PutRestRequest;
 
@@ -19,7 +20,7 @@ public class InvokePutStep extends AbstractRestStep
 	/**
 	 * Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.
 	 */
-	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.")
+	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.", sourceType = SourceType.EXPRESSION)
 	private Object body;
 	
 	/**

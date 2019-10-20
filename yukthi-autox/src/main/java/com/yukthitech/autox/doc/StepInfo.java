@@ -196,6 +196,11 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 	 */
 	public ParamInfo getParam(String name)
 	{
+		if(params == null)
+		{
+			return null;
+		}
+		
 		return params.get(name);
 	}
 	

@@ -297,6 +297,7 @@
 		
 			<wrap:steps>
 				<s:set expression="store: testStoreKey" value="value1"/>
+				<s:set expression="store: testStoreIntKey" value="int: 120"/>
 			
 				<s:set expression="ctxAttrKey" value="store: testStoreKey"/>
 			
@@ -305,8 +306,8 @@
 		
 			<wrap:validations>
 				<s:assert-equals actual="attr: ctxAttrKey" expected="value1"/>
-			
 				<s:assert-equals actual="attr: ctxAttrKey1" expected="Value is value1"/>
+				<s:assert-equals actual="store: testStoreIntKey" expected="int: 120"/>
 			</wrap:validations>
 		</testCase>
 	

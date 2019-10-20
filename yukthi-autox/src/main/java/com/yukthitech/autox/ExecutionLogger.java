@@ -128,7 +128,21 @@ public class ExecutionLogger
 	
 	private String getSource(StackTraceElement stackTrace[])
 	{
-		return stackTrace[2].getFileName() + ":" + stackTrace[2].getLineNumber();
+		StackTraceElement finalElem = null;
+		String curClsName = ExecutionLogger.class.getName();
+		
+		for(StackTraceElement elem  : stackTrace)
+		{
+			if(elem.getClassName().equals(curClsName) || elem.getClassName().startsWith("java"))
+			{
+				continue;
+			}
+			
+			finalElem = elem;
+			break;
+		}
+		
+		return finalElem.getFileName() + ":" + finalElem.getLineNumber();
 	}
 	
 	/**
