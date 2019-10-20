@@ -2,7 +2,10 @@ package com.yukthitech.autox.ide.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -177,12 +180,19 @@ public class FileEditor extends JPanel
 			@Override
 			public void keyPressed(KeyEvent e)
 			{
+				if(e.getKeyCode() == KeyEvent.VK_HOME)
+				{
+					handleHomeKey(e);
+					return;
+				}
+				
 				fileContentChanged(false);
 			}
 			
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
+				
 				fileContentChanged(false);
 			}
 		});
@@ -192,6 +202,48 @@ public class FileEditor extends JPanel
 		//syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl shift R"), "dummy");
 		
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.VK_CONTROL | KeyEvent.VK_SHIFT), "dummy");
+	}
+	
+	private void handleHomeKey(KeyEvent e)
+	{
+		try
+		{
+			int curLine = syntaxTextArea.getCaretLineNumber();
+			int stOffset = syntaxTextArea.getLineStartOffset(curLine);
+			
+			if(stOffset != syntaxTextArea.getCaretPosition())
+			{
+				syntaxTextArea.setCaretPosition(stOffset);
+				e.consume();
+				return;
+			}
+			
+			int endOffset = syntaxTextArea.getLineEndOffset(curLine);
+			char lineText[] = syntaxTextArea.getText().substring(stOffset, endOffset).toCharArray();
+			
+			int extraOffset = 0;
+			
+			for(char ch : lineText)
+			{
+				if(Character.isWhitespace(ch))
+				{
+					extraOffset ++;
+					continue;
+				}
+				
+				break;
+			}
+			
+			e.consume();
+			
+			if(extraOffset > 0)
+			{
+				syntaxTextArea.setCaretPosition(stOffset + extraOffset);
+			}
+		}catch(Exception ex)
+		{
+			//ignore
+		}
 	}
 	
 	@PostConstruct
@@ -435,6 +487,13 @@ public class FileEditor extends JPanel
 	public void setCaretPosition(int position)
 	{
 		syntaxTextArea.setCaretPosition(position);
+		
+		Point viewPoint = syntaxTextArea.getCaret().getMagicCaretPosition();
+		
+		if(viewPoint != null)
+		{
+			syntaxTextArea.scrollRectToVisible(new Rectangle(viewPoint, new Dimension(1, 1)));
+		}
 	}
 	
 	public String getContent()

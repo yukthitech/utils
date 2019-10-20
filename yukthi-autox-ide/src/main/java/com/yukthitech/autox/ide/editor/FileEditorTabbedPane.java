@@ -84,27 +84,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			@Override
 			public void loadState(IdeState state)
 			{
-				for(ProjectState projState : state.getOpenProjects())
-				{
-					Project proj = projectActions.openExistingProject(projState.getPath());
-					
-					if(proj == null)
-					{
-						continue;
-					}
-					
-					for(FileState fileState : projState.getOpenFiles())
-					{
-						FileEditor fileEditor = openProjectFile(proj, new File(fileState.getPath()) );
-						
-						if(fileEditor == null)
-						{
-							continue;
-						}
-						
-						fileEditor.setCaretPosition(fileState.getCursorPositon());
-					}
-				}
+				//opening files before window is displayed, so that slow processing is completed before hand
+				openFilesFromState(state);
 				
 				changeEditorSettings(state.getIdeSettings());
 			}
@@ -138,6 +119,31 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				ideContext.getProxy().activeFileChanged(editor.getFile(), FileEditorTabbedPane.this);
 			}
 		});
+	}
+	
+	private void openFilesFromState(IdeState state)
+	{
+		for(ProjectState projState : state.getOpenProjects())
+		{
+			Project proj = projectActions.openExistingProject(projState.getPath());
+			
+			if(proj == null)
+			{
+				continue;
+			}
+			
+			for(FileState fileState : projState.getOpenFiles())
+			{
+				FileEditor fileEditor = openProjectFile(proj, new File(fileState.getPath()) );
+				
+				if(fileEditor == null)
+				{
+					continue;
+				}
+				
+				fileEditor.setCaretPosition(fileState.getCursorPositon());
+			}
+		}
 	}
 	
 	@IdeEventHandler
