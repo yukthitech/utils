@@ -30,6 +30,9 @@ public class BeanPropertyInfoFactory
 		List<BeanProperty> props = BeanProperty.loadProperties(type, false, false, true);
 		props = (props == null) ? Collections.<BeanProperty>emptyList() : props;
 		
-		return new BeanPropertyInfo(type, props);
+		beanPropertyInfo = new BeanPropertyInfo(type, props);
+		typeToInfo.put(type, beanPropertyInfo);
+		
+		return beanPropertyInfo;
 	}
 }
