@@ -51,8 +51,7 @@ public class TransactionWrapper<T extends ITransaction> implements ITransaction
 				return;
 			}
 			
-			logger.trace("Close is called on un-committed existing transaction. Closing the main transaction: {}", this);
-			transaction.close();
+			logger.debug("Without calling commit(), close is called on existing transaction. Ignoring close: {}", this);
 			return;
 		}
 
