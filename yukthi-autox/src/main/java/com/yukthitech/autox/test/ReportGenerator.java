@@ -108,10 +108,13 @@ public class ReportGenerator
 			context.put("reportFolderName", reportFolder.getName());
 			context.put("context", automationContext);
 			
+			SummaryNotificationConfig summaryNotificationConfig = applicationConfiguration.getSummaryNotificationConfig();
+			summaryNotificationConfig = (summaryNotificationConfig != null && summaryNotificationConfig.isEnabled()) ? summaryNotificationConfig : null;
+			
 			//generate header and footer content and place in context which in turn will be used in summary report template
-			if(applicationConfiguration.getSummaryNotificationConfig() != null)
+			if(summaryNotificationConfig != null)
 			{
-				generateHeaderAndFooter(context, applicationConfiguration.getSummaryNotificationConfig());
+				generateHeaderAndFooter(context, summaryNotificationConfig);
 			}
 
 			String reportTemplate = IOUtils.toString(ReportGenerator.class.getResourceAsStream(SUMMARY_REPORT_TEMPLATE));
@@ -121,9 +124,9 @@ public class ReportGenerator
 			FileUtils.write(summaryHtml, summaryResult);
 
 			//send notification mail
-			if(applicationConfiguration.getSummaryNotificationConfig() != null)
+			if(summaryNotificationConfig != null)
 			{
-				sendSummaryMail(applicationConfiguration.getSummaryNotificationConfig(), summaryHtml, context);
+				sendSummaryMail(summaryNotificationConfig, summaryHtml, context);
 			}
 		} catch(Exception ex)
 		{

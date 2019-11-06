@@ -59,6 +59,11 @@ public class SummaryNotificationConfig
 	private String footerTemplateFile;
 	
 	/**
+	 * Flag indicating if summary notification config is enabled or not.
+	 */
+	private boolean enabled = true;
+	
+	/**
 	 * Instantiates a new summary notification config.
 	 */
 	public SummaryNotificationConfig()
@@ -294,5 +299,25 @@ public class SummaryNotificationConfig
 	public void setFooterTemplateFile(String footerTemplateFile)
 	{
 		this.footerTemplateFile = footerTemplateFile;
+	}
+
+	/**
+	 * Gets the flag indicating if summary notification config is enabled or not.
+	 *
+	 * @return the flag indicating if summary notification config is enabled or not
+	 */
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	/**
+	 * Sets the flag indicating if summary notification config is enabled or not.
+	 *
+	 * @param enabled the new flag indicating if summary notification config is enabled or not
+	 */
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
 	}
 }
