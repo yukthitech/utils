@@ -97,12 +97,10 @@
 		 </wrap:post-commands>
 	 -->
 
-	<!-- 
-	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="kranthi@mail">
+	<summaryNotificationConfig smptpHost="smtp.gmail.com" userName="akranthikiran@gmail.com" password="" enabled="#{system.enabel.summary}">
 		<toAddressList>akranthikiran@gmail.com</toAddressList>
 		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
 	</summaryNotificationConfig>
-	 -->
 	 
 	 <excludedGroups>download</excludedGroups>
 </app>

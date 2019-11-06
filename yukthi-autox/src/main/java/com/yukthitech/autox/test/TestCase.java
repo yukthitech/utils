@@ -28,6 +28,10 @@ import com.yukthitech.utils.ObjectWrapper;
  */
 public class TestCase implements IStepContainer, Validateable, IEntryPoint
 {
+	
+	/**
+	 * The logger.
+	 */
 	private static Logger logger = LogManager.getLogger(TestCase.class);
 	
 	/**
@@ -84,16 +88,44 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	 */
 	private Cleanup cleanup;
 	
+	/**
+	 * Data setup to be used. This will be invoked only when data-provider is specified
+	 * and will be executed before any data-test-case is executed.
+	 */
+	private Setup dataSetup;
+	
+	/**
+	 * Data cleanup to be used. This will be invoked only when data-provider is specified
+	 * and will be executed after all data-test-cases are executed.
+	 */
+	private Cleanup dataCleanup;
+	
+	/**
+	 * The data.
+	 */
 	private TestCaseData data;
 	
+	/**
+	 * Instantiates a new test case.
+	 */
 	public TestCase()
 	{}
 	
+	/**
+	 * Instantiates a new test case.
+	 *
+	 * @param name the name
+	 */
 	public TestCase(String name)
 	{
 		this.name = name;
 	}
 	
+	/**
+	 * Adds the group.
+	 *
+	 * @param name the name
+	 */
 	public void addGroup(String name)
 	{
 		if(name.trim().length() == 0)
@@ -133,11 +165,19 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 		return true;
 	}
 	
+	/**
+	 * Sets the data.
+	 *
+	 * @param data the new data
+	 */
 	public void setData(TestCaseData data)
 	{
 		this.data = data;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.yukthitech.autox.test.IEntryPoint#toText()
+	 */
 	@Override
 	public String toText()
 	{
@@ -282,6 +322,46 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	public void setCleanup(Cleanup cleanup)
 	{
 		this.cleanup = cleanup;
+	}
+
+	/**
+	 * Gets the data setup to be used. This will be invoked only when data-provider is specified and will be executed before any data-test-case is executed.
+	 *
+	 * @return the data setup to be used
+	 */
+	public Setup getDataSetup()
+	{
+		return dataSetup;
+	}
+
+	/**
+	 * Sets the data setup to be used. This will be invoked only when data-provider is specified and will be executed before any data-test-case is executed.
+	 *
+	 * @param dataSetup the new data setup to be used
+	 */
+	public void setDataSetup(Setup dataSetup)
+	{
+		this.dataSetup = dataSetup;
+	}
+
+	/**
+	 * Gets the data cleanup to be used. This will be invoked only when data-provider is specified and will be executed after all data-test-cases are executed.
+	 *
+	 * @return the data cleanup to be used
+	 */
+	public Cleanup getDataCleanup()
+	{
+		return dataCleanup;
+	}
+
+	/**
+	 * Sets the data cleanup to be used. This will be invoked only when data-provider is specified and will be executed after all data-test-cases are executed.
+	 *
+	 * @param dataCleanup the new data cleanup to be used
+	 */
+	public void setDataCleanup(Cleanup dataCleanup)
+	{
+		this.dataCleanup = dataCleanup;
 	}
 
 	/*

@@ -1,3 +1,7 @@
+06/11
+	Data-setup and cleanup logs are added as part of first and last steps resp.
+	Instead it should be handled separately. 
+
 11/10
 	STATS
 	=====

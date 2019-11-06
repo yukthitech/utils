@@ -144,13 +144,34 @@ public class TestSuiteExecutor
 		String name = null;
 		TestStatus finalStatus = TestStatus.SUCCESSFUL;
 		
+		Setup dataSetup = testCase.getDataSetup();
+		Cleanup dataCleanup = testCase.getDataCleanup();
+		int dataIndex = 0;
+		
 		for(TestCaseData data : dataLst)
 		{
+			dataIndex++;
+			
 			name = testCase.getName() + " [" + data.getName() + "]";
 			exeLogger = new ExecutionLogger(context, name, testCase.getDescription());
 			
-			exeLogger.debug(null, "Executing test case '{}' with data: {}", name, data.getName());
-					
+			//TODO: As of now data-setup is executed as part of first data-step. It should be a separate one 
+			//  and need to decide how logs should be presented
+			if(dataSetup != null)
+			{
+				logger.debug("Executing data-setup steps for test case: {}", name);
+				result = dataSetup.execute(context, exeLogger);
+				
+				if(result.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Data-setup execution failed.");
+				}
+				
+				dataSetup = null;
+			}
+
+			exeLogger.debug("Executing test case '{}' with data: {}", name, data.getName());
+
 			//set data provider data on context
 			context.setAttribute(dataProvider.getName(), data.getValue());
 
@@ -175,6 +196,21 @@ public class TestSuiteExecutor
 				context.clearActiveTestCase();
 			}
 			
+			//execute data cleanup as part of last data test case
+			//TODO: as of now data-cleanup is executed as part of last data-step. Instead it should be handled separately 
+			//  and need to decide how to present the logs
+			if(dataIndex == dataLst.size() && dataCleanup != null)
+			{
+				logger.debug("Executing data-cleanup steps for test case: {}", name);
+				
+				result = dataCleanup.execute(context, exeLogger);
+				
+				if(result.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					finalStatus = TestStatus.FAILED;
+				}
+			}
+			
 			//stop monitoring logs
 			Map<String, File> monitoringLogs = context.stopLogMonitoring();
 			reportGenerator.createLogFiles(context, result, testFileName + "_" + nextFileIndex.getAndIncrement(), monitoringLogs, data + "\n" + testCase.getDescription());
@@ -191,7 +227,7 @@ public class TestSuiteExecutor
 			
 			testCaseDatsResults.add(result);
 		}
-		
+
 		return new TestCaseResult(testCase.getName(), finalStatus, null, "", true);
 	}
 	

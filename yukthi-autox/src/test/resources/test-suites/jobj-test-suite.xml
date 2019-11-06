@@ -101,6 +101,8 @@
 			<description>
 				Invokes simple method on bean with data provider and
 				ensures data-provider working.
+				
+				And also test data-setup working.
 			</description>
 		
 			<list-data-provider name="dataString">
@@ -110,6 +112,10 @@
 			
 				<data>ghi</data>
 			</list-data-provider>
+			
+			<data-setup>
+				<s:set expression="dataSetupAttr" value="data-setup-val"/>
+			</data-setup>
 		
 			<wrap:steps>
 				<s:invokeMethod deepCloneParams="true" method="toText" paramTypes="com.yukthitech.test.beans.NameBean">
@@ -121,7 +127,12 @@
 		
 			<wrap:validations>
 				<s:assert-equals actual="attr: returnValue" expected="beanFromTestSuite=&gt;${attr.dataString}"/>
+				<s:assert-equals actual="attr: dataSetupAttr" expected="data-setup-val"/>
 			</wrap:validations>
+			
+			<data-cleanup>
+				<s:log message="This message is from data-cleanup"/>
+			</data-cleanup>
 		</testCase>
 	
 		<testCase name="testStepDataProvider">
