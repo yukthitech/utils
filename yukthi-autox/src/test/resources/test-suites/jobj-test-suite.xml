@@ -255,7 +255,7 @@
 			
 				<s:assert-equals actual="attr: propAttr2" expected="Test123"/>
 			
-				<s:assert-equals actual="attr: propAttr3" expected="int: 234"/>
+				<s:assert-equals actual="attr: propAttr3" expected="234"/>
 			</wrap:validations>
 		</testCase>
 	
