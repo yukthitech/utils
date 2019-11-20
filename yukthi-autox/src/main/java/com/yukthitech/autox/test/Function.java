@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
@@ -28,6 +31,16 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 	 * Name of this group.
 	 */
 	private String name;
+	
+	/**
+	 * Description of the function.
+	 */
+	private String description;
+	
+	/**
+	 * Parameter definitions of the function.
+	 */
+	private List<FunctionParamDef> parameterDefs;
 	
 	/**
 	 * Steps for the test case.
@@ -93,6 +106,35 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		return name;
 	}
 	
+	public String getDescription()
+	{
+		return description;
+	}
+
+	/**
+	 * Sets the description of the function.
+	 *
+	 * @param description the new description of the function
+	 */
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
+	
+	/**
+	 * Adds the specified parameter def to this function.
+	 * @param def def to add.
+	 */
+	public void addParamDef(FunctionParamDef def)
+	{
+		if(this.parameterDefs == null)
+		{
+			this.parameterDefs = new ArrayList<>();
+		}
+		
+		this.parameterDefs.add(def);
+	}
+
 	/**
 	 * Sets the parent where this function is defined.
 	 *

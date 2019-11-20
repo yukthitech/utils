@@ -330,6 +330,8 @@
 		</testCase>
 	
 		<function name="factorialGroup1">
+			<param-def name="value" description="value to be evaluated"/>
+			
 			<s:if condition="param.value lt 2">
 				<then>
 					<s:set expression="result" value="int: 1"/>
