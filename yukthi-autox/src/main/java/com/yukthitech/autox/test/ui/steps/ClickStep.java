@@ -1,5 +1,9 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
@@ -11,7 +15,6 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -37,7 +40,7 @@ public class ClickStep extends AbstractPostCheckStep
 
 		try
 		{
-			ObjectWrapper<Boolean> clickedAtleastOnce = new ObjectWrapper<>(false);
+			AtomicInteger clickedAtleastOnce = new AtomicInteger(0);
 			
 			UiAutomationUtils.validateWithWait(() -> 
 			{
@@ -51,7 +54,8 @@ public class ClickStep extends AbstractPostCheckStep
 						throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 					}
 
-					if(clickedAtleastOnce.getValue())
+					//if at least once button is clicked
+					if(clickedAtleastOnce.get() > 0)
 					{
 						if(super.isPostCheckAvailable() && doPostCheck(exeLogger, "Before re-click"))
 						{
@@ -62,8 +66,28 @@ public class ClickStep extends AbstractPostCheckStep
 					
 					exeLogger.trace("Trying to click element specified by locator: {}", locator);
 					
-					webElement.click();
-					clickedAtleastOnce.setValue(true);
+					try
+					{
+						webElement.click();
+					}catch(RuntimeException ex)
+					{
+						//if second click is also resulted in error, try js way of clicking.
+						if(clickedAtleastOnce.get() > 0)
+						{
+							exeLogger.debug(
+									"Click element failed with error twice or more than twice. So trying to click the element using JS. Error: {} "
+									, "" + ex);
+							SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
+							WebDriver driver = seleniumConfiguration.getWebDriver();
+
+							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
+							return doPostCheck(exeLogger, "Post Click");
+						}
+						
+						throw ex;
+					}
+					
+					clickedAtleastOnce.incrementAndGet();
 					
 					//after click check the post-check and return result approp
 					return doPostCheck(exeLogger, "Post Click");
