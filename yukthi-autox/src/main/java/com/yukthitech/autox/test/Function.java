@@ -13,6 +13,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
@@ -30,16 +31,29 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 	/**
 	 * Name of this group.
 	 */
+	@Param(name = "name", description = "Name of the function", required = true)
 	private String name;
 	
 	/**
 	 * Description of the function.
 	 */
+	@SkipParsing
+	@Param(name = "description", description = "Description of the function", required = false)
 	private String description;
+	
+	/**
+	 * Description of the return value. This should be omitted for functions which dont return any value.
+	 */
+	@SkipParsing
+	@Param(name = "returnDescription", 
+		description = "Return description of the function. If not specified, function is assumed will not return any value", 
+		required = false)
+	private String returnDescription;
 	
 	/**
 	 * Parameter definitions of the function.
 	 */
+	@SkipParsing
 	private List<FunctionParamDef> parameterDefs;
 	
 	/**
