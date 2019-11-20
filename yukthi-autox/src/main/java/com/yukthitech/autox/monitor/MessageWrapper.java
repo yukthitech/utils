@@ -67,4 +67,21 @@ public class MessageWrapper implements Serializable
 	{
 		return confirmationRequired;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Message: ").append(message);
+		builder.append(",").append("Confirmation Req: ").append(confirmationRequired);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

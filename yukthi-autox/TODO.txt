@@ -1,3 +1,9 @@
+19/11
+-====
+	Warnings to be shown in ide
+		when "." is used in "attr:" expression indicate it might be mistake
+		when ${} expressions are used within freemarker context
+
 06/11
 	Data-setup and cleanup logs are added as part of first and last steps resp.
 	Instead it should be handled separately. 

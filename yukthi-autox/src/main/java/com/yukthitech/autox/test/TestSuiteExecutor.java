@@ -106,6 +106,11 @@ public class TestSuiteExecutor
 			context.startLogMonitoring();
 			context.setActiveTestCase(testCase, null);
 			
+			if(context.getInteractiveEnvironmentContext() != null)
+			{
+				context.getInteractiveEnvironmentContext().setLastTestCase(testCase);
+			}
+			
 			testCase.setData(null);
 			context.getExecutionStack().push(testCase);
 			
@@ -386,6 +391,12 @@ public class TestSuiteExecutor
 		
 		//set test suite as active test suite
 		context.setActiveTestSuite(testSuite);
+		
+		//for interactive environment set the test suite on interactive context
+		if(context.getInteractiveEnvironmentContext() != null)
+		{
+			context.getInteractiveEnvironmentContext().setLastTestSuite(testSuite);
+		}
 		
 		try
 		{

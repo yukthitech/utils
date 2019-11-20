@@ -54,6 +54,7 @@
 				</ccg:rest-invoke-post>
 				
 				<ccg:set expression="emp2_id" value="attr: response | xpath: //id"/>
+				<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 			]]></content>
 		</example>
 		<example>

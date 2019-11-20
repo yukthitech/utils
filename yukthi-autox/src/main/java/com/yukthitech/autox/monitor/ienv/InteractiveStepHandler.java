@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.InteractiveEnvironmentContext;
 import com.yukthitech.autox.monitor.IAsyncServerDataHandler;
 import com.yukthitech.autox.test.IEntryPoint;
 import com.yukthitech.autox.test.StepExecutor;
@@ -100,8 +101,25 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 	
 	private void executeSteps(List<IStep> steps)
 	{
-		automationContext.setActiveTestSuite(testSuite);
-		automationContext.setActiveTestCase(testCase, null);
+		InteractiveEnvironmentContext interactiveContext = automationContext.getInteractiveEnvironmentContext();
+		
+		if(interactiveContext.getLastTestSuite() != null)
+		{
+			automationContext.setActiveTestSuite(interactiveContext.getLastTestSuite());
+		}
+		else
+		{
+			automationContext.setActiveTestSuite(testSuite);
+		}
+		
+		if(interactiveContext.getLastTestCase() != null)
+		{
+			automationContext.setActiveTestCase(interactiveContext.getLastTestCase(), null);
+		}
+		else
+		{
+			automationContext.setActiveTestCase(testCase, null);
+		}
 		
 		automationContext.getExecutionStack().push(this);
 		

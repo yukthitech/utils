@@ -1,5 +1,7 @@
 package com.yukthitech.autox;
 
+import com.yukthitech.autox.test.TestCase;
+import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 
 /**
@@ -22,6 +24,16 @@ public class InteractiveEnvironmentContext
 	 * Flag indicating if global setup has to be executed.
 	 */
 	private boolean executeGlobalSetup = true;
+	
+	/**
+	 * Last test suite that got executed as part of this interactive context.
+	 */
+	private TestSuite lastTestSuite;
+	
+	/**
+	 * Last test case that got executed as part of this interactive context.
+	 */
+	private TestCase lastTestCase;
 
 	/**
 	 * Instantiates a new interactive environment context.
@@ -81,5 +93,45 @@ public class InteractiveEnvironmentContext
 	public void setExecuteGlobalSetup(boolean executeGlobalSetup)
 	{
 		this.executeGlobalSetup = executeGlobalSetup;
+	}
+
+	/**
+	 * Gets the last test suite that got executed as part of this interactive context.
+	 *
+	 * @return the last test suite that got executed as part of this interactive context
+	 */
+	public TestSuite getLastTestSuite()
+	{
+		return lastTestSuite;
+	}
+
+	/**
+	 * Sets the last test suite that got executed as part of this interactive context.
+	 *
+	 * @param lastTestSuite the new last test suite that got executed as part of this interactive context
+	 */
+	public void setLastTestSuite(TestSuite lastTestSuite)
+	{
+		this.lastTestSuite = lastTestSuite;
+	}
+
+	/**
+	 * Gets the last test case that got executed as part of this interactive context.
+	 *
+	 * @return the last test case that got executed as part of this interactive context
+	 */
+	public TestCase getLastTestCase()
+	{
+		return lastTestCase;
+	}
+
+	/**
+	 * Sets the last test case that got executed as part of this interactive context.
+	 *
+	 * @param lastTestCase the new last test case that got executed as part of this interactive context
+	 */
+	public void setLastTestCase(TestCase lastTestCase)
+	{
+		this.lastTestCase = lastTestCase;
 	}
 }

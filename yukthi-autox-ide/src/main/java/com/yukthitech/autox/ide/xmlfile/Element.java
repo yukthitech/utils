@@ -59,6 +59,11 @@ public class Element implements INode
 	private StepInfo stepInfo;
 	
 	/**
+	 * Function call represented by this function.
+	 */
+	private FunctionCall functionCall;
+	
+	/**
 	 * Prefix to namespace mapping.
 	 */
 	private Map<String, String> prefixToNamespace;
@@ -289,6 +294,11 @@ public class Element implements INode
 			{
 				return this;
 			}
+			
+			if(functionCall != null)
+			{
+				return this;
+			}
 		}
 
 		for(INode node : this.nodes)
@@ -509,6 +519,7 @@ public class Element implements INode
 		else if(IAutomationConstants.FUNC_NAME_SPACE.equals(namespace))
 		{
 			this.elementType = null;
+			this.functionCall = new FunctionCall(name);
 		}
 		else if(AutomationUtils.isReserveNamespace(namespace))
 		{

@@ -118,7 +118,7 @@ public class InteractiveTestCaseExecDetails implements Serializable
 
 		builder.append("Test Case: ").append(testCase);
 		builder.append(",").append("File: ").append(filePath);
-		builder.append(",").append("Ling: ").append(lineNumber);
+		builder.append(",").append("Line: ").append(lineNumber);
 
 		builder.append("]");
 		return builder.toString();

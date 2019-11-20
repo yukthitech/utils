@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,10 +70,18 @@ public class ExecutionEnvironmentManager
 		File reportFolder = new File(project.getBaseFolderPath(), outputDir);
 		
 		int monitorPort = fetchNextAvailablePort();
+		String debugArg = System.getProperty("autox.debug.enabled");
+		
+		//if debug args are not specified, use dummy args
+		if(StringUtils.isBlank(debugArg))
+		{
+			debugArg = "-Ddummy=true";
+		}
 		
 		List<String> command = new ArrayList<>( Arrays.asList(
 			javaCmd, 
 			"-classpath", classpath,
+			debugArg,
 			"-D" + MonitorServer.SYS_PROP_MONITOR_PORT + "=" + monitorPort,
 			AutomationLauncher.class.getName(),
 			project.getAppConfigFilePath(),
