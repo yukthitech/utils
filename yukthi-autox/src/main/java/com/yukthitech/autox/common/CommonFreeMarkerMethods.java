@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.jxpath.JXPathContext;
@@ -232,5 +234,51 @@ public class CommonFreeMarkerMethods
 		}
 		
 		return falseVal;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@FreeMarkerMethod(
+			description = "Used to check if specified value is empty. "
+					+ "For collection, map and string, along with null this will check for empty value.",
+			returnDescription = "True if value is empty."
+			)
+	public static boolean isEmpty(
+			@FmParam(name = "value", description = "Value to be checked for empty") Object value)
+	{
+		if(value == null)
+		{
+			return true;
+		}
+		
+		if(value instanceof String)
+		{
+			String str = (String) value;
+			return (str.trim().length() == 0);
+		}
+		
+		if(value instanceof Collection)
+		{
+			Collection<Object> col = (Collection<Object>) value;
+			return col.isEmpty();
+		}
+
+		if(value instanceof Map)
+		{
+			Map<Object, Object> map = (Map<Object, Object>) value;
+			return map.isEmpty();
+		}
+		
+		return false;
+	}
+
+	@FreeMarkerMethod(
+			description = "Used to check if specified value is not empty. "
+					+ "For collection, map and string, along with non-null this will check for non-empty value.",
+			returnDescription = "True if value is empty."
+			)
+	public static boolean isNotEmpty(
+			@FmParam(name = "value", description = "Value to be checked for empty") Object value)
+	{
+		return !isEmpty(value);
 	}
 }
