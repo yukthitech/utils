@@ -11,6 +11,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Mocks the specified request (url + method) with specified response.
@@ -55,6 +56,12 @@ public class MockResponseStep extends AbstractStep
 	 */
 	@Param(description = "Body of the mocked response", required = true, sourceType = SourceType.EXPRESSION)
 	private String responseBody;
+	
+	/**
+	 * Number of times for which response should be available for given request. Default: Integer max value.
+	 */
+	@Param(description = "Number of times for which response should be available for given request. Default: Integer max value", required = false)
+	private int times = Integer.MAX_VALUE;
 
 	/**
 	 * Sets the name of the server where mocking should be done.
@@ -110,6 +117,21 @@ public class MockResponseStep extends AbstractStep
 	{
 		this.responseBody = responseBody;
 	}
+	
+	/**
+	 * Sets the number of times for which response should be available for given request. Default: Integer max value.
+	 *
+	 * @param times the new number of times for which response should be available for given request
+	 */
+	public void setTimes(int times)
+	{
+		if(times <= 0)
+		{
+			throw new InvalidArgumentException("Times value should be greater than zero: {}", times);
+		}
+		
+		this.times = times;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -121,6 +143,7 @@ public class MockResponseStep extends AbstractStep
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		MockResponse response = new MockResponse(uri, method, responseHeaders, responseStatusCode, responseBody);
+		response.setCountLeft(times);
 
 		logger.debug("On server '{}' mocking response {}", name, response);
 		

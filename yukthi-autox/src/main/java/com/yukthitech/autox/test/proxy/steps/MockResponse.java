@@ -14,6 +14,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class MockResponse implements Serializable 
 {
+	
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -41,9 +45,26 @@ public class MockResponse implements Serializable
 	 */
 	private String body;
 	
+	/**
+	 * Count left after which this response will expire.
+	 */
+	private int countLeft = 1;
+	
+	/**
+	 * Instantiates a new mock response.
+	 */
 	public MockResponse()
 	{}
 	
+	/**
+	 * Instantiates a new mock response.
+	 *
+	 * @param uri the uri
+	 * @param method the method
+	 * @param headers the headers
+	 * @param statusCode the status code
+	 * @param body the body
+	 */
 	public MockResponse(String uri, String method, Map<String, String> headers, int statusCode, String body)
 	{
 		this.uri = uri;
@@ -51,6 +72,26 @@ public class MockResponse implements Serializable
 		this.headers = headers;
 		this.statusCode = statusCode;
 		this.body = body;
+	}
+	
+	/**
+	 * Gets the count left after which this response will expire.
+	 *
+	 * @return the count left after which this response will expire
+	 */
+	public int getCountLeft()
+	{
+		return countLeft;
+	}
+
+	/**
+	 * Sets the count left after which this response will expire.
+	 *
+	 * @param countLeft the new count left after which this response will expire
+	 */
+	public void setCountLeft(int countLeft)
+	{
+		this.countLeft = countLeft;
 	}
 
 	/**
@@ -71,6 +112,11 @@ public class MockResponse implements Serializable
 		return true;
 	}
 	
+	/**
+	 * Write to.
+	 *
+	 * @param response the response
+	 */
 	void writeTo(HttpServletResponse response)
 	{
 		response.setStatus(statusCode);
@@ -83,6 +129,8 @@ public class MockResponse implements Serializable
 				pw.print(body);
 				pw.close();
 			}
+			
+			countLeft --;
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while writing response", ex);
@@ -97,16 +145,24 @@ public class MockResponse implements Serializable
 	 */
 	boolean canServeMore()
 	{
-		//TODO: As of now one response can be served only once. Later logic needs to be added for-ever
-			// or specific number of times, etc
-		return false;
+		return (countLeft > 0);
 	}
 	
+	/**
+	 * Gets the uri for which this response should be returned.
+	 *
+	 * @return the uri for which this response should be returned
+	 */
 	public String getUri()
 	{
 		return uri;
 	}
 
+	/**
+	 * Sets the uri for which this response should be returned.
+	 *
+	 * @param uri the new uri for which this response should be returned
+	 */
 	public void setUri(String uri)
 	{
 		this.uri = uri;
@@ -204,6 +260,7 @@ public class MockResponse implements Serializable
 		builder.append("Req Uri: ").append(uri);
 		builder.append(", ").append("Req Method: ").append(method);
 		builder.append(", ").append("Res Status Code: ").append(statusCode);
+		builder.append(", ").append("Available count: ").append(countLeft);
 		builder.append(",\n").append("Res Headers: ").append(headers);
 		builder.append(",\n").append("Res Body: ").append(body);
 
