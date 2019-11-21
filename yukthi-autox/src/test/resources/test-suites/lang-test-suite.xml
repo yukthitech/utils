@@ -483,5 +483,16 @@
 				<command>java -version</command>
 			</s:execute-command>
 		</testCase>
+
+		<testCase name="testCreateFile">
+			<description>
+				Test wether create file step is working as expected or not.
+			</description>
+			
+			<s:set expression="resAttribute" value="testVal"/>
+			<s:create-temp-file pathAttr="tempFilePath" content="res(text=true, template=true): /data/test-text1.txt"/>
+
+			<s:assert-equals actual="file(text=true): ${attr.tempFilePath}" expected="Some test content testVal"/>			
+		</testCase>
 	</testSuite>
 </testData>
