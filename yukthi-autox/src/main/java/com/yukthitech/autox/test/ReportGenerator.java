@@ -128,6 +128,10 @@ public class ReportGenerator
 			{
 				sendSummaryMail(summaryNotificationConfig, summaryHtml, context);
 			}
+			else
+			{
+				logger.debug("Summary mail is disabled. Hence skipping sending summary mail..");
+			}
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while generating summary report");

@@ -66,7 +66,7 @@ public class MockServer
 				return;
 			}
 			
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No mock response found for specified request.");
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No mock response found for specified request. Time Stamp: " + System.currentTimeMillis());
 		}
 	}
 

@@ -1,6 +1,6 @@
 package com.yukthitech.autox.test.proxy.steps;
 
-import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -92,9 +92,9 @@ public class MockRequest implements Serializable
 
 		try
 		{
-			BufferedReader reader = request.getReader();
-			this.body = IOUtils.toString(reader);
-			reader.close();
+			InputStream is = request.getInputStream();
+			this.body = IOUtils.toString(is);
+			is.close();
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while reading body of the request", ex);

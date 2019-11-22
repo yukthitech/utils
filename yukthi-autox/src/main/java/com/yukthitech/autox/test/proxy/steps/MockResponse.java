@@ -67,6 +67,11 @@ public class MockResponse implements Serializable
 	 */
 	public MockResponse(String uri, String method, Map<String, String> headers, int statusCode, String body)
 	{
+		if(!uri.endsWith("/"))
+		{
+			uri += "/";
+		}
+		
 		this.uri = uri;
 		this.method = method;
 		this.headers = headers;
@@ -101,7 +106,10 @@ public class MockResponse implements Serializable
 	 */
 	boolean isMatchingRequest(MockRequest request)
 	{
-		if(!uri.equals(request.getUri()))
+		String reqUri = request.getUri();
+		reqUri = reqUri.endsWith("/") ? reqUri : (reqUri + "/");
+		
+		if(!uri.equals(reqUri))
 		{
 			return false;
 		}
