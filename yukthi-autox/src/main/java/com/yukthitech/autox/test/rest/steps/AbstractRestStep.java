@@ -254,22 +254,28 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		ResponseHandler<RestResult<?>> handler = getRestResultHandler(exeLogger);
 		
-		if(handler != null)
+		try
 		{
-			exeLogger.debug("Using current step handler for processing response and building the result");
-			
-			result = (RestResult) client.invokeRequest( (RestRequest) request, (ResponseHandler) handler);
-		}
-		else
-		{
-			if(expectedResponseType == null || String.class.equals(expectedResponseType))
+			if(handler != null)
 			{
-				result = (RestResult) client.invokeRequest(request);
+				exeLogger.debug("Using current step handler for processing response and building the result");
+				
+				result = (RestResult) client.invokeRequest( (RestRequest) request, (ResponseHandler) handler);
 			}
 			else
 			{
-				result = (RestResult) client.invokeJsonRequest(request, expectedResponseType);
+				if(expectedResponseType == null || String.class.equals(expectedResponseType))
+				{
+					result = (RestResult) client.invokeRequest(request);
+				}
+				else
+				{
+					result = (RestResult) client.invokeJsonRequest(request, expectedResponseType);
+				}
 			}
+		} catch(Exception ex)
+		{
+			exeLogger.error("An error occurred while invoking the REST API", ex);
 		}
 		
 		exeLogger.debug("Using context attributes [Result attribute: {}, Response attribute: {}]. Obtained result:\n{}", resultContextAttribute, responseContextAttribure, result);
