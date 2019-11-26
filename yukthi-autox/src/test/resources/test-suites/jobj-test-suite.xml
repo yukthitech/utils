@@ -453,5 +453,43 @@
 				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, three"/>
 			</wrap:steps>
 		</testCase>
+
+		<testCase name="testCollectionAndRemove">
+			<description>
+				Tests collection add and remove steps.
+			</description>
+		
+			<wrap:steps>
+				<s:set expression="bean">
+					<value>
+						json:
+						{
+							"arr": [1, 2, 3, 4, 5],
+							"strArr": ["one", "two", "three"],
+							"mapAttr": {
+								"key1": "val1",
+								"key2": "val2"
+							}
+						}
+					</value>
+				</s:set>
+				
+				<s:collection-add collection="xpath: /attr/bean/arr" value="int: 6"/>
+				<s:collection-add collection="xpath: /attr/bean/strArr" value="four"/>
+				<s:map-put map="xpath: /attr/bean/mapAttr" key="key3" value="val3"/>
+				
+				<s:assert-equals actual="xpath: /attr/bean/arr" expected="list(int): 1, 2, 3, 4, 5, 6"/>
+				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, two, three, four"/>
+				<s:assert-equals actual="xpath: /attr/bean/mapAttr" expected="map: key1=val1, key2=val2, key3=val3"/>
+
+				<s:collection-remove collection="xpath: /attr/bean/arr" value="int: 3"/>
+				<s:collection-remove collection="xpath: /attr/bean/strArr" value="two"/>
+				<s:collection-remove collection="xpath: /attr/bean/mapAttr" value="key1"/>
+				
+				<s:assert-equals actual="xpath: /attr/bean/arr" expected="list(int): 1, 2, 4, 5, 6"/>
+				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, three, four"/>
+				<s:assert-equals actual="xpath: /attr/bean/mapAttr" expected="map: key2=val2, key3=val3"/>
+			</wrap:steps>
+		</testCase>
 	</testSuite>
 </testData>
