@@ -2,6 +2,7 @@ package com.yukthitech.autox.test;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.ccg.xml.DynamicBean;
 
 /**
  * Represents data for test case execution. 
@@ -75,6 +76,15 @@ public class TestCaseData
 	public void setValue(Object value)
 	{
 		this.value = AutomationUtils.parseObjectSource(AutomationContext.getInstance(), null, value, null);
+	}
+	
+	/**
+	 * Convenient method to set dynamic value for test data from xml.
+	 * @param value
+	 */
+	public void setDynamicValue(DynamicBean value)
+	{
+		this.value = value.toSimpleMap();
 	}
 	
 	/* (non-Javadoc)

@@ -47,7 +47,7 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	public void setStepDataList(Object data)
 	{
 		Object result = AutomationUtils.parseObjectSource(AutomationContext.getInstance(), null, data, 
-				TypeFactory.defaultInstance().constructCollectionType(List.class, TestCaseData.class));
+				TypeFactory.defaultInstance().constructSimpleType(TestCaseDataList.class, null));
 		
 		if(!(result instanceof List))
 		{
