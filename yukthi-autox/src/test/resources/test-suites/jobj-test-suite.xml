@@ -184,33 +184,6 @@
 			</expectedException>
 		</testCase>
 	
-		<testCase name="invoke_Method_With_Ext_Bean_Data_Provder">
-			<description>
-				Invokes simple method on bean with externalized data provider beans and
-				ensures data-provider working.
-			</description>
-		
-			<list-data-provider name="extDataProvider" stepDataList="res(java.util.List &lt;com.yukthitech.test.beans.TestCaseBean&gt;):/data/ext-data-provider.json"/>
-		
-			<wrap:steps>
-				<s:invokeMethod deepCloneParams="true" method="halfOf" paramTypes="int">
-					<object s:beanRef="testUtils"/>
-				
-					<parameter>
-						${attr.extDataProvider.value.paramValue}
-					</parameter>
-				</s:invokeMethod>
-			</wrap:steps>
-		
-			<wrap:validations>
-				<s:assert-equals actual="attr: returnValue" expected="int: ${attr.extDataProvider.value.result}"/>
-			</wrap:validations>
-		
-			<expectedException enabled="${attr.extDataProvider.value.exception?c}" type="com.yukthitech.utils.exceptions.InvalidStateException">
-				<property name="message" value="Value can not be less than zero: ${attr.extDataProvider.value.paramValue}"/>
-			</expectedException>
-		</testCase>
-	
 		<testCase name="invoke_Method_With_Ext_Bean_Data_Provder_With_xml">
 			<description>
 				Invokes simple method on bean with externalized data provider beans in xml format and

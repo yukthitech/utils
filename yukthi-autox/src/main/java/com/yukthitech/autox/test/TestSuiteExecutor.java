@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -147,6 +148,7 @@ public class TestSuiteExecutor
 		TestCaseResult result = null;
 		ExecutionLogger exeLogger = null;
 		String name = null;
+		String description = null;
 		TestStatus finalStatus = TestStatus.SUCCESSFUL;
 		
 		Setup dataSetup = testCase.getDataSetup();
@@ -158,7 +160,10 @@ public class TestSuiteExecutor
 			dataIndex++;
 			
 			name = testCase.getName() + " [" + data.getName() + "]";
-			exeLogger = new ExecutionLogger(context, name, testCase.getDescription());
+			description = data.getDescription();
+			description = StringUtils.isNotBlank(description)? description : testCase.getDescription(); 
+			
+			exeLogger = new ExecutionLogger(context, name, description);
 			
 			//TODO: As of now data-setup is executed as part of first data-step. It should be a separate one 
 			//  and need to decide how logs should be presented

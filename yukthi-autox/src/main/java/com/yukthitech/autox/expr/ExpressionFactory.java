@@ -206,6 +206,11 @@ public class ExpressionFactory
 	
 	public Object parseExpression(AutomationContext context, Object expressionObj, Object initValue)
 	{
+		return parseExpression(context, expressionObj, new ExpressionConfig(initValue, null));
+	}
+	
+	public Object parseExpression(AutomationContext context, Object expressionObj, ExpressionConfig exprConfig)
+	{
 		if(!(expressionObj instanceof String))
 		{
 			return expressionObj;
@@ -220,8 +225,13 @@ public class ExpressionFactory
 			
 		
 		Object result = null;
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, initValue);
+		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, ((exprConfig != null) ? exprConfig.getInitValue() : null));
 		ObjectWrapper<Boolean> expressionParsed = new ObjectWrapper<Boolean>(true);
+		
+		if(exprConfig != null)
+		{
+			expressionParserContext.setDefaultExpressionType(exprConfig.getDefaultExpectedType());
+		}
 		
 		List<String> lst = parseExpressionTokens(expression);
 		
@@ -304,6 +314,11 @@ public class ExpressionFactory
 		if(parser == null)
 		{
 			throw new InvalidArgumentException("Invalid expression type '{}' specified in expression: {}", exprType, expression);
+		}
+		
+		if(exprTypeParams == null && context.getDefaultExpressionType() != null)
+		{
+			exprTypeParams = new String[] {context.getDefaultExpressionType().getName()};
 		}
 		
 		context.setCurrentParser(parser);

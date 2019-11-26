@@ -31,7 +31,15 @@ public class ExpressionParserContext
 	 */
 	private ExpressionParserDetails currentParser;
 	
+	/**
+	 * Parameters passed to expression.
+	 */
 	private Map<String, String> parameters = new HashMap<>();
+	
+	/**
+	 * Default type expected out of expression.
+	 */
+	private Class<?> defaultExpressionType;
 
 	/**
 	 * Instantiates a new expression parser context.
@@ -42,6 +50,26 @@ public class ExpressionParserContext
 	{
 		this.automationContext = context;
 		this.currentValue = currentValue;
+	}
+	
+	/**
+	 * Sets the default type expected out of expression.
+	 *
+	 * @param defaultExpressionType the new default type expected out of expression
+	 */
+	void setDefaultExpressionType(Class<?> defaultExpressionType)
+	{
+		this.defaultExpressionType = defaultExpressionType;
+	}
+	
+	/**
+	 * Gets the default type expected out of expression.
+	 *
+	 * @return the default type expected out of expression
+	 */
+	public Class<?> getDefaultExpressionType()
+	{
+		return defaultExpressionType;
 	}
 
 	/**

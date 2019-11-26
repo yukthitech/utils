@@ -3,9 +3,10 @@ package com.yukthitech.autox.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.expr.ExpressionConfig;
+import com.yukthitech.autox.expr.ExpressionFactory;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -46,8 +47,22 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	@SuppressWarnings("rawtypes")
 	public void setStepDataList(Object data)
 	{
-		Object result = AutomationUtils.parseObjectSource(AutomationContext.getInstance(), null, data, 
-				TypeFactory.defaultInstance().constructSimpleType(TestCaseDataList.class, null));
+		ExpressionFactory expressionFactory = ExpressionFactory.getExpressionFactory();
+		AutomationContext automationContext = AutomationContext.getInstance();
+		boolean loggerSet = false;
+		
+		if(automationContext.getExecutionLogger() == null)
+		{
+			automationContext.setExecutionLogger(new ExecutionLogger(automationContext, "<data-provider-load>", "Data provider load"));
+			loggerSet = true;
+		}
+		
+		Object result = expressionFactory.parseExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
+		
+		if(loggerSet)
+		{
+			automationContext.setExecutionLogger(null);
+		}
 		
 		if(!(result instanceof List))
 		{

@@ -16,6 +16,11 @@ public class TestCaseData
 	private String name;
 	
 	/**
+	 * Description of what this test case data will do.
+	 */
+	private String description;
+	
+	/**
 	 * Value of this test case data.
 	 */
 	private Object value;
@@ -87,6 +92,26 @@ public class TestCaseData
 		this.value = value.toSimpleMap();
 	}
 	
+	/**
+	 * Gets the description of what this test case data will do.
+	 *
+	 * @return the description of what this test case data will do
+	 */
+	public String getDescription()
+	{
+		return description;
+	}
+
+	/**
+	 * Sets the description of what this test case data will do.
+	 *
+	 * @param description the new description of what this test case data will do
+	 */
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

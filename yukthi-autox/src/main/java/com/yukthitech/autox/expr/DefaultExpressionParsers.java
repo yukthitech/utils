@@ -678,7 +678,11 @@ public class DefaultExpressionParsers
 
 	@ExpressionParser(type = "json", description = "Parses specified expression as json string and loads it as object. "
 			+ "In case of '$', current value's string value will be parsed.", 
-			example = "json: {\"a\": 2, \"b\": 3}")
+			example = "json: {\"a\": 2, \"b\": 3}",
+			params = {
+					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+				}
+	)
 	public IPropertyPath jsonParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
@@ -695,7 +699,11 @@ public class DefaultExpressionParsers
 
 	@ExpressionParser(type = "jsonWithType", description = "Parses specified expression as json (with types) string and loads it as object. "
 			+ "In case of '$', current value's string value will be parsed.", 
-			example = "jsonWithType: {\"a\": 2, \"b\": 3}")
+			example = "jsonWithType: {\"a\": 2, \"b\": 3}",
+			params = {
+					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+				}
+	)
 	public IPropertyPath jsonWithTypeParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
