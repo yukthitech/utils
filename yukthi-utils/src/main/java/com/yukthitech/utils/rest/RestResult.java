@@ -18,6 +18,10 @@ import org.apache.http.HttpResponse;
  */
 public class RestResult<T> implements Serializable
 {
+	
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -34,6 +38,11 @@ public class RestResult<T> implements Serializable
 	 * Response headers.
 	 */
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
+	
+	/**
+	 * Parse error, if any, during response parsing.
+	 */
+	private String parseError;
 	
 	/**
 	 * Actual http response recieved by Rest Client
@@ -136,6 +145,26 @@ public class RestResult<T> implements Serializable
 		return headers.get(name);
 	}
 	
+	/**
+	 * Gets the parse error, if any, during response parsing.
+	 *
+	 * @return the parse error, if any, during response parsing
+	 */
+	public String getParseError()
+	{
+		return parseError;
+	}
+
+	/**
+	 * Sets the parse error, if any, during response parsing.
+	 *
+	 * @param parseError the new parse error, if any, during response parsing
+	 */
+	public void setParseError(String parseError)
+	{
+		this.parseError = parseError;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -147,6 +176,11 @@ public class RestResult<T> implements Serializable
 
 		builder.append("Status Code: ").append(statusCode);
 		builder.append(",").append("Value: ").append(value);
+		
+		if(parseError != null)
+		{
+			builder.append(",").append("Parse Error: ").append(parseError);
+		}
 
 		builder.append("]");
 		return builder.toString();

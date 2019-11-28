@@ -235,6 +235,7 @@ public class RestClient
 		//invoked the request
 		RestResult<String> stringResult = makeRequest(request, new RestResultHandler());
 		T resultValue = null;
+		String parseError = null;
 
 		//if response has body
 		if(stringResult.getValue() != null)
@@ -249,11 +250,13 @@ public class RestClient
 				logger.error("An error occurred while parsing json response", ex);
 				//throw new RestInvocationException("An error occurred while parsing json response", ex);
 				resultValue = null;
+				parseError = "" + ex;
 			}
 		}
 		
 		//return final result
 		RestResult<T> result = new RestResult<T>(resultValue, stringResult.getStatusCode(), stringResult.getHttpResponse());
+		result.setParseError(parseError);
 		
 		if(restClientListener != null)
 		{
