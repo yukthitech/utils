@@ -45,7 +45,7 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	 * @param data data to be set
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setStepDataList(Object data)
+	public void addStepDataList(Object data)
 	{
 		ExpressionFactory expressionFactory = ExpressionFactory.getExpressionFactory();
 		AutomationContext automationContext = AutomationContext.getInstance();

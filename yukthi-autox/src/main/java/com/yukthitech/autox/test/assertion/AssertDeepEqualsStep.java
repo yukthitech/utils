@@ -169,6 +169,16 @@ public class AssertDeepEqualsStep extends AbstractValidation
 		Object expectedVal = null, actualVal = null;
 		int size = expected.size();
 		
+		//if the actual size is less than actual size, return false
+		if(actual.size() < size)
+		{
+			context.setAttribute(failedPathAttr, propPath);
+			
+			logger.debug("Comparision failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
+					propPath, actual.size(), expected.size());
+			return false;
+		}
+
 		for(int i = 0; i < size; i++)
 		{
 			expectedVal = expected.get(i);
@@ -197,7 +207,7 @@ public class AssertDeepEqualsStep extends AbstractValidation
 		{
 			context.setAttribute(failedPathAttr, propPath);
 			
-			logger.debug("Comparision failed because of null value at path: {} [Actual Null: {}, Expected Null: {}]", 
+			logger.debug("Comparision failed because of null value at path: {} [Actual is Null: {}, Expected is Null: {}]", 
 					propPath, (actual == null), (expected == null));
 			return false;
 		}
