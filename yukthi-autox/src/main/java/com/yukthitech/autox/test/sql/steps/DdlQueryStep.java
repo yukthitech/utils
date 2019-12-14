@@ -13,8 +13,8 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.DbPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
+import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

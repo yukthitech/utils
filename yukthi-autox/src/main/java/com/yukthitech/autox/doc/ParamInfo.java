@@ -47,6 +47,16 @@ public class ParamInfo implements Comparable<ParamInfo>
 	private SourceType sourceType;
 	
 	/**
+	 * Flag indicating if this parameter represents attribute name.
+	 */
+	private boolean attrName;
+	
+	/**
+	 * Default value used by param.
+	 */
+	private String defaultValue;
+	
+	/**
 	 * Instantiates a new param info.
 	 *
 	 * @param field the field
@@ -65,6 +75,8 @@ public class ParamInfo implements Comparable<ParamInfo>
 		this.description = paramAnnot.description();
 		this.mandatory = paramAnnot.required();
 		this.sourceType = paramAnnot.sourceType();
+		this.attrName = paramAnnot.attrName();
+		this.defaultValue = paramAnnot.defaultValue();
 		
 		Type genericType = field.getType();
 		
@@ -92,6 +104,13 @@ public class ParamInfo implements Comparable<ParamInfo>
 		}
 	}
 
+	/**
+	 * Instantiates a new param info.
+	 *
+	 * @param name the name
+	 * @param description the description
+	 * @param type the type
+	 */
 	public ParamInfo(String name, String description, String type)
 	{
 		this.name = name;
@@ -158,7 +177,30 @@ public class ParamInfo implements Comparable<ParamInfo>
 	{
 		return sourceType;
 	}
+	
+	/**
+	 * Gets the flag indicating if this parameter represents attribute name.
+	 *
+	 * @return the flag indicating if this parameter represents attribute name
+	 */
+	public boolean isAttrName()
+	{
+		return attrName;
+	}
 
+	/**
+	 * Gets the default value used by param.
+	 *
+	 * @return the default value used by param
+	 */
+	public String getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	@Override
 	public int compareTo(ParamInfo o)
 	{

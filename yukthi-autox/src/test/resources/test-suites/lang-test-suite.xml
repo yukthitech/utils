@@ -51,8 +51,8 @@
 		
 			<wrap:steps>
 				<s:set expression="flag" value="int: 1"/>
-			
-				<s:function-ref name="condSimpleGroup" return-attr="ifExec"/>
+
+				<f:condSimpleGroup return-attr="ifExec"/>
 			
 				<s:assert-equals actual="attr: ifExec" expected="if-then"/>
 			</wrap:steps>
@@ -66,7 +66,7 @@
 			
 				<s:set expression="ifExec" value="test"/>
 			
-				<s:function-ref name="condSimpleGroup" return-attr="ifExec"/>
+				<f:condSimpleGroup return-attr="ifExec"/>
 			
 				<s:remove name="returnFlag"/>
 			
@@ -82,7 +82,7 @@
 			<wrap:steps>
 				<s:set expression="flag" value="int: 2"/>
 			
-				<s:function-ref name="condSimpleGroup"  return-attr="ifExec"/>
+				<f:condSimpleGroup return-attr="ifExec"/>
 			
 				<s:assert-equals actual="attr: ifExec" expected="if-else"/>
 			</wrap:steps>
@@ -364,9 +364,7 @@
 		
 			<s:set expression="checkVar" value="int: 1"/>
 		
-			<s:function-ref name="factorialGroup1">
-				<param name="value" value="int: 4"/>
-			</s:function-ref>
+			<f:factorialGroup1 value="int: 4"/>
 		
 			<s:assert-equals actual="attr: result" expected="int: 24"/>
 		</testCase>

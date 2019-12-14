@@ -46,7 +46,8 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	/**
 	 * Loop variable that will be used to set loop iteration object on context. Default: loopVar.
 	 */
-	@Param(description = "Loop variable that will be used to set loop iteration object on context. Default: loopVar", required = false)
+	@Param(description = "Loop variable that will be used to set loop iteration object on context. Default: loopVar", required = false,
+			attrName = true, defaultValue = "loopVar")
 	private String loopVar = "loopVar";
 
 	/**

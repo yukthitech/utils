@@ -31,7 +31,7 @@ public class UiGetElementsStep extends AbstractUiStep
 	/**
 	 * Name of attribute to set.
 	 */
-	@Param(description = "Name of the attribute to set.")
+	@Param(description = "Name of the attribute to set.", attrName = true)
 	private String name;
 
 	/**

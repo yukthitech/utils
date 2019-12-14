@@ -38,4 +38,16 @@ public @interface Param
 	 * @return flag indicating if resource or not. Default false.
 	 */
 	public SourceType sourceType() default SourceType.NONE;
+	
+	/**
+	 * Should be set as true, if the value of the target param represents name of attribute being set.
+	 * @return true if value represents name of attribute going to be set.
+	 */
+	public boolean attrName() default false;
+	
+	/**
+	 * Default value used by this param.
+	 * @return
+	 */
+	public String defaultValue() default "";
 }

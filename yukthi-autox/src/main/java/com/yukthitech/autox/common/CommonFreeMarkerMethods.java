@@ -281,4 +281,17 @@ public class CommonFreeMarkerMethods
 	{
 		return !isEmpty(value);
 	}
+
+	@FreeMarkerMethod(
+			description = "Used to check if specified value is null and return approp value when null and when non-null.",
+			returnDescription = "Specified null-condition-value or non-null-condition-value."
+			)
+	public static Object nvl(
+			@FmParam(name = "value", description = "Value to be checked for empty") Object value,
+			@FmParam(name = "nullValue", description = "Value to be returned when value is null") Object nullValue,
+			@FmParam(name = "nonNullValue", description = "Value to be returned when value is non-null") Object nonNullValue
+			)
+	{
+		return (value == null) ? nullValue : nonNullValue;
+	}
 }

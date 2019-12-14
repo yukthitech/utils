@@ -18,8 +18,8 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.DbPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
+import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -48,7 +48,7 @@ public class LoadQueryRowBeanStep extends AbstractStep
 	/**
 	 * Context attribute to be used to load the map.
 	 */
-	@Param(description = "Name of the attribute which should be used to keep the result bean on the context.")
+	@Param(description = "Name of the attribute which should be used to keep the result bean on the context.", attrName = true)
 	private String contextAttribute;
 
 	/**

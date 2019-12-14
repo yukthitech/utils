@@ -1,20 +1,15 @@
 package com.yukthitech.autox.test.assertion;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
-import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.autox.common.DeepEqualsUtil;
 
 /**
  * Validation to Compare specified values for deep equality.
@@ -28,8 +23,6 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private static ObjectMapper objectMapper = new ObjectMapper();
-
 	/**
 	 * Expected value in comparison..
 	 */
@@ -52,7 +45,7 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	@Param(description = "If false, instead of checking for equlity, check will be done for non equality. Default: true")
 	private boolean checkEquality = true;
 	
-	@Param(description = "Failed path, if any, will be set on context with this attribute. Default: failedPath")
+	@Param(description = "Failed path, if any, will be set on context with this attribute. Default: failedPath", attrName = true, defaultValue = "failedPath")
 	private String failedPathAttr = "failedPath";
 
 	/**
@@ -91,158 +84,6 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	}
 
 	/**
-	 * Converts input object into map of maps using json.
-	 * @param obj
-	 * @return
-	 */
-	private Object toJsonObject(Object obj)
-	{
-		try
-		{
-			String json = objectMapper.writeValueAsString(obj);
-			return objectMapper.readValue(json, Object.class);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while converting object into json object: {}", obj);
-		}
-	}
-	
-	private boolean deepCompare(Map<String, Object> actual, Map<String, Object> expected, String propPath, AutomationContext context, ExecutionLogger logger)
-	{
-		if(!ignoreExtraProperties)
-		{
-			if(actual.size() != expected.size())
-			{
-				context.setAttribute(failedPathAttr, propPath);
-				
-				logger.debug("Comparision failed because of non-matching map-size at path: {} [Actual's size: {}, Expected's size: {}]", 
-						propPath, actual.size(), expected.size());
-				return false;
-			}
-		}
-		
-		Object expectedVal = null, actualVal = null;
-		
-		for(String key : expected.keySet())
-		{
-			expectedVal = expected.get(key);
-			actualVal = actual.get(key);
-			
-			if(!deepCompare(actualVal, expectedVal, propPath + "." + key, context, logger))
-			{
-				return false;
-			}
-		}
-		
-		if(ignoreExtraProperties)
-		{
-			return true;
-		}
-		
-		for(String key : actual.keySet())
-		{
-			//if a key present in actual is not present in expected
-			// Note: common properties are already verified.
-			if(!expected.containsKey(key))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private boolean deepCompare(List<Object> actual, List<Object> expected, String propPath, AutomationContext context, ExecutionLogger logger)
-	{
-		if(!ignoreExtraProperties)
-		{
-			if(actual.size() != expected.size())
-			{
-				context.setAttribute(failedPathAttr, propPath);
-				
-				logger.debug("Comparision failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
-						propPath, actual.size(), expected.size());
-				return false;
-			}
-		}
-		
-		Object expectedVal = null, actualVal = null;
-		int size = expected.size();
-		
-		//if the actual size is less than actual size, return false
-		if(actual.size() < size)
-		{
-			context.setAttribute(failedPathAttr, propPath);
-			
-			logger.debug("Comparision failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
-					propPath, actual.size(), expected.size());
-			return false;
-		}
-
-		for(int i = 0; i < size; i++)
-		{
-			expectedVal = expected.get(i);
-			actualVal = actual.get(i);
-			
-			if(!deepCompare(actualVal, expectedVal, propPath + "[" + i + "]", context, logger))
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	@SuppressWarnings("unchecked")
-	private boolean deepCompare(Object actual, Object expected, String propPath, AutomationContext context, ExecutionLogger logger)
-	{
-		//if both are null
-		if(actual == null && expected == null)
-		{
-			return true;
-		}
-		
-		//if both are not null but one of object is null
-		if(actual == null || expected == null)
-		{
-			context.setAttribute(failedPathAttr, propPath);
-			
-			logger.debug("Comparision failed because of null value at path: {} [Actual is Null: {}, Expected is Null: {}]", 
-					propPath, (actual == null), (expected == null));
-			return false;
-		}
-		
-		if(!actual.getClass().equals(expected.getClass()))
-		{
-			context.setAttribute(failedPathAttr, propPath);
-			
-			logger.debug("Comparision failed because of incompatible types at path: {} [Actual's type: {}, Expected's type: {}]", 
-					propPath, actual.getClass().getName(), expected.getClass().getName());
-			return false;
-		}
-		
-		if(actual instanceof Map)
-		{
-			return deepCompare((Map<String, Object>) actual, (Map<String, Object>) expected, propPath, context, logger);
-		}
-		
-		if(actual instanceof List)
-		{
-			return deepCompare((List<Object>) actual, (List<Object>) expected, propPath, context, logger);
-		}
-
-		boolean res = Objects.equals(actual, expected);
-		
-		if(!res)
-		{
-			logger.debug("Comparision failed because of non-equal values at path: {} [Actual Val: {}, Expected Val: {}]", 
-					propPath, actual, expected);
-		}
-		
-		return res;
-	}
-
-	/**
 	 * Gets the type.
 	 *
 	 * @param val the val
@@ -268,22 +109,11 @@ public class AssertDeepEqualsStep extends AbstractValidation
 				actual, getType(actual),
 				ignoreExtraProperties);
 		
-		//if both are null
-		if(this.actual == null && this.expected == null)
-		{
-			return true;
-		}
+		String diffPath = DeepEqualsUtil.deepCompare(this.actual, this.expected, ignoreExtraProperties, context, exeLogger);
+		boolean res = (diffPath == null);
 		
-		//if both are not null but one of object is null
-		if(this.actual == null || this.expected == null)
-		{
-			return false;
-		}
+		context.setAttribute(failedPathAttr, diffPath);
 		
-		Object actual = toJsonObject(this.actual);
-		Object expected = toJsonObject(this.expected);
-
-		boolean res = deepCompare(actual, expected, "$", context, exeLogger);
 		exeLogger.debug("Result of comparision is: {}", res);
 		
 		if(!checkEquality)

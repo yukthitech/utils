@@ -71,7 +71,8 @@ public class InvokeMethodStep extends AbstractStep
 	/**
 	 * Context parameter name to be used to set the result on context.
 	 */
-	@Param(description = "Context parameter name to be used to set the result on context. \nDefault: returnValue", required = false)
+	@Param(description = "Context parameter name to be used to set the result on context. \nDefault: returnValue", required = false, 
+			attrName = true, defaultValue = "returnValue")
 	private String resultParameter = "returnValue";
 	
 	/**

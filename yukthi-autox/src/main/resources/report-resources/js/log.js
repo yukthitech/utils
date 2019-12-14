@@ -1,7 +1,7 @@
 $.application.controller('testLogAppController', function($scope){
 	
 	$scope.filterLevel = "LEVEL";
-	$scope.levels = ["ALL", "DEBUG", "SUMMARY", "ERROR", "INFO", "TRACE"];
+	$scope.levels = ["ALL", "DEBUG", "SUMMARY", "WARN", "ERROR", "INFO", "TRACE"];
 	
 	/**
 	 * Gets invoked on init.
@@ -150,6 +150,20 @@ $.application.controller('testLogAppController', function($scope){
 		
 		return result;
 		
+	};
+	
+	$scope.getLogClass = function(level) {
+		if(level == "ERROR")
+		{
+			return "errorVal";
+		}
+
+		if(level == "WARN")
+		{
+			return "warnVal";
+		}
+		
+		return "defaultVal";
 	};
 	
 	/**

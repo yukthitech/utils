@@ -44,7 +44,7 @@ public class MockFetchRequestStep extends AbstractStep
 	/**
 	 * Attribute name to be used to store filtered-request on context.
 	 */
-	@Param(description = "Attribute name to be used to store filtered-request on context.", required = true)
+	@Param(description = "Attribute name to be used to store filtered-request on context.", required = true, attrName = true)
 	private String attributeName;
 
 	/**

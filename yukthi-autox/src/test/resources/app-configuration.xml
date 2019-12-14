@@ -62,6 +62,10 @@
 				<url>jdbc:derby:#{derby.folder};create=true</url>
 			</dataSource>
 		</db-plugin>
+
+		<mongo-plugin>
+			<mongo-resource name="mongoResource" replicas="localhost:27017" dbName="weaver"/>
+		</mongo-plugin>
 		
 		<rest-plugin>
 			<baseUrl>http://localhost:8080/app/api</baseUrl>

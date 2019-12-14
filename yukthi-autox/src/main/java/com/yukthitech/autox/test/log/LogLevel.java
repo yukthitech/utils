@@ -8,6 +8,7 @@ public enum LogLevel
 {
 	TRACE("  TRACE"), 
 	DEBUG("  DEBUG"), 
+	WARN("   WARN"),
 	ERROR("  ERROR"), 
 	
 	/**

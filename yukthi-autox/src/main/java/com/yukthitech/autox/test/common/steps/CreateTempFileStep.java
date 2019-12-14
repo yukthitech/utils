@@ -29,7 +29,7 @@ public class CreateTempFileStep extends AbstractStep
 	/**
 	 * Name of the attribute to use to set the generated file path.
 	 */
-	@Param(description = "Name of the attribute to use to set the generated file path.", required = true)
+	@Param(description = "Name of the attribute to use to set the generated file path.", required = true, attrName = true)
 	private String pathAttr;
 
 	/**

@@ -1,0 +1,65 @@
+<test-file 
+	xmlns:s="http://autox.yukthitech.com/steps"
+	xmlns:f="http://autox.yukthitech.com/functions" 
+	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	
+	<test-suite name="mongoTestSuite">
+		<test-case name="mongoQueryTest">
+			<description>
+				Ensure the mongo query execution is as expected.
+			</description>
+
+			<s:mongo-multi-query mongoResourceName="mongoResource">
+				<query>
+					{ "create": "AUTOX_TEST" }
+				</query>
+				<query>
+					{ 
+						"insert": "AUTOX_TEST", 
+						"documents" : [
+							{"name": "test1", "entry": 1},
+							{"name": "test2", "entry": 2},
+							{"name": "test3", "entry": 3}
+						] 
+					}
+				</query>
+			</s:mongo-multi-query>
+
+			<s:assert-mongo mongoResourceName="mongoResource">
+				<query>
+					{ "count": "AUTOX_TEST" }
+				</query>
+				<expected>
+					json: {
+						"n": 3
+					}
+				</expected>
+			</s:assert-mongo>
+			
+			<s:mongo-query mongoResourceName="mongoResource">
+				<query>
+					{ 
+						"delete": "AUTOX_TEST",
+						"deletes": [
+							{"q": {"name": "test1"}, "limit": 1}
+						]
+					}
+				</query>
+			</s:mongo-query>
+
+			<s:mongo-query mongoResourceName="mongoResource">
+				<query>
+					{ "count": "AUTOX_TEST" }
+				</query>
+			</s:mongo-query>
+			<s:assert-equals actual="${attr.result.n}" expected="2"/>
+
+			<s:mongo-query mongoResourceName="mongoResource">
+				<query>
+					{ "drop": "AUTOX_TEST" }
+				</query>
+			</s:mongo-query>
+		</test-case>
+	</test-suite>
+
+</test-file>

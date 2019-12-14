@@ -17,7 +17,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * @author akiran
  */
 @Executable(name = {"uiExecuteJs"}, requiredPluginTypes = SeleniumPlugin.class, message = "Can be used to execute js code")
-public class UiExecuteJs extends AbstractUiStep
+public class UiExecuteJsStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -30,7 +30,8 @@ public class UiExecuteJs extends AbstractUiStep
 	/**
 	 * If specified, the result of the js execution (returned by 'return' statement) will be stored with this name on context. Default: null.
 	 */
-	@Param(description = "If specified, the result of the js execution (returned by 'return' statement) will be stored with this name on context. Default: null", required = false)
+	@Param(description = "If specified, the result of the js execution (returned by 'return' statement) will be stored with this name on context. Default: null", required = false,
+			attrName = true)
 	private String resultAttribute;
 
 	/**

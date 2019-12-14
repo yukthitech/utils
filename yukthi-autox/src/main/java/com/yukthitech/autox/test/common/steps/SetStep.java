@@ -21,7 +21,7 @@ public class SetStep extends AbstractStep
 	/**
 	 * Expression to be used to set the value.
 	 */
-	@Param(description = "Expression to be used to set the value.", required = true, sourceType = SourceType.EXPRESSION_PATH)
+	@Param(description = "Expression to be used to set the value.", required = true, sourceType = SourceType.EXPRESSION_PATH, attrName = true)
 	private String expression;
 
 	/**

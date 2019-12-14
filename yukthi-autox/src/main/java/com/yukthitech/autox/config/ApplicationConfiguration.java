@@ -18,6 +18,8 @@ import com.yukthitech.autox.logmon.BrowserLogMonitor;
 import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.RemoteFileLogMonitor;
+import com.yukthitech.autox.test.mongo.MongoPlugin;
+import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.persistence.repository.RepositoryFactory;
 
@@ -258,6 +260,15 @@ public class ApplicationConfiguration
 		this.addPlugin(plugin);
 	}
 	
+	/**
+	 * Sets the specified mongo plugin.
+	 * @param plugin
+	 */
+	public void setMongoPlugin(MongoPlugin plugin)
+	{
+		this.addPlugin(plugin);
+	}
+
 	/**
 	 * Sets the rest plugin.
 	 *

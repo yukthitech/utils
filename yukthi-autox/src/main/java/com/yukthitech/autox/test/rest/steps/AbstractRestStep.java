@@ -66,13 +66,15 @@ public abstract class AbstractRestStep extends AbstractStep
 			+ "1. statusCode (int) - Http status code obtained from the rest call<br/>"
 			+ "2. value (object) - the response object (this can be accessed using 'responseContextAttribure' directly"
 			+ "3. headers (Map<String, List<String>>) - Response header. Note: a header can have multiple values.<br/>"
-			+ "default: result", required = false)
+			+ "default: result", required = false,
+			attrName = true, defaultValue = "result")
 	protected String resultContextAttribute = "result";
 	
 	/**
 	 * Context attribute name on which response object will be placed. default: response.
 	 */
-	@Param(description = "Context attribute name on which the actaul rest response object will be placed. default: response", required = false)
+	@Param(description = "Context attribute name on which the actaul rest response object will be placed. default: response", required = false,
+			attrName = true, defaultValue = "response")
 	protected String responseContextAttribure = "response";
 	
 	/**

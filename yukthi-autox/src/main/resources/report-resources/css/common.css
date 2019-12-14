@@ -29,6 +29,13 @@ td
 	color: red;
 }
 
+.warnVal
+{
+	color: rgb(0, 147, 0);
+	font-style: italic;
+	font-weight: bold;
+}
+
 .defaultVal
 {
 	color: black;

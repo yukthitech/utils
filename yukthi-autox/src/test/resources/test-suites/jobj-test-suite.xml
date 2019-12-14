@@ -1,4 +1,4 @@
-<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
 	<function name="simpleGroup">
 		<s:log message="This message is from step group"/>
 	
@@ -265,8 +265,8 @@
 			</description>
 		
 			<s:set expression="simpleGroupInput" value="true"/>
-		
-			<s:function-ref name="simpleGroup"/>
+
+			<f:simpleGroup />
 		
 			<s:assert-true value="attr: simpleGroupOutput"/>
 		</testCase>

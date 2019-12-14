@@ -18,8 +18,8 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.DbPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
+import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -40,7 +40,7 @@ public class FetchValueQueryStep extends AbstractStep
 	/**
 	 * Context attribute to be used to load the map.
 	 */
-	@Param(description = "Name of the attribute which should be used to keep the result value.")
+	@Param(description = "Name of the attribute which should be used to keep the result value.", attrName = true)
 	private String contextAttribute;
 
 	/**

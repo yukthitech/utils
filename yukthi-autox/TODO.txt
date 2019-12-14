@@ -3,6 +3,9 @@
 	Warnings to be shown in ide
 		when "." is used in "attr:" expression indicate it might be mistake
 		when ${} expressions are used within freemarker context
+		
+		>, <, &gt; &lt; should not be used in <s:if> step as it will result in problems
+			in s:if itself we can replace, that is one way
 
 06/11
 	Data-setup and cleanup logs are added as part of first and last steps resp.

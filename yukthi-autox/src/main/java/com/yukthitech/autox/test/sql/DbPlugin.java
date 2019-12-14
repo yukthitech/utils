@@ -1,4 +1,4 @@
-package com.yukthitech.autox.config;
+package com.yukthitech.autox.test.sql;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 

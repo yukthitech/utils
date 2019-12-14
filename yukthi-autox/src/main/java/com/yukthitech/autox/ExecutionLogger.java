@@ -366,6 +366,37 @@ public class ExecutionLogger
 	}
 	
 	/**
+	 * Used to log warn messages as part of current execution.
+	 * @param source location from where logging is being done
+	 * @param mssgTemplate Message template with params.
+	 * @param args Arguments for message template.
+	 */
+	public void warn(String mssgTemplate, Object... args)
+	{
+		warn(true, mssgTemplate, args);
+	}
+
+	/**
+	 * Used to log warn messages as part of current execution.
+	 * @param escapeHtml Whether html tags should be escaped in result content.
+	 * @param source location from where logging is being done
+	 * @param mssgTemplate Message template with params.
+	 * @param args Arguments for message template.
+	 */
+	public void warn(boolean escapeHtml, String mssgTemplate, Object... args)
+	{
+		if(disabled)
+		{
+			return;
+		}
+		
+		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
+
+		logger.debug(finalMssg);
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.WARN, finalMssg, new Date()));
+	}
+
+	/**
 	 * Used to log trace messages as part of current execution.
 	 * @param source location from where logging is being done
 	 * @param mssgTemplate Message template with params.

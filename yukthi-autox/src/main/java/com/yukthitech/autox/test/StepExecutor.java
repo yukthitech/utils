@@ -184,17 +184,23 @@ public class StepExecutor
 		return executable;
 	}
 	
+	public static TestCaseResult handleException(AutomationContext context, TestCase testCase, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
+	{
+		return handleException(context, testCase, testCase.getName(), step, exeLogger, ex, expectedException);
+	}
+	
 	/**
 	 * Expected to be invoked by test cases, to process the exception and get appropriate result.
 	 * @param context automation context
 	 * @param testCase Test case being tested
+	 * @param resName name to be used in result (useful for test case with data)
 	 * @param step Step which resulted in exception
 	 * @param exeLogger logger to be used
 	 * @param ex exception to be handled
 	 * @param expectedException If test case is expecting exception, those details
 	 * @return result based on input exception
 	 */
-	public static TestCaseResult handleException(AutomationContext context, TestCase testCase, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
+	public static TestCaseResult handleException(AutomationContext context, TestCase testCase, String resName, IStep step, ExecutionLogger exeLogger, Exception ex, ExpectedException expectedException)
 	{
 		//from exception, try to find the step which caused the problem
 		//	so that approp plugin handlers can be called.
@@ -218,13 +224,13 @@ public class StepExecutor
 		if(ex instanceof TestCaseValidationFailedException)
 		{
 			invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-			return new TestCaseResult(testCase.getName(), TestStatus.FAILED, exeLogger.getExecutionLogData(), ex.getMessage());
+			return new TestCaseResult(resName, TestStatus.FAILED, exeLogger.getExecutionLogData(), ex.getMessage());
 		}
 		
 		if(ex instanceof TestCaseFailedException)
 		{
 			invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-			return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name);
+			return new TestCaseResult(resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name);
 		}
 		
 		if(expectedException != null)
@@ -239,7 +245,7 @@ public class StepExecutor
 			{
 				exeLogger.error(ex, ex.getMessage());
 				invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-				return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
+				return new TestCaseResult(resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
 			}
 		}
 
@@ -247,6 +253,6 @@ public class StepExecutor
 		exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
 		invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 		
-		return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());
+		return new TestCaseResult(resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());
 	}
 }

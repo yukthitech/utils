@@ -38,13 +38,15 @@ public class ExecuteCommandStep extends AbstractStep
 	 * Name of the output context attribute on which output needs to be set.
 	 * Default: output.
 	 */
-	@Param(description = "Name of the output context attribute on which output needs to be set. Default: output", required = false)
+	@Param(description = "Name of the output context attribute on which output needs to be set. Default: output", required = false,
+			attrName = true, defaultValue = "output")
 	private String outputVar = "output";
 	
 	/**
 	 * Name of the context attribute on which exit status to be set. Default: exitStatus.
 	 */
-	@Param(description = "Name of the context attribute on which exit status to be set. Default: exitStatus", required = false)
+	@Param(description = "Name of the context attribute on which exit status to be set. Default: exitStatus", required = false,
+			attrName = true, defaultValue = "exitStatus")
 	private String exitStatusVar = "exitStatus";
 
 	/*
