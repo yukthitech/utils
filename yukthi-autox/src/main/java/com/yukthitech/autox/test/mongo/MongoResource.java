@@ -7,14 +7,15 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.InvalidArgumentException;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * Represents a mongo db resource.
@@ -92,7 +93,7 @@ public class MongoResource implements Validateable
 			
 			if(!matcher.matches())
 			{
-				throw new InvalidArgumentException("Invalid mongo host-port combination specified. It should be of format host:port");
+				throw new InvalidArgumentException("Invalid mongo host-port combination specified. It should be of format host:port. Specified Replicas: {}", replicas);
 			}
 			
 			this.serverAddresses.add(new ServerAddress(matcher.group(1), Integer.parseInt(matcher.group(2))));
@@ -171,10 +172,24 @@ public class MongoResource implements Validateable
 			return mongoClient;
 		}
 		
-		MongoClient client = new MongoClient(
+		MongoCredential credential = (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) ? MongoCredential.createCredential(userName, dbName, password.toCharArray()) : null;
+		MongoClient client = null;
+		
+		if(credential != null)
+		{
+			client = new MongoClient(
+				serverAddresses, 
+				credential,
+				MongoClientOptions.builder().writeConcern(WriteConcern.ACKNOWLEDGED).build()
+			);
+		}
+		else
+		{
+			client = new MongoClient(
 				serverAddresses, 
 				MongoClientOptions.builder().writeConcern(WriteConcern.ACKNOWLEDGED).build()
-				);
+			);
+		}
 		
 		this.mongoClient = client;
 		return client;

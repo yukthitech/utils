@@ -53,6 +53,7 @@ public class MongoQuryUtils
 		}catch(Exception ex)
 		{
 			exeLogger.error("Invalid mongo-query json specified for execution: {}", query);
+			throw new InvalidStateException("Invalid mongo-query json specified for execution: {}", query, ex);
 		}
 		
 		MongoClient client = mongoResource.getMongoClient();

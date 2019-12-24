@@ -1,10 +1,15 @@
 package com.yukthitech.autox.common;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
@@ -33,6 +38,18 @@ public class CollectionFreeMarkerFunctions
 	}
 	
 	@FreeMarkerMethod(
+			description = "Converts specified string into list by splitting it using specified delimiter.",
+			returnDescription = "Converted list."
+			)
+	public static List<String> strToList(
+			@FmParam(name = "str", description = "String to be converted") String str,
+			@FmParam(name = "delim", description = "Delimiter to be used") String delim
+			)
+	{
+		return new ArrayList<String>( Arrays.asList(str.split(delim)) );
+	}
+
+	@FreeMarkerMethod(
 			description = "Checks if specified submap is submap of supermap",
 			returnDescription = "true if comparision is susccessful."
 			)
@@ -55,5 +72,20 @@ public class CollectionFreeMarkerFunctions
 		}
 		
 		return true;
+	}
+	
+	@FreeMarkerMethod(
+			description = "Evaluates the intersection size of specified collections.",
+			returnDescription = "intersection size of collections"
+			)
+	@SuppressWarnings("unchecked")
+	public static int intersectionCount(
+			@FmParam(name = "collection1", description = "Collection one to be checked") Collection<Object> collection1, 
+			@FmParam(name = "collection2", description = "Collection two to be checked") Collection<Object> collection2
+			)
+	{
+		Collection<Object> intersection = CollectionUtils.intersection(collection1, collection2);
+		//return the size
+		return intersection.size();
 	}
 }

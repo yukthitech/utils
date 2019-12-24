@@ -113,6 +113,10 @@ public class DeepEqualsUtil
 			// Note: common properties are already verified.
 			if(!expected.containsKey(key))
 			{
+				pathFailed = propPath;
+				
+				logger.warn("Comparision failed because of expected map is not having key: {}", 
+						propPath, key);
 				return false;
 			}
 		}
@@ -203,6 +207,7 @@ public class DeepEqualsUtil
 		
 		if(!res)
 		{
+			pathFailed = propPath;
 			logger.warn("Comparision failed because of non-equal values at path: {} [Actual Val: {}, Expected Val: {}]", 
 					propPath, actual, expected);
 		}

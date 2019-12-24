@@ -19,6 +19,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.InteractiveExecutionController;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.ObjectWrapper;
@@ -455,6 +456,12 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 					StepExecutor.executeStep(context, exeLogger, step);
 				} catch(Exception ex)
 				{
+					if(ex instanceof ReturnException)
+					{
+						exeLogger.debug("Because of return statement, returning from the test case execution");
+						break;
+					}
+					
 					TestCaseResult result = StepExecutor.handleException(context, this, name, step, exeLogger, ex, expectedException);
 					
 					if(result != null)
