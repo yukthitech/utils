@@ -65,6 +65,11 @@ public class AutomationUtils
 	 */
 	private static final Pattern TYPE_STR_PATTERN = Pattern.compile("([\\w\\.\\$]+)\\s*\\<\\s*([\\w\\.\\$\\,\\ ]+\\s*)\\>\\s*");
 	
+	/**
+	 * Pattern to be used for identifying value expressions.
+	 */
+	private static final Pattern VALUE_EXPR_PATTERN = Pattern.compile("^\\[\\[(.*)\\]\\]$");
+	
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	private static ObjectMapper objectMapperWithType = new ObjectMapper();
@@ -138,6 +143,19 @@ public class AutomationUtils
 		return FreeMarkerMethodManager.replaceExpressions(templateName, context, templateStr);
 	}
 	
+	private static Object parseExpressions(String templateName, AutomationContext context, String templateStr)
+	{
+		Matcher matcher = VALUE_EXPR_PATTERN.matcher(templateStr);
+		
+		if(matcher.matches())
+		{
+			String valueExpr = matcher.group(1);
+			return ExpressionFactory.getExpressionFactory().parseExpression(context, valueExpr);
+		}
+		
+		return FreeMarkerMethodManager.replaceExpressions(templateName, context, templateStr);
+	}
+
 	/**
 	 * Gets all fields of specified type and also its ancestors.
 	 * @param type Type from which fields needs to be extracted
@@ -190,7 +208,7 @@ public class AutomationUtils
 		
 		if(object instanceof String)
 		{
-			return (T) replaceExpressionsInString(templateName, context, (String) object);
+			return (T) parseExpressions(templateName, context, (String) object);
 		}
 		
 		//when executable is collection

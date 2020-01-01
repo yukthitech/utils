@@ -63,9 +63,47 @@ public class DefaultMethods
 	}
 	
 	@FreeMarkerMethod(
+			description = "Adds specified number of hours to specified date",
+			returnDescription = "Resultant date after addition of specified hours")
+	public static Date addHours(
+			@FmParam(name = "date", description = "Date to which hours should be added") Date date, 
+			@FmParam(name = "hours", description = "Hours to be added.") int hours)
+	{
+		return DateUtils.addHours(date, hours);
+	}
+
+	@FreeMarkerMethod(
+			description = "Adds specified number of minutes to specified date",
+			returnDescription = "Resultant date after addition of specified minutes")
+	public static Date addMinutes(
+			@FmParam(name = "date", description = "Date to which minutes should be added") Date date, 
+			@FmParam(name = "minutes", description = "Minutes to be added.") int minutes)
+	{
+		return DateUtils.addMinutes(date, minutes);
+	}
+
+	@FreeMarkerMethod(
+			description = "Adds specified number of seconds to specified date",
+			returnDescription = "Resultant date after addition of specified seconds")
+	public static Date addSeconds(
+			@FmParam(name = "date", description = "Date to which seconds should be added") Date date, 
+			@FmParam(name = "seconds", description = "Seconds to be added.") int seconds)
+	{
+		return DateUtils.addSeconds(date, seconds);
+	}
+
+	@FreeMarkerMethod(
 			description = "Returns the current date object",
 			returnDescription = "Current date")
 	public static Date today()
+	{
+		return new Date();
+	}
+
+	@FreeMarkerMethod(
+			description = "Returns the current date object",
+			returnDescription = "Current date and time")
+	public static Date now()
 	{
 		return new Date();
 	}

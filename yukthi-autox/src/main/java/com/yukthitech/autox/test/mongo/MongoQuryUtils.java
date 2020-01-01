@@ -12,6 +12,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -55,6 +56,8 @@ public class MongoQuryUtils
 			exeLogger.error("Invalid mongo-query json specified for execution: {}", query);
 			throw new InvalidStateException("Invalid mongo-query json specified for execution: {}", query, ex);
 		}
+		
+		queryMap = AutomationUtils.replaceExpressions("mongoQuery", context, queryMap);
 		
 		MongoClient client = mongoResource.getMongoClient();
 		MongoDatabase mongoDatabase = client.getDatabase(mongoResource.getDbName());
