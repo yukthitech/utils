@@ -46,7 +46,7 @@ public class TFEmailTracker
 		ObjectMapper mapper = new ObjectMapper();
 		EmailServerSettings settings = mapper.readValue(TFEmailTracker.class.getResourceAsStream("/email-settings.json"), EmailServerSettings.class);
 		
-		EmailTracker tracker = new EmailTracker(settings, new MailProcessor());
+		EmailTracker tracker = new EmailTracker(settings, settings, new MailProcessor());
 		tracker.startTracking();
 		
 		tracker.join();

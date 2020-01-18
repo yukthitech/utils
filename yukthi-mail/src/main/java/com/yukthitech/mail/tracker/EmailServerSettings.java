@@ -23,8 +23,6 @@
 
 package com.yukthitech.mail.tracker;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -56,6 +54,8 @@ public class EmailServerSettings
 	 * Property indicating if TTLS should be used.
 	 */
 	public static final String PROP_ENABLE_TTLS = "mail.smtp.starttls.enable";
+	
+	public static final String PROP_ENABLE_SSL = "mail.smtp.ssl.enable";
 
 	/**
 	* Smtp host.
@@ -78,6 +78,11 @@ public class EmailServerSettings
 	private String userName;
 	
 	/**
+	 * Email id to be used while sending the mail. If not specified userName will be used.
+	 */
+	private String fromId;
+	
+	/**
 	 * Password for authentication.
 	 */
 	private String password;
@@ -86,6 +91,11 @@ public class EmailServerSettings
 	 * Flag indicating if ttls should be enabled.
 	 */
 	private boolean enableTtls = false;
+	
+	/**
+	 * Flag to enable ssl.
+	 */
+	private boolean enableSsl = false;
 	
 	/**
 	 * Protocol to be used for reading mails.
@@ -98,9 +108,14 @@ public class EmailServerSettings
 	private String readHost;
 	
 	/**
-	 * Folders from which mails needs to be accessed.
+	 * Port to be used for reading mails.
 	 */
-	private List<String> folderNames = Arrays.asList("INBOX");
+	private int readPort;
+	
+	/**
+	 * Folder from which mails needs to be accessed.
+	 */
+	private String folderName = "INBOX";
 	
 	/**
 	 * Gets the smtp host.
@@ -261,25 +276,85 @@ public class EmailServerSettings
 	{
 		this.readHost = readHost;
 	}
-
+	
 	/**
-	 * Gets the folders from which mails needs to be accessed.
+	 * Gets the port to be used for reading mails.
 	 *
-	 * @return the folders from which mails needs to be accessed
+	 * @return the port to be used for reading mails
 	 */
-	public List<String> getFolderNames()
+	public int getReadPort()
 	{
-		return folderNames;
+		return readPort;
 	}
 
 	/**
-	 * Sets the folders from which mails needs to be accessed.
+	 * Sets the port to be used for reading mails.
 	 *
-	 * @param folderNames the new folders from which mails needs to be accessed
+	 * @param readPort the new port to be used for reading mails
 	 */
-	public void setFolderNames(List<String> folderNames)
+	public void setReadPort(int readPort)
 	{
-		this.folderNames = folderNames;
+		this.readPort = readPort;
+	}
+
+	/**
+	 * Gets the folder from which mails needs to be accessed.
+	 *
+	 * @return the folder from which mails needs to be accessed
+	 */
+	public String getFolderName()
+	{
+		return folderName;
+	}
+
+	/**
+	 * Sets the folder from which mails needs to be accessed.
+	 *
+	 * @param folderName the new folder from which mails needs to be accessed
+	 */
+	public void setFolderName(String folderName)
+	{
+		this.folderName = folderName;
+	}
+
+	/**
+	 * Gets the email id to be used while sending the mail. If not specified userName will be used.
+	 *
+	 * @return the email id to be used while sending the mail
+	 */
+	public String getFromId()
+	{
+		return fromId;
+	}
+
+	/**
+	 * Sets the email id to be used while sending the mail. If not specified userName will be used.
+	 *
+	 * @param fromId the new email id to be used while sending the mail
+	 */
+	public void setFromId(String fromId)
+	{
+		this.fromId = fromId;
+	}
+
+	/**
+	 * Checks if is flag to enable ssl.
+	 *
+	 * @return the flag to enable ssl
+	 */
+	public boolean isEnableSsl()
+	{
+		return enableSsl;
+	}
+
+	/**
+	 * Sets the flag to enable ssl.
+	 *
+	 * @param enableSsl the new flag to enable ssl
+	 */
+	public void setEnableSsl(boolean enableSsl)
+	{
+		this.enableSsl = enableSsl;
 	}
 
 	/**
@@ -313,7 +388,7 @@ public class EmailServerSettings
 		
 		props.put(PROP_USE_AUTH, "" + useAuthentication);
 		props.put(PROP_ENABLE_TTLS, "" + enableTtls);
-		props.put("mail.smtp.ssl.enable", "" + enableTtls);
+		props.put(PROP_ENABLE_SSL, "" + enableSsl);
 		
 		props.put(PROP_SMTP_HOST, smtpHost);
 		

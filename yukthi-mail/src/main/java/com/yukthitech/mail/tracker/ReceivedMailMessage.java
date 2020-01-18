@@ -2,6 +2,7 @@ package com.yukthitech.mail.tracker;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -91,6 +92,11 @@ public class ReceivedMailMessage
 	}
 	
 	/**
+	 * uid of the mail.
+	 */
+	private long uid;
+	
+	/**
 	 * Name extracted from mail id.
 	 */
 	private String fromName;
@@ -126,25 +132,56 @@ public class ReceivedMailMessage
 	private Document contentDocument;
 	
 	/**
-	 * Instantiates a new mail message.
+	 * The received date.
 	 */
-	public ReceivedMailMessage()
-	{}
-
+	private Date receivedDate;
+	
+	/**
+	 * Flag indicating if this message was read earlier.
+	 */
+	private boolean readEarlier;
+	
+	/**
+	 * To list;
+	 */
+	private String toList;
+	
 	/**
 	 * Instantiates a new received mail message.
 	 *
+	 * @param uid the uid
 	 * @param fromName the from name
 	 * @param fromMailId the from mail id
 	 * @param subject the subject
+	 * @param receivedDate the received date
+	 * @param readEarlier the read earlier
 	 */
-	public ReceivedMailMessage(String fromName, String fromMailId, String subject)
+	public ReceivedMailMessage(long uid, String fromName, String fromMailId, String subject, Date receivedDate, boolean readEarlier, String toList)
 	{
+		this.uid = uid;
 		this.fromName = fromName;
 		this.fromMailId = fromMailId;
 		this.subject = subject;
+		this.receivedDate = receivedDate;
+		this.readEarlier = readEarlier;
+		this.toList = toList;
 	}
 	
+	public String getToList()
+	{
+		return toList;
+	}
+	
+	/**
+	 * Gets the uid of the mail.
+	 *
+	 * @return the uid of the mail
+	 */
+	public long getUid()
+	{
+		return uid;
+	}
+
 	/**
 	 * Gets the name extracted from mail id.
 	 *
@@ -153,16 +190,6 @@ public class ReceivedMailMessage
 	public String getFromName()
 	{
 		return fromName;
-	}
-
-	/**
-	 * Sets the name extracted from mail id.
-	 *
-	 * @param fromName the new name extracted from mail id
-	 */
-	public void setFromName(String fromName)
-	{
-		this.fromName = fromName;
 	}
 
 	/**
@@ -176,16 +203,6 @@ public class ReceivedMailMessage
 	}
 
 	/**
-	 * Sets the mail id from which mail is received.
-	 *
-	 * @param fromMailId the new mail id from which mail is received
-	 */
-	public void setFromMailId(String fromMailId)
-	{
-		this.fromMailId = fromMailId;
-	}
-
-	/**
 	 * Gets the mail message subject.
 	 *
 	 * @return the mail message subject
@@ -193,16 +210,6 @@ public class ReceivedMailMessage
 	public String getSubject()
 	{
 		return subject;
-	}
-
-	/**
-	 * Sets the mail message subject.
-	 *
-	 * @param subject the new mail message subject
-	 */
-	public void setSubject(String subject)
-	{
-		this.subject = subject;
 	}
 
 	/**
@@ -216,20 +223,10 @@ public class ReceivedMailMessage
 	}
 
 	/**
-	 * Sets the attachments received in mail.
-	 *
-	 * @param attachments the new attachments received in mail
-	 */
-	public void setAttachments(List<Attachment> attachments)
-	{
-		this.attachments = attachments;
-	}
-	
-	/**
 	 * Adds specified attachment to this mail.
 	 * @param attachment Attachment to be added.
 	 */
-	public void addAttachment(Attachment attachment)
+	void addAttachment(Attachment attachment)
 	{
 		if(this.attachments == null)
 		{
@@ -254,7 +251,7 @@ public class ReceivedMailMessage
 	 *
 	 * @param content the new main content of the mail
 	 */
-	public void setContent(String content)
+	void setContent(String content)
 	{
 		this.content = content;
 		this.contentDocument = null;
@@ -284,16 +281,36 @@ public class ReceivedMailMessage
 	 *
 	 * @param textContent the new context of the mail in textual format
 	 */
-	public void setTextContent(String textContent)
+	void setTextContent(String textContent)
 	{
 		this.textContent = textContent;
 	}
 	
 	/**
+	 * Gets the received date.
+	 *
+	 * @return the received date
+	 */
+	public Date getReceivedDate()
+	{
+		return receivedDate;
+	}
+	
+	/**
+	 * Checks if is flag indicating if this message was read earlier.
+	 *
+	 * @return the flag indicating if this message was read earlier
+	 */
+	public boolean isReadEarlier()
+	{
+		return readEarlier;
+	}
+
+	/**
 	 * Adds the specified text content to existing content.
 	 * @param textContent text content to be added.
 	 */
-	public void addTextContent(String textContent)
+	void addTextContent(String textContent)
 	{
 		if(this.textContent != null)
 		{

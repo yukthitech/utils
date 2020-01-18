@@ -2,8 +2,6 @@ package com.yukthitech.mail.tracker;
 
 import java.util.Set;
 
-import javax.mail.Message;
-
 /**
  * Context object sent during processing mails.
  * @author akiran
@@ -14,7 +12,7 @@ public interface IMailTrackerContext
 	 * Returns the original mail message received.
 	 * @return original mail
 	 */
-	public Message getOriginalMessage();
+	public ReceivedMailMessage getOriginalMessage();
 	
 	/**
 	 * Marks the mail for deleting, which would happen at end of processing the mail.
