@@ -63,6 +63,11 @@ public class AutomationContext
 	private Map<String, Object> nameToAttr = new HashMap<String, Object>();
 	
 	/**
+	 * Context attributes which are set at global level.
+	 */
+	private Map<String, Object> globalAttributes = new HashMap<String, Object>();
+	
+	/**
 	 * Application configuration.
 	 */
 	private ApplicationConfiguration appConfiguration;
@@ -254,6 +259,13 @@ public class AutomationContext
 	public void setActiveTestSuite(TestSuite currentTestSuite)
 	{
 		this.activeTestSuite = currentTestSuite;
+		
+		//before starting the test suite clear the current attributes and get 
+		// set global attributes and test-suite attributes
+		this.nameToAttr.clear();
+		this.nameToAttr.putAll(this.globalAttributes);
+		this.nameToAttr.putAll(this.activeTestSuite.getAttributes());
+		
 	}
 	
 	/**
@@ -272,6 +284,11 @@ public class AutomationContext
 	public void clearActiveTestSuite()
 	{
 		this.activeTestSuite = null;
+		
+		//at the end of test suite, clear the attribute and set global attr only
+		// so that the global attr is available to cleanup
+		this.nameToAttr.clear();
+		this.nameToAttr.putAll(this.globalAttributes);
 	}
 	
 	/**
@@ -283,6 +300,25 @@ public class AutomationContext
 	{
 		this.activeTestCase = testCase;
 		this.activeTestCaseData = testCaseData;
+
+		//before starting the test case clear the current attributes and  
+		// set global attributes, test-suite attributes, current dependency test case attr and test case attributes
+		this.nameToAttr.clear();
+		this.nameToAttr.putAll(this.globalAttributes);
+		this.nameToAttr.putAll(this.activeTestSuite.getAttributes());
+		
+		Set<String> depTestCases = this.activeTestCase.getDependenciesSet();
+		
+		if(depTestCases != null)
+		{
+			for(String depTestName : depTestCases)
+			{
+				TestCase depTestCase = this.activeTestSuite.getTestCase(depTestName);
+				this.nameToAttr.putAll(depTestCase.getAttributes());
+			}
+		}
+		
+		this.nameToAttr.putAll(this.activeTestCase.getAttributes());
 	}
 	
 	/**
@@ -292,6 +328,12 @@ public class AutomationContext
 	{
 		this.activeTestCase = null;
 		this.activeTestCaseData = null;
+
+		//at the end of test case, clear the attribute and set global attr and test-suite att
+		// so that these attr is available to test-suite cleanup
+		this.nameToAttr.clear();
+		this.nameToAttr.putAll(this.globalAttributes);
+		this.nameToAttr.putAll(this.activeTestSuite.getAttributes());
 	}
 	
 	/**
@@ -382,6 +424,19 @@ public class AutomationContext
 	public void setAttribute(String name, Object value)
 	{
 		nameToAttr.put(name, value);
+
+		if(activeTestCase != null)
+		{
+			activeTestCase.setAttribute(name, value);
+		}
+		else if(activeTestSuite != null)
+		{
+			activeTestSuite.setAttribute(name, value);
+		}
+		else
+		{
+			globalAttributes.put(name, value);
+		}
 		
 		if(monitorServer != null)
 		{
@@ -946,7 +1001,7 @@ public class AutomationContext
 	{
 		for(IPlugin<?> plugin : this.requiredPlugins.values())
 		{
-			if(initializedPlugins.contains(plugin))
+			if(initializedPlugins.contains(plugin.getClass()))
 			{
 				logger.debug("Closing plugin: " + plugin.getClass().getName());
 				plugin.close();

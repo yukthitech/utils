@@ -3,6 +3,7 @@ package com.yukthitech.autox.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class TestSuite implements Validateable
 	/**
 	 * List of test cases to be executed in this test suite.
 	 */
-	private List<TestCase> testCases = new ArrayList<>();
+	private Map<String, TestCase> testCases = new LinkedHashMap<>();
 	
 	/**
 	 * Setup steps to be executed before executing test suite.
@@ -55,6 +56,11 @@ public class TestSuite implements Validateable
 	 * File in which this test suite is defined.
 	 */
 	private File file;
+	
+	/**
+	 * Attributes which are set at test suite level.
+	 */
+	private Map<String, Object> attributes = new HashMap<>();
 	
 	public TestSuite()
 	{}
@@ -124,8 +130,10 @@ public class TestSuite implements Validateable
 			}
 			else
 			{
-				this.testCases.addAll(newTestSuite.testCases);
+				this.testCases.putAll(newTestSuite.testCases);
 			}
+			
+			this.testCases.values().forEach(tc -> tc.setParentTestSuite(this));
 		}
 		
 		this.nameToFunction.putAll(newTestSuite.nameToFunction);
@@ -179,15 +187,7 @@ public class TestSuite implements Validateable
 	 */
 	public TestCase getTestCase(String name)
 	{
-		for(TestCase testCase : this.testCases)
-		{
-			if(name.equals(testCase.getName()))
-			{
-				return testCase;
-			}
-		}
-		
-		return null;
+		return testCases.get(name);
 	}
 
 	/**
@@ -197,23 +197,7 @@ public class TestSuite implements Validateable
 	 */
 	public List<TestCase> getTestCases()
 	{
-		return testCases;
-	}
-
-	/**
-	 * Sets the list of test cases to be executed in this test suite.
-	 *
-	 * @param testCases
-	 *            the new list of test cases to be executed in this test suite
-	 */
-	public void setTestCases(List<TestCase> testCases)
-	{
-		if(testCases == null)
-		{
-			throw new NullPointerException("Test cases can not be null.");
-		}
-		
-		this.testCases = testCases;
+		return new ArrayList<>(testCases.values());
 	}
 
 	/**
@@ -224,7 +208,15 @@ public class TestSuite implements Validateable
 	 */
 	public void addTestCase(TestCase testCase)
 	{
-		testCases.add(testCase);
+		TestCase oldTestCase = this.testCases.get(testCase.getName());
+		
+		if(oldTestCase != null)
+		{
+			throw new InvalidArgumentException("Duplicate test case name encountered: " + testCase.getName());
+		}
+		
+		testCases.put(testCase.getName(), testCase);
+		testCase.setParentTestSuite(this);
 	}
 
 	/**
@@ -316,6 +308,16 @@ public class TestSuite implements Validateable
 	public Function getFunction(String name)
 	{
 		return nameToFunction.get(name);
+	}
+	
+	public void setAttribute(String name, Object value)
+	{
+		this.attributes.put(name, value);
+	}
+	
+	public Map<String, Object> getAttributes()
+	{
+		return attributes;
 	}
 
 	/* (non-Javadoc)

@@ -81,7 +81,7 @@
 			</wrap:validations>
 		</testCase>
 	
-		<testCase name="invoke_Method_On_Suite_Bean">
+		<testCase name="invoke_Method_On_Suite_Bean1">
 			<description>
 				Invokes method where an exception is expected.
 			</description>

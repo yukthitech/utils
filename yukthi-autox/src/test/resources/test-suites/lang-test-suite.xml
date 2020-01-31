@@ -233,7 +233,7 @@
 			<s:element>c</s:element>
 		</data-bean>
 	
-		<testCase name="testSimpleForEachLoopWithList">
+		<testCase name="testSimpleForEachLoopWithList1">
 			<description>
 				Tests if simple for-each loop working with list
 			</description>

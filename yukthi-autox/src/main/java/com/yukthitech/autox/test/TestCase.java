@@ -3,8 +3,10 @@ package com.yukthitech.autox.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -107,6 +109,16 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	private TestCaseData data;
 	
 	/**
+	 * Parent test suite.
+	 */
+	private TestSuite parentTestSuite;
+	
+	/**
+	 * Attributes which are set at test case level.
+	 */
+	private Map<String, Object> attributes = new HashMap<>();
+
+	/**
 	 * Instantiates a new test case.
 	 */
 	public TestCase()
@@ -120,6 +132,26 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	public TestCase(String name)
 	{
 		this.name = name;
+	}
+	
+	/**
+	 * Sets the parent test suite.
+	 *
+	 * @param parentTestSuite the new parent test suite
+	 */
+	public void setParentTestSuite(TestSuite parentTestSuite)
+	{
+		this.parentTestSuite = parentTestSuite;
+	}
+	
+	/**
+	 * Gets the parent test suite.
+	 *
+	 * @return the parent test suite
+	 */
+	public TestSuite getParentTestSuite()
+	{
+		return parentTestSuite;
 	}
 	
 	/**
@@ -529,6 +561,17 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	public void setFailureActions(List<TestCaseFailureAction> failureActions)
 	{
 		this.failureActions = failureActions;
+	}
+
+	
+	public void setAttribute(String name, Object value)
+	{
+		this.attributes.put(name, value);
+	}
+	
+	public Map<String, Object> getAttributes()
+	{
+		return attributes;
 	}
 
 	/*

@@ -241,6 +241,76 @@ public class TestSuiteExecutor
 		return new TestCaseResult(testCase.getName(), finalStatus, null, "", true);
 	}
 	
+	/**
+	 * Executes the dependencies of specified test case if any. And also setup of test-suite if any. 
+	 * @param testSuite parent test suite
+	 * @param testCase test case whose dependencies needs to be checked
+	 * @return null if all dependencies are executed successfully. If not, returns the result the test case execution should return.
+	 */
+	private TestCaseResult executeDependencies(TestSuite testSuite, TestCase testCase)
+	{
+		Set<String> dependencyTestCases = testCase.getDependenciesSet();
+		TestCaseResult depTestCaseResult = null;
+		
+		//Check the dependency test cases of the test case 
+		if(dependencyTestCases != null)
+		{
+			for(String depTestCase : dependencyTestCases)
+			{
+				depTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), depTestCase);
+				
+				if(depTestCaseResult == null)
+				{
+					TestCase depTestCaseObj = testSuite.getTestCase(depTestCase);
+					
+					if(depTestCaseObj == null)
+					{
+						String skipMssg = String.format("Invalid dependency test case '%s' specified for test case - %s", 
+								depTestCase, testCase.getName());
+						logger.info(skipMssg);
+							
+						TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
+						fullExecutionDetails.addTestResult(testSuite, result);
+						return result;
+					}
+					
+					depTestCaseResult = executeTestCaseWithDependencies(testSuite, depTestCaseObj);
+				}
+				
+				if(depTestCaseResult.getStatus() == TestStatus.SUCCESSFUL)
+				{
+					continue;
+				}
+				
+				String skipMssg = String.format("Skipping test case '%s' as the status of dependency test case '%s' is found as - %s", 
+					testCase.getName(), depTestCase, depTestCaseResult.getStatus());
+				logger.info(skipMssg);
+				
+				TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
+				fullExecutionDetails.addTestResult(testSuite, result);
+				return result;
+			}
+		}
+		
+		TestSuiteResults currentTestSuiteResults = fullExecutionDetails.getTestSuiteResults(testSuite.getName());
+		
+		//Execute the setup before first test case is executed.
+		// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
+		if(!currentTestSuiteResults.isSetupSuccessful())
+		{
+			if( !executeSetup(testSuite.getName(), testSuite.getSetups()) )
+			{
+				TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
+				results.setSetupSuccessful(false);
+				
+				throw new SetupExecutionFailedException("Setup execution failed");
+			}
+			
+			currentTestSuiteResults.setSetupSuccessful(true);
+		}
+
+		return null;
+	}
 	private TestCaseResult executeTestCaseWithDependencies(TestSuite testSuite, TestCase testCase)
 	{
 		//if test case execution is already in progress in 
@@ -249,78 +319,26 @@ public class TestSuiteExecutor
 			throw new InvalidStateException("Test case is being {} is being re-executed when it is already in progress", testCase.getName());
 		}
 		
-		TestCaseResult depTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), testCase.getName());
+		TestCaseResult curTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), testCase.getName());
 
 		//if test case is already executed, simply return
-		if(depTestCaseResult != null)
+		if(curTestCaseResult != null)
 		{
 			logger.warn("Skipping test case as it is already executed- [Test suite: {}, Test Case: {}]", testSuite.getName(), testCase.getName());
-			return depTestCaseResult;
+			return curTestCaseResult;
 		}
 		
+		curTestCaseResult = executeDependencies(testSuite, testCase);
+		
+		if(curTestCaseResult != null)
+		{
+			logger.warn("Skipping actual test case execution as the dependencies execution was not successful. [Test suite: {}, Test Case: {}]", testSuite.getName(), testCase.getName());
+		}
+	
 		fullExecutionDetails.startedTestCase(testCase.getName());
 		
 		try
 		{
-			Set<String> dependencyTestCases = testCase.getDependenciesSet();
-			
-			//Check the dependency test cases of the test case 
-			if(dependencyTestCases != null)
-			{
-				for(String depTestCase : dependencyTestCases)
-				{
-					depTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), depTestCase);
-					
-					if(depTestCaseResult == null)
-					{
-						TestCase depTestCaseObj = testSuite.getTestCase(depTestCase);
-						
-						if(depTestCaseObj == null)
-						{
-							String skipMssg = String.format("Invalid dependency test case '%s' specified for test case - %s", 
-									depTestCase, testCase.getName());
-							logger.info(skipMssg);
-								
-							TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
-							fullExecutionDetails.addTestResult(testSuite, result);
-							return result;
-						}
-						
-						depTestCaseResult = executeTestCaseWithDependencies(testSuite, depTestCaseObj);
-					}
-					
-					if(depTestCaseResult.getStatus() == TestStatus.SUCCESSFUL)
-					{
-						continue;
-					}
-					
-					String skipMssg = String.format("Skipping test case '%s' as the status of dependency test case '%s' is found as - %s", 
-						testCase.getName(), depTestCase, depTestCaseResult.getStatus());
-					logger.info(skipMssg);
-					
-					TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
-					fullExecutionDetails.addTestResult(testSuite, result);
-					return result;
-				}
-			}
-			
-			TestSuiteResults currentTestSuiteResults = fullExecutionDetails.getTestSuiteResults(testSuite.getName());
-			
-			//Execute the setup before first test case is executed.
-			// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
-			if(!currentTestSuiteResults.isSetupSuccessful())
-			{
-				if( !executeSetup(testSuite.getName(), testSuite.getSetups()) )
-				{
-					TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
-					results.setSetupSuccessful(false);
-					
-					throw new SetupExecutionFailedException("Setup execution failed");
-				}
-				
-				currentTestSuiteResults.setSetupSuccessful(true);
-			}
-	
 			//execute the test case
 			logger.debug("Executing test case '{}' in test suite - {}", testCase.getName(), testSuite.getName());
 	

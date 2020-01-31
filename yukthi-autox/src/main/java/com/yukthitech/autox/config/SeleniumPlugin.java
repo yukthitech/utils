@@ -376,7 +376,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			activeDriver.quit();
 		}catch(Exception ex)
 		{
-			logger.warn("Ignored error during selenium plugin closing", ex);
+			logger.warn("Ignored error during selenium plugin closing: " + ex);
 		}
 	}
 }
