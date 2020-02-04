@@ -6,6 +6,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -14,11 +19,12 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class MockResponse implements Serializable 
 {
-	
 	/**
 	 * The Constant serialVersionUID.
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(MockResponse.class);
 
 	/**
 	 * Uri for which this response should be returned.
@@ -51,6 +57,11 @@ public class MockResponse implements Serializable
 	private int countLeft = 1;
 	
 	/**
+	 * Wait configuration to be used.
+	 */
+	private WaitConfig waitConfig;
+	
+	/**
 	 * Instantiates a new mock response.
 	 */
 	public MockResponse()
@@ -64,8 +75,9 @@ public class MockResponse implements Serializable
 	 * @param headers the headers
 	 * @param statusCode the status code
 	 * @param body the body
+	 * @param waitConfig the wait config
 	 */
-	public MockResponse(String uri, String method, Map<String, String> headers, int statusCode, String body)
+	public MockResponse(String uri, String method, Map<String, String> headers, int statusCode, String body, WaitConfig waitConfig)
 	{
 		if(!uri.endsWith("/"))
 		{
@@ -77,6 +89,7 @@ public class MockResponse implements Serializable
 		this.headers = headers;
 		this.statusCode = statusCode;
 		this.body = body;
+		this.waitConfig = waitConfig;
 	}
 	
 	/**
@@ -98,6 +111,16 @@ public class MockResponse implements Serializable
 	{
 		this.countLeft = countLeft;
 	}
+	
+	/**
+	 * Sets the wait configuration to be used.
+	 *
+	 * @param waitConfig the new wait configuration to be used
+	 */
+	public void setWaitConfig(WaitConfig waitConfig)
+	{
+		this.waitConfig = waitConfig;
+	}
 
 	/**
 	 * Checks if current response can be sent for specified request.
@@ -116,7 +139,6 @@ public class MockResponse implements Serializable
 		
 		//TODO: more dynamic conditions, like url patterns, parameter checking etc should be done here
 		// in multi threaded env, context matching should be done here
-		
 		return true;
 	}
 	
@@ -127,6 +149,36 @@ public class MockResponse implements Serializable
 	 */
 	void writeTo(HttpServletResponse response)
 	{
+		if(waitConfig != null)
+		{
+			if(waitConfig.getTime() > 0)
+			{
+				logger.debug("Before sending response, waiting for time: {} millis", waitConfig.getTime());
+				
+				try
+				{
+					Thread.sleep(waitConfig.getTime());
+				}catch(Exception ex)
+				{}
+			}
+			
+			if(StringUtils.isNotBlank(waitConfig.getForAttr()))
+			{
+				logger.debug("Before sending response, waiting for attr: {}", waitConfig.getForAttr());
+				
+				AutomationContext automationContext = AutomationContext.getInstance();
+				
+				while(automationContext.getAttribute(waitConfig.getForAttr()) == null)
+				{
+					try
+					{
+						Thread.sleep(100);
+					}catch(Exception ex)
+					{}
+				}
+			}
+		}
+		
 		response.setStatus(statusCode);
 
 		try
@@ -256,6 +308,11 @@ public class MockResponse implements Serializable
 		this.method = method;
 	}
 
+	/**
+	 * To string.
+	 *
+	 * @return the string
+	 */
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

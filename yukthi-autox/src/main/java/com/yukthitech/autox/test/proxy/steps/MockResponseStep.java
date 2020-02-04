@@ -19,6 +19,10 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 @Executable(name = "mockResponse", message = "Mocks the specified request (url + method) with specified response.")
 public class MockResponseStep extends AbstractStep
 {
+	
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -62,6 +66,12 @@ public class MockResponseStep extends AbstractStep
 	 */
 	@Param(description = "Number of times for which response should be available for given request. Default: Integer max value", required = false)
 	private int times = Integer.MAX_VALUE;
+	
+	/**
+	 * Wait configuration to be used before sending response.
+	 */
+	@Param(description = "Wait configuration to be used before sending response.", required = false)
+	private WaitConfig waitConfig;
 
 	/**
 	 * Sets the name of the server where mocking should be done.
@@ -103,6 +113,12 @@ public class MockResponseStep extends AbstractStep
 		this.responseStatusCode = responseStatusCode;
 	}
 
+	/**
+	 * Adds the response header.
+	 *
+	 * @param name the name
+	 * @param value the value
+	 */
 	public void addResponseHeader(String name, String value)
 	{
 		this.responseHeaders.put(name, value);
@@ -132,7 +148,35 @@ public class MockResponseStep extends AbstractStep
 		
 		this.times = times;
 	}
+	
+	/**
+	 * Gets the wait configuration to be used before sending response.
+	 *
+	 * @return the wait configuration to be used before sending response
+	 */
+	public WaitConfig getWaitConfig()
+	{
+		return waitConfig;
+	}
 
+	/**
+	 * Sets the wait configuration to be used before sending response.
+	 *
+	 * @param waitConfig the new wait configuration to be used before sending response
+	 */
+	public void setWaitConfig(WaitConfig waitConfig)
+	{
+		this.waitConfig = waitConfig;
+	}
+
+	/**
+	 * Execute.
+	 *
+	 * @param context the context
+	 * @param logger the logger
+	 * @return true, if successful
+	 * @throws Exception the exception
+	 */
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -142,7 +186,7 @@ public class MockResponseStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		MockResponse response = new MockResponse(uri, method, responseHeaders, responseStatusCode, responseBody);
+		MockResponse response = new MockResponse(uri, method, responseHeaders, responseStatusCode, responseBody, waitConfig);
 		response.setCountLeft(times);
 
 		logger.debug("On server '{}' mocking response {}", name, response);
