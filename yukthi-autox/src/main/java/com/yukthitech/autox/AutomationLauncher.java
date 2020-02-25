@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -88,6 +90,8 @@ public class AutomationLauncher
 			logger.debug("Limiting the xml file loading to folders: {}", limitFolders);
 		}
 
+		Set<String> errors = new HashSet<>();
+
 		for(File xmlFile : xmlFiles)
 		{
 			if(limitFolders != null)
@@ -129,6 +133,11 @@ public class AutomationLauncher
 					
 					testSuite.setFile(xmlFile);
 					testSuiteGroup.addTestSuite(testSuite);
+					
+					if(testSuite.getTestCases() != null)
+					{
+						testSuite.getTestCases().forEach(tc -> tc.setFile(xmlFile));
+					}
 				}
 				
 				if(testDataFile.getSetup() != null)
@@ -164,10 +173,16 @@ public class AutomationLauncher
 				}
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while loading test suite from file: {}", xmlFile.getPath());
+				errors.add(String.format("Error File: %s\n\t\tError: %s\n\t\tCaused by: %s", xmlFile.getPath(), ex, ex.getCause()));
 			}
 		}
 		
+		if(!errors.isEmpty())
+		{
+			String errorStr = errors.stream().collect(Collectors.joining("\n\n\t"));
+			throw new InvalidStateException("Failed to load test suite files. Following errors occurred: \n\t{}", errorStr);
+		}
+
 		logger.debug("Found required configurations by this context to be: {}", context.getPlugins());
 		
 		return testSuiteGroup;

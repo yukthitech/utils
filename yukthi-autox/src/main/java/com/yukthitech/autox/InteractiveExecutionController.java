@@ -1,9 +1,8 @@
 package com.yukthitech.autox;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -38,55 +37,20 @@ public class InteractiveExecutionController
 	private static class FilePoint
 	{
 		/**
-		 * File in which this point is set.
-		 */
-		File file;
-
-		/**
 		 * Line number in which this point is set.
 		 */
 		int lineNumber;
 
-		public FilePoint(File file, int lineNumber)
+		public FilePoint(int lineNumber)
 		{
-			this.file = file;
 			this.lineNumber = lineNumber;
-		}
-		
-		/* (non-Javadoc)
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(Object obj)
-		{
-			if(obj == this)
-			{
-				return true;
-			}
-
-			if(!(obj instanceof InteractiveExecutionController.FilePoint))
-			{
-				return false;
-			}
-
-			InteractiveExecutionController.FilePoint other = (InteractiveExecutionController.FilePoint) obj;
-			return Objects.equals(file, other.file) && (lineNumber == other.lineNumber);
-		}
-
-		/* (non-Javadoc)
-		 * @see java.lang.Object#hashcode()
-		 */
-		@Override
-		public int hashCode()
-		{
-			return Objects.hash(file, lineNumber);
 		}
 	}
 	
 	/**
 	 * End points where execution should stop.
 	 */
-	private Set<FilePoint> endPoints = new HashSet<>();
+	private Map<File, FilePoint> endPoints = new HashMap<>();
 	
 	/**
 	 * Adds end point where execution should stop.
@@ -97,7 +61,8 @@ public class InteractiveExecutionController
 	{
 		try
 		{
-			this.endPoints.add(new FilePoint(file.getCanonicalFile(), lineNo));
+			file = file.getCanonicalFile();
+			this.endPoints.put(file, new FilePoint(lineNo));
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while determining cannoical path from file path: {}", file, ex);
@@ -112,9 +77,17 @@ public class InteractiveExecutionController
 	 */
 	public Action getAction(File file, int lineNo)
 	{
-		FilePoint curFilePoint = new FilePoint(file, lineNo);
+		FilePoint filePoint = null;
+
+		try
+		{
+			filePoint = this.endPoints.get(file.getCanonicalFile());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while determining cannoical path from file path: {}", file, ex);
+		}
 		
-		if(endPoints.contains(curFilePoint))
+		if(filePoint != null && lineNo > filePoint.lineNumber)
 		{
 			return Action.STOP_EXECUTION;
 		}

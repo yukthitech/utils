@@ -169,6 +169,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			{
 				FunctionRef funcRef = new FunctionRef();
 				funcRef.setName(beanNode.getName());
+				funcRef.setLocation(fileBeingParsed + ":" + locator.getLineNumber(), locator.getLineNumber());
 				
 				return funcRef;
 			}

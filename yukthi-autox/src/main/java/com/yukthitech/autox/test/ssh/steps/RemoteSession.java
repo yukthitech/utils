@@ -257,10 +257,13 @@ public class RemoteSession
 		}
 		else
 		{
-			logger.debug("Starting ssh session with remote host using private key - {}:{}", host, port);
+			logger.debug("Starting ssh session with remote host using private key - {}:{} [User: {}, Private key path: {}]", host, port, user, privateKeyPath);
 			
 			jsch.addIdentity(privateKeyPath);
 			session = jsch.getSession(user, host, port);
+			
+			session.setConfig("PreferredAuthentications", "publickey");
+			session.setConfig("StrictHostKeyChecking", "no");
 		}
 		
 		session.connect();

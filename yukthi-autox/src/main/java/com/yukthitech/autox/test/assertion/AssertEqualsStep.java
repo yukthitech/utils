@@ -1,5 +1,7 @@
 package com.yukthitech.autox.test.assertion;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 import com.yukthitech.autox.AbstractValidation;
@@ -59,14 +61,26 @@ public class AssertEqualsStep extends AbstractValidation
 	 * @param val the val
 	 * @return the type
 	 */
-	private Class<?> getType(Object val)
+	@SuppressWarnings("rawtypes")
+	static String getType(Object val)
 	{
 		if(val == null)
 		{
 			return null;
 		}
 		
-		return val.getClass();
+		String type = val.getClass().getName();
+		
+		if(val instanceof Collection)
+		{
+			type += " [Size: " + ((Collection) val).size() + "]";
+		}
+		else if(val instanceof Map)
+		{
+			type += " [Size: " + ((Map) val).size() + "]";
+		}
+		
+		return type;
 	}
 
 	/* (non-Javadoc)

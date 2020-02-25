@@ -84,7 +84,8 @@ public class TestSuiteExecutor
 	 *            the context
 	 * @return the test case result
 	 */
-	public TestCaseResult executeTestCase(AutomationContext context, List<TestCaseResult> testCaseDatsResults, TestCase testCase, String testFileName)
+	public TestCaseResult executeTestCase(AutomationContext context, List<TestCaseResult> testCaseDatsResults, TestCase testCase, 
+			String testFileName, TestSuite testSuite)
 	{
 		ObjectWrapper<String> excludedGrp = new ObjectWrapper<>();
 		
@@ -117,19 +118,46 @@ public class TestSuiteExecutor
 			
 			try
 			{
-				result = testCase.execute(context, exeLogger);
+				if(testSuite.getBeforeTestCase() != null)
+				{
+					if(!executeSetup("before-test-case", Arrays.asList(testSuite.getBeforeTestCase())))
+					{
+						result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
+					}
+				}
+				
+				//execute only when before-test-case was successful
+				if(result == null)
+				{
+					result = testCase.execute(context, exeLogger);
+				}
 			}catch(Exception ex)
 			{
 				exeLogger.error(ex, "An error occurred while executing test case: {}", testCase.getName());
 				result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case.");
 			} finally
 			{
+				if(testSuite.getAfterTestCase() != null)
+				{
+					try
+					{
+						if(!executeCleanup("after-test-case", Arrays.asList(testSuite.getAfterTestCase())))
+						{
+							result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+						}
+					}catch(Exception ex)
+					{
+						exeLogger.error(ex, "An error occurred while executing after-test-case of test-suited: {}", testCase.getName());
+						result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+					}
+				}
+
 				context.getExecutionStack().pop(testCase);
 				context.clearActiveTestCase();
 			}
 			
 			//stop monitoring logs
-			Map<String, File> monitoringLogs = context.stopLogMonitoring();
+			Map<String, File> monitoringLogs = context.stopLogMonitoring(result);
 			reportGenerator.createLogFiles(context, result, testFileName, monitoringLogs, testCase.getDescription());
 			
 			context.getAutomationListener().testCaseCompleted(new AutomationEvent(currentTestSuite, testCase, result));
@@ -222,7 +250,7 @@ public class TestSuiteExecutor
 			}
 			
 			//stop monitoring logs
-			Map<String, File> monitoringLogs = context.stopLogMonitoring();
+			Map<String, File> monitoringLogs = context.stopLogMonitoring(result);
 			reportGenerator.createLogFiles(context, result, testFileName + "_" + nextFileIndex.getAndIncrement(), monitoringLogs, data + "\n" + testCase.getDescription());
 
 			if(result.getStatus() == TestStatus.ERRORED)
@@ -333,6 +361,7 @@ public class TestSuiteExecutor
 		if(curTestCaseResult != null)
 		{
 			logger.warn("Skipping actual test case execution as the dependencies execution was not successful. [Test suite: {}, Test Case: {}]", testSuite.getName(), testCase.getName());
+			return curTestCaseResult;
 		}
 	
 		fullExecutionDetails.startedTestCase(testCase.getName());
@@ -354,7 +383,7 @@ public class TestSuiteExecutor
 			}
 			
 			List<TestCaseResult> testCaseDataResults = new ArrayList<>();
-			TestCaseResult testCaseResult = executeTestCase(context, testCaseDataResults, testCase, testFileName);
+			TestCaseResult testCaseResult = executeTestCase(context, testCaseDataResults, testCase, testFileName, testSuite);
 			
 			//Accumulated result (Accumulated of data-provider results) should not be persisted directly.
 			if(!testCaseResult.isAccumlatedResult())

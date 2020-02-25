@@ -13,4 +13,10 @@ public interface IMessageCallback
 	 * @param confirmation confirmation mssg received from server.
 	 */
 	public void onProcess(MessageConfirmation confirmation);
+	
+	/**
+	 * Invoked when child process gets terminated abruptly.
+	 */
+	public default void terminated()
+	{}
 }

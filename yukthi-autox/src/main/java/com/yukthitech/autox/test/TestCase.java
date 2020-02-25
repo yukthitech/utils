@@ -117,6 +117,11 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	 * Attributes which are set at test case level.
 	 */
 	private Map<String, Object> attributes = new HashMap<>();
+	
+	/**
+	 * File in which this test case is defined.
+	 */
+	private File file;
 
 	/**
 	 * Instantiates a new test case.
@@ -132,6 +137,11 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	public TestCase(String name)
 	{
 		this.name = name;
+	}
+	
+	public void setFile(File file)
+	{
+		this.file = file;
 	}
 	
 	/**
@@ -465,20 +475,18 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 		
 		try
 		{
-			TestSuite activeTestSuite = context.getActiveTestSuite();
 			InteractiveExecutionController executionController = (context.getInteractiveEnvironmentContext() == null) ? null : context.getInteractiveEnvironmentContext().getExecutionController();
-			File testSuiteFile = (activeTestSuite != null) ? activeTestSuite.getFile() : null; 
 			
 			// execute the steps involved
 			for(IStep step : steps)
 			{
-				if(executionController != null && testSuiteFile != null && step.getLineNumber() >= 0)
+				if(executionController != null && file != null && step.getLineNumber() >= 0)
 				{
-					InteractiveExecutionController.Action action = executionController.getAction(testSuiteFile, step.getLineNumber());
+					InteractiveExecutionController.Action action = executionController.getAction(file, step.getLineNumber());
 					
 					if(action == InteractiveExecutionController.Action.STOP_EXECUTION)
 					{
-						logger.debug("Because of stop point at {}#{} stopping the execution", testSuiteFile.getName(), step.getLineNumber());
+						logger.debug("Because of stop point at {}#{} stopping the execution", file.getName(), step.getLineNumber());
 						return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 					}
 				}

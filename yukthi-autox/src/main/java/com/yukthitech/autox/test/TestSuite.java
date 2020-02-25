@@ -62,6 +62,16 @@ public class TestSuite implements Validateable
 	 */
 	private Map<String, Object> attributes = new HashMap<>();
 	
+	/**
+	 * Setup to be executed after every test case.
+	 */
+	private Setup beforeTestCase;
+	
+	/**
+	 * Cleanup to be executed after every test case.
+	 */
+	private Cleanup afterTestCase;
+	
 	public TestSuite()
 	{}
 	
@@ -318,6 +328,26 @@ public class TestSuite implements Validateable
 	public Map<String, Object> getAttributes()
 	{
 		return attributes;
+	}
+	
+	public Setup getBeforeTestCase()
+	{
+		return beforeTestCase;
+	}
+
+	public void setBeforeTestCase(Setup beforeTestCase)
+	{
+		this.beforeTestCase = beforeTestCase;
+	}
+
+	public Cleanup getAfterTestCase()
+	{
+		return afterTestCase;
+	}
+
+	public void setAfterTestCase(Cleanup afterTestCase)
+	{
+		this.afterTestCase = afterTestCase;
 	}
 
 	/* (non-Javadoc)

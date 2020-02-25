@@ -402,7 +402,7 @@ public class DefaultExpressionParsers
 				
 				for(String part : parts)
 				{
-					resultLst.add( ConvertUtils.convert(part, elemType) );
+					resultLst.add( ConvertUtils.convert(part.trim(), elemType) );
 				}
 				
 				return resultLst;

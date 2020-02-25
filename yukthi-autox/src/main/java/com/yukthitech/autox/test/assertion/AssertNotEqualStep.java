@@ -53,30 +53,14 @@ public class AssertNotEqualStep extends AbstractValidation
 		this.actual = actual;
 	}
 
-	/**
-	 * Gets the type.
-	 *
-	 * @param val the val
-	 * @return the type
-	 */
-	private Class<?> getType(Object val)
-	{
-		if(val == null)
-		{
-			return null;
-		}
-		
-		return val.getClass();
-	}
-
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Comparing values for NON equlity. [Expected: {} [{}], Actual: {} [{}]]", 
-				expected, getType(expected),  
-				actual, getType(actual));
+				expected, AssertEqualsStep.getType(expected),  
+				actual, AssertEqualsStep.getType(actual));
 
 		boolean res = !Objects.equal(actual, expected);
 		exeLogger.debug("Result is {}", res);

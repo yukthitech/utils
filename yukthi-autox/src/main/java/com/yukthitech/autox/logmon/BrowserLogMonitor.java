@@ -17,6 +17,8 @@ import org.openqa.selenium.logging.Logs;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.test.TestCaseResult;
+import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -97,14 +99,18 @@ public class BrowserLogMonitor extends AbstractLogMonitor implements Validateabl
 	}
 
 	@Override
-	public List<LogFile> stopMonitoring(AutomationContext context)
+	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
 	{
+		if(super.isOnErrorOnly() && testCaseResult.getStatus() != TestStatus.ERRORED)
+		{
+			return null;
+		}
+		
 		if(currentLogs == null)
 		{
 			logger.warn("As current logs object is not available for webdriver, no log file is being generated.");
 			return null;
 		}
-		
 		
 		File tempFile = null;
 		

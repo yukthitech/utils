@@ -14,7 +14,18 @@ public abstract class AbstractLogMonitor implements ILogMonitor, Validateable
 	 * Name of the log monitor.
 	 */
 	private String name;
+	
+	/**
+	 * If this flag is set, then only on error, the log will be fetched and added to report.
+	 * Defaults to true.
+	 */
+	private boolean onErrorOnly = true;
 
+	/**
+	 * Gets the name of the log monitor.
+	 *
+	 * @return the name of the log monitor
+	 */
 	/* (non-Javadoc)
 	 * @see com.yukthitech.automation.logmon.ILogMonitor#getName()
 	 */
@@ -34,6 +45,31 @@ public abstract class AbstractLogMonitor implements ILogMonitor, Validateable
 		this.name = name;
 	}
 	
+	/**
+	 * Checks if is if this flag is set, then only on error, the log will be fetched and added to report. Defaults to true.
+	 *
+	 * @return the if this flag is set, then only on error, the log will be fetched and added to report
+	 */
+	public boolean isOnErrorOnly()
+	{
+		return onErrorOnly;
+	}
+
+	/**
+	 * Sets the if this flag is set, then only on error, the log will be fetched and added to report. Defaults to true.
+	 *
+	 * @param onErrorOnly the new if this flag is set, then only on error, the log will be fetched and added to report
+	 */
+	public void setOnErrorOnly(boolean onErrorOnly)
+	{
+		this.onErrorOnly = onErrorOnly;
+	}
+
+	/**
+	 * Validate.
+	 *
+	 * @throws ValidateException the validate exception
+	 */
 	@Override
 	public void validate() throws ValidateException
 	{

@@ -11,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.test.TestCaseResult;
+import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -59,8 +61,13 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 	}
 
 	@Override
-	public List<LogFile> stopMonitoring(AutomationContext context)
+	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
 	{
+		if(super.isOnErrorOnly() && testCaseResult.getStatus() != TestStatus.ERRORED)
+		{
+			return null;
+		}
+		
 		File file = new File(path);
 		
 		if(!file.exists() || !file.isFile())

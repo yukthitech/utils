@@ -17,6 +17,8 @@ import org.apache.logging.log4j.Logger;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpProgressMonitor;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.test.TestCaseResult;
+import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.ssh.steps.RemoteSession;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -126,6 +128,12 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			{
 				Matcher matcher = REMOTE_FILE_PATTERN.matcher(remotePath);
 				
+				if(!matcher.matches())
+				{
+					logger.error("Invalid remote file path specified. It should be of pattern '/remoteFilePath@host:port'. Ignoring errored file path: {}", remotePath);
+					continue;
+				}
+				
 				RemoteSessionWithPosition remoteSession = new RemoteSessionWithPosition(matcher.group("host"), Integer.parseInt(matcher.group("port")), user, password, privateKeyPath);
 				String remoteFilePath = matcher.group("path");
 				ChannelSftp sftp = remoteSession.getChannelSftp();
@@ -155,8 +163,13 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 * @see com.yukthitech.autox.logmon.ILogMonitor#stopMonitoring()
 	 */
 	@Override
-	public List<LogFile> stopMonitoring(AutomationContext context)
+	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
 	{
+		if(super.isOnErrorOnly() && testCaseResult.getStatus() != TestStatus.ERRORED)
+		{
+			return null;
+		}
+		
 		List<LogFile> logFiles = new ArrayList<>(pathToSession.size());
 		
 		for(String remotePath : pathToSession.keySet())
@@ -296,6 +309,16 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 		if(StringUtils.isBlank(password) && StringUtils.isBlank(privateKeyPath))
 		{
 			throw new ValidateException("Either of password or private-key-path is mandatory.");
+		}
+		
+		if(StringUtils.isNotBlank(privateKeyPath))
+		{
+			File keyFile = new File(privateKeyPath);
+			
+			if(!keyFile.exists())
+			{
+				throw new ValidateException("Specified private key file does not exist: " + privateKeyPath);
+			}
 		}
 	}
 }

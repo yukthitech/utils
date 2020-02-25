@@ -246,7 +246,7 @@ public class ActionPlanExecutor
 		}
 		
 		//stop monitoring logs
-		Map<String, File> monitoringLogs = context.stopLogMonitoring();
+		Map<String, File> monitoringLogs = context.stopLogMonitoring(testCaseResult);
 
 		reportGenerator.createLogFiles(context, testCaseResult, "action-plan", monitoringLogs, "Action output");
 

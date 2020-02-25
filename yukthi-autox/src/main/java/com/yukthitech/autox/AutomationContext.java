@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +33,7 @@ import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
+import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
@@ -687,7 +689,7 @@ public class AutomationContext
 	 * Stops the log monitors and collects the log files generated.
 	 * @return Collected log files
 	 */
-	public synchronized Map<String, File> stopLogMonitoring()
+	public synchronized Map<String, File> stopLogMonitoring(TestCaseResult testCaseResult)
 	{
 		if(logMonitors == null)
 		{
@@ -698,9 +700,9 @@ public class AutomationContext
 		
 		for(Map.Entry<String, ILogMonitor> entry : this.logMonitors.entrySet())
 		{
-			List<LogFile> monitorLogFiles = entry.getValue().stopMonitoring(this);
+			List<LogFile> monitorLogFiles = entry.getValue().stopMonitoring(this, testCaseResult);
 			
-			if(monitorLogFiles == null)
+			if(CollectionUtils.isEmpty(monitorLogFiles))
 			{
 				continue;
 			}

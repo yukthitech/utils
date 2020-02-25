@@ -8,9 +8,11 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -322,6 +324,28 @@ public class MonitorClient
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while sending data to server.", ex);
+		}
+	}
+	
+	/**
+	 * Called when process is terminated.
+	 */
+	public void processTerminated()
+	{
+		callbackLock.lock();
+		
+		try
+		{
+			Set<String> callbackIds = new HashSet<>(idToCallback.keySet());
+			
+			for(String id : callbackIds)
+			{
+				IMessageCallback callback = idToCallback.remove(id);
+				callback.terminated();
+			}
+		}finally
+		{
+			callbackLock.unlock();
 		}
 	}
 	
