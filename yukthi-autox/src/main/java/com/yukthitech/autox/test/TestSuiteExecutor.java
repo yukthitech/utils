@@ -120,7 +120,7 @@ public class TestSuiteExecutor
 			{
 				if(testSuite.getBeforeTestCase() != null)
 				{
-					if(!executeSetup("before-test-case", Arrays.asList(testSuite.getBeforeTestCase())))
+					if(!executeSetup("before-test-case", Arrays.asList(testSuite.getBeforeTestCase()), exeLogger))
 					{
 						result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
 					}
@@ -141,7 +141,7 @@ public class TestSuiteExecutor
 				{
 					try
 					{
-						if(!executeCleanup("after-test-case", Arrays.asList(testSuite.getAfterTestCase())))
+						if(!executeCleanup("after-test-case", Arrays.asList(testSuite.getAfterTestCase()), exeLogger))
 						{
 							result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
 						}
@@ -326,7 +326,7 @@ public class TestSuiteExecutor
 		// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
 		if(!currentTestSuiteResults.isSetupSuccessful())
 		{
-			if( !executeSetup(testSuite.getName(), testSuite.getSetups()) )
+			if( !executeSetup(testSuite.getName(), testSuite.getSetups(), null) )
 			{
 				TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
 				results.setSetupSuccessful(false);
@@ -476,7 +476,7 @@ public class TestSuiteExecutor
 			// Note: setup will be executed only if atleast one test case is executed in current test suite
 			if(currentTestSuiteResults.isSetupSuccessful())
 			{
-				if( !executeCleanup(testSuite.getName(), testSuite.getCleanups()) )
+				if( !executeCleanup(testSuite.getName(), testSuite.getCleanups(), null) )
 				{
 					currentTestSuiteResults.setCleanupSuccessful(false);
 					fullExecutionDetails.testSuiteFailed(testSuite, "Cleanup execution failed.");
@@ -516,7 +516,7 @@ public class TestSuiteExecutor
 	/**
 	 * Executes the setup steps.
 	 */
-	private boolean executeSetup(String prefix, List<Setup> setups)
+	private boolean executeSetup(String prefix, List<Setup> setups, ExecutionLogger exeLogger)
 	{
 		if(CollectionUtils.isEmpty(setups))
 		{
@@ -530,8 +530,17 @@ public class TestSuiteExecutor
 			{
 				logger.debug("Executing {} setup steps specified at location: {}", prefix, setup.getLocation());
 				
-				TestCaseResult testCaseResult = setup.execute(context);
-				reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");
+				TestCaseResult testCaseResult = null;
+						
+				if(exeLogger == null)
+				{
+					testCaseResult = setup.execute(context);
+					reportGenerator.createLogFiles(context, testCaseResult, prefix + "-setup", null, "");
+				}
+				else
+				{
+					testCaseResult = setup.execute(context, exeLogger);
+				}
 				
 				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
 				{
@@ -550,7 +559,7 @@ public class TestSuiteExecutor
 	/**
 	 * Executes the cleanup steps.
 	 */
-	private boolean executeCleanup(String prefix, List<Cleanup> cleanups)
+	private boolean executeCleanup(String prefix, List<Cleanup> cleanups, ExecutionLogger exeLogger)
 	{
 		if(context.getInteractiveEnvironmentContext() != null)
 		{
@@ -570,8 +579,17 @@ public class TestSuiteExecutor
 		{
 			for(Cleanup cleanup : cleanups)
 			{
-				TestCaseResult testCaseResult = cleanup.execute(context);
-				reportGenerator.createLogFiles(context, testCaseResult, prefix + "-cleanup", null, "");
+				TestCaseResult testCaseResult = null;
+				
+				if(exeLogger == null)
+				{
+					testCaseResult = cleanup.execute(context);
+					reportGenerator.createLogFiles(context, testCaseResult, prefix + "-cleanup", null, "");
+				}
+				else
+				{
+					testCaseResult = cleanup.execute(context, exeLogger);
+				}
 				
 				if(testCaseResult.getStatus() != TestStatus.SUCCESSFUL)
 				{
@@ -603,7 +621,7 @@ public class TestSuiteExecutor
 			return true;
 		}
 		
-		return executeSetup("_global", Arrays.asList(testSuiteGroup.getSetup()));
+		return executeSetup("_global", Arrays.asList(testSuiteGroup.getSetup()), null);
 	}
 
 	/**
@@ -665,7 +683,7 @@ public class TestSuiteExecutor
 			}
 		}
 		
-		if( testSuiteGroup.getCleanup() != null && !executeCleanup("_global", Arrays.asList(testSuiteGroup.getCleanup())) )
+		if( testSuiteGroup.getCleanup() != null && !executeCleanup("_global", Arrays.asList(testSuiteGroup.getCleanup()), null) )
 		{
 			logger.error("Global cleanup failed.");
 			fullExecutionDetails.setCleanupSuccessful(false);
