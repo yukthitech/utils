@@ -170,7 +170,7 @@ public class ReportGenerator
 		Properties props = new Properties();
 		props.put("mail.smtp.host", notificationConfig.getSmptpHost()); // SMTP
 																		// Host
-		props.put("mail.smtp.port", "" + notificationConfig.getSmptpHost()); // TLS
+		props.put("mail.smtp.port", "" + notificationConfig.getSmptpPort()); // TLS
 																				// Port
 		props.put("mail.smtp.auth", "" + notificationConfig.isAuthEnabled()); // enable
 																				// authentication
