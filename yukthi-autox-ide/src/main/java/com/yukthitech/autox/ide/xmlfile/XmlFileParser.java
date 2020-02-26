@@ -1,6 +1,5 @@
 package com.yukthitech.autox.ide.xmlfile;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.ide.FileParseCollector;
@@ -475,16 +473,5 @@ public class XmlFileParser
 		XmlFileParser parser = new XmlFileParser(content, collector);
 		Element rootElement = parser.parseElement();
 		return new XmlFile(rootElement);
-	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		String content = FileUtils.readFileToString(new File("./dml-test-suite.xml"));
-		XmlFile xmlFile = XmlFileParser.parse(content, new FileParseCollector());
-		
-		StringBuilder builder = new StringBuilder();
-		xmlFile.getRootElement().toText("", builder);
-		
-		System.out.println(builder);
 	}
 }

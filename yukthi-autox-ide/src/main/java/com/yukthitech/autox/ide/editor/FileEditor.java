@@ -33,6 +33,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
+import org.fife.ui.rsyntaxtextarea.LinkGenerator;
+import org.fife.ui.rsyntaxtextarea.LinkGeneratorResult;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
 import org.fife.ui.rsyntaxtextarea.SquiggleUnderlineHighlightPainter;
@@ -273,6 +275,19 @@ public class FileEditor extends JPanel
 				
 				logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
 			}
+			
+			syntaxTextArea.setHyperlinksEnabled(true);
+			syntaxTextArea.setLinkGenerator(new LinkGenerator(){
+
+				@Override
+				public LinkGeneratorResult isLinkAtOffset(RSyntaxTextArea textArea, int offs)
+				{
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+			});
+
 		}
 
 		setSyntaxStyle();
@@ -467,7 +482,7 @@ public class FileEditor extends JPanel
 			clearAllMessages();
 		}
 		
-		FileParseCollector collector = new FileParseCollector();
+		FileParseCollector collector = new FileParseCollector(project, file);
 		parsedFileContent = currentFileManager.parseContent(project, file.getName(), syntaxTextArea.getText(), collector);
 		
 		collector.getMessages().stream().forEach(mssg -> this.addMessage(mssg));

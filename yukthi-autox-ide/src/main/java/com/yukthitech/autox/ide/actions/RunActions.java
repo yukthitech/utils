@@ -96,6 +96,11 @@ public class RunActions
 	
 	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
 	{
+		executeStepCode(code, project, envCallback, null);
+	}
+	
+	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback, String callbackMssg)
+	{
 		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
 		
 		if(interactiveEnv == null)
@@ -130,6 +135,11 @@ public class RunActions
 						
 						if(envCallback != null)
 						{
+							if(callbackMssg != null)
+							{
+								inProgressDialog.setSubmessage(callbackMssg);
+							}
+							
 							envCallback.accept(newInteractiveEnv);
 						}
 					}
@@ -208,6 +218,7 @@ public class RunActions
 		{
 			logger.debug("Sending command to execute test case '{}' till line number: {}", testCaseName, stepLineNo);
 			ObjectWrapper<Boolean> testCaseExecuted = new ObjectWrapper<>(false);
+			ObjectWrapper<Boolean> isTerminated = new ObjectWrapper<>(false);
 			
 			env.sendDataToServer(new InteractiveTestCaseExecDetails(testCaseName, fileEditor.getFile().getPath(), stepLineNo), new IMessageCallback()
 			{
@@ -216,6 +227,14 @@ public class RunActions
 				{
 					logger.debug("Interactive environment testcase execution is completed. Environment is ready to use...");
 					testCaseExecuted.setValue(true);
+				}
+				
+				@Override
+				public void terminated()
+				{
+					logger.debug("Interactive environment terminated abruptly");
+					testCaseExecuted.setValue(true);
+					isTerminated.setValue(true);
 				}
 			});
 			
@@ -230,8 +249,11 @@ public class RunActions
 				{}
 			}
 			
-			logger.debug("Test case execution completed. Environment is ready to interact...");
-		});
+			if(isTerminated.getValue())
+			{
+				logger.debug("Test case execution completed. Environment is ready to interact...");
+			}
+		}, String.format("Executing test case '%s' till line number: %s", testCaseName, stepLineNo));
 	}
 	
 	@Action

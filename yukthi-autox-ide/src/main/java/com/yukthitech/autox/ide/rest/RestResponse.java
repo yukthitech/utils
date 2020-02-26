@@ -1,10 +1,8 @@
 package com.yukthitech.autox.ide.rest;
 
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
@@ -14,32 +12,19 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
-import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
-import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
-import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
-import com.yukthitech.utils.rest.RestResult;
 
 @Component
 public class RestResponse extends JPanel
@@ -109,6 +94,7 @@ public class RestResponse extends JPanel
 		responsePopup = uiLayout.getPopupMenu("restResponsePopup").toPopupMenu(actionCollection);
 //		textArea.setPopupMenu(responsePopup);
 
+		/*
 		ideContext.addContextListener(new IContextListener()
 		{
 			@Override
@@ -187,7 +173,7 @@ public class RestResponse extends JPanel
 				return root;
 			}
 		});
-
+	*/
 	}
 
 //	private RSyntaxTextArea getTextArea()

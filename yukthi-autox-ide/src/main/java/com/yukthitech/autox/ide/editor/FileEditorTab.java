@@ -153,7 +153,7 @@ public class FileEditorTab extends MaximizableTabbedPaneTab
 	
 	private void parseFile()
 	{
-		FileParseCollector collector = new FileParseCollector();
+		FileParseCollector collector = new FileParseCollector(project, file);
 		ideFileManager.parseFile(project, file, collector);
 		
 		super.setErrored(collector.getErrorCount() > 0);

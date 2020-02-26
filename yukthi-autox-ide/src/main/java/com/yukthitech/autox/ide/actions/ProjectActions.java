@@ -38,7 +38,7 @@ public class ProjectActions
 
 	private NewProjectDialog newProjDialog;
 
-	private ProjectPropertiesDialog projtPropertiesDialog;
+	private ProjectPropertiesDialog projPropertiesDialog;
 	
 	private DeleteProjectDialog deleteProjectDialog;
 
@@ -122,26 +122,26 @@ public class ProjectActions
 	@Action
 	public void refreshProject()
 	{
-		BaseTreeNode node = projectExplorer.reloadActiveNode();
+		BaseTreeNode node = projectExplorer.getActiveNode();
 		
-		if(!(node instanceof ProjectTreeNode))
+		if(node instanceof ProjectTreeNode)
 		{
-			return;
+			ProjectTreeNode projNode = (ProjectTreeNode) node;
+			projNode.getProject().reset();
 		}
-		
-		ProjectTreeNode projNode = (ProjectTreeNode) node;
-		projNode.getProject().reset();
+
+		projectExplorer.reloadActiveNode();
 	}
 
 	@Action
 	public void projectProperties()
 	{
-		if(projtPropertiesDialog == null)
+		if(projPropertiesDialog == null)
 		{
-			projtPropertiesDialog = new ProjectPropertiesDialog(IdeUtils.getCurrentWindow());
-			IdeUtils.autowireBean(applicationContext, projtPropertiesDialog);
+			projPropertiesDialog = new ProjectPropertiesDialog(IdeUtils.getCurrentWindow());
+			IdeUtils.autowireBean(applicationContext, projPropertiesDialog);
 		}
 
-		projtPropertiesDialog.display(ideContext);
+		projPropertiesDialog.display(ideContext);
 	}
 }

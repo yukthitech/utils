@@ -222,5 +222,37 @@
 	</table>
 	
 	<br/><br/><br/>
+	<!-- ****************************************************************** -->
+	<h1>Special cases</h1>
+
+	<p>
+		In jxpath in a map, value of a key can :
+	</p>
+	<br />
+	
+	<table>
+		<tbody>
+			<tr>
+				<th style="width: 40%">Use Case</th>
+				<th>Description</th>
+				<th>Solution</th>
+			</tr>
+			
+			<tr>
+				<td>
+					Accessing bean property "name" in attribute conditions like [@name='xyz'] will not work
+				</td>
+				<td>
+					@name in jxpath is used to specify a key to access an element in a map. Eg:<br/>
+					&nbsp;&nbsp;&nbsp;&nbsp;<b>map[@name='key1']</b> will access map-element with key "key1"<br><br>
+				</td>
+				<td>
+					In order to access "name" property of a bean, use ./name instead of @name, as shown below
+					&nbsp;&nbsp;&nbsp;&nbsp;<b>/attr/workflowSteps/steps[./name='Step1']</b>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<br/><br/><br/>
 </body>
 </html>

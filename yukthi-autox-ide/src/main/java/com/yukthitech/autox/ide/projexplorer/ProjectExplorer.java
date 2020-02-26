@@ -674,7 +674,7 @@ public class ProjectExplorer extends JPanel
 		{
 			logger.debug("Parsing and loading file: {}", file.getPath());
 			
-			FileParseCollector collector = new FileParseCollector();
+			FileParseCollector collector = new FileParseCollector(fileNode.getProject(), file);
 		
 			try
 			{

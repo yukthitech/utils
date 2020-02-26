@@ -612,7 +612,8 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 	
 	private List<Completion> getCurLocationCompletions()
 	{
-		xmlFileLocation.getXmlFile().getRootElement().populateTestFileTypes(project, new FileParseCollector());
+		//TODO: Content reparsing is required only when content is changed
+		xmlFileLocation.getXmlFile().getRootElement().populateTestFileTypes(project, new FileParseCollector(project, fileEditor.getFile()));
 		
 		switch(xmlFileLocation.getType())
 		{

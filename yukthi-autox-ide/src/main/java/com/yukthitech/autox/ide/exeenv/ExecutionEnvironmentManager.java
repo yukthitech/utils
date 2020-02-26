@@ -70,6 +70,7 @@ public class ExecutionEnvironmentManager
 		File reportFolder = new File(project.getBaseFolderPath(), outputDir);
 		
 		int monitorPort = fetchNextAvailablePort();
+		//Eg: -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
 		String debugArg = System.getProperty("autox.debug.enabled");
 		
 		//if debug args are not specified, use dummy args

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -324,8 +325,133 @@ public class Element implements INode
 		return null;
 	}
 	
-	public Element getElementWithName(String withName)
+	/**
+	 * Fetches all attributes and child text nodes in a map.
+	 * @return
+	 */
+	public Map<String, List<ValueWithLocation>> getTextChildValueMap()
 	{
+		Map<String, List<ValueWithLocation>> resMap = new HashMap<>();
+		
+		BiConsumer<String, Object> addToMap = new BiConsumer<String, Object>()
+		{
+			@Override
+			public void accept(String name, Object valueParent)
+			{
+				List<ValueWithLocation> valLst = resMap.get(name);
+				
+				if(valLst == null)
+				{
+					valLst = new ArrayList<>();
+					resMap.put(name, valLst);
+				}
+				
+				String value = null;
+				LocationRange loc = null;
+				LocationRange nameLoc = null;
+				
+				if(valueParent instanceof Attribute)
+				{
+					value = ((Attribute) valueParent).getValue();
+					loc = ((Attribute) valueParent).getValueLocation();
+					nameLoc = ((Attribute) valueParent).getNameLocation();
+				}
+				else
+				{
+					TextNode textNode = (TextNode) ((Element) valueParent).nodes.get(0); 
+					value =  textNode.getContent();
+					loc = textNode.getLocation();
+					nameLoc = ((Element) valueParent).getStartLocation();
+				}
+				
+				valLst.add(new ValueWithLocation(value, nameLoc, loc));
+			}
+		};
+		
+		attributes.entrySet()
+			.stream()
+			//skip reserved attributes
+			.filter(entry -> !AutomationUtils.isReserveNamespace(entry.getValue().getNamespace()) )
+			.forEach( entry -> addToMap.accept(entry.getKey(), entry.getValue()));
+
+		this.nodes
+			.stream()
+			//skip non-element nodes
+			.filter(node -> (node instanceof Element))
+			//type cast
+			.map(node -> (Element) node)
+			//filter only nodes which has single text node as child
+			.filter(elem -> elem.nodes.size() == 1 && (elem.nodes.get(0) instanceof TextNode))
+			.forEach( elem -> addToMap.accept(elem.getNormalizedName(), elem));
+
+		return resMap;
+	}
+	
+	/**
+	 * Fetches values for all specified names (both from attributes and from sub-elements).
+	 * @param names
+	 * @return
+	 */
+	public Map<String, String> getChildValues(Set<String> names)
+	{
+		Map<String, String> valueMap = new HashMap<>();
+		
+		for(String name : names)
+		{
+			Attribute attr = attributes.get(name);
+			
+			if(attr != null)
+			{
+				valueMap.put(name, attr.getValue());
+				continue;
+			}
+		}
+		
+		//if all names are found in attr, simply return
+		if(valueMap.size() == names.size())
+		{
+			return valueMap;
+		}
+
+		for(INode node : this.nodes)
+		{
+			if(!(node instanceof Element))
+			{
+				continue;
+			}
+			
+			Element elem = (Element) node;
+			String elemName = elem.getNormalizedName();
+			
+			if(!names.contains(elemName))
+			{
+				continue;
+			}
+			
+			if(elem.nodes.size() == 1 && (elem.nodes.get(0) instanceof TextNode))
+			{
+				valueMap.put(elemName, ((TextNode) elem.nodes.get(0)).getContent() );
+
+				//if all names are found, simply return
+				if(valueMap.size() == names.size())
+				{
+					return valueMap;
+				}
+			}
+		}
+		
+		return valueMap;
+	}
+	
+	/**
+	 * Fetches child elements with specified name and ensures only 'limit' number of elements are fetched to max.
+	 * @param withName
+	 * @param limit
+	 * @return
+	 */
+	private List<Element> getElementsWithName(String withName, int limit)
+	{
+		List<Element> resLst = new ArrayList<>();
 		String elemName = withName.toLowerCase().replaceAll("\\W+", "");
 		
 		for(INode node : this.nodes)
@@ -339,11 +465,43 @@ public class Element implements INode
 
 			if(elemName.equals(elem.getNormalizedName()))
 			{
-				return elem;
+				resLst.add(elem);
+				
+				if(resLst.size() >= limit)
+				{
+					break;
+				}
 			}
 		}
 		
-		return null;
+		return resLst;
+	}
+	
+	/**
+	 * Fetches all elements with specified name.
+	 * @param withName
+	 * @return
+	 */
+	public List<Element> getElementsWithName(String withName)
+	{
+		return getElementsWithName(withName, Integer.MAX_VALUE);
+	}
+	
+	/**
+	 * Fetches first child element with specified name.
+	 * @param withName
+	 * @return
+	 */
+	public Element getElementWithName(String withName)
+	{
+		List<Element> elements = getElementsWithName(withName, 1);
+		
+		if(elements.isEmpty())
+		{
+			return null;
+		}
+		
+		return elements.get(0);
 	}
 
 	public Element getLastElement(int offset)
@@ -520,6 +678,8 @@ public class Element implements INode
 		{
 			this.elementType = null;
 			this.functionCall = new FunctionCall(name);
+			
+			collector.addFunctionRef(this);
 		}
 		else if(AutomationUtils.isReserveNamespace(namespace))
 		{
@@ -632,75 +792,83 @@ public class Element implements INode
 	
 	private void populateChildren(Project project, FileParseCollector collector)
 	{
-		for(INode node : this.nodes)
-		{
-			if(!(node instanceof Element))
-			{
-				continue;
-			}
-			
-			Element selem = (Element) node;
-			selem.populateTypes(elementType, project, collector, true);
-		}
+		collector.elementStarted(this);
 		
-		BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
-
-		for(Attribute attr : this.attributes.values())
+		try
 		{
-			if(AutomationUtils.isReserveNamespace(attr.getNamespace()))
+			for(INode node : this.nodes)
 			{
-				continue;
-			}
-			
-			BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(attr.getName());
-			
-			if(propInfo == null && attr.getName().contains("-"))
-			{
-				propInfo =  beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(IdeUtils.removeHyphens(attr.getName()));
-			}
-			
-			if(propInfo == null)
-			{
-				//if this id based node ignore it
-				if(this.beanProperty != null && this.beanProperty.isKeyProperty())
+				if(!(node instanceof Element))
 				{
 					continue;
 				}
 				
-				//if step info is present and it is of key based, ignore missing attribute prop
-				if(this.stepInfo != null && (this.stepInfo instanceof ElementInfo))
+				Element selem = (Element) node;
+				selem.populateTypes(elementType, project, collector, true);
+			}
+			
+			BeanPropertyInfoFactory beanInfoFactory = project.getBeanPropertyInfoFactory();
+	
+			for(Attribute attr : this.attributes.values())
+			{
+				if(AutomationUtils.isReserveNamespace(attr.getNamespace()))
 				{
-					ElementInfo elemInfo = (ElementInfo) this.stepInfo;
-					
-					if(StringUtils.isNotBlank(elemInfo.getKeyName()))
+					continue;
+				}
+				
+				BeanProperty propInfo = beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(attr.getName());
+				
+				if(propInfo == null && attr.getName().contains("-"))
+				{
+					propInfo =  beanInfoFactory.getBeanPropertyInfo(elementType).getProperty(IdeUtils.removeHyphens(attr.getName()));
+				}
+				
+				if(propInfo == null)
+				{
+					//if this id based node ignore it
+					if(this.beanProperty != null && this.beanProperty.isKeyProperty())
 					{
 						continue;
 					}
+					
+					//if step info is present and it is of key based, ignore missing attribute prop
+					if(this.stepInfo != null && (this.stepInfo instanceof ElementInfo))
+					{
+						ElementInfo elemInfo = (ElementInfo) this.stepInfo;
+						
+						if(StringUtils.isNotBlank(elemInfo.getKeyName()))
+						{
+							continue;
+						}
+					}
+					
+					collector.addMessage(
+							new FileParseMessage(
+									MessageType.ERROR, 
+									String.format("No matching property found for attribute '%s' under bean-type: %s'", attr.getName(), elementType.getName()), 
+									startLocation.getStartLineNumber(),
+									attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
+									)
+							);
+					continue;
 				}
 				
-				collector.addMessage(
-						new FileParseMessage(
-								MessageType.ERROR, 
-								String.format("No matching property found for attribute '%s' under bean-type: %s'", attr.getName(), elementType.getName()), 
+				if(propInfo.getWriteMethod() == null)
+				{
+					collector.addMessage(new FileParseMessage(
+								MessageType.ERROR, "No writeable property found for attribute with name: " + attr.getName(), 
 								startLocation.getStartLineNumber(),
 								attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
 								)
-						);
-				continue;
+							);
+					continue;
+				}
+				
+				attr.setAttributeType(propInfo.getType());
 			}
-			
-			if(propInfo.getWriteMethod() == null)
-			{
-				collector.addMessage(new FileParseMessage(
-							MessageType.ERROR, "No writeable property found for attribute with name: " + attr.getName(), 
-							startLocation.getStartLineNumber(),
-							attr.getNameLocation().getStartOffset(), attr.getValueLocation().getEndOffset()
-							)
-						);
-				continue;
-			}
-			
-			attr.setAttributeType(propInfo.getType());
+		}finally
+		{
+			collector.elementEnded(this);
 		}
 	}
 	

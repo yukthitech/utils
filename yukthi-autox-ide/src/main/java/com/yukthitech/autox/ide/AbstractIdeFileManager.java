@@ -53,7 +53,7 @@ public abstract class AbstractIdeFileManager implements IIdeFileManager
 			return parseDetails.result;
 		}
 		
-		FileParseCollector newCollector = new FileParseCollector();
+		FileParseCollector newCollector = new FileParseCollector(project, file);
 		Object result = null;
 		
 		try

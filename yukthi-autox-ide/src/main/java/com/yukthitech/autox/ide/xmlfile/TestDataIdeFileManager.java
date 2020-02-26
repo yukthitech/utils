@@ -98,7 +98,8 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	@Override
 	public String getActiveElement(FileEditor fileEditor, String nodeType)
 	{
-		XmlFile xmlFile = getXmlFile(fileEditor.getFile(), fileEditor.getContent());
+		//TODO: Content reparsing is required only when content is changed
+		XmlFile xmlFile = getXmlFile(fileEditor.getProject(), fileEditor.getFile(), fileEditor.getContent());
 
 		if(xmlFile == null)
 		{
@@ -126,14 +127,14 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	@Override
 	public int getActiveElementLineNumber(FileEditor fileEditor, String nodeType)
 	{
-		XmlFile xmlFile = getXmlFile(fileEditor.getFile(), fileEditor.getContent());
+		XmlFile xmlFile = getXmlFile(fileEditor.getProject(), fileEditor.getFile(), fileEditor.getContent());
 
 		if(xmlFile == null)
 		{
 			return -1;
 		}
 		
-		xmlFile.getRootElement().populateTestFileTypes(fileEditor.getProject(), new FileParseCollector());
+		xmlFile.getRootElement().populateTestFileTypes(fileEditor.getProject(), new FileParseCollector(fileEditor.getProject(), fileEditor.getFile()));
 		
 		int curLineNo = fileEditor.getCurrentLineNumber() + 1;
 		Element curElement = xmlFile.getElement(nodeType, curLineNo);
@@ -151,14 +152,15 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	{
 		String content = fileEditor.getContent();
 		
-		XmlFile xmlFile = getXmlFile(fileEditor.getFile(), fileEditor.getContent());
+		XmlFile xmlFile = getXmlFile(fileEditor.getProject(), fileEditor.getFile(), fileEditor.getContent());
 
 		if(xmlFile == null)
 		{
 			return null;
 		}
 		
-		xmlFile.getRootElement().populateTestFileTypes(fileEditor.getProject(), new FileParseCollector());
+		//TODO: Content reparsing is required only when content is changed
+		xmlFile.getRootElement().populateTestFileTypes(fileEditor.getProject(), new FileParseCollector(fileEditor.getProject(), fileEditor.getFile()));
 
 		int curLineNo = fileEditor.getCurrentLineNumber() + 1;
 		Element curElement = xmlFile.getElement(nodeType, curLineNo);
@@ -171,7 +173,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 		return content.substring(curElement.getStartLocation().getStartOffset(), curElement.getEndLocation().getEndOffset() + 1);
 	}
 
-	private XmlFile getXmlFile(File file, String content)
+	private XmlFile getXmlFile(Project project, File file, String content)
 	{
 		if(!file.getName().toLowerCase().endsWith(".xml"))
 		{
@@ -180,7 +182,7 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 
 		try
 		{
-			XmlFile xmlFile = XmlFile.parse(content, -1, new FileParseCollector());
+			XmlFile xmlFile = XmlFile.parse(content, -1, new FileParseCollector(project, file));
 			return xmlFile;
 		} catch(Exception ex)
 		{
