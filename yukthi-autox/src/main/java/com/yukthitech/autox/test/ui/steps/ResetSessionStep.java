@@ -10,7 +10,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * Resets the driver for usage.
  * @author akiran
  */
-@Executable(name = {"uiResetSession", "resetSession"}, requiredPluginTypes = SeleniumPlugin.class, message = "Resets the driver for usage.")
+@Executable(name = "uiResetSession", requiredPluginTypes = SeleniumPlugin.class, message = "Resets the driver for usage.")
 public class ResetSessionStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

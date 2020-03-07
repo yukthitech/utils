@@ -18,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiSwitchWindow", "switchWindow"}, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching between windows")
+@Executable(name = "uiSwitchWindow", requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching between windows")
 public class SwitchWindow extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

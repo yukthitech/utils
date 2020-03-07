@@ -7,7 +7,6 @@
 			</description>
 		
 			<s:mock-server-start name="testMockServer" port="9944"/>
-		
 			<s:mock-response method="POST" name="testMockServer" responseStatusCode="200" uri="/test/job">
 				<response-header name="Content-Type">application/json</response-header>
 			
@@ -18,7 +17,7 @@
 					}
 				</responseBody>
 			</s:mock-response>
-		
+
 			<s:rest-invoke-post baseUrl="http://localhost:9944" responseContextAttribure="apiResult" uri="/test/job">
 				<body>json:
 					{

@@ -10,7 +10,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * Quits the driver. In order to user driver again it has to be initialized.
  * @author akiran
  */
-@Executable(name = {"uiQuitSession", "quitSession"}, requiredPluginTypes = SeleniumPlugin.class, message = "Quits the driver. In order to user driver again it has to be initialized.")
+@Executable(name = "uiQuitSession", requiredPluginTypes = SeleniumPlugin.class, message = "Quits the driver. In order to user driver again it has to be initialized.")
 public class QuitSessionStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

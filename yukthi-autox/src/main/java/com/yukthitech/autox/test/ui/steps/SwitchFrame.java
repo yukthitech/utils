@@ -16,7 +16,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiSwitchFrame", "switchFrame"}, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching the frames")
+@Executable(name = "uiSwitchFrame", requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching the frames")
 public class SwitchFrame extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

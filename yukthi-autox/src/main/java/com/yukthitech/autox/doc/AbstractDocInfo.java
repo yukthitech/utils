@@ -30,4 +30,14 @@ public class AbstractDocInfo
 	{
 		this.documentation = documentation;
 	}
+
+	public boolean hasReturnInfo()
+	{
+		return false;
+	}
+	
+	public boolean hasParameters()
+	{
+		return false;
+	}
 }

@@ -29,6 +29,11 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 	private String name;
 	
 	/**
+	 * Title of the executable.
+	 */
+	private String title;
+	
+	/**
 	 * Description about the step.
 	 */
 	private String description;
@@ -71,7 +76,7 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 	 */
 	public StepInfo(Class<? extends IStep> stepClass, Executable executablAnnot, List<Example> examples)
 	{
-		setDetails(executablAnnot.name()[0], executablAnnot.message());
+		setDetails(executablAnnot.name(), executablAnnot.message());
 
 		this.javaType = stepClass.getName();
 
@@ -93,6 +98,7 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 		this.name = name;
 		this.description = description;
 		this.nameWithHyphens = name.replaceAll("([A-Z])", "-$1").toLowerCase();
+		this.title = name.replaceAll("([A-Z])", " $1").toLowerCase();
 	}
 
 	protected void loadParams(Class<?> stepClass)
@@ -276,6 +282,16 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 	public boolean hasExamples()
 	{
 		return CollectionUtils.isNotEmpty(examples);
+	}
+	
+	/**
+	 * Gets the title of the executable.
+	 *
+	 * @return the title of the executable
+	 */
+	public String getTitle()
+	{
+		return title;
 	}
 
 	@Override

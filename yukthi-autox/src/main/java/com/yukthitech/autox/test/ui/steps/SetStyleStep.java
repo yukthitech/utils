@@ -21,7 +21,7 @@ import com.yukthitech.autox.test.ui.steps.AbstractUiStep;
  * 
  * @author akiran
  */
-@Executable(name = {"uiSetStyle"}, requiredPluginTypes = SeleniumPlugin.class, message = "Used to manipulate the style of the element.")
+@Executable(name = "uiSetStyle", requiredPluginTypes = SeleniumPlugin.class, message = "Used to manipulate the style of the element.")
 public class SetStyleStep extends AbstractUiStep
 {
 	/** The Constant serialVersionUID. */

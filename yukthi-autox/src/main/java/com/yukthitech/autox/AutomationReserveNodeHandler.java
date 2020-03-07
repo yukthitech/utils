@@ -145,10 +145,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 					continue;
 				}
 
-				for(String name : executable.name())
-				{
-					nameToStepType.put(name, stepType);
-				}
+				nameToStepType.put(executable.name(), stepType);
 			}
 		}
 		

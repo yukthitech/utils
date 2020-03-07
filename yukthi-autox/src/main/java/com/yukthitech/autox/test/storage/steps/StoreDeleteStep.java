@@ -11,7 +11,7 @@ import com.yukthitech.autox.Param;
  * 
  * @author akiran
  */
-@Executable(name = {"storeDelete"}, message = "Deletes value from store for specified key.")
+@Executable(name = "storeDelete", message = "Deletes value from store for specified key.")
 public class StoreDeleteStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

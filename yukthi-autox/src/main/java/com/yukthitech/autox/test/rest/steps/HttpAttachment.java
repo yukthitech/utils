@@ -5,7 +5,6 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.SourceType;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -26,7 +25,7 @@ public class HttpAttachment implements Validateable, Serializable
 	/**
 	 * File of the attachment.
 	 */
-	@Param(name = "file", description = "Resource to be added as attachment", required = true, sourceType = SourceType.RESOURCE)
+	@Param(name = "file", description = "Resource to be added as attachment", required = true)
 	private String file;
 	
 	/**

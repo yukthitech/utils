@@ -12,11 +12,6 @@ public enum SourceType
 	CONDITION,
 
 	/**
-	 * Indicates param is resource.
-	 */
-	RESOURCE,
-	
-	/**
 	 * Indicates param is expression type. And will be processed by framework before
 	 * step execution.
 	 */

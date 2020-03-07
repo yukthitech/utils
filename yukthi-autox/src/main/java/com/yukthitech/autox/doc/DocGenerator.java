@@ -18,7 +18,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
@@ -289,6 +288,43 @@ public class DocGenerator
 		
 		return docs.getDocuments();
 	}
+	
+	private static void copyDocResources(File outFolder, DocInformation docInformation) throws Exception
+	{
+		PathMatchingResourcePatternResolver loader = new PathMatchingResourcePatternResolver();
+		Resource[] resources = loader.getResources("classpath:/docs/**/*.*");
+		int prefixLen = "/docs/".length();
+		
+		for (Resource resource : resources) 
+		{
+			String resPath = resource.getURL().toString();
+			
+			if(resPath.endsWith("/"))
+			{
+				continue;
+			}
+			
+			int idx = resPath.indexOf("/docs/");
+			
+			resPath = resPath.substring(idx + prefixLen);
+			
+			System.out.println("Copying doc resource: " + resPath);
+			
+			File destFile = new File(outFolder, resPath);
+			FileUtils.forceMkdir(destFile.getParentFile());
+			
+			InputStream resIs = resource.getInputStream();
+			FileUtils.copyInputStreamToFile(resIs, destFile);
+			resIs.close();
+
+			if("index.html".equals(destFile.getName()))
+			{
+				String content = FileUtils.readFileToString(destFile);
+				content = FreeMarkerMethodManager.replaceExpressions(resPath, docInformation, content);
+				FileUtils.write(destFile, content);
+			}
+		}		
+	}
 
 	public static void main(String[] args) throws Exception
 	{
@@ -307,19 +343,16 @@ public class DocGenerator
 		//docInformation.setBasicDocuments(loadBasicDocs());
 
 		//convert data into json
-		ObjectMapper objectMapper = new ObjectMapper();
-		String json = objectMapper.writeValueAsString(docInformation);
+		File outFolderFile = new File(outFolder);
 		
-		File apiFolder = new File(outFolder, "api");
-		File dataJsFolder = new File(apiFolder, "js");
+		if(outFolderFile.exists())
+		{
+			FileUtils.deleteDirectory(outFolderFile);
+		}
 		
-		dataJsFolder.mkdirs();
+		FileUtils.forceMkdir(outFolderFile);
+		copyDocResources(outFolderFile, docInformation);
 		
-		File dataJsFile = new File(dataJsFolder, "data.js");
-		File dataJsonFile = new File(dataJsFolder, "data.json");
-		
-		FileUtils.write(dataJsFile, "var docData = " + json + ";", (String) null);
-		FileUtils.write(dataJsonFile, json, (String) null);
 		
 		System.out.println("Files are generate to folder: " + outFolder);
 	}

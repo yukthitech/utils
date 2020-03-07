@@ -5,8 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents the information required to generate documentation.
@@ -253,5 +258,46 @@ public class DocInformation
 	public void addParser(ExpressionParserDoc parser)
 	{
 		this.parsers.put(parser.getName(), parser);
+	}
+	
+	public Set<StepInfo> getStepsWithPlugin(String plugin)
+	{
+		if(StringUtils.isEmpty(plugin))
+		{
+			return steps.values()
+					.stream()
+					.filter(step -> CollectionUtils.isEmpty(step.getRequiredPlugins()))
+					.collect(Collectors.toSet());
+		}
+
+		return steps.values()
+				.stream()
+				.filter(step -> step.getRequiredPlugins().contains(plugin))
+				.collect(Collectors.toSet());
+	}
+	
+	public Set<StepInfo> getValidationsWithPlugin(String plugin)
+	{
+		if(StringUtils.isEmpty(plugin))
+		{
+			return validations.values()
+					.stream()
+					.filter(step -> CollectionUtils.isEmpty(step.getRequiredPlugins()))
+					.collect(Collectors.toSet());
+		}
+
+		return validations.values()
+				.stream()
+				.filter(step -> step.getRequiredPlugins().contains(plugin))
+				.collect(Collectors.toSet());
+	}
+
+	public Set<String> getActivePlugins()
+	{
+		Set<String> pluginNames = new TreeSet<>();
+		steps.values().forEach(step -> pluginNames.addAll(step.getRequiredPlugins()));
+		validations.values().forEach(validator -> pluginNames.addAll(validator.getRequiredPlugins()));
+		
+		return pluginNames;
 	}
 }

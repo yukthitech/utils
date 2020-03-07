@@ -181,7 +181,7 @@ public class CommonFreeMarkerMethods
 			description = "Used to convert specified data into a input stream. Supported parameter types - CharSequence, byte[].",
 			returnDescription = "Converted input stream."
 			)
-	public static InputStream toStream(Object val)
+	public static InputStream toStream(@FmParam(name = "input", description = "Input that needs to be converted to input stream") Object val)
 	{
 		if(val instanceof byte[])
 		{
@@ -200,7 +200,7 @@ public class CommonFreeMarkerMethods
 			description = "Used to convert specified data into a reader. Supported parameter types - CharSequence, byte[].",
 			returnDescription = "Converted input stream."
 			)
-	public static Reader toReader(Object val)
+	public static Reader toReader(@FmParam(name = "input", description = "Input that needs to be converted to reader") Object val)
 	{
 		if(val instanceof byte[])
 		{

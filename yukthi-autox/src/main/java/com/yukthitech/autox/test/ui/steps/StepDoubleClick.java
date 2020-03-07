@@ -16,7 +16,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-@Executable(name = {"uiDblClick", "dblclick"}, requiredPluginTypes = SeleniumPlugin.class, message = "Double Clicks the specified target")
+@Executable(name = "uiDblClick", requiredPluginTypes = SeleniumPlugin.class, message = "Double Clicks the specified target")
 public class StepDoubleClick extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;

@@ -15,7 +15,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * 
  * @author akiran
  */
-@Executable(name = {"uiSyncWindowHandles"}, requiredPluginTypes = SeleniumPlugin.class, message = "Syncs the current open window handles to context. Which can be used to identify ")
+@Executable(name = "uiSyncWindowHandles", requiredPluginTypes = SeleniumPlugin.class, message = "Syncs the current open window handles to context. Which can be used to identify ")
 public class SyncWindowHandles extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

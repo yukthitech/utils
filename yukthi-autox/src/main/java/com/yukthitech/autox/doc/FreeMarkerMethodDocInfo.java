@@ -176,4 +176,10 @@ public class FreeMarkerMethodDocInfo extends AbstractDocInfo
 		parameterString = builder.toString();
 		return parameterString;
 	}
+	
+	@Override
+	public boolean hasReturnInfo()
+	{
+		return true;
+	}
 }

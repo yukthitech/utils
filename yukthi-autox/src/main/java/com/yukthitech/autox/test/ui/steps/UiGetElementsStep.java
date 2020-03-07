@@ -17,7 +17,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = {"uiGetElements"}, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
+@Executable(name = "uiGetElements", requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
 public class UiGetElementsStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

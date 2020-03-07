@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
 public class SqlFreeMarkerFunctions
@@ -24,7 +25,7 @@ public class SqlFreeMarkerFunctions
 			description = "Used to convert specified data into a blob object. Supported parameter types - CharSequence, byte[], Serializable, InputStream.",
 			returnDescription = "Converted blob object."
 			)
-	public static Blob toBlob(Object val) throws SerialException, SQLException, IOException
+	public static Blob toBlob(@FmParam(name = "input", description = "Input that needs to be converted to blob") Object val) throws SerialException, SQLException, IOException
 	{
 		if(val instanceof byte[])
 		{
@@ -56,7 +57,7 @@ public class SqlFreeMarkerFunctions
 			description = "Used to load specified resource as blob object.",
 			returnDescription = "Loaded blob object."
 			)
-	public static Blob resBlob(String res) throws SerialException, SQLException, IOException
+	public static Blob resBlob(@FmParam(name = "res", description = "Resource that needs to be converted to blob") String res) throws SerialException, SQLException, IOException
 	{
 		InputStream is = SqlFreeMarkerFunctions.class.getResourceAsStream(res);
 		return new SerialBlob(IOUtils.toByteArray(is));		
@@ -66,7 +67,7 @@ public class SqlFreeMarkerFunctions
 			description = "Used to convert specified data into a clob. Supported parameter types - CharSequence, byte[], InputStream, Reader.",
 			returnDescription = "Converted input stream."
 			)
-	public static Clob toClob(Object val) throws SerialException, SQLException, IOException
+	public static Clob toClob(@FmParam(name = "input", description = "Input that needs to be converted to clob") Object val) throws SerialException, SQLException, IOException
 	{
 		if(val instanceof byte[])
 		{
@@ -99,7 +100,7 @@ public class SqlFreeMarkerFunctions
 			description = "Used to load specified resource as clob object.",
 			returnDescription = "Loaded blob object."
 			)
-	public static Clob resClob(String res) throws SerialException, SQLException, IOException
+	public static Clob resClob(@FmParam(name = "res", description = "Resource to be converted into clob") String res) throws SerialException, SQLException, IOException
 	{
 		InputStream is = SqlFreeMarkerFunctions.class.getResourceAsStream(res);
 		return new SerialClob(IOUtils.toCharArray(is));		

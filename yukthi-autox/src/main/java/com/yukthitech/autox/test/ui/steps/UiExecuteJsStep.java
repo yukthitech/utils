@@ -16,7 +16,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * Can be used to execute js code.
  * @author akiran
  */
-@Executable(name = {"uiExecuteJs"}, requiredPluginTypes = SeleniumPlugin.class, message = "Can be used to execute js code")
+@Executable(name = "uiExecuteJs", requiredPluginTypes = SeleniumPlugin.class, message = "Can be used to execute js code")
 public class UiExecuteJsStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

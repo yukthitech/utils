@@ -20,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiRightClick"}, requiredPluginTypes = SeleniumPlugin.class, message = "Right clicks the specified target")
+@Executable(name = "uiRightClick", requiredPluginTypes = SeleniumPlugin.class, message = "Right clicks the specified target")
 public class RightClickStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

@@ -22,7 +22,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = {"uiStoreCookies"}, requiredPluginTypes = SeleniumPlugin.class, message = "Stores the current session cookies into specified file.")
+@Executable(name = "uiStoreCookies", requiredPluginTypes = SeleniumPlugin.class, message = "Stores the current session cookies into specified file.")
 public class StoreCookiesStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

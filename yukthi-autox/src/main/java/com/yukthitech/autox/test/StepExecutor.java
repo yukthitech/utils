@@ -3,7 +3,6 @@ package com.yukthitech.autox.test;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -101,7 +100,7 @@ public class StepExecutor
 				{
 					Executable executable = step.getClass().getAnnotation(Executable.class);
 					
-					String message = String.format("Validation %s failed. Validation Details: %s", executable.name()[0], step);
+					String message = String.format("Validation %s failed. Validation Details: %s", executable.name(), step);
 					
 					exeLogger.error(message);
 					throw new TestCaseValidationFailedException(step, message);
@@ -129,7 +128,7 @@ public class StepExecutor
 	
 	private static void invokeErrorHandling(AutomationContext context, Executable executable, ErrorDetails errorDetails)
 	{
-		logger.debug( "Invoking plugin error handling for executable: {}", Arrays.toString(executable.name()) );
+		logger.debug( "Invoking plugin error handling for executable: {}", executable.name() );
 		
 		Collection< IPlugin<?> > pluginTypes = context.getPlugins();
 		
@@ -217,7 +216,7 @@ public class StepExecutor
 		}
 		
 		Executable executable = (step instanceof Function) ?  createExecutable((Function) step) : step.getClass().getAnnotation(Executable.class);
-		String name = executable.name()[0];
+		String name = executable.name();
 		
 		String stepType = (step instanceof IValidation) ? "Validation" : "Step";
 		

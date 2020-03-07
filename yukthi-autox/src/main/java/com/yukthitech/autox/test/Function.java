@@ -23,7 +23,7 @@ import com.yukthitech.ccg.xml.IParentAware;
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
-@Executable(name = "function", message = "Can be used to group multiple steps into single step")
+@Executable(name = "function", message = "Creates custom function for reusability which can be invoked from other places.")
 public class Function extends AbstractLocationBased implements IStepContainer, IStep, Cloneable, IEntryPoint, IParentAware
 {
 	private static final long serialVersionUID = 1L;
@@ -229,7 +229,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 					}
 					
 					Executable executable = step.getClass().getAnnotation(Executable.class);
-					logger.error("An error occurred while executing child-step '{}'. Error: {}", executable.name()[0], ex);
+					logger.error("An error occurred while executing child-step '{}'. Error: {}", executable.name(), ex);
 					throw ex;
 				}
 			}
