@@ -10,6 +10,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
@@ -21,7 +22,7 @@ import com.yukthitech.autox.test.ui.steps.AbstractUiStep;
  * 
  * @author akiran
  */
-@Executable(name = "uiSetStyle", requiredPluginTypes = SeleniumPlugin.class, message = "Used to manipulate the style of the element.")
+@Executable(name = "uiSetStyle", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Used to manipulate the style of the element.")
 public class SetStyleStep extends AbstractUiStep
 {
 	/** The Constant serialVersionUID. */

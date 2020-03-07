@@ -1,48 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 	<head>
-		<title>AutoX Api Documentation</title>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		
+		<title>AutoX API Documentation</title>
+
 		<script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
 		<script type="text/javascript" src="bootstrap-3.4.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="popper/popper.min.js"></script>
+		<script type="text/javascript" src="doc/docs.js"></script>
 
-		<link rel="stylesheet" href="docs.css">
 		<link rel="stylesheet" href="bootstrap-3.4.1/css/bootstrap.min.css">
-		<link rel="stylesheet" href="font-awesome-5.12.1/css/all.min.css">		
-		
+	    <link rel="stylesheet" href="site/homepagecontent.css">
+		<link rel="stylesheet" href="doc/docs.css">
 
-		<script>
-			$(document).ready(function(){
-				var winHeight = $(window).height();
-				var y = $("#myScrollspy").position().top;
-				
-				var h = winHeight - (3 * y);
-				
-				$("#myScrollspy").height( h );
-				$("#myScrollspy").width( $($("#myScrollspy").parent()).width() );
+		<style>
+			#height
+			{
+			  line-height:1;
+			}
+			#header
+			{
+			  word-spacing:-6px;
+			}
 
-				$('#myScrollspy').on('activate.bs.scrollspy', function () {
-					var lastActiv = $("#myScrollspy li.active").last();
-					lastActiv = $(lastActiv);
-					
-					var activY = lastActiv.position().top;
-					var scrollY = $("#myScrollspy").position().top;
-					
-					var midPos = scrollY + ($("#myScrollspy").height() / 2);
-					
-					var toScroll = activY - midPos;
-					$("#myScrollspy").scrollTop(toScroll);
-				});
-			});
-			
-		</script>
-
+			img
+			{
+				 width:100%;
+			}
+			.active
+			{
+			  color:lightblue;
+			  padding-bottom:1px;
+			  border-bottom:1px solid white;
+			}
+		</style>
 	</head>
+	<body data-spy="scroll" data-target="#myScrollspy" data-offset="80">
+		<?php
+			  $color='blue';
+			  include('common/topnavbar.php');
+		 ?>
 
-	<body data-spy="scroll" data-target="#myScrollspy" data-offset="40">
-		<div class="container" style="margin-top: 20px; padding: 0px; width: 100%;">
+		<div class="container" style="margin-top: 70px; padding: 0px; width: 100%;">
 			<div class="row" style="margin: 0px;">
 				<div class="col-md-3 col-lg-2">
 					<div id="myScrollspy" class="bs-docs-sidebar" style="position: fixed; overflow: auto;">
@@ -51,19 +50,14 @@
 								<a href="#steps">Steps and Assertions</a>
 								
 								<ul class="nav nav-stacked" style="margin-left: 10px">
-									<#list activePlugins as plugin>
+									<#list activeGroups as group>
 										<li>
-											<a href="#s-plugin-${plugin}">${plugin}</a>
+											<a href="#grp-${group}">${group}</a>
 	
 											<ul class="nav nav-stacked" style="margin-left: 10px">
-												<#list getStepsWithPlugin(plugin) as step>
+												<#list getStepsWithGroup(group) as step>
 													<li>
-														<a href="#step-${plugin}-${step.name}">${step.name}</a>
-													</li>
-												</#list>
-												<#list getValidationsWithPlugin(plugin) as validator>
-													<li>
-														<a href="#validator-${plugin}-${validator.name}">${validator.name}</a>
+														<a href="#step-${group}-${step.name}">${step.name}</a>
 													</li>
 												</#list>
 											</ul>
@@ -111,7 +105,6 @@
 					</div>
 				</div>
 				
-				
 				<div class="col-md-9 col-lg-10">
 					<div id="steps" class="dataSection1">
 						<h1>Steps and Assertions</h1>
@@ -122,23 +115,15 @@
 							<b>Assertion</b> is similar to step, which apart from execution of some functionality it also validates the state of current execution.
 						</p>
 						
-						<#list activePlugins as plugin>
-							<div id="s-plugin-${plugin}" class="dataSection2">
-								<h2>${plugin} related steps</h2>
+						<#list activeGroups as group>
+							<div id="grp-${group}" class="dataSection2">
+								<h2>${group} related steps</h2>
 								
-								<#list getStepsWithPlugin(plugin) as step>
-									<div id="step-${plugin}-${step.name}" class="dataSection3">
-										<h3>Step ${step.name} - ${step.title}</h3>
+								<#list getStepsWithGroup(group) as step>
+									<div id="step-${group}-${step.name}" class="dataSection3">
+										<h3>${step.type} ${step.name} - ${step.title}</h3>
 										
 										<@addContent step=step/>
-									</div>
-								</#list>
-
-								<#list getValidationsWithPlugin(plugin) as validator>
-									<div id="validator-${plugin}-${validator.name}" class="dataSection3">
-										<h3>Assertion ${validator.name} - ${validator.title}</h3>
-										
-										<@addContent step=validator/>
 									</div>
 								</#list>
 							</div>
@@ -183,9 +168,10 @@
 				</div>
 			</div>
 		</div>
-	
+
 	</body>
 </html>
+
 
 <#macro addContent step>
 	<p>

@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -12,7 +13,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "sshCloseSession", message = "Closes the specified remote session.")
+@Executable(name = "sshCloseSession", group = Group.Ssh, message = "Closes the specified remote session.")
 public class CloseSessionStep extends AbstractStep
 {
 	

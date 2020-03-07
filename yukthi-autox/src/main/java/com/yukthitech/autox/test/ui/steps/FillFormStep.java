@@ -10,6 +10,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -24,7 +25,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiFillForm", requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
+@Executable(name = "uiFillForm", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
 public class FillFormStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

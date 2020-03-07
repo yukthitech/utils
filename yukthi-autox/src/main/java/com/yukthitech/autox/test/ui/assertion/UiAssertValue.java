@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
@@ -15,7 +16,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author akiran
  */
-@Executable(name = "uiAssertValue", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
+@Executable(name = "uiAssertValue", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element has specified value/text")
 public class UiAssertValue extends AbstractUiAssert
 {
 	private static final long serialVersionUID = 1L;

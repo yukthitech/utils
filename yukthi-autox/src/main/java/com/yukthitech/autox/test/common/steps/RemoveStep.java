@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.expr.ExpressionFactory;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -15,7 +16,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * 
  * @author akiran
  */
-@Executable(name = "remove", message = "Removes the specified context attribute or values matching with specified path.")
+@Executable(name = "remove", group = Group.Common, message = "Removes the specified context attribute or values matching with specified path.")
 public class RemoveStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

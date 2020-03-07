@@ -5,6 +5,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
@@ -19,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "if", message = "Evaluates specified condition and if evaluates to true execute 'then' otherwise execute 'else'. "
+@Executable(name = "if", group = Group.Lang, message = "Evaluates specified condition and if evaluates to true execute 'then' otherwise execute 'else'. "
 		+ "For ease 'if' supports direct addition of steps which would be added to then block.")
 public class IfConditionStep extends AbstractStep implements IStepContainer
 {

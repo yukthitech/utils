@@ -7,6 +7,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -16,7 +17,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiSwitchFrame", requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching the frames")
+@Executable(name = "uiSwitchFrame", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching the frames")
 public class SwitchFrame extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

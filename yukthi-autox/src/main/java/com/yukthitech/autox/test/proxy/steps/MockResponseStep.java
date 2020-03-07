@@ -9,6 +9,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -16,7 +17,7 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 /**
  * Mocks the specified request (url + method) with specified response.
  */
-@Executable(name = "mockResponse", message = "Mocks the specified request (url + method) with specified response.")
+@Executable(name = "mockResponse", group = Group.Mock, message = "Mocks the specified request (url + method) with specified response.")
 public class MockResponseStep extends AbstractStep
 {
 	

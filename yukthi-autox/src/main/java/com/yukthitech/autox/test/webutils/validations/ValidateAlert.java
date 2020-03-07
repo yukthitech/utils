@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.autox.test.ui.steps.WaitForStep;
@@ -13,7 +14,7 @@ import com.yukthitech.autox.test.ui.steps.WaitForStep;
 /**
  * Validates alert box is displayed and closes the dialog.
  */
-@Executable(name = "validateAlert", requiredPluginTypes = SeleniumPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
+@Executable(name = "validateAlert", group = Group.NONE, requiredPluginTypes = SeleniumPlugin.class, message = "Validates an webutils-specific alert comes up with specified message")
 public class ValidateAlert extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

@@ -20,6 +20,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -31,7 +32,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * SQL based validation.
  */
-@Executable(name = "sqlAssert", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
+@Executable(name = "sqlAssert", group = Group.Rdbms, requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates expected data is returned")
 public class SqlAssert extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

@@ -7,6 +7,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 
@@ -15,7 +16,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * 
  * @author akiran
  */
-@Executable(name = "uiOpenWindow", requiredPluginTypes = SeleniumPlugin.class, message = "Opens new window with specifie name and url.")
+@Executable(name = "uiOpenWindow", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Opens new window with specifie name and url.")
 public class OpenWindowStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

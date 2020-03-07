@@ -17,6 +17,7 @@ import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -27,7 +28,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Plugin needed by selenium based steps or validators.
  * @author akiran
  */
-@Executable(name = "SeleniumPlugin", message = "Plugin needed by selenium/ui-automation based steps or validators.")
+@Executable(name = "SeleniumPlugin", group = Group.NONE, message = "Plugin needed by selenium/ui-automation based steps or validators.")
 public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 {
 	

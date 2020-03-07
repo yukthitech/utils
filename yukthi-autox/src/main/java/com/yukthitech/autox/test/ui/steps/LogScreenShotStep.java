@@ -10,6 +10,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.log.LogLevel;
@@ -18,7 +19,7 @@ import com.yukthitech.autox.test.log.LogLevel;
  * Takes the screen shot of the browser and adds it to the log .
  * @author akiran
  */
-@Executable(name = "uiLogScreenShot", requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
+@Executable(name = "uiLogScreenShot", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
 public class LogScreenShotStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

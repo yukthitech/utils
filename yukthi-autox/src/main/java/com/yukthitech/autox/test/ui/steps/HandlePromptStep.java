@@ -7,6 +7,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -15,7 +16,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = "uiHandlePrompt", requiredPluginTypes = SeleniumPlugin.class, message = "Used to validate, feed and accept/cancel prompt.")
+@Executable(name = "uiHandlePrompt", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Used to validate, feed and accept/cancel prompt.")
 public class HandlePromptStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

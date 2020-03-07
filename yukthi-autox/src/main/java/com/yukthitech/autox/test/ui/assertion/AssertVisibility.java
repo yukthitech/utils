@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -17,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiAssertVisibility", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
+@Executable(name = "uiAssertVisibility", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified element is visible/hidden")
 public class AssertVisibility extends AbstractUiAssert
 {
 	

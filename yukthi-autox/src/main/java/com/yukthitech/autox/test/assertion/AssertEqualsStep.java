@@ -8,6 +8,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -15,7 +16,7 @@ import com.yukthitech.autox.SourceType;
  * Validation to Compare specified values for equality.
  * @author akiran
  */
-@Executable(name = "assertEquals", message = "Compares specified values for euqality.")
+@Executable(name = "assertEquals", group = Group.Common, message = "Compares specified values for euqality.")
 public class AssertEqualsStep extends AbstractValidation
 {
 	/**

@@ -9,6 +9,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -22,7 +23,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiClick", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
+@Executable(name = "uiClick", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target")
 public class ClickStep extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;

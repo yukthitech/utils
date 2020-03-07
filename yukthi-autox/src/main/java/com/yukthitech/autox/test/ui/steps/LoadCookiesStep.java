@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.IUiConstants;
@@ -21,7 +22,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiLoadCookies", requiredPluginTypes = SeleniumPlugin.class, message = "Loads cookies from specified file into current session cookies.")
+@Executable(name = "uiLoadCookies", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Loads cookies from specified file into current session cookies.")
 public class LoadCookiesStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -15,7 +16,7 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  * 
  * @author akiran
  */
-@Executable(name = "mapPut", message = "Adds the specified key-value entry to specified map.")
+@Executable(name = "mapPut", group = Group.Common, message = "Adds the specified key-value entry to specified map.")
 public class MapPutStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

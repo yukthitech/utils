@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -14,7 +15,7 @@ import com.yukthitech.autox.SourceType;
  * 
  * @author akiran
  */
-@Executable(name = "mockFetchRequest", message = "Fetches mock request details with specified filter details")
+@Executable(name = "mockFetchRequest", group = Group.Mock, message = "Fetches mock request details with specified filter details")
 public class MockFetchRequestStep extends AbstractStep
 {
 	

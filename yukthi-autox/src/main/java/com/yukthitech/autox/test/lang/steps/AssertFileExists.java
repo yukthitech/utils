@@ -6,13 +6,13 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.test.sql.DbPlugin;
 
 /**
  * Validates specified path exists.
  */
-@Executable(name = "assertFileExists", requiredPluginTypes = DbPlugin.class, message = "Validates specified path exists.")
+@Executable(name = "assertFileExists", group = Group.Common, message = "Validates specified path exists.")
 public class AssertFileExists extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

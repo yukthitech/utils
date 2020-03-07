@@ -10,8 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.yukthitech.autox.Group;
 
 /**
  * Represents the information required to generate documentation.
@@ -260,44 +259,32 @@ public class DocInformation
 		this.parsers.put(parser.getName(), parser);
 	}
 	
-	public Set<StepInfo> getStepsWithPlugin(String plugin)
+	public Set<StepInfo> getStepsWithGroup(String group)
 	{
-		if(StringUtils.isEmpty(plugin))
-		{
-			return steps.values()
-					.stream()
-					.filter(step -> CollectionUtils.isEmpty(step.getRequiredPlugins()))
-					.collect(Collectors.toSet());
-		}
-
-		return steps.values()
+		Set<StepInfo> filSteps = steps.values()
 				.stream()
-				.filter(step -> step.getRequiredPlugins().contains(plugin))
+				.filter(step -> step.getGroup().equals(group))
 				.collect(Collectors.toSet());
-	}
-	
-	public Set<StepInfo> getValidationsWithPlugin(String plugin)
-	{
-		if(StringUtils.isEmpty(plugin))
-		{
-			return validations.values()
-					.stream()
-					.filter(step -> CollectionUtils.isEmpty(step.getRequiredPlugins()))
-					.collect(Collectors.toSet());
-		}
 
-		return validations.values()
+		Set<StepInfo> filVal = validations.values()
 				.stream()
-				.filter(step -> step.getRequiredPlugins().contains(plugin))
+				.filter(step -> step.getGroup().equals(group))
 				.collect(Collectors.toSet());
-	}
-
-	public Set<String> getActivePlugins()
-	{
-		Set<String> pluginNames = new TreeSet<>();
-		steps.values().forEach(step -> pluginNames.addAll(step.getRequiredPlugins()));
-		validations.values().forEach(validator -> pluginNames.addAll(validator.getRequiredPlugins()));
 		
-		return pluginNames;
+		TreeSet<StepInfo> res = new TreeSet<StepInfo>(filSteps);
+		res.addAll(filVal);
+		
+		return res;
+	}
+
+	public Set<String> getActiveGroups()
+	{
+		Set<String> groups = new TreeSet<>();
+		
+		steps.values().forEach(step -> groups.add(step.getGroup()));
+		validations.values().forEach(validator -> groups.add(validator.getGroup()));
+		
+		groups.remove(Group.NONE.name());
+		return groups;
 	}
 }

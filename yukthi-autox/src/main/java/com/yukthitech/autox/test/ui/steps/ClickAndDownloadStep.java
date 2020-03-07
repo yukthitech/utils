@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -21,7 +22,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiClickAndDownload", requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target and download the result file. If no  file is downloaded, this will throw exception.")
+@Executable(name = "uiClickAndDownload", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target and download the result file. If no  file is downloaded, this will throw exception.")
 public class ClickAndDownloadStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

@@ -5,6 +5,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -12,7 +13,7 @@ import com.yukthitech.autox.SourceType;
  * Non validation step, to compares specified values for non equality.
  * @author akiran
  */
-@Executable(name = "assertNotEquals", message = "Compares specified values for non euqality.")
+@Executable(name = "assertNotEquals", group = Group.Common, message = "Compares specified values for non euqality.")
 public class AssertNotEqualStep extends AbstractValidation
 {
 	

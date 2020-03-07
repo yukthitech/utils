@@ -1,17 +1,14 @@
 package com.yukthitech.autox.doc;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.springframework.core.io.Resource;
@@ -271,24 +268,6 @@ public class DocGenerator
 		return docInformation;
 	}
 	
-	/**
-	 * Loads basic documents.
-	 * @return basic documents.
-	 */
-	private static List<BasicDocs.Document> loadBasicDocs() throws IOException
-	{
-		BasicDocs docs = new BasicDocs();
-		XMLBeanParser.parse(DocGenerator.class.getResourceAsStream("/docs/index-basic-docs.xml"), docs);
-		
-		for(BasicDocs.Document doc : docs.getDocuments())
-		{
-			String content = IOUtils.toString(DocGenerator.class.getResourceAsStream(doc.getFile()));
-			doc.setContent(content);
-		}
-		
-		return docs.getDocuments();
-	}
-	
 	private static void copyDocResources(File outFolder, DocInformation docInformation) throws Exception
 	{
 		PathMatchingResourcePatternResolver loader = new PathMatchingResourcePatternResolver();
@@ -317,7 +296,7 @@ public class DocGenerator
 			FileUtils.copyInputStreamToFile(resIs, destFile);
 			resIs.close();
 
-			if("index.html".equals(destFile.getName()))
+			if("doc.php".equals(destFile.getName()))
 			{
 				String content = FileUtils.readFileToString(destFile);
 				content = FreeMarkerMethodManager.replaceExpressions(resPath, docInformation, content);
@@ -344,13 +323,6 @@ public class DocGenerator
 
 		//convert data into json
 		File outFolderFile = new File(outFolder);
-		
-		if(outFolderFile.exists())
-		{
-			FileUtils.deleteDirectory(outFolderFile);
-		}
-		
-		FileUtils.forceMkdir(outFolderFile);
 		copyDocResources(outFolderFile, docInformation);
 		
 		

@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -13,7 +14,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author akiran
  */
-@Executable(name = "uiGetNewWindowHandle", requiredPluginTypes = SeleniumPlugin.class, message = "Used to fetch newly opened window handle.")
+@Executable(name = "uiGetNewWindowHandle", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Used to fetch newly opened window handle.")
 public class GetNewWindowHandleStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

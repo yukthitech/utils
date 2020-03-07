@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -16,7 +17,7 @@ import com.yukthitech.utils.rest.RestClient;
  * Plugin for REST based steps and validations.
  * @author akiran
  */
-@Executable(name = "RestPlugin", message = "Plugin for REST based steps and validations.")
+@Executable(name = "RestPlugin", group = Group.NONE, message = "Plugin for REST based steps and validations.")
 public class RestPlugin implements IPlugin<Object>, Validateable
 {
 	/**

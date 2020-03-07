@@ -11,6 +11,7 @@ import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
@@ -23,7 +24,7 @@ import com.yukthitech.ccg.xml.IParentAware;
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
-@Executable(name = "function", message = "Creates custom function for reusability which can be invoked from other places.")
+@Executable(name = "function", group = Group.Lang, message = "Creates custom function for reusability which can be invoked from other places.")
 public class Function extends AbstractLocationBased implements IStepContainer, IStep, Cloneable, IEntryPoint, IParentAware
 {
 	private static final long serialVersionUID = 1L;

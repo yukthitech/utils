@@ -15,6 +15,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
@@ -24,7 +25,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Step to execute DML Query.
  * @author akiran
  */
-@Executable(name = "sqlDmlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified DML Query on specified data source.")
+@Executable(name = "sqlDmlQuery", group = Group.Rdbms, requiredPluginTypes = DbPlugin.class, message = "Executes specified DML Query on specified data source.")
 public class DmlQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

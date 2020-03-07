@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -15,7 +16,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiRefresh", requiredPluginTypes = SeleniumPlugin.class, message = "Refreshes the current page.")
+@Executable(name = "uiRefresh", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Refreshes the current page.")
 public class RefreshStep extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;

@@ -32,4 +32,10 @@ public @interface Executable
 	 * @return required plugin type.
 	 */
 	public Class<? extends IPlugin<?>>[] requiredPluginTypes() default {};
+	
+	/**
+	 * Group to which current executable belongs to. 
+	 * @return
+	 */
+	public Group group();
 }

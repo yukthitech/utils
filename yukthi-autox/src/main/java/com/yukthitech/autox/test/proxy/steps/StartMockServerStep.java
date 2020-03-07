@@ -6,13 +6,14 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
 /**
  * Starts Mock Server with specified name and port.
  */
-@Executable(name = "mockServerStart", message = "Starts Mock Server with specified name and port")
+@Executable(name = "mockServerStart", group = Group.Mock, message = "Starts Mock Server with specified name and port")
 public class StartMockServerStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

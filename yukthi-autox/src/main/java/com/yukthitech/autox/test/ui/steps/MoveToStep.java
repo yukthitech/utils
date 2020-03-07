@@ -9,6 +9,7 @@ import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -24,7 +25,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiMoveTo", requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
+@Executable(name = "uiMoveTo", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
 public class MoveToStep extends AbstractUiStep
 {
 	/** The Constant serialVersionUID. */

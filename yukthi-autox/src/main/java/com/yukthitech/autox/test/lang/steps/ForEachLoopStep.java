@@ -8,6 +8,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
@@ -21,7 +22,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "forEach", message = "Loops through specified collection, map or string tokens and for each iteration executed underlying steps")
+@Executable(name = "forEach", group = Group.Lang, message = "Loops through specified collection, map or string tokens and for each iteration executed underlying steps")
 public class ForEachLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;

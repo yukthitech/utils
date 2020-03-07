@@ -7,6 +7,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -15,7 +16,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Used to validate and click ok of alert prompt.
  * @author akiran
  */
-@Executable(name = "uiHandleAlert", requiredPluginTypes = SeleniumPlugin.class, message = "Used to validate and click ok of alert prompt.")
+@Executable(name = "uiHandleAlert", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Used to validate and click ok of alert prompt.")
 public class HandleAlertStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

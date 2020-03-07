@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -11,7 +12,7 @@ import com.yukthitech.autox.SourceType;
  * Asserts specified values are not same reference.
  * @author akiran
  */
-@Executable(name = "assertNotSame", message = "Asserts specified values are not same reference.")
+@Executable(name = "assertNotSame", group = Group.Common, message = "Asserts specified values are not same reference.")
 public class AssertNotSameStep extends AbstractValidation
 {
 	/**

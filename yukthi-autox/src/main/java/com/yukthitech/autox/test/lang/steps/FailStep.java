@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -11,7 +12,7 @@ import com.yukthitech.autox.SourceType;
  * Fails the current test case by throwing fail exception.
  * @author akiran
  */
-@Executable(name = "fail", message = "Fails the current test case by throwing fail exception.")
+@Executable(name = "fail", group = Group.Lang, message = "Fails the current test case by throwing fail exception.")
 public class FailStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

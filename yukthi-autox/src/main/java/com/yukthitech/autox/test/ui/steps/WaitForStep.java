@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -20,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Waits for locator to be part of the page and is visible.
  * @author akiran
  */
-@Executable(name = "uiWaitFor", requiredPluginTypes = SeleniumPlugin.class, message = "Waits for (at least one) specified element to become visible/hidden")
+@Executable(name = "uiWaitFor", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Waits for (at least one) specified element to become visible/hidden")
 public class WaitForStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

@@ -3,6 +3,7 @@ package com.yukthitech.autox.test.rest.steps;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.rest.DeleteRestRequest;
 
@@ -10,7 +11,7 @@ import com.yukthitech.utils.rest.DeleteRestRequest;
  * Used to invoke DELETE REST API.
  * @author akiran
  */
-@Executable(name = "restInvokeDelete", requiredPluginTypes = RestPlugin.class, message = "Used to invoke DELETE api.")
+@Executable(name = "restInvokeDelete", group = Group.Rest_Api, requiredPluginTypes = RestPlugin.class, message = "Used to invoke DELETE api.")
 public class InvokeDeleteStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

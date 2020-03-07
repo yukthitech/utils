@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
@@ -17,7 +18,7 @@ import com.yukthitech.autox.test.Function;
  * 
  * @author akiran
  */
-@Executable(name = "while", message = "Loops till specified condition is evaluated to true executed underlying steps")
+@Executable(name = "while", group = Group.Lang, message = "Loops till specified condition is evaluated to true executed underlying steps")
 public class WhileLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;

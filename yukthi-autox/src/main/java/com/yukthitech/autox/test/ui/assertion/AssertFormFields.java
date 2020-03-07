@@ -11,6 +11,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
@@ -23,7 +24,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 /**
  * Validates specified form has specified fields with specified field details.
  */
-@Executable(name = "uiAssertFormFields", requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
+@Executable(name = "uiAssertFormFields", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Validates specified form fields are present")
 public class AssertFormFields extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

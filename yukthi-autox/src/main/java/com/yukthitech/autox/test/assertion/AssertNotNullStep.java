@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -13,7 +14,7 @@ import com.yukthitech.autox.SourceType;
  * Asserts the value for not null.
  * @author akiran
  */
-@Executable(name = "assertNotNull", message = "Asserts the specified value is not null.")
+@Executable(name = "assertNotNull", group = Group.Common, message = "Asserts the specified value is not null.")
 public class AssertNotNullStep extends AbstractValidation
 {
 	

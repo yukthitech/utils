@@ -21,6 +21,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -29,7 +30,7 @@ import com.yukthitech.autox.SourceType;
  * 
  * @author akiran
  */
-@Executable(name = "sendMail", message = "Step to send mail, useful to send specific notifications from test cases.")
+@Executable(name = "sendMail", group = Group.Common, message = "Step to send mail, useful to send specific notifications from test cases.")
 public class SendMailStep extends AbstractStep
 {
 	

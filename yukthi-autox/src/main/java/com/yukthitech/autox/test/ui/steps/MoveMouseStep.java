@@ -6,6 +6,7 @@ import org.openqa.selenium.interactions.Actions;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 
@@ -14,7 +15,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * 
  * @author akiran
  */
-@Executable(name = "uiMoveMouse", requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
+@Executable(name = "uiMoveMouse", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
 public class MoveMouseStep extends AbstractUiStep
 {
 	/** The Constant serialVersionUID. */

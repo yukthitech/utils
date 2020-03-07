@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -18,7 +19,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * plugin related to db related steps or validators.
  * @author akiran
  */
-@Executable(name = "DbPlugin", message = "Plugin related to db related steps or validators.")
+@Executable(name = "DbPlugin", group = Group.NONE, message = "Plugin related to db related steps or validators.")
 public class DbPlugin implements IPlugin<Object>, Validateable
 {
 	/**

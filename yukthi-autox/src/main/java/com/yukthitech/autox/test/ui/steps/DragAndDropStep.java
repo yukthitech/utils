@@ -12,6 +12,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
@@ -22,7 +23,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author Pritam.
  */
-@Executable(name = "uiDragAndDrop", requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
+@Executable(name = "uiDragAndDrop", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
 public class DragAndDropStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

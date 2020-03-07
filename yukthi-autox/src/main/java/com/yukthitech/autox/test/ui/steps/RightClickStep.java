@@ -7,6 +7,7 @@ import org.openqa.selenium.interactions.Actions;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -20,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiRightClick", requiredPluginTypes = SeleniumPlugin.class, message = "Right clicks the specified target")
+@Executable(name = "uiRightClick", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Right clicks the specified target")
 public class RightClickStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

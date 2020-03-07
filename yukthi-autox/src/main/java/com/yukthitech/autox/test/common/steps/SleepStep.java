@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.TestCaseFailedException;
 
@@ -13,7 +14,7 @@ import com.yukthitech.autox.test.TestCaseFailedException;
  * Sleeps for specified amount of time.
  * @author akiran
  */
-@Executable(name = "sleep", message = "Sleeps for specified amount of time.")
+@Executable(name = "sleep", group = Group.Common, message = "Sleeps for specified amount of time.")
 public class SleepStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

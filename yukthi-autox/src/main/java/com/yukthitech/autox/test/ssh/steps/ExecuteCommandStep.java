@@ -8,6 +8,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -17,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "sshExecuteCommand", message = "Executes specified command on specified session and stores the output on context.")
+@Executable(name = "sshExecuteCommand", group = Group.Ssh, message = "Executes specified command on specified session and stores the output on context.")
 public class ExecuteCommandStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

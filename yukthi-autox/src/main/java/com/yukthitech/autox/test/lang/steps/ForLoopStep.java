@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
@@ -18,7 +19,7 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  * 
  * @author akiran
  */
-@Executable(name = "for", message = "Loops through specified range of values and for each iteration executed underlying steps")
+@Executable(name = "for", group = Group.Lang, message = "Loops through specified range of values and for each iteration executed underlying steps")
 public class ForLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;

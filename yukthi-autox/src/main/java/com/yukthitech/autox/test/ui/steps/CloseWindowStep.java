@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.SeleniumPlugin;
 
 /**
@@ -13,7 +14,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * 
  * @author akiran
  */
-@Executable(name = "uiCloseWindow", requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current window.")
+@Executable(name = "uiCloseWindow", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current window.")
 public class CloseWindowStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

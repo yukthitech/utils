@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 
@@ -13,7 +14,7 @@ import com.yukthitech.autox.config.SeleniumPlugin;
  * Goes to the specified page url.
  * @author akiran
  */
-@Executable(name = "uiGotoUrl", requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified url")
+@Executable(name = "uiGotoUrl", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified url")
 public class GotoUrlStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

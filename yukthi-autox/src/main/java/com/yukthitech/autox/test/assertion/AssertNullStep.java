@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -13,7 +14,7 @@ import com.yukthitech.autox.SourceType;
  * Asserts the value to be null.
  * @author akiran
  */
-@Executable(name = "assertNull", message = "Asserts the value to be null.")
+@Executable(name = "assertNull", group = Group.Common, message = "Asserts the value to be null.")
 public class AssertNullStep extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

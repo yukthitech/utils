@@ -18,6 +18,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
@@ -31,7 +32,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * SQL based validation.
  */
-@Executable(name = "sqlAssertValue", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates only single value (first row - first column value)")
+@Executable(name = "sqlAssertValue", group = Group.Rdbms, requiredPluginTypes = DbPlugin.class, message = "Executes specified query and validates only single value (first row - first column value)")
 public class SqlAssertValue extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

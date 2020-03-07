@@ -34,6 +34,11 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 	private String title;
 	
 	/**
+	 * Group to which this step belongs to.
+	 */
+	private String group;
+	
+	/**
 	 * Description about the step.
 	 */
 	private String description;
@@ -79,6 +84,7 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 		setDetails(executablAnnot.name(), executablAnnot.message());
 
 		this.javaType = stepClass.getName();
+		this.group = executablAnnot.group().toString();
 
 		loadParams(stepClass);
 
@@ -292,6 +298,16 @@ public class StepInfo extends AbstractDocInfo implements Comparable<StepInfo>
 	public String getTitle()
 	{
 		return title;
+	}
+	
+	public String getGroup()
+	{
+		return group;
+	}
+	
+	public String getType()
+	{
+		return "Step";
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
@@ -26,7 +27,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(name = "sqlFetchValueQuery", requiredPluginTypes = DbPlugin.class, message = "Fetches single value (first row, first column value) from the results of specified query.")
+@Executable(name = "sqlFetchValueQuery", group = Group.Rdbms, requiredPluginTypes = DbPlugin.class, message = "Fetches single value (first row, first column value) from the results of specified query.")
 public class FetchValueQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

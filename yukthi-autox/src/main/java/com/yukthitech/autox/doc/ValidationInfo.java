@@ -21,4 +21,9 @@ public class ValidationInfo extends StepInfo
 	{
 		super(validationClass, executablAnnot, examples);
 	}
+
+	public String getType()
+	{
+		return "Assertion";
+	}
 }

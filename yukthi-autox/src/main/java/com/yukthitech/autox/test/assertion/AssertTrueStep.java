@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -11,7 +12,7 @@ import com.yukthitech.autox.SourceType;
  * Asserts given value is either boolean true or string 'true'.
  * @author akiran
  */
-@Executable(name = "assertTrue", message = "Asserts given value is either boolean true or string 'true'")
+@Executable(name = "assertTrue", group = Group.Common, message = "Asserts given value is either boolean true or string 'true'")
 public class AssertTrueStep extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

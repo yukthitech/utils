@@ -9,6 +9,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -22,7 +23,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "pollAndCheck", message = "Used to execute polling steps till check condition is met with specified interval gap. Validation will fail if required condition is not met or exceeds timeout.")
+@Executable(name = "pollAndCheck", group = Group.Lang, message = "Used to execute polling steps till check condition is met with specified interval gap. Validation will fail if required condition is not met or exceeds timeout.")
 public class PollAndCheckStep extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;

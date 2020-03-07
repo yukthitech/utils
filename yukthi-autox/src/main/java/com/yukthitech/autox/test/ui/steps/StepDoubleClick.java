@@ -7,6 +7,7 @@ import org.openqa.selenium.interactions.Actions;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -16,7 +17,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-@Executable(name = "uiDblClick", requiredPluginTypes = SeleniumPlugin.class, message = "Double Clicks the specified target")
+@Executable(name = "uiDblClick", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Double Clicks the specified target")
 public class StepDoubleClick extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;

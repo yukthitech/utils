@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -14,7 +15,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "mongoQuery", requiredPluginTypes = MongoPlugin.class, message = "Executes specified mongo Query on specified mongo resource. "
+@Executable(name = "mongoQuery", group = Group.Mongodb, requiredPluginTypes = MongoPlugin.class, message = "Executes specified mongo Query on specified mongo resource. "
 		+ "Syntax of queries  can be found at https://docs.mongodb.com/manual/reference/command.")
 public class MongoQueryStep extends AbstractStep
 {

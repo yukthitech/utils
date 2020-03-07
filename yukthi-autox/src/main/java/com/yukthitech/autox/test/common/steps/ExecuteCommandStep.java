@@ -7,6 +7,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.Command;
 import com.yukthitech.autox.test.log.LogLevel;
@@ -17,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "executeCommand", message = "Executes specified OS command.")
+@Executable(name = "executeCommand", group = Group.Common, message = "Executes specified OS command.")
 public class ExecuteCommandStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

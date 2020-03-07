@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -16,7 +17,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * Can be used to execute js code.
  * @author akiran
  */
-@Executable(name = "uiExecuteJs", requiredPluginTypes = SeleniumPlugin.class, message = "Can be used to execute js code")
+@Executable(name = "uiExecuteJs", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Can be used to execute js code")
 public class UiExecuteJsStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

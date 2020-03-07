@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -11,7 +12,7 @@ import com.yukthitech.autox.SourceType;
  * Asserts given value is either boolean false or string 'false'.
  * @author akiran
  */
-@Executable(name = "assertFalse", message = "Asserts given value is either boolean false or string 'false'")
+@Executable(name = "assertFalse", group = Group.Common, message = "Asserts given value is either boolean false or string 'false'")
 public class AssertFalseStep extends AbstractValidation
 {
 	

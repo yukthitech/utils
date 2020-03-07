@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
@@ -19,7 +20,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * 
  * @author Pritam.
  */
-@Executable(name = "uiSetValue", requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified value")
+@Executable(name = "uiSetValue", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified value")
 public class UiSetValueStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

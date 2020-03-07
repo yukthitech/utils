@@ -9,6 +9,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -20,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Reference step to execute target function with specified parameters.
  * @author akiran
  */
-@Executable(name = "functionRef", message = "Reference step to execute target function with specified parameters.")
+@Executable(name = "functionRef", group = Group.Lang, message = "Reference step to execute target function with specified parameters.")
 public class FunctionRef extends AbstractStep implements IDynamicAttributeAcceptor, DynamicDataAcceptor
 {
 	private static final long serialVersionUID = 1L;

@@ -11,6 +11,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -23,7 +24,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * Step to invoke method on target object.
  */
-@Executable(name = "invokeMethod", message = "Executes specified method on specified bean.")
+@Executable(name = "invokeMethod", group = Group.Common, message = "Executes specified method on specified bean.")
 public class InvokeMethodStep extends AbstractStep
 {
 	

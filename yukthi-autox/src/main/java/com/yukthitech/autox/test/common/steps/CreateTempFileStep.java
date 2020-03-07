@@ -8,6 +8,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -17,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "createTempFile", message = "Creates temporary file with specified content.")
+@Executable(name = "createTempFile", group = Group.Common, message = "Creates temporary file with specified content.")
 public class CreateTempFileStep extends AbstractStep
 {
 	

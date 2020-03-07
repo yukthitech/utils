@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -11,7 +12,7 @@ import com.yukthitech.autox.SourceType;
  * Resets specified mock server.
  * @author akiran
  */
-@Executable(name = "mockServerReset", message = "Resets specified mock server, that is cleaning up all mocked responses and requests..")
+@Executable(name = "mockServerReset", group = Group.Mock, message = "Resets specified mock server, that is cleaning up all mocked responses and requests..")
 public class ResetMockServerStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -25,7 +26,7 @@ import com.yukthitech.utils.rest.RestResult;
  * Used to invoke GET REST API.
  * @author akiran
  */
-@Executable(name = "restInvokeGetFile", requiredPluginTypes = RestPlugin.class, message = "Used to invoke GET api and save response as file.")
+@Executable(name = "restInvokeGetFile", group = Group.Rest_Api, requiredPluginTypes = RestPlugin.class, message = "Used to invoke GET api and save response as file.")
 public class InvokeGetFileStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;

@@ -4,13 +4,14 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 
 /**
  * Stops the timer and keeps the elapsed time on context.
  * @author akiran
  */
-@Executable(name = "stopTimer", message = "Stops the timer and keeps the elapsed time on context.")
+@Executable(name = "stopTimer", group = Group.Common, message = "Stops the timer and keeps the elapsed time on context.")
 public class StopTimerStep extends AbstractStep 
 {
 	private static final long serialVersionUID = 1L;

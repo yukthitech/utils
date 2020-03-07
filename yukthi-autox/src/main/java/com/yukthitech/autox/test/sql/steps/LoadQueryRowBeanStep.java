@@ -17,6 +17,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
@@ -26,7 +27,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executes specified query and creates map out of results. And sets this map on
  * the context.
  */
-@Executable(name = "sqlLoadQueryRowBean", requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as bean(s) on context. "
+@Executable(name = "sqlLoadQueryRowBean", group = Group.Rdbms, requiredPluginTypes = DbPlugin.class, message = "Executes specified query and loads the results as bean(s) on context. "
 		+ "\nIn case of zero results empty map will be kept on context. \nPer row new bean will be created.")
 public class LoadQueryRowBeanStep extends AbstractStep
 {

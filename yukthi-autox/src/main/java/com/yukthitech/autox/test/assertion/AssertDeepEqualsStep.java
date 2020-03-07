@@ -7,6 +7,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.DeepEqualsUtil;
@@ -15,7 +16,7 @@ import com.yukthitech.autox.common.DeepEqualsUtil;
  * Validation to Compare specified values for deep equality.
  * @author akiran
  */
-@Executable(name = "assertDeepEquals", message = "Compares specified values for deep equality. This will not compare the java types, but compares only the structure.")
+@Executable(name = "assertDeepEquals", group = Group.Common, message = "Compares specified values for deep equality. This will not compare the java types, but compares only the structure.")
 public class AssertDeepEqualsStep extends AbstractValidation
 {
 	/**

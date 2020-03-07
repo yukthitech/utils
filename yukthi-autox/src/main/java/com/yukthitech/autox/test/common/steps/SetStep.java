@@ -4,6 +4,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.expr.ExpressionFactory;
@@ -13,7 +14,7 @@ import com.yukthitech.autox.expr.ExpressionFactory;
  * 
  * @author akiran
  */
-@Executable(name = "set", message = "Sets the specified value using specified expression")
+@Executable(name = "set", group = Group.Common, message = "Sets the specified value using specified expression")
 public class SetStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

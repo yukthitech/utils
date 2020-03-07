@@ -8,6 +8,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 
 /**
@@ -15,7 +16,7 @@ import com.yukthitech.autox.Param;
  * 
  * @author akiran
  */
-@Executable(name = "mongoMultiQuery", requiredPluginTypes = MongoPlugin.class, message = "Executes specified multiple mongo Query on specified mongo resource. "
+@Executable(name = "mongoMultiQuery", group = Group.Mongodb, requiredPluginTypes = MongoPlugin.class, message = "Executes specified multiple mongo Query on specified mongo resource. "
 		+ "Syntax of queries  can be found at https://docs.mongodb.com/manual/reference/command.")
 public class MongoMultiQueryStep extends AbstractStep
 {

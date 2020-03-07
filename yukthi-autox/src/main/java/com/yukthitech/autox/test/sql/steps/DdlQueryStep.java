@@ -12,6 +12,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
@@ -20,7 +21,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * Step to execute DDL query.
  */
-@Executable(name = "sqlDdlQuery", requiredPluginTypes = DbPlugin.class, message = "Executes specified DDL query on specified data source.")
+@Executable(name = "sqlDdlQuery", group = Group.Rdbms, requiredPluginTypes = DbPlugin.class, message = "Executes specified DDL query on specified data source.")
 public class DdlQueryStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

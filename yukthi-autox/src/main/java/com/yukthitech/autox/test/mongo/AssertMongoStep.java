@@ -6,6 +6,7 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.DeepEqualsUtil;
@@ -16,7 +17,7 @@ import com.yukthitech.autox.common.DeepEqualsUtil;
  * 
  * @author akiran
  */
-@Executable(name = "assertMongo", requiredPluginTypes = MongoPlugin.class, message = "Executes specified mongo Query on specified mongo resource. "
+@Executable(name = "assertMongo", group = Group.Mongodb, requiredPluginTypes = MongoPlugin.class, message = "Executes specified mongo Query on specified mongo resource. "
 		+ "Syntax of queries can be found at https://docs.mongodb.com/manual/reference/command. And the result is deep-compared with specified expecte object. Extra properties from result are ignored.")
 public class AssertMongoStep extends AbstractValidation
 {

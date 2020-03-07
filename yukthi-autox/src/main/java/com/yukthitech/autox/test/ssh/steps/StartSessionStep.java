@@ -9,6 +9,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -18,7 +19,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "sshStartSession", message = "Starts a new session with specified details. The session can be accessed in other ssh steps with specified name.")
+@Executable(name = "sshStartSession", group = Group.Ssh, message = "Starts a new session with specified details. The session can be accessed in other ssh steps with specified name.")
 public class StartSessionStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

@@ -8,6 +8,7 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.test.TestCaseFailedException;
 
@@ -16,7 +17,7 @@ import com.yukthitech.autox.test.TestCaseFailedException;
  * 
  * @author akiran
  */
-@Executable(name = "mkdir", message = "Creates a directory with required parent folder as needed in work folder.")
+@Executable(name = "mkdir", group = Group.Common, message = "Creates a directory with required parent folder as needed in work folder.")
 public class MkDirStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
