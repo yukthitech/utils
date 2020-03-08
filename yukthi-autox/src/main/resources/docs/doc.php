@@ -3,6 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>AutoX API Documentation</title>
+		
+		<link rel="icon" type="image/png" href="autox-logo.png" />
 
 		<script type="text/javascript" src="jquery/jquery-3.4.1.min.js"></script>
 		<script type="text/javascript" src="bootstrap-3.4.1/js/bootstrap.min.js"></script>
@@ -195,11 +197,11 @@
 				<td>${param.type}</td>
 				<td>
 					<#if param.sourceType == "CONDITION">
-						<b><i>This is a "Condition" paramaeter. This is a freemarker expression that should result in boolean value.</i></b>
+						<b><i>This is a "Condition" parameter. This is a freemarker expression that should result in boolean value.</i></b>
 						<BR/>
 					</#if>
 					<#if param.sourceType == "EXPRESSION">
-						<b><i>This is an <a href="#parsers">Expressions</a></i></b>
+						<b><i>This is an <a href="#parsers">Expression param</a></i></b>
 						<BR/>
 					</#if>
 					<#if param.sourceType == "EXPRESSION_PATH">
