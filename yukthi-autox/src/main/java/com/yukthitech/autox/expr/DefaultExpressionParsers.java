@@ -552,7 +552,9 @@ public class DefaultExpressionParsers
 		return FileUtils.readFileToString(file);
 	}
 
-	@ExpressionParser(type = "file", description = "Parses specified expression as file path and loads it as object. Supported file types: xml, json, properties", 
+	@ExpressionParser(type = "file", description = "Parses specified expression as file path and loads it as object. "
+			+ "As part of 'set', the specified content will be converted to string and will be writtern to file. "
+			+ "Supported object file types: xml, json, properties", 
 			example = "file: /tmp/data.json",
 			params = {
 				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
@@ -567,10 +569,17 @@ public class DefaultExpressionParsers
 			{
 				return loadInputStream(loadFile(expression), expression, exprType, parserContext);
 			}
+			
+			@Override
+			public void setValue(Object value) throws Exception
+			{
+				FileUtils.write(new File(expression), String.valueOf(value));
+			}
 		};
 	}
 
-	@ExpressionParser(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array).", 
+	@ExpressionParser(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array)."
+			+ "As part of 'set' the value is expected to be byte[] which will be written to specified file.", 
 			example = "bfile: /tmp/data")
 	public IPropertyPath bfileParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
@@ -579,7 +588,17 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
+				parserContext.getAutomationContext().getExecutionLogger().debug("Loading binary content from file: {}", expression);
+				
 				return FileUtils.readFileToByteArray(new File(expression));
+			}
+			
+			@Override
+			public void setValue(Object value) throws Exception
+			{
+				parserContext.getAutomationContext().getExecutionLogger().debug("Writing binary content to file: {}", expression);
+				
+				FileUtils.writeByteArrayToFile(new File(expression), (byte[]) value);
 			}
 		};
 	}
@@ -597,6 +616,8 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
+				parserContext.getAutomationContext().getExecutionLogger().debug("Loading text content from resource: {}", expression);
+				
 				String data = null;
 				
 				if("$".equals(expression.trim()))
@@ -630,7 +651,7 @@ public class DefaultExpressionParsers
 	}
 
 	@ExpressionParser(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
-			example = "res: /tmp/data.json")
+			example = "bres: /tmp/data.json")
 	public IPropertyPath bresParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
@@ -638,6 +659,8 @@ public class DefaultExpressionParsers
 			@Override
 			public Object getValue() throws Exception
 			{
+				parserContext.getAutomationContext().getExecutionLogger().debug("Loading binary content from resource: {}", expression);
+				
 				byte data[] = null;
 				
 				if("$".equals(expression.trim()))

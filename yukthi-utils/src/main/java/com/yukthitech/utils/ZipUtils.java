@@ -1,5 +1,6 @@
 package com.yukthitech.utils;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -248,5 +250,58 @@ public class ZipUtils
 		{
 			throw new InvalidStateException("An exception occurred while unzipping specified file: " + zipFile, ex);
 		}
+	}
+
+	/**
+	 * Unzips the specified zip file to specified root folder.
+	 * @param zipFile file to unzip file.
+	 * @param rootFolder folder to which unzip should be done.
+	 * @return Retuns the list of files unzipped.
+	 */
+	public static List<File> unzip(InputStream zipFile, File rootFolder)
+	{
+		try
+		{
+			ZipInputStream zis = new ZipInputStream(zipFile);
+			
+			ZipEntry zipEntry = null;
+			List<File> unzipFiles = new LinkedList<File>();
+			
+			while( (zipEntry = zis.getNextEntry()) != null)
+			{
+				System.out.println("Unzipping: " + zipEntry.getName());
+				File entryFile = new File(rootFolder, zipEntry.getName().replace("/", File.separator));
+				
+				if(zipEntry.isDirectory())
+				{
+					FileUtils.forceMkdir(entryFile);
+					continue;
+				}
+				
+				FileUtils.forceMkdir(entryFile.getParentFile());
+				
+				FileUtils.copyInputStreamToFile(new BufferedInputStream(zis) 
+				{
+					public void close()
+					{
+						//dont do anything here, as zip stream should not be closed yet
+					}
+				}, entryFile);
+
+				unzipFiles.add(entryFile);
+			}
+
+			return unzipFiles;
+		} catch(IOException ex)
+		{
+			throw new InvalidStateException("An exception occurred while unzipping specified file: " + zipFile, ex);
+		}
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		FileInputStream fis = new FileInputStream("C:\\p4a\\razor\\weaver\\feature\\weaver-automation\\src\\main\\resources\\weaver-template-loader-1.0-bin.zip"); 
+		unzip(fis, new File(".\\test"));
+		fis.close();
 	}
 }

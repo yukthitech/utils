@@ -219,17 +219,46 @@ public class TestSuiteExecutor
 			testCase.setData(data);
 			
 			context.getExecutionStack().push(testCase);
+			
+			result = null;
 
 			//execute test case for current data
+			if(testSuite.getBeforeTestCase() != null)
+			{
+				if(!executeSetup("before-test-case", Arrays.asList(testSuite.getBeforeTestCase()), exeLogger))
+				{
+					result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
+				}
+			}
+
 			try
 			{
-				result = testCase.execute(context, exeLogger);
+				//execute only when before-test-case is successful
+				if(result == null)
+				{
+					result = testCase.execute(context, exeLogger);
+				}
 			}catch(Exception ex)
 			{
 				exeLogger.error(null, ex, "An error occurred while executing test case '{}' with data: {}", testCase.getName(), data);
 				result = new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case with data: " + data);
 			}finally
 			{
+				if(testSuite.getAfterTestCase() != null)
+				{
+					try
+					{
+						if(!executeCleanup("after-test-case", Arrays.asList(testSuite.getAfterTestCase()), exeLogger))
+						{
+							result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+						}
+					}catch(Exception ex)
+					{
+						exeLogger.error(ex, "An error occurred while executing after-test-case of test-suited: {}", testCase.getName());
+						result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+					}
+				}
+
 				context.getExecutionStack().pop(testCase);
 				context.clearActiveTestCase();
 			}
