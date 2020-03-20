@@ -43,7 +43,7 @@ public class RefreshStep extends AbstractPostCheckStep
 				
 				throw ex;
 			}
-		} , IAutomationConstants.SIXTY_SECONDS, IAutomationConstants.ONE_SECOND,
+		} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
 				"Waiting for refresh to be successful", 
 				new InvalidStateException("Failed to refresh"));
 		return true;

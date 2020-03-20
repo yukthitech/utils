@@ -89,7 +89,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 	
 					throw ex;
 				}
-			} , IAutomationConstants.SIXTY_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
