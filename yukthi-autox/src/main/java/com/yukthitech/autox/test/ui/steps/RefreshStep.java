@@ -39,7 +39,7 @@ public class RefreshStep extends AbstractPostCheckStep
 				return doPostCheck(exeLogger, "Post Refresh");
 			} catch(RuntimeException ex)
 			{
-				exeLogger.debug("IGNORED: An error occurred while doing refresh. Error: {}", "" + ex);
+				exeLogger.debug("An error occurred while doing refresh. Error: {}", "" + ex);
 				
 				throw ex;
 			}

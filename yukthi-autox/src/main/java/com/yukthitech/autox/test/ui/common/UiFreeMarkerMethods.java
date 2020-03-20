@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test.ui.common;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -151,7 +152,14 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
 		WebElement element = getElementByLocator(locator, parent);
-		return (element != null && element.isDisplayed());
+		
+		try
+		{
+			return (element != null && element.isDisplayed());
+		}catch(StaleElementReferenceException ex)
+		{
+			return false;
+		}
 	}
 
 	/**
