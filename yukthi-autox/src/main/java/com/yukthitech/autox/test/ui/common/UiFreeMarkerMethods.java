@@ -151,10 +151,9 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
-		WebElement element = getElementByLocator(locator, parent);
-		
 		try
 		{
+			WebElement element = getElementByLocator(locator, parent);
 			return (element != null && element.isDisplayed());
 		}catch(StaleElementReferenceException ex)
 		{
