@@ -106,6 +106,15 @@
 				<ccg:assert-equals actual="attr: empNames" expected="list: employee1, employee2"/>
 			]]></content>
 		</example>
+		<example>
+			<description>Converting delimited string of values into list of particular data type.
+				Note: Generic types are not supported here. 
+			</description>
+			
+			<content><![CDATA[
+				<ccg:assert-equals actual="attr: ids" expected="list(int): 1, 2"/>
+			]]></content>
+		</example>
 	</collection>
 
 	<collection name="$parsers.prop">

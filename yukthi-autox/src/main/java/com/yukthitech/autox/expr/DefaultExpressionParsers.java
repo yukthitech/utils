@@ -537,7 +537,14 @@ public class DefaultExpressionParsers
 			type = Class.forName(exprType[0]);
 		}
 		
-		return AutomationUtils.loadObjectContent(data, name, type, logger);
+		Object val = AutomationUtils.loadObjectContent(data, name, type, logger);
+		
+		if("true".equalsIgnoreCase(parserContext.getParameter("expressions")))
+		{
+			val = AutomationUtils.replaceExpressions(name, parserContext.getAutomationContext(), val);
+		}
+		
+		return val;
 	}
 	
 	private String loadFile(String filePath) throws IOException
