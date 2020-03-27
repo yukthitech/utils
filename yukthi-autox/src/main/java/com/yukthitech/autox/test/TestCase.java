@@ -577,6 +577,16 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 		this.attributes.put(name, value);
 	}
 	
+	public void initAttributes(Map<String, Object> attrMap)
+	{
+		if(attrMap == null)
+		{
+			return;
+		}
+		
+		this.attributes.putAll(attrMap);
+	}
+	
 	public Map<String, Object> getAttributes()
 	{
 		return attributes;
