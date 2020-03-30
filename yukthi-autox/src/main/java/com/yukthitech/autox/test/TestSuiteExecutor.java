@@ -210,14 +210,14 @@ public class TestSuiteExecutor
 
 			exeLogger.debug("Executing test case '{}' with data: {}", name, data.getName());
 
-			//set data provider data on context
-			context.setAttribute(dataProvider.getName(), data.getValue());
-
 			//start monitoring logs
 			context.startLogMonitoring();
 			context.setActiveTestCase(testCase, data);
 			testCase.setData(data);
 			
+			//set data provider data on context
+			context.setAttribute(dataProvider.getName(), data.getValue());
+
 			context.getExecutionStack().push(testCase);
 			
 			result = null;

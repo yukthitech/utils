@@ -1,6 +1,7 @@
 package com.yukthitech.autox.config;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.yukthitech.ccg.xml.util.ValueProvider;
 
@@ -14,18 +15,18 @@ public class AppConfigValueProvider implements ValueProvider
 	/**
 	 * Application properties, main source of values.
 	 */
-	private Properties appProperties;
+	private Map<String, String> appProperties;
 
 	/**
 	 * Instantiates a new app config value provider.
 	 *
 	 * @param appProperties the app properties
 	 */
-	public AppConfigValueProvider(Properties appProperties)
+	public AppConfigValueProvider(Map<String, String> appProperties)
 	{
 		if(appProperties == null)
 		{
-			appProperties = new Properties();
+			appProperties = new HashMap<>();
 		}
 		
 		this.appProperties = appProperties;
@@ -49,6 +50,6 @@ public class AppConfigValueProvider implements ValueProvider
 			return System.getenv(name);
 		}
 		
-		return "" + appProperties.getProperty(name);
+		return "" + appProperties.get(name);
 	}
 }

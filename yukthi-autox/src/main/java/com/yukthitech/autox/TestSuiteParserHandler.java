@@ -1,6 +1,7 @@
 package com.yukthitech.autox;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -63,10 +64,11 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 		this(context, null);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TestSuiteParserHandler(AutomationContext context, AutomationReserveNodeHandler reserveNodeHandler)
 	{
 		this.appConfig = context.getAppConfiguration();
-		appConfigValueProvider = new AppConfigValueProvider(appConfig.getApplicationProperties());
+		appConfigValueProvider = new AppConfigValueProvider((Map) appConfig.getApplicationProperties());
 		
 		if(reserveNodeHandler == null)
 		{

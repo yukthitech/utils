@@ -1,5 +1,6 @@
 package com.yukthitech.autox.config;
 
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -37,9 +38,10 @@ public class AppConfigParserHandler extends DefaultParserHandler
 	 *
 	 * @param appProperties the app properties
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public AppConfigParserHandler(Properties appProperties)
 	{
-		this.appConfigValueProvider = new AppConfigValueProvider(appProperties);
+		this.appConfigValueProvider = new AppConfigValueProvider((Map) appProperties);
 	}
 
 	/* (non-Javadoc)

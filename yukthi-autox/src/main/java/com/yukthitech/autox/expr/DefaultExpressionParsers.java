@@ -23,6 +23,9 @@ import org.apache.commons.jxpath.JXPathNotFoundException;
 
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.config.AppConfigParserHandler;
+import com.yukthitech.autox.config.AppConfigValueProvider;
+import com.yukthitech.ccg.xml.util.StringUtil;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -517,6 +520,16 @@ public class DefaultExpressionParsers
 			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
 		}
 		
+		//if the input stream needs app prop replacement
+		if("true".equalsIgnoreCase(parserContext.getParameter("propExpr")))
+		{
+			logger.debug("Processing property expressions: {}", name);
+			
+			AppConfigValueProvider appConfigValueProvider = new AppConfigValueProvider(parserContext.getAutomationContext().getProp());
+			data = StringUtil.getPatternString(data, appConfigValueProvider, 
+					AppConfigParserHandler.EXPR_PATTERN, AppConfigParserHandler.EXPR_ESCAPE_PREFIX, AppConfigParserHandler.EXPR_ESCAPE_REPLACE);
+		}
+
 		//if input stream has to be loaded as simple text, simply return the current data string
 		if("true".equalsIgnoreCase(parserContext.getParameter("text")))
 		{

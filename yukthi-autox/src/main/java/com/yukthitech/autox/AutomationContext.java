@@ -665,12 +665,16 @@ public class AutomationContext
 		return appConfiguration;
 	}
 	
+	/**
+	 * For ease of access of app properties using context.
+	 * @return
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Map<String, String> getAppProperties()
+	public Map<String, String> getProp()
 	{
 		return (Map) appConfiguration.getApplicationProperties();
 	}
-	
+
 	/**
 	 * Starts all registered log monitors.
 	 */
