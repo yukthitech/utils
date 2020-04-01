@@ -45,6 +45,39 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	@Param(description = "Time to wait for download to complete in millis. Default: 30000")
 	private long downloadWaitTime = 30000;
 	
+	
+	/**
+	 * Number of retries to happen. Default: 5
+	 */
+	@Param(description = "Number of retries to happen. Default: 5", required = false)
+	private int retryCount = 5;
+	
+	/**
+	 * Time gap between retries.
+	 */
+	@Param(description = "Time gap between retries. Default: 1000", required = false)
+	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+
+	/**
+	 * Sets the number of retries to happen. Default: 5.
+	 *
+	 * @param retryCount the new number of retries to happen
+	 */
+	public void setRetryCount(int retryCount)
+	{
+		this.retryCount = retryCount;
+	}
+	
+	/**
+	 * Sets the time gap between retries.
+	 *
+	 * @param retryTimeGapMillis the new time gap between retries
+	 */
+	public void setRetryTimeGapMillis(int retryTimeGapMillis)
+	{
+		this.retryTimeGapMillis = retryTimeGapMillis;
+	}
+
 	/**
 	 * Sets the attribute name which would be set with the downloaded file path.
 	 *
@@ -104,7 +137,7 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	
 					throw ex;
 				}
-			} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , retryCount, retryTimeGapMillis,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 			

@@ -399,8 +399,8 @@ public class UiAutomationUtils
 	 * 
 	 * @param checkFunction
 	 *            Function to check
-	 * @param waitTime
-	 *            Total time in seconds to wait for
+	 * @param retryCount
+	 *            Total number of retries that should happen.
 	 * @param gapTime
 	 *            Gap time in seconds to wait between each check.
 	 * @param waitMessage
@@ -408,21 +408,18 @@ public class UiAutomationUtils
 	 * @param ex
 	 *            Exception to be thrown if all tries fail.
 	 */
-	public static void validateWithWait(Supplier<Boolean> checkFunction, int waitTime, int gapTime, String waitMessage, RuntimeException ex)
+	public static void validateWithWait(Supplier<Boolean> checkFunction, int retryCount, long gapTime, String waitMessage, RuntimeException ex)
 	{
 		logger.trace(waitMessage);
 		
-		long gapTimeInMillis = gapTime;
-		long iterationCount = waitTime / gapTime;
-
-		for(int i = 0; i < iterationCount; i++)
+		for(int i = 0; i < retryCount; i++)
 		{
 			if(checkFunction.get())
 			{
 				return;
 			}
 
-			waitFor(gapTimeInMillis);
+			waitFor(gapTime);
 		}
 
 		throw ex;

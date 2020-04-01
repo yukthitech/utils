@@ -45,53 +45,37 @@ public class AssertVisibility extends AbstractUiAssert
 	 */
 	@Param(description = "Message expected in the target element.", required = false)
 	private String message = null;
+	
+	/**
+	 * Number of retries to happen. Default: 5
+	 */
+	@Param(description = "Number of retries to happen. Default: 5", required = false)
+	private int retryCount = 5;
+	
+	/**
+	 * Time gap between retries.
+	 */
+	@Param(description = "Time gap between retries. Default: 1000", required = false)
+	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
 
 	/**
-	 * Execute.
+	 * Sets the number of retries to happen. Default: 5.
 	 *
-	 * @param context
-	 *            the context
-	 * @param exeLogger
-	 *            the exe logger
-	 * @return true, if successful
+	 * @param retryCount the new number of retries to happen
 	 */
-	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void setRetryCount(int retryCount)
 	{
-		if(!"true".equals(enabled))
-		{
-			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
-		}
-		
-		exeLogger.trace("Checking for element Visibility is {}", locator, "true".equals(visible) ? "Visible" : "Invisible");
-		
-		UiAutomationUtils.validateWithWait(() -> {
-			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
-
-			if(!"true".equals(visible))
-			{
-				return (element == null || !element.isDisplayed());
-			}
-
-			return (element != null && element.isDisplayed());
-		} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND, 
-				"Waiting for element: " + getLocatorWithParent(locator), 
-				new InvalidStateException("Failed to find element - " + getLocatorWithParent(locator)));
-
-		if(message != null)
-		{
-			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
-			String actualMessage = element.getText().trim();
-
-			if(actualMessage == null || !actualMessage.contains(message))
-			{
-				exeLogger.error("Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, getLocatorWithParent(locator));
-				return false;
-			}
-		}
-
-		return true;
+		this.retryCount = retryCount;
+	}
+	
+	/**
+	 * Sets the time gap between retries.
+	 *
+	 * @param retryTimeGapMillis the new time gap between retries
+	 */
+	public void setRetryTimeGapMillis(int retryTimeGapMillis)
+	{
+		this.retryTimeGapMillis = retryTimeGapMillis;
 	}
 
 	/**
@@ -154,6 +138,55 @@ public class AssertVisibility extends AbstractUiAssert
 	public void setMessage(String message)
 	{
 		this.message = message;
+	}
+
+	/**
+	 * Execute.
+	 *
+	 * @param context
+	 *            the context
+	 * @param exeLogger
+	 *            the exe logger
+	 * @return true, if successful
+	 */
+	@Override
+	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	{
+		if(!"true".equals(enabled))
+		{
+			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
+			return true;
+		}
+		
+		exeLogger.trace("Checking for element Visibility is {}", locator, "true".equals(visible) ? "Visible" : "Invisible");
+		
+		UiAutomationUtils.validateWithWait(() -> 
+		{
+			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
+
+			if(!"true".equals(visible))
+			{
+				return (element == null || !element.isDisplayed());
+			}
+
+			return (element != null && element.isDisplayed());
+		} , retryCount, retryTimeGapMillis, 
+				"Waiting for element: " + getLocatorWithParent(locator), 
+				new InvalidStateException("Failed to find element - " + getLocatorWithParent(locator)));
+
+		if(message != null)
+		{
+			WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
+			String actualMessage = element.getText().trim();
+
+			if(actualMessage == null || !actualMessage.contains(message))
+			{
+				exeLogger.error("Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, getLocatorWithParent(locator));
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/*

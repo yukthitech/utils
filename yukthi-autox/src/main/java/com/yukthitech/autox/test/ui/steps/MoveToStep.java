@@ -55,6 +55,39 @@ public class MoveToStep extends AbstractUiStep
 	@Param(description = "Before moving the element, the element will be aligned to document. This flag indicates if alignment should be to top or bottom. Default: true", required = false)
 	private boolean alignToTop = true;
 	
+	
+	/**
+	 * Number of retries to happen. Default: 5
+	 */
+	@Param(description = "Number of retries to happen. Default: 5", required = false)
+	private int retryCount = 5;
+	
+	/**
+	 * Time gap between retries.
+	 */
+	@Param(description = "Time gap between retries. Default: 1000", required = false)
+	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+
+	/**
+	 * Sets the number of retries to happen. Default: 5.
+	 *
+	 * @param retryCount the new number of retries to happen
+	 */
+	public void setRetryCount(int retryCount)
+	{
+		this.retryCount = retryCount;
+	}
+	
+	/**
+	 * Sets the time gap between retries.
+	 *
+	 * @param retryTimeGapMillis the new time gap between retries
+	 */
+	public void setRetryTimeGapMillis(int retryTimeGapMillis)
+	{
+		this.retryTimeGapMillis = retryTimeGapMillis;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
@@ -109,7 +142,7 @@ public class MoveToStep extends AbstractUiStep
 				}
 				
 				return true;
-			} , IAutomationConstants.FIVE_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , retryCount, retryTimeGapMillis,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to move to element - " + getLocatorWithParent(locator)));
 			

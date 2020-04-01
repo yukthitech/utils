@@ -3,6 +3,7 @@ package com.yukthitech.autox.test.ui.steps;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
@@ -38,17 +39,38 @@ public class WaitForStep extends AbstractUiStep
 	@Param(description = "If true, this step waits for element with specified locator gets removed or hidden.\nDefault: false", required = false)
 	private String hidden = "false";
 	
-	/**
-	 * Total wait time in seconds for element to become visible or hidden. Default: 5 sec.
-	 */
-	@Param(description = "Total wait time in millis for element to become visible or hidden. Default: 60000", required = false)
-	private int waitTime = IAutomationConstants.SIXTY_SECONDS;
 	
 	/**
-	 * Gap time in seconds to wait for between each check. Default: 1 sec.
+	 * Number of retries to happen. Default: 5
 	 */
-	@Param(description = "Gap time in millis to wait for between each check. Default: 1000", required = false)
-	private int gapTime = IAutomationConstants.ONE_SECOND; 
+	@Param(description = "Number of retries to happen. Default: 5", required = false)
+	private int retryCount = 60;
+	
+	/**
+	 * Time gap between retries.
+	 */
+	@Param(description = "Time gap between retries. Default: 1000", required = false)
+	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+
+	/**
+	 * Sets the number of retries to happen. Default: 5.
+	 *
+	 * @param retryCount the new number of retries to happen
+	 */
+	public void setRetryCount(int retryCount)
+	{
+		this.retryCount = retryCount;
+	}
+	
+	/**
+	 * Sets the time gap between retries.
+	 *
+	 * @param retryTimeGapMillis the new time gap between retries
+	 */
+	public void setRetryTimeGapMillis(int retryTimeGapMillis)
+	{
+		this.retryTimeGapMillis = retryTimeGapMillis;
+	}
 
 	/**
 	 * Simulates the click event on the specified button.
@@ -85,24 +107,30 @@ public class WaitForStep extends AbstractUiStep
 					}
 					
 					//if element needs to be checked for invisibility
-					if("true".equals(hidden))
+					try
 					{
-						if(element == null || !element.isDisplayed())
+						if("true".equals(hidden))
 						{
-							exeLogger.debug("Found locator '{}' to be hidden", getLocatorWithParent(locator));
+							if(element == null || !element.isDisplayed())
+							{
+								exeLogger.debug("Found locator '{}' to be hidden", getLocatorWithParent(locator));
+								return true;
+							}
+						}
+						//if element needs to be checked for visibility
+						else if(element != null && element.isDisplayed())
+						{
+							exeLogger.debug("Found locator '{}' to be visible.", getLocatorWithParent(locator));
 							return true;
 						}
-					}
-					//if element needs to be checked for visibility
-					else if(element != null && element.isDisplayed())
+					}catch(StaleElementReferenceException ex)
 					{
-						exeLogger.debug("Found locator '{}' to be visible.", getLocatorWithParent(locator));
-						return true;
+						exeLogger.debug("Locator '{}' check resulted in stale exception. Which is going to be ignored", getLocatorWithParent(locator));
 					}
 				}
 				
 				return false;
-			}, waitTime, gapTime, "Waiting for element: " + locators, 
+			}, retryCount, retryTimeGapMillis, "Waiting for element: " + locators, 
 				new InvalidStateException("Failed to find element - " + locators));
 			
 		} catch(InvalidStateException ex)
@@ -149,26 +177,6 @@ public class WaitForStep extends AbstractUiStep
 		this.hidden = hidden;
 	}
 	
-	/**
-	 * Sets the total wait time in seconds for element to become visible or hidden. Default: 5 sec.
-	 *
-	 * @param waitTime the new total wait time in seconds for element to become visible or hidden
-	 */
-	public void setWaitTime(int waitTime)
-	{
-		this.waitTime = waitTime;
-	}
-
-	/**
-	 * Sets the gap time in seconds to wait for between each check. Default: 1 sec.
-	 *
-	 * @param gapTime the new gap time in seconds to wait for between each check
-	 */
-	public void setGapTime(int gapTime)
-	{
-		this.gapTime = gapTime;
-	}
-
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -180,8 +188,8 @@ public class WaitForStep extends AbstractUiStep
 
 		builder.append("Locators: ").append(locators);
 		builder.append(",").append("Hidden: ").append(hidden);
-		builder.append(",").append("Wait Time: ").append(waitTime);
-		builder.append(",").append("Gap Time: ").append(gapTime);
+		builder.append(",").append("Retry Count: ").append(retryCount);
+		builder.append(",").append("Retry Gap: ").append(retryTimeGapMillis);
 
 		builder.append("]");
 		return builder.toString();

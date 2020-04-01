@@ -28,6 +28,39 @@ public class StepDoubleClick extends AbstractPostCheckStep
 	@Param(description = "Locator of the element to be double-cicked.", sourceType = SourceType.UI_LOCATOR)
 	private String locator;
 
+	
+	/**
+	 * Number of retries to happen. Default: 5
+	 */
+	@Param(description = "Number of retries to happen. Default: 5", required = false)
+	private int retryCount = 10;
+	
+	/**
+	 * Time gap between retries.
+	 */
+	@Param(description = "Time gap between retries. Default: 1000", required = false)
+	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+
+	/**
+	 * Sets the number of retries to happen. Default: 5.
+	 *
+	 * @param retryCount the new number of retries to happen
+	 */
+	public void setRetryCount(int retryCount)
+	{
+		this.retryCount = retryCount;
+	}
+	
+	/**
+	 * Sets the time gap between retries.
+	 *
+	 * @param retryTimeGapMillis the new time gap between retries
+	 */
+	public void setRetryTimeGapMillis(int retryTimeGapMillis)
+	{
+		this.retryTimeGapMillis = retryTimeGapMillis;
+	}
+
 	/**
 	 * Sets the locator of the element to be triggered..
 	 *
@@ -89,7 +122,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 	
 					throw ex;
 				}
-			} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
+			} , retryCount, retryTimeGapMillis,
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)

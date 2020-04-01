@@ -106,4 +106,33 @@
 		</example>
 	</collection>
 
+	<collection name="com.yukthitech.autox.test.sql.assertion.SqlAssert">
+		<example>
+			<description>
+				Fetching the data and validating the columns. Rows returned by query and expected rows
+				order should match.
+			</description>
+			
+			<content><![CDATA[
+				<s:sql-assert dataSourceName="dataSource">
+					<query>
+						SELECT NAME, AGE 
+						FROM EMPLOYEE 
+						WHERE AGE < 40
+						ORDER BY NAME
+					</query>
+				
+					<expectedRow>
+						<column name="NAME">employee1</column>
+						<column name="AGE">20</column>
+					</expectedRow>
+
+					<expectedRow>
+						<column name="NAME">employee2</column>
+						<column name="AGE">30</column>
+					</expectedRow>
+				</s:sql-assert>
+			]]></content>
+		</example>
+	</collection>
 </examples>

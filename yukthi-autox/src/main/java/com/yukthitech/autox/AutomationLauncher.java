@@ -173,6 +173,7 @@ public class AutomationLauncher
 				}
 			} catch(Exception ex)
 			{
+				logger.error("An error occurred while loading file: %s", xmlFile.getPath(), ex);
 				errors.add(String.format("Error File: %s\n\t\tError: %s\n\t\tCaused by: %s", xmlFile.getPath(), ex, ex.getCause()));
 			}
 		}

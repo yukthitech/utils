@@ -6,6 +6,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -20,6 +21,38 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class RefreshStep extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Number of retries to happen. Default: 5
+	 */
+	@Param(description = "Number of retries to happen. Default: 10", required = false)
+	private int retryCount = 10;
+	
+	/**
+	 * Time gap between retries.
+	 */
+	@Param(description = "Time gap between retries. Default: 1000", required = false)
+	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+
+	/**
+	 * Sets the number of retries to happen. Default: 5.
+	 *
+	 * @param retryCount the new number of retries to happen
+	 */
+	public void setRetryCount(int retryCount)
+	{
+		this.retryCount = retryCount;
+	}
+	
+	/**
+	 * Sets the time gap between retries.
+	 *
+	 * @param retryTimeGapMillis the new time gap between retries
+	 */
+	public void setRetryTimeGapMillis(int retryTimeGapMillis)
+	{
+		this.retryTimeGapMillis = retryTimeGapMillis;
+	}
 
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
@@ -43,7 +76,7 @@ public class RefreshStep extends AbstractPostCheckStep
 				
 				throw ex;
 			}
-		} , IAutomationConstants.TEN_SECONDS, IAutomationConstants.ONE_SECOND,
+		} , retryCount, retryTimeGapMillis,
 				"Waiting for refresh to be successful", 
 				new InvalidStateException("Failed to refresh"));
 		return true;
