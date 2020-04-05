@@ -49,4 +49,6 @@ public interface IAutomationConstants
 	 * One seconds.
 	 */
 	public int ONE_SECOND = 1000;
+	
+	public int TWO_MIN_MILLIS = 2 * 60000;
 }

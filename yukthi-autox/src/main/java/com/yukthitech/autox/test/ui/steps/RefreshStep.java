@@ -7,6 +7,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -17,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "uiRefresh", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Refreshes the current page.")
+@Executable(name = "uiRefresh", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Refreshes the current page. This step uses 2 min post-verification delay by default.")
 public class RefreshStep extends AbstractPostCheckStep
 {
 	private static final long serialVersionUID = 1L;
@@ -33,6 +34,11 @@ public class RefreshStep extends AbstractPostCheckStep
 	 */
 	@Param(description = "Time gap between retries. Default: 1000", required = false)
 	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+	
+	public RefreshStep()
+	{
+		super.setPostVerificationDelay(IAutomationConstants.TWO_MIN_MILLIS);
+	}
 
 	/**
 	 * Sets the number of retries to happen. Default: 5.
@@ -66,7 +72,11 @@ public class RefreshStep extends AbstractPostCheckStep
 		{
 			try
 			{
+				exeLogger.trace("Performing refresh operation..");
 				driver.navigate().refresh();
+				
+				//wait for page refresh to complete
+				AutomationUtils.sleep(2000);
 				
 				//after refresh check the post-check and return result approp
 				return doPostCheck(exeLogger, "Post Refresh");

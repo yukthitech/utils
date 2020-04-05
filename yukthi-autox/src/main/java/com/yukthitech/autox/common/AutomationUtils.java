@@ -879,4 +879,19 @@ public class AutomationUtils
 		
 		throw new com.yukthitech.utils.exceptions.UnsupportedOperationException("Unsupported input specified for bean loading: '{}'", name);
 	}
+	
+	/**
+	 * Makes current thread for specified time.
+	 * @param timeInMillis
+	 */
+	public static void sleep(long timeInMillis)
+	{
+		try
+		{
+			Thread.sleep(timeInMillis);
+		}catch(InterruptedException ex)
+		{
+			throw new IllegalStateException(ex);
+		}
+	}
 }

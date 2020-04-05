@@ -85,7 +85,7 @@ public class ClickStep extends AbstractPostCheckStep
 					if(webElement == null)
 					{
 						exeLogger.error("Failed to find element with locator: {}", getLocatorWithParent(locator));
-						throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
+						throw new IllegalArgumentException("Failed to find element with locator: " + getLocatorWithParent(locator));
 					}
 
 					//if at least once button is clicked
