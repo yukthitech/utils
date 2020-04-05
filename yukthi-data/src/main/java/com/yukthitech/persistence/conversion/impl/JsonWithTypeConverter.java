@@ -7,6 +7,7 @@ import java.sql.Clob;
 
 import org.apache.commons.io.IOUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
@@ -34,6 +35,7 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 	static
 	{
 		objectMapper.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
+		objectMapper.setSerializationInclusion(Include.NON_NULL);
 	}
 
 	/* (non-Javadoc)

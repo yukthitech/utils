@@ -7,6 +7,7 @@ import java.sql.Clob;
 
 import org.apache.commons.io.IOUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.DataTypeMapping;
@@ -25,6 +26,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class JsonConverter implements IPersistenceConverter
 {
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	static
+	{
+		objectMapper.setSerializationInclusion(Include.NON_NULL);
+	}
 	
 	/* (non-Javadoc)
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToJavaType(java.lang.Object, com.fw.persistence.annotations.DataType, java.lang.Class)
