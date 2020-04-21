@@ -170,6 +170,8 @@ public class MockServer
 	
 	public void reset()
 	{
+		mockResponses.forEach(resp -> resp.stop());
+		
 		mockRequests.clear();
 		mockResponses.clear();
 	}

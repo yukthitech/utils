@@ -62,6 +62,11 @@ public class MockResponse implements Serializable
 	private WaitConfig waitConfig;
 	
 	/**
+	 * Flag indicating if this response should stop serving requests.
+	 */
+	private boolean stopped = false;
+	
+	/**
 	 * Instantiates a new mock response.
 	 */
 	public MockResponse()
@@ -153,28 +158,50 @@ public class MockResponse implements Serializable
 		{
 			if(waitConfig.getTime() > 0)
 			{
-				logger.debug("Before sending response, waiting for time: {} millis", waitConfig.getTime());
+				AutomationContext automationContext = AutomationContext.getInstance();
 				
-				try
+				if(automationContext.getExecutionLogger() != null)
 				{
-					Thread.sleep(waitConfig.getTime());
-				}catch(Exception ex)
-				{}
+					automationContext.getExecutionLogger().debug("Before sending response, waiting for time: {} millis", waitConfig.getTime());
+				}
+				else
+				{
+					logger.debug("Before sending response, waiting for time: {} millis", waitConfig.getTime());
+				}
+
+				synchronized(this)
+				{
+					try
+					{
+						super.wait(waitConfig.getTime());
+					}catch(Exception ex)
+					{}
+				}
 			}
 			
 			if(StringUtils.isNotBlank(waitConfig.getForAttr()))
 			{
-				logger.debug("Before sending response, waiting for attr: {}", waitConfig.getForAttr());
-				
 				AutomationContext automationContext = AutomationContext.getInstance();
 				
-				while(automationContext.getAttribute(waitConfig.getForAttr()) == null)
+				if(automationContext.getExecutionLogger() != null)
 				{
-					try
+					automationContext.getExecutionLogger().debug("Before sending response, waiting for attr: {}", waitConfig.getForAttr());
+				}
+				else
+				{
+					logger.debug("Before sending response, waiting for attr: {}", waitConfig.getForAttr());					
+				}
+				
+				synchronized(this)
+				{
+					while(automationContext.getAttribute(waitConfig.getForAttr()) == null && !stopped)
 					{
-						Thread.sleep(100);
-					}catch(Exception ex)
-					{}
+						try
+						{
+							super.wait(100);
+						}catch(Exception ex)
+						{}
+					}
 				}
 			}
 		}
@@ -306,6 +333,15 @@ public class MockResponse implements Serializable
 	public void setMethod(String method) 
 	{
 		this.method = method;
+	}
+	
+	/**
+	 * Stops the current response from serving any current requests.
+	 */
+	public synchronized void stop()
+	{
+		this.stopped = true;
+		super.notifyAll();
 	}
 
 	/**

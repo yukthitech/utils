@@ -67,6 +67,16 @@
 				</ccg:for-each>
 			]]></content>
 		</example>
+
+		<example>
+			<description>Looping through map. Each iteration using loop variable, key and value can be accessed as shown in this example.</description>
+			
+			<content><![CDATA[
+				<s:forEach expression="prop: data.dataMap">
+					<s:set expression="res" value="${attr.res}|${attr.loopVar.key}=${attr.loopVar.value}"/>
+				</s:forEach>
+			]]></content>
+		</example>
 	</collection>
 
 	<collection name="com.yukthitech.autox.test.lang.steps.ForLoopStep">
