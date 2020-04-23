@@ -2,6 +2,7 @@ package com.yukthitech.autox.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +12,8 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.rest.HttpClientFactory;
 import com.yukthitech.utils.rest.RestClient;
 
 /**
@@ -25,6 +28,12 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 	 */
 	@Param(description = "Default base url to be used for REST steps and validations.", required = true)
 	private String baseUrl;
+	
+	/**
+	 * Proxy host and port in host:port format.
+	 */
+	@Param(description = "Proxy host and port in host:port format.", required = true)
+	private String proxyHostPort;
 	
 	/**
 	 * Default headers to be passed with every method invocation.
@@ -89,6 +98,23 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 		return defaultHeaders;
 	}
 	
+	/**
+	 * Sets the proxy host and port in host:port format.
+	 *
+	 * @param proxyHostPort the new proxy host and port in host:port format
+	 */
+	public void setProxyHostPort(String proxyHostPort)
+	{
+		Matcher matcher = HttpClientFactory.PROXY_PATTERN.matcher(proxyHostPort);
+		
+		if(!matcher.matches())
+		{
+			throw new InvalidArgumentException("Invalid proxy-host-port specified. It should be in host:port format. Specified value: {}", proxyHostPort);
+		}
+		
+		this.proxyHostPort = proxyHostPort;
+	}
+	
 	@Override
 	public void validate() throws ValidateException
 	{
@@ -111,7 +137,7 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 		
 		if(client == null)
 		{
-			client = new RestClient(baseUrl);
+			client = new RestClient(baseUrl, proxyHostPort);
 			urlToClient.put(baseUrl, client);
 		}
 		
