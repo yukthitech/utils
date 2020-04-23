@@ -122,7 +122,7 @@ public class RestClient
 	 * A base url of the API server (eg: http://localhost:8080/test), which will get prepended to each request being invoked
 	 * @param baseUrl
 	 */
-	public RestClient(String baseUrl)
+	public RestClient(String baseUrl, String proxyHostPort)
 	{
 		int len = baseUrl.length();
 
@@ -133,9 +133,14 @@ public class RestClient
 		}
 
 		this.baseUrl = baseUrl;
-		httpclient = HttpClientFactory.getInstance().newHttpClient();
+		httpclient = HttpClientFactory.getInstance().newHttpClient(proxyHostPort);
 	}
 	
+	public RestClient(String baseUrl)
+	{
+		this(baseUrl, null);
+	}
+
 	/**
 	 * @return the {@link #restClientListener restClientListener}
 	 */

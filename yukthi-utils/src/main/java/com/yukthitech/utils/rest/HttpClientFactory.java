@@ -44,7 +44,7 @@ public class HttpClientFactory
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 500;
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 5;
-	private static final Pattern PROXY_PATTERN = Pattern.compile("([\\w\\.\\-]+)\\:(\\d+)");
+	public static final Pattern PROXY_PATTERN = Pattern.compile("([\\w\\.\\-]+)\\:(\\d+)");
 
 	public static final String PROP_PROXY = "http.proxy";
 
@@ -131,19 +131,23 @@ public class HttpClientFactory
 
 		if(StringUtils.isNotBlank(proxy))
 		{
-			Matcher matcher = PROXY_PATTERN.matcher(proxy);
-
-			if(!matcher.matches())
-			{
-				throw new IllegalStateException(String.format("Invalid proxy specified - %s. Expected pattern - proxy-host:port", proxy));
-			}
-
-			String host = matcher.group(1);
-			Integer port = Integer.parseInt(matcher.group(2));
-			proxyHost = new HttpHost(host, port);
-
-			logger.debug("Using http proxy {}:{}", host, port);
+			proxyHost = parseProxyHost(proxy);
+			logger.debug("Using default http proxy {}:{}", proxyHost.getHostName(), proxyHost.getPort());
 		}
+	}
+	
+	private HttpHost parseProxyHost(String hostPort)
+	{
+		Matcher matcher = PROXY_PATTERN.matcher(hostPort);
+
+		if(!matcher.matches())
+		{
+			throw new IllegalStateException(String.format("Invalid proxy specified - %s. Expected pattern - proxy-host:port", hostPort));
+		}
+
+		String host = matcher.group(1);
+		Integer port = Integer.parseInt(matcher.group(2));
+		return new HttpHost(host, port);
 	}
 
 	/**
@@ -169,19 +173,34 @@ public class HttpClientFactory
 		return new DefaultProxyRoutePlanner(host);
 	}
 
-	public CloseableHttpClient newHttpClient()
+	/**
+	 * Creates http client using proxy, is specified.
+	 * @param proxyHostStr proxy host string in host:port format
+	 * @return http client with proxy
+	 */
+	public CloseableHttpClient newHttpClient(String proxyHostStr)
 	{
 		HttpClientBuilder clientBuilder = newClientBuilder();
 		clientBuilder.setConnectionManager(connectionManager);
 		clientBuilder.setKeepAliveStrategy(keepAliveStrategy);
 		clientBuilder.setConnectionManagerShared(true);
 
-		if(proxyHost != null)
+		if(StringUtils.isNotBlank(proxyHostStr))
+		{
+			HttpHost proxy = parseProxyHost(proxyHostStr);
+			clientBuilder.setRoutePlanner(newDefaultProxyRoutePlanner(proxy));
+		}
+		else if(proxyHost != null)
 		{
 			clientBuilder.setRoutePlanner(newDefaultProxyRoutePlanner(proxyHost));
 		}
 		
 		return clientBuilder.build();
+	}
+
+	public CloseableHttpClient newHttpClient()
+	{
+		return newHttpClient(null);
 	}
 
 	public static synchronized void reset()
