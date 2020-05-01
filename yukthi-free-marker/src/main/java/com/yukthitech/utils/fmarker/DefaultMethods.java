@@ -265,6 +265,23 @@ public class DefaultMethods
 	}
 	
 	/**
+	 * If 'nullCheck' is null, 'ifNull' will be returned otherwise 'nullCheck' will be returned.
+	 * @param nullCheck
+	 * @param ifNull
+	 * @return
+	 */
+	@FreeMarkerMethod(
+			value = "nullVal", 
+			description = "If 'nullCheck' is null, 'ifNull' will be returned otherwise 'nullCheck' will be returned.",
+			returnDescription = "ifNull or nullCheck based on nullCheck is null or not.")
+	public static Object nullVal(
+			@FmParam(name = "nullCheck", description = "object to be checked for null") Object nullCheck, 
+			@FmParam(name = "ifNull", description = "object to be returned if null") Object ifNull)
+	{
+		return (nullCheck == null) ? ifNull : nullCheck;
+	}
+
+	/**
 	 * Fetches the size of object based on below logic
 	 * 	If null, returns 0
 	 *  If string, length of string
