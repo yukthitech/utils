@@ -513,13 +513,6 @@ public class DefaultExpressionParsers
 	{
 		ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
 		
-		//if the input stream needs to be loaded as template, parse the expressions
-		if("true".equalsIgnoreCase(parserContext.getParameter("template")))
-		{
-			logger.debug("Processing input data as template: {}", name);
-			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
-		}
-		
 		//if the input stream needs app prop replacement
 		if("true".equalsIgnoreCase(parserContext.getParameter("propExpr")))
 		{
@@ -530,6 +523,13 @@ public class DefaultExpressionParsers
 					AppConfigParserHandler.EXPR_PATTERN, AppConfigParserHandler.EXPR_ESCAPE_PREFIX, AppConfigParserHandler.EXPR_ESCAPE_REPLACE);
 		}
 
+		//if the input stream needs to be loaded as template, parse the expressions
+		if("true".equalsIgnoreCase(parserContext.getParameter("template")))
+		{
+			logger.debug("Processing input data as template: {}", name);
+			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
+		}
+		
 		//if input stream has to be loaded as simple text, simply return the current data string
 		if("true".equalsIgnoreCase(parserContext.getParameter("text")))
 		{

@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.rest.steps;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.apache.http.client.ResponseHandler;
 
@@ -13,6 +14,8 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.RestPlugin;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.rest.HttpClientFactory;
 import com.yukthitech.utils.rest.RestClient;
 import com.yukthitech.utils.rest.RestRequest;
 import com.yukthitech.utils.rest.RestResult;
@@ -32,6 +35,12 @@ public abstract class AbstractRestStep extends AbstractStep
 	@Param(description = "Base url to be used. If specified, this will be used instead of using base url from plugin.", required = false)
 	private String baseUrl;
 	
+	/**
+	 * Proxy host and port in host:port format.
+	 */
+	@Param(description = "Proxy host and port in host:port format.", required = false)
+	private String proxyHostPort;
+
 	/**
 	 * Uri to be invoked.
 	 */
@@ -177,6 +186,23 @@ public abstract class AbstractRestStep extends AbstractStep
 	}
 
 	/**
+	 * Sets the proxy host and port in host:port format.
+	 *
+	 * @param proxyHostPort the new proxy host and port in host:port format
+	 */
+	public void setProxyHostPort(String proxyHostPort)
+	{
+		Matcher matcher = HttpClientFactory.PROXY_PATTERN.matcher(proxyHostPort);
+		
+		if(!matcher.matches())
+		{
+			throw new InvalidArgumentException("Invalid proxy-host-port specified. It should be in host:port format. Specified value: {}", proxyHostPort);
+		}
+		
+		this.proxyHostPort = proxyHostPort;
+	}
+
+	/**
 	 * Populates the request with specified headers, params and path variables.
 	 * @param context Context to be used to get plugin and default headers
 	 * @param request Request to be populated
@@ -243,14 +269,14 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		if(baseUrl != null)
 		{
-			exeLogger.debug("With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", baseUrl, expectedResponseType, request);
+			exeLogger.debug("With [Base url: {}, Proxy: {}, Expected Response Type: {}] invoking request: \n {}", baseUrl, proxyHostPort, expectedResponseType, request);
 		}
 		else
 		{
-			exeLogger.debug("With [Base url: {}, Expected Response Type: {}] invoking request: \n {}", restPlugin.getBaseUrl(), expectedResponseType, request);
+			exeLogger.debug("With [Base url: {}, Proxy: {}, Expected Response Type: {}] invoking request: \n {}", restPlugin.getBaseUrl(), proxyHostPort, expectedResponseType, request);
 		}
 		
-		RestClient client = restPlugin.getRestClient(baseUrl);
+		RestClient client = restPlugin.getRestClient(baseUrl, proxyHostPort);
 		
 		RestResult<Object> result = null;
 		
