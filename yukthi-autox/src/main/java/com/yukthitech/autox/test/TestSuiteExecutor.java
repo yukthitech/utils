@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.Command;
 import com.yukthitech.autox.event.AutomationEvent;
 import com.yukthitech.utils.ObjectWrapper;
@@ -702,8 +703,15 @@ public class TestSuiteExecutor
 			// if no limited test suites are specified execute all test suites
 			else
 			{
+				ApplicationConfiguration appConfig = context.getAppConfiguration();
+				
 				for(TestSuite testSuite : testSuiteGroup.getTestSuites())
 				{
+					if(appConfig.isTestSuiteExcluded(testSuite.getName()))
+					{
+						continue;
+					}
+					
 					if( !executeTestSuite(testSuite) )
 					{
 						successful = false;

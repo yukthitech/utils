@@ -112,6 +112,11 @@ public class ApplicationConfiguration
 	private Set<String> excludeGroups = new HashSet<>();
 	
 	/**
+	 * Test suites which should be excluded.
+	 */
+	private Set<String> excludeTestSuite = new HashSet<>();
+	
+	/**
 	 * List of commands to be executed post automation execution. 
 	 * This can include commands like code coverage report generation, sending mail etc.
 	 */
@@ -545,6 +550,21 @@ public class ApplicationConfiguration
 		}
 	}
 	
+	public void addExcludedTestSuites(String testSuiteStr)
+	{
+		String tsLst[] = testSuiteStr.split("\\s*\\,\\s*");
+		
+		for(String ts : tsLst)
+		{
+			if(ts.trim().length() == 0)
+			{
+				continue;
+			}
+			
+			this.excludeTestSuite.add(ts);
+		}
+	}
+
 	/**
 	 * Returns true if specified group name is under exclusion list.
 	 * @param name group name to check
@@ -553,6 +573,11 @@ public class ApplicationConfiguration
 	public boolean isGroupExcluded(String name)
 	{
 		return excludeGroups.contains(name);
+	}
+	
+	public boolean isTestSuiteExcluded(String name)
+	{
+		return excludeTestSuite.contains(name);
 	}
 	
 	/**
