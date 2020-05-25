@@ -1,14 +1,21 @@
 package com.yukthitech.mail.tracker;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.mail.Message;
+
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Represents Mail message received. 
@@ -91,6 +98,24 @@ public class ReceivedMailMessage
 		}
 	}
 	
+	private static File TEMP_MAIL_FOLDER = new File(".mail.temp");
+	
+	private static AtomicInteger UQ_ID = new AtomicInteger(1);
+	
+	static
+	{
+		if(!TEMP_MAIL_FOLDER.exists())
+		{
+			try
+			{
+				FileUtils.forceMkdir(TEMP_MAIL_FOLDER);
+			}catch(Exception  ex)
+			{
+				throw new InvalidStateException("An error occurred while creating temp mail folder: " + TEMP_MAIL_FOLDER.getPath(), ex);
+			}
+		}
+	}
+	
 	/**
 	 * uid of the mail.
 	 */
@@ -146,6 +171,10 @@ public class ReceivedMailMessage
 	 */
 	private String toList;
 	
+	private Message actualMessage;
+	
+	private File mailFile;
+	
 	/**
 	 * Instantiates a new received mail message.
 	 *
@@ -156,7 +185,7 @@ public class ReceivedMailMessage
 	 * @param receivedDate the received date
 	 * @param readEarlier the read earlier
 	 */
-	public ReceivedMailMessage(long uid, String fromName, String fromMailId, String subject, Date receivedDate, boolean readEarlier, String toList)
+	public ReceivedMailMessage(long uid, String fromName, String fromMailId, String subject, Date receivedDate, boolean readEarlier, String toList, Message actualMessage)
 	{
 		this.uid = uid;
 		this.fromName = fromName;
@@ -165,6 +194,7 @@ public class ReceivedMailMessage
 		this.receivedDate = receivedDate;
 		this.readEarlier = readEarlier;
 		this.toList = toList;
+		this.actualMessage = actualMessage;
 	}
 	
 	public String getToList()
@@ -505,5 +535,31 @@ public class ReceivedMailMessage
 		
 		Element element = elements.first();
 		return element.text();
+	}
+	
+	public File getEmlFile()
+	{
+		if(mailFile != null && mailFile.exists())
+		{
+			return mailFile;
+		}
+
+		try
+		{
+			File file = new File(TEMP_MAIL_FOLDER, "mail-" + UQ_ID.getAndIncrement() + ".eml");
+			FileOutputStream fos = new FileOutputStream(file);
+			
+			actualMessage.writeTo(fos);
+			
+			fos.flush();
+			fos.close();
+			
+			this.mailFile = file;
+		}catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while saving mail file", ex);
+		}
+		
+		return mailFile;
 	}
 }

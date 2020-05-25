@@ -134,6 +134,7 @@ public class EmailTracker
 			
 			Folder sourceFolder = (Folder) folder;
 			Folder destFolder = null;
+			Store store = sourceFolder.getStore();
 
 			try
 			{
@@ -141,7 +142,7 @@ public class EmailTracker
 				
 				logger.debug("Moving to folder {} the mail with subject: {}", folderToMove, mailMessage.getSubject());
 				
-				destFolder = sourceFolder.getFolder(folderToMove);
+				destFolder = folderToMove != null ? store.getFolder(folderToMove) : null;
 
 				if(destFolder == null || !destFolder.exists())
 				{
@@ -581,8 +582,11 @@ public class EmailTracker
 				.collect(Collectors.joining(","));
 
 		ReceivedMailMessage mailMessage = new ReceivedMailMessage(folder.getUID(message), fromName, 
-				frmMailId, subject, recvDate, isReadEarlier, toLst);
+				frmMailId, subject, recvDate, isReadEarlier, toLst, message);
 		extractMailContent(mailMessage, message.getContent(), message.getContentType());
+		
+		//Generate eml file of the mail.
+		mailMessage.getEmlFile();
 		
 		return mailMessage;
 	}
@@ -722,6 +726,11 @@ public class EmailTracker
 					} finally
 					{
 						processedCount.incrementAndGet();
+						
+						if(mssg.getEmlFile() != null)
+						{
+							mssg.getEmlFile().delete();
+						}
 					}
 				}
 			});
