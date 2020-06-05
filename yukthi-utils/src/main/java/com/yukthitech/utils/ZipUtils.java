@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -23,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -170,7 +173,7 @@ public class ZipUtils
 			throw new IllegalStateException("An error occurred while creating zip of input bytes", ex);
 		}
 	}
-	
+
 	/**
 	 * Creates a zip file of the specified file and returns the same. Input map should have expected file name as 
 	 * key and the file as value (from which content will be fetched).
@@ -179,11 +182,32 @@ public class ZipUtils
 	 */
 	public static File zipFiles(Map<String, File> files)
 	{
+		File zipFile = null;
+		
 		try
 		{
-			File tempFile = File.createTempFile("temp", ".zip");
-			
-			FileOutputStream fos = new FileOutputStream(tempFile);
+			zipFile = File.createTempFile("temp", ".zip");
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while creating temp file", ex);
+		}
+		
+		zipFiles(files, zipFile);
+		
+		return zipFile; 
+	}
+	
+	/**
+	 * Creates a zip file of the specified files and returns the same. Input map should have expected file name as 
+	 * key and the file as value (from which content will be fetched).
+	 * @param files mapping from expected file name to file
+	 * @param zipFile output zip file
+	 */
+	public static void zipFiles(Map<String, File> files, File zipFile)
+	{
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(zipFile);
 			ZipOutputStream zos = new ZipOutputStream(fos);
 			
 			for(String fileName : files.keySet())
@@ -191,21 +215,74 @@ public class ZipUtils
 				ZipEntry zipEntry = new ZipEntry(fileName);
 				zos.putNextEntry(zipEntry);
 				
-				FileInputStream input = new FileInputStream(files.get(fileName));
-				IOUtils.copy(input, zos);
+				File file = files.get(fileName);
+				
+				if(file != null)
+				{
+					FileInputStream input = new FileInputStream(file);
+					IOUtils.copy(input, zos);
+					input.close();
+				}
 				
 				zos.closeEntry();
-				input.close();
 			}
 			
 			zos.close();
 			fos.close();
-			
-			return tempFile;
 		} catch(IOException ex)
 		{
 			throw new InvalidStateException("An exception occurred while zipping specified files", ex);
 		}
+	}
+	
+	/**
+	 * Fetches all the files into specified file-map using relative path as the key.
+	 * @param directory dir from which files needs to be fetched
+	 * @param files map where files should be collected
+	 * @param path current directory relative path
+	 */
+	private static void fetchFiles(File directory, final Map<String, File> files, final String path)
+	{
+		if(!path.isEmpty())
+		{
+			files.put(path, null);
+		}
+		
+		directory.listFiles(new FileFilter()
+		{
+			@Override
+			public boolean accept(File pathname)
+			{
+				if(pathname.isFile())
+				{
+					files.put(path + pathname.getName(), pathname);
+				}
+				else
+				{
+					fetchFiles(pathname, files, path + pathname.getName() + "/");
+				}
+				
+				return false;
+			}
+		});
+	}
+	
+	/**
+	 * Zips the specified directory into specified zip file.
+	 * @param directory directory to be zipped.
+	 * @param zipFile zip file to be created.
+	 */
+	public static void zipDirectory(File directory, File zipFile)
+	{
+		if(!directory.isDirectory())
+		{
+			throw new InvalidArgumentException("Invalid directory specified: {}", directory);
+		}
+		
+		Map<String, File> files = new TreeMap<String, File>();
+		fetchFiles(directory, files, "");
+		
+		zipFiles(files, zipFile);
 	}
 	
 	/**
@@ -300,8 +377,9 @@ public class ZipUtils
 	
 	public static void main(String[] args) throws Exception
 	{
-		FileInputStream fis = new FileInputStream("C:\\p4a\\razor\\weaver\\feature\\weaver-automation\\src\\main\\resources\\weaver-template-loader-1.0-bin.zip"); 
-		unzip(fis, new File(".\\test"));
-		fis.close();
+		zipDirectory(new File("C:\\Office\\Stories\\SDP"), new File("C:\\temp\\sms.zip"));
+		System.out.println("Zip is completed");
+		unzip(new File("C:\\temp\\sms.zip"), new File("c:\\temp\\sms"));
+		System.out.println("Unzip is done..");
 	}
 }
