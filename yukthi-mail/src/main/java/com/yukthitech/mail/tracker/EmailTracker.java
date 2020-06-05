@@ -526,6 +526,27 @@ public class EmailTracker
 		}
 	}
 	
+	private String[] extractNameAndId(String nameMailId)
+	{
+		String mailId = nameMailId;
+		String name = null;
+
+		if(nameMailId.contains("<"))
+		{
+			name = nameMailId.substring(0, nameMailId.indexOf("<")).trim();
+			mailId = nameMailId.substring(nameMailId.indexOf("<") + 1, nameMailId.indexOf(">")).trim();
+		}
+		else
+		{
+			name = nameMailId.substring(0, nameMailId.indexOf("@")).trim();
+		}
+
+		// remove non alpha characters
+		name = name.replaceAll("[^a-zA-Z]", " ").replaceAll("\\s+", " ").trim();
+		
+		return new String[] {name, mailId};
+	}
+	
 	/**
 	 * Convert message.
 	 *
@@ -559,30 +580,18 @@ public class EmailTracker
 
 		String subject = message.getSubject();
 
-		String nameMailId = message.getFrom()[0].toString();
-		String frmMailId = nameMailId;
-		String fromName = null;
+		String frmNameMail[] = extractNameAndId(message.getFrom()[0].toString());
+		String replyToNameMail[] = extractNameAndId(message.getReplyTo()[0].toString());
 
-		if(nameMailId.contains("<"))
-		{
-			fromName = nameMailId.substring(0, nameMailId.indexOf("<")).trim();
-			frmMailId = nameMailId.substring(nameMailId.indexOf("<") + 1, nameMailId.indexOf(">")).trim();
-		}
-		else
-		{
-			fromName = nameMailId.substring(0, nameMailId.indexOf("@")).trim();
-		}
-
-		// remove non alpha characters
-		fromName = fromName.replaceAll("[^a-zA-Z]", " ").replaceAll("\\s+", " ").trim();
-		
 		String toLst = Arrays.asList(message.getAllRecipients())
 				.stream()
 				.map(addr -> addr.toString())
 				.collect(Collectors.joining(","));
 
-		ReceivedMailMessage mailMessage = new ReceivedMailMessage(folder.getUID(message), fromName, 
-				frmMailId, subject, recvDate, isReadEarlier, toLst, message);
+		ReceivedMailMessage mailMessage = new ReceivedMailMessage(folder.getUID(message), 
+				frmNameMail[0], frmNameMail[1],
+				replyToNameMail[0], replyToNameMail[1],
+				subject, recvDate, isReadEarlier, toLst, message);
 		extractMailContent(mailMessage, message.getContent(), message.getContentType());
 		
 		//Generate eml file of the mail.

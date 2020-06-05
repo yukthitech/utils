@@ -98,8 +98,14 @@ public class ReceivedMailMessage
 		}
 	}
 	
+	/**
+	 * The temp mail folder.
+	 */
 	private static File TEMP_MAIL_FOLDER = new File(".mail.temp");
 	
+	/**
+	 * The uq id.
+	 */
 	private static AtomicInteger UQ_ID = new AtomicInteger(1);
 	
 	static
@@ -130,6 +136,16 @@ public class ReceivedMailMessage
 	 * Mail id from which mail is received.
 	 */
 	private String fromMailId;
+	
+	/**
+	 * Name extracted from reply to id.
+	 */
+	private String replyToName;
+	
+	/**
+	 * Reply to mail id.
+	 */
+	private String replyToMailId;
 	
 	/**
 	 * Mail message subject.
@@ -171,8 +187,14 @@ public class ReceivedMailMessage
 	 */
 	private String toList;
 	
+	/**
+	 * The actual message.
+	 */
 	private Message actualMessage;
 	
+	/**
+	 * The mail file.
+	 */
 	private File mailFile;
 	
 	/**
@@ -185,11 +207,16 @@ public class ReceivedMailMessage
 	 * @param receivedDate the received date
 	 * @param readEarlier the read earlier
 	 */
-	public ReceivedMailMessage(long uid, String fromName, String fromMailId, String subject, Date receivedDate, boolean readEarlier, String toList, Message actualMessage)
+	public ReceivedMailMessage(long uid, 
+			String fromName, String fromMailId,
+			String replyToName, String replyToMailId,
+			String subject, Date receivedDate, boolean readEarlier, String toList, Message actualMessage)
 	{
 		this.uid = uid;
 		this.fromName = fromName;
 		this.fromMailId = fromMailId;
+		this.replyToName = replyToName;
+		this.replyToMailId = replyToMailId;
 		this.subject = subject;
 		this.receivedDate = receivedDate;
 		this.readEarlier = readEarlier;
@@ -197,6 +224,11 @@ public class ReceivedMailMessage
 		this.actualMessage = actualMessage;
 	}
 	
+	/**
+	 * Gets the to list;.
+	 *
+	 * @return the to list;
+	 */
 	public String getToList()
 	{
 		return toList;
@@ -210,6 +242,26 @@ public class ReceivedMailMessage
 	public long getUid()
 	{
 		return uid;
+	}
+	
+	/**
+	 * Sets the name extracted from mail id.
+	 *
+	 * @param fromName the new name extracted from mail id
+	 */
+	public void setFromName(String fromName)
+	{
+		this.fromName = fromName;
+	}
+
+	/**
+	 * Sets the mail id from which mail is received.
+	 *
+	 * @param fromMailId the new mail id from which mail is received
+	 */
+	public void setFromMailId(String fromMailId)
+	{
+		this.fromMailId = fromMailId;
 	}
 
 	/**
@@ -326,6 +378,26 @@ public class ReceivedMailMessage
 		return receivedDate;
 	}
 	
+	/**
+	 * Gets the name extracted from reply to id.
+	 *
+	 * @return the name extracted from reply to id
+	 */
+	public String getReplyToName()
+	{
+		return replyToName;
+	}
+
+	/**
+	 * Gets the reply to mail id.
+	 *
+	 * @return the reply to mail id
+	 */
+	public String getReplyToMailId()
+	{
+		return replyToMailId;
+	}
+
 	/**
 	 * Checks if is flag indicating if this message was read earlier.
 	 *
@@ -537,6 +609,11 @@ public class ReceivedMailMessage
 		return element.text();
 	}
 	
+	/**
+	 * Gets the eml file.
+	 *
+	 * @return the eml file
+	 */
 	public File getEmlFile()
 	{
 		if(mailFile != null && mailFile.exists())
