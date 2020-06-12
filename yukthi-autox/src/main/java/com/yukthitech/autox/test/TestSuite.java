@@ -2,10 +2,14 @@ package com.yukthitech.autox.test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,6 +30,11 @@ public class TestSuite implements Validateable
 	 * Name of the test suite.
 	 */
 	private String name;
+	
+	/**
+	 * Author names of this test suite.
+	 */
+	private String author;
 	
 	/**
 	 * Description about the test suite.
@@ -80,6 +89,20 @@ public class TestSuite implements Validateable
 		this.name = name;
 	}
 	
+	public String getAuthor()
+	{
+		return author;
+	}
+
+	public void setAuthor(String author)
+	{
+		if(StringUtils.isNotBlank(author))
+		{
+			Set<String> authors = new TreeSet<>(Arrays.asList(author.trim().split("\\s*\\,\\s*")));
+			this.author = authors.stream().collect(Collectors.joining(", "));
+		}
+	}
+
 	/**
 	 * Sets the file in which this test suite is defined.
 	 *
@@ -144,6 +167,18 @@ public class TestSuite implements Validateable
 			}
 			
 			this.testCases.values().forEach(tc -> tc.setParentTestSuite(this));
+		}
+		
+		if(StringUtils.isNotBlank(newTestSuite.author))
+		{
+			Set<String> authors = new TreeSet<>(Arrays.asList(newTestSuite.author.trim().split("\\s*\\,\\s*")));
+			
+			if(StringUtils.isNotBlank(author))
+			{
+				authors.addAll(Arrays.asList(author.trim().split("\\s*\\,\\s*")));
+			}
+			
+			this.author = authors.stream().collect(Collectors.joining(", "));
 		}
 		
 		this.nameToFunction.putAll(newTestSuite.nameToFunction);

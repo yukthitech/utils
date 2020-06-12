@@ -115,12 +115,12 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 						return result;
 					}
 					
-					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+					return new TestCaseResult(null, NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 				}
 			}
 	
 			exeLogger.debug("Completed setup process");
-			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			return new TestCaseResult(null, NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
 			context.getExecutionStack().pop(this);

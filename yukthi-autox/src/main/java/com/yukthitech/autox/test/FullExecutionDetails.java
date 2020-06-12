@@ -115,7 +115,7 @@ public class FullExecutionDetails
 
 		if(results == null)
 		{
-			results = new TestSuiteResults(suite.getName());
+			results = new TestSuiteResults(suite);
 			suiteToResults.put(suite.getName(), results);
 		}
 
@@ -332,10 +332,10 @@ public class FullExecutionDetails
 	 * Marks specified test suite as in progress. 
 	 * @param testSuite Test suite to be marked
 	 */
-	public void testSuiteInProgress(String testSuite)
+	public void testSuiteInProgress(TestSuite testSuite)
 	{
-		this.inProgressTestSuites.add(testSuite);
-		suiteToResults.put(testSuite, new TestSuiteResults(testSuite));
+		this.inProgressTestSuites.add(testSuite.getName());
+		suiteToResults.put(testSuite.getName(), new TestSuiteResults(testSuite));
 	}
 	
 	/**
@@ -360,7 +360,7 @@ public class FullExecutionDetails
 
 		if(results == null)
 		{
-			results = new TestSuiteResults(testSuite.getName());
+			results = new TestSuiteResults(testSuite);
 			suiteToResults.put(testSuite.getName(), results);
 		}
 		
@@ -384,7 +384,7 @@ public class FullExecutionDetails
 	 */
 	public TestSuiteResults testSuiteCompleted(TestSuite testSuite)
 	{
-		this.inProgressTestSuites.remove(testSuite);
+		this.inProgressTestSuites.remove(testSuite.getName());
 		return updateTestSuiteStatus(testSuite, TestStatus.SUCCESSFUL, "");
 	}
 	
@@ -395,7 +395,7 @@ public class FullExecutionDetails
 	 */
 	public TestSuiteResults testSuiteFailed(TestSuite testSuite, String statusMessage)
 	{
-		this.inProgressTestSuites.remove(testSuite);
+		this.inProgressTestSuites.remove(testSuite.getName());
 		return updateTestSuiteStatus(testSuite, TestStatus.FAILED, statusMessage);
 	}
 	
@@ -406,7 +406,7 @@ public class FullExecutionDetails
 	 */
 	public TestSuiteResults testSuiteSkipped(TestSuite testSuite, String statusMessage)
 	{
-		this.inProgressTestSuites.remove(testSuite);
+		this.inProgressTestSuites.remove(testSuite.getName());
 		return updateTestSuiteStatus(testSuite, TestStatus.SKIPPED, statusMessage);
 	}
 	

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,11 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	 * Name of the test case.
 	 */
 	private String name;
+	
+	/**
+	 * Author of the test cases.
+	 */
+	private String author;
 
 	/**
 	 * Description about test case.
@@ -139,6 +146,20 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 		this.name = name;
 	}
 	
+	public String getAuthor()
+	{
+		return author;
+	}
+
+	public void setAuthor(String author)
+	{
+		if(StringUtils.isNotBlank(author))
+		{
+			Set<String> authors = new TreeSet<>(Arrays.asList(author.trim().split("\\s*\\,\\s*")));
+			this.author = authors.stream().collect(Collectors.joining(", "));
+		}
+	}
+
 	public void setFile(File file)
 	{
 		this.file = file;
@@ -469,7 +490,7 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 			
 			if(result.getStatus() != TestStatus.SUCCESSFUL)
 			{
-				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Setup execution failed.");
+				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Setup execution failed.");
 			}
 		}
 		
@@ -487,7 +508,7 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 					if(action == InteractiveExecutionController.Action.STOP_EXECUTION)
 					{
 						logger.debug("Because of stop point at {}#{} stopping the execution", file.getName(), step.getLineNumber());
-						return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+						return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 					}
 				}
 				
@@ -516,10 +537,10 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 
 			if(expectedException != null && !expectedExcpetionOccurred)
 			{
-				return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
+				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
 			}
 
-			return new TestCaseResult(name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
 			if(cleanup != null)

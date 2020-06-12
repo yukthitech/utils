@@ -19,6 +19,11 @@ public class TestCaseResult
 	private String testCaseName;
 	
 	/**
+	 * Author of test case.
+	 */
+	private String author;
+	
+	/**
 	 * Status of the test case execution.
 	 */
 	private TestStatus status;
@@ -48,32 +53,35 @@ public class TestCaseResult
 	 */
 	private boolean accumlatedResult = false;
 
-	/**
-	 * Instantiates a new test case result.
-	 */
-	public TestCaseResult()
-	{}
-	
-	/**
-	 * Instantiates a new test case result.
-	 *
-	 * @param testCaseName Test case name
-	 * @param status the status
-	 * @param executionLog the execution log
-	 * @param message the failure message
-	 */
-	public TestCaseResult(String testCaseName, TestStatus status, ExecutionLogData executionLog, String message)
+	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, String message)
 	{
-		this(testCaseName, status, executionLog, message, false);
+		this(testCase, testCase.getName(), status, executionLog, message, false);
 	}
 	
-	public TestCaseResult(String testCaseName, TestStatus status, ExecutionLogData executionLog, String message, boolean accumlatedResult)
+	public TestCaseResult(TestCase testCase, String effectiveName, TestStatus status, ExecutionLogData executionLog, String message)
 	{
-		this.testCaseName = testCaseName;
+		this(testCase, effectiveName, status, executionLog, message, false);
+	}
+
+	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, String message, boolean accumlatedResult)
+	{
+		this(testCase, testCase.getName(), status, executionLog, message, accumlatedResult);
+	}
+
+	public TestCaseResult(TestCase testCase, String effectiveName, TestStatus status, ExecutionLogData executionLog, String message, boolean accumlatedResult)
+	{
+		this.testCaseName = effectiveName;
+		this.author = testCase != null? testCase.getAuthor() : null;
+		
 		this.status = status;
 		this.executionLog = executionLog;
 		this.message = message;
 		this.accumlatedResult = accumlatedResult;
+	}
+	
+	public String getAuthor()
+	{
+		return author;
 	}
 
 	/**

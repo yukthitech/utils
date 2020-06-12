@@ -19,6 +19,11 @@ public class TestSuiteResults
 	 * Test suite name.
 	 */
 	private String suiteName;
+	
+	/**
+	 * Author of the test suite.
+	 */
+	private String author;
 
 	/**
 	 * List of test case results.
@@ -59,11 +64,17 @@ public class TestSuiteResults
 	/**
 	 * Instantiates a new test suite results.
 	 *
-	 * @param suiteName the suite name
+	 * @param testsuite the testsuite
 	 */
-	public TestSuiteResults(String suiteName)
+	public TestSuiteResults(TestSuite testsuite)
 	{
-		this.suiteName = suiteName;
+		this.suiteName = testsuite.getName();
+		this.author = testsuite.getAuthor();
+	}
+	
+	public String getAuthor()
+	{
+		return author;
 	}
 	
 	/**

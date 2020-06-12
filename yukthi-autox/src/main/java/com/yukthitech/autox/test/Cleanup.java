@@ -117,13 +117,13 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 						return result;
 					}
 					
-					return new TestCaseResult(NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+					return new TestCaseResult(null, NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
 				}
 			}
 			
 			exeLogger.debug("Completed cleanup process");
 	
-			return new TestCaseResult(NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			return new TestCaseResult(null, NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}finally
 		{
 			context.getExecutionStack().pop(this);

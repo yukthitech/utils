@@ -4,7 +4,7 @@
 	xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
 	
 	<test-suite name="mongoTestSuite">
-		<test-case name="mongoQueryTest">
+		<test-case name="mongoQueryTest" author="kranthi, kiran">
 			<description>
 				Ensure the mongo query execution is as expected.
 			</description>

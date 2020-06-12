@@ -1,5 +1,5 @@
 <test-file xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
-	<test-suite name="spreadTestSuite">
+	<test-suite name="spreadTestSuite" author="kranthi">
 		<test-case name="spreadTestCase">
 			<description>Ensures when test suite is spread across multiple files, it is working properly</description>
 

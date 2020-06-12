@@ -225,11 +225,11 @@ public class ActionPlanExecutor
 		
 		if(result)
 		{
-			testCaseResult = new TestCaseResult("action-plan", TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			testCaseResult = new TestCaseResult(dummy, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
 		}
 		else
 		{
-			testCaseResult = new TestCaseResult("action-plan", TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Action plan execution failed.");
+			testCaseResult = new TestCaseResult(dummy, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Action plan execution failed.");
 		}
 		
 		FullExecutionDetails fullExecutionDetails = new FullExecutionDetails();

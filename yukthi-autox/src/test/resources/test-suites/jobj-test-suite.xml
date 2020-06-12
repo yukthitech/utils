@@ -7,7 +7,7 @@
 		<s:assert-true value="attr: simpleGroupInput"/>
 	</function>
 
-	<testSuite name="jobj-test-suites">
+	<testSuite name="jobj-test-suites" author="kranthi, kiran">
 		<wrap:data-beans>
 			<data-bean s:beanType="com.yukthitech.test.beans.TestObject" id="beanFromTestSuite">
 				<name>beanFromTestSuite</name>

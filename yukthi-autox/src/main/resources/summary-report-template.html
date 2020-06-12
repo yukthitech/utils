@@ -118,7 +118,8 @@
 					<#if result.totalCount gt 0>
 						<tr style="<#if result_index % 2 == 0>background-color: #eee</#if>">
 							<td style="${tableCell}">
-								${result.suiteName}
+								${result.suiteName}<br/>
+								<#if result.author??><span style="font-size: 10px;">[${result.author}]</span></#if>
 							</td>
 							<td style="${tableCell}  <#if result.status == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
 								${result.status}	
@@ -165,7 +166,8 @@
 						<#list result.testCaseResults as suiteResult>
 							<tr  style="<#if suiteResult_index % 2 == 0>background-color: #eee</#if>">
 								<td  style="${tableCell} color: #3973ac;width: 20%;">
-									${suiteResult.testCaseName}
+									${suiteResult.testCaseName}<br/>
+									<#if suiteResult.author??><span style="font-size: 10px;">[${suiteResult.author}]</span></#if>
 								</td>
 								<td style="${tableCell} width: 20%; <#if suiteResult.status == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
 									${suiteResult.status}

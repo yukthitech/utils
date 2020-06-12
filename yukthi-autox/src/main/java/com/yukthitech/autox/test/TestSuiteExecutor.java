@@ -92,7 +92,7 @@ public class TestSuiteExecutor
 		
 		if(!testCase.isExecutable(context, excludedGrp))
 		{
-			return new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, 
+			return new TestCaseResult(testCase, TestStatus.SKIPPED, null, 
 					"Skipping as the test case group '" + excludedGrp.getValue() + "' is under exclusion list.");
 		}
 
@@ -123,7 +123,7 @@ public class TestSuiteExecutor
 				{
 					if(!executeSetup("before-test-case", Arrays.asList(testSuite.getBeforeTestCase()), exeLogger))
 					{
-						result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
+						result = new TestCaseResult(testCase, TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
 					}
 				}
 				
@@ -135,7 +135,7 @@ public class TestSuiteExecutor
 			}catch(Exception ex)
 			{
 				exeLogger.error(ex, "An error occurred while executing test case: {}", testCase.getName());
-				result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case.");
+				result = new TestCaseResult(testCase, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case.");
 			} finally
 			{
 				if(testSuite.getAfterTestCase() != null)
@@ -144,12 +144,12 @@ public class TestSuiteExecutor
 					{
 						if(!executeCleanup("after-test-case", Arrays.asList(testSuite.getAfterTestCase()), exeLogger))
 						{
-							result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+							result = new TestCaseResult(testCase, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
 						}
 					}catch(Exception ex)
 					{
 						exeLogger.error(ex, "An error occurred while executing after-test-case of test-suited: {}", testCase.getName());
-						result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+						result = new TestCaseResult(testCase, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
 					}
 				}
 
@@ -171,7 +171,7 @@ public class TestSuiteExecutor
 		//Log error and fail test case if data is missing
 		if(dataLst == null)
 		{
-			return new TestCaseResult(testCase.getName(), TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName());
+			return new TestCaseResult(testCase, TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName());
 		}
 		
 		TestCaseResult result = null;
@@ -203,7 +203,7 @@ public class TestSuiteExecutor
 				
 				if(result.getStatus() != TestStatus.SUCCESSFUL)
 				{
-					return new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Data-setup execution failed.");
+					return new TestCaseResult(testCase, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Data-setup execution failed.");
 				}
 				
 				dataSetup = null;
@@ -228,7 +228,7 @@ public class TestSuiteExecutor
 			{
 				if(!executeSetup("before-test-case", Arrays.asList(testSuite.getBeforeTestCase()), exeLogger))
 				{
-					result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
+					result = new TestCaseResult(testCase, TestStatus.SKIPPED, null, "Skipping the test case as before-test-case of test-suite failed.");
 				}
 			}
 
@@ -242,7 +242,7 @@ public class TestSuiteExecutor
 			}catch(Exception ex)
 			{
 				exeLogger.error(null, ex, "An error occurred while executing test case '{}' with data: {}", testCase.getName(), data);
-				result = new TestCaseResult(name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case with data: " + data);
+				result = new TestCaseResult(testCase, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "An unhandled error occurred while executing test case with data: " + data);
 			}finally
 			{
 				if(testSuite.getAfterTestCase() != null)
@@ -251,12 +251,12 @@ public class TestSuiteExecutor
 					{
 						if(!executeCleanup("after-test-case", Arrays.asList(testSuite.getAfterTestCase()), exeLogger))
 						{
-							result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+							result = new TestCaseResult(testCase, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
 						}
 					}catch(Exception ex)
 					{
 						exeLogger.error(ex, "An error occurred while executing after-test-case of test-suited: {}", testCase.getName());
-						result = new TestCaseResult(testCase.getName(), TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
+						result = new TestCaseResult(testCase, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Failed to execute after-test-case of test-suite.");
 					}
 				}
 
@@ -296,7 +296,7 @@ public class TestSuiteExecutor
 			testCaseDatsResults.add(result);
 		}
 
-		return new TestCaseResult(testCase.getName(), finalStatus, null, "", true);
+		return new TestCaseResult(testCase, finalStatus, null, "", true);
 	}
 	
 	/**
@@ -327,7 +327,7 @@ public class TestSuiteExecutor
 								depTestCase, testCase.getName());
 						logger.info(skipMssg);
 							
-						TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
+						TestCaseResult result = new TestCaseResult(testCase, TestStatus.SKIPPED, null, skipMssg);
 						fullExecutionDetails.addTestResult(testSuite, result);
 						return result;
 					}
@@ -344,7 +344,7 @@ public class TestSuiteExecutor
 					testCase.getName(), depTestCase, depTestCaseResult.getStatus());
 				logger.info(skipMssg);
 				
-				TestCaseResult result = new TestCaseResult(testCase.getName(), TestStatus.SKIPPED, null, skipMssg);
+				TestCaseResult result = new TestCaseResult(testCase, TestStatus.SKIPPED, null, skipMssg);
 				fullExecutionDetails.addTestResult(testSuite, result);
 				return result;
 			}
@@ -457,7 +457,7 @@ public class TestSuiteExecutor
 		}
 
 		logger.debug("Executing test suite - {}", testSuite.getName());
-		fullExecutionDetails.testSuiteInProgress(testSuite.getName());
+		fullExecutionDetails.testSuiteInProgress(testSuite);
 
 		this.currentTestSuite = testSuite;
 

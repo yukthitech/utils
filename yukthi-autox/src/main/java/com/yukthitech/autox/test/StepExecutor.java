@@ -223,13 +223,13 @@ public class StepExecutor
 		if(ex instanceof TestCaseValidationFailedException)
 		{
 			invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-			return new TestCaseResult(resName, TestStatus.FAILED, exeLogger.getExecutionLogData(), ex.getMessage());
+			return new TestCaseResult(testCase, resName, TestStatus.FAILED, exeLogger.getExecutionLogData(), ex.getMessage());
 		}
 		
 		if(ex instanceof TestCaseFailedException)
 		{
 			invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-			return new TestCaseResult(resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name);
+			return new TestCaseResult(testCase, resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name);
 		}
 		
 		if(expectedException != null)
@@ -244,7 +244,7 @@ public class StepExecutor
 			{
 				exeLogger.error(ex, ex.getMessage());
 				invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-				return new TestCaseResult(resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
+				return new TestCaseResult(testCase, resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + name);
 			}
 		}
 
@@ -252,6 +252,6 @@ public class StepExecutor
 		exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
 		invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 		
-		return new TestCaseResult(resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());
+		return new TestCaseResult(testCase, resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name());
 	}
 }
