@@ -12,7 +12,7 @@ import com.yukthitech.autox.common.AutomationUtils;
  * Used to execute specified expression.
  * @author akiran
  */
-@Executable(name = "execute", group = Group.Lang, message = "Execute specified expression.")
+@Executable(name = "execute", group = Group.Lang, message = "Execute specified freemarker expression.")
 public class ExecuteStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;

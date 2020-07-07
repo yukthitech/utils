@@ -47,8 +47,8 @@ public class PollAndCheckStep extends AbstractValidation
 	/**
 	 * Polling interval duration.
 	 */
-	@Param(description = "Polling interval duration.", required = true)
-	private Long pollingInterval;
+	@Param(description = "Polling interval duration.", required = true, expectedType = Long.class, sourceType = SourceType.EXPRESSION)
+	private Object pollingInterval;
 	
 	/**
 	 * Polling interval time unit. Defaults to millis.
@@ -57,10 +57,10 @@ public class PollAndCheckStep extends AbstractValidation
 	private TimeUnit pollingIntervalUnit = TimeUnit.MILLISECONDS;
 	
 	/**
-	 * Timout till which check condition will be tried. After this time, this validation will fail.
+	 * Timeout till which check condition will be tried. After this time, this validation will fail.
 	 */
-	@Param(description = "Timout till which check condition will be tried. After this time, this validation will fail.", required = true)
-	private Long timeOut;
+	@Param(description = "Timout till which check condition will be tried. After this time, this validation will fail.", required = true, expectedType = Long.class, sourceType = SourceType.EXPRESSION)
+	private Object timeOut;
 
 	/**
 	 * Time out time unit. Defaults to millis.
@@ -94,7 +94,7 @@ public class PollAndCheckStep extends AbstractValidation
 	 *
 	 * @param pollingInterval the new polling interval duration in millis
 	 */
-	public void setPollingInterval(Long pollingInterval)
+	public void setPollingInterval(Object pollingInterval)
 	{
 		this.pollingInterval = pollingInterval;
 	}
@@ -114,7 +114,7 @@ public class PollAndCheckStep extends AbstractValidation
 	 *
 	 * @param timeOut the new timout in millis till which check condition will be tried
 	 */
-	public void setTimeOut(Long timeOut)
+	public void setTimeOut(Object timeOut)
 	{
 		this.timeOut = timeOut;
 	}
@@ -152,7 +152,7 @@ public class PollAndCheckStep extends AbstractValidation
 			
 			diff = System.currentTimeMillis() - startTime.getTime();
 			
-			if(diff > timeOutUnit.toMillis(timeOut))
+			if(diff > timeOutUnit.toMillis((Long) timeOut))
 			{
 				exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
 				return false;
@@ -162,7 +162,7 @@ public class PollAndCheckStep extends AbstractValidation
 			
 			try
 			{
-				Thread.sleep(pollingIntervalUnit.toMillis(pollingInterval));
+				Thread.sleep(pollingIntervalUnit.toMillis((Long) pollingInterval));
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("Thread was interruped while waiting as part of polling step", ex);

@@ -50,4 +50,10 @@ public @interface Param
 	 * @return
 	 */
 	public String defaultValue() default "";
+	
+	/**
+	 * Type of value expected for this field, post parsing.
+	 * @return
+	 */
+	public Class<?> expectedType() default Object.class;
 }

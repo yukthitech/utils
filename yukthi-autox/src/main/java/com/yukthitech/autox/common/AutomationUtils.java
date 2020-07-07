@@ -324,6 +324,21 @@ public class AutomationUtils
 						return ExpressionFactory.getExpressionFactory().parseExpression(context, val);
 					});
 					
+					if(result != null && !Object.class.equals(param.expectedType()))
+					{
+						if(!param.expectedType().isAssignableFrom(result.getClass()))
+						{
+							try
+							{
+								result = ConvertUtils.convert(result, param.expectedType());
+							}catch(Exception ex)
+							{
+								throw new InvalidArgumentException("For field {}.{} specified value {} (Type: {}) when {} is expected", 
+										object.getClass().getName(), field.getName(), result, result.getClass().getName(), param.expectedType().getName());
+							}
+						}
+					}
+					
 					field.set(object, result);
 				}
 

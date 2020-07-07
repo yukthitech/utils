@@ -359,25 +359,4 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			throw new ValidateException("No base url is specified.");
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.config.IPlugin#close()
-	 */
-	@Override
-	public void close()
-	{
-		if(activeDriver == null)
-		{
-			return;
-		}
-		
-		try
-		{
-			activeDriver.close();
-			activeDriver.quit();
-		}catch(Exception ex)
-		{
-			logger.warn("Ignored error during selenium plugin closing: " + ex);
-		}
-	}
 }

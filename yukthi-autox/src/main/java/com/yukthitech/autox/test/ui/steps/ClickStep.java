@@ -46,7 +46,10 @@ public class ClickStep extends AbstractPostCheckStep
 	 */
 	@Param(description = "Time gap between retries. Default: 1000", required = false)
 	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
-
+	
+	@Param(description = "Flag to enforce clicking using js instead of selenium", required = false)
+	private boolean clickByJs = false;
+	
 	/**
 	 * Sets the number of retries to happen. Default: 5.
 	 *
@@ -65,6 +68,11 @@ public class ClickStep extends AbstractPostCheckStep
 	public void setRetryTimeGapMillis(int retryTimeGapMillis)
 	{
 		this.retryTimeGapMillis = retryTimeGapMillis;
+	}
+	
+	public void setClickByJs(boolean clickByJs)
+	{
+		this.clickByJs = clickByJs;
 	}
 
 	@Override
@@ -102,7 +110,20 @@ public class ClickStep extends AbstractPostCheckStep
 					
 					try
 					{
-						webElement.click();
+						if(clickByJs)
+						{
+							exeLogger.debug("As per config clicking the target element using js..");
+
+							SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
+							WebDriver driver = seleniumConfiguration.getWebDriver();
+
+							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
+							return doPostCheck(exeLogger, "Post Click");
+						}
+						else
+						{
+							webElement.click();	
+						}
 					}catch(RuntimeException ex)
 					{
 						//if second click is also resulted in error, try js way of clicking.
