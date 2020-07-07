@@ -13,7 +13,7 @@
 
 		<log4j.version>2.1</log4j.version>
 
-		<commons.beanutils.version>1.9.2</commons.beanutils.version>
+		<commons.beanutils.version>1.9.4</commons.beanutils.version>
 		<derby.version>10.11.1.1</derby.version>
 
 		<testng.version>6.9.10</testng.version>
