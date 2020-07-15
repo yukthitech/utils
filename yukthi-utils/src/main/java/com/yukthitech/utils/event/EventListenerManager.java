@@ -6,6 +6,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -81,6 +82,36 @@ public class EventListenerManager<L>
 		{
 			this.listener = listener;
 			this.data = data;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean equals(Object obj)
+		{
+			if(obj == this)
+			{
+				return true;
+			}
+
+			if(!(obj instanceof EventListenerManager.ListenerWithData))
+			{
+				return false;
+			}
+
+			ListenerWithData other = (ListenerWithData) obj;
+			return listener.equals(other.listener) && Objects.equals(data, other.data);
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashcode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			return listener.hashCode();
 		}
 	}
 	
@@ -192,9 +223,14 @@ public class EventListenerManager<L>
 	 */
 	public boolean removeListener(L listener)
 	{
-		return listeners.remove(listener);
+		return listeners.remove(new ListenerWithData(listener, null));
 	}
 	
+	public boolean removeListener(L listener, Object data)
+	{
+		return listeners.remove(new ListenerWithData(listener, data));
+	}
+
 	/**
 	 * Fetches the listeners added to this manager.
 	 * @return
