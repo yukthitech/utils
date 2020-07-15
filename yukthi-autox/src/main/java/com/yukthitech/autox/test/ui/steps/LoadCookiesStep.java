@@ -102,8 +102,8 @@ public class LoadCookiesStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Load Cookies [");
 
 		builder.append("Path: ").append(path);
 

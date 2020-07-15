@@ -88,8 +88,8 @@ public class SwitchFrame extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Switch Frame [");
 
 		builder.append("Locator: ").append(locator);
 		builder.append(", Index: ").append(index);

@@ -111,7 +111,9 @@
 					       	style="width: 50em; border: 1px solid black;"/>
 					    </a>
 						<a ng-if="message.fileName" href="./logs/{{message.fileName}}">
-					       <img alt="Log" src="./img/log-file.png" 
+					       <img ng-if="message.fileName.endsWith('.mp4')" alt="Log" src="./img/mp4-file.png" 
+					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
+					       <img ng-if="!message.fileName.endsWith('.mp4')" alt="Log" src="./img/log-file.png" 
 					       		style="width: 5em; height: 5em; margin-top: 1em; margin-left: 2em;"/>
 					    </a>
 					</td>

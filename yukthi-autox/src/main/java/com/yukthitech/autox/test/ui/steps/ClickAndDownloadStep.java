@@ -198,8 +198,8 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Click and Download [");
 
 		builder.append("Locator: ").append(locator);
 

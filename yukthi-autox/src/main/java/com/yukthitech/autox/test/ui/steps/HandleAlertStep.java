@@ -82,10 +82,10 @@ public class HandleAlertStep extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Handle alert [");
 
-		builder.append("Expected Message: ").append(expectedMessage);
+		builder.append("Expected Mssg: ").append(expectedMessage);
 
 		builder.append("]");
 		return builder.toString();

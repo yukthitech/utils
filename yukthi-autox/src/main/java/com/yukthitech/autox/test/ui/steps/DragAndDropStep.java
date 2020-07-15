@@ -150,4 +150,21 @@ public class DragAndDropStep extends AbstractStep
 	{
 		this.destination = destination;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("Drang and Drop [");
+
+		builder.append("Source: ").append(source);
+		builder.append(",").append("Destination: ").append(destination);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

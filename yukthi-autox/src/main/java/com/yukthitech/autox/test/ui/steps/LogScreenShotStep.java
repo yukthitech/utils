@@ -83,4 +83,20 @@ public class LogScreenShotStep extends AbstractStep
 		
 		return true;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("Log Screenshot [");
+
+		builder.append("Name: ").append(name);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

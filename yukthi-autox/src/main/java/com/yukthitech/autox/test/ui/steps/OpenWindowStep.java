@@ -81,8 +81,8 @@ public class OpenWindowStep extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Open Window [");
 
 		builder.append("Name: ").append(name);
 		builder.append(", Url: ").append(url);

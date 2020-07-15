@@ -156,7 +156,8 @@ public class MoveToStep extends AbstractUiStep
 				Thread.sleep(timeGap);
 			}catch(Exception ex)
 			{}
-			
+
+			context.getStepListenerProxy().stepPhase(this, "Clicking the element: " + locator);
 			WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 			if(webElement == null)
@@ -230,8 +231,8 @@ public class MoveToStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Move To [");
 
 		builder.append("Locator: ").append(locator);
 

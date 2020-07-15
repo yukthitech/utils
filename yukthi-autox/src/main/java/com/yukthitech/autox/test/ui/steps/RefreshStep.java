@@ -79,7 +79,7 @@ public class RefreshStep extends AbstractPostCheckStep
 				AutomationUtils.sleep(2000);
 				
 				//after refresh check the post-check and return result approp
-				return doPostCheck(exeLogger, "Post Refresh");
+				return doPostCheck(context, exeLogger, "Post Refresh");
 			} catch(RuntimeException ex)
 			{
 				exeLogger.debug("An error occurred while doing refresh. Error: {}", "" + ex);
@@ -99,8 +99,8 @@ public class RefreshStep extends AbstractPostCheckStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[]");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Refresh Page");
 		return builder.toString();
 	}
 }

@@ -130,8 +130,8 @@ public class RightClickStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Right Click [");
 
 		builder.append("Locator: ").append(locator);
 

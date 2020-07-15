@@ -99,7 +99,7 @@ public class ClickStep extends AbstractPostCheckStep
 					//if at least once button is clicked
 					if(clickedAtleastOnce.get() > 0)
 					{
-						if(super.isPostCheckAvailable() && doPostCheck(exeLogger, "Before re-click"))
+						if(super.isPostCheckAvailable() && doPostCheck(context, exeLogger, "Before re-click"))
 						{
 							exeLogger.trace("Before re-click as post check is successful, skipping re-click");
 							return true;
@@ -118,7 +118,7 @@ public class ClickStep extends AbstractPostCheckStep
 							WebDriver driver = seleniumConfiguration.getWebDriver();
 
 							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
-							return doPostCheck(exeLogger, "Post Click");
+							return doPostCheck(context, exeLogger, "Post Click");
 						}
 						else
 						{
@@ -136,7 +136,7 @@ public class ClickStep extends AbstractPostCheckStep
 							WebDriver driver = seleniumConfiguration.getWebDriver();
 
 							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
-							return doPostCheck(exeLogger, "Post Click");
+							return doPostCheck(context, exeLogger, "Post Click");
 						}
 						
 						throw ex;
@@ -145,7 +145,7 @@ public class ClickStep extends AbstractPostCheckStep
 					clickedAtleastOnce.incrementAndGet();
 					
 					//after click check the post-check and return result approp
-					return doPostCheck(exeLogger, "Post Click");
+					return doPostCheck(context, exeLogger, "Post Click");
 				} catch(RuntimeException ex)
 				{
 					exeLogger.debug("IGNORED: An error occurred while clicking locator - {}. Error: {}", locator,  "" + ex);
@@ -188,8 +188,8 @@ public class ClickStep extends AbstractPostCheckStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Click [");
 
 		builder.append("Locator: ").append(locator);
 

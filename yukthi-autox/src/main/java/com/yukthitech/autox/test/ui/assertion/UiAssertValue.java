@@ -125,7 +125,7 @@ public class UiAssertValue extends AbstractUiAssert
 	{
 		String comma = ", ";
 		StringBuilder builder = new StringBuilder();
-		builder.append("[");
+		builder.append("Assert Value [");
 
 		builder.append("Locator: ").append(locator);
 		builder.append(comma).append("Value: ").append(value);

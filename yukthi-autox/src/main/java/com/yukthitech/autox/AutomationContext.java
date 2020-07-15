@@ -38,6 +38,7 @@ import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
 import com.yukthitech.utils.cli.OptionsFactory;
+import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -187,6 +188,11 @@ public class AutomationContext
 	 * Manages the stack trace of execution.
 	 */
 	private ExecutionStack executionStack = new ExecutionStack();
+	
+	/**
+	 * Step listeners.
+	 */
+	private EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
 	
 	/**
 	 * Constructor.
@@ -999,6 +1005,21 @@ public class AutomationContext
 	public ExecutionStack getExecutionStack()
 	{
 		return executionStack;
+	}
+	
+	public void addStepListener(IStepListener listener)
+	{
+		this.stepListeners.addListener(listener);
+	}
+	
+	public void removeStepListener(IStepListener listener)
+	{
+		this.stepListeners.removeListener(listener);
+	}
+	
+	public IStepListener getStepListenerProxy()
+	{
+		return stepListeners.get();
 	}
 
 	/**

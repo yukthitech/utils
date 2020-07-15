@@ -123,8 +123,8 @@ public class SwitchWindow extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Switch Window [");
 
 		builder.append("Locator: ").append(locator);
 		builder.append(", New Window: ").append(newWindow);

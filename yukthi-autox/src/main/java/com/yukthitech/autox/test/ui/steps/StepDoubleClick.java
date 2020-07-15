@@ -92,7 +92,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 
 				if(clickedAtleastOnce.getValue())
 				{
-					if(super.isPostCheckAvailable() && doPostCheck(exeLogger, "Before Re-dbl-click"))
+					if(super.isPostCheckAvailable() && doPostCheck(context, exeLogger, "Before Re-dbl-click"))
 					{
 						exeLogger.trace("Before re-click as post check is successful, skipping re-dbl-click");
 						return true;
@@ -110,7 +110,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 					
 					actions.doubleClick(webElement).perform();
 					
-					return doPostCheck(exeLogger, "Post Dbl-click");
+					return doPostCheck(context, exeLogger, "Post Dbl-click");
 				} catch(RuntimeException ex)
 				{
 					exeLogger.debug("IGNORED: An error occurred while dbl-clicking locator - {}. Error: {}", locator,  "" + ex);
@@ -133,4 +133,20 @@ public class StepDoubleClick extends AbstractPostCheckStep
 		
 		return true;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("Double Click [");
+
+		builder.append("Locator: ").append(locator);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

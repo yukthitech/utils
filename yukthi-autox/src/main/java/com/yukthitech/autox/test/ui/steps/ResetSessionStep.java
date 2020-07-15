@@ -27,4 +27,16 @@ public class ResetSessionStep extends AbstractStep
 		
 		return true;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("Reset Session");
+		return builder.toString();
+	}
+
 }

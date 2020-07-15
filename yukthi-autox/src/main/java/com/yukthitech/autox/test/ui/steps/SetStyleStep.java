@@ -96,8 +96,8 @@ public class SetStyleStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Set Style [");
 
 		builder.append("Locator: ").append(locator);
 

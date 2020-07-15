@@ -199,7 +199,7 @@ public class AssertVisibility extends AbstractUiAssert
 	{
 		String comma = ", ";
 		StringBuilder builder = new StringBuilder();
-		builder.append("[");
+		builder.append("Assert Visibility [");
 
 		builder.append("Locator: ").append(locator);
 		builder.append(comma).append("Visible: ").append(visible);

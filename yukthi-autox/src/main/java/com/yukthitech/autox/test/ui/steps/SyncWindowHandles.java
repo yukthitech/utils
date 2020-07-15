@@ -45,8 +45,8 @@ public class SyncWindowHandles extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[]");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Sync Window Handles");
 		return builder.toString();
 	}
 }

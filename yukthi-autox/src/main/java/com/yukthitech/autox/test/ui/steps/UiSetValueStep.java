@@ -92,6 +92,7 @@ public class UiSetValueStep extends AbstractUiStep
 		{
 			logger.debug( "User has provided enter key to be pressed");
 
+			context.getStepListenerProxy().stepPhase(this, "Pressing enter");
 			pressEnter(context, logger);
 		}
 		
@@ -163,4 +164,21 @@ public class UiSetValueStep extends AbstractUiStep
 	{
 		this.pressEnterAtEnd = pressEnterAtEnd;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("Set Value [");
+
+		builder.append("Locator: ").append(locator);
+		builder.append(",").append("Value: ").append(value);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

@@ -118,11 +118,12 @@ public class HandlePromptStep extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Handle Prompt [");
 
-		builder.append("Expected Message: ").append(expectedMessage);
-		builder.append(", ").append("Accept Flag: ").append(accept);
+		builder.append("Expected Mssg: ").append(expectedMessage);
+		builder.append(", ").append("Accept: ").append(accept);
+		builder.append(", ").append("Value: ").append(text);
 
 		builder.append("]");
 		return builder.toString();

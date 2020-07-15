@@ -68,8 +68,8 @@ public class GotoPageStep extends AbstractStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Goto Page [");
 
 		builder.append("Uri: ").append(uri);
 

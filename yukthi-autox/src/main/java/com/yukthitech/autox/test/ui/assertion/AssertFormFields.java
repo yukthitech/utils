@@ -338,7 +338,7 @@ public class AssertFormFields extends AbstractValidation
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append("[");
+		builder.append("Assert Form [");
 
 		builder.append("Locator: ").append(locator);
 

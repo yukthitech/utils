@@ -103,10 +103,10 @@ public class HandleConfirmStep extends AbstractStep
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		builder.append("Handle Alert [");
 
-		builder.append("Expected Message: ").append(expectedMessage);
-		builder.append(", ").append("Accept Flag: ").append(accept);
+		builder.append("Expected Mssg: ").append(expectedMessage);
+		builder.append(", ").append("Accept: ").append(accept);
 
 		builder.append("]");
 		return builder.toString();

@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
@@ -50,7 +51,7 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 		return (postVisibilityLocator != null || postHideLocator != null);
 	}
 
-	protected boolean doPostCheck(ExecutionLogger exeLogger, String purpose)
+	protected boolean doPostCheck(AutomationContext context, ExecutionLogger exeLogger, String purpose)
 	{
 		if(postVisibilityLocator != null)
 		{
@@ -64,11 +65,13 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 			//if visible locator is not visible, return false
 			if(!isVisible)
 			{
+				context.getStepListenerProxy().stepPhase(this, "Post visibility check failed - " + postVisibilityLocator);
 				exeLogger.debug("{} - Post check failed. Specified locator is not visible yet. Locator: {}", purpose, postVisibilityLocator);
 				return false;
 			}
 			else
 			{
+				context.getStepListenerProxy().stepPhase(this, "Post visibility check passed - " + postVisibilityLocator);
 				exeLogger.debug("{} - Post check Successful. Specified locator is visible. Locator: {}", purpose, postVisibilityLocator);
 			}
 		}
@@ -85,11 +88,13 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 			//if hide locator is visible 
 			if(isVisible)
 			{
+				context.getStepListenerProxy().stepPhase(this, "Post hide check failed - " + postHideLocator);
 				exeLogger.debug("{} - Post check failed. Specified locator is not hidden yet. Locator: {}", purpose, postHideLocator);
 				return false;
 			}
 			else
 			{
+				context.getStepListenerProxy().stepPhase(this, "Post hide check passed - " + postHideLocator);
 				exeLogger.debug("{} - Post check Successful. Specified locator is hidden. Locator: {}", purpose, postHideLocator);
 			}
 		}

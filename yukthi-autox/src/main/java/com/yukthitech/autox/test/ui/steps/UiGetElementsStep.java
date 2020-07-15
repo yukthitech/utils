@@ -88,8 +88,8 @@ public class UiGetElementsStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Get Elements [");
 
 		builder.append("Locator: ").append(locator);
 		builder.append(",").append("Name: ").append(name);

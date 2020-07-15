@@ -44,6 +44,8 @@ public class StepExecutor
 			exeLogger.setDisabled(true);
 		}
 
+		TestCaseData currentData = null;
+		
 		context.getExecutionStack().push(step);
 		
 		try
@@ -58,6 +60,7 @@ public class StepExecutor
 				step = step.clone();
 				AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 
+				context.getStepListenerProxy().stepStarted(step, null);
 				res = step.execute(context, exeLogger);
 			}
 			else
@@ -74,6 +77,8 @@ public class StepExecutor
 				{
 					for(TestCaseData data : dataLst)
 					{
+						currentData = data;
+						
 						if(dataProvider.isParsingEnabled())
 						{
 							AutomationUtils.replaceExpressions("testCaseData", context, data);
@@ -86,6 +91,7 @@ public class StepExecutor
 						IStep dataStep = step.clone();
 						AutomationUtils.replaceExpressions("step-" + dataStep.getClass().getName(), context, dataStep);
 
+						context.getStepListenerProxy().stepStarted(dataStep, data);
 						if(!dataStep.execute(context, exeLogger))
 						{
 							res = false;
@@ -106,8 +112,12 @@ public class StepExecutor
 					throw new TestCaseValidationFailedException(step, message);
 				}
 			}
+			
+			context.getStepListenerProxy().stepCompleted(step, currentData);
 		} catch(RuntimeException ex)
 		{
+			context.getStepListenerProxy().stepErrored(step, currentData, ex);
+			
 			if(ex instanceof LangException)
 			{
 				throw ex;

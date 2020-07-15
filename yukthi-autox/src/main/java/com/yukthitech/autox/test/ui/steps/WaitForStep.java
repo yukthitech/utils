@@ -183,8 +183,8 @@ public class WaitForStep extends AbstractUiStep
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Waiting For [");
 
 		builder.append("Locators: ").append(locators);
 		builder.append(",").append("Hidden: ").append(hidden);
