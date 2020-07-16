@@ -100,7 +100,9 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
-		File videoFile = exeLogger.logFile("Recording started and can be seen in below file", LogLevel.DEBUG, name, ".mp4");
+		exeLogger.debug("Recording started with name: {}", name);
+		
+		File videoFile = exeLogger.createFile(name, ".mp4"); 
 		SeekableByteChannel channel = NIOUtils.writableChannel(videoFile);
 		
 		AWTSequenceEncoder encoder = new AWTSequenceEncoder(channel, Rational.R(framesPerSec, 1));
@@ -119,9 +121,7 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 				}
 				
 				String stepText = step.toString();
-				String fullMssg = String.format("[%s] Step '%s' - %s", TIME_FORMAT.format(new Date()), stepText, message);
-
-				exeLogger.debug("Adding img with mssg: {}", fullMssg);
+				String stepDet = String.format("[%s] [%s] %s", TIME_FORMAT.format(new Date()), step.getLocation(), stepText);
 				File file = null;
 						
 				try
@@ -149,12 +149,13 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 					g.drawImage(img, 0, 0, null);
 					g.setColor(Color.white);
 					g.setFont(MSSG_FONT);
-					g.drawString(fullMssg, 10, img.getHeight() + 25);
+					g.drawString(stepDet, 10, img.getHeight() + 15);
+					g.drawString(message, 20, img.getHeight() + 15 + 20);
 					
 					encoder.encodeImage(imgWithMssg);
 				}catch(Exception ex)
 				{
-					exeLogger.error("Adding img with mssg: '{}' resulted in error", fullMssg, ex);
+					exeLogger.error("Adding img with mssg: '{}' resulted in error", stepDet, ex);
 					throw new InvalidStateException("An error occurred while adding current screen shot to video", ex);
 				}
 			}
@@ -196,7 +197,7 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 		    NIOUtils.closeQuietly(channel);
 		    
 			context.removeStepListener(listener);
-			exeLogger.debug("Recoding completed.");
+			exeLogger.logFile("Recoding completed and can be seen in below file", LogLevel.DEBUG, videoFile);
 		}
 		
 		return true;

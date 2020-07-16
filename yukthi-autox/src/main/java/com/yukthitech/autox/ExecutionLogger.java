@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.monitor.MonitorLogMessage;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.autox.test.log.LogLevel;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
  * A simple internal logger to consolidate execution messages in test result.
@@ -506,6 +507,45 @@ public class ExecutionLogger
 		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
 	}
 	
+	public File createFile(String filePrefix, String fileSuffix)
+	{
+		File logsFolder = new File(automationContext.getReportFolder(), "logs");
+		String fileName = filePrefix + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + fileSuffix;
+
+		File tempFile = new File(logsFolder, fileName);
+
+		return tempFile;
+	}
+	
+	public void logFile(String message, LogLevel logLevel, File file)
+	{
+		if(disabled)
+		{
+			return;
+		}
+		
+		if(logLevel == null)
+		{
+			logLevel = LogLevel.DEBUG;
+		}
+		
+		File logsFolder = new File(automationContext.getReportFolder(), "logs");
+		
+		if(!file.getParentFile().equals(logsFolder))
+		{
+			throw new InvalidArgumentException("Specified file is not part of report-logs folder files. [File: {}, Report Folder: {}]", 
+					file.getPath(), automationContext.getReportFolder().getPath());
+		}
+		
+		if(mode != null)
+		{
+			message = (message != null) ? "" : message;
+			message = "<b>[" + mode + "]</b> " + message;
+		}
+		
+		addMessage(new ExecutionLogData.FileMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), file));
+	}
+
 	public File logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
 	{
 		if(disabled)
