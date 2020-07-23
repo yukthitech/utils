@@ -1,10 +1,13 @@
 package com.yukthitech.autox.test.ui.common;
 
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -218,5 +221,29 @@ public class UiFreeMarkerMethods
 		{
 			throw new InvalidStateException("An error occurred while converting intput string into json string: {}", str);
 		}
+	}
+
+	@FreeMarkerMethod(
+			description = "Fetches the size of the browser",
+			returnDescription = "Size of the browser"
+			)
+	public static Dimension uiBrowserSize()
+	{
+		AutomationContext context = AutomationContext.getInstance();
+		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
+		
+		return plugin.getWebDriver().manage().window().getSize();
+	}
+
+	@FreeMarkerMethod(
+			description = "Fetches the position of the browser",
+			returnDescription = "Position of the browser"
+			)
+	public static Point uiBrowserPosition()
+	{
+		AutomationContext context = AutomationContext.getInstance();
+		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
+		
+		return plugin.getWebDriver().manage().window().getPosition();
 	}
 }

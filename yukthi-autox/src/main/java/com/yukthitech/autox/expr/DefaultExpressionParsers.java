@@ -578,7 +578,8 @@ public class DefaultExpressionParsers
 			example = "file: /tmp/data.json",
 			params = {
 				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
-				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object.")
+				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
+				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values.")
 			})
 	public IPropertyPath fileParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
@@ -627,7 +628,8 @@ public class DefaultExpressionParsers
 			example = "res: /tmp/data.json",
 			params = {
 				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
-				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object.")
+				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
+				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values.")
 			})
 	public IPropertyPath resParser(ExpressionParserContext parserContext, String expression, String exprType[])
 	{
@@ -723,7 +725,7 @@ public class DefaultExpressionParsers
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "json: {\"a\": 2, \"b\": 3}",
 			params = {
-					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template")
 				}
 	)
 	public IPropertyPath jsonParser(ExpressionParserContext parserContext, String expression, String exprType[])

@@ -341,6 +341,10 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	{
 		File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
 		errorDetails.getExecutionLogger().logImage("error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
+		
+		errorDetails.getExecutionLogger().error("During error browser details are: [Postition: {}, Size: {}]",
+				activeDriver.manage().window().getPosition(),
+				activeDriver.manage().window().getSize());
 	}
 
 	/* (non-Javadoc)
