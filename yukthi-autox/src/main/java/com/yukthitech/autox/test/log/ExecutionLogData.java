@@ -125,7 +125,7 @@ public class ExecutionLogData
 		 */
 		public String getTimeStr()
 		{
-			return DateUtils.formatDate(time, ApplicationConfiguration.getInstance().getTimeFomat());
+			return ApplicationConfiguration.getInstance().getTimeFormatObject().format(time);
 		}
 		
 		

@@ -2,6 +2,7 @@ package com.yukthitech.autox.config;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -82,7 +83,9 @@ public class ApplicationConfiguration
 	/**
 	 * Time format to be used in reports.
 	 */
-	private String timeFomat = "hh:mm:ss aa";
+	private String timeFormat = "hh:mm:ss aa";
+	
+	private SimpleDateFormat timeFormatObject = new SimpleDateFormat(timeFormat);
 	
 	/**
 	 * Application properties.
@@ -456,9 +459,9 @@ public class ApplicationConfiguration
 	 *
 	 * @return the time format to be used in reports
 	 */
-	public String getTimeFomat()
+	public String getTimeFormat()
 	{
-		return timeFomat;
+		return timeFormat;
 	}
 
 	/**
@@ -466,9 +469,17 @@ public class ApplicationConfiguration
 	 *
 	 * @param timeFomat the new time format to be used in reports
 	 */
-	public void setTimeFomat(String timeFomat)
+	public void setTimeFormat(String timeFomat)
 	{
-		this.timeFomat = timeFomat;
+		SimpleDateFormat timeFormatObject = new SimpleDateFormat(timeFomat);
+		
+		this.timeFormat = timeFomat;
+		this.timeFormatObject = timeFormatObject;
+	}
+	
+	public SimpleDateFormat getTimeFormatObject()
+	{
+		return timeFormatObject;
 	}
 
 	/**
