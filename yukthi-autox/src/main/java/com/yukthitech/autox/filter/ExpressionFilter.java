@@ -1,4 +1,4 @@
-package com.yukthitech.autox.expr;
+package com.yukthitech.autox.filter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExpressionParser
+public @interface ExpressionFilter
 {
 	/**
 	 * Provides expression type.

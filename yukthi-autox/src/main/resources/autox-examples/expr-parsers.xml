@@ -171,7 +171,6 @@
 		</example>
 	</collection>
 
-
 	<collection name="$parsers.xpath">
 		<example>
 			<description>Using xpath to access single property value</description>
@@ -185,6 +184,37 @@
 			
 			<content><![CDATA[
 				<ccg:set expression="xpathAttr1" value="xpath(multi=true): /attr/bean1//prop1"/>
+			]]></content>
+		</example>
+	</collection>
+
+	<collection name="$parsers.sort">
+		<example>
+			<description>Sorting by natural order</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="list: abc, bcd, def, fgh" actual="set: def, fgh, abc, bcd | sort: $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting in natural order in descending order</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="list: fgh, def, bcd, abc" actual="set: def, fgh, abc, bcd | sort(desc=true): $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting the objects using property expression</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}): $"/>
+			]]></content>
+		</example>
+		<example>
+			<description>Sorting the objects using complex property expression and in descending order</description>
+			
+			<content><![CDATA[
+				<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}-@{val}, desc=true): $"/>
 			]]></content>
 		</example>
 	</collection>

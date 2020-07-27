@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.yukthitech.autox.expr.ParserContentType;
+import com.yukthitech.autox.filter.ParserContentType;
 
 /**
  * Expression parser details.

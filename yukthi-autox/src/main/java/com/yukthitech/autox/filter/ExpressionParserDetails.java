@@ -1,4 +1,4 @@
-package com.yukthitech.autox.expr;
+package com.yukthitech.autox.filter;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -309,7 +309,7 @@ public class ExpressionParserDetails
 	 * @param expression expression to be executed
 	 * @return result
 	 */
-	public IPropertyPath invoke(ExpressionParserContext context, String expression, String expectedType[])
+	public IPropertyPath invoke(FilterContext context, String expression, String expectedType[])
 	{
 		try
 		{

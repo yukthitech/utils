@@ -39,7 +39,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
-import com.yukthitech.autox.expr.ExpressionFactory;
+import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.ref.IReference;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;

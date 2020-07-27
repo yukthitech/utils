@@ -1,4 +1,4 @@
-package com.yukthitech.autox.expr;
+package com.yukthitech.autox.filter;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,9 +22,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
 import com.yukthitech.ccg.xml.util.StringUtil;
@@ -32,13 +36,13 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Default expression parser methods.
+ * Default filter methods.
  * @author akiran
  */
-public class DefaultExpressionParsers
+public class DefaultFilters
 {
-	@ExpressionParser(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", example = "prop: attr.bean.value1")
-	public IPropertyPath propertyParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", example = "prop: attr.bean.value1")
+	public IPropertyPath propertyParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -56,8 +60,8 @@ public class DefaultExpressionParsers
 		};
 	}
 	
-	@ExpressionParser(type = "store", description = "Parses specified expression as value on/from store.", example = "store: key1")
-	public IPropertyPath storeParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "store", description = "Parses specified expression as value on/from store.", example = "store: key1")
+	public IPropertyPath storeParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -81,8 +85,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = ParserContentType.ATTRIBUTE)
-	public IPropertyPath attrParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = ParserContentType.ATTRIBUTE)
+	public IPropertyPath attrParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -106,8 +110,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "param", description = "Parses specified expression as parameter.", example = "param: paramName")
-	public IPropertyPath paramParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "param", description = "Parses specified expression as parameter.", example = "param: paramName")
+	public IPropertyPath paramParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -119,11 +123,11 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "xpath", description = "Parses specified expression as xpath on effective-context (context or current object in case of piping).", example = "xpath: /attr/bean/value1",
+	@ExpressionFilter(type = "xpath", description = "Parses specified expression as xpath on effective-context (context or current object in case of piping).", example = "xpath: /attr/bean/value1",
 			params = {
 					@ParserParam(name = "multi", type = "boolean", defaultValue = "false", description = "If true, list of matches will be returned"),
 				})
-	public IPropertyPath xpathParser(ExpressionParserContext parserContext, String expression)
+	public IPropertyPath xpathParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -177,7 +181,7 @@ public class DefaultExpressionParsers
 		};
 	}
 	
-	private String getStringValue(ExpressionParserContext parserContext, String expression) throws Exception
+	private String getStringValue(FilterContext parserContext, String expression) throws Exception
 	{
 		if("$".equals(expression.trim()))
 		{
@@ -206,10 +210,10 @@ public class DefaultExpressionParsers
 		return expression.trim();
 	}
 
-	@ExpressionParser(type = "string", description = "Returns specified expression as stirng value after triming. In case of '$', current value will be converted to string. "
+	@ExpressionFilter(type = "string", description = "Returns specified expression as stirng value after triming. In case of '$', current value will be converted to string. "
 			+ "In case input object Blob/Clob, string value will be extracted from it.", 
 			example = "string: str")
-	public IPropertyPath strParser(ExpressionParserContext parserContext, String expression)
+	public IPropertyPath strParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -221,8 +225,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "int", description = "Parses specified expression into int. In case of '$', current value's string value will be parsed.", example = "int: 10")
-	public IPropertyPath intParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "int", description = "Parses specified expression into int. In case of '$', current value's string value will be parsed.", example = "int: 10")
+	public IPropertyPath intParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -235,8 +239,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "long", description = "Parses specified expression into long. In case of '$', current value's string value will be parsed.", example = "long: 10")
-	public IPropertyPath longParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "long", description = "Parses specified expression into long. In case of '$', current value's string value will be parsed.", example = "long: 10")
+	public IPropertyPath longParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -248,8 +252,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "float", description = "Parses specified expression into float. In case of '$', current value's string value will be parsed.", example = "float: 10.2")
-	public IPropertyPath floatParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "float", description = "Parses specified expression into float. In case of '$', current value's string value will be parsed.", example = "float: 10.2")
+	public IPropertyPath floatParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -261,8 +265,8 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "double", description = "Parses specified expression into double. In case of '$', current value's string value will be parsed.", example = "double: 10.2")
-	public IPropertyPath doubleParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "double", description = "Parses specified expression into double. In case of '$', current value's string value will be parsed.", example = "double: 10.2")
+	public IPropertyPath doubleParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -274,10 +278,10 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "boolean", description = "Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.  "
+	@ExpressionFilter(type = "boolean", description = "Parses specified expression into boolean. If expression value is true (case insensitive), then result will be true.  "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "boolean: True")
-	public IPropertyPath booleanParser(ExpressionParserContext parserContext, String expression)
+	public IPropertyPath booleanParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -289,10 +293,10 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "date", description = "Parses specified expression into date. "
+	@ExpressionFilter(type = "date", description = "Parses specified expression into date. "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "date: 21/3/2018, date(format=MM/dd/yyy): 3/21/2018")
-	public IPropertyPath dateParser(ExpressionParserContext parserContext, String expression)
+	public IPropertyPath dateParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -327,10 +331,10 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
+	@ExpressionFilter(type = "list", description = "Parses specified expression into list of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
 			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to list directly.", 
 			example = "list: val1, val2, val3")
-	public IPropertyPath listParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath listParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -370,10 +374,10 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "set", description = "Parses specified expression into set of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
+	@ExpressionFilter(type = "set", description = "Parses specified expression into set of strings (using comma as delimiter). If type specified, strings will be converted to specified type. "
 			+ "In case of '$', current value's string value will be parsed. If current value is collection, it will converted to set directly.", 
 			example = "set: val1, val2, val3")
-	public IPropertyPath setParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath setParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -413,11 +417,99 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "map", description = "Parses specified expression into map of strings (using comma as delimiter and = as delimiter for key and value). "
+	@ExpressionFilter(type = "sort", description = "Sorts the input collection and returns the result as list. As the input is expected to be collection this filter"
+			+ "can be used only with $. If no property is specified, ordering will be done in natural order.", 
+			example = "attr: lstAttr | sort(property=name): $",
+			params = {
+					@ParserParam(name = "propertyExpr", type = "String", defaultValue = "natural-ordering", 
+							description = "A free marker expression which will be used to convert each object into string, post which sorting will be done. In order"
+									+ "to overcome default expression parsing, optionally @{} expression format can be used instead of ${}."),
+					@ParserParam(name = "desc", type = "boolean", defaultValue = "false", 
+						description = "If set to true, the sorting will be done in reverse order.")
+				})
+	public IPropertyPath sortParser(FilterContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@SuppressWarnings({ "unchecked", "rawtypes"})
+			@Override
+			public Object getValue() throws Exception
+			{
+				Object curVal = parserContext.getCurrentValue();
+				
+				if(curVal == null)
+				{
+					return null;
+				}
+				
+				if(!(curVal instanceof Collection))
+				{
+					throw new InvalidArgumentException("Non-collection is specified as input for sort: {} [Type: {}]", curVal, curVal.getClass().getName());
+				}
+				
+				List<Object> lst = new ArrayList<>((Collection<Object>) curVal);
+				String prop = parserContext.getParameter("propertyExpr");
+				boolean desc = "true".equals(parserContext.getParameter("desc"));
+				
+				if(StringUtils.isBlank(prop))
+				{
+					if(desc)
+					{
+						Collections.sort((List) lst, Collections.reverseOrder());
+					}
+					else
+					{
+						Collections.sort((List) lst);
+					}
+					
+					return lst;
+				}
+				
+				prop = prop.replaceAll("\\@\\{(.*?)\\}", "\\${$1}");
+				
+				final String finalProp = prop;
+				Comparator<Object> valueComparator = new Comparator<Object>()
+				{
+					@Override
+					public int compare(Object o1, Object o2)
+					{
+						if(o1 == null)
+						{
+							return -1;
+						}
+						
+						if(o2 == null)
+						{
+							return 1;
+						}
+						
+						String val1 = FreeMarkerMethodManager.replaceExpressions("expression-obj1", o1, finalProp);
+						String val2 = FreeMarkerMethodManager.replaceExpressions("expression-obj2", o2, finalProp);
+						
+						int diff = val1.compareTo(val2);
+						return (diff == 0) ? 1 : diff;
+					}
+				};
+				
+				if(desc)
+				{
+					Collections.sort(lst, Collections.reverseOrder(valueComparator));	
+				}
+				else
+				{
+					Collections.sort(lst, valueComparator);
+				}
+				
+				return lst;
+			}
+		};
+	}
+
+	@ExpressionFilter(type = "map", description = "Parses specified expression into map of strings (using comma as delimiter and = as delimiter for key and value). "
 			+ "If types specified, strings will be converted to specified type. "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "map: key1 = val1, key2=val2, key3=val3")
-	public IPropertyPath mapParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath mapParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -463,9 +555,9 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned", 
+	@ExpressionFilter(type = "condition", description = "Evaluates specified expression as condition and resultant boolean value will be returned", 
 			example = "condition: (attr.flag == true)", contentType = ParserContentType.FM_EXPRESSION)
-	public IPropertyPath conditionParser(ExpressionParserContext parserContext, String expression)
+	public IPropertyPath conditionParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -477,9 +569,9 @@ public class DefaultExpressionParsers
 		};
 	}
 	
-	@ExpressionParser(type = "expr", description = "Evaluates specified expression as freemarker expression and resultant value will be returned", 
+	@ExpressionFilter(type = "expr", description = "Evaluates specified expression as freemarker expression and resultant value will be returned", 
 			example = "expr: today()", contentType = ParserContentType.FM_EXPRESSION)
-	public IPropertyPath expressionParser(ExpressionParserContext parserContext, String expression)
+	public IPropertyPath expressionParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{
@@ -509,7 +601,7 @@ public class DefaultExpressionParsers
 	 * @param name name of the input
 	 * @return loaded object
 	 */
-	private Object loadInputStream(String data, String name, String exprType[], ExpressionParserContext parserContext) throws Exception
+	private Object loadInputStream(String data, String name, String exprType[], FilterContext parserContext) throws Exception
 	{
 		ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
 		
@@ -572,7 +664,7 @@ public class DefaultExpressionParsers
 		return FileUtils.readFileToString(file);
 	}
 
-	@ExpressionParser(type = "file", description = "Parses specified expression as file path and loads it as object. "
+	@ExpressionFilter(type = "file", description = "Parses specified expression as file path and loads it as object. "
 			+ "As part of 'set', the specified content will be converted to string and will be writtern to file. "
 			+ "Supported object file types: xml, json, properties", 
 			example = "file: /tmp/data.json",
@@ -581,7 +673,7 @@ public class DefaultExpressionParsers
 				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
 				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values.")
 			})
-	public IPropertyPath fileParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath fileParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -599,10 +691,10 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array)."
+	@ExpressionFilter(type = "bfile", description = "Parses specified expression as file path and loads it as binary data (byte array)."
 			+ "As part of 'set' the value is expected to be byte[] which will be written to specified file.", 
 			example = "bfile: /tmp/data")
-	public IPropertyPath bfileParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath bfileParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -624,14 +716,14 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "res", description = "Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties",
+	@ExpressionFilter(type = "res", description = "Parses specified expression as resource path and loads it as object. Supported file types: xml, json, properties",
 			example = "res: /tmp/data.json",
 			params = {
 				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
 				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values.")
 			})
-	public IPropertyPath resParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath resParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -655,7 +747,7 @@ public class DefaultExpressionParsers
 				}
 				else
 				{
-					InputStream is = DefaultExpressionParsers.class.getResourceAsStream(expression); 
+					InputStream is = DefaultFilters.class.getResourceAsStream(expression); 
 
 					if(is == null)
 					{
@@ -672,9 +764,9 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
+	@ExpressionFilter(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
 			example = "bres: /tmp/data.json")
-	public IPropertyPath bresParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath bresParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -705,7 +797,7 @@ public class DefaultExpressionParsers
 				}
 				else
 				{
-					InputStream is = DefaultExpressionParsers.class.getResourceAsStream(expression); 
+					InputStream is = DefaultFilters.class.getResourceAsStream(expression); 
 
 					if(is == null)
 					{
@@ -721,14 +813,14 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "json", description = "Parses specified expression as json string and loads it as object. "
+	@ExpressionFilter(type = "json", description = "Parses specified expression as json string and loads it as object. "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "json: {\"a\": 2, \"b\": 3}",
 			params = {
 					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template")
 				}
 	)
-	public IPropertyPath jsonParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath jsonParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{
@@ -742,14 +834,14 @@ public class DefaultExpressionParsers
 		};
 	}
 
-	@ExpressionParser(type = "jsonWithType", description = "Parses specified expression as json (with types) string and loads it as object. "
+	@ExpressionFilter(type = "jsonWithType", description = "Parses specified expression as json (with types) string and loads it as object. "
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "jsonWithType: {\"a\": 2, \"b\": 3}",
 			params = {
 					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 				}
 	)
-	public IPropertyPath jsonWithTypeParser(ExpressionParserContext parserContext, String expression, String exprType[])
+	public IPropertyPath jsonWithTypeParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
 		{

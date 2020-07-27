@@ -447,6 +447,62 @@
 		
 		</testCase>
 
+		<testCase name="testSortFilter">
+			<description>
+				Tests the working of sort filter
+			</description>
+			
+			<s:set expression="unsortedLst">
+				<value>
+					json: [
+						{"name": "xyz", "val": "20"},
+						{"name": "bdc", "val": "25"},
+						{"name": "yzx", "val": "30"},
+						{"name": "abc", "val": "40"}
+					]
+				</value>
+			</s:set>
+
+			<s:set expression="sortedLst">
+				<value>
+					json: [
+						{"name": "abc", "val": "40"},
+						{"name": "bdc", "val": "25"},
+						{"name": "xyz", "val": "20"},
+						{"name": "yzx", "val": "30"}
+					]
+				</value>
+			</s:set>
+
+			<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}): $"/>
+			<s:assert-equals expected="list: abc, bcd, def, fgh" actual="set: def, fgh, abc, bcd | sort: $"/>
+			
+			<s:assert-equals expected="list: fgh, def, bcd, abc" actual="set: def, fgh, abc, bcd | sort(desc=true): $"/>
+			
+			<!-- Test when multiple fields are being used -->
+			<s:set expression="unsortedLst">
+				<value>
+					json: [
+						{"name": "abc", "val": "30"},
+						{"name": "yzx", "val": "30"},
+						{"name": "abc", "val": "40"}
+					]
+				</value>
+			</s:set>
+
+			<s:set expression="sortedLst">
+				<value>
+					json: [
+						{"name": "yzx", "val": "30"},
+						{"name": "abc", "val": "40"},
+						{"name": "abc", "val": "30"}
+					]
+				</value>
+			</s:set>
+
+			<s:assert-equals expected="attr: sortedLst" actual="attr: unsortedLst | sort(propertyExpr=@{name}-@{val}, desc=true): $"/>
+		</testCase>
+
 		<testCase name="testSubmapFunction">
 			<description>
 				Tests the submap function is working properly.

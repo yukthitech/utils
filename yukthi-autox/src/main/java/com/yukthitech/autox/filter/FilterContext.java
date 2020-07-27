@@ -1,4 +1,4 @@
-package com.yukthitech.autox.expr;
+package com.yukthitech.autox.filter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.yukthitech.autox.AutomationContext;
  * Context used by expression parsers.
  * @author akiran
  */
-public class ExpressionParserContext
+public class FilterContext
 {
 	/**
 	 * Automation context being used.
@@ -46,7 +46,7 @@ public class ExpressionParserContext
 	 *
 	 * @param context the context
 	 */
-	public ExpressionParserContext(AutomationContext context, Object currentValue)
+	public FilterContext(AutomationContext context, Object currentValue)
 	{
 		this.automationContext = context;
 		this.currentValue = currentValue;

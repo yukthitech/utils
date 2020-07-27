@@ -2,9 +2,9 @@ package com.yukthitech.autox.test.ui;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.expr.ExpressionParser;
-import com.yukthitech.autox.expr.ExpressionParserContext;
-import com.yukthitech.autox.expr.IPropertyPath;
+import com.yukthitech.autox.filter.ExpressionFilter;
+import com.yukthitech.autox.filter.FilterContext;
+import com.yukthitech.autox.filter.IPropertyPath;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
@@ -14,8 +14,8 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  */
 public class UiExpressionParsers
 {
-	@ExpressionParser(type = "uival", description = "Parses provided exprssion as ui locator and fetches/sets its value.", example = "uival: id:name")
-	public IPropertyPath propertyParser(ExpressionParserContext parserContext, String expression)
+	@ExpressionFilter(type = "uival", description = "Parses provided exprssion as ui locator and fetches/sets its value.", example = "uival: id:name")
+	public IPropertyPath propertyParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
 		{

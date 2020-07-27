@@ -12,7 +12,7 @@ import org.apache.commons.dbutils.QueryRunner;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.IAutomationConstants;
-import com.yukthitech.autox.expr.ExpressionFactory;
+import com.yukthitech.autox.filter.ExpressionFactory;
 
 /**
  * Common query utility methods.

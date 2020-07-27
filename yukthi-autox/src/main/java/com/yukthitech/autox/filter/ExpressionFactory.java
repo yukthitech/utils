@@ -1,4 +1,4 @@
-package com.yukthitech.autox.expr;
+package com.yukthitech.autox.filter;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -82,12 +82,12 @@ public class ExpressionFactory
 					ConfigurationBuilder.build(pack, new MethodAnnotationsScanner(), classLoader)
 				);
 
-			parserMethods = reflections.getMethodsAnnotatedWith(ExpressionParser.class);
+			parserMethods = reflections.getMethodsAnnotatedWith(ExpressionFilter.class);
 			
 			if(parserMethods != null)
 			{
 				Object parserObj = null;
-				ExpressionParser parserAnnot = null;
+				ExpressionFilter parserAnnot = null;
 				ExpressionParserDetails parserDet = null;
 				Class<?> paramTypes[] = null;
 				
@@ -97,14 +97,14 @@ public class ExpressionFactory
 					
 					if(paramTypes.length == 2)
 					{
-						if(!ExpressionParserContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]))
+						if(!FilterContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]))
 						{
 							throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
 						}
 					}
 					else if(paramTypes.length == 3)
 					{
-						if(!ExpressionParserContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]) || !String[].class.equals(paramTypes[2]))
+						if(!FilterContext.class.equals(paramTypes[0]) || !String.class.equals(paramTypes[1]) || !String[].class.equals(paramTypes[2]))
 						{
 							throw new InvalidStateException("Invalid arguments specified for expression parser method: {}.{}", method.getDeclaringClass().getName(), method.getName());
 						}
@@ -119,7 +119,7 @@ public class ExpressionFactory
 						throw new InvalidStateException("Expression parser method is not returning property path: {}.{}", method.getDeclaringClass().getName(), method.getName());
 					}
 					
-					parserAnnot = method.getAnnotation(ExpressionParser.class);
+					parserAnnot = method.getAnnotation(ExpressionFilter.class);
 					parserObj = parserClasses.get(method.getDeclaringClass());
 					
 					if(parserObj == null)
@@ -225,7 +225,7 @@ public class ExpressionFactory
 			
 		
 		Object result = null;
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, ((exprConfig != null) ? exprConfig.getInitValue() : null));
+		FilterContext expressionParserContext = new FilterContext(context, ((exprConfig != null) ? exprConfig.getInitValue() : null));
 		ObjectWrapper<Boolean> expressionParsed = new ObjectWrapper<Boolean>(true);
 		
 		if(exprConfig != null)
@@ -256,7 +256,7 @@ public class ExpressionFactory
 		return result;
 	}
 	
-	private IPropertyPath getPropertyPath(ExpressionParserContext context, String expression)
+	private IPropertyPath getPropertyPath(FilterContext context, String expression)
 	{
 		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		
@@ -325,7 +325,7 @@ public class ExpressionFactory
 		return parser.invoke(context, mainExpr, exprTypeParams);
 	}
 	
-	private Object parseSingleExpression(ExpressionParserContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
+	private Object parseSingleExpression(FilterContext context, String expression, ObjectWrapper<Boolean> expressionParsed)
 	{
 		IPropertyPath propPath = getPropertyPath(context, expression);
 		
@@ -384,7 +384,7 @@ public class ExpressionFactory
 	
 	public void removeByExpression(AutomationContext context, String expression, Object initValue)
 	{
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, initValue);
+		FilterContext expressionParserContext = new FilterContext(context, initValue);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		ExecutionLogger exeLogger = context.getExecutionLogger();
 		
@@ -414,7 +414,7 @@ public class ExpressionFactory
 	
 	public void setExpressionValue(AutomationContext context, String expression, Object value, Object initValue)
 	{
-		ExpressionParserContext expressionParserContext = new ExpressionParserContext(context, initValue);
+		FilterContext expressionParserContext = new FilterContext(context, initValue);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		ExecutionLogger exeLogger = context.getExecutionLogger();
 		
