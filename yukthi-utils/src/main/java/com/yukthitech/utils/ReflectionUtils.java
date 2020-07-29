@@ -104,6 +104,48 @@ public class ReflectionUtils
 	}
 
 	/**
+	 * Used to set value of specified static field irrespective of the field modifier
+	 * 
+	 * @param bean
+	 *            Bean from which field value needs to be set
+	 * @param field
+	 *            static field from which value needs to be set
+	 * @param value
+	 *            Value to be set
+	 */
+	public static void setStaticFieldValue(Class<?> clazz, String field, Object value)
+	{
+		try
+		{
+			Field fieldObj = clazz.getDeclaredField(field);
+			fieldObj.setAccessible(true);
+			fieldObj.set(null, value);
+		} catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while seting static field value - " + field, ex);
+		}
+	}
+	
+	/**
+	 * Invokes specified method on specified bean with specified params irrespective of modifiers of method.
+	 * @param bean bean on which method to be invoked. For static methods this can be null
+	 * @param method method to be invoked. Can be obtained using method {@link #getMethod(Class, String, Class...)}
+	 * @param params params to be passed to method
+	 * @return method return value.
+	 */
+	public static Object invokeMethod(Object bean, Method method, Object... params)
+	{
+		try
+		{
+			method.setAccessible(true);
+			return method.invoke(bean, params);
+		} catch(Exception ex)
+		{
+			throw new IllegalStateException("An error occurred while invoking method - " + method.getName(), ex);
+		}
+	}
+
+	/**
 	 * Used to set value of specified field irrespective of the field modifier
 	 * 
 	 * @param bean
@@ -396,7 +438,7 @@ public class ReflectionUtils
 		return newInstance;
 	}
 	
-	private static Method getMethod(Class<?> type, String name, Class<?>... paramTypes)
+	public static Method getMethod(Class<?> type, String name, Class<?>... paramTypes)
 	{
 		try
 		{
