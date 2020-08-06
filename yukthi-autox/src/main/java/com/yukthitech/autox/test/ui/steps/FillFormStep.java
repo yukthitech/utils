@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -201,6 +202,7 @@ public class FillFormStep extends AbstractStep
 	 * @param data
 	 *            the new data to be filled
 	 */
+	@ChildElement(description = "Data to fill")
 	public void setData(Object data)
 	{
 		this.data = data;

@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,7 +51,7 @@ public class XmlFormatter
 			
 			Element oldElement = oldDocument.getDocumentElement();
 	
-			Element newElement = formatElement(oldElement, newDoc, "");
+			Element newElement = formatElement(oldElement, newDoc, "", new AtomicInteger(0));
 			newDoc.appendChild(newElement);
 			
 			//convert to xml text
@@ -63,7 +64,10 @@ public class XmlFormatter
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			transformer.transform(domSource, result);		
 			
-			return writer.toString();
+			String resultContent = writer.toString();
+			resultContent = resultContent.replace("xmlns:", "\n\txmlns:");
+			
+			return resultContent;
 		}catch(Exception ex)
 		{
 			if(ex instanceof RuntimeException)
@@ -75,7 +79,7 @@ public class XmlFormatter
 		}
 	}
 	
-	private static Element formatElement(Element oldElement, Document newDoc, String indentation)
+	private static Element formatElement(Element oldElement, Document newDoc, String indentation, AtomicInteger childCount)
 	{
 		Element element = newDoc.createElement(oldElement.getNodeName());
 		
@@ -91,9 +95,11 @@ public class XmlFormatter
 		for(int i = 0; i < size; i++)
 		{
 			Attr oldAttr = (Attr) attrMap.item(i);
-			Attr attr = newDoc.createAttribute(oldAttr.getName());
-			attr.setValue(oldAttr.getValue());
+			String name = oldAttr.getName();
 			
+			Attr attr = newDoc.createAttribute(name);
+			attr.setValue(oldAttr.getValue());
+
 			if(StringUtils.isNotEmpty(oldAttr.getPrefix()))
 			{
 				attr.setPrefix(oldAttr.getPrefix());
@@ -105,9 +111,21 @@ public class XmlFormatter
 		//set the child nodes recursively
 		NodeList nodeList = oldElement.getChildNodes();
 		size = nodeList.getLength();
-		Node node = null;
+		Node node = null, prevNode = null;
 		String childIndent = indentation + "\t";
-		String indentText = "\n" + childIndent;
+		String nextLineIndentText = "\n" + childIndent;
+		String nextLineIndentTextWithGap = nextLineIndentText + nextLineIndentText;
+		
+		boolean prevElemMultiLined = false;
+		AtomicInteger subchildCount = new AtomicInteger(0);
+		boolean firstElement = true;
+		int elementCount = 0;
+
+		//for root element, before child elements are added, add a line gap
+		if("".equals(indentation))
+		{
+			element.appendChild(newDoc.createTextNode(nextLineIndentText));
+		}
 		
 		for(int i = 0 ; i < size ; i++)
 		{
@@ -124,6 +142,9 @@ public class XmlFormatter
 				text = formatText(text, childIndent, indentation);
 				
 				element.appendChild(newDoc.createCDATASection(text));
+				childCount.incrementAndGet();
+				
+				prevNode = node;
 				continue;
 			}
 			
@@ -138,6 +159,9 @@ public class XmlFormatter
 				}
 				
 				element.appendChild(newDoc.createTextNode(text));
+				childCount.incrementAndGet();
+				
+				prevNode = node;
 				continue;
 			}
 			
@@ -146,25 +170,68 @@ public class XmlFormatter
 				String text = ((Comment) node).getNodeValue();
 				text = formatText(text, childIndent + "\t", indentation + "\t");
 				
-				element.appendChild(newDoc.createTextNode(indentText));
+				if(firstElement)
+				{
+					element.appendChild(newDoc.createTextNode(nextLineIndentText));
+				}
+				else
+				{
+					element.appendChild(newDoc.createTextNode(nextLineIndentTextWithGap));
+				}
+				
 				element.appendChild(newDoc.createComment(text));
+				
+				childCount.incrementAndGet();
+				prevNode = node;
 				continue;
 			}
 			
 			if(node instanceof Element)
 			{
-				element.appendChild(newDoc.createTextNode(indentText));
+				//if prev element is multi-lined, add empty line after new element
+				if(prevElemMultiLined && !(prevNode instanceof Comment))
+				{
+					element.appendChild(newDoc.createTextNode("\n" + indentation));
+				}
 				
-				Element newElem = formatElement((Element) node, newDoc, indentation + "\t");
+				element.appendChild(newDoc.createTextNode(nextLineIndentText));
+				
+				subchildCount.set(0);
+				
+				Element newElem = formatElement((Element) node, newDoc, indentation + "\t", subchildCount);
+				
+				//if new element is multi lined
+				if(subchildCount.get() > 0)
+				{
+					//add if there is no line break or comment before this and also this is not first element
+					if(!prevElemMultiLined && !(prevNode instanceof Comment) && !firstElement)
+					{
+						//add extra line gap
+						element.appendChild(newDoc.createTextNode("\n" + indentation + "\t"));
+					}
+				}
+				
 				element.appendChild(newElem);
 				
-				element.appendChild(newDoc.createTextNode("\n" + indentation));
+				prevElemMultiLined = (subchildCount.get() > 0);
+				
+				elementCount ++;
+				childCount.incrementAndGet();
+				firstElement = false;
+				prevNode = node;
 				continue;
 			}
 			
 			throw new IllegalStateException("Unknow node type encountered in xml conent: " + node.getNodeType() + "[" + node.getClass().getName() + "]");
 		}
 		
+		//if element has children, add extra line with indent for closing tag
+		if(elementCount > 0)
+		{
+			element.appendChild(newDoc.createTextNode("\n" + indentation));
+			prevElemMultiLined = true;
+		}
+
 		return element;
 	}
 

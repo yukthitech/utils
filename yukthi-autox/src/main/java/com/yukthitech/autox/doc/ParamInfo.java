@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -57,6 +58,11 @@ public class ParamInfo implements Comparable<ParamInfo>
 	private String defaultValue;
 	
 	/**
+	 * Flag indicating if this param can be specified as attribute or not.
+	 */
+	private boolean attributable;
+	
+	/**
 	 * Instantiates a new param info.
 	 *
 	 * @param field the field
@@ -82,7 +88,9 @@ public class ParamInfo implements Comparable<ParamInfo>
 		
 		if(genericType instanceof Class)
 		{
-			type = ((Class<?>) genericType).getName();
+			Class<?> cls = (Class<?>) genericType; 
+			type = cls.getName();
+			attributable = Object.class.equals(cls) || XMLUtil.isSupportedAttributeClass((Class<?>) genericType);
 		}
 		else if(genericType instanceof ParameterizedType)
 		{
@@ -196,6 +204,16 @@ public class ParamInfo implements Comparable<ParamInfo>
 	public String getDefaultValue()
 	{
 		return defaultValue;
+	}
+	
+	/**
+	 * Checks if is flag indicating if this param can be specified as attribute or not.
+	 *
+	 * @return the flag indicating if this param can be specified as attribute or not
+	 */
+	public boolean isAttributable()
+	{
+		return attributable;
 	}
 
 	/* (non-Javadoc)

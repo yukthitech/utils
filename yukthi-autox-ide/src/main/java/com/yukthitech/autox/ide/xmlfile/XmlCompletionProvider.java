@@ -122,7 +122,10 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 			{
 				if(param.isMandatory())
 				{
-					builder.append(param.getName()).append("=\"\" ");
+					if(param.isAttributable())
+					{
+						builder.append(param.getName()).append("=\"\" ");
+					}
 				}
 			}
 		}
@@ -136,7 +139,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		}
 		
 		builder.append(">").append("\n").append(location.getIndentation());
-		builder.append("</").append(location.getXmlFile().getPrefixForNamespace(XMLConstants.CCG_URI)).append(":").append(nodeName).append(">");
+		builder.append("</").append(location.getXmlFile().getPrefixForNamespace(IAutomationConstants.STEP_NAME_SPACE, XMLConstants.NEW_CCG_URI, XMLConstants.CCG_URI)).append(":").append(nodeName).append(">");
 		
 		return builder.toString();
 	}

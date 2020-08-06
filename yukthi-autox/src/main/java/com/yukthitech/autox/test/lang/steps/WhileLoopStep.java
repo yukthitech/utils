@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.lang.steps;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -50,6 +51,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStepContainer#addStep(com.yukthitech.autox.IStep)
 	 */
+	@ChildElement(description = "Steps to be executed")
 	@Override
 	public void addStep(IStep step)
 	{

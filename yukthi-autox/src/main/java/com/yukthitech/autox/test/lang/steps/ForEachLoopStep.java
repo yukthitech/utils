@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -38,7 +39,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	/**
 	 * Expression which will be evaluated to collection or map or String.
 	 */
-	@Param(description = "Expression which will be evaluated to collection or map or String", sourceType = SourceType.EXPRESSION)
+	@Param(description = "Expression which will be evaluated to collection or map or String", sourceType = SourceType.EXPRESSION, required = true)
 	private Object expression;
 	
 	/**
@@ -90,6 +91,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStepContainer#addStep(com.yukthitech.autox.IStep)
 	 */
+	@ChildElement(description = "Steps to be executed")
 	@Override
 	public void addStep(IStep step)
 	{

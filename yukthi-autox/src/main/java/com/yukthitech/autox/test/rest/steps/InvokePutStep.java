@@ -1,6 +1,7 @@
 package com.yukthitech.autox.test.rest.steps;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -29,6 +30,7 @@ public class InvokePutStep extends AbstractRestStep
 	 *
 	 * @param body the new body to be set
 	 */
+	@ChildElement(description = "Body of the request")
 	public void setBody(Object body)
 	{
 		this.body = body;
