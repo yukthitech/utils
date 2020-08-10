@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -14,6 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yukthitech.autox.AutoxVersion;
+import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
 import com.yukthitech.autox.ide.IdeFileUtils;
@@ -46,6 +49,7 @@ public class Project implements Serializable
 	private String appPropertyFilePath;
 	private Set<String> testSuitesFoldersList;
 	private Set<String> classPathEntriesList;
+	private String resourcesFolder;
 	
 	private transient ProjectClassLoader projectClassLoader;
 	
@@ -64,9 +68,10 @@ public class Project implements Serializable
 	public Project()
 	{
 		name = "";
-		appConfigFilePath = "appConfig.xml";
-		appPropertyFilePath = "app.properties";
-		testSuitesFoldersList = CommonUtils.toSet("src/testsuites");
+		appConfigFilePath = "src/main/config/app-configuration.xml";
+		appPropertyFilePath = "src/main/config/app.properties";
+		testSuitesFoldersList = CommonUtils.toSet("src/main/test-suites");
+		resourcesFolder = "src/main/resources";
 	}
 
 	public String getName()
@@ -273,40 +278,56 @@ public class Project implements Serializable
 				FileUtils.forceMkdir(testSuiteFolder);
 			}
 		}
-
-		File appProp = new File(baseFolder, appPropertyFilePath);
 		
-		if(appProp.getParentFile().exists())
+		File resourcesFolder = new File(baseFolder, this.resourcesFolder);
+
+		if(!resourcesFolder.exists())
 		{
-			FileUtils.forceMkdir(appProp.getParentFile());
+			FileUtils.forceMkdir(resourcesFolder);
 		}
 
-		if(!appProp.exists())
+		Map<String, String> pathToTemp = CommonUtils.toMap(
+				appPropertyFilePath, "/templates/new-project/app-prop-template.properties",
+				appConfigFilePath, "/templates/new-project/app-config-template.xml",
+				"/pom.xml", "/templates/new-project/pom.xml",
+				"/zip-pom.xml", "/templates/new-project/zip-pom.xml"
+			);
+		
+		Map<String, String> context = CommonUtils.toMap(
+				"testSuitesFolder", testSuitesFoldersList.iterator().next(),
+				"projectName", this.name,
+				"autoxVersion", AutoxVersion.getVersion()
+			);
+		
+		for(Map.Entry<String, String> entry : pathToTemp.entrySet())
 		{
-			createFile(appProp, "/templates/app-prop-template.properties");
-			appProp.createNewFile();
-		}
+			String path = entry.getKey();
+			String temp = entry.getValue();
+			
+			File entryFile = new File(baseFolder, path);
+			
+			if(entryFile.getParentFile().exists())
+			{
+				FileUtils.forceMkdir(entryFile.getParentFile());
+			}
 
-		File appConfig = new File(baseFolder, appConfigFilePath);
-
-		if(appConfig.getParentFile().exists())
-		{
-			FileUtils.forceMkdir(appConfig.getParentFile());
-		}
-
-		if(!appConfig.exists())
-		{
-			createFile(appConfig, "/templates/app-config-template.xml");
+			if(!entryFile.exists())
+			{
+				createFile(entryFile, temp, context);
+				entryFile.createNewFile();
+			}
 		}
 
 		save();
 	}
 	
-	private void createFile(File file, String templateFile) throws IOException
+	private void createFile(File file, String templateFile, Map<String, String> context) throws IOException
 	{
 		InputStream is = Project.class.getResourceAsStream(templateFile);
 		String content = IOUtils.toString(is);
 		is.close();
+		
+		content = FreeMarkerMethodManager.replaceExpressions(templateFile, context, content);
 		
 		FileUtils.write(file, content);
 	}
@@ -432,6 +453,7 @@ public class Project implements Serializable
 		FileUtils.forceDelete(baseFolder);
 	}
 	
+	@JsonIgnore
 	public synchronized ProjectElementTracker getProjectElementTracker()
 	{
 		if(projectElementTracker == null)
@@ -473,5 +495,14 @@ public class Project implements Serializable
 	public int hashCode()
 	{
 		return name.hashCode();
+	}
+	
+	public static void main(String[] args) throws Exception
+	{
+		Project project = new Project();
+		project.setName("test");
+		project.setProjectFilePath("C:\\Users\\akiran\\Documents\\Sound recordings\\test\\" + PROJECT_FILE_NAME);
+		
+		project.createProject();
 	}
 }

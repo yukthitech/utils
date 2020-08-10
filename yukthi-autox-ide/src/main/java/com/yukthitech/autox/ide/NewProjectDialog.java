@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.utils.CommonUtils;
 
 public class NewProjectDialog extends JDialog
 {
@@ -33,15 +32,11 @@ public class NewProjectDialog extends JDialog
 	private static Logger logger = LogManager.getLogger(NewProjectDialog.class);
 
 	private final JPanel contentPanel = new JPanel();
-	private JTextField appConfigPath;
-	private JTextField appPropertyPath;
-	private JTextField testSuiteFolderPath;
 	private JTextField baseFolderPath;
 	private JTextField projectName;
 	private JFileChooser fileChooser = new JFileChooser();
 	private Project project = new Project();
 	private boolean projectCreated = false;
-	private final JLabel lblPleaseProvideRelative = new JLabel("Please provide relative paths for below (using /):");
 
 	/**
 	 * Create the dialog.
@@ -51,15 +46,15 @@ public class NewProjectDialog extends JDialog
 		super(window, ModalityType.APPLICATION_MODAL);
 		setTitle("New Project");
 
-		setBounds(100, 100, 450, 252);
+		setBounds(100, 100, 450, 148);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[] { 64, 12, 257, 45, 0 };
-		gbl_contentPanel.rowHeights = new int[] { 0, 20, 23, 23, 23, 23, 0 };
-		gbl_contentPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_contentPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPanel.columnWidths = new int[] {64, 30, 257};
+		gbl_contentPanel.rowHeights = new int[] {20, 20};
+		gbl_contentPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
+		gbl_contentPanel.rowWeights = new double[] { 0.0, 0.0 };
 		contentPanel.setLayout(gbl_contentPanel);
 
 		JLabel lblName = new JLabel("Name");
@@ -112,67 +107,6 @@ public class NewProjectDialog extends JDialog
 		gbc_btnBaseFolder.gridx = 3;
 		gbc_btnBaseFolder.gridy = 1;
 		contentPanel.add(btnBaseFolder, gbc_btnBaseFolder);
-
-		GridBagConstraints gbc_lblPleaseProvideRelative = new GridBagConstraints();
-		gbc_lblPleaseProvideRelative.anchor = GridBagConstraints.WEST;
-		gbc_lblPleaseProvideRelative.gridwidth = 3;
-		gbc_lblPleaseProvideRelative.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPleaseProvideRelative.gridx = 0;
-		gbc_lblPleaseProvideRelative.gridy = 2;
-		contentPanel.add(lblPleaseProvideRelative, gbc_lblPleaseProvideRelative);
-
-		JLabel lblAppConfigFile = new JLabel("App config file");
-		GridBagConstraints gbc_lblAppConfigFile = new GridBagConstraints();
-		gbc_lblAppConfigFile.anchor = GridBagConstraints.WEST;
-		gbc_lblAppConfigFile.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAppConfigFile.gridwidth = 2;
-		gbc_lblAppConfigFile.gridx = 0;
-		gbc_lblAppConfigFile.gridy = 3;
-		contentPanel.add(lblAppConfigFile, gbc_lblAppConfigFile);
-
-		appConfigPath = new JTextField("app-configuration.xml");
-		appConfigPath.setColumns(10);
-		GridBagConstraints gbc_appConfigPath = new GridBagConstraints();
-		gbc_appConfigPath.fill = GridBagConstraints.HORIZONTAL;
-		gbc_appConfigPath.insets = new Insets(0, 0, 5, 5);
-		gbc_appConfigPath.gridx = 2;
-		gbc_appConfigPath.gridy = 3;
-		contentPanel.add(appConfigPath, gbc_appConfigPath);
-
-		JLabel lblAppProperty = new JLabel("App property");
-		GridBagConstraints gbc_lblAppProperty = new GridBagConstraints();
-		gbc_lblAppProperty.anchor = GridBagConstraints.WEST;
-		gbc_lblAppProperty.insets = new Insets(0, 0, 5, 5);
-		gbc_lblAppProperty.gridx = 0;
-		gbc_lblAppProperty.gridy = 4;
-		contentPanel.add(lblAppProperty, gbc_lblAppProperty);
-
-		appPropertyPath = new JTextField(project.getAppPropertyFilePath());
-		appPropertyPath.setColumns(10);
-		GridBagConstraints gbc_appPropertyPath = new GridBagConstraints();
-		gbc_appPropertyPath.fill = GridBagConstraints.HORIZONTAL;
-		gbc_appPropertyPath.insets = new Insets(0, 0, 5, 5);
-		gbc_appPropertyPath.gridx = 2;
-		gbc_appPropertyPath.gridy = 4;
-		contentPanel.add(appPropertyPath, gbc_appPropertyPath);
-
-		JLabel lblNewLabel = new JLabel("Test suite folder");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel.gridwidth = 2;
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 5;
-		contentPanel.add(lblNewLabel, gbc_lblNewLabel);
-
-		testSuiteFolderPath = new JTextField("src/test-suites");
-		testSuiteFolderPath.setColumns(10);
-		GridBagConstraints gbc_testSuiteFolderPath = new GridBagConstraints();
-		gbc_testSuiteFolderPath.fill = GridBagConstraints.HORIZONTAL;
-		gbc_testSuiteFolderPath.insets = new Insets(0, 0, 0, 5);
-		gbc_testSuiteFolderPath.gridx = 2;
-		gbc_testSuiteFolderPath.gridy = 5;
-		contentPanel.add(testSuiteFolderPath, gbc_testSuiteFolderPath);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -219,48 +153,8 @@ public class NewProjectDialog extends JDialog
 			return;
 		}
 
-		if(StringUtils.isBlank(appConfigPath.getText()))
-		{
-			JOptionPane.showMessageDialog(NewProjectDialog.this, "appCofig file name must be given");
-			return;
-		}
-		else
-		{
-			String str = appConfigPath.getText().toLowerCase();
-
-			if(!str.endsWith(".xml"))
-			{
-				JOptionPane.showMessageDialog(NewProjectDialog.this, " file extension must be .xml");
-				return;
-			}
-		}
-
-		if(StringUtils.isBlank(appPropertyPath.getText()))
-		{
-			JOptionPane.showMessageDialog(NewProjectDialog.this, "appProperties file name must be given");
-			return;
-		}
-		else
-		{
-			String str = appPropertyPath.getText().toLowerCase();
-			if(!str.endsWith(".properties"))
-			{
-				JOptionPane.showMessageDialog(NewProjectDialog.this, "file extension must be .properties");
-				return;
-			}
-		}
-
-		if(StringUtils.isBlank(testSuiteFolderPath.getText()))
-		{
-			JOptionPane.showMessageDialog(NewProjectDialog.this, "testSuite folder name must be given");
-			return;
-		}
-
 		project.setName(projectName.getText());
 		project.setProjectFilePath(new File(baseFolderPath.getText(), Project.PROJECT_FILE_NAME).getPath());
-		project.setAppConfigFilePath(appConfigPath.getText());
-		project.setAppPropertyFilePath(appPropertyPath.getText());
-		project.setTestSuiteFolders(CommonUtils.toSet(testSuiteFolderPath.getText()));
 
 		try
 		{
@@ -302,9 +196,6 @@ public class NewProjectDialog extends JDialog
 	{
 		projectName.setText("");
 		baseFolderPath.setText("");
-		appPropertyPath.setText("app.properties");
-		appConfigPath.setText("app-configuration.xml");
-		testSuiteFolderPath.setText("src/test-suites");
 	}
 
 	public Project display()

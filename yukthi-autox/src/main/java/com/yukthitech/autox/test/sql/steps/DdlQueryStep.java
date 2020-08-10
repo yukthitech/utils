@@ -86,7 +86,7 @@ public class DdlQueryStep extends AbstractStep
 			throw new TestCaseFailedException(this, "An erorr occurred while executing DDL query - {}", query, ex);
 		} finally
 		{
-			DbUtils.closeQuietly(connection);
+			DbUtils.closeQuietly(connection, statement, null);
 		}
 		
 		return true;
