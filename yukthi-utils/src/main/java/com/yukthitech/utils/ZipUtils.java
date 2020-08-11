@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -283,6 +285,36 @@ public class ZipUtils
 		fetchFiles(directory, files, "");
 		
 		zipFiles(files, zipFile);
+	}
+	
+	/**
+	 * Fetches zip entries from the specified file.
+	 *
+	 * @param zipFile the zip file to be read
+	 * @return the zip entries
+	 */
+	public static Set<String> getZipEntries(File zipFile)
+	{
+		try
+		{
+			ZipFile zfile = new ZipFile(zipFile);
+			Enumeration<? extends ZipEntry> it = zfile.entries();
+			
+			ZipEntry zipEntry = null;
+			Set<String> zipEntries = new LinkedHashSet<String>();
+			
+			while(it.hasMoreElements())
+			{
+				zipEntry = it.nextElement();
+				zipEntries.add(zipEntry.getName());
+			}
+
+			zfile.close();
+			return zipEntries;
+		} catch(IOException ex)
+		{
+			throw new InvalidStateException("An exception occurred while fetching zip file entries: " + zipFile, ex);
+		}
 	}
 	
 	/**
