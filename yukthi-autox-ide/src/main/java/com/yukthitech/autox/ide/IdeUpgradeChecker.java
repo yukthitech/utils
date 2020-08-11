@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -14,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.utils.ZipUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class IdeUpgradeChecker
@@ -37,6 +40,15 @@ public class IdeUpgradeChecker
 		String latestVersion = IOUtils.toString(is);
 		
 		is.close();
+		
+		Pattern pattern = Pattern.compile("[\\w\\.\\-]+\\-\\d+");
+		latestVersion = latestVersion.trim();
+		
+		if(!pattern.matcher(latestVersion).matches())
+		{
+			return null;
+		}
+		
 		return latestVersion;
 	}
 	
@@ -58,6 +70,37 @@ public class IdeUpgradeChecker
 		FileUtils.copyInputStreamToFile(is, tempFile);
 		
 		is.close();
+		
+		try
+		{
+			logger.debug("Download completed. Validating the download..");
+			
+			Set<String> entries = ZipUtils.getZipEntries(tempFile);
+			boolean foundJar = false;
+			
+			for(String entry : entries)
+			{
+				entry = entry.toLowerCase();
+				
+				if(entry.contains("yukthi-autox-ide") && entry.endsWith(".jar"))
+				{
+					foundJar = true;
+					break;
+				}
+			}
+			
+			if(!foundJar)
+			{
+				logger.error("In downloaded zip found ide jar file to be missing. Assuming zip is corrupted, deleting zip file");
+				tempFile.delete();
+			}
+			
+		} catch(Exception ex)
+		{
+			logger.error("Failed to extract zip entries from the downloaded ide zip file: {}.\n\tError: {}", tempFile.getPath(), "" + ex);
+			return null;
+		}
+		
 		return tempFile;
 	}
 	
@@ -115,6 +158,12 @@ public class IdeUpgradeChecker
 		String latestVersion = getLatestVersion(prop);
 		logger.debug("Got latest version as: {}", latestVersion);
 		
+		if(latestVersion == null)
+		{
+			logger.error("Failed to determine latest version. So skipping the upgrade");
+			System.exit(0);
+		}
+		
 		String localVersion = getLocalVersion();
 		logger.debug("Got local version as: {}", localVersion);
 		
@@ -124,8 +173,15 @@ public class IdeUpgradeChecker
 			System.exit(0);
 		}
 		
-		logger.debug("Found new updates available. Downloading latest ide zip file (this may take few mins...");
+		logger.debug("Found new updates available. Downloading latest ide zip file (this may take few mins)...");
 		File latestIde = downloadLatestIde(prop);
+		
+		if(latestIde == null)
+		{
+			logger.error("An error occurred while downloading latest zip file. Hence skipping the upgrade..");
+			System.exit(0);
+		}
+		
 		logger.debug("Downloaded latest ide as file: {}", latestIde.getPath());
 		
 		unzipLib(latestIde, new File(".." + File.separator + "lib-new"));

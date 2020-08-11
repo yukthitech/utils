@@ -691,7 +691,7 @@ public class TestSuiteExecutor
 	
 					if(testSuite == null)
 					{
-						throw new InvalidConfigurationException("Invalid test suite name '{}' specified in limited test suites", name);
+						throw new InvalidConfigurationException("Invalid test suite name '{}' specified for execution", name);
 					}
 	
 					if( !executeTestSuite(testSuite) )
