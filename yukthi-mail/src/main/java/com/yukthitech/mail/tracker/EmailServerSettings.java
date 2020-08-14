@@ -26,6 +26,7 @@ package com.yukthitech.mail.tracker;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -382,9 +383,21 @@ public class EmailServerSettings
 	*
 	* @return Java mail compatible properties.
 	*/
-	public Properties toProperties()
+	public Properties toProperties(MailReadProtocol protocol)
 	{
 		Properties props = new Properties();
+		
+		if(protocol == MailReadProtocol.POP3S)
+		{
+			props.put("mail.store.protocol", "pop3s");
+			props.put("mail.pop3s.host", smtpHost);
+			props.put("mail.pop3s.port", "" + smtpPort);
+			props.put("mail.pop3s.auth", "true");
+			props.put("mail.pop3s.socketFactory.class", SSLSocketFactory.class.getName());
+			props.put("mail.pop3s.ssl.trust", "*");
+			
+			return props;
+		}
 		
 		props.put(PROP_USE_AUTH, "" + useAuthentication);
 		props.put(PROP_ENABLE_TTLS, "" + enableTtls);

@@ -1,13 +1,10 @@
 package com.yukthitech.mail.tracker;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.mail.Message;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -125,7 +122,7 @@ public class ReceivedMailMessage
 	/**
 	 * uid of the mail.
 	 */
-	private long uid;
+	private String uid;
 	
 	/**
 	 * Name extracted from mail id.
@@ -187,10 +184,7 @@ public class ReceivedMailMessage
 	 */
 	private String toList;
 	
-	/**
-	 * The actual message.
-	 */
-	private Message actualMessage;
+	private EmailTracker emailTracker;
 	
 	/**
 	 * The mail file.
@@ -207,10 +201,10 @@ public class ReceivedMailMessage
 	 * @param receivedDate the received date
 	 * @param readEarlier the read earlier
 	 */
-	public ReceivedMailMessage(long uid, 
+	public ReceivedMailMessage(String uid, 
 			String fromName, String fromMailId,
 			String replyToName, String replyToMailId,
-			String subject, Date receivedDate, boolean readEarlier, String toList, Message actualMessage)
+			String subject, Date receivedDate, boolean readEarlier, String toList, EmailTracker emailTracker)
 	{
 		this.uid = uid;
 		this.fromName = fromName;
@@ -221,7 +215,7 @@ public class ReceivedMailMessage
 		this.receivedDate = receivedDate;
 		this.readEarlier = readEarlier;
 		this.toList = toList;
-		this.actualMessage = actualMessage;
+		this.emailTracker = emailTracker;
 	}
 	
 	/**
@@ -239,7 +233,7 @@ public class ReceivedMailMessage
 	 *
 	 * @return the uid of the mail
 	 */
-	public long getUid()
+	public String getUid()
 	{
 		return uid;
 	}
@@ -621,21 +615,10 @@ public class ReceivedMailMessage
 			return mailFile;
 		}
 
-		try
-		{
-			File file = new File(TEMP_MAIL_FOLDER, "mail-" + UQ_ID.getAndIncrement() + ".eml");
-			FileOutputStream fos = new FileOutputStream(file);
-			
-			actualMessage.writeTo(fos);
-			
-			fos.flush();
-			fos.close();
-			
-			this.mailFile = file;
-		}catch(Exception ex)
-		{
-			throw new IllegalStateException("An error occurred while saving mail file", ex);
-		}
+		File file = new File(TEMP_MAIL_FOLDER, "mail-" + UQ_ID.getAndIncrement() + ".eml");
+		emailTracker.saveEmlContent(uid, file);
+		
+		this.mailFile = file;
 		
 		return mailFile;
 	}

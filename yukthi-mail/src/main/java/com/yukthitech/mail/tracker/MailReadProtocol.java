@@ -14,7 +14,12 @@ public enum MailReadProtocol
 	/**
 	 * POP3 read protocol.
 	 */
-	POP3("pop3");
+	POP3("pop3"),
+	
+	/**
+	 * Pop3 security protocol.
+	 */
+	POP3S("pop3s");
 	
 	/**
 	 * String name of the protocol.

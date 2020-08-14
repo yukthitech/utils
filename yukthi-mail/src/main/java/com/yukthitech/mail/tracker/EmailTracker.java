@@ -1,16 +1,24 @@
 package com.yukthitech.mail.tracker;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,6 +79,8 @@ public class EmailTracker
 	 * The Constant TIME_FORMAT.
 	 */
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa");
+	
+	private static final SimpleDateFormat INTERNAL_TIME_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	/**
 	 * Context object to be used while processing mails.
@@ -125,7 +135,7 @@ public class EmailTracker
 			return mailMessage;
 		}
 		
-		private void applyChanges(UIDFolder folder)
+		private void applyChanges(Folder folder, Map<String, Message> mssgMap)
 		{
 			if(folderToMove == null && flagsToApply.isEmpty() && flagsToRemove.isEmpty())
 			{
@@ -135,10 +145,12 @@ public class EmailTracker
 			Folder sourceFolder = (Folder) folder;
 			Folder destFolder = null;
 			Store store = sourceFolder.getStore();
+			
+			String mssgId = mailMessage.getUid();
 
 			try
 			{
-				Message message = folder.getMessageByUID(mailMessage.getUid());
+				Message message = mssgMap.get(mssgId);
 				
 				logger.debug("Moving to folder {} the mail with subject: {}", folderToMove, mailMessage.getSubject());
 				
@@ -342,8 +354,8 @@ public class EmailTracker
 		this.sendSettings = sendSettings;
 		
 		this.mailProcessor = processor;
-		readSession = newSession(readSettings);
-		sendSession = newSession(sendSettings);
+		readSession = newSession(readSettings, readSettings.getReadProtocol());
+		sendSession = newSession(sendSettings, null);
 	}
 
 	/**
@@ -453,10 +465,10 @@ public class EmailTracker
 	 *            Settings to create session.
 	 * @return newly created session.
 	 */
-	private Session newSession(EmailServerSettings settings)
+	private Session newSession(EmailServerSettings settings, MailReadProtocol protocol)
 	{
 		Session mailSession = null;
-		Properties configProperties = settings.toProperties();
+		Properties configProperties = settings.toProperties(protocol);
 		
 		logger.debug("Connecting to server using properties: {}", configProperties);
 
@@ -547,6 +559,26 @@ public class EmailTracker
 		return new String[] {name, mailId};
 	}
 	
+	private String getUniqueId(Folder folder, Message message)
+	{
+		try
+		{
+			if(folder instanceof UIDFolder)
+			{
+				UIDFolder uidFolder = (UIDFolder) folder;
+				return "" + uidFolder.getUID(message);
+			}
+			
+			Date recvDate = message.getReceivedDate();
+			recvDate = (recvDate == null) ? message.getSentDate() : recvDate;
+			
+			return message.getFrom()[0].toString() + "-" + INTERNAL_TIME_FORMAT.format(recvDate) + "-" + message.getSubject();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while building unique message id", ex);
+		}
+	}
+	
 	/**
 	 * Convert message.
 	 *
@@ -556,17 +588,10 @@ public class EmailTracker
 	 * @return the received mail message
 	 * @throws Exception the exception
 	 */
-	private ReceivedMailMessage convertMessage(Message message, UIDFolder folder, String lastReadTimeStr) throws Exception
+	private ReceivedMailMessage convertMessage(Message message, Folder folder) throws Exception
 	{
 		Date recvDate = message.getReceivedDate();
 		recvDate = (recvDate == null) ? message.getSentDate() : recvDate;
-		
-		if(lastReadTime != null && lastReadTime.after(recvDate))
-		{
-			logger.trace("Ignoring message as it's receive time [{}] older than last read time: {}. Message subject: {}", 
-					TIME_FORMAT.format(recvDate), lastReadTimeStr, message.getSubject());
-			return null;
-		}
 		
 		boolean isProcessed = message.isSet(Flag.FLAGGED);
 		
@@ -588,16 +613,62 @@ public class EmailTracker
 				.map(addr -> addr.toString())
 				.collect(Collectors.joining(","));
 
-		ReceivedMailMessage mailMessage = new ReceivedMailMessage(folder.getUID(message), 
+		ReceivedMailMessage mailMessage = new ReceivedMailMessage(getUniqueId(folder, message), 
 				frmNameMail[0], frmNameMail[1],
 				replyToNameMail[0], replyToNameMail[1],
-				subject, recvDate, isReadEarlier, toLst, message);
+				subject, recvDate, isReadEarlier, toLst, this);
 		extractMailContent(mailMessage, message.getContent(), message.getContentType());
 		
 		//Generate eml file of the mail.
-		mailMessage.getEmlFile();
+		//mailMessage.getEmlFile();
 		
 		return mailMessage;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Set<String> loadCurrentMailIds()
+	{
+		File file = new File(".mails.cache");
+		
+		if(!file.exists())
+		{
+			return Collections.emptySet();
+		}
+		
+		try
+		{
+			FileInputStream fis = new FileInputStream(file);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			
+			Set<String> ids = (Set<String>) ois.readObject();
+			ois.close();
+			fis.close();
+			
+			return ids;
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while reading mail cache", ex);
+		}
+	}
+	
+	private void saveMailIds(Set<String> ids)
+	{
+		File file = new File(".mails.cache");
+		
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(file);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			
+			oos.writeObject(ids);
+			oos.flush();
+			
+			oos.close();
+			fos.close();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while saving to mail cache", ex);
+		}
 	}
 
 	/**
@@ -620,11 +691,10 @@ public class EmailTracker
 		logger.debug("Reading mails from folder: {}. Last read time: {}", folderName, TIME_FORMAT.format(lastReadTime));
 
 		Folder mailFolder = store.getFolder(folderName);
-		UIDFolder uidFolder = (UIDFolder) mailFolder;
 		
 		mailFolder.open(Folder.READ_WRITE);
 
-		Message newMessages[] = mailFolder.getMessages();
+		Message newMessages[] = null;
 
 		if(readSettings.getReadProtocol() == MailReadProtocol.IMAPS)
 		{
@@ -644,41 +714,86 @@ public class EmailTracker
 		{
 			newMessages = mailFolder.getMessages();
 		}
-
+		
 		if(newMessages.length <= 0)
 		{
 			logger.debug("No new messages are found from last read [{}]. Total messages: {}", 
 					TIME_FORMAT.format(lastReadTime), mailFolder.getMessageCount());
 			return null;
 		}
+		else
+		{
+			logger.debug("Number of messages read: " + newMessages.length);
+		}
 
 		int count = newMessages.length;
-		String lastReadTimeStr = TIME_FORMAT.format(lastReadTime);
 		
 		List<ReceivedMailMessage> mssgLst = new LinkedList<>();
-
+		Set<String> readMailIds = loadCurrentMailIds();
+		Set<String> newMailIds = new HashSet<String>();
+		final Message finalMssgs[] = newMessages;
+		
+		CountDownLatch latch = new CountDownLatch(count);
+		
 		for(int i = 0; i < count; i++)
 		{
-			final Message message = newMessages[i];
-			ReceivedMailMessage mailMessage = null;
+			final int index = i;
 			
-			try
+			scheduledExecutorService.execute(() -> 
 			{
-				mailMessage = convertMessage(message, uidFolder, lastReadTimeStr);
-			}catch(Exception ex)
-			{
-				logger.error("An error occurred while reading message with subject: {}", message.getSubject(), ex);
-				continue;
-			}
-			
-			if(mailMessage == null)
-			{
-				continue;
-			}
-			
-			mssgLst.add(mailMessage);
+				try
+				{
+					logger.trace("Processing mail: " + index);
+					
+					final Message message = finalMssgs[index];
+					
+					String mailId = getUniqueId(mailFolder, message);
+					newMailIds.add(mailId);
+					
+					//if the current mail was already processed earlier
+					if(readMailIds.contains(mailId))
+					{
+						return;
+					}
+					
+					ReceivedMailMessage mailMessage = null;
+					
+					try
+					{
+						mailMessage = convertMessage(message, mailFolder);
+					}catch(Exception ex)
+					{
+						logger.error("An error occurred while reading message with subject: {}", message.getSubject(), ex);
+						return;
+					}
+					
+					if(mailMessage == null)
+					{
+						return;
+					}
+					
+					mssgLst.add(mailMessage);
+				}catch(Exception ex)
+				{
+					logger.error("An error occurred while converting mail message", ex);
+				} finally
+				{
+					latch.countDown();
+				}
+			});
 		}
 		
+		logger.debug("Waiting for messages to be converted..");
+		
+		try
+		{
+			latch.await();
+		}catch(InterruptedException ex)
+		{
+			throw new InvalidStateException("An error occcurred during conversion", ex);
+		}
+		
+		saveMailIds(newMailIds);
 		mailFolder.close(true);
 		return mssgLst;
 	}
@@ -780,11 +895,14 @@ public class EmailTracker
 		Folder mailFolder = store.getFolder(readSettings.getFolderName());
 		mailFolder.open(Folder.READ_WRITE);
 		
-		UIDFolder uidFolder = (UIDFolder) mailFolder;
+		Message newMessages[] = mailFolder.getMessages();
+		Map<String, Message> mssgMap = Arrays.asList(newMessages)
+				.stream()
+				.collect(Collectors.toMap(mssg -> getUniqueId(mailFolder, mssg), mssg -> mssg));
 		
 		for(MailProcessingContext context : mailContexts)
 		{
-			context.applyChanges(uidFolder);
+			context.applyChanges(mailFolder, mssgMap);
 		}
 		
 		mailFolder.close(true);
@@ -795,6 +913,58 @@ public class EmailTracker
 		if(lastReadTime == null)
 		{
 			lastReadTime = now;
+		}
+	}
+	
+	void saveEmlContent(String uniqueId, File file)
+	{
+		Store store = null;
+		
+		try
+		{
+			store = readSession.getStore(readSettings.getReadProtocol().getName());
+			store.connect(readSettings.getReadHost(), readSettings.getReadPort(), readSettings.getUserName(), readSettings.getPassword());
+			
+			Folder mailFolder = store.getFolder(readSettings.getFolderName());
+			Message message = null;
+			
+			if(mailFolder instanceof UIDFolder)
+			{
+				UIDFolder uidFolder = (UIDFolder) mailFolder;
+				Long id = Long.parseLong(uniqueId);
+				
+				message = uidFolder.getMessageByUID(id);
+			}
+			else
+			{
+				Message mssgs[] = mailFolder.getMessages();
+				
+				for(Message mssg : mssgs)
+				{
+					if(uniqueId.equals(getUniqueId(mailFolder, mssg)))
+					{
+						message = mssg;
+						break;
+					}
+				}
+			}
+			
+			if(message == null)
+			{
+				throw new InvalidStateException("No mail found with specified id: {}", uniqueId);
+			}
+			
+			FileOutputStream fos = new FileOutputStream(file);
+			
+			message.writeTo(fos);
+			
+			fos.flush();
+			fos.close();
+			
+			store.close();
+		} catch(Exception e)
+		{
+			throw new IllegalStateException("Exception occured while reading the mail ", e);
 		}
 	}
 
