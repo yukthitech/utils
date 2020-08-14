@@ -36,7 +36,7 @@ public class AssertTrueStep extends AbstractValidation
 		}
 		else
 		{
-			res = "true".equalsIgnoreCase("" + value);
+			res = "true".equalsIgnoreCase(("" + value).trim());
 		}
 		
 		exeLogger.debug("Result is: {}", res);

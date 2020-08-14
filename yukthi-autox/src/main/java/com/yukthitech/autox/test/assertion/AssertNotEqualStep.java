@@ -59,7 +59,7 @@ public class AssertNotEqualStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Comparing values for NON equlity. [Expected: {} [{}], Actual: {} [{}]]", 
+		exeLogger.debug(false, "Comparing values for NON equlity. <span style=\"white-space: pre\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
 				expected, AssertEqualsStep.getType(expected),  
 				actual, AssertEqualsStep.getType(actual));
 

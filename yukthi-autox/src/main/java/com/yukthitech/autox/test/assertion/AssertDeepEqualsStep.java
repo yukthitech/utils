@@ -105,7 +105,7 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug("Comparing values for deep-equlity. [\nExpected: {} [{}], \nActual: {} [{}], \nIgnore exta Properties: {}]", 
+		exeLogger.debug(false, "Comparing values for deep-equlity. <span style=\"white-space: pre\">[\nExpected: {} [{}], \nActual: {} [{}], \nIgnore exta Properties: {}]</span>", 
 				expected, getType(expected),  
 				actual, getType(actual),
 				ignoreExtraProperties);
