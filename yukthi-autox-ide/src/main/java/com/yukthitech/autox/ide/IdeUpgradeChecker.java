@@ -3,10 +3,14 @@ package com.yukthitech.autox.ide;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -23,6 +27,8 @@ public class IdeUpgradeChecker
 {
 	private static Logger logger = LogManager.getLogger(IdeUpgradeChecker.class);
 	
+	private static long timeoutInSec = 180;
+	
 	private static Properties loadAppProp() throws Exception
 	{
 		Properties prop = new Properties();
@@ -36,11 +42,14 @@ public class IdeUpgradeChecker
 	private static String getLatestVersion(Properties prop) throws Exception
 	{
 		String vesionUrl = prop.getProperty("autox.ide.version.url");
-		InputStream is = new URL(vesionUrl).openStream();
-		String latestVersion = IOUtils.toString(is);
+		File verFile = downloadFile(vesionUrl, "autox-ide-version", ".txt");
 		
-		is.close();
+		if(verFile == null)
+		{
+			return null;
+		}
 		
+		String latestVersion = FileUtils.readFileToString(verFile);
 		Pattern pattern = Pattern.compile("[\\w\\.\\-]+\\-\\d+");
 		latestVersion = latestVersion.trim();
 		
@@ -50,6 +59,58 @@ public class IdeUpgradeChecker
 		}
 		
 		return latestVersion;
+	}
+	
+	private static File downloadFile(String urlStr, String prefix, String extension) throws Exception
+	{
+		logger.debug("Downloading file from: " + urlStr);
+		
+		URL url = new URL(urlStr);
+		URLConnection urlConnection = url.openConnection();
+		InputStream is = urlConnection.getInputStream();
+		
+		File tempFile = File.createTempFile(prefix, extension);
+		CountDownLatch latch = new CountDownLatch(1);
+		
+		Thread downloader = new Thread() 
+		{
+			public void run()
+			{
+				try
+				{
+					FileUtils.copyInputStreamToFile(is, tempFile);
+					is.close();
+				} catch(Exception ex)
+				{
+					logger.warn("An error occurred while downloading the remote file: " + ex);
+				} finally
+				{
+					latch.countDown();					
+				}
+			}
+		};
+		
+		downloader.start();
+		
+		if(!latch.await(timeoutInSec, TimeUnit.SECONDS))
+		{
+			logger.error("Download got timeout after waiting for {} Seconds.", timeoutInSec);
+			
+			if(is != null)
+			{
+				is.close();
+			}
+			
+			if(urlConnection instanceof HttpURLConnection)
+			{
+				((HttpURLConnection) urlConnection).disconnect();
+				logger.debug("Connection is forcefully closed..");
+			}
+			
+			return null;
+		}
+		
+		return tempFile;
 	}
 	
 	private static String getLocalVersion() throws Exception
@@ -64,12 +125,12 @@ public class IdeUpgradeChecker
 	private static File downloadLatestIde(Properties prop) throws Exception
 	{
 		String downloadUrl = prop.getProperty("autox.ide.download.url");
-		InputStream is = new URL(downloadUrl).openStream();
-		File tempFile = File.createTempFile("autox-ide-latest", ".zip");
+		File tempFile = downloadFile(downloadUrl, "autox-ide-latest", ".zip");
 		
-		FileUtils.copyInputStreamToFile(is, tempFile);
-		
-		is.close();
+		if(tempFile == null)
+		{
+			return null;
+		}
 		
 		try
 		{
@@ -93,6 +154,7 @@ public class IdeUpgradeChecker
 			{
 				logger.error("In downloaded zip found ide jar file to be missing. Assuming zip is corrupted, deleting zip file");
 				tempFile.delete();
+				return null;
 			}
 			
 		} catch(Exception ex)
@@ -152,6 +214,11 @@ public class IdeUpgradeChecker
 
 	public static void main(String[] args) throws Exception
 	{
+		if(args.length > 0)
+		{
+			timeoutInSec = Long.parseLong(args[0]);
+		}
+		
 		Properties prop = loadAppProp();
 		logger.debug("Loaded app properties...");
 		
