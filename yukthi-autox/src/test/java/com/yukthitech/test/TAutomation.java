@@ -25,8 +25,8 @@ public class TAutomation
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
-				//"-ts", "lang-test-suites"
-				//"-tc", "testSortFilter"
+				//"-ts", "spreadTestSuite"
+				//"-tc", "invoke_Method_With_Data_Provder"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

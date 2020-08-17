@@ -85,7 +85,7 @@ public class TestSuiteExecutor
 	 *            the context
 	 * @return the test case result
 	 */
-	public TestCaseResult executeTestCase(AutomationContext context, List<TestCaseResult> testCaseDatsResults, TestCase testCase, 
+	public TestCaseResult executeTestCase(AutomationContext context, List<TestCaseResult> testCaseDataResults, TestCase testCase, 
 			String testFileName, TestSuite testSuite)
 	{
 		ObjectWrapper<String> excludedGrp = new ObjectWrapper<>();
@@ -184,31 +184,41 @@ public class TestSuiteExecutor
 		Cleanup dataCleanup = testCase.getDataCleanup();
 		int dataIndex = 0;
 		
+		//Execute the data-setup if any and generate the log
+		if(dataSetup != null)
+		{
+			name = testCase.getName() + " [[Data-Setup]]";
+			
+			logger.debug("Executing data-setup steps for test case: {}", name);
+			exeLogger = new ExecutionLogger(context, name, "Data setup");
+			
+			result = dataSetup.execute(context, exeLogger);
+			
+			if(result.getStatus() != TestStatus.SUCCESSFUL)
+			{
+				result = new TestCaseResult(testCase, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Data-setup execution failed.");
+			}
+			
+			reportGenerator.createLogFiles(context, result, testFileName + "_" + nextFileIndex.getAndIncrement(), null, testCase.getName() + "\n[[Data-Setup]]");
+			
+			if(result.getStatus() != TestStatus.SUCCESSFUL)
+			{
+				return result;
+			}
+			
+			result.setTestCaseName(name);
+			testCaseDataResults.add(result);
+		}
+
 		for(TestCaseData data : dataLst)
 		{
 			dataIndex++;
-			
+
 			name = testCase.getName() + " [" + data.getName() + "]";
 			description = data.getDescription();
 			description = StringUtils.isNotBlank(description)? description : testCase.getDescription(); 
 			
 			exeLogger = new ExecutionLogger(context, name, description);
-			
-			//TODO: As of now data-setup is executed as part of first data-step. It should be a separate one 
-			//  and need to decide how logs should be presented
-			if(dataSetup != null)
-			{
-				logger.debug("Executing data-setup steps for test case: {}", name);
-				result = dataSetup.execute(context, exeLogger);
-				
-				if(result.getStatus() != TestStatus.SUCCESSFUL)
-				{
-					return new TestCaseResult(testCase, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Data-setup execution failed.");
-				}
-				
-				dataSetup = null;
-			}
-
 			exeLogger.debug("Executing test case '{}' with data: {}", name, data.getName());
 
 			//start monitoring logs
@@ -264,21 +274,6 @@ public class TestSuiteExecutor
 				context.clearActiveTestCase();
 			}
 			
-			//execute data cleanup as part of last data test case
-			//TODO: as of now data-cleanup is executed as part of last data-step. Instead it should be handled separately 
-			//  and need to decide how to present the logs
-			if(dataIndex == dataLst.size() && dataCleanup != null)
-			{
-				logger.debug("Executing data-cleanup steps for test case: {}", name);
-				
-				result = dataCleanup.execute(context, exeLogger);
-				
-				if(result.getStatus() != TestStatus.SUCCESSFUL)
-				{
-					finalStatus = TestStatus.FAILED;
-				}
-			}
-			
 			//stop monitoring logs
 			Map<String, File> monitoringLogs = context.stopLogMonitoring(result);
 			reportGenerator.createLogFiles(context, result, testFileName + "_" + nextFileIndex.getAndIncrement(), monitoringLogs, data + "\n" + testCase.getDescription());
@@ -293,7 +288,26 @@ public class TestSuiteExecutor
 				finalStatus = TestStatus.FAILED;
 			}
 			
-			testCaseDatsResults.add(result);
+			testCaseDataResults.add(result);
+
+			//execute data cleanup as part of last data test case
+			if(dataIndex == dataLst.size() && dataCleanup != null)
+			{
+				logger.debug("Executing data-cleanup steps for test case: {}", name);
+				exeLogger = new ExecutionLogger(context, testCase.getName() + " [[Data-Cleanup]]", "Data Cleanup");
+				
+				result = dataCleanup.execute(context, exeLogger);
+				result.setTestCaseName(testCase.getName() + " [[Data-Cleanup]]");
+				
+				reportGenerator.createLogFiles(context, result, testFileName + "_" + nextFileIndex.getAndIncrement(), monitoringLogs, testCase.getName() + "\n[[Data-Cleanup]]");
+				
+				if(result.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					finalStatus = TestStatus.FAILED;
+				}
+				
+				testCaseDataResults.add(result);
+			}
 		}
 
 		return new TestCaseResult(testCase, finalStatus, null, "", true);
