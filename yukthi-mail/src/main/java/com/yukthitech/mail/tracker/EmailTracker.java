@@ -26,12 +26,14 @@ import java.util.stream.Collectors;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -926,6 +928,8 @@ public class EmailTracker
 			store.connect(readSettings.getReadHost(), readSettings.getReadPort(), readSettings.getUserName(), readSettings.getPassword());
 			
 			Folder mailFolder = store.getFolder(readSettings.getFolderName());
+			mailFolder.open(Folder.READ_WRITE);
+			
 			Message message = null;
 			
 			if(mailFolder instanceof UIDFolder)
@@ -954,13 +958,63 @@ public class EmailTracker
 				throw new InvalidStateException("No mail found with specified id: {}", uniqueId);
 			}
 			
+			Message emlMssg = new MimeMessage(readSession);
+			
+			//set from and to addresses
+			emlMssg.setFrom(message.getFrom()[0]);
+			
+			Address address[] = message.getRecipients(RecipientType.TO);
+			
+			if(address != null && address.length > 0)
+			{
+				emlMssg.setRecipients(RecipientType.TO, address);
+			}
+			
+			address = message.getRecipients(RecipientType.CC);
+			
+			if(address != null && address.length > 0)
+			{
+				emlMssg.setRecipients(RecipientType.CC, address);
+			}
+			
+			emlMssg.setSubject(message.getSubject());
+			
+			//set the body content
+			Multipart multipart = new MimeMultipart();
+			
+			String contentType = message.getContentType();
+			Object content = message.getContent();
+			
+			if(!contentType.toLowerCase().contains("multipart"))
+			{
+				BodyPart mailBodyPart = new MimeBodyPart();
+				mailBodyPart.setContent(content, contentType);
+				multipart.addBodyPart(mailBodyPart);
+			}
+			else
+			{
+				Multipart mssgMultipart = (Multipart) content;
+				int count = mssgMultipart.getCount();
+				BodyPart part = null;
+
+				for(int i = 0; i < count; i++)
+				{
+					part = mssgMultipart.getBodyPart(i);
+					multipart.addBodyPart(part);
+				}
+			}
+			
+			emlMssg.setContent(multipart);
+			
+			//save the eml message
 			FileOutputStream fos = new FileOutputStream(file);
 			
-			message.writeTo(fos);
+			emlMssg.writeTo(fos);
 			
 			fos.flush();
 			fos.close();
 			
+			mailFolder.close(true);
 			store.close();
 		} catch(Exception e)
 		{
