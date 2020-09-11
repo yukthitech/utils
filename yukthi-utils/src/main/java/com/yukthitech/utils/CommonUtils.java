@@ -7,13 +7,13 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -335,20 +335,13 @@ public class CommonUtils
 		return false;
 	}
 
-	/**
-	 * Creates a map out of the key value pairs provided
-	 * 
-	 * @param keyValues
-	 *            Key Value pairs
-	 * @return
-	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <K, V> Map<K, V> toMap(Object... keyValues)
+	private static <K, V> Map<K, V> populateMap(Map<K, V> res, Object... keyValues)
 	{
 		// if array is empty, return empty map
 		if(isEmptyArray(keyValues))
 		{
-			return Collections.emptyMap();
+			return res;
 		}
 
 		// if key values are not provided in pairs
@@ -357,14 +350,36 @@ public class CommonUtils
 			throw new IllegalArgumentException("Key values are not provided in pairs");
 		}
 
-		Map<K, V> keyToVal = new HashMap<K, V>();
-
 		for(int i = 0; i < keyValues.length; i += 2)
 		{
-			((Map) keyToVal).put(keyValues[i], keyValues[i + 1]);
+			((Map) res).put(keyValues[i], keyValues[i + 1]);
 		}
+		
+		return res;
+	}
 
-		return keyToVal;
+	/**
+	 * Creates a map out of the key value pairs provided
+	 * 
+	 * @param keyValues
+	 *            Key Value pairs
+	 * @return
+	 */
+	public static <K, V> Map<K, V> toMap(Object... keyValues)
+	{
+		return populateMap(new HashMap<K, V>(), keyValues);
+	}
+
+	/**
+	 * Creates a sorted map out of the key value pairs provided
+	 * 
+	 * @param keyValues
+	 *            Key Value pairs
+	 * @return
+	 */
+	public static <K, V> Map<K, V> toSortedMap(Object... keyValues)
+	{
+		return populateMap(new TreeMap<K, V>(), keyValues);
 	}
 
 	/**

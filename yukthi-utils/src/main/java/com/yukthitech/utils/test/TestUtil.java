@@ -18,12 +18,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,7 +95,6 @@ public class TestUtil
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-	@SuppressWarnings("unchecked")
 	public static void coverEnumTest(Class<? extends Enum<?>>... enumTypes) throws SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException
 	{
 		Method valueOfMet = null;
@@ -263,7 +262,7 @@ public class TestUtil
 
 				if(expectedValue != null)
 				{
-					if(!ObjectUtils.equals(expectedValue, propValue))
+					if(!Objects.equals(expectedValue, propValue))
 					{
 						String mssg = String.format("Property test failed for property '%s' of bean '%s'. Expected - <%s>, Found - <%s>", 
 								prop.getName(), bean.getClass().getName(), expectedValue, propValue);

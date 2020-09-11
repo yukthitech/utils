@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,9 +23,9 @@ public class FtpUploader
 
 	private static Pattern URL_PATTERN = Pattern.compile("([\\w\\-\\.]+)\\:(\\d+)\\@(\\w+)\\/(.+)");
 
-	private static FTPClient connect(String host, int port, String user, String password) throws Exception
+	private static FTPClient connect(boolean secured, String host, int port, String user, String password) throws Exception
 	{
-		FTPClient ftp = new FTPClient();
+		FTPClient ftp = secured ? new FTPSClient() : new FTPClient();
 		ftp.enterLocalActiveMode();
 		ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
 
@@ -96,7 +97,7 @@ public class FtpUploader
 
 		logger.debug("Connecting to [Host: {}, Port: {}, User: {}]", host, port, user);
 
-		FTPClient ftpClient = connect(host, port, user, password);
+		FTPClient ftpClient = connect("true".equalsIgnoreCase(System.getProperty("secured")), host, port, user, password);
 		
 		for(File file : localFiles)
 		{
