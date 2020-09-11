@@ -722,12 +722,6 @@ public class AutomationContext
 			for(LogFile logFile : monitorLogFiles)
 			{
 				String key = entry.getKey();
-				
-				if(!key.equals(logFile.getName()))
-				{
-					key = key + "[" + logFile.getName() + "]";
-				}
-				
 				logFiles.put(key, logFile.getFile());
 			}
 		}

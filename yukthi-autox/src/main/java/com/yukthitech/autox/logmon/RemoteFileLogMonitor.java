@@ -212,7 +212,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			
 			try
 			{
-				tempFile = File.createTempFile("file-monitoring", ".log");
+				tempFile = File.createTempFile(super.getName(), ".log");
 			}catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while creating temp file", ex);
@@ -224,7 +224,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			//if there is no content simply return empty file.
 			if(currentSize == 0)
 			{
-				return new LogFile(remoteFilePath + "@" + remoteSession.getHost(), tempFile);
+				return new LogFile(super.getName(), tempFile);
 			}
 
 			//if current size is less than start size
@@ -270,7 +270,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				throw new InvalidStateException("An error occurred while creating monitoring log.", ex);
 			}
 			
-			return new LogFile(remoteFilePath + "@" + remoteSession.getHost(), tempFile);
+			return new LogFile(super.getName(), tempFile);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remoteFilePath);

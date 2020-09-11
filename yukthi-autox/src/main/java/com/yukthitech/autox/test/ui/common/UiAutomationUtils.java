@@ -1,7 +1,5 @@
 package com.yukthitech.autox.test.ui.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -271,25 +269,8 @@ public class UiAutomationUtils
 		return findElements(context, parent, locator);
 	}
 	
-	/**
-	 * Fetches the elements with specified locator.
-	 * 
-	 * @param context
-	 *            Context to be used
-	 * @param parent
-	 *            Parent under which elements need to be searched
-	 * @param locator
-	 *            Locator to be used for searching
-	 * @return Matching elements
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static List<WebElement> findElements(AutomationContext context, WebElement parent, String locator)
+	public static By getLocator(String locator)
 	{
-		logger.trace("Trying to find element with location '{}' under parent - {}", locator, parent);
-
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
-
 		Matcher matcher = LOCATOR_PATTERN.matcher(locator);
 		LocatorType locatorType = LocatorType.JS;
 		String query = null;
@@ -337,13 +318,42 @@ public class UiAutomationUtils
 			default:
 				locatorBy = null;
 		}
+		
+		return locatorBy;
+	}
+	
+	/**
+	 * Fetches the elements with specified locator.
+	 * 
+	 * @param context
+	 *            Context to be used
+	 * @param parent
+	 *            Parent under which elements need to be searched
+	 * @param locator
+	 *            Locator to be used for searching
+	 * @return Matching elements
+	 */
+	public static List<WebElement> findElements(AutomationContext context, WebElement parent, String locator)
+	{
+		logger.trace("Trying to find element with location '{}' under parent - {}", locator, parent);
+
+		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
+		WebDriver driver = seleniumConfiguration.getWebDriver();
+
+		By locatorBy = getLocator(locator);
 
 		logger.trace("For locator '{}' using locator-by - {}", locator, locatorBy);
+		
+		if(locatorBy == null)
+		{
+			return null;
+		}
 
 		List<WebElement> result = null;
 
 		// if locator type is not defined (which would be the case for JS
 		// locator type)
+		/*
 		if(locatorBy == null)
 		{
 			Object res = ((JavascriptExecutor) driver).executeScript("return $(" + query + ").get()");
@@ -359,6 +369,9 @@ public class UiAutomationUtils
 		}
 		// if parent is defined
 		else if(parent != null)
+		*/
+		
+		if(parent != null)
 		{
 			result = parent.findElements(locatorBy);
 		}

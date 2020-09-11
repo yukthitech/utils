@@ -854,5 +854,24 @@ public class DefaultFilters
 			}
 		};
 	}
+
+	@ExpressionFilter(type = "template", description = "Parses specified value for free marker expressions and returns the result.",
+			example = "template: Value=${someAttr}",
+			params = {
+					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+				}
+	)
+	public IPropertyPath templateParser(FilterContext parserContext, String expression, String exprType[])
+	{
+		return new IPropertyPath()
+		{
+			@Override
+			public Object getValue() throws Exception
+			{
+				String data = getStringValue(parserContext, expression);
+				return AutomationUtils.replaceExpressionsInString("template", parserContext.getAutomationContext(), data);
+			}
+		};
+	}
 }
 

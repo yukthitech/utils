@@ -89,7 +89,7 @@ public class AssertEqualsStep extends AbstractValidation
 	 */
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(false, "Comparing values for equlity. <span style=\"white-space: pre\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
+		exeLogger.debug(false, "Comparing values for equlity. <span style=\"white-space: pre-wrap\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
