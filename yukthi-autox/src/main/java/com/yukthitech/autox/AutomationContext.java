@@ -693,6 +693,11 @@ public class AutomationContext
 		
 		for(ILogMonitor monitor : logMonitors.values())
 		{
+			if(!monitor.isEnabled())
+			{
+				continue;
+			}
+			
 			monitor.startMonitoring(this);
 		}
 	}
@@ -712,7 +717,19 @@ public class AutomationContext
 		
 		for(Map.Entry<String, ILogMonitor> entry : this.logMonitors.entrySet())
 		{
-			List<LogFile> monitorLogFiles = entry.getValue().stopMonitoring(this, testCaseResult);
+			ILogMonitor monitor = entry.getValue();
+			
+			if(!monitor.isEnabled())
+			{
+				continue;
+			}
+			
+			if(monitor.isOnErrorOnly() && !testCaseResult.getStatus().isErrored())
+			{
+				continue;
+			}
+
+			List<LogFile> monitorLogFiles = monitor.stopMonitoring(this, testCaseResult);
 			
 			if(CollectionUtils.isEmpty(monitorLogFiles))
 			{

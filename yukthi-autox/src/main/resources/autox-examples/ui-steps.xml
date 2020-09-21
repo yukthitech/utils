@@ -121,4 +121,18 @@
 			]]></content>
 		</example>
 	</collection>
+
+	<collection name="com.yukthitech.autox.test.ui.steps.UiExecuteJsStep">
+		<example>
+			<description>Clicking an ui element using javascript</description>
+			
+			<content><![CDATA[
+				<s:ui-execute-js>
+					<script>
+						document.getElementById("changeByJs").click()
+					</script>
+				</s:ui-execute-js>
+			]]></content>
+		</example>
+	</collection>
 </examples>

@@ -18,7 +18,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpProgressMonitor;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.test.TestCaseResult;
-import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.ssh.steps.RemoteSession;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -120,6 +119,12 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public void startMonitoring(AutomationContext context)
 	{
+		if(!super.isEnabled())
+		{
+			logger.warn("As this log monitor is not enabled, skipping start-monitor call");
+			return;
+		}
+
 		String paths[] = this.remoteFilePaths.split("\\s*\\,\\s*");
 		
 		for(String remotePath : paths)
@@ -165,11 +170,6 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
 	{
-		if(super.isOnErrorOnly() && testCaseResult.getStatus() != TestStatus.ERRORED)
-		{
-			return null;
-		}
-		
 		List<LogFile> logFiles = new ArrayList<>(pathToSession.size());
 		
 		for(String remotePath : pathToSession.keySet())
@@ -284,6 +284,11 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public void validate() throws ValidateException
 	{
+		if(!isEnabled())
+		{
+			return;
+		}
+		
 		super.validate();
 		
 		if(StringUtils.isEmpty(remoteFilePaths))

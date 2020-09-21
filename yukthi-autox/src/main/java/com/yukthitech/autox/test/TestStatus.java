@@ -9,20 +9,32 @@ public enum TestStatus
 	/**
 	 * Represents success state of test case.
 	 */
-	SUCCESSFUL,
+	SUCCESSFUL(false),
 	
 	/**
 	 * Indicates test case failed.
 	 */
-	FAILED,
+	FAILED(true),
 	
 	/**
 	 * Indicates test case is skipped.
 	 */
-	SKIPPED,
+	SKIPPED(false),
 	
 	/**
 	 * Indicates an error occurred while test case execution.
 	 */
-	ERRORED;
+	ERRORED(true);
+	
+	private boolean errored;
+
+	private TestStatus(boolean errored)
+	{
+		this.errored = errored;
+	}
+	
+	public boolean isErrored()
+	{
+		return errored;
+	}
 }

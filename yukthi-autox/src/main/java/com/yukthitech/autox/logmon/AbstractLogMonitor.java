@@ -20,6 +20,11 @@ public abstract class AbstractLogMonitor implements ILogMonitor, Validateable
 	 * Defaults to true.
 	 */
 	private boolean onErrorOnly = true;
+	
+	/**
+	 * Flag indicating whether this log monitor is enabled or not.
+	 */
+	private boolean enabled = true;
 
 	/**
 	 * Gets the name of the log monitor.
@@ -63,6 +68,26 @@ public abstract class AbstractLogMonitor implements ILogMonitor, Validateable
 	public void setOnErrorOnly(boolean onErrorOnly)
 	{
 		this.onErrorOnly = onErrorOnly;
+	}
+	
+	/**
+	 * Checks if is flag indicating whether this log monitor is enabled or not.
+	 *
+	 * @return the flag indicating whether this log monitor is enabled or not
+	 */
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	/**
+	 * Sets the flag indicating whether this log monitor is enabled or not.
+	 *
+	 * @param enabled the new flag indicating whether this log monitor is enabled or not
+	 */
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
 	}
 
 	/**
