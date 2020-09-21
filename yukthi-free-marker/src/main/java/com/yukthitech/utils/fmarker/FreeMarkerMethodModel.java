@@ -72,15 +72,15 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		
 		if(argument instanceof Collection)
 		{
-			if(List.class.isAssignableFrom(argument.getClass()))
+			if(List.class.isAssignableFrom(requiredType))
 			{
 				return new ArrayList( (Collection) argument );
 			}
-			else if(Set.class.isAssignableFrom(argument.getClass()))
+			else if(Set.class.isAssignableFrom(requiredType))
 			{
 				return new HashSet( (Collection) argument );
 			}
-			else if(Collection.class.isAssignableFrom(argument.getClass()))
+			else if(Collection.class.isAssignableFrom(requiredType))
 			{
 				return (Collection) argument ;
 			}
