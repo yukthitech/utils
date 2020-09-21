@@ -9,8 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.utils.ObjectLockManager;
-
 /**
  * Consolidated job manager which helps in scheduling and resheduling jobs based on name.
  * @author akiran
@@ -18,8 +16,6 @@ import com.yukthitech.utils.ObjectLockManager;
 public class ConsolidatedJobManager
 {
 	private static Logger logger = LogManager.getLogger(ConsolidatedJobManager.class);
-	
-	private static ObjectLockManager jobNameLocker = new ObjectLockManager();
 	
 	/**
 	 * Job whose multiple invocation has to be consolidated and executed only once.
@@ -69,12 +65,7 @@ public class ConsolidatedJobManager
 		@Override
 		public void run()
 		{
-			jobNameLocker.lockObject(name);
-			
-			String threadName = Thread.currentThread().getName();
-			Thread.currentThread().setName("cjob-" + name);
-			
-			try
+			synchronized(consolidatedJobs)
 			{
 				long timeLeft = getTimeLeft();
 				
@@ -83,8 +74,15 @@ public class ConsolidatedJobManager
 					threadPool.schedule(this, timeLeft, TimeUnit.MILLISECONDS);
 					return;
 				}
-				
+
 				consolidatedJobs.remove(name);
+			}
+			
+			String threadName = Thread.currentThread().getName();
+			Thread.currentThread().setName("cjob-" + name);
+			
+			try
+			{
 				runnable.run();
 			} catch(Exception ex)
 			{
@@ -92,7 +90,6 @@ public class ConsolidatedJobManager
 			} finally
 			{
 				Thread.currentThread().setName(threadName);
-				jobNameLocker.releaseObject(name);
 			}
 		}
 	}
@@ -126,28 +123,20 @@ public class ConsolidatedJobManager
 	 */
 	public static void executeConsolidatedJob(String name, Runnable runnable, long delay)
 	{
-		jobNameLocker.lockObject(name);
-		
-		try
+		synchronized(consolidatedJobs)
 		{
-			synchronized(ConsolidatedJobManager.class)
+			ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
+			
+			if(consolidatedJob != null)
 			{
-				ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
-				
-				if(consolidatedJob != null)
-				{
-					consolidatedJob.scheduleAfter(runnable, delay);
-					return;
-				}
-				
-				consolidatedJob = new ConsolidatedJob(name, runnable, delay);
-				consolidatedJobs.put(name, consolidatedJob);
-				
-				threadPool.schedule(consolidatedJob, delay, TimeUnit.MILLISECONDS);
+				consolidatedJob.scheduleAfter(runnable, delay);
+				return;
 			}
-		}finally
-		{
-			jobNameLocker.releaseObject(name);
+			
+			consolidatedJob = new ConsolidatedJob(name, runnable, delay);
+			consolidatedJobs.put(name, consolidatedJob);
+			
+			threadPool.schedule(consolidatedJob, delay, TimeUnit.MILLISECONDS);
 		}
 	}
 	
@@ -162,25 +151,17 @@ public class ConsolidatedJobManager
 	 */
 	public static boolean rescheduleConsolidatedJob(String name, Runnable runnable, long delay)
 	{
-		jobNameLocker.lockObject(name);
-		
-		try
+		synchronized(consolidatedJobs)
 		{
-			synchronized(ConsolidatedJobManager.class)
+			ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
+			
+			if(consolidatedJob == null)
 			{
-				ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
-				
-				if(consolidatedJob == null)
-				{
-					return false;
-				}
-				
-				consolidatedJob.scheduleAfter(runnable, delay);
-				return true;
+				return false;
 			}
-		}finally
-		{
-			jobNameLocker.releaseObject(name);
+			
+			consolidatedJob.scheduleAfter(runnable, delay);
+			return true;
 		}
 	}
 }

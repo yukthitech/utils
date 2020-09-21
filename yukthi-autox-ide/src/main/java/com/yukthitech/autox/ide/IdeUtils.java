@@ -17,23 +17,18 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.ide.xmlfile.LocationRange;
-import com.yukthitech.utils.ObjectLockManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.pool.ConsolidatedJobManager;
 
 /**
  * Common util methods used across the ide project.
@@ -41,8 +36,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class IdeUtils
 {
-	private static Logger logger = LogManager.getLogger(IdeUtils.class);
-	
 	/**
 	 * Used to serialize and deserialize the objects.
 	 */
@@ -52,85 +45,7 @@ public class IdeUtils
 	
 	private static final int BORDER_SIZE = 8;
 	private static final int HALF_BORDER_SIZE = BORDER_SIZE / 2;
-	
-	private static ObjectLockManager jobNameLocker = new ObjectLockManager();
-	
-	/**
-	 * Job whose multiple invocation has to be consolidated and executed only once.
-	 * @author akiran
-	 */
-	private static class ConsolidatedJob implements Runnable
-	{
-		private String name;
-		
-		/**
-		 * Job to be executed.
-		 */
-		private Runnable runnable;
-		
-		/**
-		 * Time at which this job should be executed.
-		 */
-		private long scheduledAt;
 
-		public ConsolidatedJob(String name, Runnable runnable, long delay)
-		{
-			this.name = name;
-			this.runnable = runnable;
-			this.scheduledAt = System.currentTimeMillis() + delay;
-		}
-		
-		/**
-		 * To be invoked when already existing job is rescheduled.
-		 * @param runnable
-		 * @param delay
-		 */
-		public void scheduleAfter(Runnable runnable, long delay)
-		{
-			this.runnable = runnable;
-			scheduledAt = System.currentTimeMillis() + delay;
-		}
-		
-		/**
-		 * Tells how much time is left for execution.
-		 * @return
-		 */
-		public long getTimeLeft()
-		{
-			return scheduledAt - System.currentTimeMillis();
-		}
-		
-		@Override
-		public void run()
-		{
-			jobNameLocker.lockObject(name);
-			
-			String threadName = Thread.currentThread().getName();
-			Thread.currentThread().setName("cjob-" + name);
-			
-			try
-			{
-				long timeLeft = getTimeLeft();
-				
-				if(timeLeft > 0)
-				{
-					threadPool.schedule(this, timeLeft, TimeUnit.MILLISECONDS);
-					return;
-				}
-				
-				consolidatedJobs.remove(name);
-				runnable.run();
-			} catch(Exception ex)
-			{
-				logger.error("An error occurred while executing consolidated task: {}", name, ex);
-			} finally
-			{
-				Thread.currentThread().setName(threadName);
-				jobNameLocker.releaseObject(name);
-			}
-		}
-	}
-	
 	/**
 	 * Size of file icon.
 	 */
@@ -140,13 +55,6 @@ public class IdeUtils
 	 * Extension to icon cache map.
 	 */
 	private static Map<String, ImageIcon> extensionToIcon = new HashMap<>();
-	
-	/**
-	 * Thread pools for scheduled jobs.
-	 */
-	private static ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(10);
-	
-	private static Map<String, ConsolidatedJob> consolidatedJobs = new HashMap<>();
 	
 	/**
 	 * Saves the specified object into specified file.
@@ -337,51 +245,17 @@ public class IdeUtils
 	 */
 	public static void execute(Runnable runnable, long delay)
 	{
-		threadPool.schedule(runnable, delay, TimeUnit.MILLISECONDS);
+		ConsolidatedJobManager.execute(runnable, delay);
 	}
 	
-	public static synchronized void executeConsolidatedJob(String name, Runnable runnable, long delay)
+	public static void executeConsolidatedJob(String name, Runnable runnable, long delay)
 	{
-		jobNameLocker.lockObject(name);
-		
-		try
-		{
-			ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
-			
-			if(consolidatedJob != null)
-			{
-				consolidatedJob.scheduleAfter(runnable, delay);
-				return;
-			}
-			
-			consolidatedJob = new ConsolidatedJob(name, runnable, delay);
-			consolidatedJobs.put(name, consolidatedJob);
-			
-			threadPool.schedule(consolidatedJob, delay, TimeUnit.MILLISECONDS);
-		}finally
-		{
-			jobNameLocker.releaseObject(name);
-		}
+		ConsolidatedJobManager.executeConsolidatedJob(name, runnable, delay);
 	}
 	
 	public static synchronized void rescheduleConsolidatedJob(String name, Runnable runnable, long delay)
 	{
-		jobNameLocker.lockObject(name);
-		
-		try
-		{
-			ConsolidatedJob consolidatedJob = consolidatedJobs.get(name);
-			
-			if(consolidatedJob == null)
-			{
-				return;
-			}
-			
-			consolidatedJob.scheduleAfter(runnable, delay);
-		}finally
-		{
-			jobNameLocker.releaseObject(name);
-		}
+		ConsolidatedJobManager.rescheduleConsolidatedJob(name, runnable, delay);
 	}
 
 	public static void executeUiTask(Runnable runnable)
