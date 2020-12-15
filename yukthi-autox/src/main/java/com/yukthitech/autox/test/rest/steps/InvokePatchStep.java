@@ -8,22 +8,21 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.RestPlugin;
-import com.yukthitech.utils.rest.PutRestRequest;
+import com.yukthitech.utils.rest.PatchRestRequest;
 
 /**
- * Used to invoke PUT REST API.
+ * Used to invoke PATCH REST API.
  * @author akiran
  */
-@Executable(name = "restInvokePut", group = Group.Rest_Api, requiredPluginTypes = RestPlugin.class, message = "Used to invoke PUT api.")
-public class InvokePutStep extends AbstractRestStep
+@Executable(name = "restInvokePatch", group = Group.Rest_Api, requiredPluginTypes = RestPlugin.class, message = "Used to invoke PATCH api.")
+public class InvokePatchStep extends AbstractRestStep
 {
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.
 	 */
-	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.", 
-			sourceType = SourceType.EXPRESSION, required = false)
+	@Param(description = "Body to be set. If non-string is specified, object will be converted to json and content-type header will be set as JSON.", sourceType = SourceType.EXPRESSION)
 	private Object body;
 	
 	/**
@@ -40,19 +39,19 @@ public class InvokePutStep extends AbstractRestStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		PutRestRequest putRestRequest = new PutRestRequest(uri);
+		PatchRestRequest patchRestRequest = new PatchRestRequest(uri);
 		
 		if(body instanceof String)
 		{
-			putRestRequest.setBody((String) body);
+			patchRestRequest.setBody((String) body);
 		}
-		else if(body != null)
+		else
 		{
-			putRestRequest.setJsonBody(body);
+			patchRestRequest.setJsonBody(body);
 		}
 		
-		super.populate(context, putRestRequest, logger);
-		super.invoke(context, putRestRequest, logger);
+		super.populate(context, patchRestRequest, logger);
+		super.invoke(context, patchRestRequest, logger);
 		
 		return true;
 	}
