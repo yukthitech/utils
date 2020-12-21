@@ -1,6 +1,18 @@
 package com.yukthitech.mail.tracker;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
+
+import javax.mail.Folder;
+import javax.mail.Message;
+
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Abstraction of mail processors.
@@ -16,11 +28,71 @@ public interface IMailProcessor
 	 */
 	public boolean process(IMailTrackerContext context, ReceivedMailMessage mailMessage);
 	
-	/**
-	 * Informs the client application about the updated last read time. Next mails will
-	 * be processed only after this timestamp only.
-	 * @param time time to update
-	 * @return Date to be used for next read. Generally this should match with input time.
-	 */
-	public Date setLastReadTime(Date time);
+	public default String getUniqueMessageId(Folder folder, Message message)
+	{
+		try
+		{
+			/*
+			if(folder instanceof UIDFolder)
+			{
+				UIDFolder uidFolder = (UIDFolder) folder;
+				return "" + uidFolder.getUID(message);
+			}
+			*/
+			
+			Date recvDate = message.getReceivedDate();
+			recvDate = (recvDate == null) ? message.getSentDate() : recvDate;
+			
+			return message.getFrom()[0].toString() + "-" + recvDate.getTime() + "-" + message.getSubject();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while building unique message id", ex);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public default Set<String> getProcessedMailIds()
+	{
+		File file = new File(".mails.cache");
+		
+		if(!file.exists())
+		{
+			return Collections.emptySet();
+		}
+		
+		try
+		{
+			FileInputStream fis = new FileInputStream(file);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			
+			Set<String> ids = (Set<String>) ois.readObject();
+			ois.close();
+			fis.close();
+			
+			return ids;
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while reading mail cache", ex);
+		}
+	}
+
+	public default void setProcessedMailIds(Set<String> ids)
+	{
+		File file = new File(".mails.cache");
+		
+		try
+		{
+			FileOutputStream fos = new FileOutputStream(file);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			
+			oos.writeObject(ids);
+			oos.flush();
+			
+			oos.close();
+			fos.close();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while saving to mail cache", ex);
+		}
+	}
 }

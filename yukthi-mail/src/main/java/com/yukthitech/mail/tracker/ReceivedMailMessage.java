@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.mail.Message;
+
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -191,6 +193,8 @@ public class ReceivedMailMessage
 	 */
 	private File mailFile;
 	
+	private Message message;
+	
 	/**
 	 * Instantiates a new received mail message.
 	 *
@@ -204,7 +208,8 @@ public class ReceivedMailMessage
 	public ReceivedMailMessage(String uid, 
 			String fromName, String fromMailId,
 			String replyToName, String replyToMailId,
-			String subject, Date receivedDate, boolean readEarlier, String toList, EmailTracker emailTracker)
+			String subject, Date receivedDate, boolean readEarlier, String toList, EmailTracker emailTracker,
+			Message message)
 	{
 		this.uid = uid;
 		this.fromName = fromName;
@@ -216,6 +221,7 @@ public class ReceivedMailMessage
 		this.readEarlier = readEarlier;
 		this.toList = toList;
 		this.emailTracker = emailTracker;
+		this.message = message;
 	}
 	
 	/**
@@ -287,6 +293,22 @@ public class ReceivedMailMessage
 	{
 		return subject;
 	}
+	
+	private void extractContent()
+	{
+		if(this.content != null)
+		{
+			return;
+		}
+		
+		try
+		{
+			emailTracker.extractMailContent(this, message.getContent(), message.getContentType());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while extracting content of mail.", ex);
+		}
+	}
 
 	/**
 	 * Gets the attachments received in mail.
@@ -295,6 +317,7 @@ public class ReceivedMailMessage
 	 */
 	public List<Attachment> getAttachments()
 	{
+		extractContent();
 		return attachments;
 	}
 
@@ -311,6 +334,11 @@ public class ReceivedMailMessage
 		
 		this.attachments.add(attachment);
 	}
+	
+	boolean isContentRead()
+	{
+		return (content != null);
+	}
 
 	/**
 	 * Gets the main content of the mail.
@@ -319,6 +347,7 @@ public class ReceivedMailMessage
 	 */
 	public String getContent()
 	{
+		extractContent();
 		return content;
 	}
 
@@ -337,7 +366,7 @@ public class ReceivedMailMessage
 	 * Checks if the content is set on this mail.
 	 * @return true if content is present.
 	 */
-	public boolean hasContent()
+	boolean hasContent()
 	{
 		return content != null;
 	}
@@ -349,6 +378,7 @@ public class ReceivedMailMessage
 	 */
 	public String getTextContent()
 	{
+		extractContent();
 		return textContent;
 	}
 
@@ -421,6 +451,8 @@ public class ReceivedMailMessage
 	 */
 	private void buildDocument() throws MailProcessingException
 	{
+		extractContent();
+		
 		if(this.contentDocument != null)
 		{
 			return;
@@ -603,6 +635,11 @@ public class ReceivedMailMessage
 		return element.text();
 	}
 	
+	boolean isEmlFileCreated()
+	{
+		return (mailFile != null);
+	}
+	
 	/**
 	 * Gets the eml file.
 	 *
@@ -616,7 +653,7 @@ public class ReceivedMailMessage
 		}
 
 		File file = new File(TEMP_MAIL_FOLDER, "mail-" + UQ_ID.getAndIncrement() + ".eml");
-		emailTracker.saveEmlContent(uid, file);
+		emailTracker.saveEmlContent(message, file);
 		
 		this.mailFile = file;
 		

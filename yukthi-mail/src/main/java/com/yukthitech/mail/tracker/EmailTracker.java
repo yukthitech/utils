@@ -1,11 +1,8 @@
 package com.yukthitech.mail.tracker;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +18,6 @@ import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.activation.DataHandler;
@@ -41,14 +37,10 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.Transport;
-import javax.mail.UIDFolder;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.search.ComparisonTerm;
-import javax.mail.search.ReceivedDateTerm;
-import javax.mail.search.SearchTerm;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -82,8 +74,6 @@ public class EmailTracker
 	 */
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa");
 	
-	private static final SimpleDateFormat INTERNAL_TIME_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
-
 	/**
 	 * Context object to be used while processing mails.
 	 * 
@@ -334,15 +324,10 @@ public class EmailTracker
 	private Thread trackerThread = null;
 
 	/**
-	 * Time when last read was done.
-	 */
-	private Date lastReadTime = null;
-
-	/**
 	 * Thread pool to process mails parallel.
 	 */
 	private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
-
+	
 	/**
 	 * Instantiates a new email tracker.
 	 *
@@ -370,22 +355,7 @@ public class EmailTracker
 	{
 		this.checkTimeGap = checkTimeGap;
 	}
-
-	/**
-	 * Sets the time when last read was done.
-	 *
-	 * @param lastReadTime the new time when last read was done
-	 */
-	public void setLastReadTime(Date lastReadTime)
-	{
-		if(lastReadTime.after(new Date()))
-		{
-			throw new IllegalArgumentException("Future date is specified for last read time. Specified time: " + lastReadTime);
-		}
-
-		this.lastReadTime = lastReadTime;
-	}
-
+	
 	/**
 	 * Starts a background thread which would start tracking the mails.
 	 */
@@ -415,7 +385,7 @@ public class EmailTracker
 
 					try
 					{
-						logger.trace("Going to sleep for {} millis.", checkTimeGap);
+						logger.debug("Processing mails completed. Going to sleep for {} millis.", checkTimeGap);
 						Thread.sleep(checkTimeGap);
 					} catch(Exception ex)
 					{
@@ -503,7 +473,7 @@ public class EmailTracker
 	 * @param contentType
 	 *            Content type.
 	 */
-	private void extractMailContent(ReceivedMailMessage mailMessage, Object content, String contentType) throws MessagingException, IOException
+	void extractMailContent(ReceivedMailMessage mailMessage, Object content, String contentType) throws MessagingException, IOException
 	{
 		if(!contentType.toLowerCase().contains("multipart"))
 		{
@@ -561,36 +531,17 @@ public class EmailTracker
 		return new String[] {name, mailId};
 	}
 	
-	private String getUniqueId(Folder folder, Message message)
-	{
-		try
-		{
-			if(folder instanceof UIDFolder)
-			{
-				UIDFolder uidFolder = (UIDFolder) folder;
-				return "" + uidFolder.getUID(message);
-			}
-			
-			Date recvDate = message.getReceivedDate();
-			recvDate = (recvDate == null) ? message.getSentDate() : recvDate;
-			
-			return message.getFrom()[0].toString() + "-" + INTERNAL_TIME_FORMAT.format(recvDate) + "-" + message.getSubject();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while building unique message id", ex);
-		}
-	}
-	
 	/**
 	 * Convert message.
-	 *
+	 * 
+	 * @param mailId Id of the message
 	 * @param message the message
 	 * @param folder the folder
 	 * @param lastReadTimeStr the last read time str
 	 * @return the received mail message
 	 * @throws Exception the exception
 	 */
-	private ReceivedMailMessage convertMessage(Message message, Folder folder) throws Exception
+	private ReceivedMailMessage convertMessage(String mailId, Message message, Folder folder) throws Exception
 	{
 		Date recvDate = message.getReceivedDate();
 		recvDate = (recvDate == null) ? message.getSentDate() : recvDate;
@@ -615,11 +566,11 @@ public class EmailTracker
 				.map(addr -> addr.toString())
 				.collect(Collectors.joining(","));
 
-		ReceivedMailMessage mailMessage = new ReceivedMailMessage(getUniqueId(folder, message), 
+		ReceivedMailMessage mailMessage = new ReceivedMailMessage(mailId, 
 				frmNameMail[0], frmNameMail[1],
 				replyToNameMail[0], replyToNameMail[1],
-				subject, recvDate, isReadEarlier, toLst, this);
-		extractMailContent(mailMessage, message.getContent(), message.getContentType());
+				subject, recvDate, isReadEarlier, toLst, this, message);
+		//extractMailContent(mailMessage, message.getContent(), message.getContentType());
 		
 		//Generate eml file of the mail.
 		//mailMessage.getEmlFile();
@@ -627,52 +578,6 @@ public class EmailTracker
 		return mailMessage;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private Set<String> loadCurrentMailIds()
-	{
-		File file = new File(".mails.cache");
-		
-		if(!file.exists())
-		{
-			return Collections.emptySet();
-		}
-		
-		try
-		{
-			FileInputStream fis = new FileInputStream(file);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			
-			Set<String> ids = (Set<String>) ois.readObject();
-			ois.close();
-			fis.close();
-			
-			return ids;
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while reading mail cache", ex);
-		}
-	}
-	
-	private void saveMailIds(Set<String> ids)
-	{
-		File file = new File(".mails.cache");
-		
-		try
-		{
-			FileOutputStream fos = new FileOutputStream(file);
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			
-			oos.writeObject(ids);
-			oos.flush();
-			
-			oos.close();
-			fos.close();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while saving to mail cache", ex);
-		}
-	}
-
 	/**
 	 * Reads mails from specified folder and for each mail, mail-processor will
 	 * be invoked.
@@ -688,39 +593,20 @@ public class EmailTracker
 	 * @param currentMailId
 	 *            Current mail id whose folder is being read
 	 */
-	private List<ReceivedMailMessage> readMailsFromFolder(String folderName, Store store) throws MessagingException, IOException
+	private List<MailProcessingContext> readMailsFromFolder(String folderName, Store store, Set<String> newMailIds) throws MessagingException, IOException
 	{
-		logger.debug("Reading mails from folder: {}. Last read time: {}", folderName, TIME_FORMAT.format(lastReadTime));
+		logger.debug("Reading mails from folder: {}.", folderName);
 
 		Folder mailFolder = store.getFolder(folderName);
 		
 		mailFolder.open(Folder.READ_WRITE);
 
-		Message newMessages[] = null;
+		Message newMessages[] = mailFolder.getMessages();
 
-		if(readSettings.getReadProtocol() == MailReadProtocol.IMAPS)
-		{
-			if(lastReadTime != null)
-			{
-				SearchTerm newerThan = new ReceivedDateTerm(ComparisonTerm.GT, lastReadTime);
-				logger.debug("Reading mails from time: {}", TIME_FORMAT.format(lastReadTime));
-	
-				newMessages = mailFolder.search(newerThan);
-			}
-			else
-			{
-				newMessages = mailFolder.getMessages();
-			}
-		}
-		else
-		{
-			newMessages = mailFolder.getMessages();
-		}
-		
 		if(newMessages.length <= 0)
 		{
-			logger.debug("No new messages are found from last read [{}]. Total messages: {}", 
-					TIME_FORMAT.format(lastReadTime), mailFolder.getMessageCount());
+			logger.debug("No new messages are found. Total messages: {}", 
+					mailFolder.getMessageCount());
 			return null;
 		}
 		else
@@ -730,9 +616,11 @@ public class EmailTracker
 
 		int count = newMessages.length;
 		
-		List<ReceivedMailMessage> mssgLst = new LinkedList<>();
-		Set<String> readMailIds = loadCurrentMailIds();
-		Set<String> newMailIds = new HashSet<String>();
+		List<MailProcessingContext> mssgLst = new LinkedList<>();
+		
+		Set<String> tmpReadMailIds = mailProcessor.getProcessedMailIds();
+		Set<String> readMailIds = (tmpReadMailIds == null) ? Collections.emptySet() : tmpReadMailIds;
+		
 		final Message finalMssgs[] = newMessages;
 		
 		CountDownLatch latch = new CountDownLatch(count);
@@ -745,24 +633,29 @@ public class EmailTracker
 			{
 				try
 				{
-					logger.trace("Processing mail: " + index);
+					logger.debug("Checking mail: " + index);
 					
 					final Message message = finalMssgs[index];
+					String mailId = mailProcessor.getUniqueMessageId(mailFolder, message);
 					
-					String mailId = getUniqueId(mailFolder, message);
-					newMailIds.add(mailId);
-					
+					synchronized(newMailIds)
+					{
+						newMailIds.add(mailId);
+					}
+
 					//if the current mail was already processed earlier
 					if(readMailIds.contains(mailId))
 					{
 						return;
 					}
 					
+					logger.debug("Processing mail: " + index);
+					
 					ReceivedMailMessage mailMessage = null;
 					
 					try
 					{
-						mailMessage = convertMessage(message, mailFolder);
+						mailMessage = convertMessage(mailId, message, mailFolder);
 					}catch(Exception ex)
 					{
 						logger.error("An error occurred while reading message with subject: {}", message.getSubject(), ex);
@@ -774,7 +667,13 @@ public class EmailTracker
 						return;
 					}
 					
-					mssgLst.add(mailMessage);
+					MailProcessingContext context = processMail(mailMessage);
+					
+					synchronized(mssgLst)
+					{
+						mssgLst.add(context);	
+					}
+					
 				}catch(Exception ex)
 				{
 					logger.error("An error occurred while converting mail message", ex);
@@ -795,9 +694,56 @@ public class EmailTracker
 			throw new InvalidStateException("An error occcurred during conversion", ex);
 		}
 		
-		saveMailIds(newMailIds);
 		mailFolder.close(true);
 		return mssgLst;
+	}
+	
+	private MailProcessingContext processMail(ReceivedMailMessage mssg)
+	{
+		MailProcessingContext mailProcessingContext = new MailProcessingContext(mssg);
+		
+		try
+		{
+			// process the mail
+			boolean isMailProcessed = false;
+
+			try
+			{
+				logger.debug("Sending mail for processing mail with subject: {} [Recv Time: {}]", 
+						mssg.getSubject(), TIME_FORMAT.format(mssg.getReceivedDate()));
+				isMailProcessed = mailProcessor.process(mailProcessingContext, mssg);
+			} catch(Exception ex)
+			{
+				logger.error("An error occurred while processing mail with subject: {}", mssg.getSubject(), ex);
+			}
+			
+			if(mssg.isContentRead())
+			{
+				if(!isMailProcessed)
+				{
+					if(!mailProcessingContext.processed && !mssg.isReadEarlier())
+					{
+						mailProcessingContext.flagsToRemove.add(Flags.Flag.SEEN);
+					}
+				}
+				else
+				{
+					//mark message as processed
+					mailProcessingContext.flagsToApply.add(Flags.Flag.FLAGGED);
+				}
+			}
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while processing mail: {}", mssg.getSubject(), ex);
+		} finally
+		{
+			if(mssg.isEmlFileCreated())
+			{
+				mssg.getEmlFile().delete();
+			}
+		}
+		
+		return mailProcessingContext;
 	}
 	
 	/**
@@ -805,6 +751,7 @@ public class EmailTracker
 	 *
 	 * @param messages the messages
 	 */
+	/*
 	private List<MailProcessingContext> processMails(List<ReceivedMailMessage> messages)
 	{
 		final AtomicInteger processedCount = new AtomicInteger(0);
@@ -889,8 +836,9 @@ public class EmailTracker
 		
 		return mailContexts;
 	}
+	*/
 	
-	private void startPostProcessing(List<MailProcessingContext> mailContexts, Store store) throws MessagingException
+	private void startPostProcessing(List<MailProcessingContext> mailContexts, Store store, Set<String> newMailIds) throws MessagingException
 	{
 		logger.debug("Doing post processing for {} mail contexts", mailContexts.size());
 		
@@ -900,25 +848,18 @@ public class EmailTracker
 		Message newMessages[] = mailFolder.getMessages();
 		Map<String, Message> mssgMap = Arrays.asList(newMessages)
 				.stream()
-				.collect(Collectors.toMap(mssg -> getUniqueId(mailFolder, mssg), mssg -> mssg));
+				.collect(Collectors.toMap(mssg -> mailProcessor.getUniqueMessageId(mailFolder, mssg), mssg -> mssg));
 		
 		for(MailProcessingContext context : mailContexts)
 		{
 			context.applyChanges(mailFolder, mssgMap);
 		}
 		
+		mailProcessor.setProcessedMailIds(newMailIds);
 		mailFolder.close(true);
-
-		Date now = new Date();
-		lastReadTime = mailProcessor.setLastReadTime(now);
-
-		if(lastReadTime == null)
-		{
-			lastReadTime = now;
-		}
 	}
 	
-	void saveEmlContent(String uniqueId, File file)
+	void saveEmlContent(Message message, File file)
 	{
 		Store store = null;
 		
@@ -930,6 +871,7 @@ public class EmailTracker
 			Folder mailFolder = store.getFolder(readSettings.getFolderName());
 			mailFolder.open(Folder.READ_WRITE);
 			
+			/*
 			Message message = null;
 			
 			if(mailFolder instanceof UIDFolder)
@@ -945,7 +887,7 @@ public class EmailTracker
 				
 				for(Message mssg : mssgs)
 				{
-					if(uniqueId.equals(getUniqueId(mailFolder, mssg)))
+					if(uniqueId.equals(mailProcessor.getUniqueMessageId(mailFolder, mssg)))
 					{
 						message = mssg;
 						break;
@@ -957,6 +899,7 @@ public class EmailTracker
 			{
 				throw new InvalidStateException("No mail found with specified id: {}", uniqueId);
 			}
+			*/
 			
 			Message emlMssg = new MimeMessage(readSession);
 			
@@ -1027,8 +970,9 @@ public class EmailTracker
 	 */
 	public void readMails()
 	{
-		List<ReceivedMailMessage> mssgs = null;
+		List<MailProcessingContext> mssgs = null;
 		Store store = null;
+		Set<String> newMailIds = new HashSet<String>();
 		
 		try
 		{
@@ -1039,7 +983,7 @@ public class EmailTracker
 
 			try
 			{
-				mssgs = readMailsFromFolder(readSettings.getFolderName(), store);
+				mssgs = readMailsFromFolder(readSettings.getFolderName(), store, newMailIds);
 			} finally
 			{
 				store.close();
@@ -1051,8 +995,8 @@ public class EmailTracker
 				return;
 			}
 			
-			logger.debug("Reading mails completed. Processing the mails...");
-			List<MailProcessingContext> mailContexts = processMails(mssgs);
+			//logger.debug("Reading mails completed. Processing the mails...");
+			//List<MailProcessingContext> mailContexts = processMails(mssgs);
 
 			logger.debug("Processing mails completed. Doing post process..");
 			store = readSession.getStore(readSettings.getReadProtocol().getName());
@@ -1060,7 +1004,7 @@ public class EmailTracker
 			
 			try
 			{
-				startPostProcessing(mailContexts, store);
+				startPostProcessing(mssgs, store, newMailIds);
 			} finally
 			{
 				store.close();
