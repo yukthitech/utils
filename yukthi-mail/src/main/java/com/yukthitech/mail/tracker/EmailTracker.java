@@ -99,12 +99,17 @@ public class EmailTracker
 		/**
 		 * True if mail is processed internally.
 		 */
-		private boolean processed;
+		private boolean moved;
 		
 		/**
 		 * Folder to which this message should be moved.
 		 */
 		private String folderToMove;
+		
+		/**
+		 * Flag indicating if mail was processed.
+		 */
+		private boolean processed;
 
 		/**
 		 * Instantiates a new mail processing context.
@@ -182,6 +187,7 @@ public class EmailTracker
 		@Override
 		public void delete() throws MailProcessingException
 		{
+			moved = true;
 			flagsToApply.add(Flags.Flag.DELETED);
 		}
 
@@ -196,7 +202,7 @@ public class EmailTracker
 		{
 			folderToMove = folder;
 			flagsToApply.add(Flag.DELETED);
-			processed = true;
+			moved = true;
 		}
 
 		/**
@@ -593,7 +599,7 @@ public class EmailTracker
 	 * @param currentMailId
 	 *            Current mail id whose folder is being read
 	 */
-	private List<MailProcessingContext> readMailsFromFolder(String folderName, Store store, Set<String> newMailIds) throws MessagingException, IOException
+	private List<MailProcessingContext> readMailsFromFolder(String folderName, Store store, Set<String> processedMailIds) throws MessagingException, IOException
 	{
 		logger.debug("Reading mails from folder: {}.", folderName);
 
@@ -618,8 +624,8 @@ public class EmailTracker
 		
 		List<MailProcessingContext> mssgLst = new LinkedList<>();
 		
-		Set<String> tmpReadMailIds = mailProcessor.getProcessedMailIds();
-		Set<String> readMailIds = (tmpReadMailIds == null) ? Collections.emptySet() : tmpReadMailIds;
+		Set<String> tmpMailIds = mailProcessor.getProcessedMailIds();
+		Set<String> prevProcessedMailIds = (tmpMailIds == null) ? Collections.emptySet() : tmpMailIds;
 		
 		final Message finalMssgs[] = newMessages;
 		
@@ -638,14 +644,14 @@ public class EmailTracker
 					final Message message = finalMssgs[index];
 					String mailId = mailProcessor.getUniqueMessageId(mailFolder, message);
 					
-					synchronized(newMailIds)
-					{
-						newMailIds.add(mailId);
-					}
-
 					//if the current mail was already processed earlier
-					if(readMailIds.contains(mailId))
+					if(prevProcessedMailIds.contains(mailId))
 					{
+						synchronized(processedMailIds)
+						{
+							processedMailIds.add(mailId);
+						}
+
 						return;
 					}
 					
@@ -674,6 +680,13 @@ public class EmailTracker
 						mssgLst.add(context);	
 					}
 					
+					if(context.processed)
+					{
+						synchronized(processedMailIds)
+						{
+							processedMailIds.add(mailId);
+						}
+					}
 				}catch(Exception ex)
 				{
 					logger.error("An error occurred while converting mail message", ex);
@@ -712,24 +725,21 @@ public class EmailTracker
 				logger.debug("Sending mail for processing mail with subject: {} [Recv Time: {}]", 
 						mssg.getSubject(), TIME_FORMAT.format(mssg.getReceivedDate()));
 				isMailProcessed = mailProcessor.process(mailProcessingContext, mssg);
+				
+				mailProcessingContext.processed = isMailProcessed;
 			} catch(Exception ex)
 			{
 				logger.error("An error occurred while processing mail with subject: {}", mssg.getSubject(), ex);
 			}
 			
+			//if mail content is opened
 			if(mssg.isContentRead())
 			{
-				if(!isMailProcessed)
+				//and if mail is not moved/deleted and was not read earlier
+				if(!mailProcessingContext.moved && !mssg.isReadEarlier())
 				{
-					if(!mailProcessingContext.processed && !mssg.isReadEarlier())
-					{
-						mailProcessingContext.flagsToRemove.add(Flags.Flag.SEEN);
-					}
-				}
-				else
-				{
-					//mark message as processed
-					mailProcessingContext.flagsToApply.add(Flags.Flag.FLAGGED);
+					//mark it as unread again
+					mailProcessingContext.flagsToRemove.add(Flags.Flag.SEEN);
 				}
 			}
 		} catch(Exception ex)
