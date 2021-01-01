@@ -300,6 +300,13 @@ public class Element implements INode
 			{
 				return this;
 			}
+			
+			String elemName = name.toLowerCase().replaceAll("\\W+", "");
+			
+			if("customuilocator".equals(elemName) || "function".equals(elemName))
+			{
+				return this;
+			}
 		}
 
 		for(INode node : this.nodes)
