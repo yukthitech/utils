@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.autox.test.Function;
 
 public class StepHolder implements IStepContainer
 {
@@ -12,6 +14,16 @@ public class StepHolder implements IStepContainer
 	 * Steps added for execution.
 	 */
 	private List<IStep> steps = new ArrayList<>();
+	
+	/**
+	 * Custom ui locators to reload.
+	 */
+	private List<CustomUiLocator> customUiLocators = new ArrayList<>();
+	
+	/**
+	 * Functions to reload.
+	 */
+	private List<Function> functions = new ArrayList<>();
 
 	/*
 	 * (non-Javadoc)
@@ -34,5 +46,25 @@ public class StepHolder implements IStepContainer
 	public List<IStep> getSteps()
 	{
 		return steps;
+	}
+	
+	public void addCustomUiLocator(CustomUiLocator locator)
+	{
+		this.customUiLocators.add(locator);
+	}
+	
+	public List<CustomUiLocator> getCustomUiLocators()
+	{
+		return customUiLocators;
+	}
+	
+	public void addFunction(Function function)
+	{
+		this.functions.add(function);
+	}
+	
+	public List<Function> getFunctions()
+	{
+		return functions;
 	}
 }

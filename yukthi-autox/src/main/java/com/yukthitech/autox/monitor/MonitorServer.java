@@ -1,5 +1,6 @@
 package com.yukthitech.autox.monitor;
 
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -140,7 +141,14 @@ public class MonitorServer
 			
 			try
 			{
-				clientStream.writeObject(dataBuff);
+				try
+				{
+					clientStream.writeObject(dataBuff);
+				}catch(NotSerializableException ex)
+				{
+					clientStream.writeObject("<< Not serializable >>");
+				}
+				
 				clientStream.flush();
 			}catch(Exception ex)
 			{

@@ -8,6 +8,8 @@ import org.openqa.selenium.WebElement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -66,6 +68,14 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") Object locator, 
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
+		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
+		CustomUiLocator customUiLocator = UiAutomationUtils.getCustomUiLocator(AutomationContext.getInstance(), locator.toString(), queryWrapper);
+		
+		if(customUiLocator != null)
+		{
+			return customUiLocator.getValue(queryWrapper.getValue(), false);
+		}
+
 		WebElement element = getElementByLocator(locator, parent);
 
 		if(element == null)
@@ -97,6 +107,15 @@ public class UiFreeMarkerMethods
 			@FmParam(name = "locator", description = "Locator of the ui element whose display value needs to be fetched.") Object locator, 
 			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
 	{
+		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
+		CustomUiLocator customUiLocator = UiAutomationUtils.getCustomUiLocator(AutomationContext.getInstance(), locator.toString(), queryWrapper);
+		
+		if(customUiLocator != null)
+		{
+			return customUiLocator.getValue(queryWrapper.getValue(), true);
+		}
+
+
 		WebElement element = getElementByLocator(locator, parent);
 
 		if(element == null)

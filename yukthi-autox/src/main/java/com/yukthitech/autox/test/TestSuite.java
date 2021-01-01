@@ -344,6 +344,16 @@ public class TestSuite implements Validateable
 		nameToFunction.put(function.getName(), function);
 	}
 
+	/**
+	 * Adds or replaces a function in this test suite.
+	 * This is expected to be called from interactive handler on need basis.
+	 * @param function
+	 */
+	public void addOrReplaceFunction(Function function)
+	{
+		function.markAsFunctionGroup();
+		nameToFunction.put(function.getName(), function);
+	}
 	
 	/**
 	 * Fetches the step group with specified name.

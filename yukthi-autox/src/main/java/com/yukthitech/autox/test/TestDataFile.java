@@ -137,6 +137,11 @@ public class TestDataFile
 		context.addFunction(function);
 	}
 	
+	public void addCustomUiLocator(CustomUiLocator customUiLocator)
+	{
+		context.addCustomUiLocator(customUiLocator);
+	}
+	
 	@Override
 	public String toString()
 	{

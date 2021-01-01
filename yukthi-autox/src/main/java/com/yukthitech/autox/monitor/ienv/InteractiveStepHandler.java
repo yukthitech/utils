@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +14,8 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.InteractiveEnvironmentContext;
 import com.yukthitech.autox.monitor.IAsyncServerDataHandler;
+import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.IEntryPoint;
 import com.yukthitech.autox.test.StepExecutor;
 import com.yukthitech.autox.test.TestCase;
@@ -67,18 +70,36 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 		}
 		
 		InteractiveExecuteSteps steps = (InteractiveExecuteSteps) data;
-		List<IStep> stepsToExe = parseSteps(steps.getStepsToExecute());
+		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
 		
-		if(stepsToExe == null)
+		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
+		{
+			for(CustomUiLocator customUiLocator : stepHolder.getCustomUiLocators())
+			{
+				automationContext.addOrReplaceCustomUiLocator(customUiLocator);
+			}
+		}
+		
+		if(CollectionUtils.isNotEmpty(stepHolder.getFunctions()))
+		{
+			TestSuite activeTestSuite = automationContext.getActiveTestSuite();
+
+			for(Function func : stepHolder.getFunctions())
+			{
+				activeTestSuite.addOrReplaceFunction(func);
+			}
+		}
+
+		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
 		{
 			return true;
 		}
 		
-		executeSteps(stepsToExe);
+		executeSteps(stepHolder.getSteps());
 		return true;
 	}
 	
-	private List<IStep> parseSteps(String xml)
+	private StepHolder parseSteps(String xml)
 	{
 		StepHolder stepHolder = new StepHolder();
 		
@@ -91,7 +112,7 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 			ByteArrayInputStream bis = new ByteArrayInputStream(stepXml.getBytes());
 			XMLBeanParser.parse(bis, stepHolder, automationContext.getTestSuiteParserHandler());
 			
-			return stepHolder.getSteps();
+			return stepHolder;
 		} catch(Exception ex)
 		{
 			logger.error("Failed to parse step list from interactive step xml:\n", xml, ex);

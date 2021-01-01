@@ -120,12 +120,6 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 			throw new InvalidArgumentException("Invalid/non-int-convertable end value specified: {}", this.end);
 		}
 		
-		if(start > end)
-		{
-			exeLogger.log(LogLevel.ERROR, "Start value '{}' is greater than end value- {}", start, end);
-			throw new InvalidArgumentException("Start value '{}' is greater than end value- {}", start, end);
-		}
-
 		for(int i = start; i <= end; i++)
 		{
 			context.setAttribute(loopVar, i);

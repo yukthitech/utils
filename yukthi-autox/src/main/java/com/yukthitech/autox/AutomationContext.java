@@ -30,6 +30,7 @@ import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.autox.monitor.ienv.InteractiveServerReady;
 import com.yukthitech.autox.storage.PersistenceStorage;
+import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
@@ -193,6 +194,11 @@ public class AutomationContext
 	 * Step listeners.
 	 */
 	private EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
+	
+	/**
+	 * Custom ui locators.
+	 */
+	private Map<String, CustomUiLocator> customUiLocators = new HashMap<>();
 	
 	/**
 	 * Constructor.
@@ -1031,6 +1037,26 @@ public class AutomationContext
 	public IStepListener getStepListenerProxy()
 	{
 		return stepListeners.get();
+	}
+	
+	public void addCustomUiLocator(CustomUiLocator locator)
+	{
+		if(customUiLocators.containsKey(locator.getName()))
+		{
+			throw new InvalidArgumentException("A custom ui locator with specified name already exist: %s", locator.getName());
+		}
+		
+		this.customUiLocators.put(locator.getName(), locator);
+	}
+	
+	public void addOrReplaceCustomUiLocator(CustomUiLocator locator)
+	{
+		this.customUiLocators.put(locator.getName(), locator);
+	}
+
+	public CustomUiLocator getCustomUiLocator(String name)
+	{
+		return this.customUiLocators.get(name);
 	}
 
 	/**

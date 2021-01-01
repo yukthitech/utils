@@ -19,6 +19,8 @@ import org.openqa.selenium.WebElement;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.AutomationConfiguration;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.test.CustomUiLocator;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.exceptions.UnsupportedOperationException;
@@ -114,6 +116,26 @@ public class UiAutomationUtils
 		return populateField(context, parent, locator, value);
 	}
 	
+	public static CustomUiLocator getCustomUiLocator(AutomationContext context, String locator, ObjectWrapper<String> query)
+	{
+		Matcher matcher = LOCATOR_PATTERN.matcher(locator); 
+		
+		if(!matcher.matches())
+		{
+			return null;
+		}
+		
+		LocatorType locatorType = LocatorType.getLocatorType(matcher.group(1));
+		
+		if(locatorType != null)
+		{
+			return null;
+		}
+		
+		query.setValue(matcher.group(2));
+		return context.getCustomUiLocator(matcher.group(1));
+	}
+	
 	/**
 	 * Populates specified field with specified value.
 	 * 
@@ -131,7 +153,17 @@ public class UiAutomationUtils
 	{
 		logger.trace("For field {} under parent {} setting value - {}", locator, parent, value);
 		
-		if(!LOCATOR_PATTERN.matcher(locator).matches())
+		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
+		CustomUiLocator customUiLocator = getCustomUiLocator(context, locator, queryWrapper);
+		
+		if(customUiLocator != null)
+		{
+			return customUiLocator.setValue(queryWrapper.getValue(), value);
+		}
+
+		Matcher matcher = LOCATOR_PATTERN.matcher(locator); 
+		
+		if(!matcher.matches())
 		{
 			locator = LocatorType.NAME.getKey() + ":" + locator;
 		}

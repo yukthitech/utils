@@ -30,7 +30,7 @@ public class UiGetValueStep extends AbstractUiStep
 	@Param(description = "Name of the attribute to set.", attrName = true)
 	private String name;
 
-	@Param(description = "If set to true, instead of value display value will be fetched (currently non-select fields will return value itself).", required = false)
+	@Param(description = "If set to true, instead of value, display value will be fetched (currently non-select fields will return value itself).", required = false)
 	private boolean displayValue = false;
 	
 	/**

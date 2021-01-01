@@ -909,4 +909,15 @@ public class AutomationUtils
 			throw new IllegalStateException(ex);
 		}
 	}
+	
+	public static String toJson(Object obj)
+	{
+		try
+		{
+			return objectMapper.writeValueAsString(obj);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while converting object to json", ex);
+		}
+	}
 }

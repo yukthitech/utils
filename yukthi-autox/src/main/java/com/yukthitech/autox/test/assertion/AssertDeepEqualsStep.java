@@ -1,8 +1,5 @@
 package com.yukthitech.autox.test.assertion;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
@@ -10,6 +7,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.DeepEqualsUtil;
 
 /**
@@ -125,11 +123,23 @@ public class AssertDeepEqualsStep extends AbstractValidation
 
 		return res;
 	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString()
 	{
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true, (Class) this.getClass());
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+
+		builder.append("ignoreExtraProperties: ").append(ignoreExtraProperties);
+		builder.append(",").append("checkEquality: ").append(checkEquality);
+		builder.append(",\n").append("expected: ").append(AutomationUtils.toJson(expected));
+		builder.append(",\n").append("actual: ").append(AutomationUtils.toJson(actual));
+
+		builder.append("]");
+		return builder.toString();
 	}
+
 }
