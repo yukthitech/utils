@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +61,22 @@ public class DefaultMethods
 			@FmParam(name = "days", description = "Days to be added.") int days)
 	{
 		return DateUtils.addDays(date, days);
+	}
+	
+	/**
+	 * Adds specified number of years to specified date and returns the same.
+	 * @param date date to which years needs to be added
+	 * @param years years to add
+	 * @return result date
+	 */
+	@FreeMarkerMethod(
+			description = "Adds specified number of days to specified date",
+			returnDescription = "Resultant date after addition of specified years")
+	public static Date addYears(
+			@FmParam(name = "date", description = "Date to which days should be added") Date date, 
+			@FmParam(name = "years", description = "Years to be added.") int years)
+	{
+		return DateUtils.addYears(date, years);
 	}
 	
 	@FreeMarkerMethod(
@@ -325,5 +342,41 @@ public class DefaultMethods
 		}
 		
 		return 1;
+	}
+
+	/**
+	 * Replaces specified substring with replacement in main string.
+	 *
+	 * @param mainString the main string
+	 * @param substring the substring
+	 * @param replacement the replacement
+	 * @return the string
+	 */
+	@FreeMarkerMethod(
+			value = "replace", 
+			description = "Replaces specified substring with replacement in main string.")
+	public static String replace(
+			@FmParam(name = "mainString", description = "String in which replacement should happen") String mainString,
+			@FmParam(name = "substring", description = "Substring to be replaced") String substring,
+			@FmParam(name = "replacement", description = "Replacement string") String replacement
+			)
+	{
+		return mainString.replace(substring, replacement);
+	}
+
+	/**
+	 * Makes first letter of every word into capital letter.
+	 *
+	 * @param str the str
+	 * @return the string
+	 */
+	@FreeMarkerMethod(
+			value = "initcap", 
+			description = "Makes first letter of every word into capital letter.")
+	public static String initcap(
+			@FmParam(name = "str", description = "String to convert") String str
+			)
+	{
+		return WordUtils.capitalize(str);
 	}
 }
