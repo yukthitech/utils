@@ -30,7 +30,7 @@ public class RestClient
 {
 	private static Logger logger = LogManager.getLogger(RestClient.class);
 	
-	private static final int MAX_STR_LENGTH = 500;
+	private static final int MAX_STR_LENGTH = 1000;
 	
 	static class RestResultHandler implements ResponseHandler<RestResult<String>>
 	{
