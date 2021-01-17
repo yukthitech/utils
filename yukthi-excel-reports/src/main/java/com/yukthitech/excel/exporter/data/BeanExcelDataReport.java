@@ -2,9 +2,14 @@ package com.yukthitech.excel.exporter.data;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.excel.importer.data.ExcelIgnoreField;
 import com.yukthitech.excel.importer.data.ExcelLabel;
@@ -111,6 +116,38 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 		
 		return headings.toArray(new String[0]);
 	}
+	
+	private String getCellValue(Object bean, Field field) throws Exception
+	{
+		Object val = field.get(bean);
+		
+		if(val == null)
+		{
+			return "";
+		}
+		
+		ExcelLabel excelLabel = field.getAnnotation(ExcelLabel.class);
+		
+		if(excelLabel != null && StringUtils.isNotBlank(excelLabel.format()))
+		{
+			if(val instanceof Date)
+			{
+				Date date = (Date) val;
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(excelLabel.format());
+				
+				val = simpleDateFormat.format(date);
+			}
+			else if(val instanceof Number)
+			{
+				double doubleNo = ((Number) val).doubleValue();
+				
+				DecimalFormat decimalFormat = new DecimalFormat(excelLabel.format());
+				val = decimalFormat.format(doubleNo);
+			}
+		}
+		
+		return val.toString();
+	}
 
 	@Override
 	public List<List<Cell>> rows()
@@ -143,7 +180,7 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 				{
 					field.setAccessible(true);
 					
-					row.add(new Cell("" + field.get(bean)));
+					row.add(new Cell(getCellValue(bean, field)));
 				}catch(Exception ex)
 				{
 					throw new IllegalStateException("An exception occurred while fetching field values", ex);

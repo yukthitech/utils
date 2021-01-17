@@ -5,8 +5,9 @@ public class Column
 	private String name;
 	private ColumnType type;
 	private Class<?> javaType;
+	private String format;
 
-	public Column(String name, ColumnType type, Class<?> javaType)
+	public Column(String name, ColumnType type, Class<?> javaType, String format)
 	{
 		if(name == null || name.trim().length() == 0)
 		{
@@ -21,6 +22,7 @@ public class Column
 		this.name = name;
 		this.type = type;
 		this.javaType = javaType;
+		this.format = format;
 	}
 
 	public String getName()
@@ -36,5 +38,10 @@ public class Column
 	public Class<?> getJavaType()
 	{
 		return javaType;
+	}
+	
+	public String getFormat()
+	{
+		return format;
 	}
 }

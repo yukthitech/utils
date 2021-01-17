@@ -3,14 +3,17 @@ package com.yukthitech.excel.importer.data;
 import static com.yukthitech.excel.importer.IExcelImporterConstants.*;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 public enum ColumnType
 {
 	STRING 
 	{
-		public Object parse(String value, Class<?> targetType)
+		public Object parse(String value, Class<?> targetType, String format)
 		{
 			return value;
 		}
@@ -18,11 +21,18 @@ public enum ColumnType
 	
 	DATE
 	{
-		public Object parse(String value, Class<?> targetType)
+		public Object parse(String value, Class<?> targetType, String format)
 		{
+			if(StringUtils.isBlank(value))
+			{
+				return null;
+			}
+			
+			SimpleDateFormat dateFormat = StringUtils.isBlank(format) ? DEFAULT_DATE_FORMAT : new SimpleDateFormat(format);
+			
 			try
 			{
-				return DEFAULT_DATE_FORMAT.parse(value);
+				return dateFormat.parse(value);
 			}catch(ParseException ex)
 			{
 				throw new IllegalArgumentException("Invalid date value specified: " + value);
@@ -32,8 +42,15 @@ public enum ColumnType
 	
 	INTEGER
 	{
-		public Object parse(String value, Class<?> targetType)
+		public Object parse(String value, Class<?> targetType, String format)
 		{
+			value = value.replace(",", "");
+
+			if(StringUtils.isBlank(value))
+			{
+				return null;
+			}
+			
 			double doubleVal = 0;
 			
 			try
@@ -65,8 +82,15 @@ public enum ColumnType
 	
 	FLOAT
 	{
-		public Object parse(String value, Class<?> targetType)
+		public Object parse(String value, Class<?> targetType, String format)
 		{
+			value = value.replace(",", "");
+			
+			if(StringUtils.isBlank(value))
+			{
+				return null;
+			}
+			
 			double doubleVal = 0;
 			
 			try
@@ -88,7 +112,7 @@ public enum ColumnType
 	
 	BOOLEAN
 	{
-		public Object parse(String value, Class<?> targetType)
+		public Object parse(String value, Class<?> targetType, String format)
 		{
 			return "true".equalsIgnoreCase(value);
 		}
@@ -96,8 +120,13 @@ public enum ColumnType
 	
 	ENUM
 	{
-		public Object parse(String value, Class<?> targetType)
+		public Object parse(String value, Class<?> targetType, String format)
 		{
+			if(StringUtils.isBlank(value))
+			{
+				return null;
+			}
+			
 			Map<String, Object> map = getEnumMap(targetType);
 			return map.get(value.toLowerCase());
 		}
@@ -126,6 +155,6 @@ public enum ColumnType
 		return enumMap;
 	}
 	
-	public abstract Object parse(String value, Class<?> targetType);
+	public abstract Object parse(String value, Class<?> targetType, String format);
 	
 }

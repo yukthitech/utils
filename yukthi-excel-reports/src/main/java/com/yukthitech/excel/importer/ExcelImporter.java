@@ -32,21 +32,24 @@ public class ExcelImporter
 		{
 			Workbook wb = WorkbookFactory.create(fis);
 			Sheet sheet = wb.getSheetAt(0);
+			ExcelImportState excelImportState = new ExcelImportState(sheet);
 
-			List<String> headings = getHeadings(sheet);
+			List<String> headings = getHeadings(excelImportState, dataFactory);
 			
-			Iterator<Row> rowIt = sheet.rowIterator();
 			Row row = null;
-			
-			//skip the headings row
-			rowIt.next();
 			
 			T bean = null;
 			Map<String, Object> dataMap = null;
 			
-			while(rowIt.hasNext())
+			while(excelImportState.hasMoreRows())
 			{
-				row = rowIt.next();
+				row = excelImportState.nextRow();
+				
+				if(!dataFactory.isDataRow(row))
+				{
+					continue;
+				}
+				
 				dataMap = toDataMap(row, headings, dataFactory);
 				
 				bean = dataFactory.newDataObject(dataMap);
@@ -63,26 +66,34 @@ public class ExcelImporter
 		}
 	}
 
-	private List<String> getHeadings(Sheet sheet)
+	private List<String> getHeadings(ExcelImportState excelImportState, IExcelDataFactory<?> factory)
 	{
-		Row row = sheet.getRow(0);
-		Iterator<Cell> cellIt = row.iterator();
-		Cell cell = null;
-		List<String> headings = new LinkedList<>();
-		String heading = null;
-		
-		while(cellIt.hasNext())
+		while(excelImportState.hasMoreRows())
 		{
-			cell = cellIt.next();
+			Row row = excelImportState.nextRow();
+			Iterator<Cell> cellIt = row.iterator();
+			Cell cell = null;
+			List<String> headings = new LinkedList<>();
+			String heading = null;
 			
-			heading = cell.getStringCellValue();
-			heading = heading.replaceAll("[\\W\\_]+", "");
-			heading = heading.toLowerCase();
+			while(cellIt.hasNext())
+			{
+				cell = cellIt.next();
+				
+				heading = cell.getStringCellValue();
+				heading = heading.replaceAll("[\\W\\_]+", "");
+				heading = heading.toLowerCase();
+				
+				headings.add(heading);
+			}
 			
-			headings.add(heading);
+			if(factory.isHeadingRow(headings))
+			{
+				return headings;
+			}
 		}
 		
-		return headings;
+		throw new IllegalStateException("No heading row found.");
 	}
 	
 	private <T> Map<String, Object> toDataMap(Row row, List<String> columnOrder, IExcelDataFactory<T> factory)
@@ -111,7 +122,7 @@ public class ExcelImporter
 			else
 			{
 				strValue = getValue(cell, column.getType(), column.getName());
-				map.put(column.getName(), column.getType().parse(strValue, column.getJavaType()));
+				map.put(column.getName(), column.getType().parse(strValue, column.getJavaType(), column.getFormat()));
 			}
 		}
 		

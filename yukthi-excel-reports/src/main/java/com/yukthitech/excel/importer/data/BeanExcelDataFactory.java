@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,9 +19,9 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 	{
 		private Field field;
 		
-		public FieldColumn(String name, ColumnType type, Field field)
+		public FieldColumn(String name, ColumnType type, Field field, ExcelLabel excelLabel)
 		{
-			super(name, type, field.getType());
+			super(name, type, field.getType(), (excelLabel == null) ? null : excelLabel.format());
 			this.field = field;
 		}
 
@@ -81,7 +82,7 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 			//remove all non word characters and make into single word
 			label = label.replaceAll("[\\W\\_]+", "");
 			
-			this.columns.put(label, new FieldColumn(label, columnType, field));
+			this.columns.put(label, new FieldColumn(label, columnType, field, excelLabel));
 		}
 	}
 	
@@ -184,5 +185,11 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 			logger.error("An error occurred while creating excel bean", ex);
 			throw new IllegalStateException("An error occurred while creating excel bean", ex);
 		}	
+	}
+	
+	@Override
+	public boolean isHeadingRow(List<String> row)
+	{
+		return this.columns.keySet().containsAll(row);
 	}
 }
