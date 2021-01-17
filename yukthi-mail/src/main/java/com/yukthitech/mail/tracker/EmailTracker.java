@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -132,7 +133,7 @@ public class EmailTracker
 			return mailMessage;
 		}
 		
-		private void applyChanges(Folder folder, Map<String, Message> mssgMap)
+		private void applyChanges(Folder folder, Map<String, List<Message>> mssgMap)
 		{
 			if(folderToMove == null && flagsToApply.isEmpty() && flagsToRemove.isEmpty())
 			{
@@ -147,31 +148,34 @@ public class EmailTracker
 
 			try
 			{
-				Message message = mssgMap.get(mssgId);
+				List<Message> messageLst = mssgMap.get(mssgId);
 				
-				logger.debug("Moving to folder {} the mail with subject: {}", folderToMove, mailMessage.getSubject());
-				
-				destFolder = folderToMove != null ? store.getFolder(folderToMove) : null;
-
-				if(destFolder == null || !destFolder.exists())
+				for(Message message : messageLst) 
 				{
-					logger.warn("Ignoring move request as requested folder '{}' does not exist under folder: {}", folderToMove, sourceFolder.getName());
-				}
-				else
-				{
-					destFolder.open(Folder.READ_WRITE);
-					sourceFolder.copyMessages(new Message[] { message }, destFolder);
-					destFolder.close(false);
-				}
-
-				for(Flag flag : flagsToApply)
-				{
-					message.setFlag(flag, true);
-				}
-
-				for(Flag flag : flagsToRemove)
-				{
-					message.setFlag(flag, false);
+					logger.debug("Moving to folder {} the mail with subject: {}", folderToMove, mailMessage.getSubject());
+					
+					destFolder = folderToMove != null ? store.getFolder(folderToMove) : null;
+	
+					if(destFolder == null || !destFolder.exists())
+					{
+						logger.warn("Ignoring move request as requested folder '{}' does not exist under folder: {}", folderToMove, sourceFolder.getName());
+					}
+					else
+					{
+						destFolder.open(Folder.READ_WRITE);
+						sourceFolder.copyMessages(new Message[] { message }, destFolder);
+						destFolder.close(false);
+					}
+	
+					for(Flag flag : flagsToApply)
+					{
+						message.setFlag(flag, true);
+					}
+	
+					for(Flag flag : flagsToRemove)
+					{
+						message.setFlag(flag, false);
+					}
 				}
 			} catch(MessagingException ex)
 			{
@@ -856,17 +860,41 @@ public class EmailTracker
 		mailFolder.open(Folder.READ_WRITE);
 		
 		Message newMessages[] = mailFolder.getMessages();
-		Map<String, Message> mssgMap = Arrays.asList(newMessages)
-				.stream()
-				.collect(Collectors.toMap(mssg -> mailProcessor.getUniqueMessageId(mailFolder, mssg), mssg -> mssg));
+		Map<String, List<Message>> mssgMap = new HashMap<>();
+		
+		for(Message message : newMessages)
+		{
+			String uqid = mailProcessor.getUniqueMessageId(mailFolder, message);
+			List<Message> messages = mssgMap.get(uqid);
+			
+			if(messages == null)
+			{
+				messages = new ArrayList<Message>();
+				mssgMap.put(uqid, messages);
+			}
+			
+			messages.add(message);
+		}
+		
+		int index = 0;
+		int totalCount = mssgMap.size();
 		
 		for(MailProcessingContext context : mailContexts)
 		{
 			context.applyChanges(mailFolder, mssgMap);
+			
+			index++;
+			
+			if(index % 5 == 0)
+			{
+				logger.debug("Post processing {} (of {}) mail", index, totalCount);
+			}
 		}
 		
 		mailProcessor.setProcessedMailIds(newMailIds);
 		mailFolder.close(true);
+		
+		logger.debug("Post processing completed...");
 	}
 	
 	void saveEmlContent(Message message, File file)
