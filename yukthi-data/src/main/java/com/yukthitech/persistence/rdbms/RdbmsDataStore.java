@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -64,6 +65,8 @@ public class RdbmsDataStore implements IDataStore
 	public static final String TEMPLATE_NAME_MYSQL = "mysql";
 	public static final String TEMPLATE_NAME_DERBY = "derby";
 	public static final String TEMPLATE_NAME_H2 = "h2";
+	
+	private static final int MAX_PARAM_LEN = 50;
 	
 	private static Logger logger = LogManager.getLogger(RdbmsDataStore.class);
 	
@@ -723,7 +726,10 @@ public class RdbmsDataStore implements IDataStore
 				index++;
 			}
 
-			logger.debug("Executing using params: {}", params);
+			if(logger.isDebugEnabled())
+			{
+				logger.debug("Executing using params: {}", toParamString(params));
+			}
 			
 			int count = pstmt.executeUpdate();
 			
@@ -749,6 +755,34 @@ public class RdbmsDataStore implements IDataStore
 		{
 			closeResources(null, pstmt);
 		}
+	}
+	
+	private String toParamString(List<Object> params)
+	{
+		if(params == null)
+		{
+			return "null";
+		}
+		
+		String res = params.stream()
+				.map(param -> 
+				{
+					if(param == null)
+					{
+						return "null";
+					}
+					
+					String paramStr = param.toString();
+					
+					if(paramStr.length() <= MAX_PARAM_LEN)
+					{
+						return paramStr;
+					}
+					
+					return paramStr.substring(0, MAX_PARAM_LEN);
+				}).collect(Collectors.joining(", "));
+		
+		return "[" + res + "]";
 	}
 	
 
