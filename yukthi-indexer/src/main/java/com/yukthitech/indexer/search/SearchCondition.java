@@ -23,23 +23,7 @@ public @interface SearchCondition
 	 * Join operator under which this condition should be grouped.
 	 * @return
 	 */
-	public JoinOperator joinOperator() default JoinOperator.MUST;
+	public JoinOperator joinWith() default JoinOperator.DEFAULT;
 	
-	/**
-	 * Condition operator to be used for thie condition.
-	 * @return
-	 */
-	public ConditionOperator op() default ConditionOperator.EQ;
-	
-	/**
-	 * Boost value to be used for boosting this condition.
-	 * @return
-	 */
-	public int boost() default 0;
-	
-	/**
-	 * Minimum match in percentage (eg: 60%) or word count (Eg: 5)
-	 * @return
-	 */
-	public String minMatch() default "";
+	public MatchOperator matchOp() default MatchOperator.NONE;
 }

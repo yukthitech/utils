@@ -6,23 +6,13 @@ package com.yukthitech.indexer.search;
  */
 public enum JoinOperator
 {
-	/**
-	 * Conditions specified with this operator must match. Equivalent of ADD.
-	 */
-	MUST,
+	AND,
+	
+	OR,
 	
 	/**
-	 * At least one of the conditions under this should match. Equivalent to OR.
+	 * Indicates the default join operator specified on search-query or group-query to
+	 * be used.
 	 */
-	SHOULD,
-	
-	/**
-	 * All of these clauses must not match. The equivalent of NOT.
-	 */
-	MUST_NOT,
-	
-	/**
-	 * Clauses that must match, but are run in non-scoring, filtering mode.
-	 */
-	FILTER;
+	DEFAULT
 }

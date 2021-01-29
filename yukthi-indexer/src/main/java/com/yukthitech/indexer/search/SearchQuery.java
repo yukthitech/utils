@@ -14,27 +14,8 @@ import java.lang.annotation.Target;
 public @interface SearchQuery
 {
 	/**
-	 * Type which is used for indexing. This helps in understanding if search needs to be done on exact value
-	 * or for full text search.
+	 * Default join operator to be used between conditions.
 	 * @return
 	 */
-	public Class<?> indexType();
-	
-	/**
-	 * Fields whose absence needs to be added to the query.
-	 * @return
-	 */
-	public NullCheck[] nullFields() default {};
-	
-	/**
-	 * Fields whose presence needs to be added to the query.
-	 * @return
-	 */
-	public NullCheck[] notNullFields() default {};
-	
-	/**
-	 * If set to true, score independent (constant score) search query will be executed. Defaults to false.
-	 * @return
-	 */
-	public boolean ignoreScore() default false;
+	public JoinOperator defaultJoinOp() default JoinOperator.DEFAULT;
 }
