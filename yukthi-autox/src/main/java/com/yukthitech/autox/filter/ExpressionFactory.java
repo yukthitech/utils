@@ -382,9 +382,15 @@ public class ExpressionFactory
 		this.removeByExpression(context, expression, null);
 	}
 	
-	public void removeByExpression(AutomationContext context, String expression, Object initValue)
+	/**
+	 * Removes specified property value.
+	 * @param context current context
+	 * @param expression expression based on which removal should happen
+	 * @param effectiveContext if specified, removal operation will be performed on this object instead of context.
+	 */
+	public void removeByExpression(AutomationContext context, String expression, Object effectiveContext)
 	{
-		FilterContext expressionParserContext = new FilterContext(context, initValue);
+		FilterContext expressionParserContext = new FilterContext(context, effectiveContext);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		ExecutionLogger exeLogger = context.getExecutionLogger();
 		
@@ -412,9 +418,16 @@ public class ExpressionFactory
 		this.setExpressionValue(context, expression, value, null);
 	}
 	
-	public void setExpressionValue(AutomationContext context, String expression, Object value, Object initValue)
+	/**
+	 * Sets the expression value.
+	 * @param context current context
+	 * @param expression expression based on which value need to be set
+	 * @param value value need to be set
+	 * @param effectiveContext if specified, instead of using context, expression will be executed on this object
+	 */
+	public void setExpressionValue(AutomationContext context, String expression, Object value, Object effectiveContext)
 	{
-		FilterContext expressionParserContext = new FilterContext(context, initValue);
+		FilterContext expressionParserContext = new FilterContext(context, effectiveContext);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
 		ExecutionLogger exeLogger = context.getExecutionLogger();
 		

@@ -324,6 +324,15 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 	}
 	
 	/**
+	 * Sets the default data provider for this test case.
+	 * @param dataProvider
+	 */
+	public void setDefaultDataProvider(DefaultDataProvider dataProvider)
+	{
+		this.setDataProvider(dataProvider);
+	}
+
+	/**
 	 * Sets the specified range data provider as data-provider for this test case.
 	 * @param dataProvider data provider to set
 	 */

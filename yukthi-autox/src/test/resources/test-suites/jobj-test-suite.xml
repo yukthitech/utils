@@ -135,6 +135,21 @@
 			</data-cleanup>
 		</testCase>
 	
+		<testCase name="testDefDataProviderWithClone">
+			<description>
+				Ensures the bean registration and clone functionality are working as expected
+				in default data provider.
+			</description>
+		
+			<default-data-provider name="dataProvider">
+				<stepDataList>
+					res: /data/def-data-provider-clone.xml
+				</stepDataList>
+			</default-data-provider>
+			
+			<s:assert-deep-equals actual="prop: attr.dataProvider.payload" expected="json: ${attr.dataProvider.expectedResult}"/>
+		</testCase>
+
 		<testCase name="testStepDataProvider">
 			<description>
 				Tests data provider usage at step level

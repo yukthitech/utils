@@ -159,7 +159,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				remoteSession.position = lsEntry.getAttrs().getSize();
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remotePath);
+				logger.error("An error occurred while getting remote file size. Remote file - {} [User: {}, Using Password: {}]", remotePath, user, (password != null), ex);
 			}
 		}
 	}

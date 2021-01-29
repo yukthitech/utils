@@ -26,7 +26,7 @@ public class TAutomation
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "spreadTestSuite"
-				//"-tc", "invoke_Method_With_Data_Provder"
+				//"-tc", "testDefDataProviderWithClone"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

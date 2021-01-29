@@ -882,6 +882,9 @@ public class AutomationUtils
 				parserHandler = new DynamicBeanParserHandler();
 			}
 			
+			parserHandler.registerReserveNodeHandler(new BeanReserveNodeHandler());
+			parserHandler.registerReserveNodeHandler(new CloneReserveNodeHandler());
+			
 			res = XMLBeanParser.parse(is, res, parserHandler);
 			
 			if(res instanceof DynamicBean)
