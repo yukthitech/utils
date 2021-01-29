@@ -1,6 +1,12 @@
 package com.yukthitech.ccg.xml.reserved;
 
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Locator;
 
@@ -9,6 +15,7 @@ import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.XMLLoadException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Reserve node handler to parse json as object.
@@ -17,10 +24,12 @@ import com.yukthitech.ccg.xml.XMLLoadException;
 @NodeName(namePattern = "json")
 public class JsonNodeHandler implements IReserveNodeHandler
 {
+	private static Pattern EXT_PATTERN = Pattern.compile("\\s*(\\w+)\\s*\\:\\s*(.*)");
+	
 	/**
 	 * Attribute to fetch property name.
 	 */
-	private static final String ATTR_PROPERTY = "property";
+	private static final String ATTR_ID = "id";
 	
 	/**
 	 * Used to parse json.
@@ -30,7 +39,7 @@ public class JsonNodeHandler implements IReserveNodeHandler
 	@Override
 	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
-		String name = att.get(ATTR_PROPERTY, null);
+		String name = att.get(ATTR_ID, null);
 		
 		if(StringUtils.isBlank(name))
 		{
@@ -38,6 +47,40 @@ public class JsonNodeHandler implements IReserveNodeHandler
 		}
 		
 		return null;
+	}
+	
+	private Object loadJson(BeanNode node, Class<?> beanType, Locator locator)
+	{
+		String text = node.getText().trim();
+		Matcher matcher = EXT_PATTERN.matcher(text);
+		
+		try
+		{
+			if(matcher.matches())
+			{
+				String type = matcher.group(1);
+				String value = matcher.group(2);
+				
+				if("res".equals(type))
+				{
+					text = IOUtils.toString(JsonNodeHandler.class.getResourceAsStream(value));
+				}
+				else if("file".equals(type))
+				{
+					text = FileUtils.readFileToString(new File(value));
+				}
+				else
+				{
+					throw new InvalidStateException("Invalid json source specified in json content: {}", text);
+				}
+			}
+
+			return OBJECT_MAPPER.readValue(node.getText(), beanType);
+		}catch(Exception ex)
+		{
+			throw new XMLLoadException("Failed to load json to type: " + beanType.getName(), ex, node, locator);
+		}
+		
 	}
 
 	@Override
@@ -62,25 +105,24 @@ public class JsonNodeHandler implements IReserveNodeHandler
 			}
 		}
 		
-		Object value = null;
-		
-		try
-		{
-			value = OBJECT_MAPPER.readValue(node.getText(), beanType);
-		}catch(Exception ex)
-		{
-			throw new XMLLoadException("Failed to load json to type: " + beanType.getName(), ex, node, locator);
-		}
+		Object value = loadJson(node, beanType, locator);
 		
 		Object parent = node.getParent();
-		String name = att.get(ATTR_PROPERTY, null);
+		String name = att.get(ATTR_ID, null);
+		
+		if(parent == null)
+		{
+			parserHandler.registerBean(name, value);
+			return;
+		}
 		
 		try
 		{
 			PropertyUtils.setProperty(parent, name, value);
 		}catch(Exception ex)
 		{
-			throw new XMLLoadException("Failed to set bean of type '" + beanType.getName() + "' as property '" + name + "' on bean of type: " + parent.getClass().getName(), ex, node, locator);
+			throw new XMLLoadException("Failed to set bean of type '" + beanType.getName() + "' as property '" + name + "' on bean of type: " + 
+					parent.getClass().getName(), ex, node, locator);
 		}
 	}
 }

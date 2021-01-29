@@ -248,6 +248,25 @@ public interface IParserHandler extends XMLConstants
 	 */
 	public String processText(Object rootBean, String text);
 	
+	/**
+	 * Registers a bean with specified id.
+	 * @param id
+	 * @param bean
+	 */
+	public default void registerBean(String id, Object bean)
+	{
+		throw new UnsupportedOperationException("This operation is not supported");
+	}
+	
+	/**
+	 * Fetches the bean with specified id.
+	 * @param id
+	 */
+	public default Object getBean(String id)
+	{
+		throw new UnsupportedOperationException("This operation is not supported");
+	}
+	
 	public default boolean isReserveUri(String uri)
 	{
 		if(uri == null)

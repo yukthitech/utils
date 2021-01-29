@@ -70,6 +70,16 @@ public class BeanNode implements Cloneable
 
 		return bean;
 	}
+	
+	/**
+	 * Replaces the current bean with newly specified bean.
+	 * This will be helpful in generating dynamic beans.
+	 * @param bean
+	 */
+	public void replaceBean(Object bean)
+	{
+		this.bean = bean;
+	}
 
 	public String getName()
 	{

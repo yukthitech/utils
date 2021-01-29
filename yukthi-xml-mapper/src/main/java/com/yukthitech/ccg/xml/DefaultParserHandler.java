@@ -1196,4 +1196,16 @@ public class DefaultParserHandler implements IParserHandler
 		this.escapePrefix = escapePrefix;
 		this.escapeReplace = escapeReplace;
 	}
+	
+	@Override
+	public void registerBean(String id, Object bean)
+	{
+		objIdToObj.put(id, bean);
+	}
+	
+	@Override
+	public Object getBean(String id)
+	{
+		return objIdToObj.get(id);
+	}
 }
