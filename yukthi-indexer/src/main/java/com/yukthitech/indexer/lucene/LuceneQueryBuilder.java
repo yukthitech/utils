@@ -121,12 +121,12 @@ public class LuceneQueryBuilder
 			{
 				prefix = "+";
 			}
-			else
+			else if(matchOp == MatchOperator.MUST_NOT_EXIST)
 			{
 				prefix = "-";
 			}
 			
-			addStringValue(prefix + value.toString(), query);
+			addStringValue(prefix + value.toString().toLowerCase(), query);
 		}
 	}
 	
@@ -137,13 +137,6 @@ public class LuceneQueryBuilder
 	 */
 	private void addStringValue(String strValue, StringBuilder query)
 	{
-		if(strValue.contains(" "))
-		{
-			query.append("\"").append(strValue).append("\"");
-		}
-		else
-		{
-			query.append(strValue);
-		}
+		query.append(strValue);
 	}
 }

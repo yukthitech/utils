@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.indexer.IndexType;
 import com.yukthitech.indexer.common.DataType;
 import com.yukthitech.indexer.common.FieldIndexDetails;
-import com.yukthitech.indexer.common.IndexUtils;
 import com.yukthitech.indexer.common.TypeIndexDetails;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -92,22 +91,19 @@ public class DocumentMapper
 				continue;
 			}
 
-			if(field.isIgnoreCase())
-			{
-				value = IndexUtils.toLowerCase(value);
-			}
-			
 			Collection<Object> valueCollection = (value instanceof Collection) ? (Collection<Object>) value : Arrays.asList(value);
 			
 			for(Object objvalue : valueCollection)
 			{
+				String strValue = objvalue.toString().toLowerCase();
+				
 				if(field.getIndexType() == IndexType.ANALYZED)
 				{
-					indexedFields.add(new TextField(field.getName(), (String) objvalue, Store.NO));
+					indexedFields.add(new TextField(field.getName(), strValue, Store.YES));
 				}
 				else
 				{
-					indexedFields.add(new StringField(field.getName(), (String) objvalue, Store.NO));
+					indexedFields.add(new StringField(field.getName(), strValue, Store.YES));
 				}
 			}
 		}

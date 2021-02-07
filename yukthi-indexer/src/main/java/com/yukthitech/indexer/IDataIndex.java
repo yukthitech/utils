@@ -15,7 +15,7 @@ public interface IDataIndex
 	 * @param objects objects to index
 	 * @return map from input object to corresponding id
 	 */
-	public void indexObjects(Collection<Object> objects);
+	public void indexObjects(Collection<? extends Object> objects);
 	
 	/**
 	 * Finds the objects with specified query.

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +16,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -83,12 +85,17 @@ public class LuceneDataIndex implements IDataIndex
 		
 		if(reader != null)
 		{
+			logger.trace("Closing the reader...");
 			reader.close();
 			reader = null;
 			searcher = null;
 		}
 		
+		logger.trace("Creating the writer...");
+		
 		IndexWriterConfig config = new IndexWriterConfig(indexAnalyzer);
+		config.setOpenMode(OpenMode.CREATE_OR_APPEND);
+		
 		writer = new IndexWriter(indexDirectory, config);
 		
 		return writer;
@@ -108,18 +115,23 @@ public class LuceneDataIndex implements IDataIndex
 		
 		if(writer != null)
 		{
+			logger.trace("Closing the writer...");
+			
 			writer.close();
 			writer = null;
 		}
 		
+		logger.trace("Opening reader...");
 		IndexReader reader = DirectoryReader.open(indexDirectory);
 		searcher = new IndexSearcher(reader);
+		
+		logger.debug("Number of docs in index: " + reader.maxDoc()); 
 		
 		return searcher;
 	}
 	
 	@Override
-	public synchronized void indexObjects(Collection<Object> objects)
+	public synchronized void indexObjects(Collection<? extends Object> objects)
 	{
 		try
 		{
@@ -129,25 +141,29 @@ public class LuceneDataIndex implements IDataIndex
 			for(Object object : objects)
 			{
 				indexes = documentMapper.toDocument(object);
+				
+				if(logger.isTraceEnabled())
+				{
+					String str = indexes.stream()
+							.map(fld -> fld.name() + " = " + fld.stringValue())
+							.collect(Collectors.joining("\n\t"));
+					
+					logger.trace("Adding new document with fields: \n\t{}", str);
+				}
+				
 				writer.addDocument(indexes);
 			}
-			
-			writer.close();
-			
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while indexing objects", ex);
 		}
 	}
-
-	@Override
-	public synchronized IndexSearchResult<Object> search(Object queryObj, SearchSettings searchSettings)
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private <T> IndexSearchResult<T> executeQuery(String query, SearchSettings searchSettings)
 	{
 		try
 		{
-			String query = queryBuilder.buildQuery(queryObj);
-			logger.debug("From search-query-object of type '{}' constructed lucene search-query as: {}", queryObj.getClass().getName(), query);
-			
 			QueryParser parser = new QueryParser("dummy", indexAnalyzer);
 			Query luceneQuery = parser.parse(query);
 			
@@ -166,11 +182,20 @@ public class LuceneDataIndex implements IDataIndex
 	        	searchResults.addResult(documentMapper.mapDocument(filteredDoc), doc.score);
 	        }
 	        
-			return searchResults;
+			return (IndexSearchResult) searchResults;
 		} catch(IOException | ParseException ex)
 		{
 			throw new InvalidStateException("An error occurred while executing search query", ex);
 		}
+	}
+
+	@Override
+	public synchronized <T> IndexSearchResult<T> search(Object queryObj, SearchSettings searchSettings)
+	{
+		String query = queryBuilder.buildQuery(queryObj);
+		logger.debug("From search-query-object of type '{}' constructed lucene search-query as: \n\t{}", queryObj.getClass().getName(), query);
+		
+		return executeQuery(query, searchSettings);
 	}
 
 	@Override

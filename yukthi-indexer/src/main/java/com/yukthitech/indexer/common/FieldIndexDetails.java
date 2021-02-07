@@ -29,11 +29,6 @@ public class FieldIndexDetails
 	private boolean idField;
 	
 	/**
-	 * Flag to indicate if case should be ignored for this field
-	 */
-	private boolean ignoreCase;
-	
-	/**
 	 * Subfields for object field type.
 	 */
 	private Map<String, FieldIndexDetails> subfields;
@@ -46,7 +41,6 @@ public class FieldIndexDetails
 		this.indexType = indexField.value();
 		this.dataType = esDataType;
 		
-		this.ignoreCase = indexField.ignoreCase();
 		this.idField = indexField.idField();
 	}
 
@@ -88,11 +82,6 @@ public class FieldIndexDetails
 	public DataType getDataType()
 	{
 		return dataType;
-	}
-	
-	public boolean isIgnoreCase()
-	{
-		return ignoreCase;
 	}
 	
 	/**

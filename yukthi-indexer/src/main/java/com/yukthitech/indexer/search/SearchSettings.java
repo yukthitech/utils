@@ -9,7 +9,7 @@ public class SearchSettings
 	/**
 	 * Count to which results should be limited. Default is all results (Integer.MAX_VALUE).
 	 */
-	private int resultsLimit = Integer.MAX_VALUE;
+	private int resultsLimit = 1000;
 
 	/**
 	 * Gets the count to which results should be limited. Default is all results (Integer.MAX_VALUE).

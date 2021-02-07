@@ -17,14 +17,7 @@ public @interface IndexField
 	 * Indicates how indexing should be done for this field.
 	 * @return
 	 */
-	public IndexType value() default IndexType.ANALYZED;
-	
-	/**
-	 * If true, value will be stored in lower case during index and 
-	 * search query also will be converted into lower case.
-	 * @return
-	 */
-	public boolean ignoreCase() default true;
+	public IndexType value() default IndexType.NOT_ANALYZED;
 	
 	/**
 	 * If true, this field will be used id field for the object.
