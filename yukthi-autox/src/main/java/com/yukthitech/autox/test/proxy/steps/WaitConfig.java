@@ -55,4 +55,21 @@ public class WaitConfig
 	{
 		this.forAttr = forAttr;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.getClass().getSimpleName());
+		builder.append("[");
+
+		builder.append("Wait: ").append(time);
+		builder.append(",").append("forAttr: ").append(forAttr);
+
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

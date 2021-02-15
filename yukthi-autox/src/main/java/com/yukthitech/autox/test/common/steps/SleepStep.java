@@ -8,6 +8,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.test.TestCaseFailedException;
 
 /**
@@ -22,8 +23,8 @@ public class SleepStep extends AbstractStep
 	/**
 	 * Time to sleep.
 	 */
-	@Param(description = "Time to sleep.")
-	private Long time;
+	@Param(description = "Time to sleep.", sourceType = SourceType.EXPRESSION)
+	private Object time;
 	
 	/**
 	 * Units of time specified. Default: millis.
@@ -36,7 +37,7 @@ public class SleepStep extends AbstractStep
 	 *
 	 * @param time the new time to sleep
 	 */
-	public void setTime(Long time)
+	public void setTime(String time)
 	{
 		this.time = time;
 	}
@@ -55,6 +56,9 @@ public class SleepStep extends AbstractStep
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		exeLogger.debug("Sleeping for {} {}", time, timeUnit);
+		
+		//as the time can be string or long value, convert to string and then parse it
+		long time = Long.parseLong(this.time.toString());
 		
 		try
 		{

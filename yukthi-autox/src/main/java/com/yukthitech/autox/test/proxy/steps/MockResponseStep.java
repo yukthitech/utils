@@ -48,7 +48,7 @@ public class MockResponseStep extends AbstractStep
 	 * Status code to be sent as part of response.
 	 */
 	@Param(description = "Status code to be sent as part of mock response", required = false, sourceType = SourceType.EXPRESSION)
-	private Integer responseStatusCode = HttpServletResponse.SC_OK;
+	private String responseStatusCode = Integer.toString(HttpServletResponse.SC_OK);
 
 	/**
 	 * Response headers to be sent as part of response.
@@ -109,7 +109,7 @@ public class MockResponseStep extends AbstractStep
 	 *
 	 * @param responseStatusCode the new status code to be sent as part of response
 	 */
-	public void setResponseStatusCode(Integer responseStatusCode)
+	public void setResponseStatusCode(String responseStatusCode)
 	{
 		this.responseStatusCode = responseStatusCode;
 	}
@@ -187,7 +187,10 @@ public class MockResponseStep extends AbstractStep
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
-		MockResponse response = new MockResponse(uri, method, responseHeaders, responseStatusCode, responseBody, waitConfig);
+		logger.debug(true, "Adding mock response for [Method: {}, Uri: {}] as [Status code: {}, <br>Headers: {}, <br>Body: {}, <br>Wait Config: {}]", 
+				method, uri, responseStatusCode, responseHeaders, responseBody, waitConfig);
+		
+		MockResponse response = new MockResponse(uri, method, responseHeaders, Integer.parseInt(responseStatusCode), responseBody, waitConfig);
 		response.setCountLeft(times);
 
 		logger.debug("On server '{}' mocking response {}", name, response);
