@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.yukthitech.indexer.IndexSearchResult;
 import com.yukthitech.indexer.search.SearchSettings;
+import com.yukthitech.utils.CommonUtils;
 
 public class TestLuceneIndexing
 {
@@ -61,9 +62,9 @@ public class TestLuceneIndexing
 	}
 	
 	@Test(dependsOnMethods = "testIndexing")
-	public void testSearching() throws Exception
+	public void testSearching_directField() throws Exception
 	{
-		FileSearchQuery query = new FileSearchQuery("IndexField.java".toLowerCase(), null);
+		FileSearchQuery query = new FileSearchQuery("IndexField.java", null);
 		IndexSearchResult<FileInfo> fileRes = dataIndex.search(query, new SearchSettings());
 		
 		List<FileInfo> files = fileRes.getResults();
@@ -73,8 +74,21 @@ public class TestLuceneIndexing
 		Assert.assertTrue(files.get(0).getSize() > 0);
 	}
 
-	@Test(dependsOnMethods = "testSearching")
-	public void testContentSearching() throws Exception
+	@Test(dependsOnMethods = "testSearching_directField")
+	public void testSearching_listField() throws Exception
+	{
+		FileSearchQuery query = new FileSearchQuery(CommonUtils.toSet("field", "index"));
+		IndexSearchResult<FileInfo> fileRes = dataIndex.search(query, new SearchSettings());
+		
+		List<FileInfo> files = fileRes.getResults();
+		Assert.assertEquals(files.size(), 1);
+		Assert.assertEquals(files.get(0).getFileName(), "IndexField.java");
+		Assert.assertEquals(files.get(0).getNameParts(), Arrays.asList("index", "field", ".java"));
+		Assert.assertTrue(files.get(0).getSize() > 0);
+	}
+
+	@Test(dependsOnMethods = "testSearching_directField")
+	public void testSearching_content() throws Exception
 	{
 		FileSearchQuery query = new FileSearchQuery(null, "how indexing be done ");
 		IndexSearchResult<FileInfo> fileRes = dataIndex.search(query, new SearchSettings());
