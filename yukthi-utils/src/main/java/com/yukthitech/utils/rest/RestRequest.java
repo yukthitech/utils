@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -46,7 +47,7 @@ public abstract class RestRequest<T extends RestRequest<T>>
 	 */
 	public RestRequest(String uri)
 	{
-		if(!uri.startsWith("/"))
+		if(StringUtils.isNotBlank(uri) && !uri.startsWith("/"))
 		{
 			uri = "/" + uri;
 		}
