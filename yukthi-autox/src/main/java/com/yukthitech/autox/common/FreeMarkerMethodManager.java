@@ -136,4 +136,28 @@ public class FreeMarkerMethodManager
 	{
 		return freeMarkerEngine.getRegisterMethodDocuments();
 	}
+
+	/**
+	 * Evaluates specified condition in specified context and returns the result.
+	 * @param name name of condition template useful for debugging.
+	 * @param condition condition to be evaluated.
+	 * @param context context to be used for processing.
+	 * @return result of condition evaluation.
+	 */
+	public static boolean evaluateCondition(String name, String condition, Object context)
+	{
+		return freeMarkerEngine.evaluateCondition(name, condition, context);
+	}
+
+	/**
+	 * Evaluates specified condition in specified context and returns the result.
+	 * @param name name of condition template useful for debugging.
+	 * @param valueExpression Value expression whose value needs to be fetched.
+	 * @param context context to be used for processing.
+	 * @return result fetched value.
+	 */
+	public static Object fetchValue(String name, String valueExpression, Object context)
+	{
+		return freeMarkerEngine.fetchValue(name, valueExpression, context);
+	}
 }

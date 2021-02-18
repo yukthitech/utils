@@ -19,6 +19,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -40,7 +41,7 @@ public class MultiDmlQueryStep extends AbstractStep
 	/**
 	 * Name of the data source to use.
 	 */
-	@Param(description = "Data source to be used for sql execution.")
+	@Param(description = "Data source to be used for sql execution.", sourceType = SourceType.EXPRESSION)
 	private String dataSourceName;
 	
 	/**

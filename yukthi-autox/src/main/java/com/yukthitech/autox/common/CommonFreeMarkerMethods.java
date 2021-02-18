@@ -294,4 +294,16 @@ public class CommonFreeMarkerMethods
 	{
 		return (value == null) ? nullValue : nonNullValue;
 	}
+
+	@FreeMarkerMethod(
+			description = "Used to check if both values are equal or not. Nulls are also allowed.",
+			returnDescription = "True if both are null or both are equal."
+			)
+	public static boolean isEqual(
+			@FmParam(name = "value1", description = "Value1 to compare") Object value1,
+			@FmParam(name = "value2", description = "Value2 to compare") Object value2
+			)
+	{
+		return Objects.equals(value1, value2);
+	}
 }

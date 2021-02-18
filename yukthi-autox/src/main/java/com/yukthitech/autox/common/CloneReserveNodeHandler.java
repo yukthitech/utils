@@ -1,6 +1,8 @@
 package com.yukthitech.autox.common;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -11,6 +13,7 @@ import org.xml.sax.Locator;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.filter.ExpressionFactory;
+import com.yukthitech.autox.jexpr.JsonExprEngine;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.IParserHandler;
@@ -27,6 +30,8 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 	private static final String ATTR_PROPERTY = "property";
 	
 	private static final Pattern PROP_PATTERN = Pattern.compile("^\\s*\\w+\\s*\\:.*");
+	
+	private static final JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine();
 	
 	/**
 	 * Property info to be altered.
@@ -80,6 +85,16 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 		 */
 		private Object bean;
 		
+		/**
+		 * Json content to be used to process expressions.
+		 */
+		private Map<String, Object> jsonContext;
+		
+		/**
+		 * Flag to enable or disable json expressions.
+		 */
+		private boolean jsonExpressionsEnabled = false;
+		
 		public BeanCloneInfo(Object bean)
 		{
 			this.bean = bean;
@@ -93,6 +108,28 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 		{
 		}
 		
+		public void setJsonExpressionsEnabled(boolean jsonExpressionsEnabled)
+		{
+			this.jsonExpressionsEnabled = jsonExpressionsEnabled;
+		}
+		
+		@SuppressWarnings("unchecked")
+		public void setJsonContextJson(String jsonContext)
+		{
+			try
+			{
+				this.jsonContext = (Map<String, Object>) IAutomationConstants.OBJECT_MAPPER.readValue(jsonContext, Object.class);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while parsing json context", ex);
+			}
+		}
+		
+		public void setJsonContext(Map<String, Object> jsonContext)
+		{
+			this.jsonContext = jsonContext;
+		}
+
 		public void setSet(SetInfo info)
 		{
 			AutomationContext automationContext = AutomationContext.getInstance();
@@ -152,20 +189,35 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 	{
 		//replace the modified bean on the node. So that, that will take effect
 		BeanCloneInfo cloneInfo = (BeanCloneInfo) node.getActualBean();
-		node.replaceBean(cloneInfo.bean);
+		Object bean = cloneInfo.bean;
+		
+		if(cloneInfo.jsonExpressionsEnabled)
+		{
+			Map<String, Object> context = cloneInfo.jsonContext;
+			
+			if(context == null)
+			{
+				context = new HashMap<String, Object>();
+			}
+			
+			context.put("context", AutomationContext.getInstance());
+			bean = JSON_EXPR_ENGINE.processObject(bean, context);
+		}
+		
+		node.replaceBean(bean);
 		
 		String propName = att.get(ATTR_PROPERTY, null);
 		Object parent = node.getParent();
 		
 		if(parent instanceof DynamicBean)
 		{
-			((DynamicBean) parent).add(propName, cloneInfo.bean);
+			((DynamicBean) parent).add(propName, bean);
 			return;
 		}
 		
 		try
 		{
-			PropertyUtils.setProperty(parent, propName, cloneInfo.bean);
+			PropertyUtils.setProperty(parent, propName, bean);
 		}catch(Exception ex)
 		{
 			String className = parent != null ? parent.getClass().getName() : "null";

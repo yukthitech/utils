@@ -388,7 +388,7 @@ public class TestSuiteExecutor
 		//if test case execution is already in progress in 
 		if(fullExecutionDetails.isTestCaseInProgress(testCase.getName()))
 		{
-			throw new InvalidStateException("Test case is being {} is being re-executed when it is already in progress", testCase.getName());
+			throw new InvalidStateException("Test case {} is being re-executed when it is already in progress", testCase.getName());
 		}
 		
 		TestCaseResult curTestCaseResult = fullExecutionDetails.getTestCaseResult(testSuite.getName(), testCase.getName());
