@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -591,5 +592,39 @@ public class CommonUtils
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Fetches root cause message recursively.
+	 * @param ex exception for which mssg needs to be fetched
+	 * @return full root cause messages.
+	 */
+	public static String getRootCauseMessages(Throwable ex)
+	{
+		if(ex == null)
+		{
+			return "null";
+		}
+		
+		StringBuilder errMssg = new StringBuilder(ex.toString());
+		Throwable cause = ex.getCause();
+		
+		Map<Throwable, Object> completed = new IdentityHashMap<Throwable, Object>();
+		completed.put(ex, null);
+		
+		while(cause != null)
+		{
+			//if current exception was already added, break
+			// this is added to avoid recursion
+			if(completed.containsKey(cause))
+			{
+				break;
+			}
+			
+			errMssg.append("\n\t").append(cause);
+			cause = cause.getCause();
+		}
+		
+		return errMssg.toString();
 	}
 }

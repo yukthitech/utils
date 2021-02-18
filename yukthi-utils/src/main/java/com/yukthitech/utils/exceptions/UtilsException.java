@@ -61,7 +61,7 @@ public class UtilsException extends RuntimeException
 	 * @param args arguments to check
 	 * @return throwable if found
 	 */
-	static Throwable getRootCause(Object... args)
+	public static Throwable getRootCause(Object... args)
 	{
 		if(args == null || args.length == 0)
 		{
