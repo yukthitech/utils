@@ -27,6 +27,33 @@ public class DefaultMethods
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	
 	/**
+	 * Used to store value collected in expressions.
+	 */
+	private static final ThreadLocal<Object> collectorValue = new ThreadLocal<Object>();
+	
+	@FreeMarkerMethod(
+			description = "Collects the value on thread local which can be accessed later. Not meant for external usage.",
+			returnDescription = "Empty string")
+	public static String __fmarker_collect(
+			@FmParam(name = "value", description = "Value to collect") Object value)
+	{
+		collectorValue.set(value);
+		return "";
+	}
+	
+	/**
+	 * Fetches the latest value collected. And removes it from memory.
+	 * @return latest value
+	 */
+	static Object getCollectedValue()
+	{
+		Object value = collectorValue.get();
+		collectorValue.remove();
+		
+		return value;
+	}
+
+	/**
 	 * Converts specified date to string with specified format.
 	 * @param date Date to be converted
 	 * @param format format to use

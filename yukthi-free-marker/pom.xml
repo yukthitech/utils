@@ -6,6 +6,7 @@
 	<packaging>jar</packaging>
 
 	<name>yukthi-free-marker</name>
+	<version>1.1-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -40,7 +41,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-utils</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

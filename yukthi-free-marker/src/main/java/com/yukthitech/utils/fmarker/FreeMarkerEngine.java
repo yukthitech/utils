@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.directives.IndentDirective;
 import com.yukthitech.utils.fmarker.directives.InitCapDirective;
@@ -21,6 +22,8 @@ import com.yukthitech.utils.fmarker.directives.TrimDirective;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateDirectiveModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.utility.DeepUnwrap;
 
 /**
  * Free marker engine where methods can be registered as template directive or direct methods
@@ -190,4 +193,61 @@ public class FreeMarkerEngine
 	{
 		return Collections.unmodifiableCollection( freeMarkerMethodDocRegistry.values() );
 	}
+
+	/**
+	 * Evaluates specified condition in specified context and returns the result.
+	 * @param name name of condition template useful for debugging.
+	 * @param condition condition to be evaluated.
+	 * @param context context to be used for processing.
+	 * @return result of condition evaluation.
+	 */
+	public boolean evaluateCondition(String name, String condition, Object context)
+	{
+		if("true".equalsIgnoreCase(condition))
+		{
+			return true;
+		}
+
+		if("false".equalsIgnoreCase(condition))
+		{
+			return false;
+		}
+
+		String ifCondition = String.format("<#if %s>true<#else>false</#if>", condition);
+		String res = processTemplate(name, ifCondition, context);
+		
+		return "true".equals(res);
+	}
+
+	/**
+	 * Evaluates specified condition in specified context and returns the result.
+	 * @param name name of condition template useful for debugging.
+	 * @param valueExpression Value expression whose value needs to be fetched.
+	 * @param context context to be used for processing.
+	 * @return result fetched value.
+	 */
+	public Object fetchValue(String name, String valueExpression, Object context)
+	{
+		try
+		{
+			String collectorExpr = String.format("${__fmarker_collect(%s)}", valueExpression);
+			processTemplate(name, collectorExpr, context);
+			
+			
+			Object res = DefaultMethods.getCollectedValue();
+			
+			if(res instanceof TemplateModel)
+			{
+				res = DeepUnwrap.unwrap((TemplateModel)res);
+			}
+
+			//return collected value
+			return res;
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("Template processing resulted in error.\n\tName: %s\n\tError: %s\n\tTemplate: %s", 
+					name, CommonUtils.getRootCauseMessages(ex), valueExpression, ex);
+		}
+	}
 }
+
