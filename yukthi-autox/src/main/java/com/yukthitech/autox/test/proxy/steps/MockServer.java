@@ -41,32 +41,7 @@ public class MockServer
 		public void handle(String arg0, Request arg1, HttpServletRequest request, HttpServletResponse response)
 				throws IOException, ServletException 
 		{
-			MockRequest mockRequest = new MockRequest(request);
-			Iterator<MockResponse> responseIt = mockResponses.iterator();
-			
-			while(responseIt.hasNext())
-			{
-				MockResponse mockResponse = responseIt.next();
-				
-				if(!mockResponse.isMatchingRequest(mockRequest))
-				{
-					continue;
-				}
-				
-				mockResponse.writeTo(response);
-				
-				if(!mockResponse.canServeMore())
-				{
-					responseIt.remove();
-				}
-				
-				mockRequest.setMockResponse(mockResponse);
-				mockRequests.add(mockRequest);
-				
-				return;
-			}
-			
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, "No mock response found for specified request. Time Stamp: " + System.currentTimeMillis());
+			handleRequest(arg0, arg1, request, response);
 		}
 	}
 
@@ -143,7 +118,7 @@ public class MockServer
 	 * Adds the specified mock response to the start of the queue.
 	 * @param response
 	 */
-	public void addMockResponse(MockResponse response)
+	public synchronized void addMockResponse(MockResponse response)
 	{
 		mockResponses.add(0, response);
 	}
@@ -153,7 +128,7 @@ public class MockServer
 	 * @param filter
 	 * @return
 	 */
-	public List<MockRequest> fetchRequests(MockRequestFilter filter)
+	public synchronized List<MockRequest> fetchRequests(MockRequestFilter filter)
 	{
 		List<MockRequest> filteredRequests = new ArrayList<>();
 		
@@ -168,11 +143,42 @@ public class MockServer
 		return filteredRequests;
 	}
 	
-	public void reset()
+	public synchronized void reset()
 	{
 		mockResponses.forEach(resp -> resp.stop());
 		
 		mockRequests.clear();
 		mockResponses.clear();
+	}
+	
+	private synchronized void handleRequest(String arg0, Request arg1, HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException 
+	{
+		MockRequest mockRequest = new MockRequest(request);
+		Iterator<MockResponse> responseIt = mockResponses.iterator();
+		
+		while(responseIt.hasNext())
+		{
+			MockResponse mockResponse = responseIt.next();
+			
+			if(!mockResponse.isMatchingRequest(mockRequest))
+			{
+				continue;
+			}
+			
+			mockResponse.writeTo(response);
+			
+			if(!mockResponse.canServeMore())
+			{
+				responseIt.remove();
+			}
+			
+			mockRequest.setMockResponse(mockResponse);
+			mockRequests.add(mockRequest);
+			
+			return;
+		}
+		
+		response.sendError(HttpServletResponse.SC_NOT_FOUND, "No mock response found for specified request. Time Stamp: " + System.currentTimeMillis());
 	}
 }
