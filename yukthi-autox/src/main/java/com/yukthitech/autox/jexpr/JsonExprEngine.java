@@ -36,6 +36,11 @@ public class JsonExprEngine
 	private static final String KEY_VALUE = "@value";
 	
 	/**
+	 * Key used to specify value for the enclosing map when condition fails. Useful when condition has to be specified for simple attribute.
+	 */
+	private static final String KEY_FALSE_VALUE = "@falseValue";
+
+	/**
 	 * Internal key used to set key expression in cases where sub-map has loop expression.
 	 */
 	private static final String KEY_KEY_EXPRESSION = "@key-expression";
@@ -327,15 +332,21 @@ public class JsonExprEngine
 	private Object processMap(Map<String, Object> map, Map<String, Object> context, String path)
 	{
 		//if condition is present and evaluated to false, then return null
+		ObjectWrapper<Object> resWrapper = new ObjectWrapper<Object>();
+
 		if(!processCondition(map, context, path))
 		{
+			if(processValueExpression(map, context, path, resWrapper, KEY_FALSE_VALUE))
+			{
+				//if value expression is present, return the result value
+				return resWrapper.getValue();
+			}
+
 			return null;
 		}
 		
 		//check if value expression is present
-		ObjectWrapper<Object> resWrapper = new ObjectWrapper<Object>();
-		
-		if(processValueExpression(map, context, path, resWrapper))
+		if(processValueExpression(map, context, path, resWrapper, KEY_VALUE))
 		{
 			//if value expression is present, return the result value
 			return resWrapper.getValue();
@@ -395,8 +406,9 @@ public class JsonExprEngine
 				continue;
 			}
 			
-			//add processed value
-			resMap.put(entry.getKey(), val);
+			//for normal key-value entry, process the key also for expressions
+			String key = String.valueOf(processString(entry.getKey(), context, path + "#key"));
+			resMap.put(key, val);
 		}
 		
 		//if set key is the only key in input map
@@ -435,25 +447,29 @@ public class JsonExprEngine
 	 * @param context context to be used
 	 * @param path path where current map is found
 	 * @param value wrapper to hold the value
+	 * @param keyName Key name to be used to fetch the value expression
 	 * @return true if value expression is present
 	 */
-	private boolean processValueExpression(Map<String, Object> map, Map<String, Object> context, String path, ObjectWrapper<Object> value)
+	private boolean processValueExpression(Map<String, Object> map, Map<String, Object> context, String path, ObjectWrapper<Object> value, String keyName)
 	{
 		Object valueExpr = null;
 		
-		valueExpr = map.get(KEY_VALUE);
+		valueExpr = map.get(keyName);
 		
 		//if value is not present, remove it
 		if(valueExpr == null)
 		{
-			map.remove(KEY_VALUE);
+			map.remove(keyName);
 			return false;
 		}
 
-		map.remove(KEY_VALUE);
+		map.remove(keyName);
 		
 		//evaluate the condition and return the result
-		Object res = (valueExpr instanceof String) ? processString((String) valueExpr, context, path + ">@value") : valueExpr;
+		Object res = (valueExpr instanceof String) ? 
+				processString((String) valueExpr, context, path + ">" + keyName) : 
+					processObject(valueExpr, context, path + ">" + keyName);
+				
 		value.setValue(res);
 		return true;
 	}

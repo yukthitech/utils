@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,7 @@ import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.jexpr.JsonExprEngine;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
@@ -26,6 +28,11 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class CommonFreeMarkerMethods
 {
+	/**
+	 * Used to process json expressions.
+	 */
+	private static JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine();
+
 	/**
 	 * Converts input file path (Can be relative, partial path) to full canonical path.
 	 * @param path path to convert.
@@ -305,5 +312,25 @@ public class CommonFreeMarkerMethods
 			)
 	{
 		return Objects.equals(value1, value2);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@FreeMarkerMethod(
+			description = "Evaluates json expressions in the input template and returns the result json. To input context, automation-context will be added with name 'context'.",
+			returnDescription = "Result of json expression evaluation. This will be json string."
+			)
+	public static String evalJsonExpr(
+			@FmParam(name = "template", description = "Json template to be evaluated. If non-string is specified, it will be converted to json first.") Object template,
+			@FmParam(name = "context", description = "Context to be used for evaluation") Map<String, Object> context
+			) throws Exception
+	{
+		AutomationContext automationContext = AutomationContext.getInstance();
+		Map<String, Object> localContext = new HashMap<String, Object>((Map) context);
+		localContext.put("context", automationContext);
+		
+		String templateStr = (template instanceof String) ? (String) template : IAutomationConstants.OBJECT_MAPPER.writeValueAsString(template);
+
+		String resJson = JSON_EXPR_ENGINE.processJson(templateStr, localContext);
+		return resJson;
 	}
 }
