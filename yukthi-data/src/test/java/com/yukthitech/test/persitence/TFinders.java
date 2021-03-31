@@ -32,6 +32,8 @@ public class TFinders extends TestSuiteBase
 	{
 		cleanFactoryAfterClass(factory);
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
+		repo.deleteAll();
+		
 		repo.save(new Employee("1230", "user0@test.com", "user1", "1234560", 20));
 		repo.save(new Employee("1231", "user1@test.com", "user2", "1234561", 25));
 		repo.save(new Employee("1232", "user2@test.com", "user2", "1234562", 30));

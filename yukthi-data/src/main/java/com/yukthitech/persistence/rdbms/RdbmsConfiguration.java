@@ -207,6 +207,12 @@ public class RdbmsConfiguration implements Validateable, IImplicitCoverterProvid
 	 */
 	private Map<DataType, IPersistenceConverter> dbImplicitConverters = new HashMap<>();
 	
+	/**
+	 * Flag to be enabled if lower case table names to be used while querying for
+	 * table meta data.
+	 */
+	private boolean lowerCaseNames = false;
+	
 	public void addConstraintErrorPattern(String constraintErrorPattern)
 	{
 		constraintErrorPattern = constraintErrorPattern.trim();
@@ -272,6 +278,26 @@ public class RdbmsConfiguration implements Validateable, IImplicitCoverterProvid
 	public void setPagingSupported(boolean pagingSupported)
 	{
 		this.pagingSupported = pagingSupported;
+	}
+	
+	/**
+	 * Checks if is flag to be enabled if lower case table names to be used while querying for table meta data.
+	 *
+	 * @return the flag to be enabled if lower case table names to be used while querying for table meta data
+	 */
+	public boolean isLowerCaseNames()
+	{
+		return lowerCaseNames;
+	}
+
+	/**
+	 * Sets the flag to be enabled if lower case table names to be used while querying for table meta data.
+	 *
+	 * @param lowerCaseNames the new flag to be enabled if lower case table names to be used while querying for table meta data
+	 */
+	public void setLowerCaseNames(boolean lowerCaseNames)
+	{
+		this.lowerCaseNames = lowerCaseNames;
 	}
 
 	@Override

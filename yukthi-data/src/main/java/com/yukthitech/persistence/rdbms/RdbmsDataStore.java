@@ -180,6 +180,11 @@ public class RdbmsDataStore implements IDataStore
 	{
 		logger.trace("Fetching columns for table {}", tableName);
 		
+		if(rdbmsConfig.isLowerCaseNames())
+		{
+			tableName = tableName.toLowerCase();
+		}
+		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
 			Connection connection = transaction.getTransaction().getConnection();
@@ -1021,8 +1026,8 @@ public class RdbmsDataStore implements IDataStore
 			{
 				recordNo++;
 				
-				//if records are avialable fetch columns names, so taht same name objects
-				//are shared across the reocrds
+				//if records are available fetch columns names, so taht same name objects
+				//are shared across the records
 				if(colNames == null)
 				{
 					colNames = new String[colCount];
@@ -1288,6 +1293,12 @@ public class RdbmsDataStore implements IDataStore
 		
 		Statement stmt = null;
 		ResultSet rs = null;
+		String tableName = dropQuery.getTableName();
+		
+		if(rdbmsConfig.isLowerCaseNames())
+		{
+			tableName = tableName.toLowerCase();
+		}
 		
 		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
 		{
@@ -1295,7 +1306,7 @@ public class RdbmsDataStore implements IDataStore
 			
 			//check if table already exists
 			DatabaseMetaData metaData = connection.getMetaData();
-			rs = metaData.getTables(null, null, dropQuery.getTableName(), null);
+			rs = metaData.getTables(null, null, tableName, null);
 			
 			if(!rs.next())
 			{

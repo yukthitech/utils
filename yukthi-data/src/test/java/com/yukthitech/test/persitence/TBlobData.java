@@ -34,13 +34,13 @@ import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.test.persitence.entity.lob.FileBlobEntity;
 import com.yukthitech.test.persitence.entity.lob.FileClobEntity;
 import com.yukthitech.test.persitence.entity.lob.IFileBlobRepository;
 import com.yukthitech.test.persitence.entity.lob.IFileClobRepository;
 import com.yukthitech.test.persitence.entity.lob.IObjBlobRepository;
 import com.yukthitech.test.persitence.entity.lob.ObjBlobEntity;
-import com.yukthitech.persistence.repository.RepositoryFactory;
 
 /**
  * @author akiran
@@ -49,6 +49,14 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
 public class TBlobData extends TestSuiteBase
 {
 	private static Logger logger = LogManager.getLogger(TBlobData.class);
+
+	@Override
+	protected void initFactoryBeforeClass(RepositoryFactory factory)
+	{
+		IFileBlobRepository repo = factory.getRepository(IFileBlobRepository.class);
+		repo.deleteAll();
+	}
+
 	@Override
 	protected void cleanFactoryAfterClass(RepositoryFactory factory)
 	{

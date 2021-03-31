@@ -2,7 +2,7 @@
 	<ccg:exprPattern enabled="false"/>
 	
 	<query name="readQuery"><![CDATA[
-		SELECT ID, EMP_NO EMPLOYEE_NO, PHONE_NO, AGE, EMAIL_ID, ENAME NAME
+		SELECT ID "ID", EMP_NO "EMPLOYEE_NO", PHONE_NO "PHONE_NO", AGE "AGE", EMAIL_ID "EMAIL_ID", ENAME "NAME"
 		FROM EMPLOYEE
 		WHERE 1 = 1
 		<#if query.name??>AND ENAME LIKE '%${query.name}%'</#if>
