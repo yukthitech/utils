@@ -31,6 +31,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.FlowLayout;
 
 public class XpathSandboxDialog extends JDialog
 {
@@ -59,8 +60,10 @@ public class XpathSandboxDialog extends JDialog
 	private final JPanel panel_5 = new JPanel();
 	private final JScrollPane scrollPane = new JScrollPane();
 	private final JTextPane helpPane = new JTextPane();
-	
+
 	private String htmlContent;
+	private final JPanel panel_6 = new JPanel();
+	private final JButton btnNewButton = new JButton("Remove");
 
 	/**
 	 * Create the dialog.
@@ -69,12 +72,12 @@ public class XpathSandboxDialog extends JDialog
 	{
 		try
 		{
-			htmlContent = IOUtils.toString( XpathSandboxDialog.class.getResourceAsStream("/help/xpath-help.html") );
-		}catch(Exception ex)
+			htmlContent = IOUtils.toString(XpathSandboxDialog.class.getResourceAsStream("/help/xpath-help.html"));
+		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while loading help content", ex);
 		}
-		
+
 		setTitle("JXPath Sandbox");
 		setBounds(100, 100, 958, 597);
 		getContentPane().setLayout(new BorderLayout());
@@ -168,7 +171,7 @@ public class XpathSandboxDialog extends JDialog
 		gbl_panel_4.columnWidths = new int[] { 168, 0, 0 };
 		gbl_panel_4.rowHeights = new int[] { 14, 0, 0, 0 };
 		gbl_panel_4.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-		gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		panel_4.setLayout(gbl_panel_4);
 
 		GridBagConstraints gbc_lblPleaseProvideXpath = new GridBagConstraints();
@@ -186,10 +189,31 @@ public class XpathSandboxDialog extends JDialog
 		gbc_xpathFld.gridy = 1;
 		panel_4.add(xpathFld, gbc_xpathFld);
 
-		GridBagConstraints gbc_btnEvaluate = new GridBagConstraints();
-		gbc_btnEvaluate.anchor = GridBagConstraints.EAST;
-		gbc_btnEvaluate.gridx = 1;
-		gbc_btnEvaluate.gridy = 2;
+		GridBagConstraints gbc_multiValuedCbox = new GridBagConstraints();
+		gbc_multiValuedCbox.anchor = GridBagConstraints.WEST;
+		gbc_multiValuedCbox.insets = new Insets(0, 0, 0, 5);
+		gbc_multiValuedCbox.gridx = 0;
+		gbc_multiValuedCbox.gridy = 2;
+		panel_4.add(multiValuedCbox, gbc_multiValuedCbox);
+
+		GridBagConstraints gbc_panel_6 = new GridBagConstraints();
+		gbc_panel_6.fill = GridBagConstraints.BOTH;
+		gbc_panel_6.gridx = 1;
+		gbc_panel_6.gridy = 2;
+		FlowLayout flowLayout = (FlowLayout) panel_6.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		flowLayout.setVgap(0);
+		panel_4.add(panel_6, gbc_panel_6);
+		panel_6.add(btnEvaluate);
+		btnNewButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				removeByXpath();
+			}
+		});
+
+		panel_6.add(btnNewButton);
 		btnEvaluate.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -197,14 +221,6 @@ public class XpathSandboxDialog extends JDialog
 				evaluateXpath();
 			}
 		});
-
-		GridBagConstraints gbc_multiValuedCbox = new GridBagConstraints();
-		gbc_multiValuedCbox.anchor = GridBagConstraints.WEST;
-		gbc_multiValuedCbox.insets = new Insets(0, 0, 0, 5);
-		gbc_multiValuedCbox.gridx = 0;
-		gbc_multiValuedCbox.gridy = 2;
-		panel_4.add(multiValuedCbox, gbc_multiValuedCbox);
-		panel_4.add(btnEvaluate, gbc_btnEvaluate);
 
 		panel_3.add(textScrollPane_1, BorderLayout.CENTER);
 		outputJsonFld.setEditable(false);
@@ -262,6 +278,49 @@ public class XpathSandboxDialog extends JDialog
 		try
 		{
 			outputJsonFld.setText(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+		} catch(Exception ex)
+		{
+			JOptionPane.showMessageDialog(this, "Failed to convert result into json.\nError: " + ex);
+		}
+	}
+
+	private void removeByXpath()
+	{
+		String expression = xpathFld.getText().trim();
+
+		if(StringUtils.isBlank(expression))
+		{
+			JOptionPane.showMessageDialog(this, "Please provide xpath and then try!");
+			return;
+		}
+
+		Object ctx = parseContext();
+
+		if(ctx == null)
+		{
+			return;
+		}
+
+		boolean isMulti = multiValuedCbox.isSelected();
+
+		try
+		{
+			if(isMulti)
+			{
+				JXPathContext.newContext(ctx).removeAll(expression);
+			}
+			else
+			{
+				JXPathContext.newContext(ctx).removePath(expression);
+			}
+		} catch(Exception ex)
+		{
+			JOptionPane.showMessageDialog(this, "Failed to execute remove-op with specified xpath.\nError: " + ex);
+		}
+
+		try
+		{
+			outputJsonFld.setText(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(ctx));
 		} catch(Exception ex)
 		{
 			JOptionPane.showMessageDialog(this, "Failed to convert result into json.\nError: " + ex);
