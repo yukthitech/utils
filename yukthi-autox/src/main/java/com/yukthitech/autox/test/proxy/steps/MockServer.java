@@ -166,7 +166,11 @@ public class MockServer
 				continue;
 			}
 			
-			mockResponse.writeTo(response);
+			//if response is not served successfully
+			if(!mockResponse.writeTo(response))
+			{
+				return;
+			}
 			
 			if(!mockResponse.canServeMore())
 			{

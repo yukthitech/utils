@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -67,6 +68,13 @@ public class MockResponse implements Serializable
 	private boolean stopped = false;
 	
 	/**
+	 * Max time after which this response will get timeout. This
+	 * is mainly used when waiting for attribute to be set. If not set during this
+	 * specified amount of time (post request arrival) then this response will get timeout.
+	 */
+	private long timeOut = 3 * 60000;
+	
+	/**
 	 * Instantiates a new mock response.
 	 */
 	public MockResponse()
@@ -118,6 +126,21 @@ public class MockResponse implements Serializable
 	}
 	
 	/**
+	 * Sets the max time after which this response will get timeout. This is mainly used when waiting for attribute to be set. If not set during this specified amount of time (post request arrival) then this response will get timeout.
+	 *
+	 * @param timeOut the new max time after which this response will get timeout
+	 */
+	public void setTimeOut(long timeOut)
+	{
+		if(timeOut < 1)
+		{
+			throw new InvalidArgumentException("Invalid timeout specified: " + timeOut);
+		}
+		
+		this.timeOut = timeOut;
+	}
+	
+	/**
 	 * Sets the wait configuration to be used.
 	 *
 	 * @param waitConfig the new wait configuration to be used
@@ -152,7 +175,7 @@ public class MockResponse implements Serializable
 	 *
 	 * @param response the response
 	 */
-	void writeTo(HttpServletResponse response)
+	boolean writeTo(HttpServletResponse response)
 	{
 		if(waitConfig != null)
 		{
@@ -192,15 +215,37 @@ public class MockResponse implements Serializable
 					logger.debug("Before sending response, waiting for attr: {}", waitConfig.getForAttr());					
 				}
 				
+				long startTime = System.currentTimeMillis();
+				long diff = 0;
+				Object attrVal = null;
+				
 				synchronized(this)
 				{
-					while(automationContext.getAttribute(waitConfig.getForAttr()) == null && !stopped)
+					while( (attrVal = automationContext.getAttribute(waitConfig.getForAttr())) == null 
+							&& !stopped 
+							&& diff < timeOut)
 					{
 						try
 						{
 							super.wait(100);
 						}catch(Exception ex)
 						{}
+						
+						diff = System.currentTimeMillis() - startTime;
+					}
+				}
+				
+				//attr val null, indicates either response got timed out or server is getting stopped
+				if(attrVal == null)
+				{
+					try
+					{
+						automationContext.getExecutionLogger().error("Waiting for attr '{}' got timedout. Sending timeout error as response", waitConfig.getForAttr());
+						response.sendError(HttpServletResponse.SC_NOT_FOUND, "No mock response found for specified request. Time Stamp: " + System.currentTimeMillis());
+						return false;
+					}catch(Exception ex)
+					{
+						throw new InvalidStateException("An error occurred while timing-out response", ex);
 					}
 				}
 			}
@@ -223,6 +268,7 @@ public class MockResponse implements Serializable
 			throw new InvalidStateException("An error occurred while writing response", ex);
 		}
 		
+		return true;
 	}
 	
 	/**
