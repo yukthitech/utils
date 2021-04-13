@@ -488,12 +488,6 @@ public class TestSuiteExecutor
 		//set test suite as active test suite
 		context.setActiveTestSuite(testSuite);
 		
-		//for interactive environment set the test suite on interactive context
-		if(context.getInteractiveEnvironmentContext() != null)
-		{
-			context.getInteractiveEnvironmentContext().setLastTestSuite(testSuite);
-		}
-		
 		try
 		{
 			TestCaseResult testCaseResult = null;
@@ -503,6 +497,13 @@ public class TestSuiteExecutor
 				if(restrictedTestCases != null && !restrictedTestCases.contains(testCase.getName()))
 				{
 					continue;
+				}
+
+				//for interactive environment set the test suite on interactive context
+				// last test suite to be set when testcase is being executed (thats why it is kept inside loop)
+				if(context.getInteractiveEnvironmentContext() != null)
+				{
+					context.getInteractiveEnvironmentContext().setLastTestSuite(testSuite);
 				}
 
 				testCaseExecuted = true;

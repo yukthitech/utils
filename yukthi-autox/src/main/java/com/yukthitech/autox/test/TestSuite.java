@@ -181,6 +181,30 @@ public class TestSuite implements Validateable
 			this.author = authors.stream().collect(Collectors.joining(", "));
 		}
 		
+		if(newTestSuite.afterTestCase != null)
+		{
+			if(this.afterTestCase == null)
+			{
+				this.afterTestCase = newTestSuite.afterTestCase;
+			}
+			else
+			{
+				throw new InvalidStateException("In test-suite '{}', after-test-case is defined more than once.", this.name);
+			}
+		}
+		
+		if(newTestSuite.beforeTestCase != null)
+		{
+			if(this.beforeTestCase == null)
+			{
+				this.beforeTestCase = newTestSuite.beforeTestCase;
+			}
+			else
+			{
+				throw new InvalidStateException("In test-suite '{}', before-test-case is defined more than once.", this.name);
+			}
+		}
+
 		this.nameToFunction.putAll(newTestSuite.nameToFunction);
 	}
 
