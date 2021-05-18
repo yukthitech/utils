@@ -35,18 +35,28 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	
 	private static final String TEXT_CONTENT_TYPE = "application/text";
 	
+	private static enum PartType
+	{
+		TEXT,
+		
+		BINARY,
+		
+		FILE
+	}
+	
 	private static final class RequestPart
 	{
 		private String name;
 		private Object value;
 		private String contentType;
+		private PartType partType;
 		
-		public RequestPart(String name, Object value, String contentType)
+		public RequestPart(String name, Object value, String contentType, PartType partType)
 		{
 			this.name = name;
 			this.value = value;
-			
 			this.contentType = contentType;
+			this.partType = partType;
 		}
 		
 		/* (non-Javadoc)
@@ -272,7 +282,19 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		
 		name = StringUtils.isBlank(name) ? file.getName() : name;
 
-		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null));
+		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null, PartType.FILE));
+	}
+
+	public void addBinaryPart(String field, String name, File file, String contentType)
+	{
+		if(!multipartRequest)
+		{
+			throw new IllegalStateException("Attachments can be added only to multi part request");
+		}
+		
+		name = StringUtils.isBlank(name) ? file.getName() : name;
+
+		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), contentType, PartType.BINARY));
 	}
 
 	/**
@@ -292,7 +314,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		try
 		{
 			String jsonObject = objectMapper.writeValueAsString(object);
-			this.multiparts.add(new RequestPart(partName, jsonObject, JSON_CONTENT_TYPE));
+			this.multiparts.add(new RequestPart(partName, jsonObject, JSON_CONTENT_TYPE, PartType.BINARY));
 		} catch(JsonProcessingException ex)
 		{
 			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
@@ -327,7 +349,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			throw new IllegalStateException("Parts can be added only to multi part request");
 		}
 		
-		this.multiparts.add(new RequestPart(partName, object, contentType));
+		this.multiparts.add(new RequestPart(partName, object, contentType, PartType.TEXT));
 		
 		return (T)this;
 	}
@@ -357,7 +379,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			// add files to request body
 			for(RequestPart part : this.multiparts)
 			{
-				if(part.value instanceof FileInfo)
+				if(part.partType == PartType.FILE)
 				{
 					fileInfo = (FileInfo)part.value;
 					
@@ -370,12 +392,21 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 						builder.addPart(part.name, new FileBody(fileInfo.getFile()));
 					}
 				}
+				else if(part.partType == PartType.TEXT)
+				{
+					builder.addTextBody(part.name, (String) part.value, ContentType.create(part.contentType));
+				}
 				else
 				{
-					//stringBody = new StringBody( part.value.toString(), ContentType.create(part.contentType) );
-					//builder.addTextBody(part.name, part.value.toString(), ContentType.create(part.contentType));
-					//builder.addPart(part.name, stringBody);
-					builder.addBinaryBody(part.name, part.value.toString().getBytes(), ContentType.create(part.contentType), part.name);
+					if(part.value instanceof FileInfo)
+					{
+						fileInfo = (FileInfo) part.value;
+						builder.addBinaryBody(part.name, fileInfo.getFile(), ContentType.create(part.contentType), fileInfo.getName());
+					}
+					else
+					{
+						builder.addBinaryBody(part.name, part.value.toString().getBytes(), ContentType.create(part.contentType), part.name);
+					}
 				}
 			}
 			

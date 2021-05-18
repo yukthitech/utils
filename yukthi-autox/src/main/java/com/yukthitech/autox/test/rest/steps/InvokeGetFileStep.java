@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -64,23 +65,39 @@ public class InvokeGetFileStep extends AbstractRestStep
 			
 			logger.debug("Got response status as {} and body as: {}", status, value);
 			
+			RestResult<String> result = null;
+			
 			if(value != null)
 			{
 				exeLogger.debug("Writing content from response to specified file: {}", outFile.getPath());
 				FileUtils.writeByteArrayToFile(outFile, value);
 				
-				return new RestResult<String>(outFile.getAbsolutePath(), status, response);
+				result = new RestResult<String>(outFile.getAbsolutePath(), status, response);
+			}
+			else
+			{
+				exeLogger.warn("No conent found to write to file");
+				result = new RestResult<String>(null, status, response);
 			}
 			
-			exeLogger.debug("No conent found to write to file");
-			return new RestResult<String>(null, status, response);
+			Header headers[] =  response.getAllHeaders();
+			
+			if(headers != null)
+			{
+				for(Header header : headers)
+				{
+					result.addHeader(header.getName(), header.getValue());
+				}
+			}
+			
+			return result;
 		}
 	}
 	
 	/**
 	 * Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set response attribute.
 	 */
-	@Param(description = "Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set response attribute", required = false)
+	@Param(description = "Output file where response content should be stored. If not specified, temp file will be used. The output file path will be set as rest-result value", required = false)
 	private String outputFile;
 
 	/**

@@ -166,7 +166,16 @@ public class TestSuiteExecutor
 			return result;
 		}
 		
-		List<TestCaseData> dataLst = dataProvider.getStepData();
+		List<TestCaseData> dataLst = null;
+		context.setActiveTestCase(testCase, null);
+		
+		try
+		{
+			dataLst = dataProvider.getStepData();
+		} finally
+		{
+			context.clearActiveTestCase();
+		}
 
 		//Log error and fail test case if data is missing
 		if(dataLst == null)
@@ -441,6 +450,12 @@ public class TestSuiteExecutor
 							testCaseResult.getMessage());
 				}
 	
+				fullExecutionDetails.addTestResult(testSuite, testCaseResult);
+			}
+			//in case of non-accumulated result also, add the accumulated result
+			// so that dependencies test cases can refer to this result
+			else
+			{
 				fullExecutionDetails.addTestResult(testSuite, testCaseResult);
 			}
 			
