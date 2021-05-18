@@ -3,7 +3,8 @@ package com.yukthitech.persistence.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.TreeSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Orm common utils.
@@ -19,22 +20,24 @@ public class OrmUtils
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Collection<Object> createCollection(Class<?> collectionType)
 	{
-		//if target collection is list type
-		if(collectionType.isAssignableFrom(ArrayList.class))
+		//check if instance of collection can be created directly from collection type
+		try
+		{
+			return (Collection) collectionType.newInstance();
+		}catch(Exception ex)
+		{
+		}
+
+		//if not use abstraction types and determine the type to be used
+		if(List.class.isAssignableFrom(collectionType))
 		{
 			collectionType = ArrayList.class;
 		}
-		//if target collection is set type
-		else if(collectionType.isAssignableFrom(HashSet.class))
+		else if(Set.class.isAssignableFrom(collectionType))
 		{
 			collectionType = HashSet.class;
 		}
-		//if target collection is sorted set type
-		else if(collectionType.isAssignableFrom(TreeSet.class))
-		{
-			collectionType = TreeSet.class;
-		}
-		
+
 		try
 		{
 			return (Collection) collectionType.newInstance();
@@ -43,5 +46,4 @@ public class OrmUtils
 			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);
 		}
 	}
-
 }
