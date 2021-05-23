@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-utils</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
