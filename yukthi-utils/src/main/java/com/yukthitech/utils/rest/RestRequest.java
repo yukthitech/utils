@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -179,7 +179,7 @@ public abstract class RestRequest<T extends RestRequest<T>>
 	 * Populates configured headers on the specified request
 	 * @param request
 	 */
-	protected void populateHeaders(HttpRequestBase request)
+	protected void populateHeaders(HttpUriRequestBase request)
 	{
 		for(String name : headers.keySet())
 		{
@@ -187,5 +187,5 @@ public abstract class RestRequest<T extends RestRequest<T>>
 		}
 	}
 
-	public abstract HttpRequestBase toHttpRequestBase(String baseUrl) throws Exception;
+	public abstract HttpUriRequestBase toHttpRequestBase(String baseUrl) throws Exception;
 }

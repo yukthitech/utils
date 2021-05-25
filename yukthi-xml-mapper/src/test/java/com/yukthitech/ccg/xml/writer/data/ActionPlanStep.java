@@ -1,6 +1,6 @@
 package com.yukthitech.ccg.xml.writer.data;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 public class ActionPlanStep
 {
@@ -54,8 +54,8 @@ public class ActionPlanStep
 		}
 
 		ActionPlanStep other = (ActionPlanStep) obj;
-		return Objects.equal( name, other.name )
-				&& Objects.equal(data, other.data)
+		return Objects.equals( name, other.name )
+				&& Objects.equals(data, other.data)
 				;
 	}
 

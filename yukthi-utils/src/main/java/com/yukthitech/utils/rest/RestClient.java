@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,11 +32,11 @@ public class RestClient
 	
 	private static final int MAX_STR_LENGTH = 1000;
 	
-	static class RestResultHandler implements ResponseHandler<RestResult<String>>
+	static class RestResultHandler implements HttpClientResponseHandler<RestResult<String>>
 	{
-		public RestResult<String> handleResponse(HttpResponse response) throws ClientProtocolException,IOException
+		public RestResult<String> handleResponse(ClassicHttpResponse response) throws ClientProtocolException,IOException
 		{
-			int status = response.getStatusLine().getStatusCode();
+			int status = response.getCode();
 			String value = null;
 			
 			logger.debug("Got response-status as {}", status);
@@ -59,9 +59,9 @@ public class RestClient
 				value = null;
 			}
 			
-			RestResult<String> result = new RestResult<String>(value, status, response);
+			RestResult<String> result = new RestResult<String>(value, status, new HttpResponse(response));
 			
-			Header headers[] =  response.getAllHeaders();
+			Header headers[] =  response.getHeaders();
 			
 			if(headers != null)
 			{
@@ -296,9 +296,9 @@ public class RestClient
 	 * @param handler Handler to handle response
 	 * @return result of processing
 	 */
-	public <T> RestResult<T> invokeRequest(RestRequest<?> request, ResponseHandler<RestResult<T>> handler)
+	public <T> RestResult<T> invokeRequest(RestRequest<?> request, IRestResponseHandler<RestResult<T>> handler)
 	{
-		RestResult<T> result = makeRequest(request, handler);
+		RestResult<T> result = makeRequest(request, new ResponseHandlerAdapter<>(handler));
 		
 		if(restClientListener != null)
 		{
@@ -309,7 +309,7 @@ public class RestClient
 		return result;
 	}
 	
-	private <T> RestResult<T> makeRequest(RestRequest<?> request, ResponseHandler<RestResult<T>> handler)
+	private <T> RestResult<T> makeRequest(RestRequest<?> request, HttpClientResponseHandler<RestResult<T>> handler)
 	{
 		try
 		{
@@ -330,7 +330,7 @@ public class RestClient
 			}
 			
 			//build http client request
-			HttpRequestBase convertedRequest = request.toHttpRequestBase(baseUrl);
+			HttpUriRequestBase convertedRequest = request.toHttpRequestBase(baseUrl);
 			
 			//invoke the request and capture the response
 			RestResult<T> result = httpclient.execute(convertedRequest, handler);

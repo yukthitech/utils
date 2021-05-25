@@ -37,8 +37,8 @@
 		
 			<wrap:steps>
 				<s:rest-invoke-post uri="/emp/saveForm">
-					<param name="name">Emp1</param>
-					<param name="address">some address</param>
+					<form-field name="name">Emp1</form-field>
+					<form-field name="address">some address</form-field>
 				</s:rest-invoke-post>
 			
 				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>
@@ -52,8 +52,8 @@
 		
 			<wrap:steps>
 				<s:rest-invoke-post uri="/emp/saveEncodedForm">
-					<param name="name">Emp1</param>
-					<param name="address">some address</param>
+					<form-field name="name">Emp1</form-field>
+					<form-field name="address">some address</form-field>
 				</s:rest-invoke-post>
 			
 				<s:set expression="emp1_id" value="attr: response | xpath: //id"/>

@@ -55,6 +55,7 @@ public class ObjectPool<T>
 		this(type, Integer.MAX_VALUE);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public ObjectPool(Class<T> type, T... initObjects)
 	{
 		if(initObjects == null || initObjects.length == 0)
@@ -67,6 +68,7 @@ public class ObjectPool<T>
 		addToPool(initObjects);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void addToPool(T... objects)
 	{
 		poolLock.lock();

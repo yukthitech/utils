@@ -101,11 +101,13 @@
 		 </wrap:post-commands>
 	 -->
 
+	<!--  
 	<summaryNotificationConfig smptpHost="blr-relay-01.corp.yodlee.com" smptpPort="25" ttlsEnabled="false"  enabled="true">
 		<toAddressList>akiran@yodlee.com</toAddressList>
 		<subjectTemplate>Automation test report mail!!!</subjectTemplate>
 		<fromAddress>autox@yukthitech.com</fromAddress>
 	</summaryNotificationConfig>
+	 -->
 	 
 	 <excludedGroups>download</excludedGroups>
 </app>

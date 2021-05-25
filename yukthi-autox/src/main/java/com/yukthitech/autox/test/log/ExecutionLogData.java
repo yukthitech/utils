@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.client.utils.DateUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yukthitech.autox.config.ApplicationConfiguration;
@@ -377,6 +377,6 @@ public class ExecutionLogData
 	 */
 	public String getExecutionDateStr()
 	{
-		return DateUtils.formatDate(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
+		return DateFormatUtils.format(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
 	}
 }

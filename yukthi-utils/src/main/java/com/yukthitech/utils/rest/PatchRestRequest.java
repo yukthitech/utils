@@ -3,11 +3,13 @@
  */
 package com.yukthitech.utils.rest;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPatch;
+import java.net.URI;
+
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
- * Represents PUT request method
+ * Represents PATCH request method
  * @author akiran
  */
 public class PatchRestRequest extends RestRequestWithBody<PatchRestRequest>
@@ -19,13 +21,10 @@ public class PatchRestRequest extends RestRequestWithBody<PatchRestRequest>
 	{
 		super(uri, "PATCH");
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.fw.utils.rest.RestRequestWithBody#newRequest(java.lang.String)
-	 */
+
 	@Override
-	protected HttpEntityEnclosingRequestBase newRequest(String baseUrl) 
+	protected HttpUriRequestBase newRequest(URI resolvedUri) 
 	{
-		return new HttpPatch(baseUrl + getResolvedUri());
+		return new HttpPatch(resolvedUri);
 	}
 }

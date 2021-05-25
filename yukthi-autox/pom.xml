@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>yukthi-automation</artifactId>
-	<version>1.5.11-SNAPSHOT</version>
+	<version>${autox.version}</version>
 	<packaging>jar</packaging>
 
 	<name>yukthi-automation</name>
@@ -18,14 +18,26 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-utils</artifactId>
-			<version>1.2-SNAPSHOT</version>
+			<version>${utils.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+		<!-- for template processing -->
 		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.3</version>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-xml-mapper</artifactId>
+			<version>${xml.mapper.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-free-marker</artifactId>
+			<version>${fmarker.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-data</artifactId>
+			<version>${data.version}</version>
 		</dependency>
 
 		<!-- For selenium based steps and validations -->
@@ -36,35 +48,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
-		</dependency>
-
-		<!-- For SQL based steps and validations, to define data sources -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-dbcp2</artifactId>
-			<version>2.1</version>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-dbutils</groupId>
 			<artifactId>commons-dbutils</artifactId>
-			<version>1.6</version>
-		</dependency>
-
-		<!-- for template processing -->
-		<dependency>
-			<groupId>com.yukthitech</groupId>
-			<artifactId>yukthi-xml-mapper</artifactId>
-			<version>1.2.3-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.yukthitech</groupId>
-			<artifactId>yukthi-free-marker</artifactId>
-			<version>1.1-SNAPSHOT</version>
+			<version>1.7</version>
 		</dependency>
 
 		<!-- for remote file monitoring -->
@@ -134,12 +120,6 @@
 
 		<!-- Yukthi data for managing persistence information -->
 		<dependency>
-			<groupId>com.yukthitech</groupId>
-			<artifactId>yukthi-data</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<version>10.11.1.1</version>
@@ -173,8 +153,8 @@
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.12.0</version>
 		</dependency>
-		
-		<!--  Dependencies to create video files from images -->
+
+		<!-- Dependencies to create video files from images -->
 		<dependency>
 			<groupId>org.jcodec</groupId>
 			<artifactId>jcodec</artifactId>

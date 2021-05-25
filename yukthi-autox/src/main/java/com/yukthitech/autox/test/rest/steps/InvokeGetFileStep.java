@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +18,8 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.rest.GetRestRequest;
+import com.yukthitech.utils.rest.HttpResponse;
+import com.yukthitech.utils.rest.IRestResponseHandler;
 import com.yukthitech.utils.rest.RestResult;
 
 /**
@@ -34,7 +33,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 	
 	private static Logger logger = LogManager.getLogger(InvokeGetFileStep.class);
 	
-	static class FileResultHandler implements ResponseHandler<RestResult<String>>
+	static class FileResultHandler implements IRestResponseHandler<RestResult<String>>
 	{
 		private File outFile;
 		private ExecutionLogger exeLogger;
@@ -45,9 +44,9 @@ public class InvokeGetFileStep extends AbstractRestStep
 			this.exeLogger = logger;
 		}
 
-		public RestResult<String> handleResponse(HttpResponse response) throws ClientProtocolException,IOException
+		public RestResult<String> handleResponse(HttpResponse response) throws IOException
 		{
-			int status = response.getStatusLine().getStatusCode();
+			int status = response.getCode();
 			byte value[] = null;
 	
 			logger.debug("Got response-status as {}", status);
@@ -80,7 +79,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 				result = new RestResult<String>(null, status, response);
 			}
 			
-			Header headers[] =  response.getAllHeaders();
+			Header headers[] =  response.getHeaders();
 			
 			if(headers != null)
 			{
@@ -123,7 +122,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected ResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
+	protected IRestResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
 	{
 		File file = null;
 		
@@ -135,6 +134,6 @@ public class InvokeGetFileStep extends AbstractRestStep
 			throw new InvalidStateException("An error occurred while creating file", ex);
 		}
 		
-		return (ResponseHandler) new FileResultHandler(file, exeLogger);
+		return (IRestResponseHandler) new FileResultHandler(file, exeLogger);
 	}
 }

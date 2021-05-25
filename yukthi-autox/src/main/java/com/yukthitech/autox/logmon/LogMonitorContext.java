@@ -2,7 +2,7 @@ package com.yukthitech.autox.logmon;
 
 import java.util.Date;
 
-import org.apache.http.client.utils.DateUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.test.TestStatus;
@@ -59,7 +59,7 @@ public class LogMonitorContext
 		this.status = status;
 		this.description = description;
 		
-		this.executionDateStr = DateUtils.formatDate(new Date(), ApplicationConfiguration.getInstance().getDateFomat());
+		this.executionDateStr = DateFormatUtils.format(new Date(), ApplicationConfiguration.getInstance().getDateFomat());
 	}
 
 	/**

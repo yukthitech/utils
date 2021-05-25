@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.http.client.utils.DateUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.config.ApplicationConfiguration;
@@ -98,7 +98,7 @@ public class FullExecutionDetails
 	 */
 	public String getExecutionDateStr()
 	{
-		return DateUtils.formatDate(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
+		return DateFormatUtils.format(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
 	}
 
 	/**

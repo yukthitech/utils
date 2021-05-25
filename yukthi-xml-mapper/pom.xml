@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>yukthi-xml-mapper</artifactId>
-	<version>1.2.4-SNAPSHOT</version>
+	<version>${xml.mapper.version}</version>
 	<packaging>jar</packaging>
 
 	<name>yukthi-xml-mapper</name>
@@ -14,23 +14,12 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
-		</dependency>
-
 		<!-- Used by class scanning services which in turn is used to load repositories, 
 			actions, models, etc -->
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC2</version>
+			<version>0.9.12</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>xml-apis</artifactId>
@@ -49,7 +38,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-utils</artifactId>
-			<version>1.2.1-SNAPSHOT</version>
+			<version>${utils.version}</version>
 		</dependency>
 
 	</dependencies>

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.apache.http.client.ResponseHandler;
-
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
@@ -16,8 +14,10 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.rest.HttpClientFactory;
+import com.yukthitech.utils.rest.IRestResponseHandler;
 import com.yukthitech.utils.rest.RestClient;
 import com.yukthitech.utils.rest.RestRequest;
+import com.yukthitech.utils.rest.RestRequestWithBody;
 import com.yukthitech.utils.rest.RestResult;
 
 /**
@@ -62,6 +62,11 @@ public abstract class AbstractRestStep extends AbstractStep
 	 */
 	protected Map<String, String> params = new HashMap<>();
 	
+	/**
+	 * Form fields.
+	 */
+	protected Map<String, String> formFields = new HashMap<>();
+
 	/**
 	 * Expected response type. Default: String.
 	 */
@@ -175,6 +180,12 @@ public abstract class AbstractRestStep extends AbstractStep
 		params.put(name, value);
 	}
 	
+	@ChildElement(description = "Form field for current request", key = "name", keyDescription = "Name of the field.")
+	public void addFormField(String name, String value)
+	{
+		formFields.put(name, value);
+	}
+
 	/**
 	 * Sets the request content type to be used. default: null.
 	 *
@@ -207,12 +218,14 @@ public abstract class AbstractRestStep extends AbstractStep
 	 * @param context Context to be used to get plugin and default headers
 	 * @param request Request to be populated
 	 */
+	@SuppressWarnings("rawtypes")
 	protected void populate(AutomationContext context, RestRequest<?> request, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Populating {} with uri {}"
 				+ "\n\tHeaders: {}"
 				+ "\n\tPath Variables: {}"
-				+ "\n\tParams: {}", request.getClass().getSimpleName(), uri, headers, pathVariables, params);
+				+ "\n\tForm Fields: {}"
+				+ "\n\tParams: {}", request.getClass().getSimpleName(), uri, headers, pathVariables, formFields, params);
 		
 		RestPlugin restPlugin = context.getPlugin(RestPlugin.class);
 		
@@ -249,6 +262,16 @@ public abstract class AbstractRestStep extends AbstractStep
 		{
 			request.addParam(name, params.get(name));
 		}
+		
+		if(request instanceof RestRequestWithBody)
+		{
+			RestRequestWithBody<?> requestWithBody = (RestRequestWithBody) request;
+
+			for(String name : formFields.keySet())
+			{
+				requestWithBody.addFormField(name, formFields.get(name));
+			}
+		}
 
 		if(contentType != null)
 		{
@@ -280,13 +303,13 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		RestResult<Object> result = null;
 		
-		ResponseHandler<RestResult<?>> handler = getRestResultHandler(exeLogger);
+		IRestResponseHandler<RestResult<?>> handler = getRestResultHandler(exeLogger);
 		
 		if(handler != null)
 		{
 			exeLogger.debug("Using current step handler for processing response and building the result");
 			
-			result = (RestResult) client.invokeRequest( (RestRequest) request, (ResponseHandler) handler);
+			result = (RestResult) client.invokeRequest( (RestRequest) request, (IRestResponseHandler) handler);
 		}
 		else
 		{
@@ -319,7 +342,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		return AutomationUtils.deepClone(this);
 	}
 	
-	protected ResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
+	protected IRestResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
 	{
 		return null;
 	}

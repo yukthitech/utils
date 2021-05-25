@@ -5,24 +5,29 @@ package com.yukthitech.utils.rest;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Represents Rest request method with body
@@ -101,7 +106,12 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 * indicates if this is multipart request
 	 */
 	private boolean multipartRequest;
-
+	
+	/**
+	 * Form fields.
+	 */
+	protected Map<String, String> formFields = new HashMap<String, String>();
+	
 	/**
 	 * @param uri
 	 */
@@ -146,6 +156,46 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	{
 		return multipartRequest;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public T addFormField(String name, String value)
+	{
+		if(requestBody != null)
+		{
+			throw new IllegalStateException("Both params and body can not be set on a single request. Request body was already set");
+		}
+		
+		if(multipartRequest)
+		{
+			throw new IllegalStateException("Params can not be added for multi part request");
+		}
+
+		this.formFields.put(name, value);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T addJsonFormField(String name, Object value)
+	{
+		try
+		{
+			addFormField(name, RestClient.OBJECT_MAPPER.writeValueAsString(value));
+			return (T) this;
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while coverting specified object to json", ex);
+		}
+	}
+
+	/**
+	 * Gets value of form-fields
+	 * 
+	 * @return the form fields
+	 */
+	public Map<String, String> getFormFields()
+	{
+		return formFields;
+	}
 
 	/**
 	 * Sets the indicates if this is multipart request.
@@ -154,9 +204,9 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 */
 	public void setMultipartRequest(boolean multipartRequest)
 	{
-		if(requestBody != null || !super.getParams().isEmpty())
+		if(requestBody != null || !formFields.isEmpty())
 		{
-			throw new IllegalStateException("Body/params is already set on this request");
+			throw new IllegalStateException("Body/formFields is already set on this request");
 		}
 		
 		this.multipartRequest = multipartRequest;
@@ -172,9 +222,9 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	@SuppressWarnings("unchecked")
 	public T setBody(String body)
 	{
-		if(!super.params.isEmpty())
+		if(!formFields.isEmpty())
 		{
-			throw new IllegalStateException("Both params and body can not be set on a single request. Param(s) were already set");
+			throw new IllegalStateException("Both formFields and body can not be set on a single request. Param(s) were already set");
 		}
 		
 		if(multipartRequest)
@@ -226,28 +276,6 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	public List<RequestPart> getMultiparts()
 	{
 		return multiparts;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.yodlee.common.rest.RestRequest#addParam(java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
-	public T addParam(String name, String value)
-	{
-		if(requestBody != null)
-		{
-			throw new IllegalStateException("Both params and body can not be set on a single request. Request body was already set");
-		}
-		
-		if(multipartRequest)
-		{
-			throw new IllegalStateException("Params can not be added for multi part request");
-		}
-
-		return super.addParam(name, value);
 	}
 
 	/**
@@ -361,18 +389,23 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 * com.yodlee.common.rest.RestRequest#toHttpRequestBase(java.lang.String)
 	 */
 	@Override
-	public HttpRequestBase toHttpRequestBase(String baseUrl) throws UnsupportedEncodingException
+	public HttpUriRequestBase toHttpRequestBase(String baseUrl) throws UnsupportedEncodingException, URISyntaxException
 	{
-		HttpEntityEnclosingRequestBase postRequest = newRequest(baseUrl);
+		URIBuilder uriBuilder = new URIBuilder(baseUrl + getResolvedUri());
+		
+		for(String paramName : super.params.keySet())
+		{
+			uriBuilder.addParameter(paramName, super.params.get(paramName));
+		}
 
-		super.populateHeaders(postRequest);
+		HttpUriRequestBase request = newRequest(uriBuilder.build());
+		super.populateHeaders(request);
 
 		// if file params are attached
 		if(!this.multiparts.isEmpty())
 		{
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			
-			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			builder.setMode(HttpMultipartMode.STRICT);
 
 			FileInfo fileInfo = null;
 
@@ -410,19 +443,19 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 				}
 			}
 			
-			postRequest.setEntity(builder.build());
+			request.setEntity(builder.build());
 		}
-		// if params are present set the request body in the http FORM format
-		else if(!super.params.isEmpty())
+		// if form-fields are present set the request body in the http FORM format
+		else if(!formFields.isEmpty())
 		{
-			List<NameValuePair> urlParameters = new ArrayList<NameValuePair>(super.params.size());
+			List<NameValuePair> urlParameters = new ArrayList<NameValuePair>(formFields.size());
 
-			for(String paramName : super.params.keySet())
+			for(String paramName : formFields.keySet())
 			{
-				urlParameters.add(new BasicNameValuePair(paramName, super.params.get(paramName)));
+				urlParameters.add(new BasicNameValuePair(paramName, formFields.get(paramName)));
 			}
 
-			postRequest.setEntity(new UrlEncodedFormEntity(urlParameters));
+			request.setEntity(new UrlEncodedFormEntity(urlParameters));
 		}
 		// if no params are present but request body is present, set body as
 		// simple string
@@ -431,13 +464,13 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			// set the content type if specified
 			if(super.getContentType() != null)
 			{
-				postRequest.setHeader(HttpHeaders.CONTENT_TYPE, super.getContentType());
+				request.setHeader(HttpHeaders.CONTENT_TYPE, super.getContentType());
 			}
 
-			postRequest.setEntity(new StringEntity(requestBody));
+			request.setEntity(new StringEntity(requestBody));
 		}
 
-		return postRequest;
+		return request;
 	}
 
 	/**
@@ -447,7 +480,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 * @param baseUrl
 	 * @return
 	 */
-	protected abstract HttpEntityEnclosingRequestBase newRequest(String baseUrl);
+	protected abstract HttpUriRequestBase newRequest(URI resolvedUri);
 
 	/*
 	 * (non-Javadoc)

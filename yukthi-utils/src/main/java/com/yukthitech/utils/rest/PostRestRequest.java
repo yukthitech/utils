@@ -3,8 +3,10 @@
  */
 package com.yukthitech.utils.rest;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
+import java.net.URI;
+
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Represents post request method
@@ -24,8 +26,8 @@ public class PostRestRequest extends RestRequestWithBody<PostRestRequest>
 	 * @see com.fw.utils.rest.RestRequestWithBody#newRequest(java.lang.String)
 	 */
 	@Override
-	protected HttpEntityEnclosingRequestBase newRequest(String baseUrl) 
+	protected HttpUriRequestBase newRequest(URI resolvedUri) 
 	{
-		return new HttpPost(baseUrl + getResolvedUri());
+		return new HttpPost(resolvedUri);
 	}
 }

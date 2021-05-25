@@ -3,8 +3,10 @@
  */
 package com.yukthitech.utils.rest;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPut;
+import java.net.URI;
+
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 /**
  * Represents PUT request method
@@ -20,12 +22,9 @@ public class PutRestRequest extends RestRequestWithBody<PutRestRequest>
 		super(uri, "PUT");
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.fw.utils.rest.RestRequestWithBody#newRequest(java.lang.String)
-	 */
 	@Override
-	protected HttpEntityEnclosingRequestBase newRequest(String baseUrl) 
+	protected HttpUriRequestBase newRequest(URI resolvedUri) 
 	{
-		return new HttpPut(baseUrl + getResolvedUri());
+		return new HttpPut(resolvedUri);
 	}
 }
