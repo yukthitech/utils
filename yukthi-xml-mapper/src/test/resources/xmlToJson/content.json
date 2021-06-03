@@ -1,0 +1,17 @@
+{
+  "booleanValue" : true,
+  "intList" : [ 1, 2, 3, 4 ],
+  "intValue" : 100,
+  "subnode" : {
+    "name" : "some simple name",
+    "multiLineContent" : "This is multi line content\nThis is multi line content\nThis is multi line content",
+    "cdataContent" : "This is cdata content with <xml a=\"b\">"
+  },
+  "objList" : [ {
+    "age" : 40,
+    "name" : "Kranthi"
+  }, {
+    "age" : 41,
+    "name" : "Kiran"
+  } ]
+}

@@ -115,7 +115,7 @@ public class BeanNode implements Cloneable
 	{
 		this.type = type;
 	}
-
+	
 	public XMLAttributeMap getAttributeMap()
 	{
 		return attributeMap;

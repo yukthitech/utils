@@ -26,6 +26,11 @@ public class XmlWriterConfig
 	 * If set to true, ccg namespace settings will be excluded in output xml.
 	 */
 	private boolean excludeNameSpace = false;
+	
+	/**
+	 * Flag indicating if xml declaration has to be excluded.
+	 */
+	private boolean excludeXmlDeclaration = false;
 
 	/**
 	 * Gets the indicates whether output xml should be indented or not.
@@ -105,5 +110,26 @@ public class XmlWriterConfig
 	public void setExcludeNameSpace(boolean excludeNameSpace)
 	{
 		this.excludeNameSpace = excludeNameSpace;
+	}
+
+	/**
+	 * Checks if is flag indicating if xml declaration has to be excluded.
+	 *
+	 * @return the flag indicating if xml declaration has to be excluded
+	 */
+	public boolean isExcludeXmlDeclaration()
+	{
+		return excludeXmlDeclaration;
+	}
+
+	/**
+	 * Sets the flag indicating if xml declaration has to be excluded.
+	 *
+	 * @param excludeXmlDeclaration
+	 *            the new flag indicating if xml declaration has to be excluded
+	 */
+	public void setExcludeXmlDeclaration(boolean excludeXmlDeclaration)
+	{
+		this.excludeXmlDeclaration = excludeXmlDeclaration;
 	}
 }

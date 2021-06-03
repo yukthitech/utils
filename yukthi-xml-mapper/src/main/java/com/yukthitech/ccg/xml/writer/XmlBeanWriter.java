@@ -193,7 +193,15 @@ public class XmlBeanWriter
 	        
 	        if(writerConfig.isIndentXml())
 	        {
+	        	transformerFactory.setAttribute("indent-number", 4);
+	        	
 	        	transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	        	transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+	        }
+	        
+	        if(writerConfig.isExcludeXmlDeclaration())
+	        {
+	        	transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 	        }
 	        
 	        DOMSource source = new DOMSource(doc);

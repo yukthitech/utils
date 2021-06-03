@@ -14,39 +14,19 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.yukthitech.ccg.xml.DefaultParserHandler;
+import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.ccg.xml.annotations.CollectionElement;
 import com.yukthitech.ccg.xml.annotations.XmlAttribute;
 import com.yukthitech.ccg.xml.annotations.XmlElement;
 import com.yukthitech.ccg.xml.annotations.XmlIgnore;
-import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.beans.BeanProperty;
 
 /**
  * Populates data from bean to document.
  * @author akiran
  */
-class BeanToDocPopulator
+public class BeanToDocPopulator
 {
-	/**
-	 * Returns true if specified type is supported in attribute.
-	 * @param type
-	 * @return
-	 */
-	private static boolean isAttributeType(Class<?> type)
-	{
-		if(type.isPrimitive() || CommonUtils.isWrapperClass(type))
-		{
-			return true;
-		}
-		
-		if(String.class.equals(type) || Date.class.equals(type) || Class.class.equals(type))
-		{
-			return true;
-		}
-
-		return type.isEnum();
-	}
-	
 	@SuppressWarnings("rawtypes")
 	private static String toAttributeString(Object value)
 	{
@@ -125,7 +105,7 @@ class BeanToDocPopulator
 		
 			lstElem.appendChild(elemElem);
 			
-			if(elementType != null && isAttributeType((Class<?>)elementType))
+			if(elementType != null && XMLUtil.isAttributeType((Class<?>)elementType))
 			{
 				String valueStr = toAttributeString(elemBean);
 				elemElem.appendChild(document.createTextNode(valueStr));
@@ -160,7 +140,7 @@ class BeanToDocPopulator
 			
 			entryElem.setAttribute("key", toAttributeString(key));
 			
-			if(valueType != null && isAttributeType((Class<?>)valueType))
+			if(valueType != null && XMLUtil.isAttributeType((Class<?>)valueType))
 			{
 				String valueStr = toAttributeString(mapValue);
 				entryElem.appendChild(document.createTextNode(valueStr));
@@ -240,9 +220,15 @@ class BeanToDocPopulator
 			return;
 		}
 		
-		if(isAttributeType(bean.getClass()) || bean.getClass().isEnum())
+		if(XMLUtil.isAttributeType(bean.getClass()) || bean.getClass().isEnum())
 		{
 			element.appendChild(document.createTextNode(toAttributeString(bean)));
+			return;
+		}
+		
+		if(bean instanceof IWriteableBean)
+		{
+			((IWriteableBean) bean).writeTo(new XmlWriterContext(element, document, writerConfig));
 			return;
 		}
 
@@ -264,7 +250,7 @@ class BeanToDocPopulator
 				continue;
 			}
 			
-			if(isAttributeType(prop.getType()))
+			if(XMLUtil.isAttributeType(prop.getType()))
 			{
 				addAttributableProperty(document, element, value, prop);
 				continue;

@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class XMLUtil
@@ -301,5 +302,25 @@ public class XMLUtil
 		
 		matcher.appendTail(builder);
 		return builder.toString();
+	}
+
+	/**
+	 * Returns true if specified type is supported in attribute.
+	 * @param type
+	 * @return
+	 */
+	public static boolean isAttributeType(Class<?> type)
+	{
+		if(type.isPrimitive() || CommonUtils.isWrapperClass(type))
+		{
+			return true;
+		}
+		
+		if(String.class.equals(type) || Date.class.equals(type) || Class.class.equals(type))
+		{
+			return true;
+		}
+
+		return type.isEnum();
 	}
 }

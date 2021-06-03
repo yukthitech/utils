@@ -129,6 +129,11 @@ class SAXEventHandler extends DefaultHandler
 
 			activeNode.setTextNodeFlag(true);
 		}
+		
+		if(Object.class.equals(activeNode.getActualType()))
+		{
+			activeNode.setTextNodeFlag(true);
+		}
 
 		// check if this method is called due to meta-text node
 		if(!activeNode.isTextNode())
