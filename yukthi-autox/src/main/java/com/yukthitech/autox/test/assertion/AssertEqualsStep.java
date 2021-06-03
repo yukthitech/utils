@@ -1,5 +1,6 @@
 package com.yukthitech.autox.test.assertion;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -93,7 +94,18 @@ public class AssertEqualsStep extends AbstractValidation
 				expected, getType(expected),  
 				actual, getType(actual));
 
-		boolean res = Objects.equals(expected, actual);
+		boolean res = false;
+		
+		if((expected instanceof byte[]) && (actual instanceof byte[]))
+		{
+			exeLogger.debug("Performing byte-array comparision..");
+			res = Arrays.equals((byte[]) expected, (byte[]) actual);
+		}
+		else
+		{
+			res = Objects.equals(expected, actual);
+		}
+		
 		exeLogger.debug("Result of comparision is: {}", res);
 
 		return res;
