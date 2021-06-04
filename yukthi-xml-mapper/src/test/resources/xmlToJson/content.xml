@@ -1,4 +1,4 @@
-<dyn-content booleanValue="boolean: true" intList="int[]: 1,2,3,4" intValue="int: 100">
+<dyn-content booleanValue="boolean: true" intList="int[]: 1, 2, 3, 4" intValue="int: 100">
   <subnode name="some simple name">
     <multiLineContent>This is multi line content
 This is multi line content

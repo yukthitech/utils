@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
@@ -132,7 +133,8 @@ class SAXEventHandler extends DefaultHandler
 		
 		if(Object.class.equals(activeNode.getActualType()))
 		{
-			activeNode.setTextNodeFlag(true);
+			activeNode.appendText(text);
+			return;
 		}
 
 		// check if this method is called due to meta-text node
@@ -259,6 +261,20 @@ class SAXEventHandler extends DefaultHandler
 				throw new XMLLoadException("Failed to set dynamic property for bean \"" + beanDesc + "\" for node: " + name, ex, activeNode, saxLocator);
 			}
 			return;
+		}
+		
+		/*
+		 * If current node is NOT text node and destination type is object
+		 * 	 and if only text is found, mark current node as text node
+		 */
+		if(!activeNode.isTextNode() && Object.class.equals(activeNode.getActualType()) && StringUtils.isNotBlank(activeNode.getText()))
+		{
+			if(activeNode.hasChildNodes())
+			{
+				throw new XMLLoadException("Meta-text node encountered.\n" + "Bean Type: " + activeNode.getActualBean().getClass().getName(), activeNode, saxLocator);
+			}
+			
+			activeNode.setTextNodeFlag(true);
 		}
 
 		if(activeNode.isIDBased())

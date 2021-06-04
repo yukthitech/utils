@@ -1,8 +1,12 @@
 package com.yukthitech.ccg.xml;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
 
 public class BeanNode implements Cloneable
 {
@@ -21,6 +25,8 @@ public class BeanNode implements Cloneable
 	private String id = null;
 	private StringBuffer buff = null;
 	private boolean textNode = false;
+	
+	private List<BeanNode> childNodes;
 	
 	/**
 	 * Context attributes that can be used during node processing.
@@ -98,7 +104,22 @@ public class BeanNode implements Cloneable
 
 	void setParentNode(BeanNode parentNode)
 	{
+		if(parentNode != null)
+		{
+			if(parentNode.childNodes == null)
+			{
+				parentNode.childNodes = new ArrayList<BeanNode>();
+			}
+		
+			parentNode.childNodes.add(this);
+		}
+		
 		this.parentNode = parentNode;
+	}
+	
+	public boolean hasChildNodes()
+	{
+		return CollectionUtils.isNotEmpty(childNodes);
 	}
 
 	public String getNameSpace()

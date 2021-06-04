@@ -110,4 +110,14 @@ public class XmlWriterContext
 	{
 		return writerConfig;
 	}
+	
+	/**
+	 * Checks whether specified property name can be added as attribute or not.
+	 * @param name
+	 * @return
+	 */
+	public boolean isAttributable(String name)
+	{
+		return writerConfig.isAttributable(getElement().getTagName(), name);
+	}
 }

@@ -251,7 +251,7 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 		{
 			context.addCdataElement(name, strValue);
 		}
-		else if(nonAttribute || strValue.length() > 50 || strValue.contains("\n") || strValue.contains("\t"))
+		else if(nonAttribute || !context.isAttributable(name) || strValue.length() > 50 || strValue.contains("\n") || strValue.contains("\t"))
 		{
 			context.addTextElement(name, strValue);
 		}

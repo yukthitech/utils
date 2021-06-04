@@ -164,22 +164,22 @@ public class TypeConversionUtils
 			
 			if(Integer.class.equals(type))
 			{
-				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(","));
+				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(", "));
 				return "int[]: " + str;
 			}
 			else if(Long.class.equals(type))
 			{
-				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(","));
+				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(", "));
 				return "long[]: " + str;
 			}
 			else if(Boolean.class.equals(type))
 			{
-				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(","));
+				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(", "));
 				return "boolean[]: " + str;
 			}
 			else if(String.class.equals(type))
 			{
-				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(","));
+				String str = lst.stream().map(obj -> obj.toString()).collect(Collectors.joining(", "));
 				return "string[]: " + str;
 			}
 		}

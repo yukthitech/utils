@@ -132,4 +132,16 @@ public class XmlWriterConfig
 	{
 		this.excludeXmlDeclaration = excludeXmlDeclaration;
 	}
+	
+	/**
+	 * Method which tells whether a particular text value can be attribute or not. By default all text values
+	 * can be attributes. This method can be overridden to provide custom implementation.
+	 * @param nodeName parent node name
+	 * @param propName Property name
+	 * @return true if specified property can be attribute 
+	 */
+	public boolean isAttributable(String nodeName, String propName)
+	{
+		return true;
+	}
 }
