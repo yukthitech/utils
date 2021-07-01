@@ -1,8 +1,13 @@
 package com.yukthitech.autox.test.rest.steps;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -26,8 +31,54 @@ import com.yukthitech.utils.rest.RestResult;
  */
 public abstract class AbstractRestStep extends AbstractStep
 {
-	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
+	
+	public static class KeyValueEntry implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * name.
+		 */
+		@Param(description = "Name.", required = true)
+		private String name;
+		
+		/**
+		 * Value.
+		 */
+		@Param(description = "Value.", required = true)
+		private String value;
+		
+		/**
+		 * Condition when this key-value entry should be used.
+		 */
+		@Param(description = "Condition when this entry should be included. If specified this entry will be included only if this condition evaluates to true.", required = false)
+		private String condition;
+		
+		public KeyValueEntry()
+		{}
+		
+		public KeyValueEntry(String name, String value)
+		{
+			this.name = name;
+			this.value = value;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public void setValue(String value)
+		{
+			this.value = value;
+		}
+
+		public void setCondition(String condition)
+		{
+			this.condition = condition;
+		}
+	}
 	
 	/**
 	 * Base Url to be used. 
@@ -50,22 +101,22 @@ public abstract class AbstractRestStep extends AbstractStep
 	/**
 	 * Headers to be added to the request.
 	 */
-	protected Map<String, String> headers = new HashMap<>();
+	protected List<KeyValueEntry> headers = new ArrayList<>();
 	
 	/**
 	 * Path variables to be replaced.
 	 */
-	protected Map<String, String> pathVariables = new HashMap<>();
+	protected List<KeyValueEntry> pathVariables = new ArrayList<>();
 	
 	/**
 	 * Path variables to be replaced.
 	 */
-	protected Map<String, String> params = new HashMap<>();
+	protected List<KeyValueEntry> params = new ArrayList<>();
 	
 	/**
 	 * Form fields.
 	 */
-	protected Map<String, String> formFields = new HashMap<>();
+	protected List<KeyValueEntry> formFields = new ArrayList<>();
 
 	/**
 	 * Expected response type. Default: String.
@@ -125,7 +176,18 @@ public abstract class AbstractRestStep extends AbstractStep
 	@ChildElement(description = "Http Header for the request", key = "name", keyDescription = "Name of the header")
 	public void addHeader(String name, String value)
 	{
-		headers.put(name, value);
+		headers.add(new KeyValueEntry(name, value));
+	}
+	
+	@ChildElement(description = "Http Header for the request")
+	public void addRequestHeader(KeyValueEntry entry)
+	{
+		if(StringUtils.isBlank(entry.name))
+		{
+			throw new InvalidArgumentException("Name cannot be empty");
+		}
+		
+		headers.add(entry);
 	}
 	
 	/**
@@ -136,9 +198,20 @@ public abstract class AbstractRestStep extends AbstractStep
 	@ChildElement(description = "Path variable to be replaced in the URI", key = "name", keyDescription = "Name of the path variable")
 	public void addPathVariable(String name, String value)
 	{
-		pathVariables.put(name, value);
+		pathVariables.add(new KeyValueEntry(name, value));
 	}
 	
+	@ChildElement(description = "Path variable to be replaced in the URI")
+	public void addRequestPathVariable(KeyValueEntry entry)
+	{
+		if(StringUtils.isBlank(entry.name))
+		{
+			throw new InvalidArgumentException("Name cannot be empty");
+		}
+		
+		pathVariables.add(entry);
+	}
+
 	/**
 	 * Sets the expected response type. Default: String.
 	 *
@@ -177,13 +250,35 @@ public abstract class AbstractRestStep extends AbstractStep
 	@ChildElement(description = "Request parameter of current request", key = "name", keyDescription = "Name of the parameter.")
 	public void addParam(String name, String value)
 	{
-		params.put(name, value);
+		params.add(new KeyValueEntry(name, value));
 	}
 	
+	@ChildElement(description = "Request parameter of current request")
+	public void addRequestParam(KeyValueEntry entry)
+	{
+		if(StringUtils.isBlank(entry.name))
+		{
+			throw new InvalidArgumentException("Name cannot be empty");
+		}
+		
+		params.add(entry);
+	}
+
 	@ChildElement(description = "Form field for current request", key = "name", keyDescription = "Name of the field.")
 	public void addFormField(String name, String value)
 	{
-		formFields.put(name, value);
+		formFields.add(new KeyValueEntry(name, value));
+	}
+
+	@ChildElement(description = "Form field for current request")
+	public void addRequestFormField(KeyValueEntry entry)
+	{
+		if(StringUtils.isBlank(entry.name))
+		{
+			throw new InvalidArgumentException("Name cannot be empty");
+		}
+		
+		formFields.add(entry);
 	}
 
 	/**
@@ -212,6 +307,29 @@ public abstract class AbstractRestStep extends AbstractStep
 		
 		this.proxyHostPort = proxyHostPort;
 	}
+	
+	private Map<String, String> toMap(AutomationContext context, String type, List<KeyValueEntry> lst)
+	{
+		Map<String, String> res = new HashMap<String, String>();
+		
+		for(KeyValueEntry entry : lst)
+		{
+			if(StringUtils.isNotBlank(entry.condition))
+			{
+				boolean condRes = AutomationUtils.evaluateCondition(context, entry.condition);
+			
+				if(!condRes)
+				{
+					context.getExecutionLogger().debug("Excluding {} with name '{}' as condition evaluated to false.", type, entry.name);
+					continue;
+				}
+			}
+			
+			res.put(entry.name, entry.value);
+		}
+		
+		return res;
+	}
 
 	/**
 	 * Populates the request with specified headers, params and path variables.
@@ -230,6 +348,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		RestPlugin restPlugin = context.getPlugin(RestPlugin.class);
 		
 		Map<String, String> defaultHeaders = new HashMap<>( restPlugin.getDefaultHeaders() );
+		Map<String, String> headers = toMap(context, "header", this.headers);
 		
 		if(!defaultHeaders.isEmpty())
 		{
@@ -253,10 +372,14 @@ public abstract class AbstractRestStep extends AbstractStep
 			request.addHeader(name, headers.get(name));
 		}
 		
+		Map<String, String> pathVariables = toMap(context, "path-variable", this.pathVariables);
+		
 		for(String name : pathVariables.keySet())
 		{
 			request.addPathVariable(name, pathVariables.get(name));
 		}
+		
+		Map<String, String> params = toMap(context, "param", this.params);
 		
 		for(String name : params.keySet())
 		{
@@ -267,6 +390,8 @@ public abstract class AbstractRestStep extends AbstractStep
 		{
 			RestRequestWithBody<?> requestWithBody = (RestRequestWithBody) request;
 
+			Map<String, String> formFields = toMap(context, "form-field", this.formFields);
+			
 			for(String name : formFields.keySet())
 			{
 				requestWithBody.addFormField(name, formFields.get(name));

@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -63,6 +65,17 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 		
 		for(HttpPart partEntry : parts)
 		{
+			if(StringUtils.isNotBlank(partEntry.getCondition()))
+			{
+				boolean condRes = AutomationUtils.evaluateCondition(context, partEntry.getCondition());
+			
+				if(!condRes)
+				{
+					context.getExecutionLogger().debug("Excluding part with name '{}' as condition evaluated to false.", partEntry.getName());
+					continue;
+				}
+			}
+
 			exeLogger.debug("Adding part with name: {}", partEntry.getName());
 			
 			if(partEntry.getValue() instanceof String)
@@ -84,6 +97,17 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 		
 		for(HttpAttachment attachment : attachments)
 		{
+			if(StringUtils.isNotBlank(attachment.getCondition()))
+			{
+				boolean condRes = AutomationUtils.evaluateCondition(context, attachment.getCondition());
+			
+				if(!condRes)
+				{
+					context.getExecutionLogger().debug("Excluding attachment with name '{}' as condition evaluated to false.", attachment.getName());
+					continue;
+				}
+			}
+
 			exeLogger.debug("Adding attachment with name: {}", attachment.getName());
 			
 			resource = ResourceFactory.getResource(context, attachment.getFile(), exeLogger, attachment.isParseAsTemplate());

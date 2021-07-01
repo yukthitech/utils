@@ -14,6 +14,10 @@ import com.yukthitech.ccg.xml.util.Validateable;
  */
 public class HttpAttachment implements Validateable, Serializable
 {
+	
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -31,8 +35,15 @@ public class HttpAttachment implements Validateable, Serializable
 	/**
 	 * Flag indicating if the attachment should be parsed as free marker template.
 	 */
+	@Param(name = "parseAsTemplate", description = "Flag indicating if the attachment should be parsed as free marker template. Defaults to false", required = false)
 	private boolean parseAsTemplate = false;
-	
+
+	/**
+	 * Condition for this condition. If specified, this attachement will be included if condition evaluates to true.
+	 */
+	@Param(name = "condition", description = "Condition for this condition. If specified, this attachement will be included if condition evaluates to true.", required = false)
+	private String condition;
+
 	/**
 	 * Instantiates a new http attachment.
 	 */
@@ -111,6 +122,29 @@ public class HttpAttachment implements Validateable, Serializable
 	public void setParseAsTemplate(boolean parseAsTemplate)
 	{
 		this.parseAsTemplate = parseAsTemplate;
+	}
+
+	/**
+	 * Gets the condition for this condition. If specified, this attachement
+	 * will be included if condition evaluates to true.
+	 *
+	 * @return the condition for this condition
+	 */
+	public String getCondition()
+	{
+		return condition;
+	}
+
+	/**
+	 * Sets the condition for this condition. If specified, this attachement
+	 * will be included if condition evaluates to true.
+	 *
+	 * @param condition
+	 *            the new condition for this condition
+	 */
+	public void setCondition(String condition)
+	{
+		this.condition = condition;
 	}
 
 	@Override

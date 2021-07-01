@@ -15,6 +15,10 @@ import com.yukthitech.ccg.xml.util.Validateable;
  */
 public class HttpPart implements Serializable, Validateable
 {
+	
+	/**
+	 * The Constant serialVersionUID.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -32,7 +36,14 @@ public class HttpPart implements Serializable, Validateable
 	/**
 	 * Content type of the part. By default is is json part.
 	 */
+	@Param(name = "contentType", description = "Content type of the part. By default is is json part.", required = false)
 	private String contentType = IRestConstants.JSON_CONTENT_TYPE;
+
+	/**
+	 * Condition for this part. If specified, this part will be included if condition evaluates to true.
+	 */
+	@Param(name = "condition", description = "Condition for this part. If specified, this part will be included if condition evaluates to true.", required = false)
+	private String condition;
 
 	/**
 	 * Gets the name of the part.
@@ -92,6 +103,29 @@ public class HttpPart implements Serializable, Validateable
 	public void setContentType(String contentType)
 	{
 		this.contentType = contentType;
+	}
+	
+	/**
+	 * Gets the condition for this part. If specified, this part will be
+	 * included if condition evaluates to true.
+	 *
+	 * @return the condition for this part
+	 */
+	public String getCondition()
+	{
+		return condition;
+	}
+
+	/**
+	 * Sets the condition for this part. If specified, this part will be
+	 * included if condition evaluates to true.
+	 *
+	 * @param condition
+	 *            the new condition for this part
+	 */
+	public void setCondition(String condition)
+	{
+		this.condition = condition;
 	}
 
 	@Override

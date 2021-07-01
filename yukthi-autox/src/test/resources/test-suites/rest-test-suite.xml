@@ -82,6 +82,7 @@
 			<s:assert-equals actual="prop: attr.result.statusCode" expected="int: 200"/>
 		
 			<s:rest-invoke-get uri="/emp/get/{id}">
+				<requestParam name="" value="" condition="" />
 				<pathVariable name="id">${attr.emp2_id}</pathVariable>
 			</s:rest-invoke-get>
 		

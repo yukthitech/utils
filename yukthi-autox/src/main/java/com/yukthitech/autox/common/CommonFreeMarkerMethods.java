@@ -54,6 +54,37 @@ public class CommonFreeMarkerMethods
 		}
 	}
 	
+	
+	@FreeMarkerMethod(
+			description = "Checks if specified file path exists or not.",
+			returnDescription = "Path to be checked"
+			)
+	public static boolean fileExists(
+			@FmParam(name = "path", description = "Path to be checked") String path)
+	{
+		return new File(path).exists();
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified file path is a file or not.",
+			returnDescription = "Path to be checked"
+			)
+	public static boolean isFile(
+			@FmParam(name = "path", description = "Path to be checked") String path)
+	{
+		return new File(path).isFile();
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified file path is a directory or not.",
+			returnDescription = "Path to be checked"
+			)
+	public static boolean isDirectory(
+			@FmParam(name = "path", description = "Path to be checked") String path)
+	{
+		return new File(path).isDirectory();
+	}
+
 	/**
 	 * Fetches the value for specified xpath.
 	 * @param source source on which xpath has to be fetched.
@@ -300,6 +331,37 @@ public class CommonFreeMarkerMethods
 			)
 	{
 		return (value == null) ? nullValue : nonNullValue;
+	}
+
+	@FreeMarkerMethod(
+			description = "Used to check if specified value is true and return approp value"
+					+ " Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.",
+			returnDescription = "Specified true-condition-value or false-condition-value."
+			)
+	public static Object ifTrue(
+			@FmParam(name = "value", description = "Value to be checked for true.") Object value,
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true") Object trueValue,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false") Object falseValue
+			)
+	{
+		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
+		
+		return bvalue ? trueValue : falseValue;
+	}
+
+	@FreeMarkerMethod(
+			description = "Used to check if specified value is false and return approp value"
+					+ " Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.",
+			returnDescription = "Specified true-condition-value or false-condition-value."
+			)
+	public static Object ifFalse(
+			@FmParam(name = "value", description = "Value to be checked for true. Can be boolean true or string 'true'") Object value,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false") Object falseValue,
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true") Object trueValue
+			)
+	{
+		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
+		return bvalue ? trueValue : falseValue;
 	}
 
 	@FreeMarkerMethod(

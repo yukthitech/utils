@@ -166,23 +166,6 @@ public class TestSuiteExecutor
 			return result;
 		}
 		
-		List<TestCaseData> dataLst = null;
-		context.setActiveTestCase(testCase, null);
-		
-		try
-		{
-			dataLst = dataProvider.getStepData();
-		} finally
-		{
-			context.clearActiveTestCase();
-		}
-
-		//Log error and fail test case if data is missing
-		if(dataLst == null)
-		{
-			return new TestCaseResult(testCase, TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName());
-		}
-		
 		TestCaseResult result = null;
 		ExecutionLogger exeLogger = null;
 		String name = null;
@@ -217,6 +200,23 @@ public class TestSuiteExecutor
 			
 			result.setTestCaseName(name);
 			testCaseDataResults.add(result);
+		}
+
+		List<TestCaseData> dataLst = null;
+		context.setActiveTestCase(testCase, null);
+		
+		try
+		{
+			dataLst = dataProvider.getStepData();
+		} finally
+		{
+			context.clearActiveTestCase();
+		}
+
+		//Log error and fail test case if data is missing
+		if(dataLst == null)
+		{
+			return new TestCaseResult(testCase, TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName());
 		}
 
 		for(TestCaseData data : dataLst)
