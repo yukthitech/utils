@@ -121,7 +121,7 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 			fos.close();
 			resource.close();
 			
-			postRestRequest.addAttachment(attachment.getName(), file, null);
+			postRestRequest.addAttachment(attachment.getName(), attachment.getFileName(), file, null);
 			filesToDelete.add(file);
 		}
 		

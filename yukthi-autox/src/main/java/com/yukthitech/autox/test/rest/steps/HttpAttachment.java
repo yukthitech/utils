@@ -33,6 +33,12 @@ public class HttpAttachment implements Validateable, Serializable
 	private String file;
 	
 	/**
+	 * File name to be used for attachment.
+	 */
+	@Param(name = "fileName", description = "File name to be used for attachment", required = false)
+	private String fileName;
+	
+	/**
 	 * Flag indicating if the attachment should be parsed as free marker template.
 	 */
 	@Param(name = "parseAsTemplate", description = "Flag indicating if the attachment should be parsed as free marker template. Defaults to false", required = false)
@@ -50,19 +56,6 @@ public class HttpAttachment implements Validateable, Serializable
 	public HttpAttachment()
 	{}
 
-	/**
-	 * Instantiates a new http attachment.
-	 *
-	 * @param name the name
-	 * @param file the file
-	 * @param parseAsTemplate the parse as template
-	 */
-	public HttpAttachment(String name, String file, boolean parseAsTemplate)
-	{
-		this.name = name;
-		this.file = file;
-		this.parseAsTemplate = parseAsTemplate;
-	}
 
 	/**
 	 * Gets the name of the attachment.
@@ -145,6 +138,27 @@ public class HttpAttachment implements Validateable, Serializable
 	public void setCondition(String condition)
 	{
 		this.condition = condition;
+	}
+	
+	/**
+	 * Gets the file name to be used for attachment.
+	 *
+	 * @return the file name to be used for attachment
+	 */
+	public String getFileName()
+	{
+		return fileName;
+	}
+
+	/**
+	 * Sets the file name to be used for attachment.
+	 *
+	 * @param fileName
+	 *            the new file name to be used for attachment
+	 */
+	public void setFileName(String fileName)
+	{
+		this.fileName = fileName;
 	}
 
 	@Override
