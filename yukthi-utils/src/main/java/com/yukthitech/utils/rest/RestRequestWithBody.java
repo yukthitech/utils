@@ -422,7 +422,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 					}
 					else
 					{
-						builder.addPart(part.name, new FileBody(fileInfo.getFile()));
+						builder.addPart(part.name, new FileBody(fileInfo.getFile(), ContentType.DEFAULT_BINARY, fileInfo.getName()));
 					}
 				}
 				else if(part.partType == PartType.TEXT)
