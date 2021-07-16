@@ -395,4 +395,52 @@ public class CommonFreeMarkerMethods
 		String resJson = JSON_EXPR_ENGINE.processJson(templateStr, localContext);
 		return resJson;
 	}
+	
+	@SuppressWarnings({ "unchecked"})
+	@FreeMarkerMethod(
+			description = "Checks whether specified value is present in specified collection/map. If map, value will be searched as key. "
+					+ "If collection is null or non-collection and non-map, then nullValue will be returned.",
+			returnDescription = "True if value/key is present in collection/map."
+			)
+	public static Boolean contains(
+			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
+			@FmParam(name = "value", description = "Value/key to be searched") Object value,
+			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type") Boolean nullVal
+			) throws Exception
+	{
+		if(collection instanceof Collection)
+		{
+			Collection<Object> col = (Collection<Object>) collection;
+			return col.contains(value);
+		}
+		
+		if(collection instanceof Map)
+		{
+			Map<Object, Object> map = (Map<Object, Object>) collection;
+			return map.containsKey(value);
+		}
+		
+		return nullVal;
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks whether specified value is NOT present in specified collection/map. If map, value will be searched as key. "
+					+ "If collection is null or non-collection and non-map, then nullValue will be returned.",
+			returnDescription = "True if value/key is NOT present in collection/map."
+			)
+	public static Boolean notContains(
+			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
+			@FmParam(name = "value", description = "Value/key to be searched") Object value,
+			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type") Boolean nullVal
+			) throws Exception
+	{
+		Boolean res = contains(collection, value, null);
+		
+		if(res == null)
+		{
+			return nullVal;
+		}
+
+		return res;
+	}
 }
