@@ -16,12 +16,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -922,5 +924,38 @@ public class AutomationUtils
 		{
 			throw new InvalidStateException("An error occurred while converting object to json", ex);
 		}
+	}
+	
+	public static String getTimeTaken(Date startTime, Date endTime)
+	{
+		if(startTime == null || endTime == null)
+		{
+			return null;
+		}
+		
+		long diff = endTime.getTime() - startTime.getTime();
+		
+		long hours = TimeUnit.HOURS.convert(diff, TimeUnit.MILLISECONDS);
+		diff = diff - hours * 3600_000;
+		
+		long minutes = TimeUnit.MINUTES.convert(diff, TimeUnit.MILLISECONDS);
+		diff = diff - minutes * 60_000;
+		
+		long seconds = TimeUnit.SECONDS.convert(diff, TimeUnit.MILLISECONDS);
+		
+		StringBuilder res = new StringBuilder();
+		
+		if(hours > 0)
+		{
+			res.append(hours).append(" Hr : ");
+		}
+
+		if(minutes > 0 || res.length() > 0)
+		{
+			res.append(minutes).append(" Min : ");
+		}
+
+		res.append(seconds).append(" Sec");
+		return res.toString();
 	}
 }

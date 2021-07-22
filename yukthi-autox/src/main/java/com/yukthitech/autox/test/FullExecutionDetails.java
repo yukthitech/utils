@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 
 /**
@@ -60,6 +61,16 @@ public class FullExecutionDetails
 	 * recursive inter dependent test cases.
 	 */
 	private Set<String> inprogressTestCases = new HashSet<>();
+	
+	/**
+	 * Start time of this execution.
+	 */
+	private Date startTime;
+	
+	/**
+	 * End time of this execution.
+	 */
+	private Date endTime;
 
 	/**
 	 * Gets the name of the report.
@@ -366,6 +377,8 @@ public class FullExecutionDetails
 		
 		results.setStatus(status);
 		results.setStatusMessage(statusMessage);
+		results.setEndTime(new Date());
+		
 		return results;
 	}
 	
@@ -517,5 +530,30 @@ public class FullExecutionDetails
 	public boolean isTestCaseInProgress(String testCase)
 	{
 		return inprogressTestCases.contains(testCase);
+	}
+
+	public Date getStartTime()
+	{
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime)
+	{
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime()
+	{
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime)
+	{
+		this.endTime = endTime;
+	}
+	
+	public String getTimeTaken()
+	{
+		return AutomationUtils.getTimeTaken(startTime, endTime);
 	}
 }

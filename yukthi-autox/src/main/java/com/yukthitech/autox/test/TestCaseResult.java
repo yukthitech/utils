@@ -1,10 +1,12 @@
 package com.yukthitech.autox.test;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 
 /**
@@ -53,22 +55,36 @@ public class TestCaseResult
 	 */
 	private boolean accumlatedResult = false;
 
-	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, String message)
+	/**
+	 * Start time of test suite.
+	 */
+	private Date startTime = new Date();
+	
+	/**
+	 * End time of test suite.
+	 */
+	private Date endTime;
+
+	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, 
+			String message, Date startTime, Date endTime)
 	{
-		this(testCase, testCase.getName(), status, executionLog, message, false);
+		this(testCase, testCase.getName(), status, executionLog, message, false, startTime, endTime);
 	}
 	
-	public TestCaseResult(TestCase testCase, String effectiveName, TestStatus status, ExecutionLogData executionLog, String message)
+	public TestCaseResult(TestCase testCase, String effectiveName, TestStatus status, 
+			ExecutionLogData executionLog, String message, Date startTime, Date endTime)
 	{
-		this(testCase, effectiveName, status, executionLog, message, false);
+		this(testCase, effectiveName, status, executionLog, message, false, startTime, endTime);
 	}
 
-	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, String message, boolean accumlatedResult)
+	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, String message, 
+			boolean accumlatedResult, Date startTime, Date endTime)
 	{
-		this(testCase, testCase.getName(), status, executionLog, message, accumlatedResult);
+		this(testCase, testCase.getName(), status, executionLog, message, accumlatedResult, startTime, endTime);
 	}
 
-	public TestCaseResult(TestCase testCase, String effectiveName, TestStatus status, ExecutionLogData executionLog, String message, boolean accumlatedResult)
+	public TestCaseResult(TestCase testCase, String effectiveName, TestStatus status, ExecutionLogData executionLog, 
+			String message, boolean accumlatedResult, Date startTime, Date endTime)
 	{
 		this.testCaseName = effectiveName;
 		this.author = testCase != null? testCase.getAuthor() : null;
@@ -77,6 +93,9 @@ public class TestCaseResult
 		this.executionLog = executionLog;
 		this.message = message;
 		this.accumlatedResult = accumlatedResult;
+		
+		this.startTime = startTime;
+		this.endTime = endTime;
 	}
 	
 	public String getAuthor()
@@ -219,5 +238,30 @@ public class TestCaseResult
 	public boolean isAccumlatedResult()
 	{
 		return accumlatedResult;
+	}
+
+	public Date getStartTime()
+	{
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime)
+	{
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime()
+	{
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime)
+	{
+		this.endTime = endTime;
+	}
+	
+	public String getTimeTaken()
+	{
+		return AutomationUtils.getTimeTaken(startTime, endTime);
 	}
 }

@@ -144,6 +144,10 @@
 			</table>
 			<table style="width: 100%;">
 				<tr>
+					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em; 
+						width: 2px; white-space: nowrap; color: white; border: 1px solid;">
+						Total Time Taken: {{testResults.timeTaken}}
+					</td>
 					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
 						<a href="./log.html?_global-setup" 
 							style="color: white; padding: 3px; background-color: {{testResults.setupSuccessful? 'inherit' : 'red'}};">Common startup Log</a>
@@ -163,6 +167,7 @@
 				<tr>
 					<th style="width: 1em; white-space: nowrap;">Test Suite</th>
 					<th style="width: 1em;">Status</th>
+					<th style="width: 1em; white-space: nowrap;">Time Taken</th>
 					<th style="width: 1em; white-space: nowrap;">Total Count</th>
 					<th style="width: 1em; white-space: nowrap;">Success Count</th>
 					<th style="width: 1em; white-space: nowrap;">Failure Count</th>
@@ -176,6 +181,9 @@
 					</td>
 					<td ng-class="result.status == 'SUCCESSFUL' ? 'successVal' : 'errorVal'">
 						{{result.status}}	
+					</td>
+					<td class="defaultVal">
+						{{result.timeTaken}}	
 					</td>
 					<td class="defaultVal">
 						{{result.totalCount}}	
@@ -211,6 +219,7 @@
 				<tr>
 					<th>Test Case</th>
 					<th>Status</th>
+					<th>Time Taken</th>
 					<th>Message</th>
 					<th>Log</th>
 				</tr>
@@ -218,8 +227,11 @@
 					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;">
 						{{suiteResult.testCaseName}}
 					</td>
-					<td ng-class="suiteResult.status != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 20%;">
+					<td ng-class="suiteResult.status != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 15%;">
 						{{suiteResult.status}}
+					</td>
+					<td style="width: 5%; text-align: left; padding-left: 1em;">
+						{{suiteResult.timeTaken}}
 					</td>
 					<td style="width: 50%; text-align: left; padding-left: 1em; word-break: break-word;">
 						{{suiteResult.message}}

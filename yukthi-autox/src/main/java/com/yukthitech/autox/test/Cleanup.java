@@ -1,6 +1,7 @@
 package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -100,6 +101,8 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 		{
 			exeLogger.debug("Starting cleanup process");
 			
+			Date startTime = new Date();
+			
 			// execute the steps involved
 			for(IStep step : steps)
 			{
@@ -110,20 +113,22 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 				{
 					exeLogger.error(ex, "An error occurred while executing step - " + step);
 	
-					TestCaseResult result = StepExecutor.handleException(context, new TestCase(NAME), step, exeLogger, ex, null);
+					TestCaseResult result = StepExecutor.handleException(context, new TestCase(NAME), step, exeLogger, ex, null, startTime);
 					
 					if(result != null)
 					{
 						return result;
 					}
 					
-					return new TestCaseResult(null, NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step);
+					return new TestCaseResult(null, NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step,
+							startTime, new Date());
 				}
 			}
 			
 			exeLogger.debug("Completed cleanup process");
 	
-			return new TestCaseResult(null, NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			return new TestCaseResult(null, NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
+					startTime, new Date());
 		}finally
 		{
 			context.getExecutionStack().pop(this);

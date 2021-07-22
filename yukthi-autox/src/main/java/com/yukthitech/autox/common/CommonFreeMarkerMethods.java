@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,60 @@ public class CommonFreeMarkerMethods
 		}
 	}
 	
-	
+	@FreeMarkerMethod(
+			description = "Converts the given value to string. If null, null will be returned.",
+			returnDescription = "String converted value"
+			)
+	public static String toString(
+			@FmParam(name = "value", description = "Value to convert") Object value)
+	{
+		if(value == null)
+		{
+			return null;
+		}
+		
+		return value.toString();
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified date into millis.",
+			returnDescription = "Millis value"
+			)
+	public static Long toMillis(
+			@FmParam(name = "date", description = "Date to be converted") Date date)
+	{
+		if(date == null)
+		{
+			return null;
+		}
+		
+		return date.getTime();
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified substring can be found in main string",
+			returnDescription = "true, if substring can be found."
+			)
+	public static boolean strContains(
+			@FmParam(name = "mainString", description = "Main string in which search has to be performed") String mainStr,
+			@FmParam(name = "substr", description = "Substring to be searched") String substr,
+			@FmParam(name = "ignoreCase", description = "Flag to indicate if case has to be ignored during search") boolean ignoreCase
+			)
+	{
+		if(mainStr == null || substr == null)
+		{
+			return false;
+		}
+		
+		if(ignoreCase)
+		{
+			mainStr = mainStr.toLowerCase();
+			substr = mainStr.toLowerCase();
+		}
+		
+		return mainStr.contains(substr);
+	}
+
 	@FreeMarkerMethod(
 			description = "Checks if specified file path exists or not.",
 			returnDescription = "Path to be checked"

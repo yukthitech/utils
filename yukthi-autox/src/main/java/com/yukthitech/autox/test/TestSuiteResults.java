@@ -1,11 +1,13 @@
 package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yukthitech.autox.common.AutomationUtils;
 
 /**
  * All test case results of test suite.
@@ -54,6 +56,16 @@ public class TestSuiteResults
 	 * Status message.
 	 */
 	private String statusMessage;
+	
+	/**
+	 * Start time of test suite.
+	 */
+	private Date startTime = new Date();
+	
+	/**
+	 * End time of test suite.
+	 */
+	private Date endTime;
 
 	/**
 	 * Instantiates a new test suite results.
@@ -273,5 +285,30 @@ public class TestSuiteResults
 	public void setCleanupSuccessful(boolean cleanupSuccessful)
 	{
 		this.cleanupSuccessful = cleanupSuccessful;
+	}
+
+	public Date getStartTime()
+	{
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime)
+	{
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime()
+	{
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime)
+	{
+		this.endTime = endTime;
+	}
+	
+	public String getTimeTaken()
+	{
+		return AutomationUtils.getTimeTaken(startTime, endTime);
 	}
 }

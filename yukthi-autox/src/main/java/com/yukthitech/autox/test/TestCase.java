@@ -3,6 +3,7 @@ package com.yukthitech.autox.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -491,6 +492,7 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 		}
 		
 		boolean expectedExcpetionOccurred = false;
+		Date startTime = new Date();
 		
 		if(setup != null)
 		{
@@ -499,7 +501,8 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 			
 			if(result.getStatus() != TestStatus.SUCCESSFUL)
 			{
-				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Setup execution failed.");
+				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Setup execution failed.",
+						startTime, new Date());
 			}
 		}
 		
@@ -517,7 +520,8 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 					if(action == InteractiveExecutionController.Action.STOP_EXECUTION)
 					{
 						logger.debug("Because of stop point at {}#{} stopping the execution", file.getName(), step.getLineNumber());
-						return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+						return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
+								startTime, new Date());
 					}
 				}
 				
@@ -532,7 +536,7 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 						break;
 					}
 					
-					TestCaseResult result = StepExecutor.handleException(context, this, name, step, exeLogger, ex, expectedException);
+					TestCaseResult result = StepExecutor.handleException(context, this, name, step, exeLogger, ex, expectedException, startTime);
 					
 					if(result != null)
 					{
@@ -546,10 +550,13 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 
 			if(expectedException != null && !expectedExcpetionOccurred)
 			{
-				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Expected exception '" + expectedException.getType() + "' did not occur.");
+				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), 
+						"Expected exception '" + expectedException.getType() + "' did not occur.",
+						startTime, new Date());
 			}
 
-			return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
+					startTime, new Date());
 		}finally
 		{
 			if(cleanup != null)

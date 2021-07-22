@@ -155,7 +155,7 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 				{
 					logger.error("An error occurred while executing interactive step: " + step, ex);
 					
-					StepExecutor.handleException(automationContext, testCase, step, executionLogger, ex, null);
+					StepExecutor.handleException(automationContext, testCase, step, executionLogger, ex, null, null);
 					break;
 				}
 			}

@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-automation</artifactId>
-			<version>1.6.10-SNAPSHOT</version>
+			<version>1.6.12-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-webmvc</artifactId>

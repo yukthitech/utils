@@ -36,6 +36,7 @@
 					string: Value: ${attr.testAttr + ' #{test.app.prop}'}
 				</value>
 			</s:set>
+			
 		
 			<s:assert-equals actual="attr: testAttr2" expected="string: Value: TestValue"/>
 		

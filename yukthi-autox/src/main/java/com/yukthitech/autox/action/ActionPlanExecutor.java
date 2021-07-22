@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -205,6 +206,7 @@ public class ActionPlanExecutor
 		context.startLogMonitoring();
 		
 		boolean result = true;
+		Date startTime = new Date();
 		
 		//execute action plan steps
 		for(IStep step : actionPlan.getSteps())
@@ -215,7 +217,7 @@ public class ActionPlanExecutor
 			} catch(Exception ex)
 			{
 				result = false;
-				StepExecutor.handleException(context, dummy, step, exeLogger, ex, null);
+				StepExecutor.handleException(context, dummy, step, exeLogger, ex, null, startTime);
 				break;
 			}
 		}
@@ -225,11 +227,13 @@ public class ActionPlanExecutor
 		
 		if(result)
 		{
-			testCaseResult = new TestCaseResult(dummy, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null);
+			testCaseResult = new TestCaseResult(dummy, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
+					startTime, new Date());
 		}
 		else
 		{
-			testCaseResult = new TestCaseResult(dummy, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Action plan execution failed.");
+			testCaseResult = new TestCaseResult(dummy, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Action plan execution failed.",
+					startTime, new Date());
 		}
 		
 		FullExecutionDetails fullExecutionDetails = new FullExecutionDetails();

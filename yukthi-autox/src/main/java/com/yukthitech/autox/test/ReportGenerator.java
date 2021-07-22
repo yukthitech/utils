@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -92,8 +93,8 @@ public class ReportGenerator
 			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(fullExecutionDetails);
 			String jsContent = "var reportData = " + jsonContent;
 
-			FileUtils.write(new File(reportFolder, "test-results.json"), jsonContent);
-			FileUtils.write(new File(reportFolder, "test-results.js"), jsContent);
+			FileUtils.write(new File(reportFolder, "test-results.json"), jsonContent, Charset.defaultCharset());
+			FileUtils.write(new File(reportFolder, "test-results.js"), jsContent, Charset.defaultCharset());
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while generating test result report");
@@ -117,11 +118,11 @@ public class ReportGenerator
 				generateHeaderAndFooter(context, summaryNotificationConfig);
 			}
 
-			String reportTemplate = IOUtils.toString(ReportGenerator.class.getResourceAsStream(SUMMARY_REPORT_TEMPLATE));
+			String reportTemplate = IOUtils.toString(ReportGenerator.class.getResourceAsStream(SUMMARY_REPORT_TEMPLATE), Charset.defaultCharset());
 			String summaryResult = FreeMarkerMethodManager.replaceExpressions("reportTemplate", context, reportTemplate);
 
 			File summaryHtml = new File(reportFolder, "summary-report.html");
-			FileUtils.write(summaryHtml, summaryResult);
+			FileUtils.write(summaryHtml, summaryResult, Charset.defaultCharset());
 
 			//send notification mail
 			if(summaryNotificationConfig != null)
@@ -161,7 +162,7 @@ public class ReportGenerator
 			return "";
 		}
 		
-		String content = FileUtils.readFileToString(file);
+		String content = FileUtils.readFileToString(file, Charset.defaultCharset());
 		return FreeMarkerMethodManager.replaceExpressions("summary-" + name + "-template", context, content);
 	}
 
@@ -210,7 +211,7 @@ public class ReportGenerator
 
 		// add body to multi part
 		BodyPart messageBodyPart = new MimeBodyPart();
-		messageBodyPart.setContent(FileUtils.readFileToString(summaryHtml), "text/html");
+		messageBodyPart.setContent(FileUtils.readFileToString(summaryHtml, Charset.defaultCharset()), "text/html");
 		multiPart.addBodyPart(messageBodyPart);
 		
 		// set the multi part message as content
@@ -256,8 +257,8 @@ public class ReportGenerator
 			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(executionLogData);
 			String jsContent = "var logData = " + jsonContent;
 			
-			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JSON), jsonContent);
-			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JS), jsContent);
+			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JSON), jsonContent, Charset.defaultCharset());
+			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JS), jsContent, Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while creating test log json file - {}", new File(logsFolder, logFilePrefix + LOG_JSON));
@@ -281,7 +282,7 @@ public class ReportGenerator
 
 					File logHtmlFile = new File(logsFolder, logFilePrefix + "_" + log.getKey() + ".log.html");
 					FileWriter writer = new FileWriter(logHtmlFile);
-					String logContent = FileUtils.readFileToString(log.getValue());
+					String logContent = FileUtils.readFileToString(log.getValue(), Charset.defaultCharset());
 					
 					freemarkerTemplate.process(new LogMonitorContext(testCaseResult.getTestCaseName(), log.getKey(), logContent, testCaseResult.getStatus(), description), writer);
 
