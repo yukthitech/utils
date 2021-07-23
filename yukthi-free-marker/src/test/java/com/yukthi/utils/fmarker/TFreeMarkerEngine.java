@@ -95,7 +95,7 @@ public class TFreeMarkerEngine
 	public void testCustomParam()
 	{
 		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
-		String template = "Obj is: ${toString(testBean)}";
+		String template = "Obj is: ${toText(testBean)}";
 		String res = freeMarkerEngine.processTemplate("Test", template, CommonUtils.toMap("testBean", new TestBean("test")));
 	
 		Assert.assertEquals(res, "Obj is: TestBean[test]");
@@ -118,5 +118,22 @@ public class TFreeMarkerEngine
 		String res = freeMarkerEngine.processTemplate("Test", template, CommonUtils.toMap("map", map));
 		
 		Assert.assertEquals(res, "Map is: one,two,three");
+	}
+	
+	@Test
+	public void testWithMissingParam()
+	{
+		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+		Object ctx = Collections.emptyMap();
+		
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains('this is good', 'IS', true)?c}", ctx), "true");
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains('this is good', 'IS', false)?c}", ctx), "false");
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains('this is good', 'good', false)?c}", ctx), "true");
+		
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains('this is good', 'IS')?c}", ctx), "false");
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains('this is good', 'is')?c}", ctx), "true");
+		
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains('this is good')?c}", ctx), "false");
+		Assert.assertEquals(freeMarkerEngine.processTemplate("Test", "${strContains()?c}", ctx), "false");
 	}
 }

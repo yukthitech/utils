@@ -406,4 +406,28 @@ public class DefaultMethods
 	{
 		return WordUtils.capitalize(str);
 	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified substring can be found in main string",
+			returnDescription = "true, if substring can be found."
+			)
+	public static boolean strContains(
+			@FmParam(name = "mainString", description = "Main string in which search has to be performed") String mainStr,
+			@FmParam(name = "substr", description = "Substring to be searched") String substr,
+			@FmParam(name = "ignoreCase", description = "Flag to indicate if case has to be ignored during search", defaultValue = "false") boolean ignoreCase
+			)
+	{
+		if(mainStr == null || substr == null)
+		{
+			return false;
+		}
+		
+		if(ignoreCase)
+		{
+			mainStr = mainStr.toLowerCase();
+			substr = mainStr.toLowerCase();
+		}
+		
+		return mainStr.contains(substr);
+	}
 }

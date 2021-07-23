@@ -6,7 +6,7 @@
 	<packaging>jar</packaging>
 
 	<name>yukthi-free-marker</name>
-	<version>1.3.2-SNAPSHOT</version>
+	<version>1.3.3-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
 
 	<properties>

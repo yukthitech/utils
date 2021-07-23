@@ -24,4 +24,10 @@ public @interface FmParam
 	 * @return
 	 */
 	public String description();
+	
+	/**
+	 * Specified default value assumed by this param.
+	 * @return default value
+	 */
+	public String defaultValue() default "";
 }

@@ -5,12 +5,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 import freemarker.template.TemplateMethodModelEx;
@@ -127,40 +128,22 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 	{
 		Class<?> argTypes[] = freeMarkerMethod.getParameterTypes();
 		boolean isVarArgs = freeMarkerMethod.isVarArgs();
-		Object methodArgs[] = null;
-		int argsSize = arguments != null ? arguments.size() : 0;
-		
-		if(!isVarArgs)
-		{
-			if(argsSize != argTypes.length)
-			{
-				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected count: {}, Actual Count: {}, Arguments: {}]", 
-						methodName, argTypes.length, argsSize, arguments);
-			}
 
-			//for normal arguments, number of method arguments will be equal to actual arguments
-			methodArgs = new Object[arguments != null ? arguments.size() : 0];
-		}
-		else
-		{
-			if(argsSize < argTypes.length - 1)
-			{
-				throw new InvalidArgumentException("Invalid number of arguments specified for method - {} [Expected min count: {}, Actual Count: {}, Arguments: {}]", 
-						methodName, argTypes.length - 1, argsSize, arguments);
-			}
-			
-			//for var args number of arguments will be equal to number of declared parameters in method
-			// 	last + extra param will be clubbed into single array for varargs
-			methodArgs = new Object[argTypes.length];
-		}
+		//for var args number of arguments will be equal to number of declared parameters in method
+		// 	last + extra param will be clubbed into single array for varargs
+		Object methodArgs[] = new Object[argTypes.length];
 		
-		if(argsSize > 0)
+		arguments = (arguments == null) ? Collections.emptyList() : arguments;
+		int argsSize = arguments.size();
+		
+		if(argTypes.length > 0)
 		{
 			int stdArgCount = isVarArgs ? argTypes.length - 1 : argTypes.length;
 			
 			for(int i = 0; i < stdArgCount; i++)
 			{
-				methodArgs[i] = convertArgument(arguments.get(i), argTypes[i]);
+				Object argVal = argsSize <= i ? CommonUtils.getDefaultValue(argTypes[i]) : arguments.get(i);
+				methodArgs[i] = convertArgument(argVal, argTypes[i]);
 			}
 			
 			if(isVarArgs && argsSize >= argTypes.length)
@@ -183,10 +166,12 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while invoking method '{}'. "
-					+ "\nJava Method: {}"
+					+ "\nJava Method: {}.{}"
 					+ "\nArguments used: {}"
 					+ "\nArguments type: {}",
-					freeMarkerMethod.getName(), freeMarkerMethod, Arrays.toString( methodArgs ), Arrays.toString( getTypes(methodArgs) ), ex);
+					methodName, 
+					freeMarkerMethod.getDeclaringClass().getName(), freeMarkerMethod.getName(), 
+					Arrays.toString( methodArgs ), Arrays.toString( getTypes(methodArgs) ), ex);
 		}
 	}
 }
