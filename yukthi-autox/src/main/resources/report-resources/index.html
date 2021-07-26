@@ -228,7 +228,7 @@
 				<tr>
 					<th>Test Case</th>
 					<th>Status</th>
-					<th>Time Taken</th>
+					<th style="white-space: nowrap;">Time Taken</th>
 					<th>Message</th>
 					<th>Log</th>
 				</tr>
@@ -239,7 +239,7 @@
 					<td ng-class="suiteResult.status != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 15%;">
 						{{suiteResult.status}}
 					</td>
-					<td style="width: 5%; text-align: left; padding-left: 1em;" class="timeDisplay">
+					<td style="width: 5%; text-align: left; padding-left: 1em; white-space: nowrap;" class="timeDisplay">
 						{{suiteResult.timeTaken}}
 					</td>
 					<td style="width: 50%; text-align: left; padding-left: 1em; word-break: break-word;">

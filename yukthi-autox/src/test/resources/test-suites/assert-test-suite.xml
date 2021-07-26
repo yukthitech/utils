@@ -15,6 +15,10 @@
 			<s:assert-equals actual="string:value" expected="string:value"/>
 		
 			<s:assert-equals actual="prop: attr.intAttr" expected="int:10"/>
+			
+			<s:assert-equals actual="expr: strContains('thisIsExpr', 'Is')" expected="boolean: true"/>
+			<s:assert-equals actual="expr: strContains('thisIsExpr', 'expr')" expected="boolean: false"/>
+			<s:assert-equals actual="expr: strContains('thisIsExpr', 'expr', true)" expected="boolean: true"/>
 		</testCase>
 	
 		<testCase name="assertNotEquals">
