@@ -54,21 +54,6 @@ public class CommonFreeMarkerMethods
 			throw new InvalidStateException("An exception occurred while fetching full path of path: {}", path, ex);
 		}
 	}
-	
-	@FreeMarkerMethod(
-			description = "Converts the given value to string. If null, null will be returned.",
-			returnDescription = "String converted value"
-			)
-	public static String toString(
-			@FmParam(name = "value", description = "Value to convert") Object value)
-	{
-		if(value == null)
-		{
-			return null;
-		}
-		
-		return value.toString();
-	}
 
 	@FreeMarkerMethod(
 			description = "Converts specified date into millis.",
@@ -83,30 +68,6 @@ public class CommonFreeMarkerMethods
 		}
 		
 		return date.getTime();
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks if specified substring can be found in main string",
-			returnDescription = "true, if substring can be found."
-			)
-	public static boolean strContains(
-			@FmParam(name = "mainString", description = "Main string in which search has to be performed") String mainStr,
-			@FmParam(name = "substr", description = "Substring to be searched") String substr,
-			@FmParam(name = "ignoreCase", description = "Flag to indicate if case has to be ignored during search") boolean ignoreCase
-			)
-	{
-		if(mainStr == null || substr == null)
-		{
-			return false;
-		}
-		
-		if(ignoreCase)
-		{
-			mainStr = mainStr.toLowerCase();
-			substr = mainStr.toLowerCase();
-		}
-		
-		return mainStr.contains(substr);
 	}
 
 	@FreeMarkerMethod(

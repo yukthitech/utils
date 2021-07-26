@@ -3,6 +3,7 @@ package com.yukthitech.autox.filter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
+import com.yukthitech.autox.common.PropertyAccessor;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
 import com.yukthitech.ccg.xml.util.StringUtil;
@@ -41,7 +42,12 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class DefaultFilters
 {
-	@ExpressionFilter(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", example = "prop: attr.bean.value1")
+	@ExpressionFilter(type = "prop", description = "Parses specified expression as bean property on effective-context (context or current object in case of piping).", 
+			example = "prop: attr.bean.value1",
+			params = {
+					@ParserParam(name = "add", type = "boolean", defaultValue = "false", 
+							description = "If true and if specified property indicates a list, during set-value instead of replacing existing element new element will be added/inserted")
+				})
 	public IPropertyPath propertyParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -49,13 +55,19 @@ public class DefaultFilters
 			@Override
 			public void setValue(Object value) throws Exception
 			{
-				PropertyUtils.setProperty(parserContext.getEffectiveContext(), expression, value);
+				PropertyAccessor.setProperty(parserContext.getEffectiveContext(), expression, value);
 			}
 			
 			@Override
 			public Object getValue() throws Exception
 			{
-				return PropertyUtils.getProperty(parserContext.getEffectiveContext(), expression);
+				return PropertyAccessor.getProperty(parserContext.getEffectiveContext(), expression);
+			}
+			
+			@Override
+			public void removeValue() throws Exception
+			{
+				PropertyAccessor.removeProperty(parserContext.getEffectiveContext(), expression);
 			}
 		};
 	}
@@ -195,13 +207,13 @@ public class DefaultFilters
 			if(curVal instanceof Clob)
 			{
 				Clob clob = (Clob) curVal;
-				return IOUtils.toString(clob.getAsciiStream());
+				return IOUtils.toString(clob.getAsciiStream(), Charset.defaultCharset());
 			}
 			
 			if(curVal instanceof Blob)
 			{
 				Blob clob = (Blob) curVal;
-				return IOUtils.toString(clob.getBinaryStream());
+				return IOUtils.toString(clob.getBinaryStream(), Charset.defaultCharset());
 			}
 
 			return curVal.toString().trim();
@@ -661,7 +673,7 @@ public class DefaultFilters
 			throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", filePath);
 		}
 		
-		return FileUtils.readFileToString(file);
+		return FileUtils.readFileToString(file, Charset.defaultCharset());
 	}
 
 	@ExpressionFilter(type = "file", description = "Parses specified expression as file path and loads it as object. "
@@ -686,7 +698,7 @@ public class DefaultFilters
 			@Override
 			public void setValue(Object value) throws Exception
 			{
-				FileUtils.write(new File(expression), String.valueOf(value));
+				FileUtils.write(new File(expression), String.valueOf(value), Charset.defaultCharset());
 			}
 		};
 	}
@@ -754,7 +766,7 @@ public class DefaultFilters
 						throw new InvalidArgumentException("Invalid/non-existing resource specified for loading: {}", expression);
 					}
 					
-					data = IOUtils.toString(is);
+					data = IOUtils.toString(is, Charset.defaultCharset());
 					is.close();
 				}
 				

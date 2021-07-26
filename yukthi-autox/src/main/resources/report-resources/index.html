@@ -46,6 +46,15 @@
 				font-weight: bold;
 				color: black;
 			}
+
+			.timeDisplay
+			{
+				font-weight: bold;
+				color: black;
+
+				font-size: 0.8em;
+				white-space: nowrap;
+			}
 		</style>
 	</head>
 	
@@ -182,7 +191,7 @@
 					<td ng-class="result.status == 'SUCCESSFUL' ? 'successVal' : 'errorVal'">
 						{{result.status}}	
 					</td>
-					<td class="defaultVal">
+					<td class="timeDisplay">
 						{{result.timeTaken}}	
 					</td>
 					<td class="defaultVal">
@@ -230,7 +239,7 @@
 					<td ng-class="suiteResult.status != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 15%;">
 						{{suiteResult.status}}
 					</td>
-					<td style="width: 5%; text-align: left; padding-left: 1em;">
+					<td style="width: 5%; text-align: left; padding-left: 1em;" class="timeDisplay">
 						{{suiteResult.timeTaken}}
 					</td>
 					<td style="width: 50%; text-align: left; padding-left: 1em; word-break: break-word;">
