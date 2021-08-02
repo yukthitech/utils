@@ -105,6 +105,11 @@ public class RestResult<T> implements Serializable
 		
 		values.add(value);
 	}
+	
+	public void setHeaders(Map<String, List<String>> headers)
+	{
+		this.headers = headers;
+	}
 
 	/**
 	 * Gets the response headers.

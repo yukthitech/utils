@@ -262,6 +262,7 @@ public class RestClient
 		//return final result
 		RestResult<T> result = new RestResult<T>(resultValue, stringResult.getStatusCode(), stringResult.getHttpResponse());
 		result.setParseError(parseError);
+		result.setHeaders(stringResult.getHeaders());
 		
 		if(restClientListener != null)
 		{

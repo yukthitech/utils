@@ -47,6 +47,11 @@ public class FileUtils
 			relativePath = relativePath.substring(1);
 		}
 		
+		if(relativePath.endsWith(File.separator))
+		{
+			relativePath = relativePath.substring(0, relativePath.length() - 1);
+		}
+
 		return relativePath;
 	}
 
