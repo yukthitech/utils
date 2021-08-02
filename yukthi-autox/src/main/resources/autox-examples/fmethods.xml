@@ -84,16 +84,6 @@
 		</example>
 	</collection>
 
-	<collection name="$parsers.prop">
-		<example>
-			<description>Using prop to access nested properties</description>
-			
-			<content><![CDATA[
-				<ccg:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
-			]]></content>
-		</example>
-	</collection>
-
 	<collection name="$parsers.res">
 		<example>
 			<description>Using res to load resource as object and extracting xpath value out of it</description>
