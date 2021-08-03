@@ -30,15 +30,15 @@ public class FileResource implements IResource
 	
 	public FileResource(String resource, boolean rawType)
 	{
-		this.resource = resource;
+		this.resource = resource.trim();
 		this.rawType = rawType;
 		
 		try
 		{
-			this.fis = new FileInputStream(resource);
+			this.fis = new FileInputStream(this.resource);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("Failed to load file resource - {}", resource);
+			throw new InvalidStateException("Failed to load file resource - {}", this.resource, ex);
 		}
 	}
 	

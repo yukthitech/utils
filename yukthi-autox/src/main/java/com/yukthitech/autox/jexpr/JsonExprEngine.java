@@ -36,6 +36,11 @@ public class JsonExprEngine
 	private static final String KEY_VALUE = "@value";
 	
 	/**
+	 * In a map if this key is specified with value as true, along with @value then the result will be converted to json string.
+	 */
+	private static final String JSON = "@json";
+	
+	/**
 	 * Key used to specify value for the enclosing map when condition fails. Useful when condition has to be specified for simple attribute.
 	 */
 	private static final String KEY_FALSE_VALUE = "@falseValue";
@@ -469,6 +474,17 @@ public class JsonExprEngine
 		Object res = (valueExpr instanceof String) ? 
 				processString((String) valueExpr, context, path + ">" + keyName) : 
 					processObject(valueExpr, context, path + ">" + keyName);
+		
+		if("true".equalsIgnoreCase("" + map.get(JSON)))
+		{
+			try
+			{
+				res = IAutomationConstants.OBJECT_MAPPER.writeValueAsString(res);
+			}catch(Exception ex)
+			{
+				throw new JsonExpressionException(path, "An error occurred while converting result value into json string", ex);	
+			}
+		}
 				
 		value.setValue(res);
 		return true;

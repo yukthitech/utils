@@ -30,13 +30,14 @@ public class ClassPathResource implements IResource
 	
 	public ClassPathResource(String resource, boolean rawType)
 	{
-		this.resource = resource;
-		is = ClassPathResource.class.getResourceAsStream(resource);
+		this.resource = resource.trim();
+		
+		is = ClassPathResource.class.getResourceAsStream(this.resource);
 		this.rawType = rawType;
 		
 		if(is == null)
 		{
-			throw new InvalidArgumentException("Invalid classpath resource specified: {}", resource);
+			throw new InvalidArgumentException("Invalid classpath resource specified: {}", this.resource);
 		}
 	}
 

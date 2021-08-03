@@ -355,10 +355,13 @@ public class CommonFreeMarkerMethods
 			)
 	public static Object ifTrue(
 			@FmParam(name = "value", description = "Value to be checked for true.") Object value,
-			@FmParam(name = "trueValue", description = "Value to be returned when value is true") Object trueValue,
-			@FmParam(name = "falseValue", description = "Value to be returned when value is false") Object falseValue
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true. Default: true") Object trueValue,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false. Default: false") Object falseValue
 			)
 	{
+		trueValue = (trueValue == null) ? true : trueValue;
+		falseValue = (falseValue == null) ? false : falseValue;
+		
 		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
 		
 		return bvalue ? trueValue : falseValue;
@@ -370,11 +373,14 @@ public class CommonFreeMarkerMethods
 			returnDescription = "Specified true-condition-value or false-condition-value."
 			)
 	public static Object ifFalse(
-			@FmParam(name = "value", description = "Value to be checked for true. Can be boolean true or string 'true'") Object value,
-			@FmParam(name = "falseValue", description = "Value to be returned when value is false") Object falseValue,
-			@FmParam(name = "trueValue", description = "Value to be returned when value is true") Object trueValue
+			@FmParam(name = "value", description = "Value to be checked for false. Can be boolean true or string 'true'") Object value,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false. Default: true") Object falseValue,
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true. Default: false") Object trueValue
 			)
 	{
+		trueValue = (trueValue == null) ? false : trueValue;
+		falseValue = (falseValue == null) ? true : falseValue;
+
 		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
 		return bvalue ? trueValue : falseValue;
 	}
