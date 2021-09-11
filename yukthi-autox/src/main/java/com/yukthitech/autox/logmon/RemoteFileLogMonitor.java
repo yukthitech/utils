@@ -65,6 +65,13 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	private String privateKeyPath;
 	
 	/**
+	 * Delay time in seconds after which the log content will be fetched. This
+	 * will help to make sure buffered log content is pushed by remote applications
+	 * into log file. 
+	 */
+	private long fetchDelayInSec = 5;
+	
+	/**
 	 * Host to session mapping.8o
 	 */
 	private Map<String, RemoteSessionWithPosition> pathToSession = new HashMap<>();
@@ -110,6 +117,20 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	public void setPrivateKeyPath(String privateKeyPath)
 	{
 		this.privateKeyPath = privateKeyPath;
+	}
+	
+	/**
+	 * Sets the delay time in seconds after which the log content will be
+	 * fetched. This will help to make sure buffered log content is pushed by
+	 * remote applications into log file.
+	 *
+	 * @param fetchDelayInSec
+	 *            the new delay time in seconds after which the log content will
+	 *            be fetched
+	 */
+	public void setFetchDelayInSec(long fetchDelayInSec)
+	{
+		this.fetchDelayInSec = fetchDelayInSec;
 	}
 
 	/* (non-Javadoc)
@@ -170,6 +191,19 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
 	{
+		if(fetchDelayInSec > 0)
+		{
+			logger.debug("Waiting for {} Sec before fetching the logs.", fetchDelayInSec);
+			
+			try
+			{
+				Thread.sleep(fetchDelayInSec * 1000);
+			} catch(Exception ex)
+			{
+				//ignore
+			}
+		}
+		
 		List<LogFile> logFiles = new ArrayList<>(pathToSession.size());
 		
 		for(String remotePath : pathToSession.keySet())
