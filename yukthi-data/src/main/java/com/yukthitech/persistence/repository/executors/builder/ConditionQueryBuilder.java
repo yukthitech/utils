@@ -984,7 +984,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 			resultField.table = codeToTable.get(defTableCode);
 			resultFields.add(resultField);
-			fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
+			fieldToResultField.put(entityFieldExpression, resultField);
 
 			if(resultProperty == null)
 			{
@@ -1006,7 +1006,7 @@ public class ConditionQueryBuilder implements Cloneable
 		// Note - Reverse mapping property has to be created for such properties
 
 		resultFields.add(resultField);
-		fieldToResultField.put(resultField.fieldDetails.getName(), resultField);
+		fieldToResultField.put(entityFieldExpression, resultField);
 
 		// if this direct return field
 		if(resultProperty == null)
@@ -1426,25 +1426,6 @@ public class ConditionQueryBuilder implements Cloneable
 			
 		resultField.orderType = orderByType;
 		this.orderByFields.add(resultField);
-	}
-
-	/**
-	 * Fetches short code for the specified result field.
-	 * 
-	 * @param field
-	 *            Field for which code needs to be fetched
-	 * @return Matching code, if not present null will be returned.
-	 */
-	public QueryResultField getResultFieldCode(String field)
-	{
-		ResultField resultField = fieldToResultField.get(field);
-
-		if(resultField == null)
-		{
-			return null;
-		}
-
-		return new QueryResultField(resultField.table.tableCode, resultField.fieldDetails.getDbColumnName(), resultField.code);
 	}
 
 	@Override

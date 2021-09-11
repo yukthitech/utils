@@ -174,6 +174,35 @@ public class RdbmsDataStore implements IDataStore
 			logger.error("An error occurred while closing DB resources", ex);
 		}
 	}
+	
+	@Override
+	public boolean tableExists(String tableName)
+	{
+		if(rdbmsConfig.isLowerCaseNames())
+		{
+			tableName = tableName.toLowerCase();
+		}
+		
+		try(TransactionWrapper<RdbmsTransaction> transaction = transactionManager.newOrExistingTransaction())
+		{
+			Connection connection = transaction.getTransaction().getConnection();
+			
+			ResultSet rs = connection.getMetaData().getTables(connection.getCatalog(), connection.getSchema(), tableName, null);
+			
+			if(rs.next())
+			{
+				return true;
+			}
+			
+			rs.close();
+			transaction.commit();
+			return false;
+		}catch(Exception ex)
+		{
+			logger.info("An error occurred while checking existence of table: " + tableName, ex);
+			throw new PersistenceException("An error occurred while checking existence of table: " + tableName, ex);
+		}
+	}
 
 	@Override
 	public Set<String> getColumnNames(String tableName)
@@ -189,7 +218,7 @@ public class RdbmsDataStore implements IDataStore
 		{
 			Connection connection = transaction.getTransaction().getConnection();
 			
-			ResultSet rs = connection.getMetaData().getColumns(null, null, tableName, null);
+			ResultSet rs = connection.getMetaData().getColumns(connection.getCatalog(), connection.getSchema(), tableName, null);
 			Set<String> columns = new HashSet<>();
 			
 			while(rs.next())

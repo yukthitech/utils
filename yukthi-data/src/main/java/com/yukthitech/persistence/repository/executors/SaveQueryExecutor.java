@@ -307,10 +307,10 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 			//if insertion was successful
 			if(res > 0)
 			{
-				//if id value is found from statement or was explicitly specified
+				//if id value is not found from statement or was explicitly specified
 				if(idWrapper.getValue() == null)
 				{
-					if(hasUqIdCol)
+					if(!hasUqIdCol)
 					{
 						throw new InvalidStateException("No unique id column [{}] configured. Failed to fetch id of saved entity. Entity: {}", EntityDetails.COL_UQ_ENTITY_ID, entityDetails);
 					}

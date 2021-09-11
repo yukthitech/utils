@@ -111,6 +111,11 @@ class RepositoryProxy implements InvocationHandler
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
 	{
+		if("toString".equals(method.getName()))
+		{
+			return repositoryType.getName() + "$proxy";
+		}
+		
 		//if current method is non-executable then throw exception
 		if(nonExecutableMethods.contains(method))
 		{

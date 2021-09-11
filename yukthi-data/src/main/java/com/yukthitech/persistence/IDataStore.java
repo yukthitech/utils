@@ -44,6 +44,8 @@ public interface IDataStore
 	
 	public ITransactionManager<? extends ITransaction> getTransactionManager();
 	
+	public boolean tableExists(String tableName);
+	
 	public Set<String> getColumnNames(String tableName);
 	
 	public void createTable(CreateTableQuery query);
