@@ -460,6 +460,12 @@ public class AutomationContext
 		}
 	}
 	
+	public void setGlobalAttribute(String name, Object value)
+	{
+		nameToAttr.put(name, value);
+		globalAttributes.put(name, value);
+	}
+	
 	/**
 	 * Sets internal context attribute which will be accessible within the java code.
 	 * @param name name of the attribute

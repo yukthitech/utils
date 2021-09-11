@@ -26,7 +26,7 @@ public class TAutomation
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "rest-test-suites"
-				"-tc", "assertEquals"
+				"-tc", "mongoQueryTest"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

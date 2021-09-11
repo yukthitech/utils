@@ -110,7 +110,7 @@ public class RepositoryFactory
 			throw new InvalidMappingException("No @Table annotation found on entity type: " + entityType.getName());
 		}
 		
-		if(!dataStore.tableExists(table.name()))
+		if(!createTables && !dataStore.tableExists(table.name()))
 		{
 			throw new NoTableExistsException(repositoryType, table.name());
 		}

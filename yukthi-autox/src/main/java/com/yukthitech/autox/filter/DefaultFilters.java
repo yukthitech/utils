@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.common.PropertyAccessor;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
@@ -97,7 +98,10 @@ public class DefaultFilters
 		};
 	}
 
-	@ExpressionFilter(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = ParserContentType.ATTRIBUTE)
+	@ExpressionFilter(type = "attr", description = "Parses specified expression as context attribute.", example = "attr: attrName", contentType = ParserContentType.ATTRIBUTE,
+			params = {
+					@ParserParam(name = "global", type = "boolean", defaultValue = "false", description = "During set if value is true, the attribute will be set at global level"),
+				})
 	public IPropertyPath attrParser(FilterContext parserContext, String expression)
 	{
 		return new IPropertyPath()
@@ -105,7 +109,14 @@ public class DefaultFilters
 			@Override
 			public void setValue(Object value) throws Exception
 			{
-				parserContext.getAutomationContext().setAttribute(expression, value);
+				if("true".equalsIgnoreCase(parserContext.getParameter("global")))
+				{
+					parserContext.getAutomationContext().setGlobalAttribute(expression, value);
+				}
+				else
+				{
+					parserContext.getAutomationContext().setAttribute(expression, value);
+				}
 			}
 			
 			@Override
@@ -616,6 +627,7 @@ public class DefaultFilters
 	private Object loadInputStream(String data, String name, String exprType[], FilterContext parserContext) throws Exception
 	{
 		ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
+		name = name.trim();
 		
 		//if the input stream needs app prop replacement
 		if("true".equalsIgnoreCase(parserContext.getParameter("propExpr")))
@@ -634,6 +646,12 @@ public class DefaultFilters
 			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
 		}
 		
+		if("true".equalsIgnoreCase(parserContext.getParameter("jel")) && name.toLowerCase().endsWith(".json"))
+		{
+			logger.debug("Parsing json content for JEL: {}", name);
+			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, CommonUtils.toMap("context", parserContext.getAutomationContext()));
+		}
+
 		//if input stream has to be loaded as simple text, simply return the current data string
 		if("true".equalsIgnoreCase(parserContext.getParameter("text")))
 		{
@@ -642,7 +660,6 @@ public class DefaultFilters
 		}
 		
 		Class<?> type = null;
-		name = name.trim();
 		
 		if(exprType != null)
 		{
@@ -683,7 +700,9 @@ public class DefaultFilters
 			params = {
 				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
-				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values.")
+				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values."),
+				@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion. Applicable only for json content."),
+				@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 			})
 	public IPropertyPath fileParser(FilterContext parserContext, String expression, String exprType[])
 	{
@@ -733,7 +752,9 @@ public class DefaultFilters
 			params = {
 				@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
-				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values.")
+				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values."),
+				@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion. Applicable only for json content."),
+				@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 			})
 	public IPropertyPath resParser(FilterContext parserContext, String expression, String exprType[])
 	{
@@ -777,7 +798,7 @@ public class DefaultFilters
 	}
 
 	@ExpressionFilter(type = "bres", description = "Parses specified expression as resource path and loads it as binary data (byte array).", 
-			example = "bres: /tmp/data.json")
+			example = "bres: /tmp/data.png")
 	public IPropertyPath bresParser(FilterContext parserContext, String expression, String exprType[])
 	{
 		return new IPropertyPath()
@@ -829,7 +850,9 @@ public class DefaultFilters
 			+ "In case of '$', current value's string value will be parsed.", 
 			example = "json: {\"a\": 2, \"b\": 3}",
 			params = {
-					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template")
+					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+					@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion"),
+					@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 				}
 	)
 	public IPropertyPath jsonParser(FilterContext parserContext, String expression, String exprType[])
@@ -851,6 +874,8 @@ public class DefaultFilters
 			example = "jsonWithType: {\"a\": 2, \"b\": 3}",
 			params = {
 					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
+					@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion"),
+					@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 				}
 	)
 	public IPropertyPath jsonWithTypeParser(FilterContext parserContext, String expression, String exprType[])
@@ -868,10 +893,7 @@ public class DefaultFilters
 	}
 
 	@ExpressionFilter(type = "template", description = "Parses specified value for free marker expressions and returns the result.",
-			example = "template: Value=${someAttr}",
-			params = {
-					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
-				}
+			example = "template: Value=${someAttr}"
 	)
 	public IPropertyPath templateParser(FilterContext parserContext, String expression, String exprType[])
 	{

@@ -53,6 +53,24 @@
 				</query>
 			</s:mongo-query>
 			<s:assert-equals actual="${attr.result.n}" expected="2"/>
+			
+			<s:assert-equals actual="expr: mongoCount('mongoResource', 'AUTOX_TEST')" expected="long: 2"/>
+			<s:assert-equals actual="expr: mongoCount('mongoResource', 'AUTOX_TEST', 'name', 'test3')" expected="long: 1"/>
+
+			<s:mongo-multi-query mongoResourceName="mongoResource">
+				<query>
+					{ 
+						"insert": "AUTOX_TEST", 
+						"documents" : [
+							{"name": "test3Ref", "entry": "${mongoFetchId('mongoResource', 'AUTOX_TEST', 'name', 'test3')}"}
+						] 
+					}
+				</query>
+			</s:mongo-multi-query>
+			
+			<s:assert-equals 
+				actual="expr: mongoFetchId('mongoResource', 'AUTOX_TEST', 'name', 'test3')" 
+				expected="expr: mongoFetchDoc('mongoResource', 'AUTOX_TEST', 'name', 'test3Ref').entry"/>
 
 			<s:mongo-query mongoResourceName="mongoResource">
 				<query>

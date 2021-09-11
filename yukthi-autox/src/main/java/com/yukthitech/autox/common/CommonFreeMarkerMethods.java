@@ -17,7 +17,6 @@ import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.jexpr.JsonExprEngine;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
@@ -29,11 +28,6 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class CommonFreeMarkerMethods
 {
-	/**
-	 * Used to process json expressions.
-	 */
-	private static JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine();
-
 	/**
 	 * Converts input file path (Can be relative, partial path) to full canonical path.
 	 * @param path path to convert.
@@ -413,7 +407,7 @@ public class CommonFreeMarkerMethods
 		
 		String templateStr = (template instanceof String) ? (String) template : IAutomationConstants.OBJECT_MAPPER.writeValueAsString(template);
 
-		String resJson = JSON_EXPR_ENGINE.processJson(templateStr, localContext);
+		String resJson = IAutomationConstants.JSON_EXPR_ENGINE.processJson(templateStr, localContext);
 		return resJson;
 	}
 	

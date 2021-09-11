@@ -3,6 +3,7 @@ package com.yukthitech.autox.common;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.jexpr.JsonExprEngine;
 
 /**
  * Constants that will be used across the classes.
@@ -32,6 +33,11 @@ public interface IAutomationConstants
 
 	public int TWO_SECONDS = 2;
 	
+	/**
+	 * Used to process json expressions.
+	 */
+	public JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine();
+
 	/**
 	 * Five seconds.
 	 */
