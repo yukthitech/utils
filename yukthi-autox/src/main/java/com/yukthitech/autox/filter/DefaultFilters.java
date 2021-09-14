@@ -612,7 +612,7 @@ public class DefaultFilters
 				
 				Object result = parserContext.getAutomationContext().removeAttribute(randomVarName);
 
-				logger.debug("From epxression {} got result as: {}", expression, result);
+				logger.debug("From expression {} got result as: {}", expression, result);
 				return result;
 			}
 		};

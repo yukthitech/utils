@@ -21,7 +21,7 @@ public class TestPropertyAccessor
 	{
 		Object data = objectMapper.readValue(TestPropertyAccessor.class.getResourceAsStream("/data/prop-access-test-data.json"), Object.class);
 		
-		assertEquals(PropertyAccessor.getProperty(data, "name"), "yodleeTemplate");
+		assertEquals(PropertyAccessor.getProperty(data, "name"), "testTemplate");
 		assertEquals(PropertyAccessor.getProperty(data, "versionLong"), 1000000);
 		assertEquals(PropertyAccessor.getProperty(data, "audit.createdBy"), "svcjenkins");
 		assertEquals(PropertyAccessor.getProperty(data, "audit(updatedBy)"), "svcupdate");
@@ -62,8 +62,8 @@ public class TestPropertyAccessor
 		Object data = objectMapper.readValue(TestPropertyAccessor.class.getResourceAsStream("/data/prop-access-test-data.json"), Object.class);
 		
 		//test simple properties
-		PropertyAccessor.setProperty(data, "name", "yodleeTemplate1");
-		assertEquals(PropertyAccessor.getProperty(data, "name"), "yodleeTemplate1");
+		PropertyAccessor.setProperty(data, "name", "testTemplate1");
+		assertEquals(PropertyAccessor.getProperty(data, "name"), "testTemplate1");
 		
 		PropertyAccessor.setProperty(data, "versionLong", 1000002);
 		assertEquals(PropertyAccessor.getProperty(data, "versionLong"), 1000002);

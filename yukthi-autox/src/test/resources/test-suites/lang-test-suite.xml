@@ -550,25 +550,5 @@
 			<s:assert-equals actual="file(text=true): ${attr.tempFilePath}" expected="Some test content testVal"/>			
 		</testCase>
 
-		<!--  
-		<testCase name="testSendMail">
-			<description>
-				Test mail sending functionality.
-			</description>
-			
-			<s:set expression="attr1" value="testVal"/>
-
-			<s:send-mail smptpHost="blr-relay-01.corp.yodlee.com" smptpPort="25" ttlsEnabled="false">
-				<toAddressList>akiran@yodlee.com</toAddressList>
-				<fromAddress>test@yodlee.com</fromAddress>
-				<subject>Autox text mail!!!</subject>
-				<content><![CDATA[
-					This is <b>a test mail</b>
-				]]></content>
-				
-			</s:send-mail>
-		</testCase>
-		
-		-->
 	</testSuite>
 </testData>

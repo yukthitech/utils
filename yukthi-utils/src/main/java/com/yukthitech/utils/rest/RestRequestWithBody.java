@@ -382,12 +382,6 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		return (T)this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.yodlee.common.rest.RestRequest#toHttpRequestBase(java.lang.String)
-	 */
 	@Override
 	public HttpUriRequestBase toHttpRequestBase(String baseUrl) throws UnsupportedEncodingException, URISyntaxException
 	{
