@@ -872,7 +872,7 @@ public class AutomationUtils
 			}
 			
 			Object res = null;
-			IParserHandler parserHandler = null;
+			DefaultParserHandler parserHandler = null;
 			
 			if(type != null)
 			{
@@ -884,6 +884,7 @@ public class AutomationUtils
 				parserHandler = new DynamicBeanParserHandler();
 			}
 			
+			parserHandler.setExpressionEnabled(false);			
 			parserHandler.registerReserveNodeHandler(new BeanReserveNodeHandler());
 			parserHandler.registerReserveNodeHandler(new CloneReserveNodeHandler());
 			

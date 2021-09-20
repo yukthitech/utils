@@ -458,4 +458,34 @@ public class CommonFreeMarkerMethods
 
 		return res;
 	}
+	
+	@FreeMarkerMethod(
+			description = "Converts specified string value into long value.",
+			returnDescription = "Converted long value."
+			)
+	public static Long toLong(
+			@FmParam(name = "str", description = "String value to be converted") String str)
+	{
+		return Long.parseLong(str);
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string value into int value.",
+			returnDescription = "Converted int value."
+			)
+	public static Integer toInt(
+			@FmParam(name = "str", description = "String value to be converted") String str)
+	{
+		return Integer.parseInt(str);
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string value into boolean value.",
+			returnDescription = "Converted boolean value."
+			)
+	public static Boolean toBoolean(
+			@FmParam(name = "str", description = "String value to be converted") String str)
+	{
+		return "true".equalsIgnoreCase(str);
+	}
 }

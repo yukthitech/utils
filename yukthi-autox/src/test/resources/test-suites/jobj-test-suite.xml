@@ -226,6 +226,25 @@
 			</expectedException>
 		</testCase>
 
+		<testCase name="dataProviderOnFetch">
+			<description>
+				Tests on fetch expression functionality of data provider.
+			</description>
+			
+			<data-setup>
+				<s:set expression="counterVal" value="int: 0"/>
+			</data-setup>
+		
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
+		
+			<wrap:steps>
+				<s:set expression="counterVal" value="int: ${(attr.counterVal + 1)?c}"/>
+				
+				<s:assert-equals actual="prop: attr.extDataProvider.expression" expected="prop: attr.extDataProvider.expectedVal"/>				
+			</wrap:steps>
+		
+		</testCase>
+
 		<testCase name="xpath_test">
 			<description>
 				Ensures xpath steps and validations works as expected.

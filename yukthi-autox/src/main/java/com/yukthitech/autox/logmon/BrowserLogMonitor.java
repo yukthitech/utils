@@ -1,6 +1,7 @@
 package com.yukthitech.autox.logmon;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -149,7 +150,7 @@ public class BrowserLogMonitor extends AbstractLogMonitor implements Validateabl
 				return null;
 			}
 
-			FileUtils.write(tempFile, mssg);
+			FileUtils.write(tempFile, mssg, Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while creating monitoring log.", ex);

@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -17,6 +18,11 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  */
 public class TypeConversionUtils
 {
+	/**
+	 * Used to parse json value objects.
+	 */
+	private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
 	/**
 	 * Value pattern used for type conversion.
 	 */
@@ -92,6 +98,16 @@ public class TypeConversionUtils
 			{
 				return toList(mainValue, str -> str);
 			}
+			case "json":
+			{
+				try
+				{
+					return OBJECT_MAPPER.readValue(mainValue, Object.class);
+				}catch(Exception ex)
+				{
+					throw new InvalidArgumentException("Failed to parse json content: {}", mainValue, ex);
+				}
+			}
 			case "date":
 			{
 				try
@@ -99,7 +115,7 @@ public class TypeConversionUtils
 					return DATE_FORMAT.parseObject(mainValue);
 				}catch(Exception ex)
 				{
-					throw new InvalidArgumentException("Failed to covert value '{}' into date (expected format: yyyy-MM-dd)", mainValue);
+					throw new InvalidArgumentException("Failed to covert value '{}' into date (expected format: yyyy-MM-dd)", mainValue, ex);
 				}
 			}
 			default:

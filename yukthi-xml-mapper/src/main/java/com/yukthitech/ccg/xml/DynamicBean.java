@@ -35,6 +35,19 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	{
 		this.typeConversationEnabled = typeConversationEnabled;
 	}
+	
+	/**
+	 * Sets the if this flag enabled, based on prefix values will be type
+	 * converted.
+	 *
+	 * @param typeConversationEnabled
+	 *            the new if this flag enabled, based on prefix values will be
+	 *            type converted
+	 */
+	public void setTypeConversationEnabled(boolean typeConversationEnabled)
+	{
+		this.typeConversationEnabled = typeConversationEnabled;
+	}
 
 	@Override
 	public void set(String propName, String value)
@@ -45,6 +58,11 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	public void addList(String name, DynamicBeanList list)
 	{
 		properties.put(name, list);
+	}
+	
+	public void addDynamic(String name, DynamicBean value)
+	{
+		this.add(name, value);
 	}
 
 	@SuppressWarnings("unchecked")

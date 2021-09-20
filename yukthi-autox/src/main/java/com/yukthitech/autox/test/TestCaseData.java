@@ -1,5 +1,11 @@
 package com.yukthitech.autox.test;
 
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.ccg.xml.DynamicBean;
@@ -10,6 +16,101 @@ import com.yukthitech.ccg.xml.DynamicBean;
  */
 public class TestCaseData
 {
+	/**
+	 * Dynamic map used to evaluate expressions during fetch.
+	 * @author akranthikiran
+	 */
+	public static class OnFetchEvalMap extends AbstractMap<String, Object>
+	{
+		private Map<String, Object> actualMap;
+
+		public OnFetchEvalMap(Map<String, Object> actualMap)
+		{
+			this.actualMap = actualMap;
+		}
+		
+		private Object process(Object val)
+		{
+			if(val == null)
+			{
+				return null;
+			}
+			
+			AutomationContext context = AutomationContext.getInstance();
+			return AutomationUtils.replaceExpressions("val", context, val);
+		}
+		
+		@Override
+		public Object get(Object key)
+		{
+			return process(actualMap.get(key));
+		}
+		
+		@Override
+		public int size()
+		{
+			return actualMap.size();
+		}
+
+		@Override
+		public Set<Entry<String, Object>> entrySet()
+		{
+			return new AbstractSet<Map.Entry<String,Object>>()
+			{
+				@Override
+				public Iterator<Entry<String, Object>> iterator()
+				{
+					final Iterator<Entry<String, Object>> mainIt = actualMap.entrySet().iterator();
+					
+					Iterator<Entry<String, Object>> it = new Iterator<Map.Entry<String,Object>>()
+					{
+						@Override
+						public boolean hasNext()
+						{
+							return mainIt.hasNext();
+						}
+
+						@Override
+						public Entry<String, Object> next()
+						{
+							final Entry<String, Object> entry = mainIt.next();
+							
+							return new Map.Entry<String, Object>()
+							{
+								@Override
+								public String getKey()
+								{
+									return entry.getKey();
+								}
+
+								@Override
+								public Object getValue()
+								{
+									return process(entry.getValue());
+								}
+
+								@Override
+								public Object setValue(Object value)
+								{
+									throw new UnsupportedOperationException();
+								}
+							};
+						}
+						
+					};
+					
+					return it;
+				}
+
+				@Override
+				public int size()
+				{
+					return actualMap.size();
+				}
+			};
+		}
+	}
+	
 	/**
 	 * String representation of the data which will be appended to test case name.
 	 */
@@ -24,6 +125,12 @@ public class TestCaseData
 	 * Value of this test case data.
 	 */
 	private Object value;
+	
+	/**
+	 * If set to true, fmarker expressions in dynamic values will be evaluated
+	 * every time it is used in testcase. 
+	 */
+	private boolean onFetchEval = false;
 	
 	/**
 	 * Instantiates a new test case data.
@@ -41,6 +148,19 @@ public class TestCaseData
 	{
 		this.name = name;
 		this.value = value;
+	}
+	
+	/**
+	 * Sets the if set to true, fmarker expressions in dynamic values will be
+	 * evaluated every time it is used in testcase.
+	 *
+	 * @param onFetchEval
+	 *            the new if set to true, fmarker expressions in dynamic values
+	 *            will be evaluated every time it is used in testcase
+	 */
+	public void setOnFetchEval(boolean onFetchEval)
+	{
+		this.onFetchEval = onFetchEval;
 	}
 
 	/**
@@ -89,7 +209,14 @@ public class TestCaseData
 	 */
 	public void setDynamicValue(DynamicBean value)
 	{
-		this.value = value.toSimpleMap();
+		if(this.onFetchEval)
+		{
+			this.value = new OnFetchEvalMap(value.toSimpleMap());
+		}
+		else
+		{
+			this.value = value.toSimpleMap();
+		}
 	}
 	
 	/**

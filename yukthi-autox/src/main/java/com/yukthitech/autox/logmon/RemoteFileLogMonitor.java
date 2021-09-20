@@ -3,6 +3,7 @@ package com.yukthitech.autox.logmon;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,16 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	private long fetchDelayInSec = 5;
 	
 	/**
+	 * Number of times this logger failed to fetch the log.
+	 */
+	private int failureCount = 0;
+	
+	/**
+	 * Maximum number of failures after this logger will self disable. Defaults to 4.
+	 */
+	private int maxFailureCount = 4;
+	
+	/**
 	 * Host to session mapping.8o
 	 */
 	private Map<String, RemoteSessionWithPosition> pathToSession = new HashMap<>();
@@ -132,6 +143,18 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	{
 		this.fetchDelayInSec = fetchDelayInSec;
 	}
+	
+	/**
+	 * Sets the maximum number of failures after this logger will self disable.
+	 *
+	 * @param maxFailureCount
+	 *            the new maximum number of failures after this logger will self
+	 *            disable
+	 */
+	public void setMaxFailureCount(int maxFailureCount)
+	{
+		this.maxFailureCount = maxFailureCount;
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.automation.logmon.ILogMonitor#startMonitoring()
@@ -143,6 +166,12 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 		if(!super.isEnabled())
 		{
 			logger.warn("As this log monitor is not enabled, skipping start-monitor call");
+			return;
+		}
+		
+		if(failureCount >= maxFailureCount)
+		{
+			logger.warn("As this log monitor is failed more than max-failure-count, skipping start-monitor call");
 			return;
 		}
 
@@ -181,6 +210,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			}catch(Exception ex)
 			{
 				logger.error("An error occurred while getting remote file size. Remote file - {} [User: {}, Using Password: {}]", remotePath, user, (password != null), ex);
+				failureCount++;
 			}
 		}
 	}
@@ -191,6 +221,18 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	@Override
 	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
 	{
+		if(!super.isEnabled())
+		{
+			logger.warn("As this log monitor is not enabled, skipping stop-monitor call");
+			return Collections.emptyList();
+		}
+		
+		if(failureCount >= maxFailureCount)
+		{
+			logger.warn("As this log monitor is failed more than max-failure-count, skipping stop-monitor call");
+			return Collections.emptyList();
+		}
+
 		if(fetchDelayInSec > 0)
 		{
 			logger.debug("Waiting for {} Sec before fetching the logs.", fetchDelayInSec);
@@ -307,7 +349,9 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			return new LogFile(super.getName(), tempFile);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while getting remote file size. Remote file - {}", remoteFilePath);
+			logger.error("An error occurred while getting remote file size. Remote file - {}", remoteFilePath, ex);
+			failureCount++;
+			return null;
 		}
 		
 	}
