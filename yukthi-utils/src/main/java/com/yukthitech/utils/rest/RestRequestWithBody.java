@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -111,6 +112,11 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 * Form fields.
 	 */
 	protected Map<String, String> formFields = new HashMap<String, String>();
+	
+	/**
+	 * Charset to be used for body content.
+	 */
+	protected String contentCharset;
 	
 	/**
 	 * @param uri
@@ -250,12 +256,24 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		{
 			setBody(objectMapper.writeValueAsString(object));
 			super.setContentType(JSON_CONTENT_TYPE);
+			this.contentCharset = "UTF-8";
 			
 			return (T)this;
 		} catch(JsonProcessingException ex)
 		{
 			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
 		}
+	}
+	
+	/**
+	 * Sets the charset to be used for body content.
+	 *
+	 * @param contentCharset
+	 *            the new charset to be used for body content
+	 */
+	public void setContentCharset(String contentCharset)
+	{
+		this.contentCharset = contentCharset;
 	}
 	
 	/**
@@ -461,7 +479,14 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 				request.setHeader(HttpHeaders.CONTENT_TYPE, super.getContentType());
 			}
 
-			request.setEntity(new StringEntity(requestBody));
+			if(this.contentCharset == null)
+			{
+				request.setEntity(new StringEntity(requestBody));
+			}
+			else
+			{
+				request.setEntity(new StringEntity(requestBody, Charset.forName(contentCharset)));
+			}
 		}
 
 		return request;
