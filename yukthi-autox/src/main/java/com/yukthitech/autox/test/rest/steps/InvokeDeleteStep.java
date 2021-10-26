@@ -1,8 +1,6 @@
 package com.yukthitech.autox.test.rest.steps;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.rest.DeleteRestRequest;
@@ -12,18 +10,12 @@ import com.yukthitech.utils.rest.DeleteRestRequest;
  * @author akiran
  */
 @Executable(name = "restInvokeDelete", group = Group.Rest_Api, requiredPluginTypes = RestPlugin.class, message = "Used to invoke DELETE api.")
-public class InvokeDeleteStep extends AbstractRestStep
+public class InvokeDeleteStep extends AbstractRestWithBodyStep<DeleteRestRequest>
 {
 	private static final long serialVersionUID = 1L;
 	
-	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	protected DeleteRestRequest newRequest(String uri)
 	{
-		DeleteRestRequest deleteRestRequest = new DeleteRestRequest(uri);
-		
-		super.populate(context, deleteRestRequest, logger);
-		super.invoke(context, deleteRestRequest, logger);
-		return true;
+		return new DeleteRestRequest(uri);
 	}
-
 }
