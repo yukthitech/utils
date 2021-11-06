@@ -111,11 +111,13 @@ public class TestSuiteExecutor
 			//start monitoring logs
 			context.startLogMonitoring();
 			context.setActiveTestCase(testCase, null);
-			
+
+			/*
 			if(context.getInteractiveEnvironmentContext() != null)
 			{
 				context.getInteractiveEnvironmentContext().setLastTestCase(testCase);
 			}
+			*/
 			
 			testCase.setData(null);
 			context.getExecutionStack().push(testCase);

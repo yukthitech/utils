@@ -1,6 +1,7 @@
 package com.yukthitech.autox;
 
 import com.yukthitech.autox.test.TestCase;
+import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 
@@ -34,6 +35,8 @@ public class InteractiveEnvironmentContext
 	 * Last test case that got executed as part of this interactive context.
 	 */
 	private TestCase lastTestCase;
+	
+	private TestCaseData lastTestCaseData;
 
 	/**
 	 * Instantiates a new interactive environment context.
@@ -126,12 +129,26 @@ public class InteractiveEnvironmentContext
 	}
 
 	/**
-	 * Sets the last test case that got executed as part of this interactive context.
+	 * Sets the last test case.
 	 *
-	 * @param lastTestCase the new last test case that got executed as part of this interactive context
+	 * @param lastTestCase
+	 *            the last test case
+	 * @param testCaseData
+	 *            the test case data
 	 */
-	public void setLastTestCase(TestCase lastTestCase)
+	public void setLastTestCase(TestCase lastTestCase, TestCaseData testCaseData)
 	{
 		this.lastTestCase = lastTestCase;
+		this.lastTestCaseData = testCaseData;
+	}
+	
+	/**
+	 * Gets the last test case data.
+	 *
+	 * @return the last test case data
+	 */
+	public TestCaseData getLastTestCaseData()
+	{
+		return lastTestCaseData;
 	}
 }

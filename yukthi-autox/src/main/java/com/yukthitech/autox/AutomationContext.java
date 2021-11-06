@@ -335,6 +335,11 @@ public class AutomationContext
 		this.nameToAttr.putAll(this.activeTestCase.getAttributes());
 		
 		this.activeTestCase.initAttributes(this.nameToAttr);
+		
+		if(this.interactiveEnvironmentContext != null)
+		{
+			this.interactiveEnvironmentContext.setLastTestCase(testCase, testCaseData);
+		}
 	}
 	
 	/**
