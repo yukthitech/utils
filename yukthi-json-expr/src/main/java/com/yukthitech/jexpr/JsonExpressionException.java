@@ -1,4 +1,4 @@
-package com.yukthitech.autox.jexpr;
+package com.yukthitech.jexpr;
 
 import com.yukthitech.utils.exceptions.UtilsException;
 

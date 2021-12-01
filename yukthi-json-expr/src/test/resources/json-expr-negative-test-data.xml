@@ -1,0 +1,86 @@
+<test-data xmlns:r="/fw/ccg/XMLBeanParser">
+	<r:exprPattern enabled="false"/>
+	
+	<jel-test-bean name="invalidTemplateJson">
+		<context>
+			{
+				"devStackEnabled": 1,
+				"prodStackEnabled": 0
+			}
+		</context>
+		<template>
+			{
+				"devStack": {
+					"@condition": "devStackEnabled == 1",
+					"desc": "This is a dev stack"
+		</template>
+		<expectedError>An error occurred while parsing json template.</expectedError>
+	</jel-test-bean>
+
+	<jel-test-bean name="invalidCondition">
+		<context>
+			{
+				"devStackEnabled": 0,
+				"prodStackEnabled": 1
+			}
+		</context>
+		<template>
+			[
+				{
+					"@condition": "notExistingField == 1",
+					"desc": "This is a dev stack"
+				}
+			]
+		</template>
+		<expectedError>Invalid condition 'notExistingField == 1' specified at path: [0] Path: [0]</expectedError>
+	</jel-test-bean>
+
+	<jel-test-bean name="invalidExpression">
+		<context>
+			{
+				"devStackEnabled": 0,
+				"prodStackEnabled": 1
+			}
+		</context>
+		<template>
+			[
+				{
+					"name": "@fmarker: nonExistingField.name"
+				}
+			]
+		</template>
+		<expectedError>An error occurred while processing expression: @fmarker: nonExistingField.name Path: [0]>name</expectedError>
+	</jel-test-bean>
+
+	<jel-test-bean name="invalidExpressionType">
+		<context>
+			{
+				"devStackEnabled": 0,
+				"prodStackEnabled": 1
+			}
+		</context>
+		<template>
+			[
+				{
+					"name": "@invalid: devStackEnabled"
+				}
+			]
+		</template>
+		<expectedError>Invalid expression type specified 'invalid' in expression: @invalid: devStackEnabled Path: [0]>name</expectedError>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<context>
+			{
+				"devStackEnabled": 1,
+				"prodStackEnabled": 0
+			}
+		</context>
+		<template>
+			{
+				"listWithPositiveCond": ["@condition:devStackEnabledx == 1", 1000, {"a": "b"}]
+			}
+		</template>
+		<expectedError>Invalid condition 'devStackEnabledx == 1' specified at path: >listWithPositiveCond Path: >listWithPositiveCond</expectedError>
+	</jel-test-bean>
+</test-data>

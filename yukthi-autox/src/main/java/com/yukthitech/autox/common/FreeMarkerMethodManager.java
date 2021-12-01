@@ -109,6 +109,16 @@ public class FreeMarkerMethodManager
 			freeMarkerEngine.loadClass(cls);
 		}
 	}
+	
+	/**
+	 * Gets the freemarker template config used to parse expressions.
+	 *
+	 * @return the freemarker template config used to parse expressions
+	 */
+	static FreeMarkerEngine getFreeMarkerEngine()
+	{
+		return freeMarkerEngine;
+	}
 
 	/**
 	 * Treats provided template as freemarker template and processes them. The result will be returned.

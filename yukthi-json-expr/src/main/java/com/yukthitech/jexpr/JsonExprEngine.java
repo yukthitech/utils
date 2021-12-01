@@ -1,4 +1,4 @@
-package com.yukthitech.autox.jexpr;
+package com.yukthitech.jexpr;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,11 +13,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.common.FreeMarkerMethodManager;
-import com.yukthitech.autox.common.IAutomationConstants;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.utils.ExecutionUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 /**
  * Json expression engine to process Json Expression Language (JEL).
@@ -25,6 +25,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class JsonExprEngine
 {
+	/**
+	 * Object mapper for parsing and formatting json.
+	 */
+	private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
 	/**
 	 * Key used to specify condition for an object/map inclusion.
 	 */
@@ -86,6 +91,27 @@ public class JsonExprEngine
 	private static final String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
 	
 	/**
+	 * Free marker engine for expression processing.
+	 */
+	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+	
+	/**
+	 * Sets the free marker engine for expression processing.
+	 *
+	 * @param freeMarkerEngine
+	 *            the new free marker engine for expression processing
+	 */
+	public void setFreeMarkerEngine(FreeMarkerEngine freeMarkerEngine)
+	{
+		if(freeMarkerEngine == null)
+		{
+			throw new NullPointerException("Free marker engine cannot be set to null.");
+		}
+		
+		this.freeMarkerEngine = freeMarkerEngine;
+	}
+	
+	/**
 	 * Process the specified json with specified context and returns the result.
 	 * @param json json to process
 	 * @param context context to be used
@@ -97,7 +123,7 @@ public class JsonExprEngine
 		
 		try
 		{
-			jsonObj = IAutomationConstants.OBJECT_MAPPER.readValue(json, Object.class);
+			jsonObj = OBJECT_MAPPER.readValue(json, Object.class);
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while parsing json template.", ex);
@@ -107,7 +133,7 @@ public class JsonExprEngine
 		
 		return ExecutionUtils.executeWithReturn(() -> 
 		{
-			return IAutomationConstants.OBJECT_MAPPER.writeValueAsString(res);
+			return OBJECT_MAPPER.writeValueAsString(res);
 		}, "An error occurred while writing json content.");
 	}
 	
@@ -122,14 +148,14 @@ public class JsonExprEngine
 		//Convert object into json object
 		String json = ExecutionUtils.executeWithReturn(() -> 
 		{
-			return IAutomationConstants.OBJECT_MAPPER.writeValueAsString(object);
+			return OBJECT_MAPPER.writeValueAsString(object);
 		}, "An error occurred while writing json content.");
 
 		Object jsonObj = null;
 		
 		try
 		{
-			jsonObj = IAutomationConstants.OBJECT_MAPPER.readValue(json, Object.class);
+			jsonObj = OBJECT_MAPPER.readValue(json, Object.class);
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while parsing json template.", ex);
@@ -273,7 +299,7 @@ public class JsonExprEngine
 		
 		if(valueLstExpr instanceof String)
 		{
-			valueLst = (List<Object>) FreeMarkerMethodManager.fetchValue("jel-valueLst-expr", (String) valueLstExpr, context);
+			valueLst = (List<Object>) freeMarkerEngine.fetchValue("jel-valueLst-expr", (String) valueLstExpr, context);
 		}
 		else if(valueLstExpr instanceof List)
 		{
@@ -294,7 +320,7 @@ public class JsonExprEngine
 		//  like removing condition etc.
 		String templateJson = ExecutionUtils.executeWithErrorAndReturn(() -> 
 		{
-			return IAutomationConstants.OBJECT_MAPPER.writeValueAsString(mapTemplate);
+			return OBJECT_MAPPER.writeValueAsString(mapTemplate);
 		}, "An error occurred while processing object for iteration");
 
 		//loop through value list and create repetitive object from template
@@ -308,7 +334,7 @@ public class JsonExprEngine
 			{
 				//evaluate the condition. And if condition results in false
 				//  ignore current iteration object
-				if(!FreeMarkerMethodManager.evaluateCondition("for-each-condition", forEachCond, context))
+				if(!freeMarkerEngine.evaluateCondition("for-each-condition", forEachCond, context))
 				{
 					continue;
 				}
@@ -316,7 +342,7 @@ public class JsonExprEngine
 			
 			cloneMap = ExecutionUtils.executeWithErrorAndReturn(() ->
 			{
-				return  IAutomationConstants.OBJECT_MAPPER.readValue(templateJson, Object.class);
+				return  OBJECT_MAPPER.readValue(templateJson, Object.class);
 			}, "An error occurred while processing object for iteration");
 			
 			processedMap = processObject(cloneMap, context, path + "{clone}");
@@ -479,7 +505,7 @@ public class JsonExprEngine
 		{
 			try
 			{
-				res = IAutomationConstants.OBJECT_MAPPER.writeValueAsString(res);
+				res = OBJECT_MAPPER.writeValueAsString(res);
 			}catch(Exception ex)
 			{
 				throw new JsonExpressionException(path, "An error occurred while converting result value into json string", ex);	
@@ -515,7 +541,7 @@ public class JsonExprEngine
 			map.remove(KEY_CONDITION);
 			
 			//evaluate the condition and return the result
-			return FreeMarkerMethodManager.evaluateCondition("Json-condition", condition, context);
+			return freeMarkerEngine.evaluateCondition("Json-condition", condition, context);
 		} catch(Exception ex)
 		{
 			throw new JsonExpressionException(path, "Invalid condition '%s' specified at path: %s", condition, path, ex);	
@@ -570,7 +596,7 @@ public class JsonExprEngine
 		try
 		{
 			//evaluate the condition and return the result
-			return FreeMarkerMethodManager.evaluateCondition("Json-condition", condition, context);
+			return freeMarkerEngine.evaluateCondition("Json-condition", condition, context);
 		} catch(Exception ex)
 		{
 			throw new JsonExpressionException(path, "Invalid condition '%s' specified at path: %s", condition, path, ex);	
@@ -591,7 +617,7 @@ public class JsonExprEngine
 		
 		if(!matcher.matches())
 		{
-			return FreeMarkerMethodManager.replaceExpressions("jel-template", context, str);
+			return freeMarkerEngine.processTemplate("jel-template", str, context);
 		}
 		
 		String exprType = matcher.group(1);
@@ -601,7 +627,7 @@ public class JsonExprEngine
 		{
 			if(EXPR_TYPE_FMARKER.matches(exprType))
 			{
-				return FreeMarkerMethodManager.fetchValue("jel-expr", expr, context);
+				return freeMarkerEngine.fetchValue("jel-expr", expr, context);
 			}
 			else if(EXPR_TYPE_XPATH.matches(exprType))
 			{

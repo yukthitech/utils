@@ -1,0 +1,329 @@
+<test-data xmlns:r="/fw/ccg/XMLBeanParser">
+	<r:exprPattern enabled="false"/>
+	
+	<jel-test-bean name="conditionBasedRemovalInMap">
+		<context>
+			{
+				"devStackEnabled": 1,
+				"prodStackEnabled": 0
+			}
+		</context>
+		<template>
+			{
+				"devStack": {
+					"@condition": "devStackEnabled == 1",
+					"desc": "This is a dev stack"
+				},
+				"prodStack": {
+					"@condition": "prodStackEnabled == 1",
+					"desc": "This is a prod stack"
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"devStack": {
+					"desc": "This is a dev stack"
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="exprInKey">
+		<context>
+			{
+				"devStackEnabled": 1,
+				"prodStackEnabled": 0
+			}
+		</context>
+		<template>
+			{
+				"devStack-${devStackEnabled}": {
+					"@condition": "devStackEnabled == 1",
+					"desc": "This is a dev stack"
+				},
+				"@fmarker: prodStackEnabled": {
+					"desc": "This is a prod stack"
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"devStack-1": {
+					"desc": "This is a dev stack"
+				},
+				"0": {
+					"desc": "This is a prod stack"
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<context>
+			{
+				"devStackEnabled": 1,
+				"prodStackEnabled": 0
+			}
+		</context>
+		<template>
+			{
+				"emptyList": [],
+				"listWithNoString": [100, 200],
+				"listWithNoCond": ["@fmarker: devStackEnabled", 20],
+				"listWithPositiveCond": ["@condition: devStackEnabled == 1", 1000, {"a": "b"}],
+				"listWithNegativeCond": ["@condition: prodStackEnabled == 1", 1000, {"a": "b"}]
+			}
+		</template>
+		<expectedResult>
+			{
+				"emptyList": [],
+				"listWithNoString": [100, 200],
+				"listWithNoCond": [1, 20],
+				"listWithPositiveCond": [1000, {"a": "b"}]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="valueKey">
+		<context>
+			{
+				"devStackEnabled": 1,
+				"prodStackEnabled": 0
+			}
+		</context>
+		<template>
+			{
+				"mapWithString": {
+					"@condition": "devStackEnabled == 1",
+					"@value": "Enabled",
+					"extraParam": 1
+				},
+				"mapWithNonString": {
+					"@condition": "devStackEnabled == 1",
+					"@value": 100,
+					"extraParam": 1
+				},
+				"list": [
+					{
+						"@condition": "devStackEnabled == 1",
+						"@value": "@fmarker: devStackEnabled",
+						"extraParam": 1
+					},
+					100
+				],
+				"prodStack": {
+					"@condition": "prodStackEnabled == 1",
+					"@value": "Enabled"
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"mapWithString": "Enabled",
+				"mapWithNonString": 100,
+				"list": [1, 100]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<context>
+			{
+				"devStackEnabled": 0,
+				"prodStackEnabled": 1
+			}
+		</context>
+		<template>
+			[
+				{
+					"@condition": "devStackEnabled == 1",
+					"desc": "This is a dev stack"
+				},
+				{
+					"@condition": "prodStackEnabled == 1",
+					"desc": "This is a prod stack"
+				},
+				{
+					"desc": "This is a extra stack"
+				}
+			]
+		</template>
+		<expectedResult>
+			[
+				{
+					"desc": "This is a prod stack"
+				},
+				{
+					"desc": "This is a extra stack"
+				}
+			]
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="loopAndExpressions">
+		<context>
+			{
+				"containers": ["bank", "card", "insurance"],
+				"products": [
+					{"name": "aggr", "desc": "Aggregation product", "docSize": 20},
+					{"name": "iav", "desc": "Verification product", "docSize": 30}
+				]
+			}
+		</context>
+		<template>
+			{
+				"products": "@xpathMulti: /products//name",
+				"docCount": "@xpath: /products[name='aggr']/docSize",
+				"allDocCounts": ["@fmarker: products[0].docSize", "@fmarker: products[1].docSize"],
+				"containers": [
+					{
+						"@for-each(cont)": "containers",
+						"name": "${cont}",
+						"desc": "This is container ${cont}"
+					}
+				],
+				"nonCardcontainers": [
+					{
+						"@for-each(cont)": "containers",
+						"@for-each-condition": "cont != 'card'",
+						"name": "${cont}",
+						"desc": "This is container ${cont}"
+					}
+				]
+			}
+		</template>
+		<expectedResult>
+			{
+				"products": ["aggr", "iav"],
+				"docCount": 20,
+				"allDocCounts": [20, 30],
+				"containers": [
+					{
+						"name": "bank",
+						"desc": "This is container bank"
+					},
+					{
+						"name": "card",
+						"desc": "This is container card"
+					},
+					{
+						"name": "insurance",
+						"desc": "This is container insurance"
+					}
+				],
+				"nonCardcontainers": [
+					{
+						"name": "bank",
+						"desc": "This is container bank"
+					},
+					{
+						"name": "insurance",
+						"desc": "This is container insurance"
+					}
+				]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="loopForMaps">
+		<context>
+			{
+				"containers": ["bank", "card", "insurance"],
+				"products": [
+					{"name": "aggr", "desc": "Aggregation product", "docSize": 20},
+					{"name": "iav", "desc": "Verification product", "docSize": 30}
+				]
+			}
+		</context>
+		<template>
+			{
+				"containers": {
+					"@fmarker: cont": {
+						"@for-each(cont)": "containers",
+						"days": "100"
+					}
+				},
+				"nonCardContainers": {
+					"@fmarker: cont": {
+						"@for-each(cont)": "containers",
+						"@for-each-condition": "cont != 'card'",
+						"days": "100"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"containers": {
+					"bank": {
+						"days": "100"
+					},
+					"card": {
+						"days": "100"
+					},
+					"insurance": {
+						"days": "100"
+					}
+				},
+				"nonCardContainers": {
+					"bank": {
+						"days": "100"
+					},
+					"insurance": {
+						"days": "100"
+					}
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="setExpressions">
+		<context>
+			{
+				"containers": ["bank", "card", "insurance"],
+				"products": [
+					{"name": "aggr", "desc": "Aggregation product", "docSize": 20},
+					{"name": "iav", "desc": "Verification product", "docSize": 30}
+				]
+			}
+		</context>
+		<template>
+			{
+				"list": [
+					100,
+					{
+						"@set(mainContainer)": "@xpath: /containers[1]"
+					}, 
+					200
+				],
+				"map": {
+					"key1": "val1",
+					
+					"@set(prodMap)": {
+						"productNames": "@xpathMulti: /products//name"
+					},
+					
+					"key2": "@fmarker: prodMap.productNames[0]"
+				},
+				
+				"names": "@fmarker: prodMap.productNames",
+				"container": "@fmarker: mainContainer"
+				
+			}
+		</template>
+		<expectedResult>
+			{
+				"list": [100, 200],
+				"map": {
+					"key1": "val1",
+					"key2": "aggr"
+				},
+				
+				"names": ["aggr", "iav"],
+				"container": "bank"
+				
+			}
+		</expectedResult>
+	</jel-test-bean>
+</test-data>

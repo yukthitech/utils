@@ -13,13 +13,13 @@ import org.xml.sax.Locator;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.filter.ExpressionFactory;
-import com.yukthitech.autox.jexpr.JsonExprEngine;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.reserved.NodeName;
+import com.yukthitech.jexpr.JsonExprEngine;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @NodeName(namePattern = "clone")

@@ -48,7 +48,6 @@ import com.yukthitech.autox.resource.ResourceFactory;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
-import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.utils.CommonUtils;
