@@ -84,7 +84,7 @@ public class DeleteProjectDialog extends JDialog
 		}
 	}
 
-	public void displayFor(Project project)
+	public boolean displayFor(Project project)
 	{
 		this.deleteProject = false;
 		
@@ -95,9 +95,10 @@ public class DeleteProjectDialog extends JDialog
 		
 		if(!deleteProject)
 		{
-			return;
+			return false;
 		}
 		
 		projectExplorer.deleteProject(project, deleteContentCbox.isSelected());
+		return true;
 	}
 }

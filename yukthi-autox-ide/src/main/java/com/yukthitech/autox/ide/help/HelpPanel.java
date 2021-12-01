@@ -9,6 +9,7 @@ import java.awt.Insets;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -115,9 +116,9 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 		try
 		{
-			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"));
-			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/fm-method-doc.html"));
-			exprDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/expr-doc.html"));
+			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/documentation.html"), Charset.defaultCharset());
+			fmMethodDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/fm-method-doc.html"), Charset.defaultCharset());
+			exprDocTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/expr-doc.html"), Charset.defaultCharset());
 		} catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occured while loading documentation template", ex);

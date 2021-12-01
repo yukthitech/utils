@@ -1,7 +1,6 @@
 package com.yukthitech.autox.ide.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import com.yukthitech.autox.ide.rest.MultiPart;

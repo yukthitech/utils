@@ -7,6 +7,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,8 @@ import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
+import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -51,7 +54,8 @@ public class FileActions
 	{
 		try
 		{
-			templates.put(TEST_FILE_TEMPLATE, IOUtils.toString(FileActions.class.getResourceAsStream("/templates/test-file-template.xml")));
+			templates.put(TEST_FILE_TEMPLATE, 
+					IOUtils.toString(FileActions.class.getResourceAsStream("/templates/test-file-template.xml"), Charset.defaultCharset()));
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while loading templates", ex);
@@ -69,6 +73,9 @@ public class FileActions
 
 	@Autowired
 	private IdeIndex ideIndex;
+	
+	@Autowired
+	private ProjectActions projectActions;
 
 	@Action
 	public void newFolder()
@@ -141,7 +148,7 @@ public class FileActions
 		{
 			try
 			{
-				FileUtils.write(finalFile, templates.get(templateName));
+				FileUtils.write(finalFile, templates.get(templateName), Charset.defaultCharset());
 			} catch(Exception ex)
 			{
 				logger.error("Failed to create file: " + finalFile.getPath(), ex);
@@ -263,6 +270,14 @@ public class FileActions
 	@Action
 	public void deleteFile()
 	{
+		BaseTreeNode baseNode = projectExplorer.getActiveNode();
+		
+		if(baseNode instanceof ProjectTreeNode)
+		{
+			projectActions.deleteProject();
+			return;
+		}
+		
 		File activeFile = ideContext.getActiveFile();
 
 		if(activeFile == null)

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -324,12 +325,12 @@ public class Project implements Serializable
 	private void createFile(File file, String templateFile, Map<String, String> context) throws IOException
 	{
 		InputStream is = Project.class.getResourceAsStream(templateFile);
-		String content = IOUtils.toString(is);
+		String content = IOUtils.toString(is, Charset.defaultCharset());
 		is.close();
 		
 		content = FreeMarkerMethodManager.replaceExpressions(templateFile, context, content);
 		
-		FileUtils.write(file, content);
+		FileUtils.write(file, content, Charset.defaultCharset());
 	}
 
 	/**

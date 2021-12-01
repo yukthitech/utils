@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -244,6 +245,8 @@ public class ProjectExplorer extends JPanel
 			@Override
 			public void saveState(IdeState state)
 			{
+				state.getOpenProjects().clear();
+				
 				for(Project proj : projects)
 				{
 					state.addOpenProject(proj);
@@ -376,8 +379,8 @@ public class ProjectExplorer extends JPanel
 		
 		try
 		{
-			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/autocomp-doc-templates/documentation.html"));
-			fmMethTemp = IOUtils.toString(HelpPanel.class.getResourceAsStream("/autocomp-doc-templates/fm-method-doc.html"));
+			documentTemplate = IOUtils.toString(HelpPanel.class.getResourceAsStream("/autocomp-doc-templates/documentation.html"), Charset.defaultCharset());
+			fmMethTemp = IOUtils.toString(HelpPanel.class.getResourceAsStream("/autocomp-doc-templates/fm-method-doc.html"), Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while loading templates", ex);

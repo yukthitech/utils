@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -348,7 +349,7 @@ public class XmlFormatter
 
 	public static void main(String[] args) throws Exception
 	{
-		String xmlContent = FileUtils.readFileToString(new File("./dml-test-suite.xml"));
+		String xmlContent = FileUtils.readFileToString(new File("./dml-test-suite.xml"), Charset.defaultCharset());
 		System.out.println(formatXml(xmlContent));
 	}
 }

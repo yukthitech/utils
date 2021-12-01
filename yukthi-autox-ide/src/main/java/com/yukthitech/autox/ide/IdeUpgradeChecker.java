@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
@@ -49,7 +50,7 @@ public class IdeUpgradeChecker
 			return null;
 		}
 		
-		String latestVersion = FileUtils.readFileToString(verFile);
+		String latestVersion = FileUtils.readFileToString(verFile, Charset.defaultCharset());
 		Pattern pattern = Pattern.compile("[\\w\\.\\-]+\\-\\d+");
 		latestVersion = latestVersion.trim();
 		
@@ -116,7 +117,7 @@ public class IdeUpgradeChecker
 	private static String getLocalVersion() throws Exception
 	{
 		InputStream is = IdeUpgradeChecker.class.getResourceAsStream("/version/version.txt");
-		String version = IOUtils.toString(is);
+		String version = IOUtils.toString(is, Charset.defaultCharset());
 		is.close();
 		
 		return version;

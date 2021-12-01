@@ -1,6 +1,7 @@
 package com.yukthitech.autox.ide;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ public abstract class AbstractIdeFileManager implements IIdeFileManager
 		
 		try
 		{
-			result = parseContent(project, file.getName(), FileUtils.readFileToString(file), newCollector);
+			result = parseContent(project, file.getName(), FileUtils.readFileToString(file, Charset.defaultCharset()), newCollector);
 			collector.load(newCollector);
 		}catch(Exception ex)
 		{

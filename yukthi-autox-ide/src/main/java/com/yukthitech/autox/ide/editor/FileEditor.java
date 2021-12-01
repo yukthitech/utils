@@ -12,6 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -145,7 +146,7 @@ public class FileEditor extends JPanel
 
 		try
 		{
-			String loadedText = FileUtils.readFileToString(file);
+			String loadedText = FileUtils.readFileToString(file, Charset.defaultCharset());
 			loadedText = IdeUtils.removeCarriageReturns(loadedText);
 			
 			syntaxTextArea.setText(loadedText);
@@ -374,7 +375,7 @@ public class FileEditor extends JPanel
 				file.setWritable(true);
 			}
 
-			FileUtils.write(file, syntaxTextArea.getText());
+			FileUtils.write(file, syntaxTextArea.getText(), Charset.defaultCharset());
 			ideContext.getProxy().fileSaved(file);
 		} catch(Exception ex)
 		{
