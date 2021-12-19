@@ -41,11 +41,6 @@ public class JsonExprEngine
 	private static final String KEY_VALUE = "@value";
 	
 	/**
-	 * In a map if this key is specified with value as true, along with @value then the result will be converted to json string.
-	 */
-	private static final String JSON = "@json";
-	
-	/**
 	 * Key used to specify value for the enclosing map when condition fails. Useful when condition has to be specified for simple attribute.
 	 */
 	private static final String KEY_FALSE_VALUE = "@falseValue";
@@ -73,7 +68,7 @@ public class JsonExprEngine
 	/**
 	 * Expression used by value string which has to be replaced with resultant value.
 	 */
-	private static final Pattern EXPR_PATTERN = Pattern.compile("^\\@(\\w+)\\:(.*)$");
+	private static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\:(.*)$");
 	
 	/**
 	 * Free marker expression type.
@@ -91,9 +86,24 @@ public class JsonExprEngine
 	private static final String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
 	
 	/**
+	 * In a map if this key is specified with value as true, along with @value then the result will be converted to json string.
+	 */
+	private static final String JSON = "@json";
+	
+	/**
 	 * Free marker engine for expression processing.
 	 */
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+	
+	/**
+	 * Map Conversion functionality.
+	 */
+	private MapConversions mapConversions;
+	
+	public JsonExprEngine()
+	{
+		this.mapConversions = new MapConversions(freeMarkerEngine);
+	}
 	
 	/**
 	 * Sets the free marker engine for expression processing.
@@ -109,6 +119,7 @@ public class JsonExprEngine
 		}
 		
 		this.freeMarkerEngine = freeMarkerEngine;
+		this.mapConversions = new MapConversions(freeMarkerEngine);
 	}
 	
 	/**
@@ -367,7 +378,7 @@ public class JsonExprEngine
 
 		if(!processCondition(map, context, path))
 		{
-			if(processValueExpression(map, context, path, resWrapper, KEY_FALSE_VALUE))
+			if(processMapValue(map, context, path, resWrapper, KEY_FALSE_VALUE))
 			{
 				//if value expression is present, return the result value
 				return resWrapper.getValue();
@@ -377,9 +388,15 @@ public class JsonExprEngine
 		}
 		
 		//check if value expression is present
-		if(processValueExpression(map, context, path, resWrapper, KEY_VALUE))
+		if(processMapValue(map, context, path, resWrapper, KEY_VALUE))
 		{
 			//if value expression is present, return the result value
+			return resWrapper.getValue();
+		}
+		
+		//check if current map is meant for resource loading.
+		if(mapConversions.processMapRes(map, context, path, resWrapper))
+		{
 			return resWrapper.getValue();
 		}
 		
@@ -481,11 +498,9 @@ public class JsonExprEngine
 	 * @param keyName Key name to be used to fetch the value expression
 	 * @return true if value expression is present
 	 */
-	private boolean processValueExpression(Map<String, Object> map, Map<String, Object> context, String path, ObjectWrapper<Object> value, String keyName)
+	private boolean processMapValue(Map<String, Object> map, Map<String, Object> context, String path, ObjectWrapper<Object> value, String keyName)
 	{
-		Object valueExpr = null;
-		
-		valueExpr = map.get(keyName);
+		Object valueExpr = map.get(keyName);
 		
 		//if value is not present, remove it
 		if(valueExpr == null)
