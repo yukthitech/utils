@@ -3,6 +3,7 @@ package com.yukthitech.autox.doc;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -200,6 +201,8 @@ public class DocGenerator
 				}
 			}
 			
+			parserDoc.setAdditionalInfo(parser.getAdditionalInfo());
+			
 			docInfo.addParser(parserDoc);
 		}
 	}
@@ -298,9 +301,9 @@ public class DocGenerator
 
 			if("doc.php".equals(destFile.getName()))
 			{
-				String content = FileUtils.readFileToString(destFile);
+				String content = FileUtils.readFileToString(destFile, Charset.defaultCharset());
 				content = FreeMarkerMethodManager.replaceExpressions(resPath, docInformation, content);
-				FileUtils.write(destFile, content);
+				FileUtils.write(destFile, content, Charset.defaultCharset());
 			}
 		}		
 	}

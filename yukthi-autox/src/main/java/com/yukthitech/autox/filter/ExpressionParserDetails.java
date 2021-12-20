@@ -39,9 +39,24 @@ public class ExpressionParserDetails
 		 */
 		private String description;
 		
+		/**
+		 * Instantiates a new param.
+		 */
 		public Param()
 		{}
 
+		/**
+		 * Instantiates a new param.
+		 *
+		 * @param name
+		 *            name of the param.
+		 * @param type
+		 *            type of the param.
+		 * @param defaultValue
+		 *            default value.
+		 * @param description
+		 *            description.
+		 */
 		public Param(String name, String type, String defaultValue, String description)
 		{
 			this.name = name;
@@ -167,6 +182,11 @@ public class ExpressionParserDetails
 	 * Params supported by this parser.
 	 */
 	private List<Param> params;
+	
+	/**
+	 * Additional information about the parser.
+	 */
+	private String additionalInfo;
 	
 	/**
 	 * Instantiates a new expression parser details.
@@ -381,6 +401,27 @@ public class ExpressionParserDetails
 	public void setParams(List<Param> params)
 	{
 		this.params = params;
+	}
+	
+	/**
+	 * Gets the additional information about the parser.
+	 *
+	 * @return the additional information about the parser
+	 */
+	public String getAdditionalInfo()
+	{
+		return additionalInfo;
+	}
+
+	/**
+	 * Sets the additional information about the parser.
+	 *
+	 * @param additionalInfo
+	 *            the new additional information about the parser
+	 */
+	public void setAdditionalInfo(String additionalInfo)
+	{
+		this.additionalInfo = additionalInfo;
 	}
 
 	/* (non-Javadoc)
