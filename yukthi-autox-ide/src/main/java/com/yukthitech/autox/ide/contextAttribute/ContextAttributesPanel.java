@@ -76,12 +76,12 @@ public class ContextAttributesPanel extends JPanel implements IViewPanel
 			@Override
 			public void environmentChanged(EnvironmentEvent event)
 			{
-				if(activeEnvironment != event.getEnvironment() || event.getEventType() != EnvironmentEventType.CONTEXT_ATTRIBUTE_ADDED)
+				if(activeEnvironment != event.getEnvironment() || event.getEventType() != EnvironmentEventType.CONTEXT_ATTRIBUTE_CHANGED)
 				{
 					return;
 				}
 				
-				addNewContextAttribute(event.getNewContextAttribute());
+				contextAttrChanged(event.getNewContextAttribute());
 			}
 		});
 	}
@@ -137,7 +137,7 @@ public class ContextAttributesPanel extends JPanel implements IViewPanel
 		return table;
 	}
 
-	private void addNewContextAttribute(ContextAttributeDetails attr)
+	private void contextAttrChanged(ContextAttributeDetails attr)
 	{
 		model.addContextAttribute(attr);
 	}

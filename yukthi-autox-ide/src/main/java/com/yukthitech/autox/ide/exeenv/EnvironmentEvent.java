@@ -75,7 +75,7 @@ public class EnvironmentEvent
 	
 	public static EnvironmentEvent newContextAttributeEvent(ExecutionEnvironment env, ContextAttributeDetails ctx)
 	{
-		EnvironmentEvent event = new EnvironmentEvent(env, EnvironmentEventType.CONTEXT_ATTRIBUTE_ADDED);
+		EnvironmentEvent event = new EnvironmentEvent(env, EnvironmentEventType.CONTEXT_ATTRIBUTE_CHANGED);
 		event.newContextAttribute = ctx;
 		
 		return event;

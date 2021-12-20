@@ -19,7 +19,7 @@ public enum EnvironmentEventType
 	/**
 	 * New context attribute is added to ContextAttributesPanel 
 	 */
-	CONTEXT_ATTRIBUTE_ADDED
+	CONTEXT_ATTRIBUTE_CHANGED
 	
 	;
 }

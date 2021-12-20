@@ -13,8 +13,11 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.swing.JEditorPane;
@@ -36,6 +39,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +60,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.doc.DocGenerator;
 import com.yukthitech.autox.doc.DocInformation;
@@ -75,6 +80,8 @@ public class HelpPanel extends JPanel implements IViewPanel
 	private static final long serialVersionUID = 1L;
 
 	private static Logger logger = LogManager.getLogger(HelpPanel.class);
+	
+	private static Pattern IMG_URL_PATTERN = Pattern.compile("\\[\\[IMG\\]\\s*(.*?)\\s*\\]");
 
 	private JTabbedPane parentTabbedPane;
 
@@ -207,6 +214,8 @@ public class HelpPanel extends JPanel implements IViewPanel
 				context.put("node", method);
 				uiLocatorNode.addHelpNode(new HelpNodeData("uiloc:" + method.getName(), method.getName(), buildDoc(exprDocTemplate, context), method));
 			}
+			
+			loadStaticDocs(rootNode);
 
 			// create and open index
 			IndexWriterConfig config = new IndexWriterConfig(indexAnalyzer);
@@ -224,6 +233,63 @@ public class HelpPanel extends JPanel implements IViewPanel
 		{
 			logger.error("An error occurred while initializing help panel", ex);
 			throw new InvalidStateException("An error occurred while initializing help panel", ex);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadHelpDocNodes(HelpNodeData rootNode, List<Map<String, Object>> docLst) throws Exception
+	{
+		StringBuffer buffer = new StringBuffer();
+		
+		for(Map<String, Object> docEntry : docLst)
+		{
+			String label = (String) docEntry.get("label");
+			String file = (String) docEntry.get("file");
+			String htmlContent = IOUtils.resourceToString(file, Charset.defaultCharset());
+			
+			logger.debug("Loading static-doc with [Label: {}, File: {}]", label, file);
+			
+			//replace image urls
+			buffer.setLength(0);
+			Matcher matcher = IMG_URL_PATTERN.matcher(htmlContent);
+			
+			while(matcher.find())
+			{
+				String imgPath = matcher.group(1);
+				logger.debug("For static-help '{}' computing classpath url for resource: {}", label, imgPath);
+				
+				String url = HelpPanel.class.getResource(imgPath).toString();
+				matcher.appendReplacement(buffer, url);
+			}
+			
+			matcher.appendTail(buffer);
+			
+			//create and add tree node
+			HelpNodeData docNode = new HelpNodeData("doc:" + label, label, buffer.toString(), null);
+			rootNode.addHelpNode(docNode);
+			
+			List<Map<String, Object>> subdocLst = (List<Map<String, Object>>) docEntry.get("subnodes");
+			
+			if(CollectionUtils.isNotEmpty(subdocLst))
+			{
+				loadHelpDocNodes(docNode, subdocLst);
+			}
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadStaticDocs(HelpNodeData rootNode)
+	{
+		try
+		{
+			ObjectMapper objectMapper = new ObjectMapper();
+			String docLstJson = IOUtils.resourceToString("/help/help-doc-list.json", Charset.defaultCharset());
+			
+			List<Map<String, Object>> docLst = (List<Map<String, Object>>) objectMapper.readValue(docLstJson, Object.class);
+			loadHelpDocNodes(rootNode, docLst);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while loading static docs", ex);
 		}
 	}
 
