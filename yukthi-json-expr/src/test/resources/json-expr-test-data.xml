@@ -352,4 +352,51 @@
 			}
 		</expectedResult>
 	</jel-test-bean>
+
+	<jel-test-bean name="resLoadingWithExpr">
+		<context>
+			{
+				"ckey1": "cval"
+			}
+		</context>
+		<template>
+			{
+				"result": {
+					"@resource": "/res-file.txt",
+					"@resParams": {
+						"key1": "val1"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "This is simple content with param-value=val1 and context-value=cval"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="resLoadingNoExpr">
+		<context>
+			{
+				"ckey1": "cval"
+			}
+		</context>
+		<template>
+			{
+				"result": {
+					"@resource": "/res-file.txt",
+					"@expressions": false,
+					"@resParams": {
+						"key1": "val1"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "This is simple content with param-value=${resParams.key1} and context-value=${ckey1}"
+			}
+		</expectedResult>
+	</jel-test-bean>
 </test-data>

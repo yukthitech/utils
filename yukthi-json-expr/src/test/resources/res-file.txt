@@ -1,2 +1,1 @@
-This is simple content with 
-		param-value=${resParams.key1} and context-value=${ckey1}
+This is simple content with param-value=${resParams.key1} and context-value=${ckey1}

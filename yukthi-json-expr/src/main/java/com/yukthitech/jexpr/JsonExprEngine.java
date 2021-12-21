@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,36 +65,20 @@ public class JsonExprEngine
 	private static final Pattern SET_PATTERN = Pattern.compile("^\\@set\\((\\w+)\\)$");
 	
 	/**
-	 * Expression used by value string which has to be replaced with resultant value.
-	 */
-	private static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\:(.*)$");
-	
-	/**
-	 * Free marker expression type.
-	 */
-	private static final String EXPR_TYPE_FMARKER = "fmarker";
-	
-	/**
-	 * Xpath expression type.
-	 */
-	private static final String EXPR_TYPE_XPATH = "xpath";
-
-	/**
-	 * Xpath expression type with multiple value.
-	 */
-	private static final String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
-	
-	/**
-	 * In a map if this key is specified with expression, along with @value/@falseValue then the result will be result of this expression.
-	 * Current value will be available in this expressions as thisValue.
-	 */
-	private static final String TRANSFORM = "@transform";
-	
-	/**
 	 * Free marker engine for expression processing.
 	 */
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 	
+	/**
+	 * Conversion functionality.
+	 */
+	private Conversions conversions;
+	
+	public JsonExprEngine()
+	{
+		this.conversions = new Conversions(freeMarkerEngine);
+	}
+
 	/**
 	 * Sets the free marker engine for expression processing.
 	 *
@@ -110,6 +93,7 @@ public class JsonExprEngine
 		}
 		
 		this.freeMarkerEngine = freeMarkerEngine;
+		this.conversions = new Conversions(freeMarkerEngine);
 	}
 	
 	/**
@@ -188,7 +172,7 @@ public class JsonExprEngine
 			}
 			else if(object instanceof String)
 			{
-				object = processString((String) object, context, path);
+				object = conversions.processString((String) object, context, path);
 			}
 		} catch(JsonExpressionException ex)
 		{
@@ -384,6 +368,12 @@ public class JsonExprEngine
 			return resWrapper.getValue();
 		}
 		
+		//check if current map is meant for resource loading.
+		if(conversions.processMapRes(map, context, path, resWrapper))
+		{
+			return resWrapper.getValue();
+		}
+		
 		Map<String, Object> resMap = new LinkedHashMap<String, Object>();
 		boolean setKeyPresent = false;
 		
@@ -439,7 +429,7 @@ public class JsonExprEngine
 			}
 			
 			//for normal key-value entry, process the key also for expressions
-			String key = String.valueOf(processString(entry.getKey(), context, path + "#key"));
+			String key = String.valueOf(conversions.processString(entry.getKey(), context, path + "#key"));
 			resMap.put(key, val);
 		}
 		
@@ -497,22 +487,10 @@ public class JsonExprEngine
 		
 		//evaluate the condition and return the result
 		Object res = (valueExpr instanceof String) ? 
-				processString((String) valueExpr, context, path + ">" + keyName) : 
+				conversions.processString((String) valueExpr, context, path + ">" + keyName) : 
 					processObject(valueExpr, context, path + ">" + keyName);
 		
-		if(map.get(TRANSFORM) instanceof String)
-		{
-			try
-			{
-				context.put("thisValue", res);
-				
-				Object finalVal = processString((String) map.get(TRANSFORM), context, path);
-				res = finalVal;
-			}catch(Exception ex)
-			{
-				throw new JsonExpressionException(path, "An error occurred while transforming result value", ex);	
-			}
-		}
+		res = conversions.checkForTransform(map, res, context, path);
 				
 		value.setValue(res);
 		return true;
@@ -573,7 +551,7 @@ public class JsonExprEngine
 			return true;
 		}
 		
-		Matcher matcher = EXPR_PATTERN.matcher((String) firstElem);
+		Matcher matcher = Conversions.EXPR_PATTERN.matcher((String) firstElem);
 		
 		//if empty list is not expression, evaluate condition as true
 		if(!matcher.matches())
@@ -603,47 +581,5 @@ public class JsonExprEngine
 		{
 			throw new JsonExpressionException(path, "Invalid condition '%s' specified at path: %s", condition, path, ex);	
 		}
-	}
-
-	/**
-	 * If input string contains expression syntax the same will be processed and result will be returned. If not string will
-	 * be evaluated as simple free marker template.
-	 * @param str string to evaluate
-	 * @param context context to be used
-	 * @param path path where this string is found
-	 * @return processed value
-	 */
-	private Object processString(String str, Map<String, Object> context, String path)
-	{
-		Matcher matcher = EXPR_PATTERN.matcher(str);
-		
-		if(!matcher.matches())
-		{
-			return freeMarkerEngine.processTemplate("jel-template", str, context);
-		}
-		
-		String exprType = matcher.group(1);
-		String expr = matcher.group(2);
-		
-		try
-		{
-			if(EXPR_TYPE_FMARKER.matches(exprType))
-			{
-				return freeMarkerEngine.fetchValue("jel-expr", expr, context);
-			}
-			else if(EXPR_TYPE_XPATH.matches(exprType))
-			{
-				return JXPathContext.newContext(context).getValue(expr);
-			}
-			else if(EXPR_TYPE_XPATH_MULTI.matches(exprType))
-			{
-				return JXPathContext.newContext(context).selectNodes(expr);
-			}
-		} catch(Exception ex)
-		{
-			throw new JsonExpressionException(path, "An error occurred while processing expression: %s", str, ex);
-		}
-		
-		throw new JsonExpressionException(path, "Invalid expression type specified '%s' in expression: %s", exprType, str);
 	}
 }
