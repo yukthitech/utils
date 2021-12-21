@@ -86,24 +86,15 @@ public class JsonExprEngine
 	private static final String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
 	
 	/**
-	 * In a map if this key is specified with value as true, along with @value then the result will be converted to json string.
+	 * In a map if this key is specified with expression, along with @value/@falseValue then the result will be result of this expression.
+	 * Current value will be available in this expressions as thisValue.
 	 */
-	private static final String JSON = "@json";
+	private static final String TRANSFORM = "@transform";
 	
 	/**
 	 * Free marker engine for expression processing.
 	 */
 	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
-	
-	/**
-	 * Map Conversion functionality.
-	 */
-	private MapConversions mapConversions;
-	
-	public JsonExprEngine()
-	{
-		this.mapConversions = new MapConversions(freeMarkerEngine);
-	}
 	
 	/**
 	 * Sets the free marker engine for expression processing.
@@ -119,7 +110,6 @@ public class JsonExprEngine
 		}
 		
 		this.freeMarkerEngine = freeMarkerEngine;
-		this.mapConversions = new MapConversions(freeMarkerEngine);
 	}
 	
 	/**
@@ -394,12 +384,6 @@ public class JsonExprEngine
 			return resWrapper.getValue();
 		}
 		
-		//check if current map is meant for resource loading.
-		if(mapConversions.processMapRes(map, context, path, resWrapper))
-		{
-			return resWrapper.getValue();
-		}
-		
 		Map<String, Object> resMap = new LinkedHashMap<String, Object>();
 		boolean setKeyPresent = false;
 		
@@ -516,14 +500,17 @@ public class JsonExprEngine
 				processString((String) valueExpr, context, path + ">" + keyName) : 
 					processObject(valueExpr, context, path + ">" + keyName);
 		
-		if("true".equalsIgnoreCase("" + map.get(JSON)))
+		if(map.get(TRANSFORM) instanceof String)
 		{
 			try
 			{
-				res = OBJECT_MAPPER.writeValueAsString(res);
+				context.put("thisValue", res);
+				
+				Object finalVal = processString((String) map.get(TRANSFORM), context, path);
+				res = finalVal;
 			}catch(Exception ex)
 			{
-				throw new JsonExpressionException(path, "An error occurred while converting result value into json string", ex);	
+				throw new JsonExpressionException(path, "An error occurred while transforming result value", ex);	
 			}
 		}
 				
