@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
@@ -19,6 +20,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -57,6 +59,20 @@ public class LoadQueryRowMapStep extends AbstractStep
 	 */
 	@Param(description = "Name of the data source to be used for query execution.")
 	private String dataSourceName;
+	
+	/**
+	 * Transformations to be applied on columns.
+	 */
+	@SkipParsing
+	@Param(description = "Column transformation expressions. This can be used to transform column values using specified expressions before loading result on context.<br>"
+			+ "In this expression current column/row details can be accessed using attribute specified by 'transformAttrName'.", required = false)
+	private Map<String, String> columnTransformations = new HashMap<String, String>();
+	
+	/**
+	 * Name of the attribute which should be used to set transform details on context while evaluating transform expression.
+	 */
+	@Param(description = "Name of the attribute which should be used to set trasnform details on context while evaluating transform expression. Defaults to: result", attrName = true)
+	private String transformAttrName = "result";
 
 	/**
 	 * Sets the query to execute.
@@ -98,6 +114,50 @@ public class LoadQueryRowMapStep extends AbstractStep
 	{
 		this.dataSourceName = dataSourceName;
 	}
+	
+	/**
+	 * Adds the column transformation.
+	 *
+	 * @param column
+	 *            the column
+	 * @param expr
+	 *            the expr
+	 */
+	public void addColumnTransformation(String column, String expr)
+	{
+		if(this.columnTransformations == null)
+		{
+			this.columnTransformations = new HashMap<String, String>();
+		}
+		
+		this.columnTransformations.put(column, expr);
+	}
+	
+	/**
+	 * Sets the name of the attribute which should be used to set transform
+	 * details on context while evaluating transform expression.
+	 *
+	 * @param transformAttrName
+	 *            the new name of the attribute which should be used to set
+	 *            transform details on context while evaluating transform
+	 *            expression
+	 */
+	public void setTransformAttrName(String transformAttrName)
+	{
+		this.transformAttrName = transformAttrName;
+	}
+	
+	private void doTransform(AutomationContext context, Map<String, Object> row)
+	{
+		for(Map.Entry<String, String> colTrans : columnTransformations.entrySet())
+		{
+			Object colVal = row.get(colTrans.getKey());
+			TransformDetails transDet = new TransformDetails(colTrans.getKey(), colVal, row);
+			
+			colVal = QueryUtils.transform(context, colTrans.getValue(), transformAttrName, transDet);
+			row.put(colTrans.getKey(), colVal);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -106,6 +166,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 	 * com.yukthitech.ui.automation.IValidation#execute(com.yukthitech.ui.automation.
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
@@ -144,6 +205,15 @@ public class LoadQueryRowMapStep extends AbstractStep
 				{
 					result = new ArrayList<>();
 				}
+				else if(MapUtils.isNotEmpty(columnTransformations))
+				{
+					List<Map<String, Object>> rowLst = (List<Map<String,Object>>) result;
+					
+					for(Map<String, Object> row : rowLst)
+					{
+						doTransform(context, row);
+					}
+				}
 			}
 			else
 			{
@@ -153,6 +223,10 @@ public class LoadQueryRowMapStep extends AbstractStep
 				if(result == null)
 				{
 					result = new HashMap<>();
+				}
+				else if(MapUtils.isNotEmpty(columnTransformations))
+				{
+					doTransform(context, (Map<String, Object>) result);
 				}
 			}
 			

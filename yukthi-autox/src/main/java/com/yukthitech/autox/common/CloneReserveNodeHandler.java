@@ -19,7 +19,6 @@ import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.reserved.IReserveNodeHandler;
 import com.yukthitech.ccg.xml.reserved.NodeName;
-import com.yukthitech.jexpr.JsonExprEngine;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @NodeName(namePattern = "clone")
@@ -30,8 +29,6 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 	private static final String ATTR_PROPERTY = "property";
 	
 	private static final Pattern PROP_PATTERN = Pattern.compile("^\\s*\\w+\\s*\\:.*");
-	
-	private static final JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine();
 	
 	/**
 	 * Property info to be altered.
@@ -201,7 +198,7 @@ public class CloneReserveNodeHandler implements IReserveNodeHandler
 			}
 			
 			context.put("context", AutomationContext.getInstance());
-			bean = JSON_EXPR_ENGINE.processObject(bean, context);
+			bean = IAutomationConstants.JSON_EXPR_ENGINE.processObject(bean, context);
 		}
 		
 		node.replaceBean(bean);

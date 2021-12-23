@@ -1,12 +1,12 @@
-<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
-	<ccg:exprPattern enabled="false"/>
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
 
 	<collection name="com.yukthitech.autox.test.ui.steps.ClickAndDownloadStep">
 		<example>
 			<description>Clicks a link in ui to download file</description>
 			
 			<content><![CDATA[
-				<ccg:ui-click-and-download locator="id: downloadLink" pathName="filePath"/>
+				<s:ui-click-and-download locator="id: downloadLink" pathName="filePath"/>
 			]]></content>
 		</example>
 	</collection>
@@ -16,7 +16,7 @@
 			<description>Click the element using locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-click locator="id: button"/>
+				<s:ui-click locator="id: button"/>
 			]]></content>
 		</example>
 	</collection>
@@ -26,10 +26,10 @@
 			<description>Click the element using locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-open-window url="/index.html" name="Index"/>
-				<ccg:ui-switch-window locator="Index"/>
-				<ccg:ui-is-visible locator="id: button" name="visibFlag1"/>
-				<ccg:ui-close-window />
+				<s:ui-open-window url="/index.html" name="Index"/>
+				<s:ui-switch-window locator="Index"/>
+				<s:ui-is-visible locator="id: button" name="visibFlag1"/>
+				<s:ui-close-window />
 			]]></content>
 		</example>
 	</collection>
@@ -39,7 +39,7 @@
 			<description>Filling html form</description>
 			
 			<content><![CDATA[
-				<ccg:ui-goto-page uri="/index.html" />
+				<s:ui-goto-page uri="/index.html" />
 			]]></content>
 		</example>
 	</collection>
@@ -49,7 +49,7 @@
 			<description>Checking for visibility of element</description>
 			
 			<content><![CDATA[
-				<ccg:ui-is-visible locator="id: testLayer" name="visibFlag1"/>
+				<s:ui-is-visible locator="id: testLayer" name="visibFlag1"/>
 			]]></content>
 		</example>
 	</collection>
@@ -59,7 +59,7 @@
 			<description>Taking screen shot of the screen</description>
 			
 			<content><![CDATA[
-				<ccg:ui-log-screen-shot name="test.png" />
+				<s:ui-log-screen-shot name="test.png" />
 			]]></content>
 		</example>
 	</collection>
@@ -69,10 +69,10 @@
 			<description>Opening a new window</description>
 			
 			<content><![CDATA[
-				<ccg:ui-open-window url="/index.html" name="Index"/>
-				<ccg:ui-switch-window locator="Index"/>
-				<ccg:ui-is-visible locator="id: button" name="visibFlag1"/>
-				<ccg:ui-close-window />
+				<s:ui-open-window url="/index.html" name="Index"/>
+				<s:ui-switch-window locator="Index"/>
+				<s:ui-is-visible locator="id: button" name="visibFlag1"/>
+				<s:ui-close-window />
 			]]></content>
 		</example>
 	</collection>
@@ -82,11 +82,11 @@
 			<description>Getting elements using locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-get-elements locator="xpath: //input[@type='checkbox']" name="checkBoxes"/>
+				<s:ui-get-elements locator="xpath: //input[@type='checkbox']" name="checkBoxes"/>
 
-				<ccg:forEach expression="attr.checkBoxes" loopVar="cbox">
-					<ccg:set expression="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
-				</ccg:forEach>
+				<s:forEach expression="attr.checkBoxes" loopVar="cbox">
+					<s:set expression="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
+				</s:forEach>
 			]]></content>
 		</example>
 	</collection>
@@ -96,7 +96,7 @@
 			<description>Getting value of specified locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+				<s:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
 			]]></content>
 		</example>
 	</collection>
@@ -106,7 +106,7 @@
 			<description>Setting value of element with specified locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-set-value locator="xpath: //input[@name='statusFld']" value="OPEN"/>
+				<s:ui-set-value locator="xpath: //input[@name='statusFld']" value="OPEN"/>
 			]]></content>
 		</example>
 	</collection>
@@ -117,7 +117,7 @@
 			<description>Asserts the visibility of ui element</description>
 			
 			<content><![CDATA[
-				<ccg:ui-assert-visibility locator="id: downloadLink"/>
+				<s:ui-assert-visibility locator="id: downloadLink"/>
 			]]></content>
 		</example>
 	</collection>

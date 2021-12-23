@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -100,5 +101,25 @@ public class QueryUtils
 	public static QueryRunner getQueryRunner()
 	{
 		return queryRunner;
+	}
+	
+	/**
+	 * Processes specified expression with specified details.
+	 *
+	 * @param context context to be used
+	 * @param expression expression to be processed
+	 * @param attrName Attr name to be used to set transform details on context
+	 * @param transformDetails transformation info
+	 * @return transformation result
+	 */
+	public static Object transform(AutomationContext context, String expression, String attrName, TransformDetails transformDetails)
+	{
+		if(StringUtils.isBlank(expression))
+		{
+			return transformDetails.getColumnValue();
+		}
+		
+		context.setAttribute(attrName, transformDetails);
+		return ExpressionFactory.getExpressionFactory().parseExpression(context, expression);
 	}
 }

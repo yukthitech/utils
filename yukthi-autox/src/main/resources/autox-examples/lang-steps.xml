@@ -1,22 +1,22 @@
-<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
-	<ccg:exprPattern enabled="false"/>
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
 	
 	<collection name="com.yukthitech.autox.test.lang.steps.BreakStep">
 		<example>
 			<description>Breaking the loop</description>
 			
 			<content><![CDATA[
-				<ccg:for start="1" end="20">
-					<ccg:if condition="attr.loopVar % 2 != 0">
-						<ccg:continue/>
-					</ccg:if>
+				<s:for start="1" end="20">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
 					
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 					
-					<ccg:if condition="attr.loopVar gte 10">
-						<ccg:break/>
-					</ccg:if>
-				</ccg:for>
+					<s:if condition="attr.loopVar gte 10">
+						<s:break/>
+					</s:if>
+				</s:for>
 			]]></content>
 		</example>
 	</collection>
@@ -26,7 +26,7 @@
 			<description>Executing the expression</description>
 			
 			<content><![CDATA[
-				<ccg:execute expression="${attr.val + 1}"/>
+				<s:execute expression="${attr.val + 1}"/>
 			]]></content>
 		</example>
 	</collection>
@@ -36,9 +36,9 @@
 			<description>Failing the test case</description>
 			
 			<content><![CDATA[
-				<ccg:if condition="attr.loopVar % 2 != 0">
-					<ccg:fail/>
-				</ccg:if>
+				<s:if condition="attr.loopVar % 2 != 0">
+					<s:fail/>
+				</s:if>
 			]]></content>
 		</example>
 	</collection>
@@ -48,9 +48,9 @@
 			<description>Looping through list elements</description>
 			
 			<content><![CDATA[
-				<ccg:for-each expression="attr: checkBoxes" loopVar="cbox">
-					<ccg:set expression="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
-				</ccg:for-each>
+				<s:for-each expression="attr: checkBoxes" loopVar="cbox">
+					<s:set expression="values" value="${attr.values},${uiElemAttr('value', attr.cbox, null)}"/>
+				</s:for-each>
 			]]></content>
 		</example>
 
@@ -58,13 +58,13 @@
 			<description>Looping through string tokens using delimter</description>
 			
 			<content><![CDATA[
-				<ccg:for-each expression="string: a,b,c,d, e,f" delimiter="\s*\,\s*">
-					<ccg:if condition="attr.loopVar == 'b'">
-						<ccg:continue/>
-					</ccg:if>
+				<s:for-each expression="string: a,b,c,d, e,f" delimiter="\s*\,\s*">
+					<s:if condition="attr.loopVar == 'b'">
+						<s:continue/>
+					</s:if>
 					
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
-				</ccg:for-each>
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for-each>
 			]]></content>
 		</example>
 
@@ -84,13 +84,13 @@
 			<description>Looping through range of numbers</description>
 			
 			<content><![CDATA[
-				<ccg:for start="1" end="20">
-					<ccg:if condition="attr.loopVar % 2 != 0">
-						<ccg:continue/>
-					</ccg:if>
+				<s:for start="1" end="20">
+					<s:if condition="attr.loopVar % 2 != 0">
+						<s:continue/>
+					</s:if>
 					
-					<ccg:set expression="res" value="${attr.res}|${attr.loopVar}"/>
-				</ccg:for>
+					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
+				</s:for>
 			]]></content>
 		</example>
 	</collection>
@@ -100,23 +100,23 @@
 			<description>If to check condition and execute steps</description>
 			
 			<content><![CDATA[
-				<ccg:if condition="attr.loopVar % 2 != 0">
-					<ccg:continue/>
-				</ccg:if>
+				<s:if condition="attr.loopVar % 2 != 0">
+					<s:continue/>
+				</s:if>
 			]]></content>
 		</example>
 		<example>
 			<description>If with else block</description>
 			
 			<content><![CDATA[
-				<ccg:if condition="attr.flag == 1">
+				<s:if condition="attr.flag == 1">
 					<then>
-						<ccg:set expression="ifExec" value="if-then"/>
+						<s:set expression="ifExec" value="if-then"/>
 					</then>
 					<else>
-						<ccg:set expression="ifExec" value="if-else"/>
+						<s:set expression="ifExec" value="if-else"/>
 					</else>
-				</ccg:if>
+				</s:if>
 			]]></content>
 		</example>
 	</collection>
@@ -127,13 +127,13 @@
 			
 			<content><![CDATA[
 				<step-group name="condSimpleGroup">
-					<ccg:if condition="attr.returnFlag??">
-						<ccg:set expression="ifExec">
+					<s:if condition="attr.returnFlag??">
+						<s:set expression="ifExec">
 							<value>string: returnFlag: ${attr.returnFlag}</value>
-						</ccg:set>
+						</s:set>
 						
-						<ccg:return/>
-					</ccg:if>
+						<s:return/>
+					</s:if>
 				</step-group>
 			]]></content>
 		</example>
@@ -144,11 +144,11 @@
 			<description>Polling and checking for condition</description>
 			
 			<content><![CDATA[
-				<ccg:pollAndCheck checkCondition="attr.checkVar gte 5" timeOut="20" timeOutUnit="SECONDS" pollingInterval="500">
+				<s:pollAndCheck checkCondition="attr.checkVar gte 5" timeOut="20" timeOutUnit="SECONDS" pollingInterval="500">
 					<poll>
-						<ccg:set expression="checkVar" value="int: ${attr.checkVar + 1}"/>
+						<s:set expression="checkVar" value="int: ${attr.checkVar + 1}"/>
 					</poll>
-				</ccg:pollAndCheck>
+				</s:pollAndCheck>
 			]]></content>
 		</example>
 	</collection>
@@ -158,10 +158,10 @@
 			<description>Looping till condition is meeting</description>
 			
 			<content><![CDATA[
-				<ccg:while condition="attr.i lt 5">
-					<ccg:set expression="res" value="${attr.res}|${attr.i}"/>
-					<ccg:set expression="i" value="int: ${attr.i + 1}"/>
-				</ccg:while>
+				<s:while condition="attr.i lt 5">
+					<s:set expression="res" value="${attr.res}|${attr.i}"/>
+					<s:set expression="i" value="int: ${attr.i + 1}"/>
+				</s:while>
 			]]></content>
 		</example>
 	</collection>
@@ -171,7 +171,7 @@
 			<description>Assert specified file exists</description>
 			
 			<content><![CDATA[
-				<ccg:assert-file-exists path="test.txt"/>
+				<s:assert-file-exists path="test.txt"/>
 			]]></content>
 		</example>
 	</collection>

@@ -1,12 +1,12 @@
-<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
-	<ccg:exprPattern enabled="false"/>
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
 
 	<collection name="$uilocators.id">
 		<example>
 			<description>Accessing ui element with id locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-click locator="id: button"/>
+				<s:ui-click locator="id: button"/>
 			]]></content>
 		</example>
 	</collection>
@@ -16,7 +16,7 @@
 			<description>Accessing ui element with xpath locator</description>
 			
 			<content><![CDATA[
-				<ccg:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
+				<s:ui-get-value locator="xpath: //input[@name='statusFld']" name="fldValue"/>
 			]]></content>
 		</example>
 	</collection>

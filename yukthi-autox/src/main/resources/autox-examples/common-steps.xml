@@ -1,12 +1,12 @@
-<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
-	<ccg:exprPattern enabled="false"/>
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
 
 	<collection name="com.yukthitech.autox.test.common.steps.LogStep">
 		<example>
 			<description>Logging simple message at default level (DEBUG)</description>
 			
 			<content><![CDATA[
-				<ccg:log message="This message is from step group"/>
+				<s:log message="This message is from step group"/>
 			]]></content>
 		</example>
 
@@ -14,10 +14,10 @@
 			<description>Logging multiple messages and by using expressions</description>
 			
 			<content><![CDATA[
-				<ccg:log>
+				<s:log>
 					<message>Invoking method using object from app config: </message>
 					<message>prop: data.beanFromApp</message>
-				</ccg:log>
+				</s:log>
 			]]></content>
 		</example>
 
@@ -25,7 +25,7 @@
 			<description>Logging at specific level</description>
 			
 			<content><![CDATA[
-				<ccg:log level="SUMMARY" message="Time taken during test was: 100"/>
+				<s:log level="SUMMARY" message="Time taken during test was: 100"/>
 			]]></content>
 		</example>
 	</collection>
@@ -35,7 +35,7 @@
 			<description>Creating dir in work folder</description>
 			
 			<content><![CDATA[
-				<ccg:mkdir path="tmp/test1" name="tmpDir"/>
+				<s:mkdir path="tmp/test1" name="tmpDir"/>
 			]]></content>
 		</example>
 	</collection>
@@ -45,7 +45,7 @@
 			<description>Removing context attribute</description>
 			
 			<content><![CDATA[
-				<ccg:remove name="tmpDir"/>
+				<s:remove name="tmpDir"/>
 			]]></content>
 		</example>
 		<example>
@@ -53,7 +53,7 @@
 				Removing using xpath expression - key in a map.
 			</description>
 			<content><![CDATA[
-				<ccg:set expression="bean">
+				<s:set expression="bean">
 					<value>
 						json:
 						{
@@ -63,9 +63,9 @@
 							"strArr": ["one", "two", "three"]
 						}
 					</value>
-				</ccg:set>
+				</s:set>
 
-				<ccg:remove expression="xpath: /attr/bean/key2"/>
+				<s:remove expression="xpath: /attr/bean/key2"/>
 			]]></content>
 		</example>
 		<example>
@@ -73,7 +73,7 @@
 				Removing using xpath expression - to remove element in a list using index. Note: In xpath idex starts with 1 (not zero). 
 			</description>
 			<content><![CDATA[
-				<ccg:remove expression="xpath: /attr/bean/arr[2]"/>
+				<s:remove expression="xpath: /attr/bean/arr[2]"/>
 			]]></content>
 		</example>
 		<example>
@@ -81,7 +81,7 @@
 				Removing using xpath expression - to remove element in a list using value. 
 			</description>
 			<content><![CDATA[
-				<ccg:remove expression="xpath: /attr/bean/strArr[contains(., 'two')]"/>
+				<s:remove expression="xpath: /attr/bean/strArr[contains(., 'two')]"/>
 			]]></content>
 		</example>
 	</collection>
@@ -91,8 +91,8 @@
 			<description>Setting context attribute with type</description>
 			
 			<content><![CDATA[
-				<ccg:set expression="intAttr" value="int: 10" />
-				<ccg:set expression="attr(int): intAttr1" value="10"/>
+				<s:set expression="intAttr" value="int: 10" />
+				<s:set expression="attr(int): intAttr1" value="10"/>
 			]]></content>
 		</example>
 
@@ -100,7 +100,7 @@
 			<description>Using piped expressions for setting the value</description>
 			
 			<content><![CDATA[
-				<ccg:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
+				<s:set expression="propAttr1" value="file:./src/test/resources/data/data1.json | prop: bean1.prop1"/>
 			]]></content>
 		</example>
 
@@ -108,7 +108,7 @@
 			<description>Setting property (instead of default context attribute)</description>
 			
 			<content><![CDATA[
-				<ccg:set expression="prop: attr.beanForTest.key1" value="newValue1" />
+				<s:set expression="prop: attr.beanForTest.key1" value="newValue1" />
 			]]></content>
 		</example>
 
@@ -116,14 +116,14 @@
 			<description>Setting property using json</description>
 			
 			<content><![CDATA[
-				<ccg:set expression="beanForTest">
+				<s:set expression="beanForTest">
 					<value>json:
 						{
 							"key1" : "value1",
 							"key2" : "value2"
 						}
 					</value>
-				</ccg:set>
+				</s:set>
 			]]></content>
 		</example>
 	</collection>
@@ -134,7 +134,7 @@
 			<description>Sleep for specified number of millis (default time units)</description>
 			
 			<content><![CDATA[
-				<ccg:sleep time="5000"/>
+				<s:sleep time="5000"/>
 			]]></content>
 		</example>
 
@@ -142,7 +142,7 @@
 			<description>Sleep using non-default time units</description>
 			
 			<content><![CDATA[
-				<ccg:sleep time="10" timeUnit="SECONDS"/>
+				<s:sleep time="10" timeUnit="SECONDS"/>
 			]]></content>
 		</example>
 	</collection>
@@ -152,9 +152,9 @@
 			<description>Starting/stopped timer with specified name</description>
 			
 			<content><![CDATA[
-				<ccg:start-timer name="timeTaken"/>
-				<ccg:sleep time="10" timeUnit="SECONDS"/>
-				<ccg:stop-timer name="timeTaken"/>
+				<s:start-timer name="timeTaken"/>
+				<s:sleep time="10" timeUnit="SECONDS"/>
+				<s:stop-timer name="timeTaken"/>
 			]]></content>
 		</example>
 	</collection>
@@ -164,9 +164,9 @@
 			<description>Starting/stopped timer with specified name</description>
 			
 			<content><![CDATA[
-				<ccg:start-timer name="timeTaken"/>
-				<ccg:sleep time="10" timeUnit="SECONDS"/>
-				<ccg:stop-timer name="timeTaken"/>
+				<s:start-timer name="timeTaken"/>
+				<s:sleep time="10" timeUnit="SECONDS"/>
+				<s:stop-timer name="timeTaken"/>
 			]]></content>
 		</example>
 	</collection>
@@ -177,11 +177,11 @@
 			<description>Invoking java object method</description>
 			
 			<content><![CDATA[
-				<ccg:invoke-method method="toText">
-					<object ccg:beanRef="beanFromApp" />
+				<s:invoke-method method="toText">
+					<object s:beanRef="beanFromApp" />
 
-					<parameter ccg:beanType="com.yukthitech.test.beans.SimpleBean" name="someName"/>
-				</ccg:invoke-method>
+					<parameter s:beanType="com.yukthitech.test.beans.SimpleBean" name="someName"/>
+				</s:invoke-method>
 			]]></content>
 		</example>
 	</collection>

@@ -8,7 +8,8 @@
 			{"label": "Freemarker Expressions", "file": "/help/jel/fmarker-expr.html"},
 			{"label": "Conditions", "file": "/help/jel/conditions.html"},
 			{"label": "Loops", "file": "/help/jel/loops.html"},
-			{"label": "Conversions", "file": "/help/jel/conversions.html"}
+			{"label": "Transformations", "file": "/help/jel/transformations.html"},
+			{"label": "Ext. Resources", "file": "/help/jel/resource-loading.html"}
 		]
 	}
 ]

@@ -1,5 +1,5 @@
-<examples xmlns:ccg="/fw/ccg/XMLBeanParser">
-	<ccg:exprPattern enabled="false"/>
+<examples xmlns:s="/fw/ccg/XMLBeanParser">
+	<s:exprPattern enabled="false"/>
 
 	<collection name="$parsers.attr">
 		<example>

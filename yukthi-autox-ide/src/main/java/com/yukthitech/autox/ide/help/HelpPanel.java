@@ -81,7 +81,7 @@ public class HelpPanel extends JPanel implements IViewPanel
 
 	private static Logger logger = LogManager.getLogger(HelpPanel.class);
 	
-	private static Pattern IMG_URL_PATTERN = Pattern.compile("\\[\\[IMG\\]\\s*(.*?)\\s*\\]");
+	private static Pattern URL_PATTERN = Pattern.compile("\\[\\[URL\\]\\s*(.*?)\\s*\\]");
 
 	private JTabbedPane parentTabbedPane;
 
@@ -246,12 +246,13 @@ public class HelpPanel extends JPanel implements IViewPanel
 			String label = (String) docEntry.get("label");
 			String file = (String) docEntry.get("file");
 			String htmlContent = IOUtils.resourceToString(file, Charset.defaultCharset());
+			htmlContent = htmlContent.replace("\t", "  ");
 			
 			logger.debug("Loading static-doc with [Label: {}, File: {}]", label, file);
 			
 			//replace image urls
 			buffer.setLength(0);
-			Matcher matcher = IMG_URL_PATTERN.matcher(htmlContent);
+			Matcher matcher = URL_PATTERN.matcher(htmlContent);
 			
 			while(matcher.find())
 			{

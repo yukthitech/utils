@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,8 +14,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -487,5 +501,60 @@ public class CommonFreeMarkerMethods
 			@FmParam(name = "str", description = "String value to be converted") String str)
 	{
 		return "true".equalsIgnoreCase(str);
+	}
+	
+	/**
+	 * Removes trailing whitespaces b/w nodes and text-content, recursively. 
+	 * @param node node to process
+	 */
+	private static void trimWhitespace(Node node)
+	{
+		NodeList children = node.getChildNodes();
+		
+		for(int i = 0; i < children.getLength(); ++i)
+		{
+			Node child = children.item(i);
+			
+			if(child.getNodeType() == Node.TEXT_NODE)
+			{
+				child.setTextContent(child.getTextContent().trim());
+			}
+			
+			trimWhitespace(child);
+		}
+	}
+	
+	@FreeMarkerMethod(
+			description = "Used for normalizing xml content, by removing trailing whitespaces between nodes, "
+					+ "which in turn can be used during xml content comparision",
+			returnDescription = "Nomralized xml content (witout white spaces)."
+			)
+	public static String normalizeXml(String xmlContent) throws Exception
+	{
+		if(xmlContent == null)
+		{
+			return null;
+		}
+		
+		//convert xml content to DOM document
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(new ByteArrayInputStream(xmlContent.getBytes()));
+		
+		trimWhitespace(doc);
+		
+		//transform document into string, in standard format
+		StringWriter buff = new StringWriter();
+		
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		Result output = new StreamResult(buff);
+		Source input = new DOMSource(doc);
+
+		transformer.transform(input, output);
+		
+		//return result
+		buff.flush();
+		return buff.toString();
 	}
 }
