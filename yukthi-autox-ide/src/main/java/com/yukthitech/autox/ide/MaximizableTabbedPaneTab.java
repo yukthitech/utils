@@ -43,9 +43,9 @@ public class MaximizableTabbedPaneTab extends JPanel
 		}
 	};
 	
-	private static ImageIcon ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_error.png", 14);
+	private static ImageIcon ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark-error.svg", 14);
 	
-	private static ImageIcon WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_warn.png", 14);
+	private static ImageIcon WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark-warn.svg", 14);
 
 	protected JLabel iconLabel = new JLabel();
 

@@ -64,9 +64,9 @@ public class FileEditor extends JPanel
 	
 	private static Logger logger = LogManager.getLogger(FileEditor.class);
 	
-	private static ImageIcon ERROR_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark_error.png", 16);
+	private static ImageIcon ERROR_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark-error.svg", 16);
 	
-	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark_warn.png", 16);
+	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark-warn.svg", 16);
 	
 	private RTextScrollPane scrollPane;
 

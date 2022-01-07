@@ -1,27 +1,36 @@
 package com.yukthitech.autox.ide;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
+import org.apache.batik.transcoder.Transcoder;
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.context.ApplicationContext;
 
@@ -49,7 +58,7 @@ public class IdeUtils
 	/**
 	 * Size of file icon.
 	 */
-	private static final int FILE_ICON_SIZE = 20;
+	private static final int FILE_ICON_SIZE = 25;
 	
 	/**
 	 * Extension to icon cache map.
@@ -137,6 +146,46 @@ public class IdeUtils
 		}
 	}
 	
+	private static BufferedImage loadSvg(String resource, int size)
+	{
+		// Create a PNG transcoder.
+        Transcoder t = new PNGTranscoder();
+
+        // Set the transcoding hints.
+        t.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) size);
+        t.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) size);
+        
+        try (InputStream inputStream = IdeUtils.class.getResourceAsStream(resource)) 
+        {
+            // Create the transcoder input.
+            TranscoderInput input = new TranscoderInput(inputStream);
+
+            // Create the transcoder output.
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            TranscoderOutput output = new TranscoderOutput(outputStream);
+
+            // Save the image.
+            t.transcode(input, output);
+
+            // Flush and close the stream.
+            outputStream.flush();
+            outputStream.close();
+
+            // Convert the byte stream into an image.
+            byte[] imgData = outputStream.toByteArray();
+            return ImageIO.read(new ByteArrayInputStream(imgData));
+
+        } catch (IOException | TranscoderException ex) 
+        {
+            throw new InvalidStateException("An error occurred while loading svg resource: {}", resource, ex);
+        }
+	}
+	
+	public static void main(String[] args)
+	{
+		loadSvg("/ui/icons/new.svg", 10);
+	}
+	
 	/**
 	 * Loads specified resource as an icon with specified size.
 	 * @param resource
@@ -145,24 +194,45 @@ public class IdeUtils
 	 */
 	public static ImageIcon loadIcon(String resource, int size)
 	{
-		ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+		Image baseImg = null;
+		
+		if(resource.toLowerCase().endsWith(".svg"))
+		{
+			baseImg = loadSvg(resource, size);
+		}
+		else
+		{
+			ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+			baseImg = icon.getImage();
+		}
+		
 		BufferedImage img = new BufferedImage(size + BORDER_SIZE, size + BORDER_SIZE, BufferedImage.TYPE_INT_ARGB);
-		img.getGraphics().drawImage(icon.getImage(), HALF_BORDER_SIZE, HALF_BORDER_SIZE, size, size, null);
+		img.getGraphics().drawImage(baseImg, HALF_BORDER_SIZE, HALF_BORDER_SIZE, size, size, null);
 		
 		return new ImageIcon(img);
 	}
 	
 	public static ImageIcon loadIconWithoutBorder(String resource, int size)
 	{
-		ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+		Image baseImg = null;
 		
+		if(resource.toLowerCase().endsWith(".svg"))
+		{
+			baseImg = loadSvg(resource, size);
+		}
+		else
+		{
+			ImageIcon icon = new ImageIcon(IdeUtils.class.getResource(resource));
+			baseImg = icon.getImage();
+		}
+
 		if(size <= 0)
 		{
-			return icon;
+			return new ImageIcon(baseImg);
 		}
 		
 		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-		img.getGraphics().drawImage(icon.getImage(), 0, 0, size, size, null);
+		img.getGraphics().drawImage(baseImg, 0, 0, size, size, null);
 		
 		return new ImageIcon(img);
 	}
@@ -176,18 +246,8 @@ public class IdeUtils
 			return imageIcon;
 		}
 			
-		int fullSize = FILE_ICON_SIZE + BORDER_SIZE;
-
-		BufferedImage img = new BufferedImage(FILE_ICON_SIZE + BORDER_SIZE, FILE_ICON_SIZE + BORDER_SIZE, BufferedImage.TYPE_INT_ARGB);
-		Graphics g = img.getGraphics();
-		
-		g.setColor(Color.white);
-		g.fillRect(0, 0, fullSize, fullSize);
-		
-		g.setColor(Color.black);
-		g.drawRect(HALF_BORDER_SIZE, HALF_BORDER_SIZE, FILE_ICON_SIZE - HALF_BORDER_SIZE - 1, FILE_ICON_SIZE - HALF_BORDER_SIZE - 1);
-		
-		imageIcon = new ImageIcon(img);
+		String fileIconPath = "/ui/file-icons/empty-file.svg";
+		imageIcon = loadIconWithoutBorder(fileIconPath, FILE_ICON_SIZE);
 		
 		extensionToIcon.put("", imageIcon);
 		return imageIcon;
@@ -204,7 +264,8 @@ public class IdeUtils
 		{
 			return emptyFileIcon;
 		}
-		
+
+		String fullExtension = extension.substring(dotIdx + 1).toLowerCase();
 		extension = extension.substring(dotIdx + 1, dotIdx + 2);
 		
 		ImageIcon fileIcon = extensionToIcon.get(extension);
@@ -214,20 +275,18 @@ public class IdeUtils
 			return fileIcon;
 		}
 		
-		BufferedImage img = new BufferedImage(FILE_ICON_SIZE, FILE_ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
-		Graphics g = img.getGraphics();
+		String fileIconPath = "/ui/file-icons/" + fullExtension + ".svg";
+		URL fileIconUrl = IdeUtils.class.getResource(fileIconPath);
 		
-		g.drawImage(emptyFileIcon.getImage(), 0, 0, null);
-		g.setColor(Color.blue);
-		/*
-		g.fillRect(0, 12, FILE_ICON_SIZE, 18);
+		if(fileIconUrl != null)
+		{
+			fileIcon = loadIconWithoutBorder(fileIconPath, FILE_ICON_SIZE);
+			extensionToIcon.put(extension, fileIcon);
+			
+			return fileIcon;
+		}
 		
-		g.setColor(Color.white);
-		*/
-		g.setFont(new Font(Font.DIALOG, Font.BOLD, 12));
-		g.drawString(extension, FILE_ICON_SIZE / 2 - 2, 17);
-		
-		fileIcon = new ImageIcon(img);
+		fileIcon = getEmptyFileIcon();
 		extensionToIcon.put(extension, fileIcon);
 		
 		return fileIcon;

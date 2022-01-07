@@ -61,7 +61,7 @@ public class FolderTreeNode extends BaseTreeNode
 
 	public FolderTreeNode(String id, ProjectExplorer projectExplorer, Project project, String name, File folder)
 	{
-		this(id, projectExplorer, IdeUtils.loadIcon("/ui/icons/folder.png", 20), project, name, folder);
+		this(id, projectExplorer, IdeUtils.loadIcon("/ui/icons/folder.svg", 20), project, name, folder);
 	}
 
 	protected void removeNonExistingNodes()

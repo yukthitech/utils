@@ -295,7 +295,7 @@ public class AutoxIDE extends JFrame
 		super.setJMenuBar(menuBar);
 		
 		JToolBar toolBar = uiLayout.getToolBar().toJToolBar(actionCollection);
-		topPanel.add(toolBar, BorderLayout.CENTER);
+		topPanel.add(toolBar, BorderLayout.WEST);
 	}
 	
 	@Action

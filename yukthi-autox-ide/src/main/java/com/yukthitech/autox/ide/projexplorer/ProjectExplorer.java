@@ -71,7 +71,7 @@ public class ProjectExplorer extends JPanel
 	
 	private static Logger logger = LogManager.getLogger(ProjectExplorer.class);
 	
-	private static ImageIcon EDITOR_LINK_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/toggle-button.png", 16);
+	private static ImageIcon EDITOR_LINK_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/toggle-button.svg", 16);
 	
 	private static final String STATE_ATTR_EDITOR_LINK_BUTTON_STATE = "ProjectExplorer.editorLinkState";
 	

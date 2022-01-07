@@ -50,7 +50,7 @@ public class ToolBar
 		{
 			if("-".equals(item.getIcon()))
 			{
-				toolBar.addSeparator();
+				toolBar.add(new ToolbarSeparator());
 				continue;
 			}
 			

@@ -99,7 +99,7 @@ public class ConsolePanel extends JPanel implements IViewPanel
 			}
 		});
 		btnClear.setToolTipText("Clear");
-		btnClear.setIcon(IdeUtils.loadIcon("/ui/icons/clear-console.png", 16));
+		btnClear.setIcon(IdeUtils.loadIcon("/ui/icons/clear-console.svg", 16));
 
 		panel_1.add(btnClear);
 		btnOpenReport.addActionListener(this::openReport);

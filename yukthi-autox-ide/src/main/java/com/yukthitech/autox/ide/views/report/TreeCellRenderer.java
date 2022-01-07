@@ -19,8 +19,8 @@ public class TreeCellRenderer extends DefaultTableCellRenderer implements IRepor
 	private static final EmptyBorder TEST_CASE_BORDER = new EmptyBorder(3, 10, 3, 3);
 	private static final EmptyBorder LOG_BORDER = new EmptyBorder(3, 30, 3, 3);
 	
-	private static ImageIcon MINIMIZED_ICON  = IdeUtils.loadIcon("/ui/icons/minimized.png", 10);
-	private static ImageIcon EXPANDED_ICON  = IdeUtils.loadIcon("/ui/icons/expanded.png", 10);
+	private static ImageIcon MINIMIZED_ICON  = IdeUtils.loadIcon("/ui/icons/minimized.svg", 10);
+	private static ImageIcon EXPANDED_ICON  = IdeUtils.loadIcon("/ui/icons/expanded.svg", 10);
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)

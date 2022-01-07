@@ -36,11 +36,11 @@ public class ExeEnvironmentPanel extends JPanel
 	
 	private static Logger logger = LogManager.getLogger(ExeEnvironmentPanel.class);
 	
-	private static Icon ACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/green-dot.png", 16);
+	private static Icon ACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/green-dot.svg", 16);
 	
-	private static Icon INACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/gray-dot.png", 16);
+	private static Icon INACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/gray-dot.svg", 16);
 	
-	private static Icon INTERACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/interactive.png", 16);
+	private static Icon INTERACTIVE_ICON = IdeUtils.loadIcon("/ui/icons/interactive.svg", 16);
 	
 	private static class ExeEnvLabel extends DefaultListCellRenderer
 	{
@@ -119,7 +119,7 @@ public class ExeEnvironmentPanel extends JPanel
 		
 		stopBut.setToolTipText("Stop");
 		stopBut.setBorder(null);
-		stopBut.setIcon(IdeUtils.loadIcon("/ui/icons/kill.png", 16));
+		stopBut.setIcon(IdeUtils.loadIcon("/ui/icons/kill.svg", 16));
 		add(stopBut);
 		
 		clearBut.addActionListener(new ActionListener()
@@ -132,7 +132,7 @@ public class ExeEnvironmentPanel extends JPanel
 		clearBut.setToolTipText("Clear Environment");
 
 		clearBut.setBorder(null);
-		clearBut.setIcon(IdeUtils.loadIcon("/ui/icons/clear.png", 16));
+		clearBut.setIcon(IdeUtils.loadIcon("/ui/icons/clear.svg", 16));
 		add(clearBut);
 		
 		clearAllBut.addActionListener(new ActionListener()
@@ -146,7 +146,7 @@ public class ExeEnvironmentPanel extends JPanel
 		clearAllBut.setToolTipText("Clear All Environments");
 
 		clearAllBut.setBorder(null);
-		clearAllBut.setIcon(IdeUtils.loadIcon("/ui/icons/clearAll.png", 16));
+		clearAllBut.setIcon(IdeUtils.loadIcon("/ui/icons/clearAll.svg", 16));
 		add(clearAllBut);
 	}
 	

@@ -88,7 +88,7 @@ public class DropDownButton extends JPanel
 	public DropDownButton(String text, Icon icon)
 	{
 		mainButton = new JButton(text, icon);
-		arrowButton = new JButton(IdeUtils.loadIcon("/ui/icons/drop-down-arrow.png", 8));
+		arrowButton = new JButton(IdeUtils.loadIcon("/ui/icons/drop-down-arrow.svg", 8));
 		
 		mainButton.setBorder(null);
 		arrowButton.setBorder(null);

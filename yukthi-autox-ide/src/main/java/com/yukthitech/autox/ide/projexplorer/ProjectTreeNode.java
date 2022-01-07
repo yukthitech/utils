@@ -18,7 +18,7 @@ public class ProjectTreeNode extends FolderTreeNode
 	
 	public ProjectTreeNode(String id, ProjectExplorer projectExplorer, Project project)
 	{
-		super(id, projectExplorer, IdeUtils.loadIcon("/ui/icons/project.png", 20), project, project.getName(), new File(project.getBaseFolderPath()));
+		super(id, projectExplorer, IdeUtils.loadIcon("/ui/icons/project.svg", 20), project, project.getName(), new File(project.getBaseFolderPath()));
 
 		this.project = project;
 		

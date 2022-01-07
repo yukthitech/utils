@@ -17,9 +17,9 @@ public class BaseTreeNodeRenderer extends DefaultTreeCellRenderer implements Tre
 	
 	private static final int ICON_BORDER = 5;
 	
-	private static Image ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_error.png", ICON_HEIGHT).getImage();
+	private static Image ERROR_ICON = IdeUtils.loadIcon("/ui/icons/bookmark-error.svg", ICON_HEIGHT).getImage();
 	
-	private static Image WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark_warn.png", ICON_HEIGHT).getImage();
+	private static Image WARN_ICON = IdeUtils.loadIcon("/ui/icons/bookmark-warn.svg", ICON_HEIGHT).getImage();
 	
 	private boolean hasErrors = false;
 	
