@@ -150,6 +150,7 @@ public class FileEditor extends JPanel
 			loadedText = IdeUtils.removeCarriageReturns(loadedText);
 			
 			syntaxTextArea.setText(loadedText);
+			syntaxTextArea.setCaretPosition(0);
 		} catch(Exception ex)
 		{
 			ex.printStackTrace();
@@ -288,7 +289,6 @@ public class FileEditor extends JPanel
 				}
 				
 			});
-
 		}
 
 		setSyntaxStyle();

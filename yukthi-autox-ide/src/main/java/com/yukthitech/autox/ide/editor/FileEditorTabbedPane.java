@@ -43,6 +43,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @Component
 public class FileEditorTabbedPane extends MaximizableTabbedPane
 {
+	private static final String ACTIVE_FILE = "fileEditor$activeFile";
+
 	private static final long serialVersionUID = 1L;
 	
 	private static Logger logger = LogManager.getLogger(FileEditorTabbedPane.class);
@@ -115,7 +117,9 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				}
 				
 				currentTabIndex = newIdx;
+
 				FileEditor editor = (FileEditor) FileEditorTabbedPane.this.getComponentAt(newIdx);
+				editor.getTextArea().requestFocus();
 				ideContext.getProxy().activeFileChanged(editor.getFile(), FileEditorTabbedPane.this);
 			}
 		});
@@ -123,6 +127,8 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	
 	private void openFilesFromState(IdeState state)
 	{
+		Map<String, FileEditor> editors = new HashMap<String, FileEditor>();
+		
 		for(ProjectState projState : state.getOpenProjects())
 		{
 			Project proj = projectActions.openExistingProject(projState.getPath());
@@ -142,6 +148,20 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 				}
 				
 				fileEditor.setCaretPosition(fileState.getCursorPositon());
+
+				editors.put(fileState.getPath(), fileEditor);
+			}
+		}
+		
+		String activePath = (String) state.getAttribute(ACTIVE_FILE);
+		
+		if(activePath != null)
+		{
+			FileEditor editor = editors.get(activePath);
+			
+			if(editor != null)
+			{
+				super.setSelectedComponent(editor);
 			}
 		}
 	}
@@ -199,8 +219,6 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		}
 	}
 	
-	
-	
 	private void saveFilesState(IdeState state) throws IOException
 	{
 		int tabCount = super.getTabCount();
@@ -212,6 +230,13 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 			ProjectState projectState = state.addOpenProject(tab.getProject());
 			
 			projectState.addOpenFile(new FileState(tab.getFile().getCanonicalPath(), editor.getCaretPosition()));
+		}
+		
+		FileEditor activeTab = getCurrentFileEditor();
+		
+		if(activeTab != null)
+		{
+			state.setAtribute(ACTIVE_FILE, activeTab.getFile().getCanonicalPath());
 		}
 	}
 	

@@ -80,6 +80,7 @@ public class ProjectState implements Serializable
 	{
 		if(openFiles != null)
 		{
+			this.openFiles.removeAll(openFiles);
 			this.openFiles.addAll(openFiles);
 		}
 	}
@@ -90,6 +91,7 @@ public class ProjectState implements Serializable
 	 */
 	public void addOpenFile(FileState fileState)
 	{
+		this.openFiles.remove(fileState);
 		this.openFiles.add(fileState);
 	}
 	

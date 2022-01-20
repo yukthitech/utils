@@ -245,12 +245,7 @@ public class ProjectExplorer extends JPanel
 			@Override
 			public void saveState(IdeState state)
 			{
-				state.getOpenProjects().clear();
-				
-				for(Project proj : projects)
-				{
-					state.addOpenProject(proj);
-				}
+				state.retainProjects(projects);
 				
 				state.setAtribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE, editorLinkButton.isSelected());
 			}

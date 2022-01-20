@@ -2,11 +2,14 @@ package com.yukthitech.autox.ide.model;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,28 +46,51 @@ public class IdeState implements Serializable
 	private IdeSettings ideSettings = new IdeSettings();
 	
 	/**
-	 * Used for internal indexing.
-	 */
-	private transient Map<String, ProjectState> projectIndex = new HashMap<>();
-
-	/**
 	 * Gets the list of project currently open.
 	 *
 	 * @return the list of project currently open
 	 */
 	public Set<ProjectState> getOpenProjects()
 	{
-		return openProjects;
+		return Collections.unmodifiableSet(openProjects);
 	}
-
-	/**
-	 * Sets the list of project currently open.
-	 *
-	 * @param openProjects the new list of project currently open
-	 */
-	public void setOpenProjects(Set<ProjectState> openProjects)
+	
+	public ProjectState getProjectState(Project project)
 	{
-		this.openProjects.addAll(openProjects);
+		if(CollectionUtils.isEmpty(openProjects))
+		{
+			return null;
+		}
+		
+		return openProjects.stream()
+				.filter(curState -> curState.getPath().equals(project.getProjectFilePath()))
+				.findFirst()
+				.orElse(null);
+	}
+	
+	public void retainProjects(Collection<Project> projects)
+	{
+		for(Project project : projects)
+		{
+			ProjectState state = getProjectState(project);
+			
+			if(state == null)
+			{
+				createNewState(project);
+			}
+		}
+	}
+	
+	private ProjectState createNewState(Project project)
+	{
+		ProjectState state = new ProjectState(project.getProjectFilePath());
+		
+		//remove existing stale state, if any (which may exist because of loading from cache file)
+		this.openProjects.remove(state);
+		
+		//add the fresh state
+		this.openProjects.add(state);
+		return state;
 	}
 	
 	/**
@@ -75,28 +101,14 @@ public class IdeState implements Serializable
 	{
 		logger.debug("Adding project to ide state: {}", project.getName());
 		
-		//project index can be null, when the state is loaded from file
-		if(projectIndex == null)
-		{
-			projectIndex = new HashMap<>();
-		}
-		
-		ProjectState state = projectIndex.get(project.getName());
+		ProjectState state = getProjectState(project);
 		
 		if(state != null)
 		{
 			return state;
 		}
 		
-		state = new ProjectState(project.getProjectFilePath());
-		projectIndex.put(project.getName(), state);
-		
-		//remove existing stale state, if any (which may exist because of loading from cache file)
-		this.openProjects.remove(state);
-		
-		//add the fresh state
-		this.openProjects.add(state);
-		return state;
+		return createNewState(project);
 	}
 	
 	/**
