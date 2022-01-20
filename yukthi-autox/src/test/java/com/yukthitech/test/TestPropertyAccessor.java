@@ -92,6 +92,10 @@ public class TestPropertyAccessor
 		PropertyAccessor.addProperty(data, "system.products[1].supportedContainers[0]", "bank");
 		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("bank", "bankTest", "investment"));
 		
+		//test append element
+		PropertyAccessor.addProperty(data, "system.products[1].supportedContainers[-1]", "credit");
+		assertEquals(PropertyAccessor.getProperty(data, "system.products[1].supportedContainers"), Arrays.asList("bank", "bankTest", "investment", "credit"));
+		
 		//test properties with conditions
 		PropertyAccessor.setProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label", "5 failed tests to one site");
 		assertEquals(PropertyAccessor.getProperty(data, "keys[name = USER_THRESHOLD_LIMIT].enumOptions[value = 5].label"), "5 failed tests to one site");

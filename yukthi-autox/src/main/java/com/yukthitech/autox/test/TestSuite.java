@@ -13,7 +13,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.exec.ExecutionBranch;
+import com.yukthitech.autox.exec.ExecutionBranchBuilder;
+import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -24,7 +28,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-public class TestSuite implements Validateable
+public class TestSuite implements Validateable, IExecutable
 {
 	/**
 	 * Name of the test suite.
@@ -431,6 +435,19 @@ public class TestSuite implements Validateable
 		}
 	}
 	
+	@Override
+	public ExecutionBranch buildExecutionBranch(AutomationContext context)
+	{
+		Set<String> restrictedTestCases = context.getBasicArguments().getTestCasesSet();
+		
+		return ExecutionBranchBuilder
+				.newBranchBuilder(context, name, this, this.testCases.values())
+				.childFilter(ts -> restrictedTestCases != null && restrictedTestCases.contains(ts.getName()))
+				.setup(beforeTestCase)
+				.cleanup(afterTestCase)
+				.build();
+	}
+
 	@Override
 	public String toString()
 	{

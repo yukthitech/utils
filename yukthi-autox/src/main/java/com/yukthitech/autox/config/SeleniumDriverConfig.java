@@ -52,6 +52,16 @@ public class SeleniumDriverConfig implements Validateable
 	 * Profile options to be used by drivers.
 	 */
 	private LinkedHashMap<String, Object> profileOptions = new LinkedHashMap<>();
+	
+	/**
+	 * Profile user-data-folder full path to be set for current driver instance.
+	 */
+	private String userDataDir;
+	
+	/**
+	 * Profile folder to be used within data folder.
+	 */
+	private String profileFolder;
 
 	/**
 	 * Gets the name of the driver.
@@ -209,6 +219,26 @@ public class SeleniumDriverConfig implements Validateable
 	public Map<String, Object> getProfileOptions()
 	{
 		return profileOptions;
+	}
+	
+	public String getProfileFolder()
+	{
+		return profileFolder;
+	}
+
+	public void setProfileFolder(String profileFolder)
+	{
+		this.profileFolder = profileFolder;
+	}
+	
+	public String getUserDataDir()
+	{
+		return userDataDir;
+	}
+
+	public void setUserDataDir(String userDataDir)
+	{
+		this.userDataDir = userDataDir;
 	}
 
 	/* (non-Javadoc)

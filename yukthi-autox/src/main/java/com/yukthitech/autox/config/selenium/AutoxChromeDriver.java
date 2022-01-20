@@ -1,7 +1,10 @@
 package com.yukthitech.autox.config.selenium;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -24,6 +27,23 @@ public class AutoxChromeDriver extends ChromeDriver
 	private static ChromeOptions buildOptions(SeleniumDriverConfig config)
 	{
 		ChromeOptions options = new ChromeOptions();
+		options.setAcceptInsecureCerts(true);
+		
+		if(StringUtils.isNotBlank(config.getDownloadFolder()))
+		{
+			Map<String, Object> expPrefs = new HashMap<String, Object>();
+			expPrefs.put("download.default_directory", config.getDownloadFolder());
+			expPrefs.put("profile.default_content_settings.popups", 0);
+			expPrefs.put("download.prompt_for_download", "false");
+			
+			options.setExperimentalOption("prefs", expPrefs);
+		}
+		
+		if(StringUtils.isNotBlank(config.getUserDataDir()) && StringUtils.isNotBlank(config.getProfileFolder()))
+		{
+			options.addArguments("--user-data-dir=" + config.getUserDataDir());
+			options.addArguments("--profile-directory=" + config.getProfileFolder());
+		}
 		
 		logger.debug("Creating chrome options with profile-options: {}", config.getProfileOptions());
 		

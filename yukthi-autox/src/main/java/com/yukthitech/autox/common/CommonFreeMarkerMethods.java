@@ -503,6 +503,16 @@ public class CommonFreeMarkerMethods
 		return "true".equalsIgnoreCase(str);
 	}
 	
+	@FreeMarkerMethod(
+			description = "Parses specified string as json and returns result.",
+			returnDescription = "parsed json object"
+			)
+	public static Object parseJson(
+			@FmParam(name = "str", description = "String to parse") String str) throws Exception
+	{
+		return IAutomationConstants.OBJECT_MAPPER.readValue(str, Object.class);
+	}
+
 	/**
 	 * Removes trailing whitespaces b/w nodes and text-content, recursively. 
 	 * @param node node to process

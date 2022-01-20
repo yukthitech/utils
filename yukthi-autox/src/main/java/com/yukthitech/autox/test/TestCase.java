@@ -24,6 +24,9 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.InteractiveExecutionController;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.exec.ExecutionBranch;
+import com.yukthitech.autox.exec.ExecutionBranchBuilder;
+import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -32,7 +35,7 @@ import com.yukthitech.utils.ObjectWrapper;
 /**
  * Test case with validations to be executed.
  */
-public class TestCase implements IStepContainer, Validateable, IEntryPoint
+public class TestCase implements IStepContainer, Validateable, IEntryPoint, IExecutable
 {
 	
 	/**
@@ -651,5 +654,16 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint
 		{
 			throw new ValidateException("No steps specified for execution of test case - " + name);
 		}
+	}
+
+	@Override
+	public ExecutionBranch buildExecutionBranch(AutomationContext context)
+	{
+		return ExecutionBranchBuilder
+				.newBranchNode(context, this.name, this, steps)
+				.setup(setup)
+				.cleanup(cleanup)
+				.dataProvider(dataProvider)
+				.build();
 	}
 }

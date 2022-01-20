@@ -24,6 +24,7 @@ import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.ContextMap;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
@@ -649,7 +650,7 @@ public class DefaultFilters
 		if("true".equalsIgnoreCase(parserContext.getParameter("jel")) && name.toLowerCase().endsWith(".json"))
 		{
 			logger.debug("Parsing json content for JEL: {}", name);
-			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, CommonUtils.toMap("context", parserContext.getAutomationContext()));
+			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, new ContextMap(parserContext.getAutomationContext()));
 		}
 
 		//if input stream has to be loaded as simple text, simply return the current data string
@@ -852,7 +853,8 @@ public class DefaultFilters
 			params = {
 					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 					@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion"),
-					@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
+					@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions"),
+					@ParserParam(name = "javaType", type = "String",  defaultValue = "null", description = "If specified, then json will be parsed to specified java type")
 				}
 	)
 	public IPropertyPath jsonParser(FilterContext parserContext, String expression, String exprType[])
@@ -863,7 +865,15 @@ public class DefaultFilters
 			public Object getValue() throws Exception
 			{
 				String data = getStringValue(parserContext, expression);
-				Object object = loadInputStream(data, ".json", exprType, parserContext);
+				String javaType = parserContext.getParameter("javaType");
+				String finalExprType[] = exprType;
+				
+				if(javaType != null)
+				{
+					finalExprType = new String[] {javaType};
+				}
+				
+				Object object = loadInputStream(data, ".json", finalExprType, parserContext);
 				return object;
 			}
 		};

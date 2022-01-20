@@ -487,12 +487,24 @@ public class PropertyAccessor
 			}
 			case INDEX:
 			{
+				int idx = (Integer) lastElem.key;
+				
+				if(idx < 0)
+				{
+					if(!(parent instanceof Collection))
+					{
+						throw new InvalidArgumentException("Index is used on non-collection value at: {}", lastElem.path);
+					}
+					
+					((Collection<Object>) parent).add(value);
+					return;
+				}
+				
+				
 				if(!(parent instanceof List))
 				{
 					throw new InvalidArgumentException("Index is used on non-list value at: {}", lastElem.path);
 				}
-				
-				int idx = (Integer) lastElem.key;
 				
 				if(addElement)
 				{

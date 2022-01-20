@@ -302,6 +302,7 @@ public class ExpressionFactory
 				}
 			}
 			
+			//Expression type params are params, which are specified in non-key-value format
 			exprTypeParams = typeParams.isEmpty() ? null : typeParams.toArray(new String[0]);
 		}
 		else

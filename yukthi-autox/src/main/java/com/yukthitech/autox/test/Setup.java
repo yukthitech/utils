@@ -12,6 +12,9 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.autox.exec.ExecutionBranch;
+import com.yukthitech.autox.exec.ExecutionBranchBuilder;
+import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.ccg.xml.IParentAware;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -19,7 +22,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
 /**
  * Represents list of steps that needs to be executed before executing testing unit.
  */
-public class Setup extends AbstractLocationBased implements IStepContainer, Validateable, IEntryPoint, IParentAware
+public class Setup extends AbstractLocationBased implements IStepContainer, Validateable, IEntryPoint, IParentAware, IExecutable
 {
 	/**
 	 * Name for logger and other purposes.
@@ -147,5 +150,13 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 		{
 			throw new ValidateException("No steps provided for setup");
 		}
+	}
+
+	@Override
+	public ExecutionBranch buildExecutionBranch(AutomationContext context)
+	{
+		return ExecutionBranchBuilder
+				.newBranchNode(context, "<setup>", this, getSteps())
+				.build();
 	}
 }

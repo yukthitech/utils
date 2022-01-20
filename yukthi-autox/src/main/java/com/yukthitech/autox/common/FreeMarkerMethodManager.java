@@ -96,7 +96,22 @@ public class FreeMarkerMethodManager
 			{
 				for(Method method : freeMarkerDirectiveMethods)
 				{
-					fmClasses.add(method.getDeclaringClass());
+					Class<?> cls = method.getDeclaringClass();
+					
+					if(fmClasses.contains(cls))
+					{
+						continue;
+					}
+					
+					try
+					{
+						Class.forName(cls.getName(), true, classLoader);
+					}catch(Exception ex)
+					{
+						throw new InvalidStateException("Failed to load fmarker method holder class: {}", cls.getName(), ex);
+					}
+								
+					fmClasses.add(cls);
 				}
 			}
 		}

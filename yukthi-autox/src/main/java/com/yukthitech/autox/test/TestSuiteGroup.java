@@ -3,13 +3,25 @@ package com.yukthitech.autox.test;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.BasicArguments;
+import com.yukthitech.autox.exec.ExecutionBranch;
+import com.yukthitech.autox.exec.ExecutionBranchBuilder;
+import com.yukthitech.autox.exec.IExecutable;
 
 /**
  * The Class TestSuiteGroup.
  */
-public class TestSuiteGroup
+public class TestSuiteGroup implements IExecutable
 {
+	private static Logger logger = LogManager.getLogger(TestSuiteGroup.class);
+	
 	/**
 	 * Setup suites to be executed before any test suite.
 	 */
@@ -110,5 +122,22 @@ public class TestSuiteGroup
 	public TestSuite getTestSuite(String name)
 	{
 		return testSuitesMap.get(name);
+	}
+
+	@Override
+	public ExecutionBranch buildExecutionBranch(AutomationContext context)
+	{
+		BasicArguments basicArguments = context.getBasicArguments();
+		Set<String> limitedTestSuites = basicArguments.getTestSuitesSet();
+		
+		if(limitedTestSuites != null)
+		{
+			logger.debug("Limiting test-suite executions to: {}", limitedTestSuites);
+		}
+
+		return ExecutionBranchBuilder
+				.newBranchBuilder(context, "<global>", null, this.testSuitesMap.values())
+				.childFilter(ts -> limitedTestSuites == null || limitedTestSuites.contains(ts.getName()))
+				.build();
 	}
 }
