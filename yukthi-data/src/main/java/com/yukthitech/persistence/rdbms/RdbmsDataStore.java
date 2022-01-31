@@ -753,6 +753,11 @@ public class RdbmsDataStore implements IDataStore
 			
 			params.addAll(conditionParams);
 
+			if(logger.isDebugEnabled())
+			{
+				logger.debug("Executing using params: {}", toParamString(params));
+			}
+			
 			//set the condition parameters on query
 			for(Object param : conditionParams)
 			{
@@ -760,11 +765,6 @@ public class RdbmsDataStore implements IDataStore
 				index++;
 			}
 
-			if(logger.isDebugEnabled())
-			{
-				logger.debug("Executing using params: {}", toParamString(params));
-			}
-			
 			int count = pstmt.executeUpdate();
 			
 			//close any open closeables (like blob streams)

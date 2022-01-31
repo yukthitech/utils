@@ -318,6 +318,12 @@ public class QueryCondition implements Cloneable
 		{
 			if(!isMultiValued())
 			{
+				//when the check is for null, dont add any param
+				if(operator == Operator.EQ && value == null)
+				{
+					return;
+				}
+				
 				params.add(value);
 			}
 			else
