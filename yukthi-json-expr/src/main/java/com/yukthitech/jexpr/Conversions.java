@@ -17,7 +17,7 @@ public class Conversions
 	/**
 	 * Expression used by value string which has to be replaced with resultant value.
 	 */
-	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\:(.*)$");
+	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
 	
 	/**
 	 * In a map if this key is specified with expression, along with @value/@falseValue then the result will be result of this expression.
