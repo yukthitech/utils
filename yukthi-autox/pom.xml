@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-json-expr</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
+			<version>1.0.4-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-jxpath</groupId>

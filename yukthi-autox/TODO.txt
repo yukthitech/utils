@@ -1,3 +1,12 @@
+For all steps where enum field is involved, the doc should include possible values (Eg: log level)
+
+find or filter in console
+
+if-else should be separate and sequential steps
+
+console content should get auto cleaned once threshold is reached
+
+
 06/04/21
 -=========
 Delete project

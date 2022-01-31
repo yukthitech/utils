@@ -167,7 +167,10 @@ public class AutoxIDE extends JFrame
 				}
 				
 				//send the started event
-				ideEventManager.processEvent(new IdeStartedEvent(ideState));
+				EventQueue.invokeLater(() -> 
+				{
+					ideEventManager.processEvent(new IdeStartedEvent(ideState));					
+				});
 			}
 		});
 	}

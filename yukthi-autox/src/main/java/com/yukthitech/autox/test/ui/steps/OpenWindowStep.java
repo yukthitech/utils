@@ -1,5 +1,7 @@
 package com.yukthitech.autox.test.ui.steps;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
@@ -10,6 +12,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 
 /**
  * Opens new window with specifie name and url.
@@ -20,6 +23,8 @@ import com.yukthitech.autox.config.SeleniumPlugin;
 public class OpenWindowStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(OpenWindowStep.class);
 
 	/**
 	 * Url to be opened.
@@ -68,7 +73,21 @@ public class OpenWindowStep extends AbstractStep
 		
 		((JavascriptExecutor) driver).executeScript(openScript);
 		
-		driver.switchTo().window(name);
+		UiAutomationUtils.waitWithPoll(() -> 
+		{
+			try
+			{
+				driver.switchTo().window(name);
+			}catch(Exception ex)
+			{
+				logger.debug("An error occurred while switching to window '{}'. Error: {}", name, "" + ex);
+				return false;
+			}
+			
+			return true;
+		}, 10000, 1000);
+		
+		
 		
 		return true;
 	}

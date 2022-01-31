@@ -303,7 +303,7 @@ public class Element implements INode
 			
 			String elemName = name.toLowerCase().replaceAll("\\W+", "");
 			
-			if("customuilocator".equals(elemName) || "function".equals(elemName))
+			if(("customuilocator".equals(elemName) || "function".equals(elemName)) && this.startLocation.hasLine(curLineNo))
 			{
 				return this;
 			}

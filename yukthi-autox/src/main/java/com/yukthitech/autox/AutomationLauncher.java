@@ -315,16 +315,9 @@ public class AutomationLauncher
 		
 		return context;
 	}
-
-	/**
-	 * Automation entry point.
-	 * 
-	 * @param args
-	 *            CMD line arguments.
-	 */
-	public static void main(String[] args) throws Exception
+	
+	public static TestSuiteGroup loadTestFiles(String args[]) throws Exception
 	{
-		System.out.println("Executing main function of automation launcher...");
 		File currentFolder = new File(".");
 		
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
@@ -349,35 +342,55 @@ public class AutomationLauncher
 			System.exit(-1);
 		}
 		
+		//initialize the configurations
+		String extendedCommandLineArgs[] = {};
+		
+		if(args.length > 1)
+		{
+			extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
+		}
+		
+		//load automation context
+		AutomationContext context = loadAutomationContext(appConfigurationFile, extendedCommandLineArgs);
+		ApplicationConfiguration appConfig = context.getAppConfiguration();
+		
+		logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
+		validateCommandLineArguments(context, extendedCommandLineArgs);
+		
+		boolean loadTestSuites = true;
+		boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
+		boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
+		
+		if(isInteractive)
+		{
+			//test suites needs to be loaded only if global setup needs to be executed.
+			loadTestSuites = isInteractiveExeGlobal;
+		}
+		
+		// load test suites
+		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
+		
+		return testSuiteGroup;
+	}
+
+	/**
+	 * Automation entry point.
+	 * 
+	 * @param args
+	 *            CMD line arguments.
+	 */
+	public static void main(String[] args) throws Exception
+	{
+		System.out.println("Executing main function of automation launcher...");
+		
 		try
 		{
-			//initialize the configurations
-			String extendedCommandLineArgs[] = {};
-			
-			if(args.length > 1)
-			{
-				extendedCommandLineArgs = Arrays.copyOfRange(args, 1, args.length);
-			}
-			
-			//load automation context
-			AutomationContext context = loadAutomationContext(appConfigurationFile, extendedCommandLineArgs);
-			ApplicationConfiguration appConfig = context.getAppConfiguration();
-			
-			logger.debug("Found extended arguments to be: {}", Arrays.toString(extendedCommandLineArgs));
-			validateCommandLineArguments(context, extendedCommandLineArgs);
-			
-			boolean loadTestSuites = true;
-			boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
-			boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
-			
-			if(isInteractive)
-			{
-				//test suites needs to be loaded only if global setup needs to be executed.
-				loadTestSuites = isInteractiveExeGlobal;
-			}
-			
 			// load test suites
-			TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
+			TestSuiteGroup testSuiteGroup = loadTestFiles(args);
+			AutomationContext context = AutomationContext.getInstance();
+			
+			boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
+			boolean loadTestSuites = (testSuiteGroup != null);
 	
 			//execute test suites
 			TestSuiteExecutor testSuiteExecutor = loadTestSuites ? new TestSuiteExecutor(context, testSuiteGroup) : null;
@@ -392,6 +405,8 @@ public class AutomationLauncher
 					System.err.println("Tried to start interactive environment without monitoring.");
 					System.exit(-1);
 				}
+				
+				boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
 				
 				if(isInteractiveExeGlobal)
 				{

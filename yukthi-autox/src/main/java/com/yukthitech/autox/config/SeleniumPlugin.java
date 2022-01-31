@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -254,7 +255,8 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName());
+			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", 
+					driverConfig.getName(), driverConfig.getClassName(), ex);
 		}
 	}
 	
@@ -339,12 +341,23 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	@Override
 	public void handleError(AutomationContext context, ErrorDetails errorDetails)
 	{
-		File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
-		errorDetails.getExecutionLogger().logImage("error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
-		
-		errorDetails.getExecutionLogger().error("During error browser details are: [Postition: {}, Size: {}]",
-				activeDriver.manage().window().getPosition(),
-				activeDriver.manage().window().getSize());
+		if(activeDriver == null)
+		{
+			return;
+		}
+
+		try
+		{
+			File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
+			errorDetails.getExecutionLogger().logImage("error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
+			
+			errorDetails.getExecutionLogger().error("During error browser details are: [Postition: {}, Size: {}]",
+					activeDriver.manage().window().getPosition(),
+					activeDriver.manage().window().getSize());
+		}catch(NoSuchSessionException ex)
+		{
+			logger.warn("Found the session to be closed, so skipping taking screen shot");
+		}
 	}
 
 	/* (non-Javadoc)

@@ -2,6 +2,7 @@ package com.yukthitech.autox.monitor.ienv;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -34,7 +35,7 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 	{
 		try
 		{
-			stepHolderTemplate = IOUtils.toString(InteractiveStepHandler.class.getResourceAsStream("/step-holder-template.xml"));
+			stepHolderTemplate = IOUtils.toString(InteractiveStepHandler.class.getResourceAsStream("/step-holder-template.xml"), Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while loading resource: /step-holder-template.xml", ex);
@@ -76,6 +77,8 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 		{
 			for(CustomUiLocator customUiLocator : stepHolder.getCustomUiLocators())
 			{
+				logger.debug("Reloading custom-ui-locator: {}", customUiLocator.getName());
+				
 				automationContext.addOrReplaceCustomUiLocator(customUiLocator);
 			}
 		}
@@ -86,6 +89,8 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 
 			for(Function func : stepHolder.getFunctions())
 			{
+				logger.debug("Reloading function: {}", func.getName());
+				
 				activeTestSuite.addOrReplaceFunction(func);
 			}
 		}

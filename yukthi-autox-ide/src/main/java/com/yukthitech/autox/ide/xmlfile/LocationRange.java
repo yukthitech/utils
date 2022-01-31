@@ -204,6 +204,11 @@ public class LocationRange
 		this.endColumnNumber = endColumnNumber;
 	}
 	
+	public boolean hasLine(int lineNo)
+	{
+		return (lineNo >= startLineNumber && lineNo <= endLineNumber);
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

@@ -5,6 +5,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.SeleniumPlugin;
 
 /**
@@ -25,6 +26,11 @@ public class CloseSessionStep extends AbstractStep
 		
 		seleniumConfiguration.getWebDriver().quit();
 		//seleniumConfiguration.getWebDriver().close();
+		
+		exeLogger.debug("Waiting for 2 Secs, for current session to close completely before resetting driver");
+		
+		AutomationUtils.sleep(2000);
+		
 		seleniumConfiguration.resetDriver();
 		
 		return true;

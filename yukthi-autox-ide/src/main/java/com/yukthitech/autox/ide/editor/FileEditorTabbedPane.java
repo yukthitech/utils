@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.services.IdeEventHandler;
 import com.yukthitech.autox.ide.services.IdeSettingChangedEvent;
+import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @ActionHolder
@@ -170,6 +172,28 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 	public void onIdeSettingsChanged(IdeSettingChangedEvent event)
 	{
 		changeEditorSettings(event.getIdeSettings());
+	}
+	
+	@IdeEventHandler
+	public void onStartup(IdeStartedEvent event)
+	{
+		List<FileEditorTab> tabs = getAllTabs();
+		
+		if(CollectionUtils.isNotEmpty(tabs))
+		{
+			tabs.forEach(tab -> 
+			{
+				FileEditor editor = tab.getFileEditor();
+				editor.setCaretPosition(editor.getCaretPosition());
+			});
+		}
+		
+		FileEditor fileEditor = getCurrentFileEditor();
+		
+		if(fileEditor != null)
+		{
+			fileEditor.getTextArea().requestFocus();
+		}
 	}
 	
 	private void changeEditorSettings(IdeSettings ideSettings)
