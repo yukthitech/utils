@@ -550,5 +550,32 @@
 			<s:assert-equals actual="file(text=true): ${attr.tempFilePath}" expected="Some test content testVal"/>			
 		</testCase>
 
+		<function name="testTryCatch">
+			<s:try>
+				<s:log message="This is from try block"/>
+				<s:set expression="var" value="try"/>
+
+				<s:if condition="param.err">
+					<s:throw message="Error mssg" value="int: 100"/>
+				</s:if>
+			</s:try>
+			<s:catch errorAttr="ex">
+				<s:log message="This is from catch block"/>
+				<s:set expression="var" value="catch-${attr.ex.value!c}"/>
+			</s:catch>
+		</function>
+
+		<testCase name="tryCatchSteps">
+			<description>
+				Tests the functionality of try-catch steps.
+			</description>
+
+			<f:testTryCatch err="boolean: false"/>
+			<s:assert-equals actual="attr: var" expected="try"/>
+			
+			<f:testTryCatch err="boolean: true"/>
+			<s:assert-equals actual="attr: var" expected="catch-100"/>
+		</testCase>
+
 	</testSuite>
 </testData>

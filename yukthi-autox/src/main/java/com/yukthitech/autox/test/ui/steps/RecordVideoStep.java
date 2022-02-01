@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -80,6 +81,12 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 		}
 		
 		steps.addStep(step);
+	}
+	
+	@Override
+	public List<IStep> getSteps()
+	{
+		return steps.getSteps();
 	}
 	
 	public void setName(String name)

@@ -3,9 +3,11 @@ package com.yukthitech.autox;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
@@ -171,7 +173,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 				return funcRef;
 			}
 			
-			IStep step = newStep(beanNode.getName());
+			IStep step = newStep(beanNode.getName(), (IStepContainer) parent);
 
 			if(step != null)
 			{
@@ -214,7 +216,23 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		{
 			AutomationUtils.validateRequiredParams(bean);
 			
-			((IStepContainer) parent).addStep((IStep) bean);
+			Executable executable = bean.getClass().getAnnotation(Executable.class);
+			
+			//if current step is expected part of another step
+			if(!IMultiPartStep.class.equals(executable.partOf()))
+			{
+				//get preceding step of current step
+				// Note: required validations were performed as part of step pojo creation.
+				List<IStep> steps = ((IStepContainer) parent).getSteps();
+				IStep lastStep = CollectionUtils.isEmpty(steps) ? null : steps.get(steps.size() - 1);
+				
+				//add current step as child step to prev multi step
+				((IMultiPartStep) lastStep).addChildStep((IStep) bean);
+			}
+			else
+			{
+				((IStepContainer) parent).addStep((IStep) bean);
+			}
 		}
 	}
 	
@@ -227,7 +245,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	 * @return Matching step instance
 	 */
 	@SuppressWarnings("rawtypes")
-	public IStep newStep(String stepTypeName)
+	public IStep newStep(String stepTypeName, IStepContainer parent)
 	{
 		Class<? extends IStep> stepType = nameToStepType.get(stepTypeName);
 
@@ -237,6 +255,20 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		}
 		
 		Executable executable = stepType.getAnnotation(Executable.class);
+		
+		//if current step is expected part of another step
+		if(!IMultiPartStep.class.equals(executable.partOf()))
+		{
+			List<IStep> steps = parent.getSteps();
+			IStep lastStep = CollectionUtils.isEmpty(steps) ? null : steps.get(steps.size() - 1);
+			
+			if(lastStep == null || !executable.partOf().isAssignableFrom(lastStep.getClass()))
+			{
+				Executable partOfExecutable = lastStep.getClass().getAnnotation(Executable.class);
+				throw new InvalidStateException("Step '{}' is not preceeded by step: {}", stepTypeName, partOfExecutable.name());
+			}
+		}
+		
 		IPlugin<?> plugin = null;
 		
 		for(Class<? extends IPlugin> pluginType : executable.requiredPluginTypes())

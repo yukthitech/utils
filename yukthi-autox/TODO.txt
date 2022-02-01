@@ -1,3 +1,9 @@
+classpath should come from maven not from lib folder
+
+Though mssg "As this is interactive environment, skipping the report generation" comes in console (TestSuiteExecutor.java # 788)
+	interactive in-progress dialog is not going off
+
+
 For all steps where enum field is involved, the doc should include possible values (Eg: log level)
 
 find or filter in console

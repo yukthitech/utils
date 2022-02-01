@@ -71,6 +71,8 @@ public class FunctionExecutor
 		TestCase dummy = new TestCase();
 		dummy.setName(function.getName());
 		
+		context.setExecutionLogger(exeLogger);
+		
 		TestSuite testSuite = new TestSuite(function.getName() + "-test-suite");
 		testSuite.addTestCase(dummy);
 		

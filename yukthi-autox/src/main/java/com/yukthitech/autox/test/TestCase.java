@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.AbstractLocationBasedStepContainer;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
@@ -35,7 +36,7 @@ import com.yukthitech.utils.ObjectWrapper;
 /**
  * Test case with validations to be executed.
  */
-public class TestCase implements IStepContainer, Validateable, IEntryPoint, IExecutable
+public class TestCase extends AbstractLocationBasedStepContainer implements IStepContainer, Validateable, IEntryPoint, IExecutable
 {
 	
 	/**
@@ -69,11 +70,6 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint, IExe
 	 * was not executed successfully then current test case will be skipped.
 	 */
 	private String dependencies;
-
-	/**
-	 * Steps for the test case.
-	 */
-	private List<IStep> steps = new ArrayList<>();
 
 	/**
 	 * Details of the exception expected from this test case.
@@ -439,19 +435,6 @@ public class TestCase implements IStepContainer, Validateable, IEntryPoint, IExe
 	public void setDataCleanup(Cleanup dataCleanup)
 	{
 		this.dataCleanup = dataCleanup;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.yukthitech.ui.automation.IStepContainer#addStep(com.yukthitech.ui.automation.
-	 * IStep)
-	 */
-	@Override
-	public void addStep(IStep step)
-	{
-		steps.add(step);
 	}
 
 	/**

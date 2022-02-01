@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.lang.steps;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.yukthitech.autox.AbstractStep;
@@ -101,6 +102,12 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 		}
 		
 		steps.addStep(step);
+	}
+	
+	@Override
+	public List<IStep> getSteps()
+	{
+		return steps.getSteps();
 	}
 	
 	/**

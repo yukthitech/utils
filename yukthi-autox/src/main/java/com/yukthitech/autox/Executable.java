@@ -38,4 +38,11 @@ public @interface Executable
 	 * @return
 	 */
 	public Group group();
+	
+	/**
+	 * Used to indicate current step must be followed by specified step type. And will be executed
+	 * in conjunction with preceding step.
+	 * @return
+	 */
+	public Class<? extends IMultiPartStep> partOf() default IMultiPartStep.class;
 }

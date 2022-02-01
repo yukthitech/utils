@@ -1,5 +1,7 @@
 package com.yukthitech.autox.test.lang.steps;
 
+import java.util.List;
+
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
@@ -61,6 +63,12 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 		}
 		
 		steps.addStep(step);
+	}
+
+	@Override
+	public List<IStep> getSteps()
+	{
+		return steps.getSteps();
 	}
 
 	@Override

@@ -12,17 +12,23 @@ import com.yukthitech.autox.SourceType;
  * Fails the current test case by throwing fail exception.
  * @author akiran
  */
-@Executable(name = "fail", group = Group.Lang, message = "Fails the current test case by throwing fail exception.")
-public class FailStep extends AbstractStep
+@Executable(name = "throw", group = Group.Lang, message = "Fails the current test case by throwing fail exception.")
+public class ThrowStep extends AbstractStep
 {
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * Message to be used to fail test case or test suite.
+	 * Message to be used to throw as part of error.
 	 */
-	@Param(description = "Message to the fail exception to be thrown", required = false, sourceType = SourceType.EXPRESSION)
+	@Param(description = "Message to be used to throw as part of error", required = false, sourceType = SourceType.EXPRESSION)
 	private String message;
 	
+	/**
+	 * Value to be sent along with error.
+	 */
+	@Param(description = "Value to be sent along with error.", required = false, sourceType = SourceType.EXPRESSION)
+	private Object value;
+
 	/**
 	 * Sets the message to be used to fail test case or test suite.
 	 *
@@ -33,18 +39,22 @@ public class FailStep extends AbstractStep
 		this.message = message;
 	}
 	
+	/**
+	 * Sets the value to be sent along with error.
+	 *
+	 * @param value
+	 *            the new value to be sent along with error
+	 */
+	public void setValue(Object value)
+	{
+		this.value = value;
+	}
+	
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		exeLogger.debug("Failing the current test case with message: {}", message);
+		exeLogger.debug("Throwing error with message: {}", message);
 		
-		if(message == null)
-		{
-			throw new FailException();
-		}
-		else
-		{
-			throw new FailException(message);
-		}
+		throw new ValuedException(message, value);
 	}
 }
