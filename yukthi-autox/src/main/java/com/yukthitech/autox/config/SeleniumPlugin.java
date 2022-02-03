@@ -180,40 +180,44 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		try
 		{
 			activeDriverName = driverName;
-			
-			if(driverConfig.getDriver() != null)
-			{
-				activeDriver = driverConfig.getDriver();
-			}
-			else
-			{
-				Class<?> driverClass = Class.forName(driverConfig.getClassName());
-				
-				try
-				{
-					Constructor<?> configConstr = driverClass.getConstructor(SeleniumDriverConfig.class);
-					activeDriver = (WebDriver) configConstr.newInstance(driverConfig);
-				}catch(NoSuchMethodException ex)
-				{
-					activeDriver = (WebDriver) driverClass.newInstance();					
-				}
-			}
-			
-			if(driverConfig.getDefaultPage() != null)
-			{
-				logger.debug("Taking driver to default page: " + driverConfig.getDefaultPage());
-				activeDriver.get(driverConfig.getDefaultPage());
-			}
-			
-			if(activeDriver.getWindowHandle() != null)
-			{
-				mainWindowHandle = activeDriver.getWindowHandle();
-			}
+			resetActiveDriver(driverConfig);
 			
 			logger.debug("Got main handle as: {}", mainWindowHandle);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
+		}
+	}
+	
+	private void resetActiveDriver(SeleniumDriverConfig driverConfig) throws Exception
+	{
+		if(driverConfig.getDriver() != null)
+		{
+			activeDriver = driverConfig.getDriver();
+		}
+		else
+		{
+			Class<?> driverClass = Class.forName(driverConfig.getClassName());
+			
+			try
+			{
+				Constructor<?> configConstr = driverClass.getConstructor(SeleniumDriverConfig.class);
+				activeDriver = (WebDriver) configConstr.newInstance(driverConfig);
+			}catch(NoSuchMethodException ex)
+			{
+				activeDriver = (WebDriver) driverClass.newInstance();					
+			}
+		}
+		
+		if(driverConfig.getDefaultPage() != null)
+		{
+			logger.debug("Taking driver to default page: " + driverConfig.getDefaultPage());
+			activeDriver.get(driverConfig.getDefaultPage());
+		}
+		
+		if(activeDriver.getWindowHandle() != null)
+		{
+			mainWindowHandle = activeDriver.getWindowHandle();
 		}
 	}
 	
@@ -244,15 +248,9 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	{
 		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
 		
-		if(driverConfig.getDriver() != null)
-		{
-			activeDriver = driverConfig.getDriver();
-			return;
-		}
-		
 		try
 		{
-			activeDriver = (WebDriver) Class.forName(driverConfig.getClassName()).newInstance();
+			resetActiveDriver(driverConfig);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", 

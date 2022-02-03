@@ -567,4 +567,42 @@ public class CommonFreeMarkerMethods
 		buff.flush();
 		return buff.toString();
 	}
+
+	@FreeMarkerMethod(
+			description = "Removes special characters from input string. Also all whitespaces chars will be replaced with space.",
+			returnDescription = "String with special chars removed"
+			)
+	public static String removeSpecialChars(
+			@FmParam(name = "str", description = "Input string") String str)
+	{
+		if(str == null)
+		{
+			return "null";
+		}
+		
+		//remove special characters if any
+		char chArr[] = str.toCharArray();
+		StringBuilder builder = new StringBuilder();
+		
+		for(int i = 0; i < chArr.length; i++)
+		{
+			if(Character.isWhitespace(chArr[i]))
+			{
+				builder.append(' ');
+				continue;
+			}
+			
+			if(chArr[i] < 33 || chArr[i] > 126)
+			{
+				continue;
+			}
+			
+			builder.append(chArr[i]);
+		}
+		
+		str = builder.toString();;
+		str = str.replaceAll("\\ +", " ");
+
+		return str;
+	}
 }

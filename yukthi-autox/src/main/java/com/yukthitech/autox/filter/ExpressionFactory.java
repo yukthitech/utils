@@ -373,7 +373,7 @@ public class ExpressionFactory
 			return result;
 		}catch(Exception ex)
 		{
-			exeLogger.error("Evaluation of expression {} resulted in error", expression, ex);
+			exeLogger.error("Evaluation of expression {} resulted in error: \n{}", expression, CommonUtils.getRootCauseMessages(ex));
 			throw new InvalidStateException("An error occurred while evaluating expression '{}'", expression, ex);
 		}
 	}

@@ -31,10 +31,17 @@ public class FunctionExecutor
 	
 	private File reportFolder;
 	
+	private ThreadLocal<ExecutionLogger> logggerLocal = new ThreadLocal<ExecutionLogger>();
+	
 	public FunctionExecutor(AutomationContext context)
 	{
 		this.context = context;
 		this.reportFolder = context.getReportFolder();
+	}
+	
+	public ExecutionLogger getExecutionLogger()
+	{
+		return logggerLocal.get();
 	}
 
 	/**
@@ -84,6 +91,8 @@ public class FunctionExecutor
 		TestCaseResult testCaseResult = null;
 		
 		Object functionResult = null;
+		
+		logggerLocal.set(exeLogger);
 	
 		try
 		{
@@ -96,6 +105,9 @@ public class FunctionExecutor
 					"An unhandled error occurred while executing test case.",
 					startTime, new Date());
 
+		} finally
+		{
+			logggerLocal.remove();
 		}
 		
 		//when execution was successful
