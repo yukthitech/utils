@@ -1,6 +1,7 @@
 package com.yukthitech.autox;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 
@@ -22,7 +23,7 @@ public class AutoxVersion
 		try
 		{
 			InputStream is = AutoxVersion.class.getResourceAsStream("/autox-version.txt");
-			version = IOUtils.toString(is);
+			version = IOUtils.toString(is, Charset.defaultCharset());
 			version = version.trim();
 			is.close();
 		}catch(Exception ex)
