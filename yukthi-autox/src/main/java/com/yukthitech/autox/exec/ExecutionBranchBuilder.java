@@ -27,6 +27,8 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 	
 	private Predicate<C> filter;
 	
+	private boolean childBranchesRequired = false;
+	
 	public static <C extends IExecutable> ExecutionBranchBuilder<C> newBranchBuilder(AutomationContext context, String label, IExecutable executable, Collection<C> subbranches)
 	{
 		ExecutionBranchBuilder<C> builder = new ExecutionBranchBuilder<C>();
@@ -84,6 +86,18 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 		executionBranch.dataProvider = provider;
 		return this;
 	}
+	
+	/**
+	 * This is to be called on builder when at least one child branch 
+	 * should exist for current builder to build.
+	 * For example: a test-suite should not be built without single testcase.
+	 * @return
+	 */
+	public ExecutionBranchBuilder<C> childBranchesRequired()
+	{
+		this.childBranchesRequired = true;
+		return this;
+	}
 
 	public ExecutionBranch build()
 	{
@@ -99,8 +113,19 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 				}
 				
 				ExecutionBranch childBranch = c.buildExecutionBranch(context);
+				
+				if(childBranch == null)
+				{
+					continue;
+				}
+				
 				this.executionBranch.childBranches.add(childBranch);
 			}
+		}
+		
+		if(childBranchesRequired && CollectionUtils.isEmpty(this.executionBranch.childBranches))
+		{
+			return null;
 		}
 		
 		return executionBranch;

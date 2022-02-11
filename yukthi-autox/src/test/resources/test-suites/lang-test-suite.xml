@@ -577,5 +577,48 @@
 			<s:assert-equals actual="attr: var" expected="catch-100"/>
 		</testCase>
 
+		<testCase name="jsonAndJel">
+			<description>
+				Tests the JEL functionality in json.
+			</description>
+
+			<s:set expression="payload">
+				<value>
+					json: {
+						"arr": [1, 2, 3],
+						"map1": {
+							"nestedMap": {
+								"simpleName": "kranthi"
+							},
+							"name": "test1"
+						},
+						"map2": {
+							"nestedMap": {
+								"simpleName": "kiran"
+							},
+							"name": "test2"
+						}
+					}
+				</value>
+			</s:set>
+
+			<s:assert-deep-equals>
+				<actual>
+					json(jel=true): {
+						"attr1": "@xpath: /attr/payload/map1/name",
+						"intAttr": "@fmarker: attr.payload.arr[1]",
+						"attr2": "@xpathMulti: /attr/payload//simpleName"
+					}
+				</actual>
+				<expected>
+					json: {
+						"attr1": "test1",
+						"intAttr": 2,
+						"attr2": ["kranthi", "kiran"]
+					}
+				</expected>
+			</s:assert-deep-equals>
+
+		</testCase>
 	</testSuite>
 </testData>

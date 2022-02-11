@@ -443,6 +443,7 @@ public class TestSuite implements Validateable, IExecutable
 		return ExecutionBranchBuilder
 				.newBranchBuilder(context, name, this, this.testCases.values())
 				.childFilter(ts -> restrictedTestCases != null && restrictedTestCases.contains(ts.getName()))
+				.childBranchesRequired()
 				.setup(beforeTestCase)
 				.cleanup(afterTestCase)
 				.build();

@@ -38,13 +38,13 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	 * If true, extra properties in actual will be ignored and will only ensure expected
 	 * structure is found in actual object.
 	 */
-	@Param(description = "If true, extra properties in actual will be ignored and will only ensure expected structure is found in actual object. Default: false")
+	@Param(description = "If true, extra properties in actual will be ignored and will only ensure expected structure is found in actual object. Default: false", required = false)
 	private boolean ignoreExtraProperties = false;
 
-	@Param(description = "If false, instead of checking for equlity, check will be done for non equality. Default: true")
+	@Param(description = "If false, instead of checking for equlity, check will be done for non equality. Default: true", required = false)
 	private boolean checkEquality = true;
 	
-	@Param(description = "Failed path, if any, will be set on context with this attribute. Default: failedPath", attrName = true, defaultValue = "failedPath")
+	@Param(description = "Failed path, if any, will be set on context with this attribute. Default: failedPath", attrName = true, defaultValue = "failedPath", required = false)
 	private String failedPathAttr = "failedPath";
 
 	/**

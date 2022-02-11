@@ -571,6 +571,11 @@ public class AutomationContext
 		parametersStack.pop();
 	}
 	
+	public boolean isParamPresent()
+	{
+		return !parametersStack.isEmpty();
+	}
+	
 	public Map<String, Object> getParam()
 	{
 		if(parametersStack.isEmpty())

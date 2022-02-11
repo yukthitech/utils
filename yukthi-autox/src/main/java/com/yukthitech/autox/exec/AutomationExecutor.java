@@ -6,7 +6,11 @@ import java.util.Stack;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.IValidation;
+import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.test.TestCaseValidationFailedException;
 import com.yukthitech.autox.test.TestSuiteGroup;
 
 import net.sourceforge.jaad.aac.tools.IS;
@@ -15,77 +19,165 @@ public class AutomationExecutor
 {
 	private AutomationContext context;
 	
-	private Stack<BranchExecutionState> branchStack = new Stack<>();
+	private Stack<ExecutionStackEntry> branchStack = new Stack<>();
+	
+	private AutomationExecutorState automationExecutorState;
 	
 	public AutomationExecutor(AutomationContext context, TestSuiteGroup testSuites)
 	{
 		this.context = context;
+		this.automationExecutorState = new AutomationExecutorState(context);
 		
 		ExecutionBranch mainBranch = testSuites.buildExecutionBranch(context);
-		branchStack.push(new BranchExecutionState(mainBranch));
+		branchStack.push(new ExecutionStackEntry(mainBranch));
 	}
 	
 	public void start()
 	{
 		while(!branchStack.isEmpty())
 		{
-			BranchExecutionState state = branchStack.peek();
+			ExecutionStackEntry state = branchStack.peek();
+			boolean res = false;
 			
-			try
+			if(state.isStepsState())
 			{
-				executeNext(state);
-			}catch(PauseExecutionException ex)
+				try
+				{
+					res = executeNextStep(state);
+				}catch(PauseExecutionException ex)
+				{
+					
+				}
+			}
+			else
 			{
-				
+				res = executeNextBranch(state);
+			}
+			
+			if(res)
+			{
+				branchStack.pop();
 			}
 		}
 	}
 	
-	private void executeNext(BranchExecutionState state) throws PauseExecutionException
+	public ExecutionStackEntry pushSteps(List<IStep> steps)
 	{
-		if(state.isSetupCompleted())
+		if(CollectionUtils.isEmpty(steps))
 		{
-			state.setSetupCompleted(true);
-			
-			if(state.getBranch().setup != null)
-			{
-				BranchExecutionState setupState = new BranchExecutionState(state.getBranch().setup);
-				branchStack.push(setupState);
-
-				executeNext(setupState);
-			}
+			return null;
 		}
 		
-		ExecutionBranch branch = state.getBranch();
+		ExecutionStackEntry stackEntry = new ExecutionStackEntry(steps);
+		branchStack.push(stackEntry);
 		
-		if(CollectionUtils.isNotEmpty(branch.childBranches))
+		return stackEntry;
+	}
+	
+	private boolean executeNextStep(ExecutionStackEntry state) throws PauseExecutionException
+	{
+		List<IStep> steps = state.getSteps();
+		int idx = state.getChildStepIndex();
+		
+		if(idx >= steps.size())
 		{
-			List<ExecutionBranch> childBranches = state.getBranch().childBranches;
-			int i = state.getChildBranchIndex();
-			int size = childBranches.size();
-			
-			for( ; i < size; i++)
+			return true;
+		}
+		
+		IStep step = steps.get(idx);
+		
+		return true;
+	}
+	
+	private void executeStep(IStep step)
+	{
+		//clone the step, so that expression replacement will not affect actual step
+		step = step.clone();
+		AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
+
+		context.getStepListenerProxy().stepStarted(step, null);
+		boolean res = false;//step.execute(context, null);
+
+		if(step instanceof IValidation)
+		{
+			if(!res)
 			{
-				ExecutionBranch nextBranch = childBranches.get(i);
-				BranchExecutionState nextState = new BranchExecutionState(nextBranch);
-				branchStack.push(nextState);
+				Executable executable = step.getClass().getAnnotation(Executable.class);
 				
-				executeNext(nextState);
+				String message = String.format("Validation %s failed. Validation Details: %s", executable.name(), step);
+				
+				//exeLogger.error(message);
+				throw new TestCaseValidationFailedException(step, message);
 			}
 		}
-
-		if(CollectionUtils.isNotEmpty(branch.childSteps))
+		
+		//context.getStepListenerProxy().stepCompleted(step, currentData);
+	}
+	
+	private boolean executeNextBranch(ExecutionStackEntry stackEntry)
+	{
+		ExecutionBranch branch = stackEntry.getBranch();
+		
+		if(!stackEntry.isStarted())
 		{
-			List<IStep> childSteps = state.getBranch().childSteps;
-			int i = state.getChildStepIndex();
-			int size = childSteps.size();
+			stackEntry.setStarted(true);
+			this.automationExecutorState.started(branch);
+		}
+		
+		if(!stackEntry.isSetupPushed())
+		{
+			stackEntry.setSetupPushed(true);
 			
-			for( ; i < size; i++)
+			if(branch.setup != null)
 			{
-				IStep nextStep = childSteps.get(i);
-				execueStep(nextStep);
+				ExecutionStackEntry childEntry = pushSteps(branch.getSetup().getChildSteps());
+				childEntry.setOnSuccess(() -> stackEntry.setSetupCompleted(true));
+				return false;
 			}
 		}
+		
+		if(!stackEntry.isBranchesPushed())
+		{
+			stackEntry.setBranchesPushed(true);
+
+			//in case child branches are present, push in reverse order, 
+			//  so that first one will be picked first
+			if(CollectionUtils.isNotEmpty(branch.childBranches))
+			{
+				int maxIdx = branch.childBranches.size() - 1;
+				
+				for(int i = maxIdx; i >= 0; i--)
+				{
+					branchStack.push(new ExecutionStackEntry(branch.childBranches.get(i)));
+				}
+			}
+			
+			return false;
+		}
+		
+		if(!stackEntry.isStepsPushed())
+		{
+			if(CollectionUtils.isNotEmpty(branch.childSteps))
+			{
+				pushSteps(branch.getSetup().getChildSteps());
+			}
+			
+			return false;
+		}
+		
+		if(!stackEntry.isCleanupPushed())
+		{
+			stackEntry.setCleanupPushed(true);
+			
+			//execute cleanup only when setup is executed successfully
+			if(branch.cleanup != null && stackEntry.isSetupCompleted())
+			{
+				pushSteps(branch.getCleanup().getChildSteps());
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	private void execueStep(IStep step)
