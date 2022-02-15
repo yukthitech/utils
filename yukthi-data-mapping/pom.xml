@@ -6,7 +6,7 @@
 	<packaging>jar</packaging>
 
 	<name>yukthi-data-mapping</name>
-	<version>1.3.3-SNAPSHOT</version>	
+	<version>1.3.4-SNAPSHOT</version>	
 	<url>http://maven.apache.org</url>
 
 	<properties>

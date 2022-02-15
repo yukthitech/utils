@@ -54,7 +54,7 @@ public interface IFinderRecordProcessor
 	
 	/**
 	 * Called for every record being processed.
-	 * @param recordNo Current record number
+	 * @param recordNo Current record number. This starts with zero.
 	 * @param record Record fetched
 	 * @return Action to be taken on current and future records.
 	 */

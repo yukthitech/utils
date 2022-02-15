@@ -21,6 +21,7 @@ import com.yukthitech.persistence.InvalidMappingException;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
 import com.yukthitech.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthitech.persistence.repository.annotations.Field;
+import com.yukthitech.persistence.repository.annotations.FirstRowOnly;
 import com.yukthitech.persistence.repository.annotations.OrderBy;
 import com.yukthitech.persistence.repository.annotations.OrderByField;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
@@ -46,6 +47,11 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	protected Type genericReturnType;
 	
 	protected Class<?> collectionReturnType = null;
+	
+	/**
+	 * Flag indicating only first row only should be fetched.
+	 */
+	protected boolean firstRowOnly = false;
 
 	/**
 	 * Keeps track of different parts required by query
@@ -201,6 +207,9 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		}
 		
 		SearchResult searchResult = recursiveAnnotationFactory.findAnnotationRecursively(method, SearchResult.class);
+		FirstRowOnly firstRowOnlyAnnnot = recursiveAnnotationFactory.findAnnotationRecursively(method, FirstRowOnly.class);
+		
+		this.firstRowOnly = (firstRowOnlyAnnnot != null);
 		
 		//if return type matches with entity type, add all entity fields as result fields
 		if(entityDetails.getEntityType().equals(this.returnType) || ICrudRepository.class.equals(method.getDeclaringClass()))

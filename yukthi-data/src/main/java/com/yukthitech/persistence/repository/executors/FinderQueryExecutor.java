@@ -183,10 +183,22 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 							resLst.add(recordBean);
 						}
 						
+						if(firstRowOnly && !resLst.isEmpty())
+						{
+							return Action.STOP;
+						}
+						
 						return filterAction.isStopProcessing() ? Action.STOP : Action.IGNORE; 
 					}
 					
 					resLst.add( recordBean );
+
+					//TODO: First row fetching limiting should happen within the query itself.
+					if(firstRowOnly)
+					{
+						return Action.STOP;
+					}
+
 					return Action.IGNORE;
 				}
 			});
