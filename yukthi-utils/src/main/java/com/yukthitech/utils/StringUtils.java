@@ -25,4 +25,32 @@ public class StringUtils
 	{
 		return str.substring(0, 1).toUpperCase() + str.substring(1);
 	}
+	
+	private static boolean isPrintableChar(char ch)
+	{
+		if(ch == '\n' || ch == '\r' || ch == '\t')
+		{
+			return true;
+		}
+		
+		return (ch >= 32 && ch <= 126);
+	}
+	
+	public static String removeSpecialCharacters(String str)
+	{
+		char chArr[] = str.toCharArray();
+		StringBuilder builder = new StringBuilder();
+		
+		for(int i = 0; i < chArr.length; i++)
+		{
+			if(!isPrintableChar(chArr[i]))
+			{
+				continue;
+			}
+			
+			builder.append(chArr[i]);
+		}
+		
+		return builder.toString();
+	}
 }
