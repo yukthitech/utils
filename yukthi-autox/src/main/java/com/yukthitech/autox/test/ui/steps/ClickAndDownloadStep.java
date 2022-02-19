@@ -2,7 +2,10 @@ package com.yukthitech.autox.test.ui.steps;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
@@ -11,10 +14,13 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
+import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -57,6 +63,12 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	 */
 	@Param(description = "Time gap between retries. Default: 1000", required = false)
 	private int retryTimeGapMillis = IAutomationConstants.ONE_SECOND;
+	
+	/**
+	 * Comma separated supported extensions. If specified, once file is found with any of these extensions, the wait will end.
+	 */
+	@Param(description = "Comma separated supported extensions. If specified, once file is found with any of these extensions, the wait will end.", required = false)
+	private String extensions;
 
 	/**
 	 * Sets the number of retries to happen. Default: 5.
@@ -98,6 +110,22 @@ public class ClickAndDownloadStep extends AbstractUiStep
 		this.downloadWaitTime = downloadWaitTime;
 	}
 	
+	/**
+	 * Sets the locator for button.
+	 *
+	 * @param locator
+	 *            the new locator for button
+	 */
+	public void setLocator(String locator)
+	{
+		this.locator = locator;
+	}
+	
+	public void setExtensions(String extensions)
+	{
+		this.extensions = extensions;
+	}
+
 	@Override
 	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
@@ -141,35 +169,24 @@ public class ClickAndDownloadStep extends AbstractUiStep
 					"Waiting for element to be clickable: " + getLocatorWithParent(locator), 
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 			
-			try
-			{
-				Thread.sleep(downloadWaitTime);
-			}catch(Exception ex)
-			{}
+			File file = null;
 			
-			File downloadFolder = new File(plugin.getDownloadFolder());
-			File files[] = downloadFolder.listFiles();
-			
-			if(files == null || files.length == 0)
+			if(StringUtils.isBlank(extensions))
 			{
-				throw new InvalidStateException("No file found in download folder: {}", downloadFolder.getPath());
+				file = waitAndDownload(plugin.getDownloadFolder());
+			}
+			else
+			{
+				file = pollAndDownload(plugin.getDownloadFolder(), extensions);
 			}
 			
-			if(files.length > 1)
+			if(file == null)
 			{
-				throw new InvalidStateException("Multiple files found in download folder: {}", downloadFolder.getPath());
+				throw new InvalidStateException("No file found in download folder: {}", plugin.getDownloadFolder());
 			}
-			
-			try
-			{
-				String path = files[0].getCanonicalPath();
-				exeLogger.trace("Setting downloaded file path '{}' on context with name: {}", path, pathName);
-				
-				context.setAttribute(pathName, path);
-			}catch(IOException ex)
-			{
-				throw new InvalidStateException("An error occurred while fetching cannoical path of downloaded file: " + files[0].getPath(), ex);
-			}
+
+			exeLogger.trace("Setting downloaded file path '{}' on context with name: {}", file.getPath(), pathName);
+			context.setAttribute(pathName, file.getPath());
 		}catch(InvalidStateException ex)
 		{
 			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
@@ -178,16 +195,61 @@ public class ClickAndDownloadStep extends AbstractUiStep
 		
 		return true;
 	}
-
-	/**
-	 * Sets the locator for button.
-	 *
-	 * @param locator
-	 *            the new locator for button
-	 */
-	public void setLocator(String locator)
+	
+	private File pollAndDownload(String downloadFolderPath, String extensions)
 	{
-		this.locator = locator;
+		Set<String> extSet = CommonUtils.toSet(extensions.trim().toLowerCase().split("\\s*\\,\\s*"));
+		ObjectWrapper<File> fileRes = new ObjectWrapper<File>();
+		
+		UiAutomationUtils.waitWithPoll(() -> 
+		{
+			File file = checkForFile(downloadFolderPath, extSet);
+			fileRes.setValue(file);
+			
+			return (file != null);
+		}, (int) downloadWaitTime, 1000);
+
+		return fileRes.getValue();
+	}
+
+	private File waitAndDownload(String downloadFolderPath)
+	{
+		AutomationUtils.sleep(downloadWaitTime);
+		return checkForFile(downloadFolderPath, null);
+	}
+	
+	private File checkForFile(String downloadFolderPath, Set<String> extensions)
+	{
+		File downloadFolder = new File(downloadFolderPath);
+		File files[] = downloadFolder.listFiles();
+		
+		if(files == null || files.length == 0)
+		{
+			return null;
+		}
+		
+		if(files.length > 1)
+		{
+			throw new InvalidStateException("Multiple files found in download folder: {}", downloadFolder.getPath());
+		}
+		
+		if(extensions != null)
+		{
+			String ext = FilenameUtils.getExtension(files[0].getName()).toLowerCase();
+			
+			if(!extensions.contains(ext))
+			{
+				return null;
+			}
+		}
+		
+		try
+		{
+			return files[0].getCanonicalFile();
+		}catch(IOException ex)
+		{
+			throw new InvalidStateException("An error occurred while fetching cannoical path of downloaded file: " + files[0].getPath(), ex);
+		}
 	}
 
 	/*
