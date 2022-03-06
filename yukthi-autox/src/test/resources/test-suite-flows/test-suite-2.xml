@@ -1,0 +1,33 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
+	<testSuite name="test-suite-2">
+		<setup>
+			<s:log message="Setup of test-suite-2"/>
+		</setup>
+		
+		<testCase name="testCase21">
+			<description>
+				Test case 21
+			</description>
+			
+			<list-data-provider name="dataString">
+				<data>abc</data>
+				<data>def</data>
+				<data>ghi</data>
+			</list-data-provider>
+			
+			<data-setup>
+				<s:log message="testCase21 - data-setup"/>
+			</data-setup>
+		
+			<s:log message="testCase21 - ${attr.dataString}"/>
+			
+			<data-cleanup>
+				<s:log message="testCase21 - data-cleanup"/>
+			</data-cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:log message="Cleanup of test-suite-2"/>
+		</cleanup>
+	</testSuite>
+</testData>

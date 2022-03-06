@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -169,6 +170,12 @@ public class ApplicationConfiguration
 		XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
 		
 		fis.close();
+		
+		if(StringUtils.isNotBlank(basicArguments.getTestSuiteFolders()))
+		{
+			String folders[] = basicArguments.getTestSuiteFolders().trim().split("\\s*\\,\\s*");
+			appConfig.testSuiteFolders = Arrays.asList(folders);
+		}
 
 		return appConfig;
 	}

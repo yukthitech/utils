@@ -185,10 +185,31 @@ public class AutomationExecutor
 		
 		if(!stackEntry.isStarted())
 		{
+			logger.debug("Starting execution branch: {}", branch.label);
 			stackEntry.started();
 			this.state.started(branch);
 		}
 		
+		//Note: before-child & after-child flags are maintained at child level so that 
+		//  before and after steps are executed for every child
+		if(!branch.dataBranch && !stackEntry.isBeforeChildPushed())
+		{
+			stackEntry.setBeforeChildPushed(true);
+			
+			ExecutionBranch parentBranch = parentEntry != null ? parentEntry.getBranch() : null;
+			
+			if(parentBranch != null && parentBranch.beforeChild != null)
+			{
+				this.state.startMode("prechild");
+				
+				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild.getChildSteps())
+				.onSuccess(entry -> state.clearMode())
+				.push();
+				
+				return false;
+			}
+		}
+
 		if(!stackEntry.isSetupPushed())
 		{
 			stackEntry.setSetupPushed(true);
@@ -215,20 +236,6 @@ public class AutomationExecutor
 			return false;
 		}
 		
-		//Note: before-child & after-child flags are maintained at child level so that 
-		//  before and after steps are executed for every child
-		if(!branch.dataBranch && !stackEntry.isBeforeChildPushed())
-		{
-			stackEntry.setBeforeChildPushed(true);
-			
-			ExecutionBranch parentBranch = parentEntry != null ? parentEntry.getBranch() : null;
-			
-			if(parentBranch != null && parentBranch.beforeChild != null)
-			{
-				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild.getChildSteps()).push();
-			}
-		}
-		
 		//Note: for data branch steps should not be executed directly
 		if(!branch.dataBranch && !stackEntry.isStepsPushed())
 		{
@@ -241,20 +248,6 @@ public class AutomationExecutor
 			}
 		}
 		
-		//Note: before-child & after-child flags are maintained at child level so that 
-		//  before and after steps are executed for every child
-		if(!branch.dataBranch && !stackEntry.isAfterChildPushed())
-		{
-			stackEntry.setAfterChildPushed(true);
-			
-			ExecutionBranch parentBranch = parentEntry != null ? parentEntry.getBranch() : null;
-
-			if(parentBranch != null && parentBranch.afterChild != null)
-			{
-				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild.getChildSteps()).push();
-			}
-		}
-
 		//execute cleanup only when setup is executed successfully
 		if(!stackEntry.isCleanupPushed())
 		{
@@ -270,7 +263,27 @@ public class AutomationExecutor
 				return false;
 			}
 		}
-		
+
+		//Note: before-child & after-child flags are maintained at child level so that 
+		//  before and after steps are executed for every child
+		if(!branch.dataBranch && !stackEntry.isAfterChildPushed())
+		{
+			stackEntry.setAfterChildPushed(true);
+			
+			ExecutionBranch parentBranch = parentEntry != null ? parentEntry.getBranch() : null;
+
+			if(parentBranch != null && parentBranch.afterChild != null)
+			{
+				this.state.startMode("postchild");
+				
+				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild.getChildSteps())
+				.onSuccess(entry -> state.clearMode())
+				.push();
+				
+				return false;
+			}
+		}
+
 		this.state.completed(stackEntry);
 		return true;
 	}

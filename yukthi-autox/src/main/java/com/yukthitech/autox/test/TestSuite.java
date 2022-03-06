@@ -521,7 +521,7 @@ public class TestSuite implements Validateable, IExecutable
 		
 		return ExecutionBranchBuilder
 				.newBranchBuilder(context, name, description, this, fetchOrderedTestCases())
-				.childFilter(ts -> restrictedTestCases != null && restrictedTestCases.contains(ts.getName()))
+				.childFilter(ts -> restrictedTestCases == null || restrictedTestCases.contains(ts.getName()))
 				.childBranchesRequired()
 				.setup(setup)
 				.cleanup(cleanup)

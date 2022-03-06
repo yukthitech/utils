@@ -159,4 +159,11 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 				.newBranchNode(context, NAME, NAME, this, getSteps())
 				.build();
 	}
+
+	@Override
+	public String toString()
+	{
+		String extra = String.format(" [Location: %s:%s]", super.getLocation(), super.getLineNumber());
+		return super.toString() + extra;
+	}
 }

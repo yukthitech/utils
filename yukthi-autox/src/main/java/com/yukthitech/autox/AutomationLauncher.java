@@ -39,6 +39,8 @@ public class AutomationLauncher
 	private static Logger logger = LogManager.getLogger(AutomationLauncher.class);
 	
 	private static final String COMMAND_SYNTAX = String.format("java %s <app-config-file> extended-args...", AutomationLauncher.class.getName());
+	
+	public static boolean systemExitEnabled = true;
 
 	/**
 	 * Loads test suites from the test suite folder specified by app
@@ -389,7 +391,10 @@ public class AutomationLauncher
 			}
 		}
 	
-		System.exit( res ? 0 : -1 );
+		if(systemExitEnabled)
+		{
+			System.exit( res ? 0 : -1 );
+		}
 	}
 
 	/**
@@ -438,7 +443,7 @@ public class AutomationLauncher
 				return;
 			}
 			
-			boolean executeOldWay = "true".equals(context.getProp().get("execution.old"));
+			boolean executeOldWay = context.getBasicArguments().isOldExecution();
 			
 			if(executeOldWay)
 			{

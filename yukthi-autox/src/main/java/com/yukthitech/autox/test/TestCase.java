@@ -654,4 +654,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 				.dataProvider(dataProvider)
 				.build();
 	}
+	
+	@Override
+	public String toString()
+	{
+		String extra = String.format(" [Name: %s, Location: %s:%s]", name, super.getLocation(), super.getLineNumber());
+		return super.toString() + extra;
+	}
 }

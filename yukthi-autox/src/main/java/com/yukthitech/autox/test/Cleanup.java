@@ -162,4 +162,11 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 				.newBranchNode(context, "<cleanup>", "cleanup", this, getSteps())
 				.build();
 	}
+
+	@Override
+	public String toString()
+	{
+		String extra = String.format(" [Location: %s:%s]", super.getLocation(), super.getLineNumber());
+		return super.toString() + extra;
+	}
 }

@@ -18,6 +18,12 @@ import com.yukthitech.utils.cli.CliArgument;
 public class BasicArguments
 {
 	/**
+	 * Test suites folders from where test suites has to be loaded. This overrides folder specified in app config file.
+	 */
+	@CliArgument(name = "tsf", longName = "test-suite-folders", description = "Test suites folders (comma separated) from where test suites has to be loaded. This overrides folders specified in app config file.", required = false)
+	private String testSuiteFolders;
+	
+	/**
 	 * If specified the execution will be limited only for this test suites.
 	 */
 	@CliArgument(name = "ts", longName = "test-suites", description = "Test suites to be executed (comma separated)", required = false)
@@ -71,6 +77,33 @@ public class BasicArguments
 	@CliArgument(name = "flmt", longName = "folder-limits", description = "Comma separated folder paths to which execution should be limited.", required = false)
 	private String folderLimits;
 	
+	@CliArgument(name = "old", longName = "old-execution", description = "If true, automation will be performed in old style", required = false)
+	private boolean oldExecution = false;
+
+	/**
+	 * Gets the test suites folder from where test suites has to be loaded. This
+	 * overrides folder specified in app config file.
+	 *
+	 * @return the test suites folder from where test suites has to be loaded
+	 */
+	public String getTestSuiteFolders()
+	{
+		return testSuiteFolders;
+	}
+
+	/**
+	 * Sets the test suites folder from where test suites has to be loaded. This
+	 * overrides folder specified in app config file.
+	 *
+	 * @param testSuiteFolder
+	 *            the new test suites folder from where test suites has to be
+	 *            loaded
+	 */
+	public void setTestSuiteFolders(String testSuiteFolder)
+	{
+		this.testSuiteFolders = testSuiteFolder;
+	}
+
 	/**
 	 * Gets the if specified the execution will be limited only for this test suites.
 	 *
@@ -309,5 +342,15 @@ public class BasicArguments
 		}
 		
 		return resList;
+	}
+
+	public boolean isOldExecution()
+	{
+		return oldExecution;
+	}
+
+	public void setOldExecution(boolean oldExecution)
+	{
+		this.oldExecution = oldExecution;
 	}
 }

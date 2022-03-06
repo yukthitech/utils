@@ -101,7 +101,7 @@ public class AutomationExecutorState
 			return null;
 		}
 		
-		return branchStack.get(size - 2);
+		return branchStack.get(1);
 	}
 	
 	public ExecutionLogger getExecutionLogger()
@@ -163,6 +163,7 @@ public class AutomationExecutorState
 	
 	public void startedSteps(ExecutionBranch stepsBranch)
 	{
+		/*
 		//if logger already exists, return the same
 		if(executionLogger != null)
 		{
@@ -174,6 +175,7 @@ public class AutomationExecutorState
 		ExecutionBranch parentBranch = parentEntry.getBranch(); 
 		
 		executionLogger = new ExecutionLogger(context, parentBranch.label, parentBranch.description);
+		*/
 	}
 
 	public void started(ExecutionBranch branch)
@@ -186,6 +188,16 @@ public class AutomationExecutorState
 		{
 			testCaseStarted((TestCase) branch.executable);
 		}
+	}
+	
+	public void startMode(String mode)
+	{
+		executionLogger.setMode(mode);
+	}
+	
+	public void clearMode()
+	{
+		executionLogger.clearMode();
 	}
 	
 	public void preSetup(ExecutionBranch branch)
@@ -277,6 +289,7 @@ public class AutomationExecutorState
 			}
 			
 			reportGenerator.createLogFiles(context, res, branch.getLabel() + "-cleanup", null, "");
+			executionLogger = null;
 		}
 		
 		return true;
@@ -538,6 +551,8 @@ public class AutomationExecutorState
 		context.startLogMonitoring();
 		context.setActiveTestCase(testCase, null);
 		context.getExecutionStack().push(testCase);
+		
+		executionLogger = new ExecutionLogger(context, testCase.getName(), testCase.getDescription());
 	}
 	
 	private boolean testCasePostStartup(TestCase testCase, ExecutionBranch branch)
