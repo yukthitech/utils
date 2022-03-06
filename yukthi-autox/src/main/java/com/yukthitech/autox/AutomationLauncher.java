@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.event.IAutomationListener;
+import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.test.TestDataFile;
@@ -372,6 +373,24 @@ public class AutomationLauncher
 		
 		return testSuiteGroup;
 	}
+	
+	private static void automationCompleted(boolean res, AutomationContext context)
+	{
+		context.close();
+		
+		if(!context.getBasicArguments().isReportOpeningDisalbed())
+		{
+			try
+			{
+				Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
+			}catch(Exception ex)
+			{
+				logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
+			}
+		}
+	
+		System.exit( res ? 0 : -1 );
+	}
 
 	/**
 	 * Automation entry point.
@@ -419,22 +438,23 @@ public class AutomationLauncher
 				return;
 			}
 			
-			boolean res = testSuiteExecutor.executeTestSuites();
+			boolean executeOldWay = "true".equals(context.getProp().get("execution.old"));
 			
-			context.close();
-	
-			if(!context.getBasicArguments().isReportOpeningDisalbed())
+			if(executeOldWay)
 			{
-				try
-				{
-					Desktop.getDesktop().open(new File(context.getReportFolder(), "index.html"));
-				}catch(Exception ex)
-				{
-					logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
-				}
+				boolean res = testSuiteExecutor.executeTestSuites();
+				automationCompleted(res, context);
 			}
-		
-			System.exit( res ? 0 : -1 );
+			else
+			{
+				AutomationExecutor executor = new AutomationExecutor(context, testSuiteGroup, res -> 
+				{
+					automationCompleted(res, context);
+				});
+				
+				executor.start();
+			}
+			
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution", ex);

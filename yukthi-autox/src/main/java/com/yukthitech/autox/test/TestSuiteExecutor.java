@@ -401,7 +401,7 @@ public class TestSuiteExecutor
 		// Note: if no test cases are executed (due to various factors) setup will not be executed. And cleanup will also gets skipped
 		if(!currentTestSuiteResults.isSetupSuccessful())
 		{
-			if( !executeSetup(testSuite.getName(), testSuite.getSetups(), null) )
+			if(testSuite.getSetup() != null && !executeSetup(testSuite.getName(), Arrays.asList(testSuite.getSetup()), null) )
 			{
 				TestSuiteResults results = fullExecutionDetails.testSuiteSkipped(testSuite, "Skipping as setup of test suite is failed");
 				results.setSetupSuccessful(false);
@@ -414,6 +414,7 @@ public class TestSuiteExecutor
 
 		return null;
 	}
+	
 	private TestCaseResult executeTestCaseWithDependencies(TestSuite testSuite, TestCase testCase)
 	{
 		//if test case execution is already in progress in 
@@ -558,7 +559,7 @@ public class TestSuiteExecutor
 			// Note: setup will be executed only if atleast one test case is executed in current test suite
 			if(currentTestSuiteResults.isSetupSuccessful())
 			{
-				if( !executeCleanup(testSuite.getName(), testSuite.getCleanups(), null) )
+				if(testSuite.getCleanup() != null && !executeCleanup(testSuite.getName(), Arrays.asList(testSuite.getCleanup()), null) )
 				{
 					currentTestSuiteResults.setCleanupSuccessful(false);
 					fullExecutionDetails.testSuiteFailed(testSuite, "Cleanup execution failed.");

@@ -1,6 +1,10 @@
 package com.yukthitech.autox.exec;
 
+import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.IStep;
 
@@ -15,15 +19,13 @@ public class ExecutionStackEntry
 	 */
 	private ExecutionBranch branch;
 	
+	private String label;
+	
 	private boolean started;
 	
 	private List<IStep> steps;
 	
 	private boolean setupPushed;
-	
-	private boolean setupCompleted;
-	
-	private boolean branchesPushed;
 	
 	private boolean stepsPushed;
 	
@@ -31,29 +33,47 @@ public class ExecutionStackEntry
 	
 	private int childStepIndex = 0;
 	
-	private Runnable onSuccess;
+	private int childBranchIndex = 0;
+	
+	private Consumer<ExecutionStackEntry> onSuccess;
+	
+	private ExceptionHandler exceptionHandler;
+	
+	private Date startedOn;
+	
+	private boolean beforeChildPushed;
+	
+	private boolean afterChildPushed;
 	
 	public ExecutionStackEntry(ExecutionBranch branch)
 	{
 		this.branch = branch;
+		this.label = branch.label;
 	}
 	
-	public ExecutionStackEntry(List<IStep> steps)
+	public ExecutionStackEntry(String label, List<IStep> steps)
 	{
 		this.steps = steps;
+		this.label = label;
 	}
 	
 	public boolean isStarted()
 	{
 		return started;
 	}
-
-	public void setStarted(boolean started)
+	
+	public void started()
 	{
-		this.started = started;
+		this.started = true;
+		startedOn = new Date();
+	}
+	
+	public Date getStartedOn()
+	{
+		return startedOn;
 	}
 
-	public boolean isStepsState()
+	public boolean isStepsEntry()
 	{
 		return (steps != null);
 	}
@@ -75,12 +95,18 @@ public class ExecutionStackEntry
 
 	public boolean isBranchesPushed()
 	{
-		return branchesPushed;
+		List<ExecutionBranch> childBranches = branch.childBranches;
+		return (CollectionUtils.isEmpty(childBranches) || childBranchIndex >= childBranches.size());
 	}
-
-	public void setBranchesPushed(boolean branchesPushed)
+	
+	public void incrementChildBranchIndex()
 	{
-		this.branchesPushed = branchesPushed;
+		childBranchIndex++;
+	}
+	
+	public int getChildBranchIndex()
+	{
+		return childBranchIndex;
 	}
 
 	public boolean isStepsPushed()
@@ -107,6 +133,11 @@ public class ExecutionStackEntry
 	{
 		return childStepIndex;
 	}
+	
+	public void incrementChildStepIndex()
+	{
+		childStepIndex++;
+	}
 
 	public void setChildStepIndex(int childStepIndex)
 	{
@@ -118,23 +149,43 @@ public class ExecutionStackEntry
 		return steps;
 	}
 
-	public Runnable getOnSuccess()
+	public Consumer<ExecutionStackEntry> getOnSuccess()
 	{
 		return onSuccess;
 	}
 
-	public void setOnSuccess(Runnable onSuccess)
+	public void setOnSuccess(Consumer<ExecutionStackEntry> onSuccess)
 	{
 		this.onSuccess = onSuccess;
 	}
-
-	public boolean isSetupCompleted()
+	
+	public void setExceptionHandler(ExceptionHandler exceptionHandler)
 	{
-		return setupCompleted;
+		this.exceptionHandler = exceptionHandler;
+	}
+	
+	public ExceptionHandler getExceptionHandler()
+	{
+		return exceptionHandler;
 	}
 
-	public void setSetupCompleted(boolean setupCompleted)
+	public boolean isBeforeChildPushed()
 	{
-		this.setupCompleted = setupCompleted;
+		return beforeChildPushed;
+	}
+
+	public void setBeforeChildPushed(boolean beforeChildPushed)
+	{
+		this.beforeChildPushed = beforeChildPushed;
+	}
+
+	public boolean isAfterChildPushed()
+	{
+		return afterChildPushed;
+	}
+
+	public void setAfterChildPushed(boolean afterChildPushed)
+	{
+		this.afterChildPushed = afterChildPushed;
 	}
 }

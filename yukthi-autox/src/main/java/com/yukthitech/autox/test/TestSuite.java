@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -53,12 +55,12 @@ public class TestSuite implements Validateable, IExecutable
 	/**
 	 * Setup steps to be executed before executing test suite.
 	 */
-	private List<Setup> setups;
+	private Setup setup;
 	
 	/**
 	 * Cleanup steps to be executed after executing test suite.
 	 */
-	private List<Cleanup> cleanups;
+	private Cleanup cleanup;
 	
 	/**
 	 * Name to step group mapping.
@@ -135,28 +137,30 @@ public class TestSuite implements Validateable, IExecutable
 	
 	public void merge(TestSuite newTestSuite)
 	{
-		if(newTestSuite.getSetups() != null)
+		if(newTestSuite.getSetup() != null)
 		{
-			if(this.setups == null)
+			if(this.setup != null)
 			{
-				this.setups = newTestSuite.setups;
+				throw new InvalidConfigurationException("For test-suite '{}' duplicate setups are configured. [Location1: {}:{}, Location2: {}:{}]", 
+						this.name, 
+						this.setup.getLocation(), this.setup.getLineNumber(), 
+						newTestSuite.setup.getLocation(), newTestSuite.setup.getLineNumber());
 			}
-			else
-			{
-				this.setups.addAll(newTestSuite.setups);
-			}
+			
+			this.setup = newTestSuite.setup;
 		}
 		
-		if(newTestSuite.cleanups != null)
+		if(newTestSuite.cleanup != null)
 		{
-			if(this.cleanups == null)
+			if(this.cleanup != null)
 			{
-				this.cleanups = newTestSuite.cleanups;
+				throw new InvalidConfigurationException("For test-suite '{}' duplicate cleanups are configured. [Location1: {}:{}, Location2: {}:{}]", 
+						this.name, 
+						this.cleanup.getLocation(), this.cleanup.getLineNumber(), 
+						newTestSuite.cleanup.getLocation(), newTestSuite.cleanup.getLineNumber());
 			}
-			else
-			{
-				this.cleanups.addAll(newTestSuite.cleanups);
-			}
+			
+			this.cleanup = newTestSuite.cleanup;
 		}
 		
 		if(newTestSuite.testCases != null)
@@ -307,9 +311,9 @@ public class TestSuite implements Validateable, IExecutable
 	 *
 	 * @return the setup steps to be executed before executing test suite
 	 */
-	public List<Setup> getSetups()
+	public Setup getSetup()
 	{
-		return setups;
+		return setup;
 	}
 
 	/**
@@ -317,14 +321,17 @@ public class TestSuite implements Validateable, IExecutable
 	 *
 	 * @param setup the new setup steps to be executed before executing test suite
 	 */
-	public void addSetup(Setup setup)
+	public void setSetup(Setup setup)
 	{
-		if(this.setups == null)
+		if(this.setup != null)
 		{
-			this.setups = new ArrayList<>();
+			throw new InvalidConfigurationException("For test-suite '{}' duplicate setups are configured. [Location1: {}:{}, Location2: {}:{}]", 
+					this.name, 
+					this.setup.getLocation(), this.setup.getLineNumber(), 
+					setup.getLocation(), setup.getLineNumber());
 		}
 		
-		this.setups.add(setup);
+		this.setup = setup;
 	}
 
 	/**
@@ -332,9 +339,9 @@ public class TestSuite implements Validateable, IExecutable
 	 *
 	 * @return the cleanup steps to be executed after executing test suite
 	 */
-	public List<Cleanup> getCleanups()
+	public Cleanup getCleanup()
 	{
-		return cleanups;
+		return cleanup;
 	}
 
 	/**
@@ -344,12 +351,15 @@ public class TestSuite implements Validateable, IExecutable
 	 */
 	public void addCleanup(Cleanup cleanup)
 	{
-		if(this.cleanups == null)
+		if(this.cleanup != null)
 		{
-			this.cleanups = new ArrayList<>();
+			throw new InvalidConfigurationException("For test-suite '{}' duplicate cleanups are configured. [Location1: {}:{}, Location2: {}:{}]", 
+					this.name, 
+					this.cleanup.getLocation(), this.cleanup.getLineNumber(), 
+					cleanup.getLocation(), cleanup.getLineNumber());
 		}
 		
-		this.cleanups.add(cleanup);
+		this.cleanup = cleanup;
 	}
 
 	/**
@@ -422,7 +432,7 @@ public class TestSuite implements Validateable, IExecutable
 	{
 		this.afterTestCase = afterTestCase;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
 	 */
@@ -435,17 +445,88 @@ public class TestSuite implements Validateable, IExecutable
 		}
 	}
 	
+	/**
+	 * Orders testcases in order as per dependencies.
+	 */
+	private void orderTestCases(TestCase testCase, LinkedHashSet<String> ordered, List<String> inProgress)
+	{
+		String testCaseName = testCase.getName();
+		
+		if(inProgress.contains(testCaseName))
+		{
+			String path = inProgress.stream().collect(Collectors.joining(" => "));
+			path += " => " + testCaseName;
+			
+			throw new InvalidConfigurationException("For testcase '{}' ciruclar dependency occurred at path: {}", testCase.getName(), path);
+		}
+		
+		if(ordered.contains(testCaseName))
+		{
+			return;
+		}
+		
+		String depStr = testCase.getDependencies();
+		
+		if(StringUtils.isEmpty(depStr))
+		{
+			ordered.add(testCase.getName());					
+			return;
+		}
+
+		String depNames[] = depStr.trim().split("\\s*\\,\\s*");
+		
+		inProgress.add(testCaseName);
+			
+		for(String depName : depNames)
+		{
+			//if required dependency is already added
+			if(ordered.contains(depName))
+			{
+				continue;
+			}
+			
+			if(!this.testCases.containsKey(depName))
+			{
+				throw new InvalidConfigurationException("For testcase '{}' invalid dependency testcase specified: {}", testCase.getName(), depName);
+			}
+			
+			TestCase depTestCase = this.testCases.get(depName);
+			orderTestCases(depTestCase, ordered, inProgress);
+		}
+		
+		inProgress.remove(testCaseName);
+		ordered.add(testCaseName);
+	}
+	
+	List<TestCase> fetchOrderedTestCases()
+	{
+		LinkedHashSet<String> ordered = new LinkedHashSet<String>();
+		List<String> inProgress = new ArrayList<String>();
+
+		for(TestCase testCase : this.testCases.values())
+		{
+			orderTestCases(testCase, ordered, inProgress);
+		}
+		
+		List<TestCase> orderedTestCases = new ArrayList<TestCase>();
+		ordered.forEach(name -> orderedTestCases.add(testCases.get(name)));
+		
+		return orderedTestCases;
+	}
+	
 	@Override
 	public ExecutionBranch buildExecutionBranch(AutomationContext context)
 	{
 		Set<String> restrictedTestCases = context.getBasicArguments().getTestCasesSet();
 		
 		return ExecutionBranchBuilder
-				.newBranchBuilder(context, name, this, this.testCases.values())
+				.newBranchBuilder(context, name, description, this, fetchOrderedTestCases())
 				.childFilter(ts -> restrictedTestCases != null && restrictedTestCases.contains(ts.getName()))
 				.childBranchesRequired()
-				.setup(beforeTestCase)
-				.cleanup(afterTestCase)
+				.setup(setup)
+				.cleanup(cleanup)
+				.beforeChild(beforeTestCase)
+				.afterChild(afterTestCase)
 				.build();
 	}
 

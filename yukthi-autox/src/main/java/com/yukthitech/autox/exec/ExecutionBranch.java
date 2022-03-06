@@ -1,9 +1,11 @@
 package com.yukthitech.autox.exec;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.test.IDataProvider;
+import com.yukthitech.autox.test.TestCaseResult;
 
 /**
  * A unit of execution on the stack.
@@ -16,6 +18,8 @@ public class ExecutionBranch
 	 */
 	String label;
 	
+	String description;
+	
 	Object executable;
 	
 	List<ExecutionBranch> childBranches;
@@ -23,25 +27,60 @@ public class ExecutionBranch
 	ExecutionBranch setup;
 	
 	ExecutionBranch cleanup;
+	
+	ExecutionBranch beforeChild;
+	
+	ExecutionBranch afterChild;
 
 	List<IStep> childSteps;
 	
 	IDataProvider dataProvider;
 	
-	ExecutionBranch(String label, Object executable)
+	TestCaseResult result;
+	
+	/**
+	 * Flag indicating the executable is based on data-provider and steps
+	 * should not be executed.
+	 */
+	boolean dataBranch;
+	
+	int failedChildCount;
+	
+	ExecutionBranch(String label, String description, Object executable)
 	{
 		this.label = label;
+		this.description = description;
 		this.executable = executable;
+	}
+	
+	void incrementFailedChildCount()
+	{
+		failedChildCount++;
 	}
 
 	public String getLabel()
 	{
 		return label;
 	}
+	
+	public String getDescription()
+	{
+		return description;
+	}
 
 	public Object getExecutable()
 	{
 		return executable;
+	}
+	
+	public void addChildBranch(ExecutionBranch branch)
+	{
+		if(childBranches == null)
+		{
+			childBranches = new ArrayList<ExecutionBranch>();
+		}
+		
+		childBranches.add(branch);
 	}
 
 	public List<ExecutionBranch> getChildBranches()

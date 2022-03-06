@@ -29,20 +29,25 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 	
 	private boolean childBranchesRequired = false;
 	
-	public static <C extends IExecutable> ExecutionBranchBuilder<C> newBranchBuilder(AutomationContext context, String label, IExecutable executable, Collection<C> subbranches)
+	public static <C extends IExecutable> ExecutionBranchBuilder<C> newBranchBuilder(AutomationContext context, String label, String desc, IExecutable executable, Collection<C> subbranches)
 	{
 		ExecutionBranchBuilder<C> builder = new ExecutionBranchBuilder<C>();
 		builder.context = context;
-		builder.executionBranch = new ExecutionBranch(label, executable);
+		builder.executionBranch = new ExecutionBranch(label, desc, executable);
+		
+		if(subbranches != null)
+		{
+			builder.subbranches = new ArrayList<C>(subbranches);
+		}
 		
 		return builder;
 	}
 
-	public static <C extends IExecutable> ExecutionBranchBuilder<C> newBranchNode(AutomationContext context, String label, IExecutable executable, Collection<IStep> steps)
+	public static <C extends IExecutable> ExecutionBranchBuilder<C> newBranchNode(AutomationContext context, String label, String desc, IExecutable executable, Collection<IStep> steps)
 	{
 		ExecutionBranchBuilder<C> builder = new ExecutionBranchBuilder<C>();
 		builder.context = context;
-		builder.executionBranch = new ExecutionBranch(label, executable);
+		builder.executionBranch = new ExecutionBranch(label, desc, executable);
 		builder.executionBranch.childSteps = new ArrayList<IStep>(steps);
 		
 		return builder;
@@ -70,6 +75,28 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 		return this;
 	}
 	
+	public ExecutionBranchBuilder<C> beforeChild(Setup setup)
+	{
+		if(setup == null)
+		{
+			return this;
+		}
+		
+		executionBranch.beforeChild =  setup.buildExecutionBranch(context);
+		return this;
+	}
+
+	public ExecutionBranchBuilder<C> afterChild(Cleanup cleanup)
+	{
+		if(cleanup == null)
+		{
+			return this;
+		}
+		
+		executionBranch.afterChild =  cleanup.buildExecutionBranch(context);
+		return this;
+	}
+
 	public ExecutionBranchBuilder<C> childFilter(Predicate<C> filter)
 	{
 		this.filter = filter;

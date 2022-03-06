@@ -156,7 +156,7 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 	public ExecutionBranch buildExecutionBranch(AutomationContext context)
 	{
 		return ExecutionBranchBuilder
-				.newBranchNode(context, "<setup>", this, getSteps())
+				.newBranchNode(context, NAME, NAME, this, getSteps())
 				.build();
 	}
 }

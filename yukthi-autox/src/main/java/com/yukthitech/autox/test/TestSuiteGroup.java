@@ -136,7 +136,9 @@ public class TestSuiteGroup implements IExecutable
 		}
 
 		return ExecutionBranchBuilder
-				.newBranchBuilder(context, "<global>", null, this.testSuitesMap.values())
+				.newBranchBuilder(context, "_global", "Global", this, this.testSuitesMap.values())
+				.setup(setup)
+				.cleanup(cleanup)
 				.childFilter(ts -> limitedTestSuites == null || limitedTestSuites.contains(ts.getName()))
 				.build();
 	}

@@ -447,6 +447,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		this.expectedException = expectedException;
 	}
 	
+	public ExpectedException getExpectedException()
+	{
+		return expectedException;
+	}
+	
 	/**
 	 * Called internally multiple times per data object provided by data provider.
 	 * @param context
@@ -643,7 +648,7 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	public ExecutionBranch buildExecutionBranch(AutomationContext context)
 	{
 		return ExecutionBranchBuilder
-				.newBranchNode(context, this.name, this, steps)
+				.newBranchNode(context, this.name, this.description, this, steps)
 				.setup(setup)
 				.cleanup(cleanup)
 				.dataProvider(dataProvider)

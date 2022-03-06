@@ -1,3 +1,5 @@
+Data provider change - jsonContext in clone and other places support "json:" prefix. Better to support all standard prefixes
+
 classpath should come from maven not from lib folder
 
 Though mssg "As this is interactive environment, skipping the report generation" comes in console (TestSuiteExecutor.java # 788)
