@@ -47,6 +47,8 @@ public class ExecutionBranch
 	
 	TestCaseData testCaseData;
 	
+	List<String> dependencies;
+	
 	ExecutionBranch(String label, String description, Object executable)
 	{
 		this.label = label;

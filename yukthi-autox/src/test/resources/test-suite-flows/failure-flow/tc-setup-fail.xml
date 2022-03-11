@@ -1,0 +1,70 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" 
+		xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" 
+		xmlns:f="http://autox.yukthitech.com/functions">
+		
+	<testSuite name="tcSetupFail">
+		<setup>
+			<s:log message="Test suite setup: tcSetupFail"/>
+			<s:collection-add collection="attr: tcSetupFail" value="testSuiteSetup"/>
+		</setup>
+		
+		<before-test-case>
+			<s:log message="Before test case: tcSetupFail"/>
+			<s:collection-add collection="attr: tcSetupFail" value="beforeTestCase"/>
+		</before-test-case>
+		
+		<after-test-case>
+			<s:collection-add collection="attr: tcSetupFail" value="afterTestCase"/>
+		</after-test-case>
+
+		<testCase name="tcf1">
+			<description>
+				Validates the use case of setup failure
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcSetupFail" value="tc1Setup"/>
+				
+				<s:log message="Got flag as: ${attr.testSuiteFlags.tcSetupFirstTime!'null'}"/>
+				
+				<s:if condition="ifFalse(attr.testSuiteFlags.tcSetupFirstTime)">
+					<s:set expression="prop: attr.testSuiteFlags.tcSetupFirstTime" value="true"/> 
+					<s:throw message="Failing test case"/>
+				</s:if>
+			</setup>
+			
+			<s:log message="test case- tcf1"/>
+			
+			<s:collection-add collection="attr: tcSetupFail" value="tc1"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcSetupFail" value="tc1Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<testCase name="tcf2">
+			<description>
+				To ensure above testcase failure is not affecting this
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcSetupFail" value="tc2Setup"/>
+			</setup>
+			
+			<s:log message="test case- tc2"/>
+			
+			<s:collection-add collection="attr: tcSetupFail" value="tc2"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcSetupFail" value="tc2Cleanup"/>
+			</cleanup>
+		</testCase>
+
+
+		<cleanup>
+			<s:log message="Cleanup of tcSetupFail"/>
+			<s:collection-add collection="attr: tcSetupFail" value="testSuiteCleanup"/>
+		</cleanup>
+	</testSuite>
+
+</testData>

@@ -1,5 +1,6 @@
 package com.yukthitech.autox.exec;
 
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -13,7 +14,10 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.test.TestCase;
+import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.autox.test.TestCaseValidationFailedException;
+import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.TestSuiteGroup;
 
 public class AutomationExecutor
@@ -40,12 +44,12 @@ public class AutomationExecutor
 	
 	public StepExecutionBuilder newSteps(String label, Object executable, List<IStep> steps)
 	{
-		return new StepExecutionBuilder(this, label, executable, steps);
+		return new StepExecutionBuilder(this, label, executable, steps, ExecutionType.STEPS);
 	}
 
-	private StepExecutionBuilder newSteps(String label, ExecutionBranch branch)
+	private StepExecutionBuilder newSteps(String label, ExecutionBranch branch, ExecutionType executionType)
 	{
-		return new StepExecutionBuilder(this, label, branch.executable, branch.getChildSteps());
+		return new StepExecutionBuilder(this, label, branch.executable, branch.getChildSteps(), executionType);
 	}
 
 	void pushSteps(ExecutionStackEntry stepEntry)
@@ -59,6 +63,7 @@ public class AutomationExecutor
 		{
 			ExecutionStackEntry stackEntry = state.peekBranch();
 			boolean res = false;
+			boolean successul = true;
 			
 			if(stackEntry.isStepsEntry())
 			{
@@ -67,18 +72,24 @@ public class AutomationExecutor
 					res = executeNextStep(stackEntry);
 				}catch(ExecutionFlowFailed ex)
 				{
-					this.state.handleException(stackEntry, ex);
 					continue;
 				}
 			}
 			else
 			{
 				res = executeNextBranch(stackEntry);
+				
+				TestCaseResult result = stackEntry.getBranch().result;
+
+				if(result != null && result.getStatus() != TestStatus.SUCCESSFUL)
+				{
+					successul = false;
+				}
 			}
 			
 			if(res)
 			{
-				stackEntry.completedBranch(true);
+				stackEntry.completedBranch(successul);
 				state.popBranch();
 			}
 		}
@@ -161,11 +172,14 @@ public class AutomationExecutor
 			}
 		
 			context.getStepListenerProxy().stepCompleted(step, null);
+		} catch(ExecutionFlowFailed ex)
+		{
+			throw ex;
 		} catch(Exception ex)
 		{
+			this.state.handleException(stackEntry, step, ex);
 			context.getStepListenerProxy().stepErrored(step, null, ex);
 			
-			//exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), context.getExecutionStack().toStackTrace());
 			throw new ExecutionFlowFailed(step, ex.getMessage(), ex);
 		} finally
 		{
@@ -191,6 +205,22 @@ public class AutomationExecutor
 			this.state.started(branch);
 		}
 		
+		if(CollectionUtils.isNotEmpty(branch.dependencies))
+		{
+			for(String dep : branch.dependencies)
+			{
+				if(!this.state.isCompleted(dep))
+				{
+					Date time = new Date();
+					branch.result = new TestCaseResult((TestCase) branch.executable, branch.label, TestStatus.SKIPPED, null, "Skipping as dependency test case was not successul: " + dep,
+							time, time);
+					
+					this.state.completedBranchEntry(stackEntry);
+					return true;
+				}
+			}
+		}
+
 		//Note: before-child & after-child flags are maintained at child level so that 
 		//  before and after steps are executed for every child
 		if(!stackEntry.isBeforeChildPushed())
@@ -201,7 +231,7 @@ public class AutomationExecutor
 			
 			if(parentBranch != null && parentBranch.beforeChild != null)
 			{
-				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild)
+				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild, ExecutionType.PRE_CHILD)
 					.onInit(entry -> state.startMode("prechild"))
 					.onSuccess(entry -> state.clearMode())
 					.push();
@@ -218,7 +248,7 @@ public class AutomationExecutor
 			{
 				
 				//create a new dynamic branch for setting callback
-				newSteps(branch.getSetup().getLabel(), branch.getSetup())
+				newSteps(branch.getSetup().getLabel(), branch.getSetup(), ExecutionType.SETUP)
 					.onInit(entry -> state.preSetup(branch))
 					.onSuccess(entry -> state.postSetup(entry, branch, true))
 					.push();
@@ -238,7 +268,7 @@ public class AutomationExecutor
 			
 			if(branch.dataSetup != null)
 			{
-				newSteps(branch.dataSetup.getLabel(), branch.dataSetup)
+				newSteps(branch.dataSetup.getLabel(), branch.dataSetup, ExecutionType.DATA_SETUP)
 					.onInit(entry -> state.startMode("dataSetup"))
 					.push();
 				return false;
@@ -275,7 +305,7 @@ public class AutomationExecutor
 			
 			if(branch.dataCleanup != null)
 			{
-				newSteps(branch.dataCleanup.getLabel(), branch.dataCleanup)
+				newSteps(branch.dataCleanup.getLabel(), branch.dataCleanup, ExecutionType.DATA_CLEANUP)
 					.onInit(entry -> state.startMode("dataCleanup"))
 					.push();
 				
@@ -290,7 +320,7 @@ public class AutomationExecutor
 			
 			if(branch.cleanup != null)
 			{
-				newSteps(branch.getCleanup().getLabel(), branch.getCleanup())
+				newSteps(branch.getCleanup().getLabel(), branch.getCleanup(), ExecutionType.CLEANUP)
 					.onInit(entry -> state.preCleanup(branch))
 					.onSuccess(entry -> state.postCleanup(entry, branch, true))
 					.push();
@@ -313,7 +343,7 @@ public class AutomationExecutor
 
 			if(parentBranch != null && parentBranch.afterChild != null)
 			{
-				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild)
+				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild, ExecutionType.POST_CHILD)
 					.onInit(entry -> state.startMode("postchild"))
 					.onSuccess(entry -> state.clearMode())
 					.push();
@@ -322,7 +352,7 @@ public class AutomationExecutor
 			}
 		}
 
-		this.state.completed(stackEntry);
+		this.state.completedBranchEntry(stackEntry);
 		return true;
 	}
 }

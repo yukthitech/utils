@@ -178,6 +178,14 @@ public class TestSuiteResults
 		return testCaseResults;
 	}
 	
+	public void setTestCaseResults(List<TestCaseResult> results)
+	{
+		for(TestCaseResult res : results)
+		{
+			addResult(res);
+		}
+	}
+	
 	/**
 	 * Fetches number of test cases having specified status.
 	 * @param status Status to be checked.

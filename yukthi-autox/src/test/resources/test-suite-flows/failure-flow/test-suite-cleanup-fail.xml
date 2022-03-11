@@ -1,0 +1,40 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" 
+		xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" 
+		xmlns:f="http://autox.yukthitech.com/functions">
+		
+	<testSuite name="tsCleanupFail">
+		<setup>
+			<s:log message="Test suite setup: tsCleanupFail"/>
+			<s:collection-add collection="attr: tsCleanupFail" value="testSuiteSetup"/>
+		</setup>
+		
+		<before-test-case>
+			<s:collection-add collection="attr: tsCleanupFail" value="beforeTestCase"/>
+		</before-test-case>
+		
+		<after-test-case>
+			<s:collection-add collection="attr: tsCleanupFail" value="afterTestCase"/>
+		</after-test-case>
+
+		<testCase name="tcf1">
+			<description>
+				Evalutes the behaviour when one of test case fails.
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tsCleanupFail" value="tcf1Setup"/>
+			</setup>
+		
+			<s:collection-add collection="attr: tsCleanupFail" value="tcf1"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tsCleanupFail" value="tcf1Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:throw message="Failing test suite"/> 
+			<s:collection-add collection="attr: tsCleanupFail" value="testSuiteCleanup"/>
+		</cleanup>
+	</testSuite>
+</testData>

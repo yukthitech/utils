@@ -1,0 +1,55 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap">
+	<setup>
+		<s:log message="Global setup"/>
+
+		<s:set expression="testSuiteFlags">
+			<value>json:{}</value>
+		</s:set>
+
+		<s:set expression="testSuiteSetupFailFlow">
+			<value>json:[
+				"globalSetup"
+			]</value>
+		</s:set>
+
+		<s:set expression="testSuiteBeforeTcFail">
+			<value>json:[
+				"globalSetup"
+			]</value>
+		</s:set>
+
+		<s:set expression="tcSetupFail">
+			<value>json:[
+				"globalSetup"
+			]</value>
+		</s:set>
+
+		<s:set expression="tcFail">
+			<value>json:[
+				"globalSetup"
+			]</value>
+		</s:set>
+
+		<s:set expression="tsCleanupFail">
+			<value>json:[
+				"globalSetup"
+			]</value>
+		</s:set>
+
+		<s:set expression="testSuiteData">
+			<value>json:[
+				"globalSetup"
+			]</value>
+		</s:set>
+	</setup>
+
+	<cleanup>
+		<s:log message="Global cleanup."/>
+		<s:collection-add collection="attr: testSuiteSetupFailFlow" value="globalCleanup"/>
+		<s:collection-add collection="attr: testSuiteBeforeTcFail" value="globalCleanup"/>
+		<s:collection-add collection="attr: tcSetupFail" value="globalCleanup"/>
+		<s:collection-add collection="attr: tcFail" value="globalCleanup"/>
+		<s:collection-add collection="attr: tsCleanupFail" value="globalCleanup"/>
+		<s:collection-add collection="attr: testSuiteData" value="globalCleanup"/>
+	</cleanup>
+</testData>

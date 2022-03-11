@@ -64,6 +64,9 @@ public class TestCaseResult
 	 * End time of test suite.
 	 */
 	private Date endTime;
+	
+	public TestCaseResult()
+	{}
 
 	public TestCaseResult(TestCase testCase, TestStatus status, ExecutionLogData executionLog, 
 			String message, Date startTime, Date endTime)

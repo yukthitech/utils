@@ -92,8 +92,6 @@ public class TSuccessFlows
 						+ "testSuiteCleanup, globalCleanup")
 		);
 		
-		checkForLogs("_global-setup_log.json", "<b>[setup]</b> Global setup");
-		checkForLogs("_global-cleanup_log.json", "<b>[cleanup]</b> Global cleanup");
 		checkForLogs("test-suite-2-setup_log.json", "<b>[setup]</b> Setup of test-suite-2");
 		checkForLogs("test-suite-2-cleanup_log.json", "<b>[cleanup]</b> Cleanup of test-suite-2");
 
@@ -142,6 +140,9 @@ public class TSuccessFlows
 				//"-old", "true"
 			});
 		
+		checkForLogs("_global-setup_log.json", "<b>[setup]</b> Global setup");
+		checkForLogs("_global-cleanup_log.json", "<b>[cleanup]</b> Global cleanup");
+
 		validSimpleSuite();
 		validateDataproviderSuite();
 		validateDataproviderWithoutSetup();

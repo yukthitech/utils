@@ -1,0 +1,42 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" 
+		xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" 
+		xmlns:f="http://autox.yukthitech.com/functions">
+		
+	<testSuite name="testSuiteSetupFail">
+		<setup>
+			<s:log message="Test suite setup: testSuiteSetupFail"/>
+			<s:collection-add collection="attr: testSuiteSetupFailFlow" value="testSuiteSetup"/>
+			
+			<s:throw message="Failing test suite"/> 
+		</setup>
+		
+		<before-test-case>
+			<s:collection-add collection="attr: testSuiteSetupFailFlow" value="beforeTestCase"/>
+		</before-test-case>
+		
+		<after-test-case>
+			<s:collection-add collection="attr: testSuiteSetupFailFlow" value="afterTestCase"/>
+		</after-test-case>
+
+		<testCase name="dummy">
+			<description>
+				This test case is not suppose to execute
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: testSuiteSetupFailFlow" value="testCaseSetup"/>
+			</setup>
+			
+			<s:collection-add collection="attr: testSuiteSetupFailFlow" value="testCase"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: testSuiteSetupFailFlow" value="testCaseCleanup"/>
+			</cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:log message="Cleanup of test-suite-1"/>
+			<s:collection-add collection="attr: testSuite1Flow" value="testSuiteCleanup"/>
+		</cleanup>
+	</testSuite>
+</testData>

@@ -160,7 +160,15 @@ public class FullExecutionDetails
 	{
 		return suiteToResults.values();
 	}
-
+	
+	public void setTestSuiteResults(Collection<TestSuiteResults> lst)
+	{
+		for(TestSuiteResults res : lst)
+		{
+			suiteToResults.put(res.getSuiteName(), res);
+		}
+	}
+	
 	/**
 	 * Fetches number of test suites having specified status.
 	 * @param status Status to be checked.

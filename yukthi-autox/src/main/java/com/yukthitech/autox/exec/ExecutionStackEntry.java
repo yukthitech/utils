@@ -61,6 +61,8 @@ public class ExecutionStackEntry
 	private ExecutionLogger executionLogger;
 	
 	private ExecutionStackEntry parent;
+	
+	private ExecutionType executionType;
 
 	public ExecutionStackEntry(ExecutionBranch branch)
 	{
@@ -69,16 +71,27 @@ public class ExecutionStackEntry
 		this.executable = branch.executable;
 	}
 	
-	public ExecutionStackEntry(String label, Object executable, List<IStep> steps)
+	public ExecutionStackEntry(String label, Object executable, List<IStep> steps, ExecutionType executionType)
 	{
 		this.steps = steps;
 		this.label = label;
 		this.executable = executable;
+		this.executionType = executionType;
+	}
+	
+	public ExecutionType getExecutionType()
+	{
+		return executionType;
 	}
 	
 	public void setParent(ExecutionStackEntry parent)
 	{
 		this.parent = parent;
+	}
+	
+	public ExecutionStackEntry getParent()
+	{
+		return parent;
 	}
 	
 	public boolean isStarted()

@@ -2,10 +2,11 @@ package com.yukthitech.autox.exec;
 
 import java.io.File;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.Command;
 import com.yukthitech.autox.event.AutomationEvent;
@@ -63,10 +65,18 @@ public class AutomationExecutorState
 	 */
 	private AtomicInteger logIndex = new AtomicInteger(1);
 	
+	private Set<String> completedTestCases = new HashSet<String>();
+	
 	public AutomationExecutorState(AutomationContext context)
 	{
 		this.context = context;
 		fullExecutionDetails.setReportName(context.getAppConfiguration().getReportName());
+	}
+	
+	public boolean isCompleted(String testCase)
+	{
+		String tsName = currentTestSuite.getName() + ".";
+		return completedTestCases.contains(tsName + testCase);
 	}
 	
 	public boolean isSuccessful()
@@ -275,22 +285,22 @@ public class AutomationExecutorState
 		context.setExecutionLogger(executionLogger);
 	}
 	
-	public boolean postSetup(ExecutionStackEntry entry, ExecutionBranch branch, boolean successful)
+	public boolean postSetup(ExecutionStackEntry entry, ExecutionBranch parentBranch, boolean successful)
 	{
 		ExecutionLogger executionLogger = getExecutionLogger();
 		
 		//Note: Entry will be null, when setup is not present
 		if(entry != null)
 		{
-			context.getExecutionStack().pop(branch.setup.executable);
+			context.getExecutionStack().pop(parentBranch.setup.executable);
 			
 			context.setSetupExecution(false);
 			executionLogger.clearMode();
 		}
 
-		if(branch.executable instanceof TestCase)
+		if(parentBranch.executable instanceof TestCase)
 		{
-			return testCasePostStartup((TestCase) branch.executable, branch);
+			return testCasePostStartup((TestCase) parentBranch.executable, parentBranch);
 		}
 		//for non-test case startup create required logs
 		else if(entry != null)
@@ -308,7 +318,7 @@ public class AutomationExecutorState
 						entry.getStartedOn(), new Date());
 			}
 			
-			reportGenerator.createLogFiles(context, res, branch.getLabel() + "-setup", null, "");
+			reportGenerator.createLogFiles(context, res, parentBranch.getLabel() + "-setup", null, "");
 		}
 		
 		return true;
@@ -326,7 +336,7 @@ public class AutomationExecutorState
 		context.setExecutionLogger(executionLogger);
 	}
 	
-	public boolean postCleanup(ExecutionStackEntry entry, ExecutionBranch branch, boolean successful)
+	public boolean postCleanup(ExecutionStackEntry entry, ExecutionBranch parentBranch, boolean successful)
 	{
 		if(entry == null)
 		{
@@ -335,13 +345,13 @@ public class AutomationExecutorState
 		
 		ExecutionLogger executionLogger = getExecutionLogger();
 		
-		context.getExecutionStack().pop(branch.cleanup.executable);
+		context.getExecutionStack().pop(parentBranch.cleanup.executable);
 		
 		context.setCleanupExecution(false);
 		executionLogger.clearMode();
 
 		//for non-test case startup create required logs
-		if(!(branch.executable instanceof TestCase))
+		if(!(parentBranch.executable instanceof TestCase))
 		{
 			TestCaseResult res = null;
 			
@@ -356,14 +366,14 @@ public class AutomationExecutorState
 						entry.getStartedOn(), new Date());
 			}
 			
-			reportGenerator.createLogFiles(context, res, branch.getLabel() + "-cleanup", null, "");
+			reportGenerator.createLogFiles(context, res, parentBranch.getLabel() + "-cleanup", null, "");
 			executionLogger = null;
 		}
 		
 		return true;
 	}
 
-	public void completed(ExecutionStackEntry stackEntry)
+	public void completedBranchEntry(ExecutionStackEntry stackEntry)
 	{
 		ExecutionBranch branch = stackEntry.getBranch();
 		boolean successful = (branch.result == null || branch.result.getStatus() == TestStatus.SUCCESSFUL);
@@ -386,10 +396,8 @@ public class AutomationExecutorState
 		}
 	}
 	
-	public void handleException(ExecutionStackEntry entry, ExecutionFlowFailed flowEx)
+	public void handleException(ExecutionStackEntry entry, IStep sourceStep, Exception actualException)
 	{
-		Exception actualException = (Exception) flowEx.getCause();
-		
 		if(entry.getExceptionHandler() != null)
 		{
 			if(entry.getExceptionHandler().handleError(actualException))
@@ -401,108 +409,144 @@ public class AutomationExecutorState
 		if(actualException instanceof ReturnException)
 		{
 			ExecutionStackEntry stackEntry = executionStack.pop();
-			completed(stackEntry);
+			completedBranchEntry(stackEntry);
 			return;
 		}
 		
 		ExecutionLogger executionLogger = getExecutionLogger();
 		
-		logger.error("Execution failed with error: ", actualException);
-		executionLogger.error("An error occurred with message - {}. Stack Trace: {}", actualException.getMessage(), context.getExecutionStack().toStackTrace());
+		executionLogger.error(actualException, "An error occurred with message - {}", actualException.getMessage());
 		
 		ExecutionStackEntry stackEntry = null;
 		TestCaseResult result = null;
 		boolean setupFailed = false;
 		boolean cleanupFailed = false;
 		
+		ExecutionType setupType = null;
+		ExecutionType cleanupType = null;
+		
 		while(!this.executionStack.isEmpty())
 		{
-			stackEntry = this.executionStack.pop();
+			stackEntry = this.executionStack.peek();
+			
+			Object executable = stackEntry.getExecutable();
+			
+			if(executable instanceof Setup)
+			{
+				if(stackEntry.getExecutionType() == ExecutionType.SETUP)
+				{
+					postSetup(stackEntry, stackEntry.getParent().getBranch(), false);
+				}
+				
+				setupFailed = true;
+				setupType = stackEntry.getExecutionType();
+				stackEntry.completedBranch(false);
+				
+				this.executionStack.pop();
+				continue;
+			}
+			
+			if(executable instanceof Cleanup)
+			{
+				if(stackEntry.getExecutionType() == ExecutionType.CLEANUP)
+				{
+					postCleanup(stackEntry, stackEntry.getParent().getBranch(), false);
+				}
+				
+				cleanupFailed = true;
+				cleanupType = stackEntry.getExecutionType();
+				stackEntry.completedBranch(false);
+				
+				this.executionStack.pop();
+				continue;
+			}
 			
 			if(stackEntry.isStepsEntry())
 			{
 				stackEntry.completedBranch(false);
+				this.executionStack.pop();
 				continue;
 			}
 			
-			ExecutionBranch branch = stackEntry.getBranch();
-			
-			if(branch.executable instanceof Setup)
+			if(executable instanceof TestCase)
 			{
-				postSetup(stackEntry, branch, false);
-				setupFailed = true;
-				stackEntry.completedBranch(false);
-				continue;
-			}
-			
-			if(branch.executable instanceof Cleanup)
-			{
-				cleanupFailed = true;
-				stackEntry.completedBranch(false);
-				continue;
-			}
-			
-			if(branch.executable instanceof TestCase)
-			{
-				result = handleTestCaseError(branch, setupFailed, cleanupFailed, stackEntry, flowEx);
-				branch.result = result;
+				ExecutionBranch branch = stackEntry.getBranch();
 				
-				//push entry back so that cleanup and other things can be executed
-				this.executionStack.push(stackEntry);
+				result = handleTestCaseError(branch, setupFailed, cleanupFailed, stackEntry, sourceStep, 
+						actualException, setupType, cleanupType);
+				branch.result = result;
 				
 				if(result.getStatus() != TestStatus.SUCCESSFUL)
 				{
-					Iterator<ExecutionStackEntry> it = this.executionStack.descendingIterator();
-					
-					while(it.hasNext())
+					ExecutionStackEntry subentry = stackEntry.getParent();
+
+					while(subentry != null)
 					{
-						ExecutionStackEntry subentry = it.next();
+						if(subentry.getBranch() == null)
+						{
+							continue;
+						}
 						
-						if(subentry.getBranch().getExecutable() instanceof TestSuite)
+						if(subentry.getBranch() != null && (subentry.getBranch().getExecutable() instanceof TestSuite))
 						{
 							subentry.getBranch().incrementFailedChildCount();
+							break;
 						}
+						
+						subentry = subentry.getParent();
 					}
-					
-					
-					//note stackEntry.completedBranch(false); is not called here as the entry is pushed to stack
-					break;
+				}
+				
+				//if setup is failed further execution should not happen
+				if(setupFailed)
+				{
+					completedBranchEntry(stackEntry);
+					stackEntry.completedBranch(false);
+					this.executionStack.pop();
 				}
 				
 				break;
 			}
-			else if(branch.executable instanceof TestSuite)
+			else if(executable instanceof TestSuite)
 			{
-				TestSuite testSuite = (TestSuite) branch.executable;
+				TestSuite testSuite = (TestSuite) executable;
 				
 				if(setupFailed)
 				{
 					TestSuiteResults results = fullExecutionDetails.testSuiteFailed(testSuite, "Setup execution failed.");
 					results.setSetupSuccessful(false);
+					results.setCleanupSuccessful(true);
 					
 					stackEntry.completedBranch(false);
+					
+					//remove test suite entry, as setup itself failed
+					this.executionStack.pop();
 					break;
 				}
 				
 				if(cleanupFailed)
 				{
 					TestSuiteResults results = fullExecutionDetails.testSuiteFailed(testSuite, "Cleanup execution failed.");
+					results.setSetupSuccessful(true);
 					results.setCleanupSuccessful(false);
 					
 					stackEntry.completedBranch(false);
+
+					//remove test suite entry, as setup itself failed
+					this.executionStack.pop();
 					break;
 				}
 			}
-			else if(branch.executable instanceof TestSuiteGroup)
+			else if(executable instanceof TestSuiteGroup)
 			{
 				if(setupFailed)
 				{
-					result = StepExecutor.handleException(context, new TestCase("setup"), flowEx.getSourceStep(), 
+					result = StepExecutor.handleException(context, new TestCase("setup"), sourceStep, 
 							executionLogger, actualException, null, stackEntry.getStartedOn());
 					
 					if(result == null)
 					{
-						new TestCaseResult(null, "setup", TestStatus.ERRORED, executionLogger.getExecutionLogData(), "Step errored - " + flowEx.getSourceStep(),
+						new TestCaseResult(null, "setup", TestStatus.ERRORED, executionLogger.getExecutionLogData(), "Step errored - " + sourceStep,
 								stackEntry.getStartedOn(), new Date());
 					}
 					
@@ -516,12 +560,12 @@ public class AutomationExecutorState
 				
 				if(cleanupFailed)
 				{
-					result = StepExecutor.handleException(context, new TestCase("cleanup"), flowEx.getSourceStep(), 
+					result = StepExecutor.handleException(context, new TestCase("cleanup"), sourceStep, 
 							executionLogger, actualException, null, stackEntry.getStartedOn());
 					
 					if(result == null)
 					{
-						new TestCaseResult(null, "cleanup", TestStatus.ERRORED, executionLogger.getExecutionLogData(), "Step errored - " + flowEx.getSourceStep(),
+						new TestCaseResult(null, "cleanup", TestStatus.ERRORED, executionLogger.getExecutionLogData(), "Step errored - " + sourceStep,
 								stackEntry.getStartedOn(), new Date());
 					}
 					
@@ -536,20 +580,25 @@ public class AutomationExecutorState
 		}
 	}
 	
-	private TestCaseResult handleTestCaseError(ExecutionBranch branch, boolean setupFailed, boolean cleanupFailed, ExecutionStackEntry stackEntry, ExecutionFlowFailed flowEx)
+	private TestCaseResult handleTestCaseError(ExecutionBranch branch, boolean setupFailed, boolean cleanupFailed, ExecutionStackEntry stackEntry, 
+			IStep sourceStep, Exception actualException, ExecutionType setupType, ExecutionType cleanupType)
 	{
 		TestCase testCase = (TestCase) branch.executable;
 		ExecutionLogger executionLogger = getExecutionLogger();
 		
 		if(setupFailed)
 		{
-			return new TestCaseResult(testCase, branch.label, TestStatus.ERRORED, executionLogger.getExecutionLogData(), "Setup execution failed.",
+			String mssg = (setupType == ExecutionType.DATA_SETUP) ? "Data provider setup failed." : "Setup execution failed.";
+			
+			return new TestCaseResult(testCase, branch.label, TestStatus.ERRORED, executionLogger.getExecutionLogData(), mssg,
 					stackEntry.getStartedOn(), new Date());
 		}
 		
 		if(cleanupFailed)
 		{
-			return new TestCaseResult(testCase, branch.label, TestStatus.ERRORED, executionLogger.getExecutionLogData(), "Cleanup execution failed.",
+			String mssg = (cleanupType == ExecutionType.DATA_CLEANUP) ? "Data provider cleanup failed." : "Cleanup execution failed.";
+			
+			return new TestCaseResult(testCase, branch.label, TestStatus.ERRORED, executionLogger.getExecutionLogData(), mssg,
 					stackEntry.getStartedOn(), new Date());
 		}
 		
@@ -567,8 +616,7 @@ public class AutomationExecutorState
 			}
 		}
 		
-		Exception actualException = (Exception) flowEx.getCause();
-		TestCaseResult result = StepExecutor.handleException(context, testCase, branch.label, flowEx.getSourceStep(), 
+		TestCaseResult result = StepExecutor.handleException(context, testCase, branch.label, sourceStep, 
 				executionLogger, actualException, expectedException, stackEntry.getStartedOn());
 		
 		//during expected exception occurance result will be null
@@ -603,16 +651,19 @@ public class AutomationExecutorState
 	{
 		if(successful)
 		{
+			TestSuiteResults results = null;
+			
 			if(branch.failedChildCount > 0)
 			{
-				fullExecutionDetails.testSuiteFailed(testSuite, "Failing as one or more test cases failed");
+				results = fullExecutionDetails.testSuiteFailed(testSuite, "Failing as one or more test cases failed");
 			}
 			else
 			{
-				TestSuiteResults results = fullExecutionDetails.testSuiteCompleted(testSuite);
-				results.setSetupSuccessful(true);
-				results.setCleanupSuccessful(true);
+				results = fullExecutionDetails.testSuiteCompleted(testSuite);
 			}
+
+			results.setSetupSuccessful(true);
+			results.setCleanupSuccessful(true);
 		}
 		
 		this.currentTestSuite = null;
@@ -724,5 +775,10 @@ public class AutomationExecutorState
 		reportGenerator.createLogFiles(context, branch.result, testFileName, monitoringLogs, testCase.getDescription());
 		
 		context.getAutomationListener().testCaseCompleted(new AutomationEvent(currentTestSuite, testCase, branch.result));
+		
+		if(branch.result.getStatus() == TestStatus.SUCCESSFUL)
+		{
+			completedTestCases.add(currentTestSuite.getName() + "." + testCase.getName());
+		}
 	}
 }

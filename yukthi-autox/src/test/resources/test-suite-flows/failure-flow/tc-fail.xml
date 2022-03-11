@@ -1,0 +1,131 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" 
+		xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" 
+		xmlns:f="http://autox.yukthitech.com/functions">
+		
+	<testSuite name="tcFail">
+		<setup>
+			<s:log message="Test suite setup: tcFail"/>
+			<s:collection-add collection="attr: tcFail" value="testSuiteSetup"/>
+		</setup>
+		
+		<before-test-case>
+			<s:log message="Before test case: tcFail"/>
+			<s:collection-add collection="attr: tcFail" value="beforeTestCase"/>
+		</before-test-case>
+		
+		<after-test-case>
+			<s:collection-add collection="attr: tcFail" value="afterTestCase"/>
+		</after-test-case>
+
+		<testCase name="tcf1">
+			<description>
+				Evalutes the behaviour when one of test case fails.
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcFail" value="tcf1Setup"/>
+			</setup>
+		
+			<s:assert-equals actual="int: 1" expected="int: 2"/>			
+			
+			<s:collection-add collection="attr: tcFail" value="tcf1"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcFail" value="tcf1Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<testCase name="tcf2">
+			<description>
+				Used to ensure one testcase failure is not affecting other
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcFail" value="tcf2Setup"/>
+			</setup>
+			
+			<s:log message="test case- tcf2"/>
+			
+			<s:collection-add collection="attr: tcFail" value="tcf2"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcFail" value="tcf2Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<testCase name="tcf3" dependencies="tcf1,tcf2">
+			<description>
+				Used to ensure when dependency test case are failed, this test case is skipped
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcFail" value="tcf3Setup"/>
+			</setup>
+			
+			<s:log message="test case- tcf3"/>
+			
+			<s:collection-add collection="attr: tcFail" value="tcf3"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcFail" value="tcf3Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<testCase name="tcf4">
+			<description>
+				Validates error use case.
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcFail" value="tcf4Setup"/>
+			</setup>
+			
+			<s:throw message="Failing test case"/>
+			
+			<s:collection-add collection="attr: tcFail" value="tcf4"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcFail" value="tcf4Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<testCase name="tcf5" dependencies="tcf2">
+			<description>
+				Ensures test case with dependencies is executed properly.
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcFail" value="tcf5Setup"/>
+			</setup>
+			
+			<s:collection-add collection="attr: tcFail" value="tcf5"/>
+			
+			<cleanup>
+				<s:collection-add collection="attr: tcFail" value="tcf5Cleanup"/>
+			</cleanup>
+		</testCase>
+
+		<testCase name="tcCleanupFail">
+			<description>
+				Checks result when cleanup fails
+			</description>
+			
+			<setup>
+				<s:collection-add collection="attr: tcFail" value="tcCleanupFail"/>
+			</setup>
+			
+			<s:collection-add collection="attr: tcFail" value="tcCleanupFail"/>
+			
+			<cleanup>
+				<s:throw message="Failing test case"/>
+				<s:collection-add collection="attr: tcFail" value="tcCleanupFail"/>
+			</cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:log message="Cleanup of tcFail"/>
+			<s:collection-add collection="attr: tcFail" value="testSuiteCleanup"/>
+		</cleanup>
+	</testSuite>
+
+</testData>

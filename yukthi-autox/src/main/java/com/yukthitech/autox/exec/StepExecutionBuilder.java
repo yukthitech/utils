@@ -26,11 +26,11 @@ public class StepExecutionBuilder
 	private ExceptionHandler exceptionHandler;
 	
 
-	StepExecutionBuilder(AutomationExecutor parentExecutor, String label, Object executable, List<IStep> steps)
+	StepExecutionBuilder(AutomationExecutor parentExecutor, String label, Object executable, List<IStep> steps, ExecutionType executionType)
 	{
 		this.parentExecutor = parentExecutor;
 		
-		this.stackEntry = new ExecutionStackEntry(label, executable, steps);
+		this.stackEntry = new ExecutionStackEntry(label, executable, steps, executionType);
 	}
 	
 	public StepExecutionBuilder onSuccess(Consumer<ExecutionStackEntry> onSuccess)

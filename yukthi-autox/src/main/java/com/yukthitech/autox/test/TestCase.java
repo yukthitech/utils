@@ -649,6 +649,7 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	{
 		return ExecutionBranchBuilder
 				.newBranchNode(context, this.name, this.description, this, steps)
+				.dependencies(dependencies)
 				.setup(setup)
 				.cleanup(cleanup)
 				.dataProvider(dataProvider)

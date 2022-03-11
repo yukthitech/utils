@@ -1,11 +1,13 @@
 package com.yukthitech.autox.exec;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.IStep;
@@ -145,6 +147,19 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 	public ExecutionBranchBuilder<C> childBranchesRequired()
 	{
 		this.childBranchesRequired = true;
+		return this;
+	}
+
+	public ExecutionBranchBuilder<C> dependencies(String dependencies)
+	{
+		if(StringUtils.isBlank(dependencies))
+		{
+			return this;
+		}
+		
+		List<String> depLst = Arrays.asList(dependencies.trim().split("\\s*,\\s*"));
+		this.executionBranch.dependencies = depLst;
+		
 		return this;
 	}
 

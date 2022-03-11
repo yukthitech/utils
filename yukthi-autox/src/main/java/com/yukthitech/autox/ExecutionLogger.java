@@ -326,6 +326,8 @@ public class ExecutionLogger
 			
 			printWriter.println(finalMssg);
 			printWriter.println(autoxStackTrace);
+			
+			printWriter.println("\nJava Stack Trace: ");
 			th.printStackTrace(printWriter);
 			printWriter.flush();
 			
