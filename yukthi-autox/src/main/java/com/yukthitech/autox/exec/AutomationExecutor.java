@@ -38,9 +38,14 @@ public class AutomationExecutor
 		state.pushBranch(new ExecutionStackEntry(mainBranch));
 	}
 	
-	public StepExecutionBuilder newSteps(String label, List<IStep> steps)
+	public StepExecutionBuilder newSteps(String label, Object executable, List<IStep> steps)
 	{
-		return new StepExecutionBuilder(this, label, steps);
+		return new StepExecutionBuilder(this, label, executable, steps);
+	}
+
+	private StepExecutionBuilder newSteps(String label, ExecutionBranch branch)
+	{
+		return new StepExecutionBuilder(this, label, branch.executable, branch.getChildSteps());
 	}
 
 	void pushSteps(ExecutionStackEntry stepEntry)
@@ -73,12 +78,8 @@ public class AutomationExecutor
 			
 			if(res)
 			{
+				stackEntry.completedBranch(true);
 				state.popBranch();
-				
-				if(stackEntry.getOnSuccess() != null)
-				{
-					stackEntry.getOnSuccess().accept(stackEntry);
-				}
 			}
 		}
 		
@@ -103,7 +104,7 @@ public class AutomationExecutor
 		
 		IStep step = steps.get(idx);
 		
-		if(executeStep(step))
+		if(executeStep(step, stackEntry))
 		{
 			stackEntry.incrementChildStepIndex();
 		}
@@ -118,7 +119,7 @@ public class AutomationExecutor
 	 * @param step
 	 * @return should return true, if the ste
 	 */
-	private boolean executeStep(IStep step) throws ExecutionFlowFailed
+	private boolean executeStep(IStep step, ExecutionStackEntry stackEntry) throws ExecutionFlowFailed
 	{
 		//TODO: Check how to understand if step is completed or not.
 		//TODO: How to throw exception to high level branches on the stack.
@@ -185,14 +186,14 @@ public class AutomationExecutor
 		
 		if(!stackEntry.isStarted())
 		{
-			logger.debug("Starting execution branch: {}", branch.label);
+			logger.debug("Starting execution of branch: {}", branch.label);
 			stackEntry.started();
 			this.state.started(branch);
 		}
 		
 		//Note: before-child & after-child flags are maintained at child level so that 
 		//  before and after steps are executed for every child
-		if(!branch.dataBranch && !stackEntry.isBeforeChildPushed())
+		if(!stackEntry.isBeforeChildPushed())
 		{
 			stackEntry.setBeforeChildPushed(true);
 			
@@ -200,11 +201,10 @@ public class AutomationExecutor
 			
 			if(parentBranch != null && parentBranch.beforeChild != null)
 			{
-				this.state.startMode("prechild");
-				
-				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild.getChildSteps())
-				.onSuccess(entry -> state.clearMode())
-				.push();
+				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild)
+					.onInit(entry -> state.startMode("prechild"))
+					.onSuccess(entry -> state.clearMode())
+					.push();
 				
 				return false;
 			}
@@ -216,38 +216,73 @@ public class AutomationExecutor
 			
 			if(branch.setup != null)
 			{
-				this.state.preSetup(branch);
 				
 				//create a new dynamic branch for setting callback
-				newSteps(branch.getSetup().getLabel(), branch.getSetup().getChildSteps())
-				.onSuccess(entry -> state.postSetup(entry, branch, true))
-				.push();
+				newSteps(branch.getSetup().getLabel(), branch.getSetup())
+					.onInit(entry -> state.preSetup(branch))
+					.onSuccess(entry -> state.postSetup(entry, branch, true))
+					.push();
 				
+				return false;
+			}
+			else
+			{
+				state.postSetup(null, branch, true);
 				return false;
 			}
 		}
 		
+		if(branch.dataProvider != null && !stackEntry.isDataSetupPushed())
+		{
+			stackEntry.setDataSetupPushed(true);
+			
+			if(branch.dataSetup != null)
+			{
+				newSteps(branch.dataSetup.getLabel(), branch.dataSetup)
+					.onInit(entry -> state.startMode("dataSetup"))
+					.push();
+				return false;
+			}
+		}
+
 		if(!stackEntry.isBranchesPushed())
 		{
 			int childBrnchIdx = stackEntry.getChildBranchIndex();
-			state.pushBranch(new ExecutionStackEntry(branch.childBranches.get(childBrnchIdx)));
+			state.pushBranch(new ExecutionStackEntry(branch.getChildBranches().get(childBrnchIdx)));
 			stackEntry.incrementChildBranchIndex();
 			
 			return false;
 		}
 		
-		//Note: for data branch steps should not be executed directly
-		if(!branch.dataBranch && !stackEntry.isStepsPushed())
+		//Note: for data provider branch steps should not be executed directly
+		if(branch.dataProvider == null && !stackEntry.isStepsPushed())
 		{
 			stackEntry.setStepsPushed(true);
 			
 			if(CollectionUtils.isNotEmpty(branch.childSteps))
 			{
-				newSteps(branch.getLabel() + " - Steps", branch.getChildSteps()).push();
+				newSteps(branch.getLabel() + " - Steps", null, branch.getChildSteps())
+					.onInit(entry -> state.clearMode())
+					.push();
+				
 				return false;
 			}
 		}
 		
+		if(branch.dataProvider != null && !stackEntry.isDataCleanupPushed())
+		{
+			stackEntry.setDataCleanupPushed(true);
+			
+			if(branch.dataCleanup != null)
+			{
+				newSteps(branch.dataCleanup.getLabel(), branch.dataCleanup)
+					.onInit(entry -> state.startMode("dataCleanup"))
+					.push();
+				
+				return false;
+			}
+		}
+
 		//execute cleanup only when setup is executed successfully
 		if(!stackEntry.isCleanupPushed())
 		{
@@ -255,18 +290,22 @@ public class AutomationExecutor
 			
 			if(branch.cleanup != null)
 			{
-				this.state.preCleanup(branch);
-				
-				newSteps(branch.getCleanup().getLabel(), branch.getCleanup().getChildSteps())
+				newSteps(branch.getCleanup().getLabel(), branch.getCleanup())
+					.onInit(entry -> state.preCleanup(branch))
 					.onSuccess(entry -> state.postCleanup(entry, branch, true))
 					.push();
+				return false;
+			}
+			else
+			{
+				state.postCleanup(null, branch, true);
 				return false;
 			}
 		}
 
 		//Note: before-child & after-child flags are maintained at child level so that 
 		//  before and after steps are executed for every child
-		if(!branch.dataBranch && !stackEntry.isAfterChildPushed())
+		if(!stackEntry.isAfterChildPushed())
 		{
 			stackEntry.setAfterChildPushed(true);
 			
@@ -274,11 +313,10 @@ public class AutomationExecutor
 
 			if(parentBranch != null && parentBranch.afterChild != null)
 			{
-				this.state.startMode("postchild");
-				
-				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild.getChildSteps())
-				.onSuccess(entry -> state.clearMode())
-				.push();
+				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild)
+					.onInit(entry -> state.startMode("postchild"))
+					.onSuccess(entry -> state.clearMode())
+					.push();
 				
 				return false;
 			}

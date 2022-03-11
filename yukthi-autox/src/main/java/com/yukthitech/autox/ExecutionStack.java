@@ -30,7 +30,6 @@ public class ExecutionStack
 
 	public void push(Object object)
 	{
-		System.out.println("**************Pushing entry: " + object);
 		if(object instanceof IEntryPoint)
 		{
 			entryPointStack.push((IEntryPoint) object);
@@ -54,8 +53,6 @@ public class ExecutionStack
 	
 	public void pop(Object object)
 	{
-		System.out.println("**************Popping entry: " + object);
-		
 		if(object instanceof IEntryPoint)
 		{
 			entryPointStack.pop();

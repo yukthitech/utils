@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +40,7 @@ public class AutomationExecutorState
 	
 	private AutomationContext context;
 	
-	private LinkedList<ExecutionStackEntry> branchStack = new LinkedList<>();
+	private LinkedList<ExecutionStackEntry> executionStack = new LinkedList<>();
 	
 	/**
 	 * Used for generating reports.
@@ -57,7 +58,10 @@ public class AutomationExecutorState
 	
 	private long testCaseStartedOn;
 	
-	private ExecutionLogger executionLogger;
+	/**
+	 * Used as suffix for data provider logs.
+	 */
+	private AtomicInteger logIndex = new AtomicInteger(1);
 	
 	public AutomationExecutorState(AutomationContext context)
 	{
@@ -74,39 +78,97 @@ public class AutomationExecutorState
 	
 	public void pushBranch(ExecutionStackEntry entry)
 	{
-		this.branchStack.push(entry);
+		ExecutionStackEntry curEntry = executionStack.peek();
+		
+		entry.setParent(curEntry);
+		this.executionStack.push(entry);
+		setExecutionLoggerFor(entry);
+		
+		if(entry.getOnInit() != null)
+		{
+			entry.getOnInit().accept(entry);
+		}
 	}
 	
 	public boolean hasMoreBranches()
 	{
-		return !branchStack.isEmpty();
+		return !executionStack.isEmpty();
 	}
 	
 	public ExecutionStackEntry peekBranch()
 	{
-		return branchStack.peek();
+		return executionStack.peek();
 	}
 	
 	public ExecutionStackEntry popBranch()
 	{
-		return branchStack.pop();
+		return executionStack.pop();
 	}
 	
 	public ExecutionStackEntry parentBranch()
 	{
-		int size = branchStack.size();
+		int size = executionStack.size();
 		
 		if(size <= 1)
 		{
 			return null;
 		}
 		
-		return branchStack.get(1);
+		return executionStack.get(1);
+	}
+	
+	private void setExecutionLoggerFor(ExecutionStackEntry entry)
+	{
+		ExecutionLogger executionLogger = null;
+		ExecutionStackEntry loggableEntry = entry.getParentEntry(Setup.class, Cleanup.class, TestCase.class);
+		
+		//for top entries, no logger is needed
+		if(loggableEntry == null)
+		{
+			return;
+		}
+		
+		executionLogger = loggableEntry.getExecutionLogger();
+		
+		if(executionLogger != null)
+		{
+			entry.setExecutionLogger(executionLogger);
+			return;
+		}
+		
+		Object executable = entry.getExecutable();
+		
+		if((executable instanceof Setup) || (executable instanceof Cleanup))
+		{
+			ExecutionStackEntry testCaseEntry = loggableEntry.getParentEntry(TestCase.class);
+			
+			//test case branch null, indicates setup belongs to global or test suite
+			if(testCaseEntry == null)
+			{
+				//for non testcase startup new log needs to be created
+				String name = (executable instanceof Setup) ? Setup.NAME : Cleanup.NAME;
+				executionLogger = new ExecutionLogger(context, name, name);
+			}
+			else
+			{
+				executionLogger = testCaseEntry.getExecutionLogger();
+			}
+		}
+		//for testcase
+		else
+		{
+			TestCase testCase = (TestCase) executable;
+			executionLogger = new ExecutionLogger(context, testCase.getName(), testCase.getDescription());
+		}
+		
+		
+		entry.setExecutionLogger(executionLogger);
 	}
 	
 	public ExecutionLogger getExecutionLogger()
 	{
-		return executionLogger;
+		ExecutionStackEntry entry = executionStack.peek();
+		return entry.getExecutionLogger();
 	}
 	
 	public void automationCompleted()
@@ -186,28 +248,25 @@ public class AutomationExecutorState
 		}
 		else if(branch.executable instanceof TestCase)
 		{
-			testCaseStarted((TestCase) branch.executable);
+			testCaseStarted((TestCase) branch.executable, branch);
 		}
 	}
 	
 	public void startMode(String mode)
 	{
+		ExecutionLogger executionLogger = getExecutionLogger();
 		executionLogger.setMode(mode);
 	}
 	
 	public void clearMode()
 	{
+		ExecutionLogger executionLogger = getExecutionLogger();
 		executionLogger.clearMode();
 	}
 	
 	public void preSetup(ExecutionBranch branch)
 	{
-		//for non testcase startup new log needs to be created
-		if(!(branch.executable instanceof TestCase))
-		{
-			this.executionLogger = new ExecutionLogger(context, Setup.NAME, Setup.NAME);
-		}
-
+		ExecutionLogger executionLogger = getExecutionLogger();
 		executionLogger.setMode("setup");
 		context.getExecutionStack().push(branch.setup.executable);
 		
@@ -218,17 +277,23 @@ public class AutomationExecutorState
 	
 	public boolean postSetup(ExecutionStackEntry entry, ExecutionBranch branch, boolean successful)
 	{
-		context.getExecutionStack().pop(branch.setup.executable);
+		ExecutionLogger executionLogger = getExecutionLogger();
 		
-		context.setSetupExecution(false);
-		executionLogger.clearMode();
+		//Note: Entry will be null, when setup is not present
+		if(entry != null)
+		{
+			context.getExecutionStack().pop(branch.setup.executable);
+			
+			context.setSetupExecution(false);
+			executionLogger.clearMode();
+		}
 
 		if(branch.executable instanceof TestCase)
 		{
 			return testCasePostStartup((TestCase) branch.executable, branch);
 		}
 		//for non-test case startup create required logs
-		else
+		else if(entry != null)
 		{
 			TestCaseResult res = null;
 			
@@ -251,12 +316,8 @@ public class AutomationExecutorState
 	
 	public void preCleanup(ExecutionBranch branch)
 	{
-		//for non testcase startup new log needs to be created
-		if(!(branch.executable instanceof TestCase))
-		{
-			this.executionLogger = new ExecutionLogger(context, Cleanup.NAME, Cleanup.NAME);
-		}
-
+		ExecutionLogger executionLogger = getExecutionLogger();
+		
 		executionLogger.setMode("cleanup");
 		context.getExecutionStack().push(branch.cleanup.executable);
 		
@@ -267,6 +328,13 @@ public class AutomationExecutorState
 	
 	public boolean postCleanup(ExecutionStackEntry entry, ExecutionBranch branch, boolean successful)
 	{
+		if(entry == null)
+		{
+			return true;
+		}
+		
+		ExecutionLogger executionLogger = getExecutionLogger();
+		
 		context.getExecutionStack().pop(branch.cleanup.executable);
 		
 		context.setCleanupExecution(false);
@@ -308,6 +376,8 @@ public class AutomationExecutorState
 		{
 			if(branch.result == null)
 			{
+				ExecutionLogger executionLogger = getExecutionLogger();
+				
 				branch.result = new TestCaseResult( (TestCase) branch.executable, branch.label, TestStatus.SUCCESSFUL, executionLogger.getExecutionLogData(), null,
 						stackEntry.getStartedOn(), new Date());
 			}
@@ -330,25 +400,28 @@ public class AutomationExecutorState
 		
 		if(actualException instanceof ReturnException)
 		{
-			ExecutionStackEntry stackEntry = branchStack.pop();
+			ExecutionStackEntry stackEntry = executionStack.pop();
 			completed(stackEntry);
 			return;
 		}
 		
+		ExecutionLogger executionLogger = getExecutionLogger();
+		
 		logger.error("Execution failed with error: ", actualException);
-		this.executionLogger.error("An error occurred with message - {}. Stack Trace: {}", actualException.getMessage(), context.getExecutionStack().toStackTrace());
+		executionLogger.error("An error occurred with message - {}. Stack Trace: {}", actualException.getMessage(), context.getExecutionStack().toStackTrace());
 		
 		ExecutionStackEntry stackEntry = null;
 		TestCaseResult result = null;
 		boolean setupFailed = false;
 		boolean cleanupFailed = false;
 		
-		while(!this.branchStack.isEmpty())
+		while(!this.executionStack.isEmpty())
 		{
-			stackEntry = this.branchStack.pop();
+			stackEntry = this.executionStack.pop();
 			
 			if(stackEntry.isStepsEntry())
 			{
+				stackEntry.completedBranch(false);
 				continue;
 			}
 			
@@ -358,12 +431,14 @@ public class AutomationExecutorState
 			{
 				postSetup(stackEntry, branch, false);
 				setupFailed = true;
+				stackEntry.completedBranch(false);
 				continue;
 			}
 			
 			if(branch.executable instanceof Cleanup)
 			{
 				cleanupFailed = true;
+				stackEntry.completedBranch(false);
 				continue;
 			}
 			
@@ -372,12 +447,12 @@ public class AutomationExecutorState
 				result = handleTestCaseError(branch, setupFailed, cleanupFailed, stackEntry, flowEx);
 				branch.result = result;
 				
-				//push then entry back so that cleanup and other things can be executed
-				this.branchStack.push(stackEntry);
+				//push entry back so that cleanup and other things can be executed
+				this.executionStack.push(stackEntry);
 				
 				if(result.getStatus() != TestStatus.SUCCESSFUL)
 				{
-					Iterator<ExecutionStackEntry> it = this.branchStack.descendingIterator();
+					Iterator<ExecutionStackEntry> it = this.executionStack.descendingIterator();
 					
 					while(it.hasNext())
 					{
@@ -389,6 +464,8 @@ public class AutomationExecutorState
 						}
 					}
 					
+					
+					//note stackEntry.completedBranch(false); is not called here as the entry is pushed to stack
 					break;
 				}
 				
@@ -402,6 +479,8 @@ public class AutomationExecutorState
 				{
 					TestSuiteResults results = fullExecutionDetails.testSuiteFailed(testSuite, "Setup execution failed.");
 					results.setSetupSuccessful(false);
+					
+					stackEntry.completedBranch(false);
 					break;
 				}
 				
@@ -409,6 +488,8 @@ public class AutomationExecutorState
 				{
 					TestSuiteResults results = fullExecutionDetails.testSuiteFailed(testSuite, "Cleanup execution failed.");
 					results.setCleanupSuccessful(false);
+					
+					stackEntry.completedBranch(false);
 					break;
 				}
 			}
@@ -428,6 +509,8 @@ public class AutomationExecutorState
 					
 					fullExecutionDetails.setSetupSuccessful(false);
 					reportGenerator.createLogFiles(context, result, "_global-setup", null, "");
+					
+					stackEntry.completedBranch(false);
 					break;
 				}
 				
@@ -445,6 +528,8 @@ public class AutomationExecutorState
 					
 					fullExecutionDetails.setCleanupSuccessful(false);
 					reportGenerator.createLogFiles(context, result, "_global-cleanup", null, "");
+					
+					stackEntry.completedBranch(false);
 					break;
 				}
 			}
@@ -454,6 +539,7 @@ public class AutomationExecutorState
 	private TestCaseResult handleTestCaseError(ExecutionBranch branch, boolean setupFailed, boolean cleanupFailed, ExecutionStackEntry stackEntry, ExecutionFlowFailed flowEx)
 	{
 		TestCase testCase = (TestCase) branch.executable;
+		ExecutionLogger executionLogger = getExecutionLogger();
 		
 		if(setupFailed)
 		{
@@ -532,7 +618,7 @@ public class AutomationExecutorState
 		this.currentTestSuite = null;
 	}
 	
-	private void testCaseStarted(TestCase testCase)
+	private void testCaseStarted(TestCase testCase, ExecutionBranch branch)
 	{
 		logger.debug("Executing test case '{}' in test suite - {}", testCase.getName(), currentTestSuite.getName());
 		fullExecutionDetails.startedTestCase(testCase.getName());
@@ -549,24 +635,32 @@ public class AutomationExecutorState
 		
 		//start monitoring logs
 		context.startLogMonitoring();
-		context.setActiveTestCase(testCase, null);
-		context.getExecutionStack().push(testCase);
+		context.setActiveTestCase(testCase, branch.testCaseData);
+		testCase.setData(branch.testCaseData);
 		
-		executionLogger = new ExecutionLogger(context, testCase.getName(), testCase.getDescription());
+		if(branch.testCaseData != null)
+		{
+			context.setAttribute(testCase.getDataProvider().getName(), branch.testCaseData.getValue());
+		}
+		
+		context.getExecutionStack().push(testCase);
 	}
 	
-	private boolean testCasePostStartup(TestCase testCase, ExecutionBranch branch)
+	private boolean testCasePostStartup(TestCase testCase, ExecutionBranch testCaseBranch)
 	{
-		IDataProvider dataProvider = testCase.getDataProvider();
+		IDataProvider dataProvider = testCaseBranch.getDataProvider();
 		
 		if(dataProvider == null)
 		{
 			return true;
 		}
 		
-		ExecutionBranch dataProviderBranch = new ExecutionBranch(testCase.getName() + " - dataProvider", testCase.getDescription(), testCase);
-		dataProviderBranch.setup = new ExecutionBranch(testCase.getName() + " [[Data-Setup]]", "Data Setup", testCase.getDataSetup());
-		dataProviderBranch.cleanup = new ExecutionBranch(testCase.getName() + " [[Data-Cleanup]]", "Data Cleanup", testCase.getDataCleanup());
+		ExecutionStackEntry testSuiteEntry = parentBranch();
+		
+		//copy before child and after child branches, so that for every test case
+		// execution these are executed approp
+		testCaseBranch.beforeChild = testSuiteEntry.getBranch().beforeChild;
+		testCaseBranch.afterChild = testSuiteEntry.getBranch().afterChild;
 		
 		List<TestCaseData> dataLst = null;
 		Date startTime = new Date();
@@ -582,7 +676,7 @@ public class AutomationExecutorState
 		
 		if(CollectionUtils.isEmpty(dataLst))
 		{
-			branch.result = new TestCaseResult(testCase, TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName(),
+			testCaseBranch.result = new TestCaseResult(testCase, TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName(),
 					startTime, new Date());
 			return false;
 		}
@@ -594,12 +688,12 @@ public class AutomationExecutorState
 
 			ExecutionBranch dpTestBranch = new ExecutionBranch(testCase.getName() + " [" + data.getName() + "]", 
 					description, testCase);
+			dpTestBranch.testCaseData = data;
+			dpTestBranch.childSteps = testCaseBranch.childSteps;
 			
-			dataProviderBranch.addChildBranch(dpTestBranch);
+			testCaseBranch.addChildBranch(dpTestBranch);
 		}
 		
-		branch.addChildBranch(dataProviderBranch);
-		branch.dataBranch = true;
 		return false;
 	}
 	
@@ -621,6 +715,12 @@ public class AutomationExecutorState
 		//stop monitoring logs
 		Map<String, File> monitoringLogs = context.stopLogMonitoring(branch.result);
 		String testFileName = currentTestSuite.getName() + "_" + testCase.getName();
+		
+		if(branch.testCaseData != null)
+		{
+			testFileName = testFileName + "_" + logIndex.getAndIncrement();
+		}
+		
 		reportGenerator.createLogFiles(context, branch.result, testFileName, monitoringLogs, testCase.getDescription());
 		
 		context.getAutomationListener().testCaseCompleted(new AutomationEvent(currentTestSuite, testCase, branch.result));

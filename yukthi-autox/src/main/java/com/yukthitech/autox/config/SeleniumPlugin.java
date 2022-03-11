@@ -185,6 +185,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			logger.debug("Got main handle as: {}", mainWindowHandle);
 		}catch(Exception ex)
 		{
+			logger.error("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
 			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
 		}
 	}

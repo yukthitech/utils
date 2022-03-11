@@ -24,7 +24,8 @@
 
 		<testCase name="testCase1">
 			<description>
-				Test case 1
+				Ensures the simple flow executions along with setups and cleanups.
+				And also ensures function execution is also proper.
 			</description>
 			
 			<setup>
@@ -45,7 +46,8 @@
 	
 		<testCase name="testCase2">
 			<description>
-				Test case 2
+				Helps in validating before-test-case and after-test-case are executed
+				after every test case.
 			</description>
 			
 			<setup>

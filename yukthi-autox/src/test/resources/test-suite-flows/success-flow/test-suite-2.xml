@@ -1,0 +1,60 @@
+<testData xmlns:s="http://autox.yukthitech.com/steps" xmlns:wrap="http://xmlbeanparser.yukthitech.com/wrap" xmlns:f="http://autox.yukthitech.com/functions">
+	<testSuite name="test-suite-2">
+		<setup>
+			<s:log message="Setup of test-suite-2"/>
+			<s:collection-add collection="attr: testSuite2Flow" value="testSuiteSetup"/>
+		</setup>
+		
+		<before-test-case>
+			<s:log message="before test-case of test-suite-1"/>
+			<s:collection-add collection="attr: testSuite2Flow" value="beforeTestCase"/>
+		</before-test-case>
+		
+		<after-test-case>
+			<s:log message="after test-case of test-suite-1"/>
+			<s:collection-add collection="attr: testSuite2Flow" value="afterTestCase"/>
+		</after-test-case>
+		
+		
+		<testCase name="testCase21">
+			<description>
+				Validates the test case with data provider is working properly along with 
+				startups and cleanups approp.
+			</description>
+			
+			<list-data-provider name="dataString">
+				<data>abc</data>
+				<data>def</data>
+				<data>ghi</data>
+			</list-data-provider>
+			
+			<setup>
+				<s:log message="testCase21 - setup"/>
+				<s:collection-add collection="attr: testSuite2Flow" value="testCaseSetup"/>
+			</setup>
+			
+			<data-setup>
+				<s:log message="testCase21 - data-setup"/>
+				<s:collection-add collection="attr: testSuite2Flow" value="dataSetup"/>
+			</data-setup>
+		
+			<s:log message="testCase21 - ${attr.dataString}"/>
+			<s:collection-add collection="attr: testSuite2Flow" value="testCase-${attr.dataString}"/>
+			
+			<data-cleanup>
+				<s:log message="testCase21 - data-cleanup"/>
+				<s:collection-add collection="attr: testSuite2Flow" value="dataCleanup"/>
+			</data-cleanup>
+
+			<cleanup>
+				<s:log message="testCase21 - cleanup"/>
+				<s:collection-add collection="attr: testSuite2Flow" value="testCaseCleanup"/>
+			</cleanup>
+		</testCase>
+
+		<cleanup>
+			<s:log message="Cleanup of test-suite-2"/>
+			<s:collection-add collection="attr: testSuite2Flow" value="testSuiteCleanup"/>
+		</cleanup>
+	</testSuite>
+</testData>

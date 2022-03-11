@@ -15,19 +15,22 @@ public class StepExecutionBuilder
 {
 	private AutomationExecutor parentExecutor;
 	
-	private String label;
-	
-	private List<IStep> steps;
+	private ExecutionStackEntry stackEntry;
 	
 	private Consumer<ExecutionStackEntry> onSuccess;
 	
+	private Consumer<ExecutionStackEntry> onInit;
+	
+	private Consumer<ExecutionStackEntry> onComplete;
+	
 	private ExceptionHandler exceptionHandler;
+	
 
-	StepExecutionBuilder(AutomationExecutor parentExecutor, String label, List<IStep> steps)
+	StepExecutionBuilder(AutomationExecutor parentExecutor, String label, Object executable, List<IStep> steps)
 	{
 		this.parentExecutor = parentExecutor;
-		this.label = label;
-		this.steps = steps;
+		
+		this.stackEntry = new ExecutionStackEntry(label, executable, steps);
 	}
 	
 	public StepExecutionBuilder onSuccess(Consumer<ExecutionStackEntry> onSuccess)
@@ -36,6 +39,18 @@ public class StepExecutionBuilder
 		return this;
 	}
 	
+	public StepExecutionBuilder onInit(Consumer<ExecutionStackEntry> onInit)
+	{
+		this.onInit = onInit;
+		return this;
+	}
+
+	public StepExecutionBuilder onComplete(Consumer<ExecutionStackEntry> onComplete)
+	{
+		this.onComplete = onComplete;
+		return this;
+	}
+
 	public StepExecutionBuilder exceptionHandler(ExceptionHandler exceptionHandler)
 	{
 		this.exceptionHandler = exceptionHandler;
@@ -44,16 +59,17 @@ public class StepExecutionBuilder
 	
 	public void push()
 	{
-		if(CollectionUtils.isEmpty(steps))
+		if(CollectionUtils.isEmpty(stackEntry.getSteps()))
 		{
 			return;
 		}
 		
-		ExecutionStackEntry entry = new ExecutionStackEntry(label, steps);
-		entry.setOnSuccess(onSuccess);
-		entry.setExceptionHandler(exceptionHandler);
+		stackEntry.setOnSuccess(onSuccess);
+		stackEntry.setOnInit(onInit);
+		stackEntry.setOnComplete(onComplete);
+		stackEntry.setExceptionHandler(exceptionHandler);
 		
-		parentExecutor.pushSteps(entry);
+		parentExecutor.pushSteps(stackEntry);
 
 	}
 }

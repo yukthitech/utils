@@ -75,6 +75,28 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 		return this;
 	}
 	
+	public ExecutionBranchBuilder<C> dataSetup(Setup setup)
+	{
+		if(setup == null)
+		{
+			return this;
+		}
+		
+		executionBranch.dataSetup =  setup.buildExecutionBranch(context);
+		return this;
+	}
+
+	public ExecutionBranchBuilder<C> dataCleanup(Cleanup cleanup)
+	{
+		if(cleanup == null)
+		{
+			return this;
+		}
+		
+		executionBranch.dataCleanup =  cleanup.buildExecutionBranch(context);
+		return this;
+	}
+
 	public ExecutionBranchBuilder<C> beforeChild(Setup setup)
 	{
 		if(setup == null)
@@ -130,8 +152,6 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 	{
 		if(CollectionUtils.isNotEmpty(subbranches))
 		{
-			this.executionBranch.childBranches = new ArrayList<ExecutionBranch>();
-			
 			for(C c : subbranches)
 			{
 				if(filter != null && !filter.test(c))
@@ -146,11 +166,11 @@ public class ExecutionBranchBuilder<C extends IExecutable>
 					continue;
 				}
 				
-				this.executionBranch.childBranches.add(childBranch);
+				this.executionBranch.addChildBranch(childBranch);
 			}
 		}
 		
-		if(childBranchesRequired && CollectionUtils.isEmpty(this.executionBranch.childBranches))
+		if(childBranchesRequired && CollectionUtils.isEmpty(this.executionBranch.getChildBranches()))
 		{
 			return null;
 		}

@@ -652,6 +652,8 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 				.setup(setup)
 				.cleanup(cleanup)
 				.dataProvider(dataProvider)
+				.dataSetup(dataSetup)
+				.dataCleanup(dataCleanup)
 				.build();
 	}
 	

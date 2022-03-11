@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.test.IDataProvider;
+import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestCaseResult;
 
 /**
@@ -22,7 +23,7 @@ public class ExecutionBranch
 	
 	Object executable;
 	
-	List<ExecutionBranch> childBranches;
+	private List<ExecutionBranch> childBranches;
 	
 	ExecutionBranch setup;
 	
@@ -32,19 +33,19 @@ public class ExecutionBranch
 	
 	ExecutionBranch afterChild;
 
+	ExecutionBranch dataSetup;
+	
+	ExecutionBranch dataCleanup;
+
 	List<IStep> childSteps;
 	
 	IDataProvider dataProvider;
 	
 	TestCaseResult result;
 	
-	/**
-	 * Flag indicating the executable is based on data-provider and steps
-	 * should not be executed.
-	 */
-	boolean dataBranch;
-	
 	int failedChildCount;
+	
+	TestCaseData testCaseData;
 	
 	ExecutionBranch(String label, String description, Object executable)
 	{
@@ -87,7 +88,7 @@ public class ExecutionBranch
 	{
 		return childBranches;
 	}
-
+	
 	public ExecutionBranch getSetup()
 	{
 		return setup;
