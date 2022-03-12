@@ -260,8 +260,8 @@ public class TFailureFlows
 		AutomationContext context = AutomationContext.getInstance();
 		
 		TestSuiteResults tsResults = exeResult.getTestSuiteResults("testSuiteData");
-		Assert.assertEquals(tsResults.getSuccessCount(), 3);
-		Assert.assertEquals(tsResults.getFailureCount(), 0);
+		Assert.assertEquals(tsResults.getSuccessCount(), 6);
+		Assert.assertEquals(tsResults.getFailureCount(), 1);
 		Assert.assertEquals(tsResults.getErrorCount(), 2);
 		Assert.assertEquals(tsResults.getSkipCount(), 0);
 		Assert.assertEquals(tsResults.getStatusMessage(), "Failing as one or more test cases failed");
@@ -269,6 +269,18 @@ public class TFailureFlows
 		Assert.assertEquals(tsResults.isSetupSuccessful(), true);
 		Assert.assertEquals(tsResults.isCleanupSuccessful(), true);
 		
+		TestCaseResult tcResult = tsResults.getTestCaseResult("dataSetupFail");
+		Assert.assertEquals(tcResult.getMessage(), "Data provider setup failed.");
+		Assert.assertEquals(tcResult.getStatus(), TestStatus.ERRORED);
+
+		tcResult = tsResults.getTestCaseResult("dataCleanupFail");
+		Assert.assertEquals(tcResult.getMessage(), "Data provider cleanup failed.");
+		Assert.assertEquals(tcResult.getStatus(), TestStatus.ERRORED);
+
+		tcResult = tsResults.getTestCaseResult("dataEntryFail [def]");
+		Assert.assertEquals(tcResult.getMessage(), "Validation assertEquals failed. Validation Details: AssertEqualsStep[actual=1,expected=2]");
+		Assert.assertEquals(tcResult.getStatus(), TestStatus.FAILED);
+
 		//Validate test suite 1
 		List<String> testSuite1Flow = (List<String>) context.getAttribute("testSuiteData");
 		System.out.println("Test Suite data fail flow: \n" + testSuite1Flow);
@@ -278,6 +290,7 @@ public class TFailureFlows
 				toList("globalSetup, "
 						+ "testCaseSetup-dataSetupFail, "
 						+ "testCaseSetup-dataCleanupFail, dataSetup-dataCleanupFail, testCase-abc, testCase-def, testCase-ghi, testCaseCleanup-dataCleanupFail, "
+						+ "testCaseSetup-dataEntryFail, dataSetup-dataEntryFail, testCase-abc, testCase-ghi, dataCleanup-dataEntryFail, testCaseCleanup-dataEntryFail, "
 						+ "globalCleanup")
 		);
 		
@@ -286,6 +299,9 @@ public class TFailureFlows
 
 		checkForLogs("testSuiteData_dataCleanupFail_log.json", 
 				"<b>[dataCleanup]</b> An error occurred with message - Validation assertEquals failed. Validation Details: AssertEqualsStep[actual=1,expected=2]");
+
+		checkForLogs("testSuiteData_dataEntryFail_5_log.json", 
+				"An error occurred with message - Validation assertEquals failed. Validation Details: AssertEqualsStep[actual=1,expected=2]");
 	}
 
 	@Test
