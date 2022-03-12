@@ -298,12 +298,8 @@ public class AutomationExecutorState
 			executionLogger.clearMode();
 		}
 
-		if(parentBranch.executable instanceof TestCase)
-		{
-			return testCasePostStartup((TestCase) parentBranch.executable, parentBranch);
-		}
 		//for non-test case startup create required logs
-		else if(entry != null)
+		if(!(parentBranch.executable instanceof TestCase))
 		{
 			TestCaseResult res = null;
 			
@@ -697,7 +693,7 @@ public class AutomationExecutorState
 		context.getExecutionStack().push(testCase);
 	}
 	
-	private boolean testCasePostStartup(TestCase testCase, ExecutionBranch testCaseBranch)
+	public boolean testCasePostDataStartup(TestCase testCase, ExecutionBranch testCaseBranch)
 	{
 		IDataProvider dataProvider = testCaseBranch.getDataProvider();
 		

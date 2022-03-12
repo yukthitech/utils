@@ -246,18 +246,12 @@ public class AutomationExecutor
 			
 			if(branch.setup != null)
 			{
-				
 				//create a new dynamic branch for setting callback
 				newSteps(branch.getSetup().getLabel(), branch.getSetup(), ExecutionType.SETUP)
 					.onInit(entry -> state.preSetup(branch))
 					.onSuccess(entry -> state.postSetup(entry, branch, true))
 					.push();
 				
-				return false;
-			}
-			else
-			{
-				state.postSetup(null, branch, true);
 				return false;
 			}
 		}
@@ -270,7 +264,13 @@ public class AutomationExecutor
 			{
 				newSteps(branch.dataSetup.getLabel(), branch.dataSetup, ExecutionType.DATA_SETUP)
 					.onInit(entry -> state.startMode("dataSetup"))
+					.onSuccess(entry -> state.testCasePostDataStartup((TestCase) branch.getExecutable(), branch))
 					.push();
+				return false;
+			}
+			else
+			{
+				state.testCasePostDataStartup((TestCase) stackEntry.getExecutable(), branch);
 				return false;
 			}
 		}

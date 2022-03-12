@@ -22,11 +22,13 @@ public class TAutomation
 	@Test
 	public void startAutomation() throws Exception
 	{
+		AutomationLauncher.systemExitEnabled = false;
+		
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "rest-test-suites"
-				"-tc", "jsonAndJel"
+				//"-tc", "testOpenWindow"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

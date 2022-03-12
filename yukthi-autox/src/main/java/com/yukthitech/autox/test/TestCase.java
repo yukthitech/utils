@@ -221,7 +221,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 			{
 				logger.debug("Test case '{}' is non-executable as its group '{}' is under exclusion list", name, grp);
 				
-				excludedGroup.setValue(grp);				
+				if(excludedGroup != null)
+				{
+					excludedGroup.setValue(grp);
+				}
+				
 				return false;
 			}
 		}
