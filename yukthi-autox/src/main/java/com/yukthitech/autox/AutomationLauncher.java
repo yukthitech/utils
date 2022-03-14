@@ -24,6 +24,7 @@ import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteExecutor;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.persistence.repository.RepositoryFactory;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
 import com.yukthitech.utils.cli.OptionsFactory;
@@ -378,8 +379,6 @@ public class AutomationLauncher
 	
 	private static void automationCompleted(boolean res, AutomationContext context)
 	{
-		context.close();
-		
 		if(!context.getBasicArguments().isReportOpeningDisalbed())
 		{
 			try
@@ -390,13 +389,25 @@ public class AutomationLauncher
 				logger.warn("Failed to open report html in browser. Ignoring the error: " + ex);
 			}
 		}
-	
+		
+		//close the open resources
+		RepositoryFactory repoFactory = context.getAppConfiguration().getStorageRepositoryFactory();
+		
+		try
+		{
+			repoFactory.close();
+			context.close();
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while closing the resources", ex);
+		}
+		
 		if(systemExitEnabled)
 		{
 			System.exit( res ? 0 : -1 );
 		}
 	}
-
+	
 	/**
 	 * Automation entry point.
 	 * 

@@ -10,6 +10,7 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 public class ExcelUtil
@@ -94,24 +95,25 @@ public class ExcelUtil
 				newCell.setCellStyle(newCellStyle);
 			}
 		}
+		
 		switch(oldCell.getCellType())
 		{
-			case HSSFCell.CELL_TYPE_STRING:
+			case STRING:
 				newCell.setCellValue(oldCell.getStringCellValue());
 				break;
-			case HSSFCell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 				newCell.setCellValue(oldCell.getNumericCellValue());
 				break;
-			case HSSFCell.CELL_TYPE_BLANK:
-				newCell.setCellType(HSSFCell.CELL_TYPE_BLANK);
+			case BLANK:
+				newCell.setCellType(CellType.BLANK);
 				break;
-			case HSSFCell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 				newCell.setCellValue(oldCell.getBooleanCellValue());
 				break;
-			case HSSFCell.CELL_TYPE_ERROR:
-				newCell.setCellErrorValue(oldCell.getErrorCellValue());
+			case ERROR:
+				newCell.setCellType(CellType.ERROR);
 				break;
-			case HSSFCell.CELL_TYPE_FORMULA:
+			case FORMULA:
 				newCell.setCellFormula(oldCell.getCellFormula());
 				break;
 			default:

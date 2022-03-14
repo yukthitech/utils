@@ -190,7 +190,7 @@ public class SimpleJavaFunction implements IFunction
 			}
 			
 			//when parameter type is not matching, try conversion
-			if(!funcParamTypes[i].isAssignableFrom(parameters[i].getClass()))
+			if(parameters[i] != null && !funcParamTypes[i].isAssignableFrom(parameters[i].getClass()))
 			{
 				parameters[i] = ConvertUtils.convert(parameters[i], funcParamTypes[i]);
 			}

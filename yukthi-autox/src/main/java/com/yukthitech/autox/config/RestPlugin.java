@@ -97,6 +97,15 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 			throw new ValidateException("Base url can not be null.");
 		}
 	}
+	
+	@Override
+	public void close() throws Exception
+	{
+		for(RestClient restClient : this.urlToClient.values())
+		{
+			restClient.close();
+		}
+	}
 
 	/**
 	 * Gets rest client for specified base url. If base url is not, default base url will be used.

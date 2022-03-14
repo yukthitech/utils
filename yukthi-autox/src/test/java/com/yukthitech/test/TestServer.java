@@ -9,9 +9,11 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 public class TestServer
 {
+	private static Server server;
+	
 	public static Server start(String[] args) throws Exception
 	{
-		Server server = new Server(8080);
+		server = new Server(8080);
 		ResourceHandler resource_handler = new ResourceHandler();
 		resource_handler.setDirectoriesListed(true);
 		resource_handler.setWelcomeFiles(new String[] { "index.html" });
@@ -28,6 +30,11 @@ public class TestServer
 		server.start();
 		System.out.println("Server started at 8080...");
 		return server;
+	}
+	
+	public static void stop() throws Exception
+	{
+		server.stop();
 	}
 
 	public static void main(String[] args) throws Exception

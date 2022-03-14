@@ -21,7 +21,6 @@ public enum EntityEventType
 	 */
 	PRE_UPDATE, 
 	/**
-	 * Called after entity update
 	 */
 	POST_UPDATE,
 	
@@ -30,6 +29,7 @@ public enum EntityEventType
 	 * Called before entity delete
 	 */
 	PRE_DELETE, 
+	
 	/**
 	 * Called after entity delete
 	 */

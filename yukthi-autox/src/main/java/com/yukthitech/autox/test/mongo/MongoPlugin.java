@@ -97,6 +97,15 @@ public class MongoPlugin implements IPlugin<Object>, Validateable
 	{
 		this.defaultMongoResource = defaultMongoResource;
 	}
+	
+	@Override
+	public void close() throws Exception
+	{
+		for(MongoResource res : mongoResourceMap.values())
+		{
+			res.getMongoClient().close();
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()

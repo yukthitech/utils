@@ -1,5 +1,6 @@
 package com.yukthitech.persistence;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import com.yukthitech.persistence.query.FetchChildrenIdsQuery;
 import com.yukthitech.persistence.query.FinderQuery;
 import com.yukthitech.persistence.query.SaveQuery;
 import com.yukthitech.persistence.query.UpdateQuery;
+import com.yukthitech.persistence.repository.IDataSourceCloser;
 import com.yukthitech.utils.ObjectWrapper;
 
 public interface IDataStore
@@ -130,6 +132,8 @@ public interface IDataStore
 	 * @return
 	 */
 	public boolean isUniqueIdColumnRequired();
+	
+	public void close(IDataSourceCloser closer) throws SQLException;
 }
 
 

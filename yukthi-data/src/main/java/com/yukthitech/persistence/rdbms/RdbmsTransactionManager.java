@@ -26,6 +26,11 @@ public class RdbmsTransactionManager implements ITransactionManager<RdbmsTransac
 		this.dataSource = dataSource;
 	}
 	
+	public DataSource getDataSource()
+	{
+		return dataSource;
+	}
+	
 	private RdbmsTransaction createTransaction() throws TransactionException
 	{
 		RdbmsTransaction transaction = null;
@@ -88,5 +93,4 @@ public class RdbmsTransactionManager implements ITransactionManager<RdbmsTransac
 	{
 		threadToTransaction.remove(Thread.currentThread());
 	}
-
 }

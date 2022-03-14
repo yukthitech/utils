@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
@@ -92,6 +93,18 @@ public class DbPlugin implements IPlugin<Object>, Validateable
 	@Override
 	public void initialize(AutomationContext context, Object args)
 	{
+	}
+	
+	@Override
+	public void close() throws Exception
+	{
+		for(DataSource dataSource : this.dataSourceMap.values())
+		{
+			if(dataSource instanceof BasicDataSource)
+			{
+				((BasicDataSource) dataSource).close();
+			}
+		}
 	}
 
 	@Override

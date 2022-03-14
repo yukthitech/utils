@@ -3,6 +3,7 @@ package com.yukthitech.test;
 import java.io.File;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -17,6 +18,12 @@ public class TAutomation
 	public void setup() throws Exception
 	{
 		TestServer.start(null);
+	}
+	
+	@AfterClass
+	public void close() throws Exception
+	{
+		TestServer.stop();
 	}
 	
 	@Test

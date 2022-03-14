@@ -3,6 +3,7 @@ package com.yukthitech.persistence.repository;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ import com.yukthitech.persistence.listeners.EntityListenerManager;
 public class RepositoryFactory
 {
 	/**
-	 * Name of the factory used for easy identificaion.
+	 * Name of the factory used for easy identification.
 	 */
 	private String name;
 	
@@ -41,6 +42,8 @@ public class RepositoryFactory
 	 */
 	private EntityListenerManager listenerManager = new EntityListenerManager();
 	
+	private IDataSourceCloser dataSourceCloser;
+	
 	public IDataStore getDataStore()
 	{
 		return dataStore;
@@ -50,6 +53,11 @@ public class RepositoryFactory
 	{
 		this.dataStore = dataStore;
 		dataStore.setEntityDetailsFactory(entityDetailsFactory);
+	}
+	
+	public void setDataSourceCloser(IDataSourceCloser dataSourceCloser)
+	{
+		this.dataSourceCloser = dataSourceCloser;
 	}
 	
 	public boolean isCreateTables()
@@ -257,6 +265,11 @@ public class RepositoryFactory
 	public void setAddUniqueIdColumnEnabled(boolean addUniqueIdColumnEnabled)
 	{
 		entityDetailsFactory.setAddUniqueIdColumnEnabled(addUniqueIdColumnEnabled);
+	}
+	
+	public void close() throws SQLException
+	{
+		dataStore.close(dataSourceCloser);
 	}
 
 	/* (non-Javadoc)

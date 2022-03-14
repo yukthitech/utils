@@ -1079,7 +1079,7 @@ public class AutomationContext
 	 * Closes all the plugins initialized in this context. Generally this method
 	 * should be called before destroying this context.
 	 */
-	public void close()
+	public void close() throws Exception
 	{
 		for(IPlugin<?> plugin : this.requiredPlugins.values())
 		{

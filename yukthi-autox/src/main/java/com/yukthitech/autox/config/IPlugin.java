@@ -30,7 +30,7 @@ public interface IPlugin<AT>
 	 * Called when close is called on context. Which generally happens before destroying
 	 * current context.
 	 */
-	public default void close()
+	public default void close() throws Exception
 	{
 	}
 }

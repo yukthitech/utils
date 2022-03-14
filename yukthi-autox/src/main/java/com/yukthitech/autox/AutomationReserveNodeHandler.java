@@ -11,8 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 import org.xml.sax.Locator;
 
@@ -125,7 +124,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			logger.debug("Scanning for steps in package: {}", pack);
 			
 			reflections = new Reflections(
-					ConfigurationBuilder.build(pack, new TypeAnnotationsScanner(), new SubTypesScanner(), customLoader)
+					ConfigurationBuilder.build(pack, Scanners.TypesAnnotated, Scanners.SubTypes)
 				);
 
 			stepTypes = reflections.getSubTypesOf(IStep.class);

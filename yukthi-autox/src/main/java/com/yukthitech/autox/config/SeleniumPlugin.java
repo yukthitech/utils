@@ -358,6 +358,18 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			logger.warn("Found the session to be closed, so skipping taking screen shot");
 		}
 	}
+	
+	@Override
+	public void close() throws Exception
+	{
+		for(SeleniumDriverConfig config : this.drivers.values())
+		{
+			if(config.getDriver() != null)
+			{
+				config.getDriver().close();
+			}
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()

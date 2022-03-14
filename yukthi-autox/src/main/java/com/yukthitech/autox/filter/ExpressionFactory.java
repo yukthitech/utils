@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
 import com.yukthitech.autox.AutomationContext;
@@ -79,9 +79,9 @@ public class ExpressionFactory
 		{
 			logger.debug("Scanning for expressions parser methods in package - {}", pack);
 			reflections = new Reflections(
-					ConfigurationBuilder.build(pack, new MethodAnnotationsScanner(), classLoader)
+					ConfigurationBuilder.build(pack, Scanners.MethodsAnnotated)
 				);
-
+			
 			parserMethods = reflections.getMethodsAnnotatedWith(ExpressionFilter.class);
 			
 			if(parserMethods != null)

@@ -1,0 +1,1988 @@
+<dyn-content name="SampleCobrandTemplate">
+  <description>SampleCobrandTemplate</description>
+  <version>1.0.0</version>
+  <versionLong>int: 1000000</versionLong>
+  <environment>qa</environment>
+  <list name="keys">
+    <element feature="ACL Configuration" name="COM.YODLEE.CORE.COBRANDS_DEFAULT_GROUP" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the default ACL Group with predefined ACL configurations that will be implicitly applicable to all Users under this cobrand.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: Basic</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Advanced Security Normalization" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <name>COM.YODLEE.CORE.SECURITY_NORMALIZATION_SERVICE.ENABLED</name>
+      <description>
+      	Key for enabling calling Security System Inputization Service Application to System Inputize the Securities. SN2.0 Feature Control key
+		Key is used SN2.0, also used for SN3.0, in addition to this, we need to consider mongo DB key '' for Advanced Security Normalization
+	  </description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Advisor" name="GENERAL_ADVISOR_AGGREGATION_TXN_SELECTION_DURATION" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>Key to configure Max Transaction Selection Duration for Advisor</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 30</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Asset Classification" name="COM.YODLEE.CORE.COBRAND_VENDORS" product="AGGREGATION">
+      <keyType>PARAM_KEY</keyType>
+      <description>To configure customer asset classification
+         For Custom asset classification, then along with this Key, the 'is_custom_asset_class' should also be enabled from vendor table
+      </description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: dummy</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="COM.YODLEE.CORE.SIMPLEDESCRIPTION.RULE.VERSION" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Acl key to switch Simple Description derivation algorithm for a transaction. Default 1.0, derive the Simple Description rule based on Transaction Classification and Type/SubType. The valuse can be set to 1.1 to derive the Simple Description rule based on...</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: 1.1</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="GENERAL_MEERKAT_BASED_SIMPLE_DESC_ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Enable Simple Description</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="GENERAL_MEERKAT_BASED_CATEGORIZATION_ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Enable TDE (Core Enrichment - Category, Merchant)</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="COM.YODLEE.CORE.CATEGORIZATION_SERVICE.ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Switchable key to enable/disable Categorization Service. Categorization Service is a standalone service, categorized the transaction for Bank or Card transaction using Meerkat and / or Legacy.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="TDE_SUPPORTED_VERSION" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>We have different versions for Transaction Data Enrichment. This ACL Key is to check the TDE Version enabled.</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: 2.0</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="com.core.yodlee.meerkat.reapply.days" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Number of transactions for which TDE needs to be applied while Failover</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 14</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="GENERAL_MEERKAT_BASED_GEO_LOCATION_ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Switchable key to enable/disable Meerkat based Geo Location Population</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="MEERKAT_SIMPLE_DESC_GEO_LOCATION_ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>App-4148 -- This key is used to configure the presence of geolocation details in the simple description. By default, the geolocation details should be disabled, i.e., not be displayed.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.categorization.refine.categories.enabled</name>
+      <description>This Key is used to enable merging/renaming of categories. Reference : Story Id B-02448.
+         This is parallel Categorisation, we are not enabling this for anyone
+      </description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Challenge Deposit Verification" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION_CD_DEBIT_ENABLED_FOR_BROKERAGE_ACCT</name>
+      <description>COM.YODLEE.CORE.VERIFICATION_CD_DEBIT_ENABLED_FOR_BROKERAGE_ACCT</description>
+      <dataType>BIT</dataType>
+      <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Challenge Deposit Verification" name="COM.YODLEE.CORE.ACCOUNT_VERIFICATION.CDV_ENABLED" product="Account Verification">
+      <keyType>PARAM_ACL</keyType>
+      <description>Access Control for Challenge Deposit Verificaiton</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Config" name="COBRAND_NAME" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Name of Client part of Yodlee communication.</description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ${developer.companyName}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Config" name="GENERAL_USER_ROLE" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Key to define User Role in the system.</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: test</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="COM.YODLEE.COBRAND.LOCALE.SUPPORTED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the locales supported by Client. Utilized to control user preferences during registration. 
+         Possible values are all possible Locales defined in our system. Probable usage will be for clients who cater to multiple regions or 
+         countries. Will be same as DEFAULT locale "COM.YODLEE.COBRAND.LOCALE.DEFAULT" if we have only one locale support.
+         needs analysis on how config tool is going to present this</description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ${input.supportedLocales}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="com.yodlee.core.dateFormat.default" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the date format preference for client. Probable usage in API : where date is returned - Account, Transactions etc.</description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: MM/dd/yyyy</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="COM.YODLEE.COBRAND.LOCALE.DEFAULT" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Used in ysl 1.1, needs analysis on how config tool is going to present this</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ${inputs.Default_Locale}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="com.yodlee.core.cobrand_timezone" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the timezone of this client, utilized in User Registration and User preferences. Probable usage in API : Transaction Search, Account (Refresh details, Error Details).</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: PST</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="com.yodlee.core.currency.default" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the currency for this client, utilized in data retrieval API. Probable usage in API : where amounts are returned - Accounts, Transaction Search.</description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: USD</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="com.yodlee.core.currencyNotation.default" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description><![CDATA[Specifies the notation of currency to be part of API respone & UX - Text/Symbol. Probable usage in API : where amounts are returned - Accounts, Transaction Search.]]></description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: SYMBOL</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="com.yodlee.core.groupPattern.default" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies where the separate should come for larger amounts. Probable usage in API : where amounts are returned - Accounts, Transaction Search.</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ###,##0.##</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="COM.YODLEE.CORE.FETCH_ALL_LOCALE_DATA_ENABLED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>To enable fetching all localized data for a key</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="PREFERRED_DATE_FORMAT" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>User preferred date format</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: MM/dd/yyyy</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="PREFERRED_NUMBER_FORMAT" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Preferred format for number display in the application</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ###</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Localization" name="PREFERRED_CURRENCY_FORMAT" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Preferred Currency format for display in the application</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: SYMBOL</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Profile" name="COBRAND_COMPANY_NAME" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Legal Company Name of client.</description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ${developer.companyName}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Compare Me" name="com.yodlee.compareme_new_flow_model_enabled" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>This is the key to determine whether cobrand is enabled for new model. Possible values:True/False</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Compare Me" name="com.yodlee.compareme_new_flow_test_mode_value" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>This key will determines the value for what purpose it is enabled in testing mode.Possible Values:1(Old Model),2(Populate both Old and New Model),null or 0(Only New model)</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <name>GENERAL_DATA_EXTRACTS.EVENTS_NOTIFICATION_BATCH_SIZE</name>
+      <description>To indicate the notification split size for ysl api pagination for Data extract events feature</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 2000</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" name="GENERAL_DATA_EXTRACTS.USER_DATA_PAGINATION_ENABLED" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>To indicate whether ysl api pagination for Data extract user data feature is supported or not</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <name>COM.YODLEE.CORE.DATA_EXTRACTS.SUPPORTED_HELD_HELDAWAY_COLLECTIONS</name>
+      <description>This Acl restricts the Data Extracts response depending on the combination configure (HELDPREPOP,HELDNONPREPOP,HELDAWAY) using SumInfo's SumInfoPrepopModeId configured for a Cobrand.This is used in DataExtractController.java (YSL Component) and WebHookDa...</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: HELDPREPOP,HELDNONPREPOP,HELDAWAY</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" name="GENERAL_DATA_EXTRACTS.DAYS_COUNT_VALUE" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>Cobrand can fetch the data up to this value in past</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 7</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.DATAEXTRACTS.UPDATE_USER_LOGIN.REQUIRED</name>
+      <description>This is a flag to check if Last Login of an user is to be updated on Data Extracts - Get UserData call</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.DBFILER.VALIDATE_ITEM_SUMMARY_DATA_MODIFICATION.ENABLED</name>
+      <description>key to decide if the item summary data need to be validated for updates. should be enabled if dataextractsmanagement apis are turned on</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.DATAEXTRACTS.USER_UNREGISTER_INFO.REQUIRED</name>
+      <description>To configure cobrand specific DataExtract API response to be exposed for DATAEXTRACTS USER_UNREGISTER which is developed on top of SDG.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <name>GENERAL_DATA_EXTRACTS.DATE_TIME_DIFFERENCE_IN_SECONDS</name>
+      <description>Cobrand data fetch duration between fromDate and toDate value cannot be greater than this value</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 3600</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Points" name="COM.YODLEE.CORE.DAILY_DATA_POINT_IN_MONTHS" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Number of past months for which daily data points will be calculated. Zero means current month. If 999 then daily data points will be calculated using all transactions</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Points" name="COM.YODLEE.CORE.WEEKLY_DATA_POINT_IN_MONTHS" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Number of past months for which weekly data points will be calculated. Zero means current month. If 999 then weekly data points will be calculated using all transactions.</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Points" name="COM.YODLEE.CORE.MONTHLY_DATA_POINT_IN_MONTHS" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Number of past months for which monthly data points will be calculated. Zero means current month. If 999 then monthly data points will be calculated using all transactions.</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 12</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Rounding" name="com.yodlee.core.amount.rounding.pattern" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>This param acl controls the rounding logic applied to amount fields</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: PRECISION_2</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Validation" name="COM.YODLEE.CORE.VAULT_SERVICE.ENABLED" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>Config Parameter Key to enable Vault Service for Data Validation. This key is independent SDG Version.</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="ICE" name="GENERAL.STATEMENTS_HISTORY_ENABLED" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>ACL Key to enable/disable minimum of 24 months transaction history for a cobrand.Default value is False.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Investment Holdings" product="Investment Holdings">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.INVESTMENT.HOLDINGS.QUOTE_FEED.FEATURE.ENABLED</name>
+      <description>Feature switch to enable/disable quote feed on Investment Holdings Finapp.Mainly used in Finapp though API will also use it for Investment Holdings product , this key should be enabled</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Investment Holdings" name="COM.YODLEE.CORE.QUOTE_FEED.MONGO_SERVICE.ENABLED" product="Investment Holdings">
+      <keyType>PARAM_KEY</keyType>
+      <description>Feature switch to enable/disable MONGO Service for Quote Feed. Used in Investment Holding Finapp. Need to disable for Non US DC.
+		For Investment Holdings product , this key should be enabled</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <valueTemplate>non us disable</valueTemplate>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="IPC" name="IPC_REFRESH_ENABLED" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>IPC Refresh Enabled for Account Aggregation Flow.
+		Feature switch for IPC.
+		As of now this should be enabled for SC9 only (input from Kirti)</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <valueTemplate>${ ifVal(customer.region.ipcRefreshEnabled, 'TRUE', 'FALSE') }</valueTemplate>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Matching Service" name="GENERAL.REFRESH.SDG.MATCHING_SERVICE" product="Account Verification">
+      <keyType>PARAM_ACL</keyType>
+      <description>Specifies access Control for SDG Matching Service. If not enabled client will not be able to make a verification API call.</description>
+      <inputType>CLIENT</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Matching Service" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.MAX_VERIFICATION_LIMIT</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.MAX_VERIFICATION_LIMIT</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 3</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Oauth" name="com.yodlee.core.oauth_based_aggregation.enabled" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description><![CDATA[Specifies whether Oauth based aggregation is enabled for this client. This will be applicable for Open Banking & Oauth providers. This is linked to Client on-boarding which would have other steps as well like certificate upload, registration @ provider level, etc.]]></description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <valueTemplate>${(region.properties.oAuthEnabled)!'true'}</valueTemplate>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Popular Sites" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.popular_sites.feature_switch_enabled</name>
+      <description><![CDATA[Specifies popular Sites feature is enabled or not for this client. This utilized only for enabling the Popular section in FL UX & to fetch popular Sites variation in Provider API. Not used in Search Sorting. In YSL Search, sorting default depends on popularity fetched from Reports DB.]]></description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: true</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Popular Sites" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.popular_sites.max_pop_sites_to_return</name>
+      <description><![CDATA[Specifies maximum number of providers that can be returned by "Provider" API "popular" flavor inclusive of static popular sites configured for client. Dependent on "com.yodlee.core.popular_sites.feature_switch_enabled" & "COM.YODLEE.CORE.POPULAR_SITES.LIST_OF_SITES".]]></description>
+      <inputType>CLIENT</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 10</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Realestate" name="COM.YODLEE.CORE.REALESTATE.SMART_ZIP.ENABLED" product="AGGREGATION">
+      <keyType>PARAM_KEY</keyType>
+      <description>Feature switch to specify if real estate vendor is SmartZip or not</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: ${businessRegion.code != "uk"}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Audit" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <name>GENERAL.REFRESH.SITE_AND_CONTAINER_REFRESH_STATS_TRACKING.ENABLED</name>
+      <description>It is used to simplify the refresh tracking at site and container level. The site and container level runtime refresh statuses are stored at SITE_REFRESH_STATS and CONTAINER_REFRESH_STATS respectively for every refresh triggered in the system</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Closed Accounts" name="COM.YODLEE.CORE.DBFILER.CLOSEDACCOUNTS.ENABLED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Feature switch to enable close accounts in case account has been closed at end site</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Closed Accounts" name="COM.YODLEE.CORE.DBFILER.CLOSE.NON_PREPOP" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Indicates item accounts status CLOSED or TO_BE_CLOSED for non pre pop accounts</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Closed Accounts" name="COM.YODLEE.CORE.DBFILER.CLOSE.PREPOP" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Indicates item accounts status CLOSED or TO_BE_CLOSED for pre pop accounts</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" name="com.yodlee.core.refresh.lost_instantupdate_timeout" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the time duration after which the refresh would be maarked as timedout.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 300</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.add_site.readd_deleted_accounts.enabled</name>
+      <description>Specifies whether existing deleted account (item account) will be re-added into the system when the user performs re-adds the site with same credentials.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" name="com.yodlee.core.site_refresh.enabled" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies user credentials management is done @ Site Level and utilized for aggregating data under this Site for all containers/accounts linked with this credentials and Login URL.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" name="COM.YODLEE.DC.REFRESH.GATHERER_REQUEST_VERSION" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>It helps to determine the data model version to be used by a COBRAND in production environment
+			Product: For new customers it should be true, for migration this may have to be changed</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ${inputs.Gatherer_Request_Version}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" name="com.yodlee.core.mfa.enabled" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>com.yodlee.core.mfa.enabled</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.new_containers_lookup.time_interval_in_sec</name>
+      <description>Value for this key is used to determine the time limit after which we should try to lookup for new containers under that site.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 604800</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" name="com.yodlee.core.refresh.generic_request_time_limit" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>com.yodlee.core.refresh.generic_request_time_limit</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 900</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" name="COM.YODLEE.FEATURE_NEW_GATHERER_KEY" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>COM.YODLEE.FEATURE_NEW_GATHERER_KEY</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Deduplication" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.DBFILER.TXN_MATCHING_ACCOUNT_DEDUPLICATION_ENABLED</name>
+      <description>Feature switch to specify if the txn matchinglogic should be enabled or not.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Deduplication" name="COM.YODLEE.DBFILER.ACCOUNT_DEDUPLICATION.ENABLED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Feature switch to specify if account deduplication feature is enabled for Cobrand or not.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Progressive Refresh" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.REFRESH.PROGRESSIVE_REFRESH.ENABLED</name>
+      <description>Feature switch for enabling/disabling the progressive refresh @ Cobrand level. If enabled transactions if count is more will be sent in batches from gatherer.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Progressive Refresh" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.REFRESH.PROGRESSIVE_REFRESH.SEQUENCING.ENABLED</name>
+      <description>This key is to control new feature to reduce latency in PR flow. In this sequential processing of PR responses is achieved by persisting the partial responses in DB and processing it sequentially without blocking the dbfiler threads.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Row Delination" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.DBFILER.RECONCILE.CHECK_TRANSACTION.BASED_ON_CHECK_NUMBER_ONLY.ENABLED</name>
+      <description>Reconcile check transactions only when check number is matching</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" name="COM.YODLEE.CORE.SSO.FIELDS_TOBE_REPLACED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the attributes that are to be massaged during SAML login parsing.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: NULL</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.SSO.IS_CUSTOMIZED_PREPOP_FLOW_ENABLED</name>
+      <description>Specifies customized pre-pop flow for a client is enabled or not.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" name="COM.YODLEE.CORE.SSO.LOGIN_FIELDS_TOBE_COMPARED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the attributes that are to be compared during SAML login parsing.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: all</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.ext.sso.prepop.accounts.readd.after.deletion</name>
+      <description>Specifies if the account (item account/item) is deleted by used will e re-added into the system as part of pre-pop flow.  Dependent on "com.yodlee.core.canDeletePrepopAccounts".</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" name="com.yodlee.saml.accpop.pref_keys_list_to_delete" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Very specific client implementation key part of SAML login.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" name="com.yodlee.saml.encrypted_mem_key" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Very specific client implementation key part of SAML login.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: NULL</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" name="COM.YODLEE.CORE.SAML_AND_HOSTED_TNC" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>TNC for SAML client</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BIT</dataType>
+      <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.fastlink.auto_add_for_prepop.enabled</name>
+      <description>Param Key to enable auto addition of containers for a site account which has atleast one pre-pop item.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SAML" name="com.yodlee.sso.override.default.url" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>SAML key</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BIT</dataType>
+      <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.SDG.ACCT_PROFILE.DEPENDANCY.BASIC_ACCOUNT_INFO.ENABLED</name>
+      <description>Param key to Include/Exclude BASIC_ACCOUNT_INFO dataset attribute form request with ACCOUNT_PROFILE Dataset attribute
+			For new customers it should be true,
+			for migration this may have to be changed</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="GENERAL.REFRESH.SDG.CONFIG" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Acl key to enable/disable SDG/SDG tracking feature for a cobrand.Default value is OFF.</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ON</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Account Masking" name="com.yodlee.core.account_number.masking.enable" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies masking feature is enabled for account number attribute.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Account Masking" name="COM.YODLEE.CORE.MASK_ACCOUNT_NUMBER" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies base feature switch for masking feature is enabled for account number attribute.</description>
+      <dataType>BIT</dataType>
+      <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Account Masking" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.supress_account_number_masking_for_held_account</name>
+      <description>Specifies whether account number masking should be suppressed  for Held Accounts. Applicable for Accounts linked to Sites that are marked as HELD for this client. Client would generally be FI's with SAML integration.</description>
+      <dataType>BIT</dataType>
+      <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Account Masking" name="com.yodlee.core.accountnumber.masklength" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description><![CDATA[Specifies the number of digits that would be masked in account number when account numer is retrieved by client API (Legacy & YSL). This is also utilized in Alerts generated. Dependent & applicable only if  'COM.YODLEE.CORE.MASK_ACCOUNT_NUMBER' key is enabled.]]></description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 4</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Account Masking" name="com.yodlee.core.accountnumber.maskchar" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>com.yodlee.core.accountnumber.maskchar</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: x</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Authentication" name="com.yodlee.core.login.relative_time_to_lock_login" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>com.yodlee.core.login.relative_time_to_lock_login</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 1800</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Authentication" name="com.yodlee.core.touch.update_session_interval" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>com.yodlee.core.touch.update_session_interval</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 300</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Data" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.AGGREGATION.ENCRYPT_PROFILE_INFORMATION</name>
+      <description>This is the key to determine whether the PII scraped should be encrypted for the cobrand while persisting to DB/decrypting in API response. Possible values: True/False</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Data" name="COM.YODLEE.COBRAND_PKI.ENABLED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>This key specifies whether credentials passed to add and edit acount APIs should be encrytped or not.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Data" name="GENERAL_PUBLICKEY_ATTRIBENCRYPTION_ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Access control to publickey based encrytpion on account number in getitemsummaries response</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Data" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.security.ingrian.account_credentials.hk1</name>
+      <description>com.yodlee.security.ingrian.account_credentials.hk1</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: NULL</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Data" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.security.ingrian.account_credentials.hk2</name>
+      <description>com.yodlee.security.ingrian.account_credentials.hk2</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: NULL</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Fraud Check" name="com.yodlee.core.fraudulent.switch.enabled" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Decides whether fraudulent user suspend feature is enabled or not</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Fraud Check" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.fraudulent.userSuspend.ifAccountAddition.maxLimit</name>
+      <description>Limits the total number of credentials which user can aggregate in our system via ADD operation.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: ${ifTrue(hasProduct("VERIFICATION", 200, 20))}</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Fraud Check" name="com.yodlee.core.login.max_login_failure_tolerance" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description><![CDATA[Specifies the number of attempts User can try with wrong login details. Applicable for non-JWT & non-SAML clients.]]></description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 5</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Categorization" name="GENERAL_GRANULAR_CATEGORY_ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Acl key to enable granular category feature. Granular category being returned by the TDE Webservice will be populated and exposed only if granular category feature is enabled.Granular categories(Refer GRANULAR_CATEGORY, GRANULAR_TXN_CAT_MAP tables) are 221 set of categories introduced to give more granular/detailed level of categorisation which will be tagged to the transactions. This will be in addition to existing master category and high level category.</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Fraud Check" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>com.yodlee.core.login.cobrand_max_login_failure_tolerance</name>
+      <description>com.yodlee.core.login.cobrand_max_login_failure_tolerance</description>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 5</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - General" name="com.yodlee.core.login.cobrand_session_timeout" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specifies the duration of session timeout for Cobrand Login. Applicable for non JWT based API/APP integration clients.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 86400</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Persistence" name="com.yodlee.security.useingrian" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>com.yodlee.security.useingrian</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <valueTemplate>${(env.properties.ingrianEnabled!'false')}</valueTemplate>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Purge" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_ON_REMOVE_TRANSFER_ACCT</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_ON_REMOVE_TRANSFER_ACCT</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Purge" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_ON_UNREGISTER</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_ON_UNREGISTER</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Purge" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.SOFT_PURGE_DETAILS</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.SOFT_PURGE_DETAILS</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Purge" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_HELD_AWAY_INFO_GATHERED_FROM_FI</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_HELD_AWAY_INFO_GATHERED_FROM_FI</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Purge" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_HELD_AWAY_INFO_ENTERED_BY_USER</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_HELD_AWAY_INFO_ENTERED_BY_USER</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Security - Purge" product="Account Verification">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_ONLINE_CREDENTIALS_ENTERED_BY_USER</name>
+      <description>COM.YODLEE.CORE.VERIFICATION.IAV.PURGE_ONLINE_CREDENTIALS_ENTERED_BY_USER</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Refresh - Config" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <name>COM.YODLEE.CORE.REMOVE_ITEM_DELETE_TRANSACTIONS_IN_OFFLINE_MODE</name>
+      <description>Cobrandable Param key to control deletion of transaction in offline mode to increase performance of ItemManagement.removeItem(userContext,itemId1) SDK API call.</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Term And Conditions" name="COM.YODLEE.CORE.IS_CORE_TNC_MANAGEMENT_ENABLED" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Specfies whether Terms And Conditions is enabled for Client to be displayed for user as part of First Time User Experience.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Verification" name="COM.YODLEE.SDG.MARK_SERVER_TYPE_AS_V" product="Account Verification">
+      <keyType>PARAM_ACL</keyType>
+      <description>key to enable  server type from I to V in server_stats table for SDG if only account profile is requested.
+			As of now this should be enabled for IAV only (input from Kirti). Not for AGGR + IAV</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <valueTemplate>${customer.ifProductWithFlag('sdgServerTypeV', 'TRUE', 'FALSE')}</valueTemplate>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Webhooks" name="COM.YODLEE.CORE.WEBHOOKS.NOTIFICATION.ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>Feature switch to enable the webhooks feature</description>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Webhooks" name="COM.YODLEE.CORE.WEBHOOKS.NOTIFICATION.VERSION" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>This key is used to decide the API Version supported for WEBHOOKS</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: 1.1</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Webhooks" name="COM.YODLEE.CORE.WEBHOOKS.NOTIFICATION.CONTENT_TYPE" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>To Indicate WebHooks Notification Content Type</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: application/json</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="YSL - Version" name="COM.YODLEE.CORE.YSL.API_VERSION" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>This param key is DEPRECATED. Use param_acl key YSL_BASE_API_VERSION for switching of API version</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: 1.1</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="YSL - Version" name="YSL_BASE_API_VERSION" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>switchable key for YSL API Versioning</description>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: 1.1</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="" name="containers" product="Common" virtualKey="boolean: true">
+      <label>Containers</label>
+      <description>List of Containers that should be used by Cobrand.</description>
+      <inputType>ADMIN</inputType>
+      <dataType>MULTI_ENUM</dataType>
+      <list name="enumOptions">
+        <element>
+          <label>Bank</label>
+          <value>bank</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>Investment</label>
+          <value>investment</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>Credit Card</label>
+          <value>creditCard</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>Insurance</label>
+          <value>insurance</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>Real Estate</label>
+          <value>realEstate</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>Loan</label>
+          <value>loan</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>Reward</label>
+          <value>reward</value>
+          <disabled>boolean: false</disabled>
+        </element>
+      </list>
+      <defaultValueNewCustomer>string[]: bank, investment, creditCard, insurance, realEstate, loan, reward</defaultValueNewCustomer>
+      <enumExpression>${product.containers}</enumExpression>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="" name="transactionDays" product="AGGREGATION" virtualKey="boolean: true">
+      <label>Transactions Duration</label>
+      <description>Number of days per which, transactions , bills and statements that should be fetched for the cobrand</description>
+      <inputType>ADMIN</inputType>
+      <dataType>ENUM</dataType>
+      <list name="enumOptions">
+        <element>
+          <label>90</label>
+          <value>90</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>120</label>
+          <value>120</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>180</label>
+          <value>180</value>
+          <disabled>boolean: false</disabled>
+        </element>
+      </list>
+      <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="" name="docDownloadTypes" product="AGGREGATION" virtualKey="boolean: true">
+      <label>Document Download Types</label>
+      <description>Type of Document download that should be enabled for the cobrand</description>
+      <inputType>ADMIN</inputType>
+      <dataType>MULTI_ENUM</dataType>
+      <list name="enumOptions">
+        <element>
+          <label>TAX</label>
+          <value>TAX</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>STMT</label>
+          <value>STMT</value>
+          <disabled>boolean: false</disabled>
+        </element>
+        <element>
+          <label>EBILL</label>
+          <value>EBILL</value>
+          <disabled>boolean: false</disabled>
+        </element>
+      </list>
+      <defaultValueNewCustomer>string[]: STMT</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Client Onboarding - Config" name="COM.YODLEE.CORE.POPULAR_SITES.LIST_OF_SITES" product="Common">
+      <keyType>PARAM_KEY</keyType>
+      <description>Parameter to configure list of static popular sites for a Cobrand. The List will be comma separated Site IDs of SITE table</description>
+      <inputType>CLIENT</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: ${inputs.Popular_Static_Sites}</defaultValueNewCustomer>
+      <valueTemplate>${colToStr(customer.sites, siteId, ',')</valueTemplate>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="" product="AGGREGATION" virtualKey="boolean: true">
+      <name>BASIC_AGG_DATA.ACCOUNT_DETAILS.CONFIGS.isProgressSupportEnabled</name>
+      <description>BASIC_AGG_DATA.ACCOUNT_DETAILS.CONFIGS.isProgressSupportEnabled</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element product="AGGREGATION" virtualKey="boolean: true">
+      <name>BASIC_AGG_DATA.STATEMENTS.CONFIGS.firstTimeTxnFetchDuration</name>
+      <description>BASIC_AGG_DATA.STATEMENTS.CONFIGS.firstTimeTxnFetchDuration</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 40</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element product="AGGREGATION" virtualKey="boolean: true">
+      <name>BASIC_AGG_DATA.STATEMENTS.CONFIGS.inactiveUserTxnFetchDuration</name>
+      <description>BASIC_AGG_DATA.STATEMENTS.CONFIGS.inactiveUserTxnFetchDuration</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element name="BASIC_AGG_DATA.STATEMENTS.CONFIGS.levelOfDetail" product="AGGREGATION" virtualKey="boolean: true">
+      <description>BASIC_AGG_DATA.STATEMENTS.CONFIGS.levelOfDetail</description>
+      <inputType>ADMIN</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: Basic</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element name="BASIC_AGG_DATA.TRANSACTIONS.IS_ENABLED" product="Common" virtualKey="boolean: true">
+      <description>BASIC_AGG_DATA.TRANSACTIONS.IS_ENABLED</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <defaultValueExpression>${customer.ifProductWithFlag('aggDataTransactionsEnabled','TRUE', 'FALSE') }</defaultValueExpression>
+      <optional>boolean: false</optional>
+    </element>
+    <element name="BASIC_AGG_DATA.TRANSACTIONS.IS_IMPLICIT_IN_REQUEST" product="Common" virtualKey="boolean: true">
+      <description>BASIC_AGG_DATA.TRANSACTIONS.IS_IMPLICIT_IN_REQUEST</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <defaultValueExpression>${customer.ifProductWithFlag('aggDataTransactionsImplicitRequest', 'TRUE', 'FALSE') }</defaultValueExpression>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Common" name="COM.YODLEE.CORE.SDG.DATA.MODEL" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>This param acl is to control Declob changes and it can have 3 values 1) OLD : Populating and consumption from only old table 2) OLD-AND-NEW - Populating into both OLD and NEW tables and Consumption from only old table 3) NEW - Data will not populated into old clob columns and consumption is also from new table</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: OLD</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element product="Common" virtualKey="boolean: true">
+      <name>BASIC_AGG_DATA.TRANSACTIONS.CONFIGS.firstTimeTxnFetchDuration</name>
+      <description>BASIC_AGG_DATA.TRANSACTIONS.CONFIGS.firstTimeTxnFetchDuration</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="TDE" name="GENERAL.REFRESH_RESPONSE_TRACKER" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>ACL Key to enable/disable scheduler based response consolidation for a cobrand.Default value is False.</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element product="Common" virtualKey="boolean: true">
+      <name>BASIC_AGG_DATA.TRANSACTIONS.CONFIGS.txnForSecurityDataEnrichment</name>
+      <description>BASIC_AGG_DATA.TRANSACTIONS.CONFIGS.txnForSecurityDataEnrichment</description>
+      <inputType>ADMIN</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element product="Common" virtualKey="boolean: true">
+      <name>BASIC_AGG_DATA.TRANSACTIONS.CONFIGS.inactiveUserTxnFetchDuration</name>
+      <description>BASIC_AGG_DATA.TRANSACTIONS.CONFIGS.inactiveUserTxnFetchDuration</description>
+      <inputType>ADMIN</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Verification" product="Account Verification">
+      <keyType>PARAM_ACL</keyType>
+      <name>INSTANT_ACCOUNT_VERIFICATION.SCRAPE_STANDARD_ROUTING_NUMBER.ENABLED</name>
+      <description>Config Parameter Key to scrape Standard Routing Number for a given cobrand.</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="ICE" name="ICE_SUPPORTED_CONTAINERS" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>ACL Key to check ICE supported containers. Default value for this key is null. Null value indicates that ICE is not enabled for any of the container. Comma separated containers will be there for which ICE will be called</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: dummy</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="ICE" name="ICE_APPLY_TDE_FOR_INCREMENTAL_TXNS" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>ACL Key to enable the TDE enrichment during cache refresh</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="ICE" name="ICE_ON_DEMAND_TXN_DURATION_MIN_INTERVAL" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>ACL Key to configure minimum duration required between start date to end date to retrieve the transactions for ICE enrichment during on demand API call</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 180</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="ICE" name="ICE_ON_DEMAND_TXN_DURATION_MAX_INTERVAL" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>ACL Key to configure maximum duration required between start date to end date to retrieve the transactions for ICE enrichment during on demand API call</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 720</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Transactions to Holding Matching" name="COM.YODLEE.CORE.T2H.ENABLED" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>This is key to control RealTime T2H in platform during account refresh for investment transactions and is applicable for IDE and RECON enabled cobrands</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: TRUE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="Data Extracts" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <name>COM.YODLEE.CORE.DATA_EXTRACTS.EXCLUDED_BDF_SUMINFO_LIST</name>
+      <description>Data extracts events notifications will be disabled for BDF requests for the provided list of suminfos. This is used in YSL and Alert Component</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>STRING</dataType>
+      <defaultValueNewCustomer>string[]: dummy</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="IPC" name="IPC_GATHERER_HANDLE_NO_OF_RETRY" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>key to enable number of default retry count if gatherer did not give IPC handle</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>INT</dataType>
+      <defaultValueNewCustomer>string[]: 2</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SMB" name="COM.YODLEE.CORE.SMALL_BUSINESS_2.0.ENABLED" product="AGGREGATION">
+      <keyType>PARAM_ACL</keyType>
+      <description>This key is used to enable or disable the Small Business Two Feature at Dbfiler and ysl</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="General" name="YODLEE.CLOUD.AWS.SQS.ROUTE.ENABLED" product="Common">
+      <keyType>PARAM_ACL</keyType>
+      <description>This param acl is to route request to Amazon SQS Queue</description>
+      <inputType>INTERNAL</inputType>
+      <dataType>BOOLEAN</dataType>
+      <defaultValueNewCustomer>string[]: FALSE</defaultValueNewCustomer>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="BASIC_AGG_DATA.BASIC_ACCOUNT_INFO" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+          <valueTemplate>ifVal(hasContainers(thisKey.containers), 1, 0)</valueTemplate>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>customer.ifProductWithFlag('isCacheRefreshSupported', '1', '0')</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: dummy</defaultValueNewCustomer>
+          <valueTemplate>[{"container": "@expr: intersection(thisKey.containers, customer.containers)"}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>BASIC_AGG_DATA.BASIC_ACCOUNT_INFO</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="BASIC_AGG_DATA.ACCOUNT_DETAILS" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(hasDatsetAttr(thisKey.name), 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>${ifVal(customer.hasProducts(thisKey.products),1,0)}</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>${customer.ifProductWithFlag('isCacheRefreshSupported', '1', '0') }</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["bank","investment","creditCard","insurance","realEstate","loan","reward","bill"],
+  "configs":{"dependentAttributesConfigs" :[{"attribute":13,"attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO", "container":["bank","investment","creditCard","insurance","realEstate","loan","reward","bill"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container":"@expr: intersection(thisKey.containers, customer.containers)","configs":{"isProgRefreshSupported":"@expr:configs['isProgRefreshSupported'].booleanValue"}}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>BASIC_AGG_DATA.ACCOUNT_DETAILS</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="BASIC_AGG_DATA.HOLDINGS" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate><![CDATA[ifVal((hasDatasetEnabled(thisKey.name) && customer.hasContainers(thisKey.containers)), 1, 0)]]></valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>hasDatasetEnabled(thisKey.name)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>customer.ifProductWithFlag('isCacheRefreshSupported', 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["investment","insurance"], "configs":{"dependentAttributesConfigs" :[{"attribute":13,
+  "attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO","container":["investment","insurance"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container": "@expr: intersection(thisKey.containers, customer.productContainers('Aggregation'))"}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>BASIC_AGG_DATA.HOLDINGS</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="BASIC_AGG_DATA.STATEMENTS" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate><![CDATA[ifVal((hasDatasetAttr(thisKey.name) && customer.hasContainers(thisKey.containers)), 1, 0)]]></valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(customer.hasDatasetAttr(thisKey.name), 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>ifProductWithFlag('isCacheRefreshSupported', 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["creditCard","insurance","loan","bill"], "configs":{"maxStmtDurationLimit": 180,
+  "historicStatementDuration": "$derived","dependentAttributesConfigs" :[{"attribute":5,
+  "attributeName":"BASIC_AGG_DATA.ACCOUNT_DETAILS","container":["creditCard"]},{"attribute":13,
+  "attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO","container":["creditCard","insurance","loan","bill"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container":"@expr: intersection(thisKey.containers, cobrand.containers)","configs":{"firstTimeTxnFetchDuration":"@expr:configs['transFetchDurationDays'].intValue","inactiveUserTxnFetchDuration":"@expr:configs['inactiveUsertransFetchDurationDays'].intvValue","levelOfDetail":"@expr:configs['levelOfDetail']"}}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>BASIC_AGG_DATA.STATEMENTS</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="BASIC_AGG_DATA.TRANSACTIONS" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>Feature Switch key for Transaction History (under verification)</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate><![CDATA[ifVal((hasDatasetAttr(thisKey.name) && customer.hasContainers(thisKey.containers) && configs['transactionsEnabled'].booleanValue), 1, 0)]]></valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate><![CDATA[ifVal((hasDatasetAttr(thisKey.name) && configs['transImplicitInReq'].booleanValue),1,0)]]></valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>ifProductWithFlag('isCacheRefreshSupported', 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["bank","investment","creditCard","insurance","loan"],
+  "configs":{"maxTxnValidationDuration": 1830, "unbilledTransactionSelectionPeriod": "$derived",
+  "historicTransactionDuration":"$derived","dependentAttributesConfigs" :[
+{"attribute":5,"attributeName":"BASIC_AGG_DATA.ACCOUNT_DETAILS","container":["creditCard"]},
+{"attribute":7,"attributeName":"BASIC_AGG_DATA.STATEMENTS","container":["creditCard"]},{"attribute":13,
+"attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO","container":["bank","investment","creditCard","insurance","loan"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container":"@expr: intersection(thisKey.containers, customer.containers)","configs":{"firstTimeTxnFetchDuration":"@expr:configs['transFetchDurationDays'].intValue","inactiveUserTxnFetchDuration":"@expr:configs['inactiveUsertransFetchDurationDays'].intValue","txnForSecurityDataEnrichment":"@expr:configs['securityDataEnrichment'].booleanValue","isProgRefreshSupported":"@expr:configs['progressiveRefreshEnabled'].booleanValue"}}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>BASIC_AGG_DATA.TRANSACTIONS</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="ACCT_PROFILE.BANK_TRANSFER_CODE" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate><![CDATA[ifVal((customer.hasDatasetAttr(thisKey.name) && customer.hasContainers(thisKey.containers)), 1, 0)]]></valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(customer.hasDatasetAttr(thisKey.name),1,0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: dummy</defaultValueNewCustomer>
+          <valueTemplate>[{"container": "@expr: intersection(thisKey.containers, customer.containers)"}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>ACCT_PROFILE.BANK_TRANSFER_CODE</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="ACCT_PROFILE.FULL_ACCT_NUMBER" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(configs["ACCT_PROFILE.FULL_ACCT_NUMBER.IS_ENABLED"].booleanValue, 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(configs["ACCT_PROFILE.FULL_ACCT_NUMBER.IS_ENABLED"].booleanValue, 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["bank","investment","creditCard","insurance","loan","reward","bill"],
+  "configs":{"includeInIntermediateResponse":true,"dependentAttributesConfigs":[{"attribute":13,
+  "attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO","container":["bank","investment","creditCard",
+  "insurance","loan","reward","bill"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container": "@expr: intersection(thisKey.containers, customer.containers)"}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>ACCT_PROFILE.FULL_ACCT_NUMBER</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="ACCT_PROFILE.HOLDER_NAME" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(configs["ACCT_PROFILE.HOLDER_NAME.IS_ENABLED"].booleanValue, 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(configs["ACCT_PROFILE.HOLDER_NAME.IS_ENABLED"].booleanValue, 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["bank","investment","loan"], "configs":{"includeInIntermediateResponse":true,
+  "dependentAttributesConfigs" :[{"attribute":13,"attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO",
+  "container":["bank","investment","loan"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container":"@expr: intersection(thisKey.containers, cobrand.containers)","configs":{"scrapeMultiHolderName":"true"}}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>ACCT_PROFILE.HOLDER_NAME</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="ACCT_PROFILE.PAYMENT_PROFILE" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>IS_ENABLED</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate><![CDATA[${ifVal((customer.hasProducts(thisKey.products) && &&configs['ACCT_PROFILE.PAYMENT_PROFILE.IS_ENABLED'].booleanValue), 1, 0)}]]></valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>${ifVal(configs['ACCT_PROFILE.PAYMENT_PROFILE.IS_ENABLED'].booleanValue, 1, 0)}</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: "[{"container":["loan"],"configs":{"dependentAttributesConfigs" :[{"attribute":1,"attributeName":"ACCT_PROFILE.FULL_ACCT_NUMBER",
+"container":["loan"]},{"attribute":13,"attributeName":"BASIC_AGG_DATA.BASIC_ACCOUNT_INFO","container":["loan"]}]},"seqNumber":1}]"</defaultValueNewCustomer>
+          <valueTemplate>[{"container":"@expr: intersection(thisKey.containers, cobrand.containers)"}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>ACCT_PROFILE.PAYMENT_PROFILE</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="ACCT_PROFILE.HOLDER_DETAILS" product="Common">
+      <keyType>DATA_SET</keyType>
+      <list name="subkeys">
+        <element name="IS_ENABLED">
+          <description>Feature Switch: Expanded Account Holder Details (verification)</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(configs["ACCT_PROFILE.HOLDER_DETAILS.IS_ENABLED"].booleanValue), 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>IMPLICIT_IN_REQUEST</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <valueTemplate>ifVal(configs["ACCT_PROFILE.HOLDER_DETAILS.IS_ENABLED"].booleanValue), 1, 0)</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_CACHE_REFRESH_SUPRT_EN">
+          <description>IS_CACHE_REFRESH_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACCT_SUPRT_EN">
+          <description>applicable only for docConfig not for sdg configs. This key can be removed here</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>IS_ONDEMAND_SUPRT_EN</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONFIGS">
+          <description>CONFIGS</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: dummy</defaultValueNewCustomer>
+          <valueTemplate>[{"container": "@expr: intersection(thisKey.containers, customer.containers)"}]</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>ACCT_PROFILE.HOLDER_DETAILS</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="TAX" product="Common">
+      <keyType>DOC_DOWNLOAD</keyType>
+      <list name="subkeys">
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>Enabling key for downloading tax related document</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <deleteExpression>${if(contains(customer.docDownloadTypes.values,'TAX')}</deleteExpression>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>Enabling key to allow tax document download on demand request by client</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACC_EN">
+          <description>Enabling key for downloading tax related document during add account flow</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ACCT_ENROLL_EN">
+          <description>Not applicable for TAX key</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_RETRY_FOR_ONDEMAND_EN">
+          <description>Enabling key to allow retry downloading tax related document in case of download failure for client on demand download request</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_HARDELETE_DOC_SUPRT_EN">
+          <description>Enabling key to allow hard deleting tax related document</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="ADDACC_DWNLD_DUR_IN_DAYS">
+          <description>Key to denote download duration in days of tax information during add account flow</description>
+          <dataType>INT</dataType>
+          <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="DWNLD_DURATION_IN_DAYS">
+          <description>Key to denote download duration in days of tax information during refresh flow</description>
+          <dataType>INT</dataType>
+          <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>Enabling key for downloading tax related document by default, client does not need to send as part of rquest</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONTAINER_SUPRT_EN">
+          <description>Configuration key provides  containers list and related information like frequency for tax document download</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer><![CDATA[string[]: <containerSupported>
+<containerConfig><tag>bank</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>stocks</tag><frequency>@monthly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>loans</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>mortgage</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig></containerSupported>]]></defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="DOC_IMPLICIT_SOURCE_ID">
+          <description>key to denote implicit source id for  tax document download</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: 3</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>Used by DocumentManagementService, they generally 26AS and 1099/1098 forms, etc</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="STMT" product="Common">
+      <keyType>DOC_DOWNLOAD</keyType>
+      <list name="subkeys">
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>Enabling key for downloading statement related document</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>${ifVal(contains(config['docDownloadTypes'].values,'STMT'), '1', '0')}</valueTemplate>
+          <deleteExpression>${if(contains(customer.docDownloadTypes.values,'STMT')}</deleteExpression>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>Enabling key to allow Statement document download on demand request by client</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>${ifVal(contains(config['docDownloadTypes'].values,'STMT'), '1', '0')}</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACC_EN">
+          <description>Enabling key for downloading statement related document during add account flow</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ACCT_ENROLL_EN">
+          <description>Not applicable for STMT key</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_RETRY_FOR_ONDEMAND_EN">
+          <description>Enabling key to allow retry downloading statement related document in case of download failure for client on demand download request</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_HARDELETE_DOC_SUPRT_EN">
+          <description>Enabling key to allow hard deleting statement related document</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="ADDACC_DWNLD_DUR_IN_DAYS">
+          <description>Key to denote download duration in days of statement information during add account flow</description>
+          <dataType>INT</dataType>
+          <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="DWNLD_DURATION_IN_DAYS">
+          <description>Key to denote download duration in days of statement information during refresh flow</description>
+          <dataType>INT</dataType>
+          <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>Enabling key for downloading statement related document by default, client does not need to send as part of rquest</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONTAINER_SUPRT_EN">
+          <description>Configuration key provides  containers list and related information like frequency for statement document download</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer><![CDATA[string[]: <containerSupported>
+<containerConfig><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled><tag>bank</tag></containerConfig>
+<containerConfig><frequency>@monthly</frequency><isDocDateControlled>FALSE</isDocDateControlled><tag>stocks</tag></containerConfig></containerSupported>]]></defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="DOC_IMPLICIT_SOURCE_ID">
+          <description>key to denote implicit source id for  statement document download</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: 3</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>Used by DocumentManagementService represents all statements such as bank/credit card statement, etc</description>
+      <optional>boolean: false</optional>
+    </element>
+    <element feature="SDG" name="EBILL" product="Common">
+      <keyType>DOC_DOWNLOAD</keyType>
+      <list name="subkeys">
+        <element name="IS_AUTO_DWNLD_SUPRT_EN">
+          <description>Enabling key for downloading bill related document</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>${ifVal(contains(config['docDownloadTypes'].values,'EBILL'), '1', '0')}</valueTemplate>
+          <deleteExpression>${if(contains(customer.docDownloadTypes.values,'EBILL')}</deleteExpression>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ONDEMAND_SUPRT_EN">
+          <description>Enabling key to allow Bill document download on demand request by client</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 1</defaultValueNewCustomer>
+          <valueTemplate>${ifVal(contains(config['docDownloadTypes'].values,'EBILL'), '1', '0')}</valueTemplate>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_AUTO_DWNLD_ADDACC_EN">
+          <description>Enabling key for downloading bill related document during add account flow</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_ACCT_ENROLL_EN">
+          <description>Enabling key for Account Enrollment</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_RETRY_FOR_ONDEMAND_EN">
+          <description>Enabling key to allow retry downloading bill related document in case of download failure for client on demand download request</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IS_HARDELETE_DOC_SUPRT_EN">
+          <description>Enabling key to allow hard deleting bill related document</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="ADDACC_DWNLD_DUR_IN_DAYS">
+          <description>Key to denote download duration in days of bill information during add account flow</description>
+          <dataType>INT</dataType>
+          <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="DWNLD_DURATION_IN_DAYS">
+          <description>Key to denote download duration in days of bill information during refresh flow</description>
+          <dataType>INT</dataType>
+          <defaultValueNewCustomer>string[]: 90</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="IMPLICIT_IN_REQUEST">
+          <description>Enabling key for downloading bill related document by default, client does not need to send as part of rquest</description>
+          <dataType>BIT</dataType>
+          <defaultValueNewCustomer>string[]: 0</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="CONTAINER_SUPRT_EN">
+          <description>Configuration key provides  containers list and related information like frequency for bill document download</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer><![CDATA[string[]: <containerSupported>
+<containerConfig><tag>credits</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>loans</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>mortgage</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>insurance</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>bills</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>telephone</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+<containerConfig><tag>utilities</tag><frequency>@yearly</frequency><isDocDateControlled>FALSE</isDocDateControlled></containerConfig>
+</containerSupported>]]></defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+        <element name="DOC_IMPLICIT_SOURCE_ID">
+          <description>key to denote implicit source id for  bill document download</description>
+          <dataType>STRING</dataType>
+          <defaultValueNewCustomer>string[]: 3</defaultValueNewCustomer>
+          <optional>boolean: false</optional>
+        </element>
+      </list>
+      <description>Used by DocumentManagementService represents ability to download all the bills from utility sites such as telephone bill, etc</description>
+      <optional>boolean: false</optional>
+    </element>
+  </list>
+  <system>
+    <list name="products">
+      <element name="Investment Holdings"/>
+      <element name="Account Verification"/>
+      <element name="AGGREGATION"/>
+      <element name="Common"/>
+    </list>
+  </system>
+  <createdBy>installer</createdBy>
+  <updatedBy>installer</updatedBy>
+  <createdOn>ISODate(2021-02-20T18:30:00.000Z)</createdOn>
+  <updatedOn>ISODate(2021-04-05T18:30:00.000Z)</updatedOn>
+</dyn-content>

@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.proxy.steps;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -93,7 +94,7 @@ public class MockRequest implements Serializable
 		try
 		{
 			InputStream is = request.getInputStream();
-			this.body = IOUtils.toString(is);
+			this.body = IOUtils.toString(is, Charset.defaultCharset());
 			is.close();
 		} catch(Exception ex)
 		{

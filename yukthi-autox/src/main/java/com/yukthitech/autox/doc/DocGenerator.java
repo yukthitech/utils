@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.Scanners;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -252,7 +252,7 @@ public class DocGenerator
 		
 		for(String pack : basePackages)
 		{
-			reflections = new Reflections(pack, new SubTypesScanner());
+			reflections = new Reflections(pack, Scanners.SubTypes);
 			
 			loadSteps(docInformation, (Set) reflections.getSubTypesOf(IStep.class), exampleCollections );
 

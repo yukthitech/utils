@@ -136,7 +136,7 @@ public class ExcelImporter
 			return "";
 		}
 		
-		switch(cell.getCellTypeEnum())
+		switch(cell.getCellType())
 		{
 			case BOOLEAN:
 			{

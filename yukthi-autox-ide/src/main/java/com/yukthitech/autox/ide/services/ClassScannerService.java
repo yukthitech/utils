@@ -11,9 +11,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.springframework.stereotype.Service;
 
 /**
@@ -193,7 +191,7 @@ public class ClassScannerService
 		
 		for(String pack: rootPackages)
 		{
-			reflections.add(new Reflections(pack, new TypeAnnotationsScanner(), new SubTypesScanner(), new MethodAnnotationsScanner()));
+			reflections.add(new Reflections(pack, Scanners.TypesAnnotated, Scanners.SubTypes, Scanners.MethodsAnnotated));
 		}
 	}
 }

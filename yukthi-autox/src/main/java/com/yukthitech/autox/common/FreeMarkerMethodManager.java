@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
 import com.yukthitech.autox.config.ApplicationConfiguration;
@@ -78,7 +78,7 @@ public class FreeMarkerMethodManager
 		{
 			logger.debug("Scanning for free marker methods in package - {}", pack);
 			reflections = new Reflections(
-					ConfigurationBuilder.build(pack, new MethodAnnotationsScanner(), classLoader)
+					ConfigurationBuilder.build(pack, Scanners.MethodsAnnotated)
 				);
 
 			freeMarkerMethods = reflections.getMethodsAnnotatedWith(FreeMarkerMethod.class);

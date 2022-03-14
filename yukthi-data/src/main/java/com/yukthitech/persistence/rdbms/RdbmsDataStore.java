@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,6 +59,7 @@ import com.yukthitech.persistence.query.UpdateQuery;
 import com.yukthitech.persistence.rdbms.RdbmsConfiguration.QueryStep;
 import com.yukthitech.persistence.rdbms.converters.BlobConverter;
 import com.yukthitech.persistence.rdbms.converters.ClobConverter;
+import com.yukthitech.persistence.repository.IDataSourceCloser;
 import com.yukthitech.utils.ObjectWrapper;
 
 public class RdbmsDataStore implements IDataStore
@@ -1409,5 +1411,22 @@ public class RdbmsDataStore implements IDataStore
 	public boolean isExplicitUniqueCheckRequired()
 	{
 		return false;
+	}
+	
+	@Override
+	public void close(IDataSourceCloser closer) throws SQLException
+	{
+		DataSource dataSource = transactionManager.getDataSource();
+		
+		if(closer != null)
+		{
+			closer.close(dataSource);
+			return;
+		}
+		
+		if(dataSource instanceof BasicDataSource)
+		{
+			((BasicDataSource) dataSource).close();
+		}
 	}
 }
