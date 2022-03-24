@@ -54,7 +54,7 @@ public class StartMockServerStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		logger.debug("Starting Mock Server '{}' on port: {}", name, port);
 
@@ -69,6 +69,5 @@ public class StartMockServerStep extends AbstractStep
 		}
 		
 		MockServerFactory.startMockServer(context, name, port);
-		return true;
 	}
 }

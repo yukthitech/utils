@@ -52,9 +52,8 @@ public class SetStep extends AbstractStep
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		ExpressionFactory.getExpressionFactory().setExpressionValue(context, expression, value);
-		return true;
 	}
 }

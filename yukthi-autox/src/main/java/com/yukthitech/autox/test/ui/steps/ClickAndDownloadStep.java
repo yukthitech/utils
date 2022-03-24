@@ -127,7 +127,7 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		SeleniumPlugin plugin = (SeleniumPlugin) context.getPlugin(SeleniumPlugin.class);
 		
@@ -192,8 +192,6 @@ public class ClickAndDownloadStep extends AbstractUiStep
 			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
-		
-		return true;
 	}
 	
 	private File pollAndDownload(String downloadFolderPath, String extensions)

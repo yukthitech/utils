@@ -45,7 +45,7 @@ public class ExecuteStep extends AbstractStep
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		String finalExpr = enclose ? "${" + expression + "}" : expression;
 		
@@ -53,7 +53,5 @@ public class ExecuteStep extends AbstractStep
 		
 		String output = AutomationUtils.replaceExpressionsInString("finalExpr", context, finalExpr);
 		exeLogger.debug("Output of expression execution: {}", output);
-		
-		return true;
 	}
 }

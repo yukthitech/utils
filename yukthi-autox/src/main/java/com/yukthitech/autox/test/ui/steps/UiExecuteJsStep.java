@@ -66,7 +66,7 @@ public class UiExecuteJsStep extends AbstractUiStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Executing JS script - {}", script);
 		
@@ -80,8 +80,6 @@ public class UiExecuteJsStep extends AbstractUiStep
 			exeLogger.debug("Setting the result of JS execution as context attribute with name '{}'. Result: {}", resultAttribute, res);
 			context.setAttribute(resultAttribute, res);
 		}
-		
-		return true;
 	}
 	
 	@Override

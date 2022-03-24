@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
@@ -78,7 +79,7 @@ public class SqlFreeMarkerFunctions
 		if(val instanceof InputStream)
 		{
 			InputStream is = (InputStream) val;
-			return new SerialClob(IOUtils.toCharArray(is));
+			return new SerialClob(IOUtils.toCharArray(is, Charset.defaultCharset()));
 		}
 
 		if(val instanceof Reader)
@@ -103,6 +104,6 @@ public class SqlFreeMarkerFunctions
 	public static Clob resClob(@FmParam(name = "res", description = "Resource to be converted into clob") String res) throws SerialException, SQLException, IOException
 	{
 		InputStream is = SqlFreeMarkerFunctions.class.getResourceAsStream(res);
-		return new SerialClob(IOUtils.toCharArray(is));		
+		return new SerialClob(IOUtils.toCharArray(is, Charset.defaultCharset()));		
 	}
 }

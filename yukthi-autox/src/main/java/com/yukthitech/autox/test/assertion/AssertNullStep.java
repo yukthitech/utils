@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -33,11 +34,18 @@ public class AssertNullStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Checking the value is null [value : {}]", value);
-		boolean res = Objects.isNull(value);
-		exeLogger.debug("Result is {}", res);
-		return res;
+		boolean isNull = Objects.isNull(value);
+		exeLogger.debug("Found object to be null: {}", isNull);
+
+
+		if(!isNull)
+		{
+			AssertNullStep actualStep = (AssertNullStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found specified object to be non-null: {}", 
+					actualStep.value);
+		}
 	}
 }

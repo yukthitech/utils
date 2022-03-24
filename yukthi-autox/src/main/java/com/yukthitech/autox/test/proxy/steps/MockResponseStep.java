@@ -185,7 +185,7 @@ public class MockResponseStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		logger.debug(true, "Adding mock response for [Method: {}, Uri: {}] as [Status code: {}, <br>Headers: {}, <br>Body: {}, <br>Wait Config: {}]", 
 				method, uri, responseStatusCode, responseHeaders, responseBody, waitConfig);
@@ -197,7 +197,5 @@ public class MockResponseStep extends AbstractStep
 		
 		MockServer server = MockServerFactory.getMockServer(name);
 		server.addMockResponse(response);
-
-		return true;
 	}
 }

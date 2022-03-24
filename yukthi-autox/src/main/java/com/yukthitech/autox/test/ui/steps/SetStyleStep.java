@@ -15,7 +15,6 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.autox.test.ui.steps.AbstractUiStep;
 
 /**
  * Simulates the click event on the specified button.
@@ -44,7 +43,7 @@ public class SetStyleStep extends AbstractUiStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("On locator '{}' setting styles: {}", locator, styles);
 
@@ -68,8 +67,6 @@ public class SetStyleStep extends AbstractUiStep
 			JavascriptExecutor js = (JavascriptExecutor) driver;
 			js.executeScript(code, webElement);
 		}
-		
-		return true;
 	}
 
 	/**

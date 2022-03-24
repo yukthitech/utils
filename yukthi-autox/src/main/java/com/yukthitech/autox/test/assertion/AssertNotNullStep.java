@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -17,10 +18,6 @@ import com.yukthitech.autox.SourceType;
 @Executable(name = "assertNotNull", group = Group.Common, message = "Asserts the specified value is not null.")
 public class AssertNotNullStep extends AbstractValidation
 {
-	
-	/**
-	 * The Constant serialVersionUID.
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -42,11 +39,18 @@ public class AssertNotNullStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Checking the value is not null [value : {}]", value);
-		boolean res = Objects.nonNull(value);
-		exeLogger.debug("Result is {}", res);
-		return res;
+		
+		boolean nonNull = Objects.nonNull(value);
+		exeLogger.debug("Found value to be non-null: {}", nonNull);
+		
+		if(!nonNull)
+		{
+			AssertNotNullStep actualStep = (AssertNotNullStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found specified value to be null: {}", 
+					actualStep.value);
+		}
 	}
 }

@@ -3,6 +3,7 @@ package com.yukthitech.autox.test.ui.assertion;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -150,12 +151,12 @@ public class AssertVisibility extends AbstractUiAssert
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{
 			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
+			return;
 		}
 		
 		exeLogger.trace("Checking for element Visibility is {}", locator, "true".equals(visible) ? "Visible" : "Invisible");
@@ -181,12 +182,12 @@ public class AssertVisibility extends AbstractUiAssert
 
 			if(actualMessage == null || !actualMessage.contains(message))
 			{
-				exeLogger.error("Expected message '{}' is not matching with actual message '{}' for locator - {}", message, actualMessage, getLocatorWithParent(locator));
-				return false;
+				exeLogger.error("Expected message '{}' is not matching with actual message '{}' for locator: {}", message, actualMessage, getLocatorWithParent(locator));
+
+				throw new AutoxValidationException(this, "Expected message '{}' is not matching with actual message '{}' for locator: {}", 
+						message, actualMessage, getLocatorWithParent(locator));
 			}
 		}
-
-		return true;
 	}
 
 	/*

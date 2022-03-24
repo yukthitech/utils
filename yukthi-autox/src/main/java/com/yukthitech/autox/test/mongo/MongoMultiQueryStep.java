@@ -45,7 +45,7 @@ public class MongoMultiQueryStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		for(String query : this.queries)
 		{
@@ -54,7 +54,5 @@ public class MongoMultiQueryStep extends AbstractStep
 		
 			exeLogger.debug("Got result of query as: {}", result);
 		}
-		
-		return true;
 	}
 }

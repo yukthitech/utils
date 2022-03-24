@@ -55,7 +55,7 @@ public class MongoQueryStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
 		
@@ -66,7 +66,5 @@ public class MongoQueryStep extends AbstractStep
 		{
 			throw new InvalidStateException("Query execution failed as the result does not contain entry: {ok: 1.0}");
 		}
-		
-		return true;
 	}
 }

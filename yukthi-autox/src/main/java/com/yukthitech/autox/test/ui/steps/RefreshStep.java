@@ -61,7 +61,7 @@ public class RefreshStep extends AbstractPostCheckStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Refreshing the current page");
 
@@ -89,7 +89,6 @@ public class RefreshStep extends AbstractPostCheckStep
 		} , retryCount, retryTimeGapMillis,
 				"Waiting for refresh to be successful", 
 				new InvalidStateException("Failed to refresh"));
-		return true;
 	}
 	/*
 	 * (non-Javadoc)

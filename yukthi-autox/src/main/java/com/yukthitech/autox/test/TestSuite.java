@@ -378,7 +378,6 @@ public class TestSuite implements Validateable, IExecutable
 			throw new InvalidStateException("Duplicate step group name encountered: {}", function.getName());
 		}
 		
-		function.markAsFunctionGroup();
 		nameToFunction.put(function.getName(), function);
 	}
 
@@ -389,7 +388,6 @@ public class TestSuite implements Validateable, IExecutable
 	 */
 	public void addOrReplaceFunction(Function function)
 	{
-		function.markAsFunctionGroup();
 		nameToFunction.put(function.getName(), function);
 	}
 	

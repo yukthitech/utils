@@ -3,6 +3,7 @@ package com.yukthitech.autox.test.ui.assertion;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -43,12 +44,12 @@ public class UiAssertValue extends AbstractUiAssert
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{
 			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
+			return;
 		}
 		
 		exeLogger.trace("Validating if locator '{}' has value - {}", getLocatorWithParent(locator), value);
@@ -67,11 +68,9 @@ public class UiAssertValue extends AbstractUiAssert
 
 		if(!value.equals(actualMessage))
 		{
-			exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator - {}", value, actualMessage, getLocatorWithParent(locator));
-			return false;
+			exeLogger.error("Expected value '{}' is not matching with actual value '{}' for locator: {}", value, actualMessage, getLocatorWithParent(locator));
+			throw new AutoxValidationException(this, "Expected value '{}' is not matching with actual value '{}' for locator: {}", value, actualMessage, getLocatorWithParent(locator));
 		}
-
-		return true;
 	}
 
 	/**

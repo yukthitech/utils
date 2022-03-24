@@ -105,7 +105,7 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		exeLogger.debug("Recording started with name: {}", name);
 		
@@ -206,7 +206,5 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 			context.removeStepListener(listener);
 			exeLogger.logFile("Recoding completed and can be seen in below file", LogLevel.DEBUG, videoFile);
 		}
-		
-		return true;
 	}
 }

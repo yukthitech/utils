@@ -1,6 +1,9 @@
 package com.yukthitech.autox.test.lang.steps;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -39,14 +42,14 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 * true.
 	 */
 	@Param(description = "Group of steps/validations to be executed when condition evaluated to be true.", required = true)
-	private Function then;
+	private List<IStep> then = new ArrayList<IStep>();
 
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * false.
 	 */
 	@Param(name = "else", description = "Group of steps/validations to be executed when condition evaluated to be false.", required = false)
-	private Function elseGroup;
+	private List<IStep> elseGroup = new ArrayList<IStep>();
 
 	/**
 	 * Sets the freemarker condition to be evaluated.
@@ -66,7 +69,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	@ChildElement(description = "Used to group steps to be executed when this if condition is true.")
 	public void setThen(Function then)
 	{
-		this.then = then;
+		this.then.addAll(then.getSteps());
 	}
 
 	/**
@@ -82,28 +85,23 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 			throw new InvalidStateException("else group is already defined.");
 		}
 		
-		this.elseGroup = elseGroup;
+		this.elseGroup.addAll(elseGroup.getSteps());
 	}
 	
 	@Override
 	public void addStep(IStep step)
 	{
-		if(then == null)
-		{
-			then = new Function();
-		}
-		
-		then.addStep(step);
+		then.add(step);
 	}
 
 	@Override
 	public List<IStep> getSteps()
 	{
-		return then.getSteps();
+		return then;
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		boolean res = AutomationUtils.evaluateCondition(context, condition);
 		
@@ -111,16 +109,18 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 		
 		if(res)
 		{
-			then.execute(context, exeLogger, true);
+			context.getAutomationExecutor()
+				.newSteps("if-then-steps", this, then)
+				.execute();
 		}
 		else
 		{
-			if(elseGroup != null)
+			if(CollectionUtils.isNotEmpty(elseGroup))
 			{
-				elseGroup.execute(context, exeLogger, true);
+				context.getAutomationExecutor()
+					.newSteps("if-then-steps", this, elseGroup)
+					.execute();
 			}
 		}
-		
-		return true;
 	}
 }

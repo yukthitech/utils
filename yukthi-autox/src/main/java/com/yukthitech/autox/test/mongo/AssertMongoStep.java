@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -57,7 +58,7 @@ public class AssertMongoStep extends AbstractValidation
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
 		
@@ -68,13 +69,9 @@ public class AssertMongoStep extends AbstractValidation
 		
 		if(!res)
 		{
-			exeLogger.debug("Found the expected value is different from result value at path: {}", diffPath);
+			throw new AutoxValidationException(this, "Found the expected value is different from result value at path: {}", diffPath);
 		}
-		else
-		{
-			exeLogger.debug("Found the query result and expected values are same");
-		}
-		
-		return res;
+
+		exeLogger.debug("Found the query result and expected values are same");
 	}
 }

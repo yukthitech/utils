@@ -16,7 +16,6 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
-import com.yukthitech.autox.test.ui.steps.AbstractUiStep;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -92,7 +91,7 @@ public class MoveToStep extends AbstractUiStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Moving to element specified by locator: {}", locator);
 
@@ -148,7 +147,7 @@ public class MoveToStep extends AbstractUiStep
 			
 			if(!click)
 			{
-				return true;
+				return;
 			}
 
 			try
@@ -173,8 +172,6 @@ public class MoveToStep extends AbstractUiStep
 			exeLogger.error(ex, "Failed to move to element - ", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to move to element - {}", getLocatorWithParent(locator), ex);
 		}
-		
-		return true;
 	}
 
 	/**

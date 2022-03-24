@@ -24,7 +24,7 @@ public class WaitForConditionsStep extends BaseConditions
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Waiting for {} conditions", conditions.size());
 
@@ -45,8 +45,6 @@ public class WaitForConditionsStep extends BaseConditions
 			exeLogger.error(ex, ex.getMessage());
 			throw new TestCaseFailedException(this, ex.getMessage(), ex);
 		}
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)

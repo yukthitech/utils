@@ -10,21 +10,13 @@ import com.yukthitech.autox.test.IDataProvider;
  */
 public interface IStep extends Cloneable, Serializable, ILocationBased
 {
-	
-	/**
-	 * Data provider to be used for this step. If specified, step will be executed for each data
-	 * element provided by data provider.
-	 */
-	public IDataProvider getDataProvider();
-
 	/**
 	 * Method which should execute current step.
 	 * @param context Current automation context
 	 * @param logger Logger to log messages.
-	 * @return In case step, the return value will not be considered. In case of validation, the return 
 	 * value will be checked for success.
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception;
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception;
 	
 	/**
 	 * Clones and makes a copy of current step.
@@ -37,4 +29,13 @@ public interface IStep extends Cloneable, Serializable, ILocationBased
 	 * @return flag indicating if logging has to be disabled for current step.
 	 */
 	public boolean isLoggingDisabled();
+	
+	/**
+	 * Sets the source step with actual expressions. Which in turn can be used, when access to actual
+	 * expressions is required. This is mainly needed by assertions to build error messages in case of
+	 * errors.
+	 * @param sourceStep
+	 */
+	public default void setSourceStep(IStep sourceStep)
+	{}
 }

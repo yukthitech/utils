@@ -17,15 +17,13 @@ public class QuitSessionStep extends AbstractStep
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Closing current session");
 		
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		
 		seleniumConfiguration.getWebDriver().quit();
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)

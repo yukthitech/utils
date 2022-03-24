@@ -1,9 +1,14 @@
 package com.yukthitech.autox.test.lang.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -16,7 +21,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -28,6 +33,10 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class ForEachLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
+	
+	private static final String VAR_LIST = "list";
+	
+	private static final String VAR_INDEX = "index";
 
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
@@ -35,7 +44,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	 */
 	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
-	private Function steps;
+	private List<IStep> steps = new ArrayList<IStep>();
 
 	/**
 	 * Expression which will be evaluated to collection or map or String.
@@ -96,18 +105,13 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public void addStep(IStep step)
 	{
-		if(steps == null)
-		{
-			steps = new Function();
-		}
-		
-		steps.addStep(step);
+		steps.add(step);
 	}
 	
 	@Override
 	public List<IStep> getSteps()
 	{
-		return steps.getSteps();
+		return steps;
 	}
 	
 	/**
@@ -139,71 +143,114 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	{
 		this.ignoreError = ignoreError;
 	}
-
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	private List<Object> fetchExpressionList(ExecutionLogger exeLogger)
 	{
-		Object exprValue = expression;
+		List<Object> collection = null;
 		
-		if(exprValue == null)
+		if(expression instanceof String)
 		{
-			exeLogger.debug("Expression '{}' evaluated to null", expression);
-			return true;
-		}
-		
-		Collection<Object> collection = null;
-		
-		if(exprValue instanceof String)
-		{
-			collection = Arrays.asList( (Object[]) ((String) exprValue).split(delimiter) );
+			collection = Arrays.asList( (Object[]) ((String) expression).split(delimiter) );
 			
-			exeLogger.debug("Expression '{}' evaluated to string and after split got collection as: {}", expression, collection);
+			exeLogger.debug("Collection expression '{}' evaluated to string and after split got collection as: {}", expression, collection);
 		}
-		else if(exprValue instanceof Collection)
+		else if(expression instanceof Collection)
 		{
-			collection = (Collection<Object>) exprValue;
-			exeLogger.debug("Expression '{}' evaluated to collection of size: {}", expression, collection.size());
+			collection =  new ArrayList<Object>( (Collection<Object>) expression );
+			exeLogger.debug("Collection expression '{}' evaluated to collection of size: {}", expression, collection.size());
 		}
-		else if(exprValue instanceof Map)
+		else if(expression instanceof Map)
 		{
-			collection = (Collection) ((Map<Object, Object>) exprValue).entrySet();
-			exeLogger.debug("Expression '{}' evaluated to map of size: {}", expression, collection.size());
+			collection = new ArrayList<Object>( (Collection) ((Map<Object, Object>) expression).entrySet() );
+			exeLogger.debug("Collection expression '{}' evaluated to map of size: {}", expression, collection.size());
 		}
 		else
 		{
-			throw new InvalidStateException("Expression {} evaluated to non-string, non-collection, non-map. Value: {}", expression, exprValue);
+			throw new InvalidStateException("Collection expression {} evaluated to non-string, non-collection, non-map. Value: {}", expression, expression);
 		}
 		
-		int idx = 0;
-		
-		for(Object val : collection)
+		return collection;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	{
+		if(expression == null)
 		{
-			context.setAttribute(loopVar, val);
-			context.setAttribute(loopIdxVar, idx);
-			
-			try
+			exeLogger.debug("Collection expression evaluated to null");
+			return;
+		}
+		
+		AutomationExecutor executor = context.getAutomationExecutor();
+		
+		executor.newSteps("for-each-steps", this, steps)
+			.onInit(entry -> 
 			{
-				steps.execute(context, exeLogger, true);
-			} catch(BreakException ex)
-			{
-				break;
-			} catch(ContinueException ex)
-			{
-				continue;
-			} catch(RuntimeException ex)
-			{
-				if(ignoreError)
+				List<Object> collection = fetchExpressionList(exeLogger);
+				
+				if(CollectionUtils.isEmpty(collection))
 				{
-					exeLogger.error("Iteration resulted in error, which is being ignore.", ex);
+					ForEachLoopStep parentStep = (ForEachLoopStep) sourceStep;
+					exeLogger.debug("Collection expression '{}' evaluated to empty collection", parentStep.expression);
+					return false;
 				}
 				
-				throw ex;
-			}
-			
-			idx++;
-		}
-		
-		return true;
+				collection = CollectionUtils.isEmpty(collection) ? Collections.emptyList() : collection;
+				
+				AtomicInteger index = new AtomicInteger(0);
+				
+				entry.setVariable(VAR_LIST, collection)
+					.setVariable(VAR_INDEX, index);
+				
+				return true;
+			})
+			.preexecute(entry -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
+				
+				int idx = loopIndex.get();
+				
+				Object val = loopCollection.get(idx);
+				context.setAttribute(loopVar, val);
+				context.setAttribute(loopIdxVar, idx);
+			})
+			.exceptionHandler((entry, ex) -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
+				
+				if(ex instanceof BreakException)
+				{
+					loopIndex.set(loopCollection.size());
+					return true;
+				}
+				
+				if(ex instanceof ContinueException)
+				{
+					loopIndex.incrementAndGet();
+					return true;
+				}
+				
+				return false;
+			})
+			.onSuccess(entry -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				loopIndex.incrementAndGet();
+			})
+			.isReexecutionNeeded(entry -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
+				
+				int idx = loopIndex.get();
+				
+				return (idx < loopCollection.size());
+			})
+			.execute();
+		;
 	}
 }

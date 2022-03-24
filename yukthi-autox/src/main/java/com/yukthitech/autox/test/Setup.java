@@ -1,14 +1,12 @@
 package com.yukthitech.autox.test;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.common.SkipParsing;
@@ -78,64 +76,6 @@ public class Setup extends AbstractLocationBased implements IStepContainer, Vali
 	public List<IStep> getSteps()
 	{
 		return steps;
-	}
-
-	/**
-	 * Execute.
-	 *
-	 * @param context
-	 *            the context
-	 * @return the test case result
-	 */
-	public TestCaseResult execute(AutomationContext context)
-	{
-		return this.execute(context, new ExecutionLogger(context, NAME, NAME));
-	}
-
-	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
-	{
-		exeLogger.setMode("setup");
-		context.getExecutionStack().push(this);
-		
-		try
-		{
-			exeLogger.debug("Started setup process");
-			context.setSetupExecution(true);
-			
-			Date startTime = new Date();
-			
-			// execute the steps involved
-			for(IStep step : steps)
-			{
-				try
-				{
-					StepExecutor.executeStep(context, exeLogger, step);
-				} catch(Exception ex)
-				{
-					exeLogger.error(ex, "An error occurred while executing step - " + step);
-	
-					TestCaseResult result = StepExecutor.handleException(context, new TestCase(NAME), step, exeLogger, ex, null, startTime);
-					
-					if(result != null)
-					{
-						return result;
-					}
-					
-					return new TestCaseResult(null, NAME, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Step errored - " + step,
-							startTime, new Date());
-				}
-			}
-	
-			exeLogger.debug("Completed setup process");
-			return new TestCaseResult(null, NAME, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
-					startTime, new Date());
-		}finally
-		{
-			context.getExecutionStack().pop(this);
-			
-			context.setSetupExecution(false);
-			exeLogger.clearMode();
-		}
 	}
 
 	/*

@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -32,22 +33,19 @@ public class AssertFileExists extends AbstractValidation
 		this.path = path;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.yukthitech.ui.automation.IValidation#execute(com.yukthitech.ui.automation.
-	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
-	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Checking for file existence: {}", path);
 		
 		File file = new File(path);
 		
 		exeLogger.debug("Found file '{}' existence status as: {}", path, file.exists());
-		return file.exists();
+		
+		if(!file.exists())
+		{
+			throw new AutoxValidationException(this, "Found file does not exist: {}", path);
+		}
 	}
 	
 	/* (non-Javadoc)

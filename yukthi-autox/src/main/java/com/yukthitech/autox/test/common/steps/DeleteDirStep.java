@@ -45,7 +45,7 @@ public class DeleteDirStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Deleting directory: {}", path);
 		
@@ -54,13 +54,13 @@ public class DeleteDirStep extends AbstractStep
 		if(!folder.exists())
 		{
 			exeLogger.debug("Specified path does not exist. So ignoring delete request. Path: {}", path);
-			return true;
+			return;
 		}
 		
 		if(!folder.isDirectory())
 		{
 			exeLogger.debug("Specified path is not a directory. So ignoring delete request. Path: {}", path);
-			return true;
+			return;
 		}
 
 		try
@@ -71,7 +71,5 @@ public class DeleteDirStep extends AbstractStep
 		{
 			throw new InvalidStateException("An error occurred while deleting folder: {}", path, ex);
 		}
-		
-		return true;
 	}
 }

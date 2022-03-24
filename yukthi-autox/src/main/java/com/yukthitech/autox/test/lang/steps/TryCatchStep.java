@@ -35,7 +35,7 @@ public class TryCatchStep extends AbstractContainerStep implements IStepContaine
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		try
 		{
@@ -47,7 +47,5 @@ public class TryCatchStep extends AbstractContainerStep implements IStepContaine
 				throw (LangException) ex;
 			}
 		}
-		
-		return true;
 	}
 }

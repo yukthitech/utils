@@ -16,7 +16,7 @@ public class ContinueStep extends AbstractStep
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		exeLogger.debug("Contining current loop");
 		throw new ContinueException();

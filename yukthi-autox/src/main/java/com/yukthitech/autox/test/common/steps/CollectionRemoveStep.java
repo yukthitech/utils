@@ -46,7 +46,7 @@ public class CollectionRemoveStep extends AbstractStep
 
 	@SuppressWarnings({ "rawtypes" })
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("From collection/map of type {} removing value of type: {}", 
 				(collection != null) ? collection.getClass().getName() : "null", 
@@ -65,8 +65,5 @@ public class CollectionRemoveStep extends AbstractStep
 		{
 			throw new InvalidArgumentException("Non-collection and non-map object specified as collection: {}", collection);
 		}
-		
-		
-		return true;
 	}
 }

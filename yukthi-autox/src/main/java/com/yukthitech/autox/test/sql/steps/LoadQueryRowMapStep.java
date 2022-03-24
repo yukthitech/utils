@@ -168,7 +168,7 @@ public class LoadQueryRowMapStep extends AbstractStep
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
@@ -241,7 +241,5 @@ public class LoadQueryRowMapStep extends AbstractStep
 		{
 			DbUtils.closeQuietly(connection);
 		}
-		
-		return true;
 	}
 }

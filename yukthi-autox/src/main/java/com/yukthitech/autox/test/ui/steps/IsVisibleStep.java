@@ -55,7 +55,7 @@ public class IsVisibleStep extends AbstractUiStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Fetching visibility flag for element '{}'", getLocatorWithParent(locator));
 
@@ -63,8 +63,6 @@ public class IsVisibleStep extends AbstractUiStep
 		
 		exeLogger.debug("Element '{}' visibility flag ({}) is being set as context attribute: {}", getLocatorWithParent(locator), visible, name);
 		context.setAttribute(name, visible);
-		
-		return true;
 	}
 
 	/* (non-Javadoc)

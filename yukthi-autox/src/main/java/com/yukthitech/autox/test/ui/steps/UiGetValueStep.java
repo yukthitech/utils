@@ -68,7 +68,7 @@ public class UiGetValueStep extends AbstractUiStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Fetching ui element value for locator - {} [Display Value Flag: {}]", getLocatorWithParent(locator), displayValue);
 		
@@ -76,8 +76,6 @@ public class UiGetValueStep extends AbstractUiStep
 		
 		exeLogger.debug("Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
 		context.setAttribute(name, elementValue);
-		
-		return true;
 	}
 
 	/* (non-Javadoc)

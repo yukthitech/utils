@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.assertion;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -101,7 +102,7 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug(false, "Comparing values for deep-equlity. <span style=\"white-space: pre-wrap\">[\nExpected: {} [{}], \nActual: {} [{}], \nIgnore exta Properties: {}]</span>", 
 				expected, getType(expected),  
@@ -109,19 +110,24 @@ public class AssertDeepEqualsStep extends AbstractValidation
 				ignoreExtraProperties);
 		
 		String diffPath = DeepEqualsUtil.deepCompare(this.actual, this.expected, ignoreExtraProperties, context, exeLogger);
-		boolean res = (diffPath == null);
+		boolean isEqual = (diffPath == null);
 		
 		context.setAttribute(failedPathAttr, diffPath);
 		
-		exeLogger.debug("Result of comparision is: {}", res);
+		exeLogger.debug("Result of comparision is: {}", isEqual);
 		
 		if(!checkEquality)
 		{
-			res = !res;
-			exeLogger.debug("As non-equality has to be checked, setting final result as: {}", res);
+			isEqual = !isEqual;
+			exeLogger.debug("As non-equality has to be checked, setting final result as: {}", isEqual);
 		}
-
-		return res;
+		
+		if(!isEqual)
+		{
+			AssertDeepEqualsStep actualStep = (AssertDeepEqualsStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found objects are unequal [Actual: {}, Expected: {}, Diff Path: {}]", 
+					actualStep.actual, actualStep.expected, diffPath);
+		}
 	}
 
 	/* (non-Javadoc)

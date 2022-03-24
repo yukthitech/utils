@@ -34,7 +34,7 @@ public class ReturnStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		exeLogger.debug("Returning from current execution");
 		throw new ReturnException(value);

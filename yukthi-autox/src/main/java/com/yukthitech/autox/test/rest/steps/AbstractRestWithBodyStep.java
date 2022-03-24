@@ -56,7 +56,7 @@ public abstract class AbstractRestWithBodyStep<T extends RestRequestWithBody<T>>
 	protected abstract T newRequest(String uri);
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		T postRestRequest = newRequest(uri);
 		
@@ -76,8 +76,6 @@ public abstract class AbstractRestWithBodyStep<T extends RestRequestWithBody<T>>
 		
 		super.populate(context, postRestRequest, logger);
 		super.invoke(context, postRestRequest, logger);
-		
-		return true;
 	}
 
 }

@@ -76,9 +76,6 @@ public class BasicArguments
 	 */
 	@CliArgument(name = "flmt", longName = "folder-limits", description = "Comma separated folder paths to which execution should be limited.", required = false)
 	private String folderLimits;
-	
-	@CliArgument(name = "old", longName = "old-execution", description = "If true, automation will be performed in old style", required = false)
-	private boolean oldExecution = false;
 
 	/**
 	 * Gets the test suites folder from where test suites has to be loaded. This
@@ -342,15 +339,5 @@ public class BasicArguments
 		}
 		
 		return resList;
-	}
-
-	public boolean isOldExecution()
-	{
-		return oldExecution;
-	}
-
-	public void setOldExecution(boolean oldExecution)
-	{
-		this.oldExecution = oldExecution;
 	}
 }

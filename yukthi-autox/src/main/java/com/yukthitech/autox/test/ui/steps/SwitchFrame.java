@@ -45,7 +45,7 @@ public class SwitchFrame extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(index != null)
 		{
@@ -67,8 +67,6 @@ public class SwitchFrame extends AbstractStep
 		{
 			driver.switchTo().frame(locator);
 		}
-
-		return true;
 	}
 	
 	@Override

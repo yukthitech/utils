@@ -45,7 +45,7 @@ public class StoreCookiesStep extends AbstractUiStep
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Stroring current cookies into file: {}", path);
 
@@ -57,7 +57,7 @@ public class StoreCookiesStep extends AbstractUiStep
 		if(cookies == null || cookies.isEmpty())
 		{
 			exeLogger.debug("No cookies found for persisting.");
-			return true;
+			return;
 		}
 		
 		File cookieFile = new File(path);
@@ -72,8 +72,6 @@ public class StoreCookiesStep extends AbstractUiStep
 		{
 			throw new InvalidStateException("An error occurred while storing cookie file: {}", cookieFile.getPath(), ex);
 		}
-		
-		return true;
 	}
 
 	/*

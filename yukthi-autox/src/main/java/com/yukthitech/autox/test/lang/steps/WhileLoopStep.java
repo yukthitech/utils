@@ -72,7 +72,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		boolean res = false;
 		
@@ -96,7 +96,5 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 				continue;
 			}
 		}
-		
-		return true;
 	}
 }

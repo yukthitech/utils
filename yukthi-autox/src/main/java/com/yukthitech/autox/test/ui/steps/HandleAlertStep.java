@@ -42,7 +42,7 @@ public class HandleAlertStep extends AbstractStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(expectedMessage != null)
 		{
@@ -73,7 +73,6 @@ public class HandleAlertStep extends AbstractStep
 		
 		alert.accept();
 		exeLogger.debug("Successfully closed the alert.");
-		return true;
 	}
 
 	/* (non-Javadoc)

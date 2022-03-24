@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.assertion;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -25,22 +26,28 @@ public class AssertTrueStep extends AbstractValidation
 		this.value = value;
 	}
 
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Checking the value for true [value : {}]", value);
-		boolean res = false;
+		boolean isTrue = false;
 		
 		if(value instanceof Boolean)
 		{
-			res = (Boolean) value;
+			isTrue = (Boolean) value;
 		}
 		else
 		{
-			res = "true".equalsIgnoreCase(("" + value).trim());
+			isTrue = "true".equalsIgnoreCase(("" + value).trim());
 		}
 		
-		exeLogger.debug("Result is: {}", res);
-		return res;
+		exeLogger.debug("Found value to be: {}", isTrue);
+
+		if(!isTrue)
+		{
+			AssertTrueStep actualStep = (AssertTrueStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Expression evaluated to be false: {}", 
+					actualStep.value);
+		}
 	}
 
 }

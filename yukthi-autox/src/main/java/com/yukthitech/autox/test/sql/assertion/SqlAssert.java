@@ -17,6 +17,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -24,7 +25,6 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.autox.test.sql.steps.QueryUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -134,12 +134,12 @@ public class SqlAssert extends AbstractValidation
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{
 			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
+			return;
 		}
 		
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
@@ -167,10 +167,10 @@ public class SqlAssert extends AbstractValidation
 			
 			AtomicInteger recCount = new AtomicInteger(0);
 
-			ResultSetHandler<Boolean> rsHandler = new ResultSetHandler<Boolean>()
+			ResultSetHandler<String> rsHandler = new ResultSetHandler<String>()
 			{
 				@Override
-				public Boolean handle(ResultSet rs) throws SQLException
+				public String handle(ResultSet rs) throws SQLException
 				{
 					int rowIdx = 0;
 					ExpectedRow row = null;
@@ -184,7 +184,7 @@ public class SqlAssert extends AbstractValidation
 						if(expectedRows.size() <= rowIdx)
 						{
 							exeLogger.error("Actual rows are more than expected row count: {}", expectedRows.size());
-							return false;
+							return String.format("Actual rows are more than expected row count: %s", expectedRows.size());
 						}
 
 						row = expectedRows.get(rowIdx);
@@ -200,7 +200,7 @@ public class SqlAssert extends AbstractValidation
 							if(!expectedVal.equals(actualVal))
 							{
 								exeLogger.error("At row {} for column {} expected value '{}' is not matching with actual value: {}", rowIdx, column, expectedVal, actualVal);
-								return false;
+								return String.format("At row %s for column %s expected value '%s' is not matching with actual value: %s", rowIdx, column, expectedVal, actualVal);
 							}
 						}
 						
@@ -209,23 +209,26 @@ public class SqlAssert extends AbstractValidation
 						rowIdx ++;
 					}
 
-					return true;
+					return null;
 				}
 			};
 			
-			Boolean res = QueryUtils.getQueryRunner().query(connection, processedQuery, rsHandler);
+			String errMssg = QueryUtils.getQueryRunner().query(connection, processedQuery, rsHandler);
 
 			if(recCount.get() < expectedRows.size())
 			{
 				exeLogger.error("Actual rows {} are less than expected row count: {}", recCount.get(), expectedRows.size());
-				return false;
+				throw new AutoxValidationException(this, "Actual rows {} are less than expected row count: {}", recCount.get(), expectedRows.size());
 			}
 			
-			return res;
+			if(errMssg != null)
+			{
+				throw new AutoxValidationException(this, errMssg);
+			}
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
-			throw new TestCaseFailedException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
+			throw new AutoxValidationException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{
 			DbUtils.closeQuietly(connection);

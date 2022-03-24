@@ -21,7 +21,6 @@ import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
-import com.yukthitech.autox.test.TestSuiteExecutor;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.persistence.repository.RepositoryFactory;
@@ -425,11 +424,8 @@ public class AutomationLauncher
 			AutomationContext context = AutomationContext.getInstance();
 			
 			boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
-			boolean loadTestSuites = (testSuiteGroup != null);
 	
 			//execute test suites
-			TestSuiteExecutor testSuiteExecutor = loadTestSuites ? new TestSuiteExecutor(context, testSuiteGroup) : null;
-			
 			if(isInteractive)
 			{
 				InteractiveEnvironmentContext interactiveEnvironmentContext = new InteractiveEnvironmentContext(testSuiteGroup);
@@ -446,7 +442,7 @@ public class AutomationLauncher
 				if(isInteractiveExeGlobal)
 				{
 					logger.debug("As part of interactive environment, executing global setup...");
-					testSuiteExecutor.executeGlobalSetup();
+					//testSuiteExecutor.executeGlobalSetup();
 				}
 				
 				logger.debug("Skipping actual test suite execution, as this is interactive environment exection.");
@@ -454,23 +450,12 @@ public class AutomationLauncher
 				return;
 			}
 			
-			boolean executeOldWay = context.getBasicArguments().isOldExecution();
-			
-			if(executeOldWay)
+			AutomationExecutor executor = new AutomationExecutor(context, testSuiteGroup, res -> 
 			{
-				boolean res = testSuiteExecutor.executeTestSuites();
 				automationCompleted(res, context);
-			}
-			else
-			{
-				AutomationExecutor executor = new AutomationExecutor(context, testSuiteGroup, res -> 
-				{
-					automationCompleted(res, context);
-				});
-				
-				executor.start();
-			}
+			});
 			
+			executor.start();
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution", ex);

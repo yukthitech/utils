@@ -165,7 +165,7 @@ public class FillFormStep extends AbstractStep
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		Object resObj = AutomationUtils.parseObjectSource(context, exeLogger, data, null);
 		
@@ -177,8 +177,6 @@ public class FillFormStep extends AbstractStep
 		{
 			fillWithStandardBean(resObj, context, exeLogger);
 		}
-		
-		return true;
 	}
 
 	/**

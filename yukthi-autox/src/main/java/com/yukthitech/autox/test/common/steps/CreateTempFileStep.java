@@ -1,6 +1,7 @@
 package com.yukthitech.autox.test.common.steps;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
 
@@ -95,7 +96,7 @@ public class CreateTempFileStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Creating temp file with [Prefix: {}, Suffix: {}, Path attr: {}]", prefix, suffix, pathAttr);
 		try
@@ -103,14 +104,12 @@ public class CreateTempFileStep extends AbstractStep
 			File tempFile = File.createTempFile(prefix, suffix);
 			exeLogger.debug("Created empty temp file '{}'. Now writing specified content to this file", tempFile.getPath());
 			
-			FileUtils.write(tempFile, content.toString());
+			FileUtils.write(tempFile, content.toString(), Charset.defaultCharset());
 			
 			context.setAttribute(pathAttr, tempFile.getPath());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating temp file", ex);
 		}
-		
-		return true;
 	}
 }

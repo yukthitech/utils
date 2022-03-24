@@ -13,6 +13,38 @@ import com.yukthitech.autox.test.IEntryPoint;
  */
 public class ExecutionStack
 {
+	private static class StackElement
+	{
+		private IEntryPoint entryPoint;
+		
+		private ILocationBased element;
+		
+		private int entryPointLevel;
+
+		public StackElement(IEntryPoint entryPoint, ILocationBased element, int entryPointLevel)
+		{
+			this.entryPoint = entryPoint;
+			this.element = element;
+			this.entryPointLevel = entryPointLevel;
+		}
+		
+		public String getLocation()
+		{
+			return element.getLocation();
+		}
+		
+		public String toString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.append(entryPoint.toText());
+			
+			String location = element.getLocation();
+			builder.append("(").append(location).append(")");
+
+			return builder.toString();
+		}
+	}
+	
 	/**
 	 * Stack trace of the execution.
 	 */
@@ -21,13 +53,8 @@ public class ExecutionStack
 	/**
 	 * Stack trace of the execution.
 	 */
-	private LinkedList<String> stackTrace = new LinkedList<>();
+	private LinkedList<StackElement> stackTrace = new LinkedList<>();
 	
-	/**
-	 * Locations stack trace.
-	 */
-	private LinkedList<String> locationStackTrace = new LinkedList<>();
-
 	public void push(Object object)
 	{
 		if(object instanceof IEntryPoint)
@@ -39,16 +66,10 @@ public class ExecutionStack
 		IEntryPoint entryPoint = entryPointStack.getFirst();
 		ILocationBased element = (ILocationBased) object;
 		
-		StringBuilder builder = new StringBuilder();
-		builder.append(entryPoint.toText());
+		StackElement stackElement = new StackElement(entryPoint, element, entryPointStack.size());
+		stackTrace.push(stackElement);
 		
-		String location = element.getLocation();
-		builder.append("(").append(location).append(")");
-		
-		locationStackTrace.push(location);
-		stackTrace.push(builder.toString());
-		
-		ThreadContext.put("xmlLoc", location);
+		ThreadContext.put("xmlLoc", stackElement.getLocation());
 	}
 	
 	public void pop(Object object)
@@ -59,16 +80,15 @@ public class ExecutionStack
 			return;
 		}
 		
-		locationStackTrace.pop();
 		stackTrace.pop();
 		
-		if(locationStackTrace.isEmpty())
+		if(stackTrace.isEmpty())
 		{
 			ThreadContext.put("xmlLoc", null);
 		}
 		else
 		{
-			ThreadContext.put("xmlLoc", locationStackTrace.peek());
+			ThreadContext.put("xmlLoc", stackTrace.peek().getLocation());
 		}
 			
 	}
@@ -76,10 +96,20 @@ public class ExecutionStack
 	public String toStackTrace()
 	{
 		StringBuilder builder = new StringBuilder("\n");
+		int entryPointLevel = -1;
 		
-		for(String element : stackTrace)
+		for(StackElement element : stackTrace)
 		{
+			//if entry point level is same as that of prev element
+			if(element.entryPointLevel == entryPointLevel)
+			{
+				//skip the element from stack trace, which would
+				// be the case with loops, try-catch etc
+				continue;
+			}
+			
 			builder.append("\t").append(element).append("\n");
+			entryPointLevel = element.entryPointLevel;
 		}
 		
 		return builder.toString();
@@ -87,11 +117,11 @@ public class ExecutionStack
 	
 	public String getCurrentLocation()
 	{
-		if(locationStackTrace.isEmpty())
+		if(stackTrace.isEmpty())
 		{
 			return null;
 		}
 		
-		return locationStackTrace.getFirst();
+		return stackTrace.getFirst().getLocation();
 	}
 }

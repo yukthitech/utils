@@ -19,7 +19,7 @@ public class MaximizeBrowserStep extends AbstractStep
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		Window window = context.getPlugin(SeleniumPlugin.class).getWebDriver().manage().window();
 		
@@ -38,8 +38,6 @@ public class MaximizeBrowserStep extends AbstractStep
 		
 		exeLogger.debug("Post maximizing the browser window browser details are: [Position: {}, Size: {}]",
 				window.getPosition(), window.getSize());
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)

@@ -67,7 +67,7 @@ public class StartSessionStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		RemoteSession remoteSession = new RemoteSession();
 		remoteSession.setHost(host);
@@ -95,8 +95,6 @@ public class StartSessionStep extends AbstractStep
 		
 		context.setInternalAttribute(name, remoteSession);
 		exeLogger.debug("Remote session is started successfully..");
-		
-		return true;
 	}
 
 	/**

@@ -305,11 +305,10 @@ public class InvokeMethodStep extends AbstractStep
 	 * @see com.yukthitech.automation.IStep#execute(com.yukthitech.automation.AutomationContext, com.yukthitech.automation.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		Object result = invokeMethod(logger);
 		context.setAttribute(resultParameter, result);
-		return true;
 	}
 
 	/* (non-Javadoc)

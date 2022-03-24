@@ -4,6 +4,7 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -48,12 +49,12 @@ public class ValidateAlert extends AbstractValidation
 	 * @see com.yukthitech.ui.automation.IValidation#execute(com.yukthitech.ui.automation.AutomationContext, java.io.PrintWriter)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{
 			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
+			return;
 		}
 		
 		exeLogger.debug("Waiting for alert with message - {}", message);
@@ -71,13 +72,13 @@ public class ValidateAlert extends AbstractValidation
 		if(!bodyText.equals(message))
 		{
 			exeLogger.error("Expected alert message '{}' is not matching with actual value - {}", message, bodyText);
-			return false;
+
+			throw new AutoxValidationException(this, "Found alert message to be different [Actual: {}, Expected: {}]", 
+					bodyText, message);
 		}
 		
 		WebElement buttonElement = UiAutomationUtils.findElement(context, alertBox, "xpath: .//button");
 		buttonElement.click();
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)

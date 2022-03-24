@@ -108,7 +108,7 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		Function function = context.getFunction(name);
 		
@@ -131,24 +131,23 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 		}
 		
 		function = (Function) function.clone();
-		function.setLoggingDisabled(super.isLoggingDisabled());
 		
 		logger.debug("Executing function '{}' with parameters: {}", name, paramValues);
 		
 		function.setParams(paramValues);
-		Object resVal = function.execute(context, logger, false);
-	
-		if(returnAttr != null)
+
+		function.execute(context, logger, resVal -> 
 		{
-			logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
-			context.setAttribute(returnAttr, resVal);
-		}
-		else if(resVal != null)
-		{
-			logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
-		}
-		
-		return true;
+			if(returnAttr != null)
+			{
+				logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
+				context.setAttribute(returnAttr, resVal);
+			}
+			else if(resVal != null)
+			{
+				logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
+			}
+		});
 	}
 	
 	@Override

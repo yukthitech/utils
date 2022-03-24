@@ -33,10 +33,6 @@ import com.yukthitech.autox.SourceType;
 @Executable(name = "sendMail", group = Group.Common, message = "Step to send mail, useful to send specific notifications from test cases.")
 public class SendMailStep extends AbstractStep
 {
-	
-	/**
-	 * The Constant serialVersionUID.
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -191,7 +187,7 @@ public class SendMailStep extends AbstractStep
 	 * @return true, if successful
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		Properties props = new Properties();
 		props.put("mail.smtp.host", smptpHost);
@@ -241,7 +237,5 @@ public class SendMailStep extends AbstractStep
 		
 		msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddressList, false));
 		Transport.send(msg);
-
-		return true;
 	}
 }

@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,10 +14,8 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
-import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPlugin;
-import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -28,114 +25,6 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 public class StepExecutor
 {
 	private static Logger logger = LogManager.getLogger(StepExecutor.class);
-	
-	/**
-	 * Executes specified step/validation. In case of validations, ensures result is true, in not {@link TestCaseValidationFailedException} will 
-	 * be thrown.
-	 * @param context context to be used
-	 * @param exeLogger logger to be used
-	 * @param step step to be executed
-	 */
-	public static void executeStep(AutomationContext context, ExecutionLogger exeLogger, IStep step) throws Exception
-	{
-		//if step is marked not to log anything
-		if(step.isLoggingDisabled())
-		{
-			//disable logging
-			exeLogger.setDisabled(true);
-		}
-
-		TestCaseData currentData = null;
-		
-		context.getExecutionStack().push(step);
-		
-		try
-		{
-			context.setExecutionLogger(exeLogger);
-			
-			boolean res = true;
-			
-			if(step.getDataProvider() == null)
-			{
-				//clone the step, so that expression replacement will not affect actual step
-				step = step.clone();
-				AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
-
-				context.getStepListenerProxy().stepStarted(step, null);
-				res = step.execute(context, exeLogger);
-			}
-			else
-			{
-				exeLogger.debug("Executing the step with data provider.");
-				IDataProvider dataProvider = step.getDataProvider();
-				List<TestCaseData> dataLst = dataProvider.getStepData();
-				
-				if(dataLst == null)
-				{
-					exeLogger.debug("Data provider resulted in empty data list.");
-				}
-				else
-				{
-					for(TestCaseData data : dataLst)
-					{
-						currentData = data;
-						
-						if(dataProvider.isParsingEnabled())
-						{
-							AutomationUtils.replaceExpressions("testCaseData", context, data);
-						}
-						
-						exeLogger.debug("Executing the step with [Data provider: {}, Data: {}]", dataProvider.getName(), data.getName());
-						context.setAttribute(dataProvider.getName(), data.getValue());
-						
-						//clone the step, so that expression replacement will not affect actual step
-						IStep dataStep = step.clone();
-						AutomationUtils.replaceExpressions("step-" + dataStep.getClass().getName(), context, dataStep);
-
-						context.getStepListenerProxy().stepStarted(dataStep, data);
-						if(!dataStep.execute(context, exeLogger))
-						{
-							res = false;
-						}
-					}
-				}
-			}
-			
-			if(step instanceof IValidation)
-			{
-				if(!res)
-				{
-					Executable executable = step.getClass().getAnnotation(Executable.class);
-					
-					String message = String.format("Validation %s failed. Validation Details: %s", executable.name(), step);
-					
-					exeLogger.error(message);
-					throw new TestCaseValidationFailedException(step, message);
-				}
-			}
-			
-			context.getStepListenerProxy().stepCompleted(step, currentData);
-		} catch(RuntimeException ex)
-		{
-			context.getStepListenerProxy().stepErrored(step, currentData, ex);
-			
-			if(ex instanceof LangException)
-			{
-				throw ex;
-			}
-			
-			exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), context.getExecutionStack().toStackTrace());
-			throw ex;
-		}finally
-		{
-			context.getExecutionStack().pop(step);
-			
-			//re-enable logging, in case it is disabled
-			exeLogger.setDisabled(false);
-			context.setExecutionLogger(null);
-		}
-
-	}
 	
 	private static void invokeErrorHandling(AutomationContext context, Executable executable, ErrorDetails errorDetails)
 	{

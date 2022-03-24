@@ -16,6 +16,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -118,12 +119,12 @@ public class SqlAssertValue extends AbstractValidation
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{
 			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
+			return;
 		}
 		
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
@@ -175,11 +176,10 @@ public class SqlAssertValue extends AbstractValidation
 			if(!Objects.equals(expectedValue, res))
 			{
 				exeLogger.error("Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));
-				return false;
+				throw new AutoxValidationException(this, "Expected value {} [Type: {}] is not matching with actual value: {} [Type: {}]", expectedValue, getType(expectedValue), res, getType(res));
 			}
 			
 			exeLogger.debug("Expected value and actual value are found to be same: {}", expectedValue);
-			return true;
 		} catch(SQLException ex)
 		{
 			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);

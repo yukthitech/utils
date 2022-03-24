@@ -76,7 +76,7 @@ public class ClickStep extends AbstractPostCheckStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Clicking the element specified by locator: {}", locator);
 
@@ -165,8 +165,6 @@ public class ClickStep extends AbstractPostCheckStep
 			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
-		
-		return true;
 	}
 
 	/**

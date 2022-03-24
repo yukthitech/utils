@@ -24,6 +24,7 @@ import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
+import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.monitor.MonitorServer;
@@ -39,7 +40,6 @@ import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
 import com.yukthitech.utils.cli.OptionsFactory;
-import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -191,14 +191,14 @@ public class AutomationContext
 	private ExecutionStack executionStack = new ExecutionStack();
 	
 	/**
-	 * Step listeners.
-	 */
-	private EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
-	
-	/**
 	 * Custom ui locators.
 	 */
 	private Map<String, CustomUiLocator> customUiLocators = new HashMap<>();
+	
+	/**
+	 * Current automation executor.
+	 */
+	private AutomationExecutor automationExecutor;
 	
 	/**
 	 * Constructor.
@@ -235,6 +235,16 @@ public class AutomationContext
 		this.persistenceStorage = new PersistenceStorage(appConfiguration);
 	}
 	
+	public AutomationExecutor getAutomationExecutor()
+	{
+		return automationExecutor;
+	}
+
+	public void setAutomationExecutor(AutomationExecutor automationExecutor)
+	{
+		this.automationExecutor = automationExecutor;
+	}
+
 	/**
 	 * Sets the used to send monitor messages to connected client.
 	 *
@@ -812,7 +822,6 @@ public class AutomationContext
 			throw new InvalidStateException("Duplicate function name encountered: {}", function.getName());
 		}
 		
-		function.markAsFunctionGroup();
 		nameToFunction.put(function.getName(), function);
 	}
 	
@@ -1038,21 +1047,6 @@ public class AutomationContext
 	public ExecutionStack getExecutionStack()
 	{
 		return executionStack;
-	}
-	
-	public void addStepListener(IStepListener listener)
-	{
-		this.stepListeners.addListener(listener);
-	}
-	
-	public void removeStepListener(IStepListener listener)
-	{
-		this.stepListeners.removeListener(listener);
-	}
-	
-	public IStepListener getStepListenerProxy()
-	{
-		return stepListeners.get();
 	}
 	
 	public void addCustomUiLocator(CustomUiLocator locator)

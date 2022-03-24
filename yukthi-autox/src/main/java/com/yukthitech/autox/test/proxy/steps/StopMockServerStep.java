@@ -41,11 +41,10 @@ public class StopMockServerStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		logger.debug("Stopping mock server: {}", name);
 		
 		MockServerFactory.stopMockServer(context, name);
-		return true;
 	}
 }

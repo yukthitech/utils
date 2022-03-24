@@ -1,21 +1,25 @@
 package com.yukthitech.autox.exec;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.IStepListener;
 import com.yukthitech.utils.CommonUtils;
 
 /**
  * Execution state of branch.
  * @author akranthikiran
  */
-public class ExecutionStackEntry
+class ExecutionStackEntry implements IExecutionStackEntry
 {
 	/**
 	 * Branch whose state being managed.
@@ -42,13 +46,21 @@ public class ExecutionStackEntry
 	
 	private int childBranchIndex = 0;
 	
-	private Consumer<ExecutionStackEntry> onSuccess;
+	private Consumer<IExecutionStackEntry> onSuccess;
 	
-	private Consumer<ExecutionStackEntry> onInit;
+	/**
+	 * Init callback, which will be called first time before execution of stack entry. 
+	 * If this returns false, then stack entry will not be executed and will be skipped.
+	 */
+	private Function<IExecutionStackEntry, Boolean> onInit;
 	
-	private Consumer<ExecutionStackEntry> onComplete;
+	private Consumer<IExecutionStackEntry> preexecute;
 	
-	private ExceptionHandler exceptionHandler;
+	private Consumer<IExecutionStackEntry> onComplete;
+	
+	private Function<IExecutionStackEntry, Boolean> reexecutionNeeded;
+	
+	private IExceptionHandler exceptionHandler;
 	
 	private Date startedOn;
 	
@@ -63,7 +75,11 @@ public class ExecutionStackEntry
 	private ExecutionStackEntry parent;
 	
 	private ExecutionType executionType;
-
+	
+	private IStepListener stepListener;
+	
+	private Map<String, Object> stackVariables;
+	
 	public ExecutionStackEntry(ExecutionBranch branch)
 	{
 		this.branch = branch;
@@ -77,6 +93,11 @@ public class ExecutionStackEntry
 		this.label = label;
 		this.executable = executable;
 		this.executionType = executionType;
+	}
+	
+	public void setStepListener(IStepListener stepListener)
+	{
+		this.stepListener = stepListener;
 	}
 	
 	public ExecutionType getExecutionType()
@@ -103,6 +124,13 @@ public class ExecutionStackEntry
 	{
 		this.started = true;
 		startedOn = new Date();
+		
+		if(preexecute == null)
+		{
+			return;
+		}
+		
+		preexecute.accept(this);
 	}
 	
 	public Date getStartedOn()
@@ -171,6 +199,11 @@ public class ExecutionStackEntry
 		return childStepIndex;
 	}
 	
+	public void resetChildIndex()
+	{
+		childStepIndex = 0;
+	}
+	
 	public void incrementChildStepIndex()
 	{
 		childStepIndex++;
@@ -186,42 +219,61 @@ public class ExecutionStackEntry
 		return steps;
 	}
 
-	public Consumer<ExecutionStackEntry> getOnSuccess()
+	public Consumer<IExecutionStackEntry> getOnSuccess()
 	{
 		return onSuccess;
 	}
 
-	public void setOnSuccess(Consumer<ExecutionStackEntry> onSuccess)
+	public void setOnSuccess(Consumer<IExecutionStackEntry> onSuccess)
 	{
 		this.onSuccess = onSuccess;
 	}
+	
+	public void setPreexecute(Consumer<IExecutionStackEntry> preexecute)
+	{
+		this.preexecute = preexecute;
+	}
 
-	public void setOnInit(Consumer<ExecutionStackEntry> onInit)
+	/**
+	 * Sets the init callback, which will be called first time before execution
+	 * of stack entry. If this returns false, then stack entry will not be
+	 * executed and will be skipped.
+	 *
+	 * @param onInit
+	 *            the new init callback, which will be called first time before
+	 *            execution of stack entry
+	 */
+	public void setOnInit(Function<IExecutionStackEntry, Boolean> onInit)
 	{
 		this.onInit = onInit;
 	}
 	
-	public Consumer<ExecutionStackEntry> getOnInit()
+	public boolean initaize()
 	{
-		return onInit;
+		if(onInit == null)
+		{
+			return true;
+		}
+		
+		return onInit.apply(this);
 	}
 	
-	public void setOnComplete(Consumer<ExecutionStackEntry> onComplete)
+	public void setOnComplete(Consumer<IExecutionStackEntry> onComplete)
 	{
 		this.onComplete = onComplete;
 	}
 	
-	public Consumer<ExecutionStackEntry> getOnComplete()
+	public Consumer<IExecutionStackEntry> getOnComplete()
 	{
 		return onComplete;
 	}
 	
-	public void setExceptionHandler(ExceptionHandler exceptionHandler)
+	public void setExceptionHandler(IExceptionHandler exceptionHandler)
 	{
 		this.exceptionHandler = exceptionHandler;
 	}
 	
-	public ExceptionHandler getExceptionHandler()
+	public IExceptionHandler getExceptionHandler()
 	{
 		return exceptionHandler;
 	}
@@ -285,8 +337,63 @@ public class ExecutionStackEntry
 	{
 		return label;
 	}
+	
+	@Override
+	public IExecutionStackEntry setVariable(String name, Object value)
+	{
+		if(this.stackVariables == null)
+		{
+			this.stackVariables = new HashMap<String, Object>();
+		}
+		
+		this.stackVariables.put(name, value);
+		return this;
+	}
+	
+	@Override
+	public Object getVariable(String name)
+	{
+		return null;
+	}
+	
+	public void stepStarted(IStep step)
+	{
+		if(stepListener == null)
+		{
+			return;
+		}
+		
+		stepListener.stepStarted(step);
+	}
+	
+	public void stepPhase(IStep step, String mssg)
+	{
+		if(stepListener == null)
+		{
+			return;
+		}
 
-	public void completedBranch(boolean successful)
+		stepListener.stepPhase(step, mssg);
+	}
+
+	public void stepCompleted(IStep step, boolean successful, Exception ex)
+	{
+		if(stepListener == null)
+		{
+			return;
+		}
+		
+		if(successful)
+		{
+			stepListener.stepCompleted(step);
+		}
+		else
+		{
+			stepListener.stepErrored(step, ex);
+		}
+	}
+
+	public void completed(boolean successful)
 	{
 		if(successful && onSuccess != null)
 		{
@@ -297,6 +404,21 @@ public class ExecutionStackEntry
 		{
 			onComplete.accept(this);
 		}
+	}
+	
+	public void setReexecutionNeeded(Function<IExecutionStackEntry, Boolean> reexecutionNeeded)
+	{
+		this.reexecutionNeeded = reexecutionNeeded;
+	}
+	
+	public boolean isReexecutionNeeded()
+	{
+		if(reexecutionNeeded == null)
+		{
+			return false;
+		}
+		
+		return reexecutionNeeded.apply(this);
 	}
 	
 	public ExecutionStackEntry getParentEntry(Class<?>... ofTypes)

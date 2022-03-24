@@ -89,7 +89,7 @@ public class FetchValueQueryStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
@@ -146,7 +146,5 @@ public class FetchValueQueryStep extends AbstractStep
 		{
 			DbUtils.closeQuietly(connection);
 		}
-		
-		return true;
 	}
 }

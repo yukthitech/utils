@@ -62,7 +62,7 @@ public class OpenWindowStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Opening window '{}' with url: {}", name, url);
 
@@ -86,10 +86,6 @@ public class OpenWindowStep extends AbstractStep
 			
 			return true;
 		}, 10000, 1000);
-		
-		
-		
-		return true;
 	}
 	
 	/*

@@ -37,17 +37,16 @@ public class StoreDeleteStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		boolean res = context.getPersistenceStorage().remove(key);
 
 		if(res)
 		{
 			exeLogger.debug("Successfully deleted entry with key: {}", key);
-			return true;
+			return;
 		}
 
 		exeLogger.debug("No entry found with key: {}. Ignoring delete request.", key);
-		return true;
 	}
 }

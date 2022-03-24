@@ -73,15 +73,13 @@ public class LogScreenShotStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 		exeLogger.logImage(name, message, file, level);
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)

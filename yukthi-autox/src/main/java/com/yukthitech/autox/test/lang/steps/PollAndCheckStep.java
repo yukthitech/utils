@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.lang.steps;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.yukthitech.autox.AbstractValidation;
@@ -128,9 +129,9 @@ public class PollAndCheckStep extends AbstractValidation
 	{
 		this.timeOutUnit = timeOutUnit;
 	}
-
+	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		Date startTime = new Date();
 		long diff = 0;
@@ -155,7 +156,7 @@ public class PollAndCheckStep extends AbstractValidation
 			if(diff > timeOutUnit.toMillis((Long) timeOut))
 			{
 				exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
-				return false;
+				return;
 			}
 			
 			exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
@@ -168,7 +169,5 @@ public class PollAndCheckStep extends AbstractValidation
 				throw new InvalidStateException("Thread was interruped while waiting as part of polling step", ex);
 			}
 		}
-		
-		return true;
 	}
 }

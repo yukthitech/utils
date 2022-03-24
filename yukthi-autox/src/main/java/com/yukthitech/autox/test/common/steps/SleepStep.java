@@ -53,7 +53,7 @@ public class SleepStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		exeLogger.debug("Sleeping for {} {}", time, timeUnit);
 		
@@ -68,7 +68,5 @@ public class SleepStep extends AbstractStep
 			exeLogger.error("Sleep step is interrupted", ex);
 			throw new TestCaseFailedException(this, "Sleep step is interrupted", ex);
 		}
-		
-		return true;
 	}
 }

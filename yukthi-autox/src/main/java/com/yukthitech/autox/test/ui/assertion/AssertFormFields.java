@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
@@ -239,12 +240,12 @@ public class AssertFormFields extends AbstractValidation
 	 * AutomationContext, com.yukthitech.ui.automation.IExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(!"true".equals(enabled))
 		{
 			exeLogger.debug("Current validation is disabled. Skipping validation execution.");
-			return true;
+			return;
 		}
 		
 		exeLogger.debug("Validating form  - {}", locator);
@@ -259,14 +260,14 @@ public class AssertFormFields extends AbstractValidation
 
 			if(fieldElements == null || fieldElements.isEmpty())
 			{
-				exeLogger.error("No field found with locator: " + field.getLocator());
-				return false;
+				exeLogger.error("No field found with locator: {}", field.getLocator());
+				throw new AutoxValidationException(this, "No field found with locator: {}", field.getLocator());
 			}
 
 			if(fieldElements.size() > 1 && !field.isMultiple())
 			{
-				exeLogger.error("Multiple fields found when single field is expected for locator: " + field.getLocator());
-				return false;
+				exeLogger.error("Multiple fields found when single field is expected for locator: {}", field.getLocator());
+				throw new AutoxValidationException(this, "Multiple fields found when single field is expected for locator: {}", field.getLocator());
 			}
 
 			if(field.getType() != null)
@@ -277,14 +278,15 @@ public class AssertFormFields extends AbstractValidation
 
 					if(fieldType == null)
 					{
-						exeLogger.error("Failed to find field type of field locator: " + field.getLocator());
-						return false;
+						exeLogger.error("Failed to find field type of field locator: {}", field.getLocator());
+						throw new AutoxValidationException(this, "Failed to find field type of field locator: {}", field.getLocator());
 					}
 
 					if(field.getType() != fieldType)
 					{
-						exeLogger.error(String.format("Expected field type '%s' is not matching with actual field type '%s' for locator - %s", field.getType(), fieldType, field.locator));
-						return false;
+						exeLogger.error(String.format("Expected field type '{}' is not matching with actual field type '{}' for locator: {}", field.getType(), fieldType, field.locator));
+						throw new AutoxValidationException(this, "Expected field type '{}' is not matching with actual field type '{}' for locator: {}", 
+								field.getType(), fieldType, field.locator);
 					}
 				}
 			}
@@ -302,14 +304,16 @@ public class AssertFormFields extends AbstractValidation
 
 					if(expectedOption.getLabel() != null && !expectedOption.getLabel().equals(actualOption.getLabel()))
 					{
-						exeLogger.error("At index {} expected field option label '{}' " + "is not matching with actual field option label '{}' for locator - {}", i, expectedOption.getLabel(), actualOption.getLabel(), field.locator);
-						return false;
+						exeLogger.error("At index {} expected field option label '{}' is not matching with actual field option label '{}' for locator: {}", i, expectedOption.getLabel(), actualOption.getLabel(), field.locator);
+						throw new AutoxValidationException(this, "At index {} expected field option label '{}' is not matching with actual field option label '{}' for locator: {}", 
+								i, expectedOption.getLabel(), actualOption.getLabel(), field.locator);
 					}
 
 					if(expectedOption.getValue() != null && !expectedOption.getValue().equals(actualOption.getValue()))
 					{
-						exeLogger.error("At index {} expected field option value '{}' " + "is not matching with actual field option value '{}' for locator - {}", i, expectedOption.getValue(), actualOption.getValue(), field.locator);
-						return false;
+						exeLogger.error("At index {} expected field option value '{}' is not matching with actual field option value '{}' for locator: {}", i, expectedOption.getValue(), actualOption.getValue(), field.locator);
+						throw new AutoxValidationException(this, "At index {} expected field option value '{}' is not matching with actual field option value '{}' for locator: {}", 
+								i, expectedOption.getLabel(), actualOption.getLabel(), field.locator);
 					}
 				}
 			}
@@ -320,13 +324,12 @@ public class AssertFormFields extends AbstractValidation
 
 				if(field.getValue().equals(actValue))
 				{
-					exeLogger.error("Expected field value '{}' is not matching with " + "actual field value'{}' for locator - {}", field.getValue(), actValue, field.locator);
-					return false;
+					exeLogger.error("Expected field value '{}' is not matching with actual field value'{}' for locator: {}", field.getValue(), actValue, field.locator);
+					throw new AutoxValidationException(this, "Expected field value '{}' is not matching with actual field value'{}' for locator: {}", 
+							field.getValue(), actValue, field.locator);
 				}
 			}
 		}
-
-		return true;
 	}
 
 	/*

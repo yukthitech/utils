@@ -33,7 +33,7 @@ public class StopTimerStep extends AbstractStep
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		logger.debug("Stopped timer with name: {}", name);
 		
@@ -69,6 +69,5 @@ public class StopTimerStep extends AbstractStep
 		timeTakenStr.append(diffInSecs).append("Sec");
 		
 		context.setAttribute(name, timeTakenStr.toString());
-		return true;
 	}
 }

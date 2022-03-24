@@ -1,6 +1,8 @@
 package com.yukthitech.autox.test.lang.steps;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -13,7 +15,8 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.exec.AutomationExecutor;
+import com.yukthitech.autox.exec.IExecutionStackEntry;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
@@ -27,13 +30,19 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
 
+	private static final String VAR_INDEX = "index";
+
+	private static final String VAR_START = "start";
+
+	private static final String VAR_END = "end";
+
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
 	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
-	private Function steps;
+	private List<IStep> steps = new ArrayList<IStep>();
 
 	/**
 	 * Inclusive start of range.
@@ -91,22 +100,16 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public void addStep(IStep step)
 	{
-		if(steps == null)
-		{
-			steps = new Function();
-		}
-		
-		steps.addStep(step);
+		steps.add(step);
 	}
 	
 	@Override
 	public List<IStep> getSteps()
 	{
-		return steps.getSteps();
+		return steps;
 	}
-
-	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	
+	private boolean populateRange(ExecutionLogger exeLogger, IExecutionStackEntry stackEntry)
 	{
 		int start = 0, end = 0;
 		
@@ -128,22 +131,69 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 			throw new InvalidArgumentException("Invalid/non-int-convertable end value specified: {}", this.end);
 		}
 		
-		for(int i = start; i <= end; i++)
+		if(start > end)
 		{
-			context.setAttribute(loopVar, i);
-			
-			try
-			{
-				steps.execute(context, exeLogger, true);
-			} catch(BreakException ex)
-			{
-				break;
-			} catch(ContinueException ex)
-			{
-				continue;
-			}
+			return false;
 		}
 		
+		stackEntry.setVariable(VAR_START, start);
+		stackEntry.setVariable(VAR_END, end);
+		stackEntry.setVariable(VAR_INDEX, new AtomicInteger(start));
 		return true;
+	}
+	
+	@Override
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	{
+		AutomationExecutor executor = context.getAutomationExecutor();
+		
+		executor.newSteps("for-each-steps", this, steps)
+			.onInit(entry -> 
+			{
+				return populateRange(exeLogger, entry);
+			})
+			.preexecute(entry -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				int idx = loopIndex.get();
+				
+				//execute the steps
+				context.setAttribute(loopVar, idx);
+			})
+			.exceptionHandler((entry, ex) -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				Integer end = (Integer) entry.getVariable(VAR_END);
+				
+				if(ex instanceof BreakException)
+				{
+					loopIndex.set(end + 1);
+					return true;
+				}
+				
+				if(ex instanceof ContinueException)
+				{
+					loopIndex.incrementAndGet();
+					return true;
+				}
+				
+				return false;
+			})
+			.onSuccess(entry -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				loopIndex.incrementAndGet();
+			})
+			.isReexecutionNeeded(entry -> 
+			{
+				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
+				Integer end = (Integer) entry.getVariable(VAR_END);
+				
+				int idx = loopIndex.get();
+				
+				return (idx <= end);
+			})
+			.execute();
+		;
 	}
 }

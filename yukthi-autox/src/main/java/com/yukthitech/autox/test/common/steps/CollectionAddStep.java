@@ -45,7 +45,7 @@ public class CollectionAddStep extends AbstractStep
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("To collection of type {} adding value of type: {}", 
 				(collection != null) ? collection.getClass().getName() : "null", 
@@ -58,6 +58,5 @@ public class CollectionAddStep extends AbstractStep
 		}
 		
 		((Collection) collection).add(value);
-		return true;
 	}
 }

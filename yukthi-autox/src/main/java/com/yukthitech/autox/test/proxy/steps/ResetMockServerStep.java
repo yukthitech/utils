@@ -41,13 +41,11 @@ public class ResetMockServerStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		logger.debug("Reseting mock server: {}", name);
 		
 		MockServer server = MockServerFactory.getMockServer(name);
 		server.reset();
-		
-		return true;
 	}
 }

@@ -95,7 +95,7 @@ public class MockFetchRequestStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
 	{
 		MockRequestFilter filter = new MockRequestFilter(uriFilter, methodFilter);
 
@@ -106,7 +106,5 @@ public class MockFetchRequestStep extends AbstractStep
 
 		logger.debug("From server '{}' number of requests filtered are {}. Setting requests as attribute: {}", name, requests.size(), attributeName);
 		context.setAttribute(attributeName, requests);
-
-		return true;
 	}
 }

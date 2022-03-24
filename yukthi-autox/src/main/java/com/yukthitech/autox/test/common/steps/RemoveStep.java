@@ -46,7 +46,7 @@ public class RemoveStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(StringUtils.isNotBlank(name))
 		{
@@ -59,8 +59,6 @@ public class RemoveStep extends AbstractStep
 			exeLogger.debug("Removing data using expression: {}", expression);
 			ExpressionFactory.getExpressionFactory().removeByExpression(context, expression);	
 		}
-		
-		return true;
 	}
 	
 	@Override

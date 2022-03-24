@@ -56,7 +56,7 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		T postRestRequest = newRequest(uri);
 		postRestRequest.setMultipartRequest(true);
@@ -135,8 +135,6 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 				exeLogger.debug("Failed to delete temp file: {}", fileToDel.getPath());
 			}
 		}
-		
-		return true;
 	}
 	
 	public abstract T newRequest(String uri); 

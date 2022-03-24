@@ -30,7 +30,7 @@ public class GotoPageStep extends AbstractStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Going to page with uri - {}", uri);
 
@@ -38,8 +38,6 @@ public class GotoPageStep extends AbstractStep
 		
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 		driver.navigate().to( seleniumConfiguration.getResourceUrl(uri) );
-		
-		return true;
 	}
 
 	/**

@@ -68,7 +68,7 @@ public class ExecuteCommandStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		Command command = new Command(name, this.command, workingDirectory);
 		
@@ -114,7 +114,5 @@ public class ExecuteCommandStep extends AbstractStep
 		{
 			out.close();			
 		}
-		
-		return true;
 	}
 }

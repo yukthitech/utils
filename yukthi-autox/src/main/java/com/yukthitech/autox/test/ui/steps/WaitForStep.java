@@ -77,7 +77,7 @@ public class WaitForStep extends AbstractUiStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Waiting for element '{}' to become {}", locators, "true".equals(hidden) ? "Invisible" : "Visible");
 		
@@ -138,8 +138,6 @@ public class WaitForStep extends AbstractUiStep
 			exeLogger.error(ex, ex.getMessage());
 			throw new TestCaseFailedException(this, ex.getMessage(), ex);
 		}
-		
-		return true;
 	}
 
 	/**

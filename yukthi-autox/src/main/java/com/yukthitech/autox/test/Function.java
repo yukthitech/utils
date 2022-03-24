@@ -6,29 +6,25 @@ package com.yukthitech.autox.test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
-import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
+import com.yukthitech.utils.ObjectWrapper;
 
 /**
  * Represents group of steps and/or validations. That can be referenced 
  * @author akiran
  */
-@Executable(name = "function", group = Group.Lang, message = "Creates custom function for reusability which can be invoked from other places.")
-public class Function extends AbstractLocationBased implements IStepContainer, IStep, Cloneable, IEntryPoint, IParentAware
+public class Function extends AbstractLocationBased implements IStepContainer, Cloneable, IEntryPoint, IParentAware
 {
-	private static final long serialVersionUID = 1L;
-	
 	/**
 	 * Name of this group.
 	 */
@@ -62,18 +58,6 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 	 */
 	@SkipParsing
 	private List<IStep> steps = new ArrayList<>();
-	
-	/**
-	 * Flag indicating if the current group is function group. Return statement will
-	 * be executed only in function groups.
-	 */
-	private boolean functionGroup = false;
-	
-	/**
-	 * Flag indicating if logging is disabled. This flag is expected to be set
-	 * by calling step-group-ref.
-	 */
-	private boolean loggingDisabled = false;
 	
 	/**
 	 * Params for step group execution. This are expected to be set by step-group-ref
@@ -160,26 +144,11 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		this.parent = parent;
 	}
 	
-	/**
-	 * Sets the flag indicating if logging is disabled. This flag is expected to be set by calling step-group-ref.
-	 *
-	 * @param loggingDisabled the new flag indicating if logging is disabled
-	 */
-	void setLoggingDisabled(boolean loggingDisabled)
-	{
-		this.loggingDisabled = loggingDisabled;
-	}
-	
 	void setParams(Map<String, Object> params)
 	{
 		this.params = params;
 	}
 	
-	public void markAsFunctionGroup()
-	{
-		this.functionGroup = true;
-	}
-
 	@Override
 	public void addStep(IStep step)
 	{
@@ -196,63 +165,43 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		return steps;
 	}
 	
-	public Object execute(AutomationContext context, ExecutionLogger logger, boolean inlineExecution) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger logger, Consumer<Object> callback)
 	{
-		/*
-		 * Note: function invocation may happen as part of other lang steps like, if, for, while etc.
-		 * In such cases, the current params should be retained and new params should not be pushed.
-		 */
+		ObjectWrapper<Object> returnValue = new ObjectWrapper<Object>();
 		
-		if(!inlineExecution)
-		{
-			context.pushParameters(params);
-			context.getExecutionStack().push(this);
-		}
-
-		try
-		{
-			for(IStep step : this.steps)
+		context.getAutomationExecutor()
+			.newSteps("function-" + name + "-steps", this, steps)
+			.onInit(entry -> 
 			{
-				try
+				context.pushParameters(params);
+				context.getExecutionStack().push(this);
+			})
+			.exceptionHandler(ex -> 
+			{
+				//occurs during return statement execution
+				//Note: even for return false is returned, to ensure current function is removed
+				//  from current execution stack and further execution does not occur.
+				if(ex instanceof ReturnException)
 				{
-					StepExecutor.executeStep(context, logger, step);
-				} catch (Exception ex)
-				{
-					if(functionGroup && (ex instanceof ReturnException))
-					{
-						logger.debug("Exiting from current function invocation");
-						return ((ReturnException) ex).getValue();
-					}
-					
-					if(ex instanceof LangException)
-					{
-						throw ex;
-					}
-					
-					Executable executable = step.getClass().getAnnotation(Executable.class);
-					logger.error("An error occurred while executing child-step '{}'. Error: {}", executable.name(), ex);
-					throw ex;
+					returnValue.setValue( ((ReturnException) ex).getValue() );
+					return true;
 				}
-			}
-		}finally
-		{
-			if(!inlineExecution)
+				
+				return false;
+			})
+			.onSuccess(entry -> 
+			{
+				callback.accept(returnValue.getValue());
+			})
+			.onComplete(entry -> 
 			{
 				context.getExecutionStack().pop(this);
 				context.popParameters();
-			}
-		}
-		
-		return null;
+			})
+			.execute();
+			;
 	}
 	
-	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger) throws Exception
-	{
-		execute(context, logger, false);
-		return true;
-	}
-
 	@Override
 	public IStep clone()
 	{
@@ -263,12 +212,6 @@ public class Function extends AbstractLocationBased implements IStepContainer, I
 		{
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	@Override
-	public boolean isLoggingDisabled()
-	{
-		return loggingDisabled;
 	}
 
 	/* (non-Javadoc)

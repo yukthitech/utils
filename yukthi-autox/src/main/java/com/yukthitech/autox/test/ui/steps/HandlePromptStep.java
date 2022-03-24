@@ -64,7 +64,7 @@ public class HandlePromptStep extends AbstractStep
 	 * @param context Current automation context 
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		if(expectedMessage != null)
 		{
@@ -108,8 +108,6 @@ public class HandlePromptStep extends AbstractStep
 			alert.dismiss();
 			exeLogger.debug("Successfully dismissed the confirmation.");
 		}
-		
-		return true;
 	}
 
 	/* (non-Javadoc)

@@ -58,7 +58,7 @@ public class MapPutStep extends AbstractStep
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("To map of type {} adding entry of [Key Type: {}, Value Type: {}]", 
 				(map != null) ? map.getClass().getName() : "null", 
@@ -72,6 +72,5 @@ public class MapPutStep extends AbstractStep
 		}
 
 		((Map) map).put(key, value);
-		return true;
 	}
 }

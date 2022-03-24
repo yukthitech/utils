@@ -1,14 +1,12 @@
 package com.yukthitech.autox;
 
-import com.yukthitech.autox.test.TestCaseData;
-
 /**
  * Listener to listen to step events which can be added to automation context.
  * @author akiran
  */
 public interface IStepListener
 {
-	public void stepStarted(IStep step, TestCaseData data);
+	public void stepStarted(IStep step);
 	
 	/**
 	 * Expected to be used by steps to inform about intermediate phases with messages.
@@ -17,7 +15,7 @@ public interface IStepListener
 	 */
 	public void stepPhase(IStep step, String mssg);
 	
-	public void stepCompleted(IStep step, TestCaseData data);
+	public void stepCompleted(IStep step);
 	
-	public void stepErrored(IStep step, TestCaseData data, Exception ex);
+	public void stepErrored(IStep step, Exception ex);
 }

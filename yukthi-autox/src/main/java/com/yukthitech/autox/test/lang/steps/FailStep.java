@@ -34,7 +34,7 @@ public class FailStep extends AbstractStep
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) 
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
 		exeLogger.debug("Failing the current test case with message: {}", message);
 		

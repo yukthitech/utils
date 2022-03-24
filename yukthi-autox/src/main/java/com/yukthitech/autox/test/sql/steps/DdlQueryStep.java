@@ -59,7 +59,7 @@ public class DdlQueryStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
 		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
@@ -88,7 +88,5 @@ public class DdlQueryStep extends AbstractStep
 		{
 			DbUtils.closeQuietly(connection, statement, null);
 		}
-		
-		return true;
 	}
 }

@@ -35,7 +35,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		try
 		{
@@ -55,7 +55,5 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 			context.setAttribute(catchSteps.getErrorAttr(), ex);
 			catchSteps.execute(context, exeLogger);
 		}
-		
-		return true;
 	}
 }

@@ -68,7 +68,7 @@ public class SwitchWindow extends AbstractStep
 	}
 	
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Switching to window: {}", locator);
 
@@ -90,8 +90,6 @@ public class SwitchWindow extends AbstractStep
 		}
 
 		driver.switchTo().window(locator);
-		
-		return true;
 	}
 
 	/**

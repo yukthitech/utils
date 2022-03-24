@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -88,26 +89,31 @@ public class AssertEqualsStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug(false, "Comparing values for equlity. <span style=\"white-space: pre-wrap\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
-		boolean res = false;
+		boolean isEqual = false;
 		
 		if((expected instanceof byte[]) && (actual instanceof byte[]))
 		{
 			exeLogger.debug("Performing byte-array comparision..");
-			res = Arrays.equals((byte[]) expected, (byte[]) actual);
+			isEqual = Arrays.equals((byte[]) expected, (byte[]) actual);
 		}
 		else
 		{
-			res = Objects.equals(expected, actual);
+			isEqual = Objects.equals(expected, actual);
 		}
 		
-		exeLogger.debug("Result of comparision is: {}", res);
-
-		return res;
+		exeLogger.debug("Result of comparision is: {}", isEqual);
+		
+		if(!isEqual)
+		{
+			AssertEqualsStep actualStep = (AssertEqualsStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found objects are unequal [Actual: {}, Expected: {}]", 
+					actualStep.actual, actualStep.expected);
+		}
 	}
 }

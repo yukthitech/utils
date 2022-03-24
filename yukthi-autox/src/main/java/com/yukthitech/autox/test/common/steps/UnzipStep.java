@@ -85,7 +85,7 @@ public class UnzipStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		File outFolder = new File(this.outFolder);
 		
@@ -114,7 +114,6 @@ public class UnzipStep extends AbstractStep
 		exeLogger.debug("Unzipped {} files successfully", files.size());
 		
 		is.close();
-		return true;
 	}
 	
 	@Override

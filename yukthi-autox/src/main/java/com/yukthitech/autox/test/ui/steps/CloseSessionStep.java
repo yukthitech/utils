@@ -30,7 +30,7 @@ public class CloseSessionStep extends AbstractStep
 	}
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Closing current session");
 		
@@ -47,8 +47,6 @@ public class CloseSessionStep extends AbstractStep
 			
 			seleniumConfiguration.resetDriver();
 		}
-		
-		return true;
 	}
 	
 	/* (non-Javadoc)

@@ -3,7 +3,7 @@ package com.yukthitech.autox;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.yukthitech.autox.test.IDataProvider;
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -38,10 +38,14 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	 */
 	protected int lineNumber = -1;
 	
-	/**
-	 * Optional data provider for the step.
-	 */
-	private IDataProvider dataProvider;
+	@SkipParsing
+	protected IStep sourceStep;
+	
+	@Override
+	public void setSourceStep(IStep sourceStep)
+	{
+		this.sourceStep = sourceStep;
+	}
 
 	@Override
 	public IValidation clone()
@@ -110,24 +114,6 @@ public abstract class AbstractValidation implements IValidation, Validateable
 		return lineNumber;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#getDataProvider()
-	 */
-	public IDataProvider getDataProvider()
-	{
-		return dataProvider;
-	}
-
-	/**
-	 * Sets the optional data provider for the step.
-	 *
-	 * @param dataProvider the new optional data provider for the step
-	 */
-	public void setDataProvider(IDataProvider dataProvider)
-	{
-		this.dataProvider = dataProvider;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

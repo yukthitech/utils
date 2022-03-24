@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.assertion;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -71,14 +72,20 @@ public class AssertNotSameStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Comparing values to be same. [Expected: {} [{}], Actual: {} [{}]]", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
-		boolean res = (actual != expected);
-		exeLogger.debug("Result is {}", res);
-		return res;
+		boolean isSame = (actual == expected);
+		exeLogger.debug("Found values to be same: {}", isSame);
+
+		if(isSame)
+		{
+			AssertNotSameStep actualStep = (AssertNotSameStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found specified values to be same [Expected: {}, Actual: {}]", 
+					actualStep.expected, actualStep.actual);
+		}
 	}
 }

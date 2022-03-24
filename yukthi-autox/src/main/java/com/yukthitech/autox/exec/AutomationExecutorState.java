@@ -91,13 +91,15 @@ public class AutomationExecutorState
 		ExecutionStackEntry curEntry = executionStack.peek();
 		
 		entry.setParent(curEntry);
+
+		//if initialization fails, don't push the stack
+		if(!entry.initaize())
+		{
+			return;
+		}
+		
 		this.executionStack.push(entry);
 		setExecutionLoggerFor(entry);
-		
-		if(entry.getOnInit() != null)
-		{
-			entry.getOnInit().accept(entry);
-		}
 	}
 	
 	public boolean hasMoreBranches()
@@ -233,23 +235,6 @@ public class AutomationExecutorState
 		));
 	}
 	
-	public void startedSteps(ExecutionBranch stepsBranch)
-	{
-		/*
-		//if logger already exists, return the same
-		if(executionLogger != null)
-		{
-			return;
-		}
-		
-		//create a new logger based on parent
-		ExecutionStackEntry parentEntry = branchStack.get(branchStack.size() - 2);
-		ExecutionBranch parentBranch = parentEntry.getBranch(); 
-		
-		executionLogger = new ExecutionLogger(context, parentBranch.label, parentBranch.description);
-		*/
-	}
-
 	public void started(ExecutionBranch branch)
 	{
 		if(branch.executable instanceof TestSuite)
@@ -392,23 +377,8 @@ public class AutomationExecutorState
 		}
 	}
 	
-	public void handleException(ExecutionStackEntry entry, IStep sourceStep, Exception actualException)
+	public boolean handleException(ExecutionStackEntry entry, IStep sourceStep, Exception actualException)
 	{
-		if(entry.getExceptionHandler() != null)
-		{
-			if(entry.getExceptionHandler().handleError(actualException))
-			{
-				return;
-			}
-		}
-		
-		if(actualException instanceof ReturnException)
-		{
-			ExecutionStackEntry stackEntry = executionStack.pop();
-			completedBranchEntry(stackEntry);
-			return;
-		}
-		
 		ExecutionLogger executionLogger = getExecutionLogger();
 		
 		executionLogger.error(actualException, "An error occurred with message - {}", actualException.getMessage());
@@ -436,7 +406,7 @@ public class AutomationExecutorState
 				
 				setupFailed = true;
 				setupType = stackEntry.getExecutionType();
-				stackEntry.completedBranch(false);
+				stackEntry.completed(false);
 				
 				this.executionStack.pop();
 				continue;
@@ -451,17 +421,47 @@ public class AutomationExecutorState
 				
 				cleanupFailed = true;
 				cleanupType = stackEntry.getExecutionType();
-				stackEntry.completedBranch(false);
+				stackEntry.completed(false);
 				
 				this.executionStack.pop();
 				continue;
 			}
 			
+			if(actualException instanceof ReturnException)
+			{
+				this.executionStack.pop();
+				stackEntry.completed(true);
+				
+				if(stackEntry.getBranch() != null)
+				{
+					completedBranchEntry(stackEntry);
+					return true;
+				}
+
+				continue;
+			}
+
 			if(stackEntry.isStepsEntry())
 			{
-				stackEntry.completedBranch(false);
+				if(entry.getExceptionHandler() != null)
+				{
+					//Note: When exception handler returns true, if means internally exception
+					// is handled and current steps needs to be executed further
+					//  which also indicates current entry execution is not completed yet
+					if(entry.getExceptionHandler().handleError(entry, actualException))
+					{
+						return true;
+					}
+				}
+
+				stackEntry.completed(false);
 				this.executionStack.pop();
 				continue;
+			}
+			//for branch execution
+			else
+			{
+				
 			}
 			
 			if(executable instanceof TestCase)
@@ -497,7 +497,7 @@ public class AutomationExecutorState
 				if(setupFailed)
 				{
 					completedBranchEntry(stackEntry);
-					stackEntry.completedBranch(false);
+					stackEntry.completed(false);
 					this.executionStack.pop();
 				}
 				
@@ -513,7 +513,7 @@ public class AutomationExecutorState
 					results.setSetupSuccessful(false);
 					results.setCleanupSuccessful(true);
 					
-					stackEntry.completedBranch(false);
+					stackEntry.completed(false);
 					
 					//remove test suite entry, as setup itself failed
 					this.executionStack.pop();
@@ -526,7 +526,7 @@ public class AutomationExecutorState
 					results.setSetupSuccessful(true);
 					results.setCleanupSuccessful(false);
 					
-					stackEntry.completedBranch(false);
+					stackEntry.completed(false);
 
 					//remove test suite entry, as setup itself failed
 					this.executionStack.pop();
@@ -550,7 +550,7 @@ public class AutomationExecutorState
 					fullExecutionDetails.setSetupSuccessful(false);
 					reportGenerator.createLogFiles(context, result, "_global-setup", null, "");
 					
-					stackEntry.completedBranch(false);
+					stackEntry.completed(false);
 					break;
 				}
 				
@@ -569,11 +569,13 @@ public class AutomationExecutorState
 					fullExecutionDetails.setCleanupSuccessful(false);
 					reportGenerator.createLogFiles(context, result, "_global-cleanup", null, "");
 					
-					stackEntry.completedBranch(false);
+					stackEntry.completed(false);
 					break;
 				}
 			}
 		}
+		
+		return false;
 	}
 	
 	private TestCaseResult handleTestCaseError(ExecutionBranch branch, boolean setupFailed, boolean cleanupFailed, ExecutionStackEntry stackEntry, 

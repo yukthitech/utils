@@ -37,7 +37,7 @@ public class MoveMouseStep extends AbstractUiStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Moving mouse by specified offset: [x: {}, y: {}]", xoffset, yoffset);
 
@@ -47,8 +47,6 @@ public class MoveMouseStep extends AbstractUiStep
 		Actions actions = new Actions(driver);
 		actions.moveByOffset(xoffset, yoffset);
 		actions.build().perform();
-		
-		return true;
 	}
 
 	/**

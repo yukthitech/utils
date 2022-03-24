@@ -1,8 +1,9 @@
 package com.yukthitech.autox.test;
 
+import java.util.function.Consumer;
+
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Custom ui locator used to customized way of handling ui 
@@ -111,44 +112,37 @@ public class CustomUiLocator extends AbstractLocationBased
 		this.setter = setter;
 	}
 	
-	public boolean setValue(String query, Object value)
+	public void setValue(String query, Object value, Consumer<Boolean> resConsumer)
 	{
 		AutomationContext context = AutomationContext.getInstance();
 		
-		try
+		setter.execute(context, context.getExecutionLogger(), resObj -> 
 		{
-			Object resObj = setter.execute(context, context.getExecutionLogger(), false);
 			boolean res = true;
-			
+
 			if(resObj != null && "false".equalsIgnoreCase(resObj.toString()))
 			{
 				res = false;
 			}
 			
-			return res;
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while setting value '{}' usng custom locator '{}' with query: {}", value, name, query, ex);
-		}
+			resConsumer.accept(res);
+		});;
 	}
 	
-	public String getValue(String query, boolean displayValue)
+	public void getValue(String query, Consumer<String> resConsumer)
 	{
 		AutomationContext context = AutomationContext.getInstance();
 		
-		try
+		setter.execute(context, context.getExecutionLogger(), resObj -> 
 		{
-			Object resObj = setter.execute(context, context.getExecutionLogger(), false);
-			
-			if(resObj == null)
+			String res = null;
+
+			if(resObj != null)
 			{
-				return null;
+				res = resObj.toString();
 			}
 			
-			return resObj.toString();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while fetching value using custom locator '{}' with query: {}", name, query, ex);
-		}
+			resConsumer.accept(res);
+		});
 	}
 }

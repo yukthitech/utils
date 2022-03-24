@@ -3,7 +3,6 @@ package com.yukthitech.autox.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,16 +18,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AbstractLocationBasedStepContainer;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
-import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
-import com.yukthitech.autox.InteractiveExecutionController;
-import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.exec.ExecutionBranch;
 import com.yukthitech.autox.exec.ExecutionBranchBuilder;
 import com.yukthitech.autox.exec.IExecutable;
-import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.ObjectWrapper;
@@ -38,10 +32,6 @@ import com.yukthitech.utils.ObjectWrapper;
  */
 public class TestCase extends AbstractLocationBasedStepContainer implements IStepContainer, Validateable, IEntryPoint, IExecutable
 {
-	
-	/**
-	 * The logger.
-	 */
 	private static Logger logger = LogManager.getLogger(TestCase.class);
 	
 	/**
@@ -126,11 +116,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	private Map<String, Object> attributes = new HashMap<>();
 	
 	/**
-	 * File in which this test case is defined.
-	 */
-	private File file;
-
-	/**
 	 * Instantiates a new test case.
 	 */
 	public TestCase()
@@ -162,7 +147,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 
 	public void setFile(File file)
 	{
-		this.file = file;
 	}
 	
 	/**
@@ -454,113 +438,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	public ExpectedException getExpectedException()
 	{
 		return expectedException;
-	}
-	
-	/**
-	 * Called internally multiple times per data object provided by data provider.
-	 * @param context
-	 * @return
-	 */
-	public TestCaseResult execute(AutomationContext context, ExecutionLogger exeLogger)
-	{
-		logger.debug("Executing test case: {}", this.name);
-		
-		String name = this.name;
-		
-		if(data != null)
-		{
-			name += " [" + data.getName() + "]";
-		}
-		
-		ExpectedException expectedException = null;
-		
-		if(this.expectedException != null)
-		{
-			expectedException = this.expectedException.clone();
-			AutomationUtils.replaceExpressions("expectedException", context, expectedException);
-			
-			//if expected exception is disabled, ignore the expected exception
-			if(!"true".equals(expectedException.getEnabled()))
-			{
-				expectedException = null;
-			}
-		}
-		
-		boolean expectedExcpetionOccurred = false;
-		Date startTime = new Date();
-		
-		if(setup != null)
-		{
-			logger.debug("Executing setup steps for test case: {}", name);
-			TestCaseResult result = setup.execute(context, exeLogger);
-			
-			if(result.getStatus() != TestStatus.SUCCESSFUL)
-			{
-				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Setup execution failed.",
-						startTime, new Date());
-			}
-		}
-		
-		try
-		{
-			InteractiveExecutionController executionController = (context.getInteractiveEnvironmentContext() == null) ? null : context.getInteractiveEnvironmentContext().getExecutionController();
-			
-			// execute the steps involved
-			for(IStep step : steps)
-			{
-				if(executionController != null && file != null && step.getLineNumber() >= 0)
-				{
-					InteractiveExecutionController.Action action = executionController.getAction(file, step.getLineNumber());
-					
-					if(action == InteractiveExecutionController.Action.STOP_EXECUTION)
-					{
-						logger.debug("Because of stop point at {}#{} stopping the execution", file.getName(), step.getLineNumber());
-						return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
-								startTime, new Date());
-					}
-				}
-				
-				try
-				{
-					StepExecutor.executeStep(context, exeLogger, step);
-				} catch(Exception ex)
-				{
-					if(ex instanceof ReturnException)
-					{
-						exeLogger.debug("Because of return statement, returning from the test case execution");
-						break;
-					}
-					
-					TestCaseResult result = StepExecutor.handleException(context, this, name, step, exeLogger, ex, expectedException, startTime);
-					
-					if(result != null)
-					{
-						return result;
-					}
-					
-					expectedExcpetionOccurred = true;
-					break;
-				}
-			}
-
-			if(expectedException != null && !expectedExcpetionOccurred)
-			{
-				return new TestCaseResult(this, name, TestStatus.ERRORED, exeLogger.getExecutionLogData(), 
-						"Expected exception '" + expectedException.getType() + "' did not occur.",
-						startTime, new Date());
-			}
-
-			return new TestCaseResult(this, name, TestStatus.SUCCESSFUL, exeLogger.getExecutionLogData(), null,
-					startTime, new Date());
-		}finally
-		{
-			if(cleanup != null)
-			{
-				logger.debug("Executing cleanup steps for test case: {}", name);
-				cleanup.execute(context, exeLogger);
-			}
-		}
-		
 	}
 
 	/**

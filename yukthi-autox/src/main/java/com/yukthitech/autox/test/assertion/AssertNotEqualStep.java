@@ -3,6 +3,7 @@ package com.yukthitech.autox.test.assertion;
 import com.google.common.base.Objects;
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -16,55 +17,50 @@ import com.yukthitech.autox.SourceType;
 @Executable(name = "assertNotEquals", group = Group.Common, message = "Compares specified values for non euqality.")
 public class AssertNotEqualStep extends AbstractValidation
 {
-	
-	/**
-	 * The Constant serialVersionUID.
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Expected value in comparison..
+	 * Value1 for comparison.
 	 */
-	@Param(description = "Expected value in comparison.", sourceType = SourceType.EXPRESSION)
-	private Object expected;
+	@Param(description = "Value1 for comparison.", sourceType = SourceType.EXPRESSION)
+	private Object value1;
 
 	/**
-	 * Actual value in comparison.
+	 * Value2 for comparison
 	 */
-	@Param(description = "Actual value in comparison", sourceType = SourceType.EXPRESSION)
-	private Object actual;
+	@Param(description = "Value2 for comparison", sourceType = SourceType.EXPRESSION)
+	private Object value2;
 
-	/**
-	 * Sets the expected value in comparison..
-	 *
-	 * @param expected the new expected value in comparison
-	 */
-	public void setExpected(Object expected)
+	public void setValue1(Object value1)
 	{
-		this.expected = expected;
+		this.value1 = value1;
 	}
-
-	/**
-	 * Sets the actual value in comparison.
-	 *
-	 * @param actual the new actual value in comparison
-	 */
-	public void setActual(Object actual)
+	
+	public void setValue2(Object value2)
 	{
-		this.actual = actual;
+		this.value2 = value2;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(false, "Comparing values for NON equlity. <span style=\"white-space: pre-wrap\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
-				expected, AssertEqualsStep.getType(expected),  
-				actual, AssertEqualsStep.getType(actual));
+		exeLogger.debug(false, "Comparing values for NON equlity. <span style=\"white-space: pre-wrap\">[Value1: {} [{}], Value2: {} [{}]]</span>", 
+				value1, AssertEqualsStep.getType(value1),  
+				value2, AssertEqualsStep.getType(value2));
 
-		boolean res = !Objects.equal(actual, expected);
-		exeLogger.debug("Result is {}", res);
-		return res;
+		boolean isEqual = Objects.equal(value1, value2);
+		
+		if(isEqual)
+		{
+			exeLogger.debug("Found specified objects to be EQUAL");
+			
+			AssertNotEqualStep actualStep = (AssertNotEqualStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found specified values are same. [Value1: {}, Value2: {}]", 
+					actualStep.value1, actualStep.value2);
+		}
+		
+		exeLogger.debug("Found specified objects to be UNEQUAL");
 	}
 }

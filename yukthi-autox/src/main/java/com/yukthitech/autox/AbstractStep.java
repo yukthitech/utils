@@ -4,9 +4,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.IDataProvider;
-import com.yukthitech.autox.test.ListDataProvider;
-import com.yukthitech.autox.test.RangeDataProvider;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -37,11 +34,14 @@ public abstract class AbstractStep implements IStep, Validateable
 	 */
 	protected int lineNumber = -1;
 	
-	/**
-	 * Optional data provider for the step.
-	 */
 	@SkipParsing
-	private IDataProvider dataProvider;
+	protected IStep sourceStep;
+	
+	@Override
+	public void setSourceStep(IStep sourceStep)
+	{
+		this.sourceStep = sourceStep;
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
@@ -109,43 +109,6 @@ public abstract class AbstractStep implements IStep, Validateable
 		return lineNumber;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.IStep#getDataProvider()
-	 */
-	public IDataProvider getDataProvider()
-	{
-		return dataProvider;
-	}
-
-	/**
-	 * Sets the optional data provider for the step.
-	 *
-	 * @param dataProvider the new optional data provider for the step
-	 */
-	public void setDataProvider(IDataProvider dataProvider)
-	{
-		this.dataProvider = dataProvider;
-	}
-
-	/**
-	 * Sets the specified list data provider as data-provider for this test case.
-	 * @param dataProvider data provider to set
-	 */
-	public void setListDataProvider(ListDataProvider dataProvider)
-	{
-		this.setDataProvider(dataProvider);
-	}
-	
-	/**
-	 * Sets the specified range data provider as data-provider for this test case.
-	 * @param dataProvider data provider to set
-	 */
-	public void setRangeDataProvider(RangeDataProvider dataProvider)
-	{
-		this.setDataProvider(dataProvider);
-	}
-
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

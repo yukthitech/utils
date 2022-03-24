@@ -9,10 +9,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.Executable;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
-import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseResult;
@@ -35,6 +34,8 @@ public class AutomationExecutor
 		this.context = context;
 		this.state = new AutomationExecutorState(context);
 		this.callback = callback;
+	
+		context.setAutomationExecutor(this);
 		
 		ExecutionBranch mainBranch = testSuites.buildExecutionBranch(context);
 		logger.debug("Got execution plan as:\n{}", mainBranch);
@@ -72,6 +73,8 @@ public class AutomationExecutor
 					res = executeNextStep(stackEntry);
 				}catch(ExecutionFlowFailed ex)
 				{
+					//when an execution flow fails, approp test case and others would have already been marked as errored/failed
+					/// so here we moved to next item on stack
 					continue;
 				}
 			}
@@ -89,7 +92,7 @@ public class AutomationExecutor
 			
 			if(res)
 			{
-				stackEntry.completedBranch(successul);
+				stackEntry.completed(successul);
 				state.popBranch();
 			}
 		}
@@ -105,20 +108,24 @@ public class AutomationExecutor
 		
 		if(idx >= steps.size())
 		{
-			return true;
+			if(!stackEntry.isReexecutionNeeded())
+			{
+				return true;
+			}
+			
+			stackEntry.resetChildIndex();
+			idx = 0;
 		}
 		
 		if(idx == 0)
 		{
-			state.startedSteps(stackEntry.getBranch());
+			stackEntry.started();
 		}
 		
 		IStep step = steps.get(idx);
 		
-		if(executeStep(step, stackEntry))
-		{
-			stackEntry.incrementChildStepIndex();
-		}
+		executeStep(step, stackEntry);
+		stackEntry.incrementChildStepIndex();
 		
 		return false;
 	}
@@ -128,23 +135,22 @@ public class AutomationExecutor
 	 * this will return false.
 	 * 
 	 * @param step
-	 * @return should return true, if the ste
 	 */
-	private boolean executeStep(IStep step, ExecutionStackEntry stackEntry) throws ExecutionFlowFailed
+	private void executeStep(IStep sourceStep, ExecutionStackEntry stackEntry) throws ExecutionFlowFailed
 	{
-		//TODO: Check how to understand if step is completed or not.
-		//TODO: How to throw exception to high level branches on the stack.
-		
 		ExecutionLogger exeLogger = this.state.getExecutionLogger();
 		
 		//if step is marked not to log anything
-		if(step.isLoggingDisabled())
+		if(sourceStep.isLoggingDisabled())
 		{
 			//disable logging
 			exeLogger.setDisabled(true);
 		}
 		
-		context.getExecutionStack().push(step);
+		context.getExecutionStack().push(sourceStep);
+		
+		//initialize step with source step to support error handling
+		IStep step = sourceStep;
 		
 		try
 		{
@@ -152,34 +158,36 @@ public class AutomationExecutor
 			context.setExecutionLogger(exeLogger);
 			
 			//clone the step, so that expression replacement will not affect actual step
-			step = step.clone();
+			step = sourceStep.clone();
 			AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
+			step.setSourceStep(sourceStep);
 	
-			context.getStepListenerProxy().stepStarted(step, null);
-			boolean res = step.execute(context, exeLogger);
-	
-			if(step instanceof IValidation)
+			stackEntry.stepStarted(step);
+			
+			try
 			{
-				if(!res)
-				{
-					Executable executable = step.getClass().getAnnotation(Executable.class);
-					
-					String message = String.format("Validation %s failed. Validation Details: %s", executable.name(), step);
-					
-					//exeLogger.error(message);
-					throw new TestCaseValidationFailedException(step, message);
-				}
+				step.execute(context, exeLogger);
+			}catch(AutoxValidationException ex)
+			{
+				throw new TestCaseValidationFailedException(step, ex.getMessage());
 			}
-		
-			context.getStepListenerProxy().stepCompleted(step, null);
+
+			stackEntry.stepCompleted(step, true, null);
 		} catch(ExecutionFlowFailed ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			this.state.handleException(stackEntry, step, ex);
-			context.getStepListenerProxy().stepErrored(step, null, ex);
+			boolean handled = this.state.handleException(stackEntry, step, ex);
 			
+			//if exception is handled, then simply return from current execution
+			if(handled)
+			{
+				stackEntry.stepCompleted(step, true, null);
+				return;
+			}
+			
+			stackEntry.stepCompleted(step, false, ex);
 			throw new ExecutionFlowFailed(step, ex.getMessage(), ex);
 		} finally
 		{
@@ -189,8 +197,6 @@ public class AutomationExecutor
 			exeLogger.setDisabled(false);
 			context.setExecutionLogger(null);
 		}
-		
-		return true;
 	}
 	
 	private boolean executeNextBranch(ExecutionStackEntry stackEntry)
@@ -232,9 +238,9 @@ public class AutomationExecutor
 			if(parentBranch != null && parentBranch.beforeChild != null)
 			{
 				newSteps(parentBranch.beforeChild.getLabel(), parentBranch.beforeChild, ExecutionType.PRE_CHILD)
-					.onInit(entry -> state.startMode("prechild"))
+					.onSimpleInit(entry -> state.startMode("prechild"))
 					.onSuccess(entry -> state.clearMode())
-					.push();
+					.execute();
 				
 				return false;
 			}
@@ -248,9 +254,9 @@ public class AutomationExecutor
 			{
 				//create a new dynamic branch for setting callback
 				newSteps(branch.getSetup().getLabel(), branch.getSetup(), ExecutionType.SETUP)
-					.onInit(entry -> state.preSetup(branch))
-					.onSuccess(entry -> state.postSetup(entry, branch, true))
-					.push();
+					.onSimpleInit(entry -> state.preSetup(branch))
+					.onSuccess(entry -> state.postSetup((ExecutionStackEntry) entry, branch, true))
+					.execute();
 				
 				return false;
 			}
@@ -263,9 +269,9 @@ public class AutomationExecutor
 			if(branch.dataSetup != null)
 			{
 				newSteps(branch.dataSetup.getLabel(), branch.dataSetup, ExecutionType.DATA_SETUP)
-					.onInit(entry -> state.startMode("dataSetup"))
+					.onSimpleInit(entry -> state.startMode("dataSetup"))
 					.onSuccess(entry -> state.testCasePostDataStartup((TestCase) branch.getExecutable(), branch))
-					.push();
+					.execute();
 				return false;
 			}
 			else
@@ -292,8 +298,8 @@ public class AutomationExecutor
 			if(CollectionUtils.isNotEmpty(branch.childSteps))
 			{
 				newSteps(branch.getLabel() + " - Steps", null, branch.getChildSteps())
-					.onInit(entry -> state.clearMode())
-					.push();
+					.onSimpleInit(entry -> state.clearMode())
+					.execute();
 				
 				return false;
 			}
@@ -306,8 +312,8 @@ public class AutomationExecutor
 			if(branch.dataCleanup != null)
 			{
 				newSteps(branch.dataCleanup.getLabel(), branch.dataCleanup, ExecutionType.DATA_CLEANUP)
-					.onInit(entry -> state.startMode("dataCleanup"))
-					.push();
+					.onSimpleInit(entry -> state.startMode("dataCleanup"))
+					.execute();
 				
 				return false;
 			}
@@ -321,9 +327,9 @@ public class AutomationExecutor
 			if(branch.cleanup != null)
 			{
 				newSteps(branch.getCleanup().getLabel(), branch.getCleanup(), ExecutionType.CLEANUP)
-					.onInit(entry -> state.preCleanup(branch))
-					.onSuccess(entry -> state.postCleanup(entry, branch, true))
-					.push();
+					.onSimpleInit(entry -> state.preCleanup(branch))
+					.onSuccess(entry -> state.postCleanup((ExecutionStackEntry) entry, branch, true))
+					.execute();
 				return false;
 			}
 			else
@@ -344,9 +350,9 @@ public class AutomationExecutor
 			if(parentBranch != null && parentBranch.afterChild != null)
 			{
 				newSteps(parentBranch.afterChild.getLabel(), parentBranch.afterChild, ExecutionType.POST_CHILD)
-					.onInit(entry -> state.startMode("postchild"))
+					.onSimpleInit(entry -> state.startMode("postchild"))
 					.onSuccess(entry -> state.clearMode())
-					.push();
+					.execute();
 				
 				return false;
 			}

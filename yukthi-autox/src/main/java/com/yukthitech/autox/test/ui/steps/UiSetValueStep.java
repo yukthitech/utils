@@ -73,7 +73,7 @@ public class UiSetValueStep extends AbstractUiStep
 	 *            Current automation context
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger logger)
+	public void execute(AutomationContext context, ExecutionLogger logger)
 	{
 		logger.debug("Populating field {} with value - {}", getLocatorWithParent(locator), value);
 		
@@ -95,8 +95,6 @@ public class UiSetValueStep extends AbstractUiStep
 			context.getStepListenerProxy().stepPhase(this, "Pressing enter");
 			pressEnter(context, logger);
 		}
-		
-		return true;
 	}
 
 	/**

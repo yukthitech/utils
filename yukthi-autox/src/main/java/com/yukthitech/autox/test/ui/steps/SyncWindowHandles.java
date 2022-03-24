@@ -22,7 +22,7 @@ public class SyncWindowHandles extends AbstractStep
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Synchronizig window handles");
 
@@ -33,8 +33,6 @@ public class SyncWindowHandles extends AbstractStep
 		
 		exeLogger.debug("Got window handles as: {}", windowHandles);
 		seleniumPlugin.setWindowHandles(windowHandles);
-		
-		return true;
 	}
 
 	/*

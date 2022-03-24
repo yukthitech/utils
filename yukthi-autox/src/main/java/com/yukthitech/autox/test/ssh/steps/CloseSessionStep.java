@@ -33,7 +33,7 @@ public class CloseSessionStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Closing the session - {}", session);
 		
@@ -45,8 +45,6 @@ public class CloseSessionStep extends AbstractStep
 		}
 		
 		remoteSession.close();
-		
-		return true;
 	}
 
 	/**

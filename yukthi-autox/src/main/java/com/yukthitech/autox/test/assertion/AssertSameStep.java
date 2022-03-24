@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.assertion;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
@@ -15,9 +16,6 @@ import com.yukthitech.autox.SourceType;
 @Executable(name = "assertSame", group = Group.Common, message = "Asserts specified values are same reference.")
 public class AssertSameStep extends AbstractValidation
 {
-	/**
-	 * The Constant serialVersionUID.
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -71,16 +69,22 @@ public class AssertSameStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Comparing values to be same. [Expected: {} [{}], Actual: {} [{}]]", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
-		boolean res = (actual == expected);
+		boolean isSame = (actual == expected);
 
-		exeLogger.debug("Result is: {}", res);
+		exeLogger.debug("Found values to be same: {}", isSame);
 
-		return res;
+
+		if(!isSame)
+		{
+			AssertSameStep actualStep = (AssertSameStep) super.sourceStep;
+			throw new AutoxValidationException(this, "Found specified values to be different [Expected: {}, Actual: {}]", 
+					actualStep.expected, actualStep.actual);
+		}
 	}
 }

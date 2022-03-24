@@ -57,7 +57,7 @@ public class ExecuteCommandStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("On session '{}' executing command: {}", session, command);
 		
@@ -132,8 +132,6 @@ public class ExecuteCommandStep extends AbstractStep
 		{
 			throw new InvalidStateException("An error occurred while executing command on session: {}", session, e);
 		}
-
-		return true;
 	}
 
 	/**

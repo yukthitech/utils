@@ -45,7 +45,7 @@ public class LoadCookiesStep extends AbstractUiStep
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Loading cookies from file: {}", path);
 
@@ -54,7 +54,7 @@ public class LoadCookiesStep extends AbstractUiStep
 		if(!cookieFile.exists())
 		{
 			exeLogger.debug("No cookie file exist at path '{}'. Ignoring load request.", path);
-			return true;
+			return;
 		}
 		
 		Set<Cookie> cookies = null;
@@ -72,7 +72,7 @@ public class LoadCookiesStep extends AbstractUiStep
 		if(cookies == null || cookies.isEmpty())
 		{
 			exeLogger.debug("No cookies found in file - {}. Ignoring load request.", path);
-			return true;
+			return;
 		}
 		
 		exeLogger.debug("Loading {} cookies from file - {}", cookies.size(), path);
@@ -90,8 +90,6 @@ public class LoadCookiesStep extends AbstractUiStep
 				exeLogger.debug("Failed to load cookie - {}\nError: {}", cookie, "" + ex);
 			}
 		}
-		
-		return true;
 	}
 
 	/*

@@ -61,7 +61,7 @@ public class CreateTempDirStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public boolean execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Creating temp dir with [Prefix: {}, Path attr: {}]", prefix, pathAttr);
 		
@@ -97,7 +97,5 @@ public class CreateTempDirStep extends AbstractStep
 		{
 			throw new InvalidStateException("An error occurred while creating temp folder", ex);
 		}
-		
-		return true;
 	}
 }
