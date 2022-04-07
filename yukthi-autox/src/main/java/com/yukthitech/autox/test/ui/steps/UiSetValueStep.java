@@ -91,8 +91,6 @@ public class UiSetValueStep extends AbstractUiStep
 		if(pressEnterAtEnd)
 		{
 			logger.debug( "User has provided enter key to be pressed");
-
-			context.getStepListenerProxy().stepPhase(this, "Pressing enter");
 			pressEnter(context, logger);
 		}
 	}

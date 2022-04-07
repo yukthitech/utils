@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +32,7 @@ import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.config.SeleniumPlugin;
-import com.yukthitech.autox.test.Function;
-import com.yukthitech.autox.test.TestCaseData;
+import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -55,7 +55,7 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 	 */
 	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
-	private Function steps;
+	private List<IStep> steps = new ArrayList<IStep>();
 	
 	/**
 	 * Name of the video file to be created.
@@ -75,18 +75,13 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 	@Override
 	public void addStep(IStep step)
 	{
-		if(steps == null)
-		{
-			steps = new Function();
-		}
-		
-		steps.addStep(step);
+		steps.add(step);
 	}
 	
 	@Override
 	public List<IStep> getSteps()
 	{
-		return steps.getSteps();
+		return steps;
 	}
 	
 	public void setName(String name)
@@ -168,7 +163,7 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 			}
 			
 			@Override
-			public void stepStarted(IStep step, TestCaseData data)
+			public void stepStarted(IStep step)
 			{
 				addStepImage(step, "Step Started.");
 			}
@@ -180,31 +175,42 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 			}
 			
 			@Override
-			public void stepErrored(IStep step, TestCaseData data, Exception ex)
+			public void stepErrored(IStep step, Exception ex)
 			{
 				addStepImage(step, "Step Errored - " + ex);
 			}
 			
 			@Override
-			public void stepCompleted(IStep step, TestCaseData data)
+			public void stepCompleted(IStep step)
 			{
 				addStepImage(step, "Step Completed.");
 			}
 		};
 		
-		context.addStepListener(listener);
+		AutomationExecutor executor = context.getAutomationExecutor();
 		
-		try
-		{
-			steps.execute(context, exeLogger, true);
-		}finally
-		{
-			// Finalize the encoding, i.e. clear the buffers, write the header, etc.
-		    encoder.finish();
-		    NIOUtils.closeQuietly(channel);
-		    
-			context.removeStepListener(listener);
-			exeLogger.logFile("Recoding completed and can be seen in below file", LogLevel.DEBUG, videoFile);
-		}
+		executor.newSteps("record-video-steps", this, steps)
+			.onInit(entry -> 
+			{
+				entry.setStepListener(listener);
+				return true;
+			})
+			.onComplete(entry -> 
+			{
+				try
+				{
+					// Finalize the encoding, i.e. clear the buffers, write the header, etc.
+				    encoder.finish();
+				    NIOUtils.closeQuietly(channel);
+				}catch(Exception ex)
+				{
+					exeLogger.error("An error occurred while creating video file: {}", ex);
+					return;
+				}
+			    
+			    entry.setStepListener(null);
+			    exeLogger.logFile("Recoding completed and can be seen in below file", LogLevel.DEBUG, videoFile);
+			})
+			.execute();
 	}
 }

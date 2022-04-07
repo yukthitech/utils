@@ -10,6 +10,7 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IMultiPartStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.exec.AutomationExecutor;
 
 /**
  * Used to enclose steps to catch errors.
@@ -21,39 +22,45 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 {
 	private static final long serialVersionUID = 1L;
 	
-	private TryCatchStep catchSteps;
+	private TryCatchStep catchStep;
 	
 	@Override
 	public void addChildStep(IStep step)
 	{
-		if(catchSteps != null)
+		if(catchStep != null)
 		{
 			throw new InvalidArgumentException("Multiple catch steps specified for same try-block");
 		}
 		
-		this.catchSteps = (TryCatchStep) step;
+		this.catchStep = (TryCatchStep) step;
 	}
 
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
-		try
-		{
-			steps.execute(context, exeLogger, true);
-		}catch(Exception ex)
-		{
-			if(catchSteps == null)
+		AutomationExecutor executor = context.getAutomationExecutor();
+		
+		executor.newSteps("try-steps", this, super.steps)
+			.exceptionHandler((entry, ex) -> 
 			{
-				throw ex;
-			}
+				if(catchStep == null)
+				{
+					return false;
+				}
 
-			if(ex instanceof LangException)
-			{
-				throw (LangException) ex;
-			}
+				if(ex instanceof LangException)
+				{
+					return false;
+				}
+				
+				exeLogger.warn("Exception occurred while executing try-block. Executing catch block. Exception: {}", ex);
+				
+				entry.skipChildSteps();
+				context.setAttribute(catchStep.getErrorAttr(), ex);
+				catchStep.execute(context, exeLogger);
 			
-			context.setAttribute(catchSteps.getErrorAttr(), ex);
-			catchSteps.execute(context, exeLogger);
-		}
+				return true;
+			})
+			.execute();
 	}
 }

@@ -156,7 +156,6 @@ public class MoveToStep extends AbstractUiStep
 			}catch(Exception ex)
 			{}
 
-			context.getStepListenerProxy().stepPhase(this, "Clicking the element: " + locator);
 			WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
 
 			if(webElement == null)

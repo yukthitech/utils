@@ -1,20 +1,24 @@
 package com.yukthitech.autox.test.lang.steps;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -43,7 +47,7 @@ public class PollAndCheckStep extends AbstractValidation
 	 */
 	@Param(description = "Group of steps/validations to be executed as part of polling.", required = true)
 	@SkipParsing
-	private Function poll;
+	private List<IStep> poll;
 
 	/**
 	 * Polling interval duration.
@@ -87,7 +91,7 @@ public class PollAndCheckStep extends AbstractValidation
 	@ChildElement(description = "Used to specify polling steps.", required = true)
 	public void setPoll(Function poll)
 	{
-		this.poll = poll;
+		this.poll = new ArrayList<IStep>( poll.getSteps() );
 	}
 	
 	/**
@@ -130,44 +134,57 @@ public class PollAndCheckStep extends AbstractValidation
 		this.timeOutUnit = timeOutUnit;
 	}
 	
+	private boolean checkCondition(AutomationContext context, ExecutionLogger exeLogger)
+	{
+		boolean res = AutomationUtils.evaluateCondition(context, checkCondition);
+		
+		if(res)
+		{
+			exeLogger.debug("Check condition was successful. Finishing polling step");
+		}
+		
+		return res;
+	}
+	
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
 		Date startTime = new Date();
-		long diff = 0;
-		boolean res = false;
-		
 		exeLogger.debug("Starting time: {}. Check Condition: {}", TIME_FORMAT.format(startTime), checkCondition);
 		
-		while(true)
-		{
-			poll.execute(context, exeLogger, true);
-			
-			res = AutomationUtils.evaluateCondition(context, checkCondition);
-			
-			if(res)
+		AutomationExecutor executor = context.getAutomationExecutor();
+		
+		executor.newSteps("pool-n-check-steps", this, poll)
+			.isReexecutionNeeded(entry -> 
 			{
-				exeLogger.debug("Check condition was successful. Finishing polling step");
-				break;
-			}
-			
-			diff = System.currentTimeMillis() - startTime.getTime();
-			
-			if(diff > timeOutUnit.toMillis((Long) timeOut))
-			{
-				exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
-				return;
-			}
-			
-			exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
-			
-			try
-			{
-				Thread.sleep(pollingIntervalUnit.toMillis((Long) pollingInterval));
-			}catch(Exception ex)
-			{
-				throw new InvalidStateException("Thread was interruped while waiting as part of polling step", ex);
-			}
-		}
+				boolean conditionSuccessful = checkCondition(context, exeLogger);
+				
+				if(conditionSuccessful)
+				{
+					return false;
+				}
+				
+				long diff = System.currentTimeMillis() - startTime.getTime();
+				
+				if(diff > timeOutUnit.toMillis((Long) timeOut))
+				{
+					exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
+					throw new AutoxValidationException(this, "Check condition '{}' is not met till timeout of {} {}", checkCondition, timeOut, timeOutUnit);
+				}
+				
+				exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
+				
+				try
+				{
+					Thread.sleep(pollingIntervalUnit.toMillis((Long) pollingInterval));
+				}catch(Exception ex)
+				{
+					throw new InvalidStateException("Thread was interruped while waiting as part of polling step", ex);
+				}
+
+				return true;
+			})
+			.execute();
+		;
 	}
 }

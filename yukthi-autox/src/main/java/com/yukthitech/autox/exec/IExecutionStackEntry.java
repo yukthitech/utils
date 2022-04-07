@@ -1,5 +1,7 @@
 package com.yukthitech.autox.exec;
 
+import com.yukthitech.autox.IStepListener;
+
 /**
  * Represents an entry on execution stack.
  * @author akranthikiran
@@ -20,4 +22,10 @@ public interface IExecutionStackEntry
 	 * @return
 	 */
 	public Object getVariable(String name);
+	
+	public void resetChildIndex();
+	
+	public void skipChildSteps();
+	
+	public void setStepListener(IStepListener stepListener);
 }

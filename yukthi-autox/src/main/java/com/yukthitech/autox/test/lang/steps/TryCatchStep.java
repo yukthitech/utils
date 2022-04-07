@@ -7,6 +7,7 @@ import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.exec.AutomationExecutor;
 
 /**
  * Represents catch block.
@@ -35,17 +36,11 @@ public class TryCatchStep extends AbstractContainerStep implements IStepContaine
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		try
-		{
-			steps.execute(context, exeLogger, true);
-		}catch(Exception ex)
-		{
-			if(ex instanceof LangException)
-			{
-				throw (LangException) ex;
-			}
-		}
+		AutomationExecutor executor = context.getAutomationExecutor();
+		
+		executor.newSteps("catch-steps", this, super.steps)
+			.execute();
 	}
 }

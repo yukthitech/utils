@@ -92,8 +92,6 @@ public class FillFormStep extends AbstractStep
 
 			exeLogger.debug("Populating field {} with value - {}", desc.getName(), value);
 
-			context.getStepListenerProxy().stepPhase(this, String.format("Populating field '%s' with value: %s", desc.getName(), value));
-			
 			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), locator, value);
@@ -138,8 +136,6 @@ public class FillFormStep extends AbstractStep
 
 			exeLogger.debug("Populating field '{}' with value - {}", name, value);
 			
-			context.getStepListenerProxy().stepPhase(this, String.format("Populating field '%s' with value: %s", name, value));
-
 			if(!UiAutomationUtils.populateField(context, parentElement, name, value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);

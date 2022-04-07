@@ -1,8 +1,7 @@
 package com.yukthitech.autox;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.yukthitech.autox.test.Function;
 
 public abstract class AbstractContainerStep extends AbstractStep implements IStepContainer
 {
@@ -11,7 +10,7 @@ public abstract class AbstractContainerStep extends AbstractStep implements ISte
 	/**
 	 * Steps for the test case.
 	 */
-	protected Function steps;
+	protected List<IStep> steps = new ArrayList<IStep>();
 
 	/*
 	 * (non-Javadoc)
@@ -23,17 +22,12 @@ public abstract class AbstractContainerStep extends AbstractStep implements ISte
 	@Override
 	public void addStep(IStep step)
 	{
-		if(steps == null)
-		{
-			steps = new Function();
-		}
-
-		steps.addStep(step);
+		steps.add(step);
 	}
 	
 	@Override
 	public List<IStep> getSteps()
 	{
-		return steps.getSteps();
+		return steps;
 	}
 }

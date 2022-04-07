@@ -1,6 +1,8 @@
 package com.yukthitech.autox.test.lang.steps;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
@@ -14,7 +16,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.test.Function;
+import com.yukthitech.autox.exec.AutomationExecutor;
 
 /**
  * Loops through specified range of values and for each iteration executed underlying steps
@@ -26,13 +28,15 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
 
+	private static final String VAR_BREAK = "break";
+
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
 	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed in loop.")
-	private Function steps;
+	private List<IStep> steps = new ArrayList<IStep>();
 
 	/**
 	 * Freemarker condition to be evaluated.
@@ -57,44 +61,53 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public void addStep(IStep step)
 	{
-		if(steps == null)
-		{
-			steps = new Function();
-		}
-		
-		steps.addStep(step);
+		steps.add(step);
 	}
 
 	@Override
 	public List<IStep> getSteps()
 	{
-		return steps.getSteps();
+		return steps;
 	}
-
+	
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
 	{
-		boolean res = false;
+		AutomationExecutor executor = context.getAutomationExecutor();
 		
-		while(true)
-		{
-			res = AutomationUtils.evaluateCondition(context, condition);
-			
-			if(!res)
+		executor.newSteps("while-steps", this, steps)
+			.onInit(entry -> 
 			{
-				break;
-			}
-			
-			try
+				AtomicBoolean breakFlag = new AtomicBoolean(false);
+				entry.setVariable(VAR_BREAK, breakFlag);
+				
+				return AutomationUtils.evaluateCondition(context, condition);
+			})
+			.exceptionHandler((entry, ex) -> 
 			{
-				steps.execute(context, exeLogger, true);
-			} catch(BreakException ex)
+				AtomicBoolean breakFlag = (AtomicBoolean) entry.getVariable(VAR_BREAK);
+				
+				if(ex instanceof BreakException)
+				{
+					entry.skipChildSteps();
+					breakFlag.set(true);
+					return true;
+				}
+				
+				if(ex instanceof ContinueException)
+				{
+					entry.resetChildIndex();
+					return true;
+				}
+				
+				return false;
+			})
+			.isReexecutionNeeded(entry -> 
 			{
-				break;
-			} catch(ContinueException ex)
-			{
-				continue;
-			}
-		}
+				AtomicBoolean breakFlag = (AtomicBoolean) entry.getVariable(VAR_BREAK);
+				return breakFlag.get() || AutomationUtils.evaluateCondition(context, condition);
+			})
+			.execute();
+		;
 	}
 }

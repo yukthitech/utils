@@ -17,7 +17,6 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
-import com.yukthitech.utils.ObjectWrapper;
 
 /**
  * Represents group of steps and/or validations. That can be referenced 
@@ -25,6 +24,8 @@ import com.yukthitech.utils.ObjectWrapper;
  */
 public class Function extends AbstractLocationBased implements IStepContainer, Cloneable, IEntryPoint, IParentAware
 {
+	private static final String VAR_RET_VAL = "returnVal";
+	
 	/**
 	 * Name of this group.
 	 */
@@ -167,23 +168,22 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	
 	public void execute(AutomationContext context, ExecutionLogger logger, Consumer<Object> callback)
 	{
-		ObjectWrapper<Object> returnValue = new ObjectWrapper<Object>();
-		
 		context.getAutomationExecutor()
 			.newSteps("function-" + name + "-steps", this, steps)
 			.onInit(entry -> 
 			{
 				context.pushParameters(params);
 				context.getExecutionStack().push(this);
+				return true;
 			})
-			.exceptionHandler(ex -> 
+			.exceptionHandler((entry, ex) -> 
 			{
 				//occurs during return statement execution
 				//Note: even for return false is returned, to ensure current function is removed
 				//  from current execution stack and further execution does not occur.
 				if(ex instanceof ReturnException)
 				{
-					returnValue.setValue( ((ReturnException) ex).getValue() );
+					entry.setVariable(VAR_RET_VAL, ((ReturnException) ex).getValue() );
 					return true;
 				}
 				
@@ -191,7 +191,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 			})
 			.onSuccess(entry -> 
 			{
-				callback.accept(returnValue.getValue());
+				callback.accept(entry.getVariable(VAR_RET_VAL));
 			})
 			.onComplete(entry -> 
 			{

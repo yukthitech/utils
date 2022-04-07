@@ -95,6 +95,7 @@ class ExecutionStackEntry implements IExecutionStackEntry
 		this.executionType = executionType;
 	}
 	
+	@Override
 	public void setStepListener(IStepListener stepListener)
 	{
 		this.stepListener = stepListener;
@@ -199,9 +200,16 @@ class ExecutionStackEntry implements IExecutionStackEntry
 		return childStepIndex;
 	}
 	
+	@Override
 	public void resetChildIndex()
 	{
 		childStepIndex = 0;
+	}
+	
+	@Override
+	public void skipChildSteps()
+	{
+		childStepIndex = Integer.MAX_VALUE;
 	}
 	
 	public void incrementChildStepIndex()

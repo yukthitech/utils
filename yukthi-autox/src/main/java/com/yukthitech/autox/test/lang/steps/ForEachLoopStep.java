@@ -224,13 +224,14 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 				
 				if(ex instanceof BreakException)
 				{
+					entry.skipChildSteps();
 					loopIndex.set(loopCollection.size());
 					return true;
 				}
 				
 				if(ex instanceof ContinueException)
 				{
-					loopIndex.incrementAndGet();
+					entry.resetChildIndex();
 					return true;
 				}
 				

@@ -1,9 +1,12 @@
 package com.yukthitech.autox.test;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Custom ui locator used to customized way of handling ui 
@@ -112,9 +115,11 @@ public class CustomUiLocator extends AbstractLocationBased
 		this.setter = setter;
 	}
 	
-	public void setValue(String query, Object value, Consumer<Boolean> resConsumer)
+	public boolean setValue(String query, Object value)
 	{
 		AutomationContext context = AutomationContext.getInstance();
+		CountDownLatch latch = new CountDownLatch(1);
+		ObjectWrapper<Boolean> resWrapper = new ObjectWrapper<Boolean>(false);
 		
 		setter.execute(context, context.getExecutionLogger(), resObj -> 
 		{
@@ -125,13 +130,26 @@ public class CustomUiLocator extends AbstractLocationBased
 				res = false;
 			}
 			
-			resConsumer.accept(res);
-		});;
+			resWrapper.setValue(res);
+			latch.countDown();
+		});
+		
+		try
+		{
+			latch.await();
+		} catch(InterruptedException ex)
+		{
+			throw new InvalidStateException("Thread is interrupted", ex);
+		}
+		
+		return resWrapper.getValue();
 	}
 	
-	public void getValue(String query, Consumer<String> resConsumer)
+	public String getValue(String query)
 	{
 		AutomationContext context = AutomationContext.getInstance();
+		CountDownLatch latch = new CountDownLatch(1);
+		ObjectWrapper<String> resWrapper = new ObjectWrapper<String>();
 		
 		setter.execute(context, context.getExecutionLogger(), resObj -> 
 		{
@@ -142,7 +160,18 @@ public class CustomUiLocator extends AbstractLocationBased
 				res = resObj.toString();
 			}
 			
-			resConsumer.accept(res);
+			resWrapper.setValue(res);
 		});
+		
+		
+		try
+		{
+			latch.await();
+		} catch(InterruptedException ex)
+		{
+			throw new InvalidStateException("Thread is interrupted", ex);
+		}
+		
+		return resWrapper.getValue();
 	}
 }
