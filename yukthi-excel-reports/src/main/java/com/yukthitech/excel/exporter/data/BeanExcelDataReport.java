@@ -11,8 +11,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.excel.importer.data.ExcelIgnoreField;
-import com.yukthitech.excel.importer.data.ExcelLabel;
+import com.yukthitech.excel.importer.data.ExcelConfig;
 
 /**
  * Simple implementation of excel data report.
@@ -85,8 +84,7 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 		headings = new ArrayList<>();
 		
 		Field fields[] = rowType.getDeclaredFields();
-		ExcelLabel excelLabel = null;
-		ExcelIgnoreField ignoreField = null;
+		ExcelConfig excelConfig = null;
 		
 		for(Field field : fields)
 		{
@@ -95,18 +93,16 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 				continue;
 			}
 			
-			ignoreField = field.getAnnotation(ExcelIgnoreField.class);
+			excelConfig = field.getAnnotation(ExcelConfig.class);
 			
-			if(ignoreField != null)
+			if(excelConfig != null && excelConfig.ignore())
 			{
 				continue;
 			}
 			
-			excelLabel = field.getAnnotation(ExcelLabel.class);
-			
-			if(excelLabel != null)
+			if(excelConfig != null && StringUtils.isNotBlank(excelConfig.label()))
 			{
-				headings.add(excelLabel.value());
+				headings.add(excelConfig.label());
 			}
 			else
 			{
@@ -126,14 +122,14 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 			return "";
 		}
 		
-		ExcelLabel excelLabel = field.getAnnotation(ExcelLabel.class);
+		ExcelConfig excelConfig = field.getAnnotation(ExcelConfig.class);
 		
-		if(excelLabel != null && StringUtils.isNotBlank(excelLabel.format()))
+		if(excelConfig != null && StringUtils.isNotBlank(excelConfig.format()))
 		{
 			if(val instanceof Date)
 			{
 				Date date = (Date) val;
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(excelLabel.format());
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(excelConfig.format());
 				
 				val = simpleDateFormat.format(date);
 			}
@@ -141,7 +137,7 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 			{
 				double doubleNo = ((Number) val).doubleValue();
 				
-				DecimalFormat decimalFormat = new DecimalFormat(excelLabel.format());
+				DecimalFormat decimalFormat = new DecimalFormat(excelConfig.format());
 				val = decimalFormat.format(doubleNo);
 			}
 		}
@@ -156,7 +152,7 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 		List<Cell> row = null;
 		
 		Field fields[] = rowType.getDeclaredFields();
-		ExcelIgnoreField ignoreField = null;
+		ExcelConfig excelConfig = null;
 		
 		for(Object bean : this.rows)
 		{
@@ -169,9 +165,9 @@ public class BeanExcelDataReport<T> implements IExcelDataReport
 					continue;
 				}
 				
-				ignoreField = field.getAnnotation(ExcelIgnoreField.class);
+				excelConfig = field.getAnnotation(ExcelConfig.class);
 				
-				if(ignoreField != null)
+				if(excelConfig != null && excelConfig.ignore())
 				{
 					continue;
 				}

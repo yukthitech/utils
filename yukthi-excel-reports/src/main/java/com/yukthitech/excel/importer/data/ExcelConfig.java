@@ -11,9 +11,19 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ExcelLabel
+public @interface ExcelConfig
 {
-	public String value();
+	/**
+	 * If true, current field will be ignored.
+	 * @return
+	 */
+	public boolean ignore() default false;
+	
+	/**
+	 * Label to be used for the field.
+	 * @return
+	 */
+	public String label() default "";
 	
 	/**
 	 * Format to be used to convert Date/Number values.

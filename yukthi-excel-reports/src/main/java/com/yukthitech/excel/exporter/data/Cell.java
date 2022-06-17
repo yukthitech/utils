@@ -4,6 +4,8 @@ public class Cell
 {
 	private String value;
 	
+	private int rowspan = 1;
+	
 	public Cell(String value)
 	{
 		this.value = value;
@@ -17,5 +19,15 @@ public class Cell
 	public void setValue(String value)
 	{
 		this.value = value;
+	}
+
+	public int getRowspan() 
+	{
+		return rowspan;
+	}
+
+	public void setRowspan(int rowspan) 
+	{
+		this.rowspan = rowspan;
 	}
 }

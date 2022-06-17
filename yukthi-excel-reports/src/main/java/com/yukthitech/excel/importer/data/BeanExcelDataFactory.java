@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +20,7 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 	{
 		private Field field;
 		
-		public FieldColumn(String name, ColumnType type, Field field, ExcelLabel excelLabel)
+		public FieldColumn(String name, ColumnType type, Field field, ExcelConfig excelLabel)
 		{
 			super(name, type, field.getType(), (excelLabel == null) ? null : excelLabel.format());
 			this.field = field;
@@ -45,7 +46,7 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 		this.beanType = beanType;
 		
 		Field fields[] = beanType.getDeclaredFields();
-		ExcelLabel excelLabel = null;
+		ExcelConfig excelConfig = null;
 		String label = null;
 		ColumnType columnType = null;
 		
@@ -56,7 +57,9 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 				continue;
 			}
 			
-			if(field.getAnnotation(ExcelIgnoreField.class) != null)
+			excelConfig = field.getAnnotation(ExcelConfig.class);
+			
+			if(excelConfig != null && excelConfig.ignore())
 			{
 				continue;
 			}
@@ -69,12 +72,11 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 				continue;
 			}
 
-			excelLabel = field.getAnnotation(ExcelLabel.class);
 			label = field.getName();
 			
-			if(excelLabel != null)
+			if(excelConfig != null && StringUtils.isNotBlank(excelConfig.label()))
 			{
-				label = excelLabel.value();
+				label = excelConfig.label();
 			}
 			
 			label = label.toLowerCase();
@@ -82,7 +84,7 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 			//remove all non word characters and make into single word
 			label = label.replaceAll("[\\W\\_]+", "");
 			
-			this.columns.put(label, new FieldColumn(label, columnType, field, excelLabel));
+			this.columns.put(label, new FieldColumn(label, columnType, field, excelConfig));
 		}
 	}
 	
