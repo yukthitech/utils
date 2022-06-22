@@ -16,6 +16,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -41,6 +42,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * true.
 	 */
+	@SkipParsing
 	@Param(description = "Group of steps/validations to be executed when condition evaluated to be true.", required = true)
 	private List<IStep> then = new ArrayList<IStep>();
 
@@ -48,6 +50,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	 * Group of steps/validations to be executed when condition evaluated to be
 	 * false.
 	 */
+	@SkipParsing
 	@Param(name = "else", description = "Group of steps/validations to be executed when condition evaluated to be false.", required = false)
 	private List<IStep> elseGroup = new ArrayList<IStep>();
 
@@ -80,7 +83,7 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	@ChildElement(description = "Used to group steps to be executed when this if condition is false.")
 	public void setElse(Function elseGroup)
 	{
-		if(this.elseGroup != null)
+		if(CollectionUtils.isNotEmpty(this.elseGroup))
 		{
 			throw new InvalidStateException("else group is already defined.");
 		}

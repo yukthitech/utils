@@ -121,12 +121,14 @@ public class ExecutionBranch
 		{
 			builder.append(childIndent);
 			
+			/*
 			if(executable != null)
 			{
 				 builder.append("[").append(executable.getClass().getSimpleName()).append("] ");
 			}
+			*/
 			
-			builder.append(label).append("[").append(setup.label).append("]\n");
+			builder.append(label).append(" [").append(setup.label).append("]\n");
 		}
 		
 		if(childBranches != null)
@@ -139,7 +141,7 @@ public class ExecutionBranch
 
 		if(cleanup != null)
 		{
-			builder.append(childIndent).append(label).append("[").append(cleanup.label).append("]\n");
+			builder.append(childIndent).append(label).append(" [").append(cleanup.label).append("]\n");
 		}
 	}
 	

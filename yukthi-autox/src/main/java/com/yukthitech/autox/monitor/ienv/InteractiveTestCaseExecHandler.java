@@ -10,7 +10,6 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.InteractiveEnvironmentContext;
 import com.yukthitech.autox.InteractiveExecutionController;
 import com.yukthitech.autox.monitor.IAsyncServerDataHandler;
-import com.yukthitech.autox.test.TestSuiteExecutor;
 
 /**
  * Used to execute test case fully/partially in interactive environment.
@@ -54,11 +53,9 @@ public class InteractiveTestCaseExecHandler implements IAsyncServerDataHandler
 		
 		try
 		{
-			TestSuiteExecutor testSuiteExecutor = new TestSuiteExecutor(automationContext, interactiveEnvironmentContext.getTestSuiteGroup());
-			automationContext.getBasicArguments().setTestCases(details.getTestCase());
-			
 			logger.debug("Executing by restrictng execution to test case: {}", details.getTestCase());
-			testSuiteExecutor.executeTestSuites();
+			automationContext.getBasicArguments().setTestCases(details.getTestCase());
+			automationContext.getAutomationExecutor().pushTestSuiteGroup(interactiveEnvironmentContext.getTestSuiteGroup());
 		}finally
 		{
 			interactiveEnvironmentContext.setExecutionController(null);

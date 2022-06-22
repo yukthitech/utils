@@ -2,8 +2,6 @@ package com.yukthitech.autox;
 
 import java.io.Serializable;
 
-import com.yukthitech.autox.test.IDataProvider;
-
 /**
  * Represents automation step to be performed.
  * @author akiran
@@ -36,6 +34,7 @@ public interface IStep extends Cloneable, Serializable, ILocationBased
 	 * errors.
 	 * @param sourceStep
 	 */
-	public default void setSourceStep(IStep sourceStep)
-	{}
+	public void setSourceStep(IStep sourceStep);
+	
+	public IStep getSourceStep();
 }

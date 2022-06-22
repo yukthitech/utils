@@ -35,7 +35,7 @@ public class TAutomation
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "rest-test-suites"
-				//"-tc", "testOpenWindow"
+				"-tc", "testIfThenCondition"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

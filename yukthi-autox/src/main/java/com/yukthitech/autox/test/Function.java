@@ -203,11 +203,11 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	}
 	
 	@Override
-	public IStep clone()
+	public Function clone()
 	{
 		try
 		{
-			return (IStep) super.clone();
+			return (Function) super.clone();
 		} catch (CloneNotSupportedException ex)
 		{
 			throw new IllegalStateException(ex);

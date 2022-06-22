@@ -206,7 +206,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 				
 				return true;
 			})
-			.preexecute(entry -> 
+			.onPreexecute(entry -> 
 			{
 				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
 				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
@@ -247,7 +247,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
 				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
 				
-				int idx = loopIndex.get();
+				int idx = loopIndex.incrementAndGet();
 				
 				return (idx < loopCollection.size());
 			})

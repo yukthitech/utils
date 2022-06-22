@@ -80,6 +80,12 @@ class ExecutionStackEntry implements IExecutionStackEntry
 	
 	private Map<String, Object> stackVariables;
 	
+	/**
+	 * Step which is currently running. This is used to check the state of step
+	 * when step results in pushing child steps or branches.
+	 */
+	private IStep runningStep;
+	
 	public ExecutionStackEntry(ExecutionBranch branch)
 	{
 		this.branch = branch;
@@ -361,17 +367,39 @@ class ExecutionStackEntry implements IExecutionStackEntry
 	@Override
 	public Object getVariable(String name)
 	{
-		return null;
+		if(this.stackVariables == null)
+		{
+			return null;
+		}
+		
+		return this.stackVariables.get(name);
 	}
 	
 	public void stepStarted(IStep step)
 	{
+		this.runningStep = (step.getSourceStep() != null) ? step.getSourceStep() : step;
+		
 		if(stepListener == null)
 		{
 			return;
 		}
 		
 		stepListener.stepStarted(step);
+	}
+	
+	public boolean isRunningStep(IStep step)
+	{
+		if(step.getSourceStep() != null)
+		{
+			step = step.getSourceStep();
+		}
+		
+		return (runningStep == step);
+	}
+	
+	public IStep getRunningStep()
+	{
+		return runningStep;
 	}
 	
 	public void stepPhase(IStep step, String mssg)
@@ -386,6 +414,8 @@ class ExecutionStackEntry implements IExecutionStackEntry
 
 	public void stepCompleted(IStep step, boolean successful, Exception ex)
 	{
+		runningStep = null;
+		
 		if(stepListener == null)
 		{
 			return;

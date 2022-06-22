@@ -97,7 +97,7 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 	public ExecutionBranch buildExecutionBranch(AutomationContext context)
 	{
 		return ExecutionBranchBuilder
-				.newBranchNode(context, "<cleanup>", "cleanup", this, getSteps())
+				.newBranchNode(context, "cleanup", "cleanup", this, getSteps())
 				.build();
 	}
 

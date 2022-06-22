@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import org.apache.logging.log4j.ThreadContext;
 
 import com.yukthitech.autox.test.IEntryPoint;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Keeps track of execution, which in turn will be used to display stack trace
@@ -55,8 +56,35 @@ public class ExecutionStack
 	 */
 	private LinkedList<StackElement> stackTrace = new LinkedList<>();
 	
+	/**
+	 * Used internally to ensure, push and pop happens in same order.
+	 */
+	private LinkedList<Object> objectStack = new LinkedList<>();
+	
+	private Object unwrapStep(Object object)
+	{
+		if(object instanceof IStep)
+		{
+			IStep step = (IStep) object;
+			
+			if(step.getSourceStep() != null)
+			{
+				return step.getSourceStep();
+			}
+			
+			return step;
+		}
+
+		return object;
+	}
+	
 	public void push(Object object)
 	{
+		object = unwrapStep(object);
+		
+		System.out.println("==========> Pushing object: " + object);
+		objectStack.push(object);
+		
 		if(object instanceof IEntryPoint)
 		{
 			entryPointStack.push((IEntryPoint) object);
@@ -74,13 +102,27 @@ public class ExecutionStack
 	
 	public void pop(Object object)
 	{
+		object = unwrapStep(object);
+		
+		Object peekObj = objectStack.peek();
+		
+		if(peekObj != object)
+		{
+			throw new InvalidStateException("Object being popped is not same as the one on stack. [Expected: {}, Actual:{}]", object, peekObj);
+		}
+		
 		if(object instanceof IEntryPoint)
 		{
-			entryPointStack.pop();
+			Object popped = entryPointStack.pop();
+			objectStack.pop();
+			System.out.println("==========> Popping object: " + object + "  =========> " + popped);
 			return;
 		}
 		
-		stackTrace.pop();
+		Object popped = stackTrace.pop();
+		objectStack.pop();
+		
+		System.out.println("==========> Popping object: " + object + "  =========> " + popped);
 		
 		if(stackTrace.isEmpty())
 		{
@@ -91,6 +133,12 @@ public class ExecutionStack
 			ThreadContext.put("xmlLoc", stackTrace.peek().getLocation());
 		}
 			
+	}
+	
+	public boolean isNotPeekElement(Object object)
+	{
+		object = unwrapStep(object);
+		return (objectStack.peek() != object);
 	}
 	
 	public String toStackTrace()

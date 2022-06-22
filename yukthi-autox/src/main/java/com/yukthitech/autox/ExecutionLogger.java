@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.monitor.MonitorLogMessage;
+import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -319,7 +320,10 @@ public class ExecutionLogger
 		
 		if(th != null)
 		{
-			logger.error(finalMssg, th);
+			if(!(th instanceof LangException))
+			{
+				logger.error(finalMssg, th);
+			}
 			
 			StringWriter stringWriter = new StringWriter();
 			PrintWriter printWriter = new PrintWriter(stringWriter);

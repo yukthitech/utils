@@ -152,7 +152,7 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 			{
 				return populateRange(exeLogger, entry);
 			})
-			.preexecute(entry -> 
+			.onPreexecute(entry -> 
 			{
 				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
 				int idx = loopIndex.get();
@@ -190,7 +190,7 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
 				Integer end = (Integer) entry.getVariable(VAR_END);
 				
-				int idx = loopIndex.get();
+				int idx = loopIndex.incrementAndGet();
 				
 				return (idx <= end);
 			})

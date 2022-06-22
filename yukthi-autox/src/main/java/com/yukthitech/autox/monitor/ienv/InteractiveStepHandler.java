@@ -11,14 +11,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.InteractiveEnvironmentContext;
 import com.yukthitech.autox.monitor.IAsyncServerDataHandler;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.IEntryPoint;
-import com.yukthitech.autox.test.StepExecutor;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.ccg.xml.XMLBeanParser;
@@ -44,8 +42,6 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 
 	private AutomationContext automationContext;
 	
-	private ExecutionLogger executionLogger;
-	
 	private TestSuite testSuite = new TestSuite("[dynamic-test-case]");
 	
 	private TestCase testCase = new TestCase("[dynamic-tst-suite]");
@@ -53,7 +49,6 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 	public InteractiveStepHandler(AutomationContext automationContext)
 	{
 		this.automationContext = automationContext;
-		executionLogger = new ExecutionLogger(automationContext, "[dynamic]", "[dynamic]");
 	}
 
 	@Override
@@ -147,27 +142,7 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 			automationContext.setActiveTestCase(testCase, null);
 		}
 		
-		automationContext.getExecutionStack().push(this);
-		
-		try
-		{
-			for(IStep step : steps)
-			{
-				try
-				{
-					StepExecutor.executeStep(automationContext, executionLogger, step);
-				} catch(Exception ex)
-				{
-					logger.error("An error occurred while executing interactive step: " + step, ex);
-					
-					StepExecutor.handleException(automationContext, testCase, step, executionLogger, ex, null, null);
-					break;
-				}
-			}
-		}finally
-		{
-			automationContext.getExecutionStack().pop(this);
-		}
+		automationContext.getAutomationExecutor().newSteps("Dynamic-steps", this, steps);
 	}
 	
 	@Override

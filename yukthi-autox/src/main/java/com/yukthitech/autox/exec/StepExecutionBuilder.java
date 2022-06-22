@@ -38,7 +38,7 @@ public class StepExecutionBuilder
 		this.stackEntry = new ExecutionStackEntry(label, executable, steps, executionType);
 	}
 	
-	public StepExecutionBuilder preexecute(Consumer<IExecutionStackEntry> preexecute)
+	public StepExecutionBuilder onPreexecute(Consumer<IExecutionStackEntry> preexecute)
 	{
 		this.preexecute = preexecute;
 		return this;

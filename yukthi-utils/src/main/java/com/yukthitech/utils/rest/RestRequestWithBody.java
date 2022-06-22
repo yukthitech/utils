@@ -168,12 +168,12 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	{
 		if(requestBody != null)
 		{
-			throw new IllegalStateException("Both params and body can not be set on a single request. Request body was already set");
+			throw new IllegalStateException("Both form-fields and body can not be set on a single request. Request body was already set");
 		}
 		
 		if(multipartRequest)
 		{
-			throw new IllegalStateException("Params can not be added for multi part request");
+			throw new IllegalStateException("Form-fields can not be added for multi part request");
 		}
 
 		this.formFields.put(name, value);

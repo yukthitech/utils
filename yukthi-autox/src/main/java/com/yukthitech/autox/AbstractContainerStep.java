@@ -3,6 +3,8 @@ package com.yukthitech.autox;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yukthitech.autox.common.SkipParsing;
+
 public abstract class AbstractContainerStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
@@ -10,6 +12,7 @@ public abstract class AbstractContainerStep extends AbstractStep implements ISte
 	/**
 	 * Steps for the test case.
 	 */
+	@SkipParsing
 	protected List<IStep> steps = new ArrayList<IStep>();
 
 	/*

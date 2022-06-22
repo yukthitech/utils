@@ -73,7 +73,7 @@ public class UiFreeMarkerMethods
 		
 		if(customUiLocator != null)
 		{
-			return customUiLocator.getValue(queryWrapper.getValue(), false);
+			return customUiLocator.getValue(queryWrapper.getValue());
 		}
 
 		WebElement element = getElementByLocator(locator, parent);
@@ -112,7 +112,7 @@ public class UiFreeMarkerMethods
 		
 		if(customUiLocator != null)
 		{
-			return customUiLocator.getValue(queryWrapper.getValue(), true);
+			return customUiLocator.getValue(queryWrapper.getValue());
 		}
 
 

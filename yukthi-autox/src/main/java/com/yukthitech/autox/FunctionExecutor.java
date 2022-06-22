@@ -3,6 +3,7 @@ package com.yukthitech.autox;
 import java.io.File;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.InvalidArgumentException;
@@ -14,6 +15,7 @@ import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.TestSuite;
+import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -93,10 +95,20 @@ public class FunctionExecutor
 		Object functionResult = null;
 		
 		logggerLocal.set(exeLogger);
-	
+		
 		try
 		{
-			functionResult = function.execute(context, exeLogger, false);
+			ObjectWrapper<Object> resWrapper = new ObjectWrapper<>();
+			CountDownLatch latch = new CountDownLatch(1);
+			
+			function.execute(context, exeLogger, result -> 
+			{
+				resWrapper.setValue(result);
+				latch.countDown();
+			});
+			
+			latch.await();
+			functionResult = resWrapper.getValue();
 		}catch(Exception ex)
 		{
 			executedSucessfully = false;

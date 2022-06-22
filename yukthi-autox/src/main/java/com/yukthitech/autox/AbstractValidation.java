@@ -46,6 +46,12 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	{
 		this.sourceStep = sourceStep;
 	}
+	
+	@Override
+	public IStep getSourceStep()
+	{
+		return sourceStep;
+	}
 
 	@Override
 	public IValidation clone()

@@ -37,6 +37,11 @@ public class AutomationExecutor
 	
 		context.setAutomationExecutor(this);
 		
+		pushTestSuiteGroup(testSuites);
+	}
+	
+	public void pushTestSuiteGroup(TestSuiteGroup testSuites)
+	{
 		ExecutionBranch mainBranch = testSuites.buildExecutionBranch(context);
 		logger.debug("Got execution plan as:\n{}", mainBranch);
 		
@@ -124,8 +129,11 @@ public class AutomationExecutor
 		
 		IStep step = steps.get(idx);
 		
-		executeStep(step, stackEntry);
-		stackEntry.incrementChildStepIndex();
+		//on completion of step execution, move to next step
+		if(executeStep(step, stackEntry))
+		{
+			stackEntry.incrementChildStepIndex();
+		}
 		
 		return false;
 	}
@@ -136,7 +144,7 @@ public class AutomationExecutor
 	 * 
 	 * @param step
 	 */
-	private void executeStep(IStep sourceStep, ExecutionStackEntry stackEntry) throws ExecutionFlowFailed
+	private boolean executeStep(IStep sourceStep, ExecutionStackEntry parentStackEntry) throws ExecutionFlowFailed
 	{
 		ExecutionLogger exeLogger = this.state.getExecutionLogger();
 		
@@ -151,6 +159,8 @@ public class AutomationExecutor
 		
 		//initialize step with source step to support error handling
 		IStep step = sourceStep;
+		boolean childBranchPushed = false;
+		boolean exceptionHandled = false;
 		
 		try
 		{
@@ -161,37 +171,55 @@ public class AutomationExecutor
 			step = sourceStep.clone();
 			AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 			step.setSourceStep(sourceStep);
-	
-			stackEntry.stepStarted(step);
 			
-			try
+			//If a step pushes child steps/branches, then it will be kept on stack, till
+			// child is completed. Running step check is used to ensure the step is executed only once
+			if(!parentStackEntry.isRunningStep(step))
 			{
-				step.execute(context, exeLogger);
-			}catch(AutoxValidationException ex)
-			{
-				throw new TestCaseValidationFailedException(step, ex.getMessage());
+				parentStackEntry.stepStarted(step);
+				
+				try
+				{
+					step.execute(context, exeLogger);
+				}catch(AutoxValidationException ex)
+				{
+					throw new TestCaseValidationFailedException(step, ex.getMessage());
+				}
 			}
+			
+			childBranchPushed = context.getExecutionStack().isNotPeekElement(step);
 
-			stackEntry.stepCompleted(step, true, null);
+			if(childBranchPushed)
+			{
+				return false;
+			}
+			
+			parentStackEntry.stepCompleted(step, true, null);
+			return true;
 		} catch(ExecutionFlowFailed ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			boolean handled = this.state.handleException(stackEntry, step, ex);
+			//Note, with exception, it will be assumed no child branches/steps are pushed
+			exceptionHandled = this.state.handleException(step, ex);
 			
 			//if exception is handled, then simply return from current execution
-			if(handled)
+			if(exceptionHandled)
 			{
-				stackEntry.stepCompleted(step, true, null);
-				return;
+				return true;
 			}
 			
-			stackEntry.stepCompleted(step, false, ex);
+			parentStackEntry.stepCompleted(step, false, ex);
 			throw new ExecutionFlowFailed(step, ex.getMessage(), ex);
 		} finally
 		{
-			context.getExecutionStack().pop(step);
+			//when child branch is pushed or exception is handled, don't remove current step from stack
+			// Note: As part of exception handling running steps would be removed.
+			if(!childBranchPushed && !exceptionHandled)
+			{
+				context.getExecutionStack().pop(step);
+			}
 			
 			//re-enable logging, in case it is disabled
 			exeLogger.setDisabled(false);
@@ -254,7 +282,7 @@ public class AutomationExecutor
 			{
 				//create a new dynamic branch for setting callback
 				newSteps(branch.getSetup().getLabel(), branch.getSetup(), ExecutionType.SETUP)
-					.onSimpleInit(entry -> state.preSetup(branch))
+					.onPreexecute(entry -> state.preSetup(branch))
 					.onSuccess(entry -> state.postSetup((ExecutionStackEntry) entry, branch, true))
 					.execute();
 				
@@ -327,7 +355,7 @@ public class AutomationExecutor
 			if(branch.cleanup != null)
 			{
 				newSteps(branch.getCleanup().getLabel(), branch.getCleanup(), ExecutionType.CLEANUP)
-					.onSimpleInit(entry -> state.preCleanup(branch))
+					.onPreexecute(entry -> state.preCleanup(branch))
 					.onSuccess(entry -> state.postCleanup((ExecutionStackEntry) entry, branch, true))
 					.execute();
 				return false;

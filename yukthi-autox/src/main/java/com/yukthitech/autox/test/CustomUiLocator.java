@@ -1,7 +1,6 @@
 package com.yukthitech.autox.test;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;

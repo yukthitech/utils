@@ -34,6 +34,7 @@ import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.autox.test.TestSuiteResults;
+import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 
 public class AutomationExecutorState
@@ -89,7 +90,6 @@ public class AutomationExecutorState
 	public void pushBranch(ExecutionStackEntry entry)
 	{
 		ExecutionStackEntry curEntry = executionStack.peek();
-		
 		entry.setParent(curEntry);
 
 		//if initialization fails, don't push the stack
@@ -377,11 +377,36 @@ public class AutomationExecutorState
 		}
 	}
 	
-	public boolean handleException(ExecutionStackEntry entry, IStep sourceStep, Exception actualException)
+	private void popStackEntry(ExecutionStackEntry stackEntry, boolean completedFlag, Exception actualException)
+	{
+		IStep runningStep = stackEntry.getRunningStep();
+		
+		if(runningStep != null)
+		{
+			if(completedFlag)
+			{
+				stackEntry.stepCompleted(runningStep, true, null);
+			}
+			else
+			{
+				stackEntry.stepCompleted(runningStep, true, actualException);
+			}
+			
+			context.getExecutionStack().pop(runningStep);
+		}
+		
+		stackEntry.completed(completedFlag);
+		this.executionStack.pop();
+	}
+	
+	public boolean handleException(IStep sourceStep, Exception actualException)
 	{
 		ExecutionLogger executionLogger = getExecutionLogger();
 		
-		executionLogger.error(actualException, "An error occurred with message - {}", actualException.getMessage());
+		if(!(actualException instanceof LangException))
+		{
+			executionLogger.error(actualException, "An error occurred with message - {}", actualException.getMessage());
+		}
 		
 		ExecutionStackEntry stackEntry = null;
 		TestCaseResult result = null;
@@ -406,9 +431,8 @@ public class AutomationExecutorState
 				
 				setupFailed = true;
 				setupType = stackEntry.getExecutionType();
-				stackEntry.completed(false);
 				
-				this.executionStack.pop();
+				popStackEntry(stackEntry, false, actualException);
 				continue;
 			}
 			
@@ -421,41 +445,24 @@ public class AutomationExecutorState
 				
 				cleanupFailed = true;
 				cleanupType = stackEntry.getExecutionType();
-				stackEntry.completed(false);
-				
-				this.executionStack.pop();
+				popStackEntry(stackEntry, false, actualException);
 				continue;
 			}
 			
-			if(actualException instanceof ReturnException)
-			{
-				this.executionStack.pop();
-				stackEntry.completed(true);
-				
-				if(stackEntry.getBranch() != null)
-				{
-					completedBranchEntry(stackEntry);
-					return true;
-				}
-
-				continue;
-			}
-
 			if(stackEntry.isStepsEntry())
 			{
-				if(entry.getExceptionHandler() != null)
+				if(stackEntry.getExceptionHandler() != null)
 				{
 					//Note: When exception handler returns true, if means internally exception
 					// is handled and current steps needs to be executed further
 					//  which also indicates current entry execution is not completed yet
-					if(entry.getExceptionHandler().handleError(entry, actualException))
+					if(stackEntry.getExceptionHandler().handleError(stackEntry, actualException))
 					{
 						return true;
 					}
 				}
 
-				stackEntry.completed(false);
-				this.executionStack.pop();
+				popStackEntry(stackEntry, false, actualException);
 				continue;
 			}
 			//for branch execution
@@ -464,6 +471,19 @@ public class AutomationExecutorState
 				
 			}
 			
+			if(actualException instanceof ReturnException)
+			{
+				if(stackEntry.getBranch() != null)
+				{
+					completedBranchEntry(stackEntry);
+					popStackEntry(stackEntry, true, actualException);
+					return true;
+				}
+				
+				popStackEntry(stackEntry, true, actualException);
+				continue;
+			}
+
 			if(executable instanceof TestCase)
 			{
 				ExecutionBranch branch = stackEntry.getBranch();
@@ -497,8 +517,7 @@ public class AutomationExecutorState
 				if(setupFailed)
 				{
 					completedBranchEntry(stackEntry);
-					stackEntry.completed(false);
-					this.executionStack.pop();
+					popStackEntry(stackEntry, false, actualException);
 				}
 				
 				break;
@@ -513,10 +532,8 @@ public class AutomationExecutorState
 					results.setSetupSuccessful(false);
 					results.setCleanupSuccessful(true);
 					
-					stackEntry.completed(false);
-					
 					//remove test suite entry, as setup itself failed
-					this.executionStack.pop();
+					popStackEntry(stackEntry, false, actualException);
 					break;
 				}
 				
@@ -526,10 +543,8 @@ public class AutomationExecutorState
 					results.setSetupSuccessful(true);
 					results.setCleanupSuccessful(false);
 					
-					stackEntry.completed(false);
-
 					//remove test suite entry, as setup itself failed
-					this.executionStack.pop();
+					popStackEntry(stackEntry, false, actualException);
 					break;
 				}
 			}

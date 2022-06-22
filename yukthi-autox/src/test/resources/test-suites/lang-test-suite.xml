@@ -8,7 +8,6 @@
 			<then>
 				<s:return value="if-then"/>
 			</then>
-		
 			<else>
 				<s:return value="if-else"/>
 			</else>
@@ -55,6 +54,7 @@
 
 				<f:condSimpleGroup return-attr="ifExec"/>
 			
+				<s:log message="Post function call.."/>
 				<s:assert-equals actual="attr: ifExec" expected="if-then"/>
 			</wrap:steps>
 		</testCase>

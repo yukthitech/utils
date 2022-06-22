@@ -43,6 +43,12 @@ public abstract class AbstractStep implements IStep, Validateable
 		this.sourceStep = sourceStep;
 	}
 	
+	@Override
+	public IStep getSourceStep()
+	{
+		return sourceStep;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
 	 */
