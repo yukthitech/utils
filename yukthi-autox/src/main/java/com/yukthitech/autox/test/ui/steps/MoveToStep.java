@@ -168,7 +168,7 @@ public class MoveToStep extends AbstractUiStep
 			
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(ex, "Failed to move to element - ", getLocatorWithParent(locator));
+			//exeLogger.error(ex, "Failed to move to element - ", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to move to element - {}", getLocatorWithParent(locator), ex);
 		}
 	}

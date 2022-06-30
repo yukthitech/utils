@@ -146,6 +146,16 @@ public class AutomationExecutor
 	 */
 	private boolean executeStep(IStep sourceStep, ExecutionStackEntry parentStackEntry) throws ExecutionFlowFailed
 	{
+		//If a step pushes child steps/branches, then it will be kept on stack, till
+		// child is completed. Running step check is used to ensure the step is executed only once
+		if(parentStackEntry.isRunningStep(sourceStep))
+		{
+			//for already executing step, simply remove from execution stacks
+			parentStackEntry.stepCompleted(sourceStep, true, null);
+			context.getExecutionStack().pop(sourceStep);
+			return true;
+		}
+		
 		ExecutionLogger exeLogger = this.state.getExecutionLogger();
 		
 		//if step is marked not to log anything
@@ -160,7 +170,7 @@ public class AutomationExecutor
 		//initialize step with source step to support error handling
 		IStep step = sourceStep;
 		boolean childBranchPushed = false;
-		boolean exceptionHandled = false;
+		boolean exceptionOccurred = false;
 		
 		try
 		{
@@ -172,19 +182,14 @@ public class AutomationExecutor
 			AutomationUtils.replaceExpressions("step-" + step.getClass().getName(), context, step);
 			step.setSourceStep(sourceStep);
 			
-			//If a step pushes child steps/branches, then it will be kept on stack, till
-			// child is completed. Running step check is used to ensure the step is executed only once
-			if(!parentStackEntry.isRunningStep(step))
+			parentStackEntry.stepStarted(step);
+			
+			try
 			{
-				parentStackEntry.stepStarted(step);
-				
-				try
-				{
-					step.execute(context, exeLogger);
-				}catch(AutoxValidationException ex)
-				{
-					throw new TestCaseValidationFailedException(step, ex.getMessage());
-				}
+				step.execute(context, exeLogger);
+			}catch(AutoxValidationException ex)
+			{
+				throw new TestCaseValidationFailedException(step, ex.getMessage());
 			}
 			
 			childBranchPushed = context.getExecutionStack().isNotPeekElement(step);
@@ -201,8 +206,19 @@ public class AutomationExecutor
 			throw ex;
 		} catch(Exception ex)
 		{
+			exceptionOccurred = true;
+			
 			//Note, with exception, it will be assumed no child branches/steps are pushed
-			exceptionHandled = this.state.handleException(step, ex);
+			boolean exceptionHandled = this.state.handleException(step, ex);
+			
+			//Note: During exception handling, based on if exception is handled by
+			//  current step or child step, the current step would have been popped.
+			// So, pop the step only if it is there on stack
+			if(context.getExecutionStack().isPeekElement(step))
+			{
+				parentStackEntry.stepCompleted(step, exceptionHandled, ex);
+				context.getExecutionStack().pop(step);
+			}
 			
 			//if exception is handled, then simply return from current execution
 			if(exceptionHandled)
@@ -210,13 +226,12 @@ public class AutomationExecutor
 				return true;
 			}
 			
-			parentStackEntry.stepCompleted(step, false, ex);
 			throw new ExecutionFlowFailed(step, ex.getMessage(), ex);
 		} finally
 		{
-			//when child branch is pushed or exception is handled, don't remove current step from stack
+			//when child branch is pushed or exception is occurred, don't remove current step from stack
 			// Note: As part of exception handling running steps would be removed.
-			if(!childBranchPushed && !exceptionHandled)
+			if(!childBranchPushed && !exceptionOccurred)
 			{
 				context.getExecutionStack().pop(step);
 			}

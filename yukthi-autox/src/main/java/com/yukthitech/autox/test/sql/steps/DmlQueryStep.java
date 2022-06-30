@@ -164,7 +164,7 @@ public class DmlQueryStep extends AbstractStep
 
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query");
+			//exeLogger.error(ex, "An error occurred while executing query");
 			throw new TestCaseFailedException(this, "An erorr occurred while executing sql query - {}", query, ex);
 		} finally
 		{

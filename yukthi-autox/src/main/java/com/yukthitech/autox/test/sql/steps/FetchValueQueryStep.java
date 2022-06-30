@@ -139,7 +139,7 @@ public class FetchValueQueryStep extends AbstractStep
 			exeLogger.debug("Data loaded on context with name {}. Data: {}", contextAttribute, result);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query: {}", query);
+			//exeLogger.error(ex, "An error occurred while executing query: {}", query);
 			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
 		} finally

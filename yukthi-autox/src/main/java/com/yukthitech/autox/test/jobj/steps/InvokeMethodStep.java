@@ -295,7 +295,7 @@ public class InvokeMethodStep extends AbstractStep
 				ex = (Exception) ex.getCause();
 			}
 
-			logger.error(ex, "An error occurred while invoking method - {}", method);
+			//logger.error(ex, "An error occurred while invoking method - {}", method);
 			
 			throw ex;
 		} 

@@ -82,7 +82,7 @@ public class DdlQueryStep extends AbstractStep
 			statement.execute(query);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing DDL query");
+			//exeLogger.error(ex, "An error occurred while executing DDL query");
 			throw new TestCaseFailedException(this, "An erorr occurred while executing DDL query - {}", query, ex);
 		} finally
 		{

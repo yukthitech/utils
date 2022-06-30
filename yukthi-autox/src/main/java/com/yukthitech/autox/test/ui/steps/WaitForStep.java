@@ -135,7 +135,7 @@ public class WaitForStep extends AbstractUiStep
 			
 		} catch(InvalidStateException ex)
 		{
-			exeLogger.error(ex, ex.getMessage());
+			//exeLogger.error(ex, ex.getMessage());
 			throw new TestCaseFailedException(this, ex.getMessage(), ex);
 		}
 	}

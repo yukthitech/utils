@@ -182,7 +182,7 @@ public class SqlAssertValue extends AbstractValidation
 			exeLogger.debug("Expected value and actual value are found to be same: {}", expectedValue);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
+			//exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
 			throw new TestCaseFailedException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{

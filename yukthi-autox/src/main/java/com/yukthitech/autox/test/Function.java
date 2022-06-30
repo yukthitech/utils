@@ -184,6 +184,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 				if(ex instanceof ReturnException)
 				{
 					entry.setVariable(VAR_RET_VAL, ((ReturnException) ex).getValue() );
+					entry.skipChildSteps();
 					return true;
 				}
 				

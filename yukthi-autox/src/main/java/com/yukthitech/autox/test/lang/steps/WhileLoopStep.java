@@ -96,7 +96,7 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 				
 				if(ex instanceof ContinueException)
 				{
-					entry.resetChildIndex();
+					entry.skipChildSteps();
 					return true;
 				}
 				
@@ -105,7 +105,13 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 			.isReexecutionNeeded(entry -> 
 			{
 				AtomicBoolean breakFlag = (AtomicBoolean) entry.getVariable(VAR_BREAK);
-				return breakFlag.get() || AutomationUtils.evaluateCondition(context, condition);
+				
+				if(breakFlag.get())
+				{
+					return false;
+				}
+				
+				return AutomationUtils.evaluateCondition(context, condition);
 			})
 			.execute();
 		;

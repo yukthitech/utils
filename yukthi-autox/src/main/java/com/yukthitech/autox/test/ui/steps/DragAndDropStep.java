@@ -94,15 +94,15 @@ public class DragAndDropStep extends AbstractStep
 			dragAndDrop.perform();
 		} catch(StaleElementReferenceException ex)
 		{
-			logger.error(ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
+			//logger.error(ex, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement);
 			throw new TestCaseFailedException(this, "Element with {} or {} is not attached to the page document", sourceElement, destinationElement, ex);
 		} catch(NoSuchElementException e)
 		{
-			logger.error(e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
+			//logger.error(e, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement);
 			throw new TestCaseFailedException(this, "Element with {} or {} was not found in DOM ", sourceElement, destinationElement, e);
 		} catch(Exception e)
 		{
-			logger.error(e, "Error occurred while performing drag and drop operation");
+			//logger.error(e, "Error occurred while performing drag and drop operation");
 			throw new TestCaseFailedException(this, "Error occurred while performing drag and drop operation ", e);
 		}
 	}

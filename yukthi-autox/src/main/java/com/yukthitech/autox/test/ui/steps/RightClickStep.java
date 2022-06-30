@@ -104,7 +104,7 @@ public class RightClickStep extends AbstractUiStep
 					new InvalidStateException("Failed to right click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(ex, "Failed to right click element - {}", getLocatorWithParent(locator));
+			//exeLogger.error(ex, "Failed to right click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to right click element - {}", getLocatorWithParent(locator), ex);
 		}
 	}

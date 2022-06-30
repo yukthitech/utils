@@ -115,14 +115,14 @@ public class ExecutionStack
 		{
 			Object popped = entryPointStack.pop();
 			objectStack.pop();
-			System.out.println("==========> Popping object: " + object + "  =========> " + popped);
+			System.out.println("==========> Popping entry object: " + object + "  =========> " + popped);
 			return;
 		}
 		
-		Object popped = stackTrace.pop();
+		StackElement popped = stackTrace.pop();
 		objectStack.pop();
 		
-		System.out.println("==========> Popping object: " + object + "  =========> " + popped);
+		System.out.println("==========> Popping normal object: " + object + "  =========> " + popped.element);
 		
 		if(stackTrace.isEmpty())
 		{
@@ -141,6 +141,12 @@ public class ExecutionStack
 		return (objectStack.peek() != object);
 	}
 	
+	public boolean isPeekElement(Object object)
+	{
+		object = unwrapStep(object);
+		return (objectStack.peek() == object);
+	}
+
 	public String toStackTrace()
 	{
 		StringBuilder builder = new StringBuilder("\n");

@@ -73,7 +73,7 @@ public class MkDirStep extends AbstractStep
 			context.setAttribute(name, dirToCreate);
 		}catch(Exception ex)
 		{
-			exeLogger.error(ex, "An error occurred while creating directory - {}", path);
+			//exeLogger.error(ex, "An error occurred while creating directory - {}", path);
 			throw new TestCaseFailedException(this, "An error occurred while creating directory - {}", path, ex);
 		}
 	}

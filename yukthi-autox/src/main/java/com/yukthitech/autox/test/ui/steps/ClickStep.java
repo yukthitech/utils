@@ -162,7 +162,7 @@ public class ClickStep extends AbstractPostCheckStep
 					new InvalidStateException("Failed to click element - " + getLocatorWithParent(locator)));
 		}catch(InvalidStateException ex)
 		{
-			exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
+			//exeLogger.error(ex, "Failed to click element - {}", getLocatorWithParent(locator));
 			throw new TestCaseFailedException(this, "Failed to click element - {}", getLocatorWithParent(locator), ex);
 		}
 	}

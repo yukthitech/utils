@@ -168,7 +168,7 @@ public class LoadQueryMapStep extends AbstractStep
 			exeLogger.debug("Processed number of rows {} and set result map on context with attribute name '{}'. Data Map: {}", rowCount, contextAttribute, resMap);
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing query: {}", query);
+			//exeLogger.error(ex, "An error occurred while executing query: {}", query);
 			
 			throw new TestCaseFailedException(this, "An erorr occurred while executing query: {}", query, ex);
 		} finally

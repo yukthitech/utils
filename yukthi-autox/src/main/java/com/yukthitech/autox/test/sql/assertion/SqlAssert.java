@@ -227,7 +227,7 @@ public class SqlAssert extends AbstractValidation
 			}
 		} catch(SQLException ex)
 		{
-			exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
+			//exeLogger.error(ex, "An error occurred while executing sql validation with query - {}", query);
 			throw new AutoxValidationException(this, "An erorr occurred while executing sql validation with query - {}", query, ex);
 		} finally
 		{
