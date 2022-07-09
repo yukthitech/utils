@@ -27,11 +27,31 @@ public class TAutomation
 	}
 	
 	@Test
-	public void startAutomation() throws Exception
+	public void testSuccessCases() throws Exception
 	{
 		AutomationLauncher.systemExitEnabled = false;
 		
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+				"-rf", "./output", 
+				"-prop", "./src/test/resources/app.properties", 
+				//"-ts", "rest-test-suites"
+				//"-tc", "testGroupRecursion"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		ExecutionResult exeResult = objectMapper.readValue(new File("./output/test-results.json"), ExecutionResult.class);
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 0, "Found one more test cases errored.");
+		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found one more test cases failed.");
+		Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 0, "Found one more test cases skipped.");
+	}
+
+	@Test
+	public void testNegativeCases() throws Exception
+	{
+		AutomationLauncher.systemExitEnabled = false;
+		
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
+				"-tsf", "./src/test/resources/neg-test-suites",
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "rest-test-suites"

@@ -1,20 +1,23 @@
 package com.yukthitech.autox.test.lang.steps;
 
+import com.yukthitech.autox.AutoxValidationException;
+import com.yukthitech.autox.IStep;
+
 /**
  * Exception that will be thrown to break current loop.
  * @author akiran
  */
-public class FailException extends LangException
+public class FailException extends AutoxValidationException
 {
 	private static final long serialVersionUID = 1L;
 
-	public FailException()
+	public FailException(IStep step)
 	{
-		super();
+		super(step, null);
 	}
 
-	public FailException(String message)
+	public FailException(IStep step, String message)
 	{
-		super(message);
+		super(step, null);
 	}
 }

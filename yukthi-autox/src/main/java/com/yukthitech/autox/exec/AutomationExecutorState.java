@@ -377,7 +377,7 @@ public class AutomationExecutorState
 		}
 	}
 	
-	private void popStackEntry(ExecutionStackEntry stackEntry, boolean completedFlag, Exception actualException)
+	private void closeRunningStep(ExecutionStackEntry stackEntry, boolean completedFlag, Exception actualException)
 	{
 		IStep runningStep = stackEntry.getRunningStep();
 		
@@ -389,11 +389,16 @@ public class AutomationExecutorState
 			}
 			else
 			{
-				stackEntry.stepCompleted(runningStep, true, actualException);
+				stackEntry.stepCompleted(runningStep, false, actualException);
 			}
 			
 			context.getExecutionStack().pop(runningStep);
 		}
+	}
+
+	private void popStackEntry(ExecutionStackEntry stackEntry, boolean completedFlag, Exception actualException)
+	{
+		closeRunningStep(stackEntry, completedFlag, actualException);
 		
 		stackEntry.completed(completedFlag);
 		this.executionStack.pop();
@@ -426,6 +431,7 @@ public class AutomationExecutorState
 			{
 				if(stackEntry.getExecutionType() == ExecutionType.SETUP)
 				{
+					closeRunningStep(stackEntry, false, actualException);
 					postSetup(stackEntry, stackEntry.getParent().getBranch(), false);
 				}
 				
@@ -440,6 +446,7 @@ public class AutomationExecutorState
 			{
 				if(stackEntry.getExecutionType() == ExecutionType.CLEANUP)
 				{
+					closeRunningStep(stackEntry, false, actualException);
 					postCleanup(stackEntry, stackEntry.getParent().getBranch(), false);
 				}
 				

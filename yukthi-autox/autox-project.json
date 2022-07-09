@@ -3,9 +3,10 @@
   "appConfigFilePath": "src/test/resources/app-configuration.xml",
   "appPropertyFilePath": "src/test/resources/app.properties",
   "testSuitesFoldersList": [
-    "src\\test\\resources\\test-suites"
+    "src\\test\\resources\\test-suites",
+    "src\\test\\resources\\neg-test-suites"
   ],
   "classPathEntriesList": [
-    "C:\\Users\\akiran\\git\\utils\\yukthi-autox\\src\\test\\resources"
+    "E:\\Kranthi\\github\\utils\\yukthi-autox\\src\\test\\resources"
   ]
 }

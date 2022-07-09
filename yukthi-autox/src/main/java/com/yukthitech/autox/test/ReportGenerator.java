@@ -294,7 +294,7 @@ public class ReportGenerator
 					log.getValue().delete();
 				}catch(Exception ex)
 				{
-					throw new InvalidStateException("An error occurred while creating monitoring log file - {}", log.getKey());
+					logger.error("An error occurred while creating monitoring log file - {}. Ignoring log error.", log.getKey(), ex);
 				}
 			}
 		}

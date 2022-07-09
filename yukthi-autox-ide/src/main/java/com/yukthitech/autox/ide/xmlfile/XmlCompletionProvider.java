@@ -42,6 +42,7 @@ import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.ccg.xml.XMLConstants;
 import com.yukthitech.ccg.xml.XMLUtil;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class XmlCompletionProvider extends AbstractCompletionProvider implements IIdeCompletionProvider
 {
@@ -232,7 +233,17 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 		String namespace = location.getNameSpace();
 		String curToken = location.getName() != null ? location.getName().toLowerCase().trim() : null;
 		
-		if(IStepContainer.class.isAssignableFrom(parentType) && 
+		Class<?> stepContainerClass = null;
+		
+		try
+		{
+			stepContainerClass = Class.forName(IStepContainer.class.getName(), false, parentType.getClassLoader());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while loading {} class from project class loader", IStepContainer.class.getName(), ex);
+		}
+		
+		if(stepContainerClass.isAssignableFrom(parentType) && 
 				( namespace == null || AutomationUtils.isReserveNamespace(namespace))
 				)
 		{

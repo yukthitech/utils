@@ -16,6 +16,7 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -129,10 +130,11 @@ public class StepExecutor
 					startTime, new Date());
 		}
 		
-		if(ex instanceof TestCaseFailedException)
+		if((ex instanceof TestCaseFailedException) || (ex instanceof LangException))
 		{
 			invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
-			return new TestCaseResult(testCase, resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), "Validation errored: " + name,
+			return new TestCaseResult(testCase, resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), 
+					String.format("%s (%s) Errored: %s", stepType, name, ex.getMessage()),
 					startTime, new Date());
 		}
 		
@@ -154,7 +156,7 @@ public class StepExecutor
 		}
 
 		//for unhandled exceptions log on ui
-		exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
+		//exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
 		invokeErrorHandling(context, executable, new ErrorDetails(exeLogger, testCase, step, ex));
 		
 		return new TestCaseResult(testCase, resName, TestStatus.ERRORED, exeLogger.getExecutionLogData(), stepType + " errored: " + executable.name(),

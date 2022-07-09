@@ -36,15 +36,15 @@ public class FailStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger) 
 	{
-		exeLogger.debug("Failing the current test case with message: {}", message);
+		exeLogger.error("Failing the current test case with message: {}", message);
 		
 		if(message == null)
 		{
-			throw new FailException();
+			throw new FailException(this);
 		}
 		else
 		{
-			throw new FailException(message);
+			throw new FailException(this, message);
 		}
 	}
 }

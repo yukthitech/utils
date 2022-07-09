@@ -20,7 +20,7 @@ public class AutoxValidationException extends UtilsException
 		return getStepName(step) + ": " + mssgTemp;
 	}
 	
-	private static String getStepName(IStep step)
+	public static String getStepName(IStep step)
 	{
 		Executable executable = step.getClass().getAnnotation(Executable.class);
 		String stepName = null;
