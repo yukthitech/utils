@@ -9,7 +9,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -28,6 +27,10 @@ import com.yukthitech.swing.tree.LazyTreeNode;
 import com.yukthitech.swing.tree.cbox.CboxNodeData;
 import com.yukthitech.swing.tree.cbox.CheckBoxTree;
 
+/**
+ * Dialog that can be used to select one or more folders.
+ * @author akranthikiran
+ */
 public class DirectoryDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
@@ -42,6 +45,7 @@ public class DirectoryDialog extends JDialog
 	/**
 	 * Launch the application.
 	 */
+	/*
 	public static void main(String[] args)
 	{
 		try
@@ -61,6 +65,7 @@ public class DirectoryDialog extends JDialog
 			e.printStackTrace();
 		}
 	}
+	*/
 
 	/**
 	 * Create the dialog.

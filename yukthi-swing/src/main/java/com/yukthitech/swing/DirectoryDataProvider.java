@@ -19,7 +19,10 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Data provider which provides folder information.
+ * Data provider which provides folder information. This allows to specify
+ * 	selected folders - By default these folders get selected
+ *  read-only folders - Folders whose state cannot be changed.
+ *   
  * @author akranthikiran
  */
 public class DirectoryDataProvider implements ILazyTreeDataProvider<CboxNodeData>, ICboxTreeStateManager
@@ -49,6 +52,11 @@ public class DirectoryDataProvider implements ILazyTreeDataProvider<CboxNodeData
 		this.rootFolders = canonlize(rootFolders);
 	}
 	
+	/**
+	 * Gets the folders which are selected by default.
+	 *
+	 * @return the folders which are selected by default
+	 */
 	public List<File> getSelectedFolders()
 	{
 		return selectedFolders;
@@ -77,6 +85,11 @@ public class DirectoryDataProvider implements ILazyTreeDataProvider<CboxNodeData
 		return res;
 	}
 	
+	/**
+	 * Sets the folders which are selected by default.
+	 *
+	 * @param selectedFolders the new folders which are selected by default
+	 */
 	public void setSelectedFolders(List<File> selectedFolders)
 	{
 		this.selectedFolders = CollectionUtils.isEmpty(selectedFolders) ? null : canonlize(selectedFolders);
