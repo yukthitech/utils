@@ -15,7 +15,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.autox.ide.proj.ProjectManager;
 
 public class DeleteProjectDialog extends JDialog
 {
@@ -27,14 +27,14 @@ public class DeleteProjectDialog extends JDialog
 
 	private boolean deleteProject = false;
 	
-	private ProjectExplorer projectExplorer;
+	private ProjectManager projectManager;
 
 	/**
 	 * Create the dialog.
 	 */
-	public DeleteProjectDialog(ProjectExplorer projectExplorer)
+	public DeleteProjectDialog(ProjectManager projectManager)
 	{
-		this.projectExplorer = projectExplorer;
+		this.projectManager = projectManager;
 		
 		super.setModalityType(ModalityType.DOCUMENT_MODAL);
 
@@ -98,7 +98,7 @@ public class DeleteProjectDialog extends JDialog
 			return false;
 		}
 		
-		projectExplorer.deleteProject(project, deleteContentCbox.isSelected());
+		projectManager.deleteProject(project, deleteContentCbox.isSelected());
 		return true;
 	}
 }

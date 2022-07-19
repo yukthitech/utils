@@ -1,6 +1,5 @@
 package com.yukthitech.autox.ide.layout;
 
-import javax.swing.JButton;
 import javax.swing.JComponent;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.swing.ToolbarButton;
+import com.yukthitech.swing.IconButton;
 
 /**
  * Toolbar icon.
@@ -136,11 +135,9 @@ public class ToolBarIcon implements Validateable
 	 */
 	public JComponent toButton(ActionCollection actionCollection)
 	{
-		JButton button = new ToolbarButton();
-		button.setIcon(IdeUtils.loadIcon(icon, 20));
-		button.setBackground(null);
+		IconButton button = new IconButton();
+		button.setIcon(IdeUtils.loadIconWithoutBorder(icon, 20));
 		button.setToolTipText(tooltip);
-		button.setBorder(null);
 
 		if(action != null)
 		{

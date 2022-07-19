@@ -29,6 +29,12 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-swing</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea -->
 		<dependency>
 			<groupId>com.fifesoft</groupId>

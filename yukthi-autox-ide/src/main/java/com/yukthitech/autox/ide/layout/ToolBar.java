@@ -3,6 +3,7 @@ package com.yukthitech.autox.ide.layout;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 
 /**
@@ -45,12 +46,15 @@ public class ToolBar
 	{
 		JToolBar toolBar = new JToolBar();
 		toolBar.setFloatable(false);
+		toolBar.setBackground(null);
+		toolBar.setOpaque(false);
+		toolBar.setBorder(null);
 		
 		for(ToolBarIcon item : items)
 		{
 			if("-".equals(item.getIcon()))
 			{
-				toolBar.add(new ToolbarSeparator());
+				toolBar.add(new JSeparator(JSeparator.VERTICAL));
 				continue;
 			}
 			

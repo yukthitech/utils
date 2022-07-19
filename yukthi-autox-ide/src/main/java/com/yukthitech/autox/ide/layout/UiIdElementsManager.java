@@ -44,4 +44,16 @@ public class UiIdElementsManager
 		
 		return new ArrayList<>(elements);
 	}
+
+	public static Object getElement(String id)
+	{
+		List<Object> elements = idElements.get(id);
+		
+		if(elements == null)
+		{
+			return null;
+		}
+		
+		return elements.get(0);
+	}
 }

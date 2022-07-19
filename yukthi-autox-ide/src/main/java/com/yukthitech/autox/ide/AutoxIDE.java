@@ -2,7 +2,10 @@ package com.yukthitech.autox.ide;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.FlowLayout;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -14,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +39,7 @@ import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.services.IdeOpeningEvent;
 import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.services.IdeStateManager;
-import com.yukthitech.autox.ide.views.ConsolePanel;
+import com.yukthitech.autox.ide.views.console.ConsolePanel;
 import com.yukthitech.autox.ide.views.report.ReportPanel;
 
 @ActionHolder
@@ -213,7 +217,19 @@ public class AutoxIDE extends JFrame
 		panel.add(lblNewLabel);
 		
 		topPanel.setLayout(new BorderLayout());
-		topPanel.add(exeEnvironmentPanel, BorderLayout.EAST);
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[] {0, 0};
+		gridBagLayout.rowHeights = new int[]{0};
+		gridBagLayout.columnWeights = new double[]{1.0, 0.0};
+		gridBagLayout.rowWeights = new double[]{1.0};
+		topPanel.setLayout(gridBagLayout);
+		
+		GridBagConstraints envPanelConst = new GridBagConstraints();
+		envPanelConst.fill = GridBagConstraints.BOTH;
+		envPanelConst.gridx = 1;
+		envPanelConst.gridy = 0;
+		topPanel.add(exeEnvironmentPanel, envPanelConst);
+
 		contentPane.add(topPanel, BorderLayout.NORTH);
 		
 		loadLayout();
@@ -297,8 +313,19 @@ public class AutoxIDE extends JFrame
 		JMenuBar menuBar = uiLayout.getMenuBar().toJMenuBar(actionCollection);
 		super.setJMenuBar(menuBar);
 		
+		JPanel wrapperPanel = new JPanel();
+		wrapperPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		wrapperPanel.setBorder(new EtchedBorder());
+		
 		JToolBar toolBar = uiLayout.getToolBar().toJToolBar(actionCollection);
-		topPanel.add(toolBar, BorderLayout.WEST);
+		wrapperPanel.add(toolBar);
+		
+		GridBagConstraints toolBarConst = new GridBagConstraints();
+		toolBarConst.gridx = 0;
+		toolBarConst.gridy = 0;
+		toolBarConst.anchor = GridBagConstraints.WEST;
+		toolBarConst.fill = GridBagConstraints.BOTH;
+		topPanel.add(wrapperPanel, toolBarConst);
 	}
 	
 	@Action

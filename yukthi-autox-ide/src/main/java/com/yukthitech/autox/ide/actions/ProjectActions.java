@@ -16,6 +16,7 @@ import com.yukthitech.autox.ide.dialog.DeleteProjectDialog;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
+import com.yukthitech.autox.ide.proj.ProjectManager;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.projexplorer.ProjectTreeNode;
 import com.yukthitech.autox.ide.projpropdialog.ProjectPropertiesDialog;
@@ -34,6 +35,9 @@ public class ProjectActions
 	private ProjectExplorer projectExplorer;
 	
 	@Autowired
+	private ProjectManager projectManager;
+	
+	@Autowired
 	private ApplicationContext applicationContext;
 
 	private NewProjectDialog newProjDialog;
@@ -46,7 +50,7 @@ public class ProjectActions
 	private void init()
 	{
 		newProjDialog = new NewProjectDialog(IdeUtils.getCurrentWindow());
-		deleteProjectDialog = new DeleteProjectDialog(projectExplorer);
+		deleteProjectDialog = new DeleteProjectDialog(projectManager);
 
 		projectChooser.setDialogTitle("Open Project");
 		projectChooser.setAcceptAllFileFilterUsed(false);
@@ -68,7 +72,7 @@ public class ProjectActions
 
 	public Project openExistingProject(String path)
 	{
-		return projectExplorer.openProject(path);
+		return projectManager.openProject(path);
 	}
 
 	@Action
@@ -83,7 +87,7 @@ public class ProjectActions
 				@Override
 				public void run()
 				{
-					projectExplorer.openProject(project.getProjectFilePath());
+					projectManager.openProject(project.getProjectFilePath());
 				}
 			});
 		}
@@ -99,7 +103,7 @@ public class ProjectActions
 				@Override
 				public void run()
 				{
-					projectExplorer.openProject(projectChooser.getSelectedFile().getPath());					
+					projectManager.openProject(projectChooser.getSelectedFile().getPath());					
 				}
 			});
 		}

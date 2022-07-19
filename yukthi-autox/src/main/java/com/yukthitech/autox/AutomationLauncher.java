@@ -458,7 +458,7 @@ public class AutomationLauncher
 			executor.start();
 		}catch(Exception ex)
 		{
-			logger.error("An unhandled error occurred during execution", ex);
+			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);
 			System.exit(-1);
 		}
 	}

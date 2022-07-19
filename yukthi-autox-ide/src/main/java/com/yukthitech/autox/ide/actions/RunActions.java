@@ -1,8 +1,6 @@
 package com.yukthitech.autox.ide.actions;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 import javax.swing.JOptionPane;
@@ -17,7 +15,8 @@ import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.ide.exeenv.ExecutionEnvironmentManager;
+import com.yukthitech.autox.ide.exeenv.ExecutionType;
+import com.yukthitech.autox.ide.exeenv.ExecutionManager;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
@@ -41,8 +40,8 @@ public class RunActions
 	private FileEditorTabbedPane fileEditorTabbedPane;
 	
 	@Autowired
-	private ExecutionEnvironmentManager executionEnvironmentManager;
-	
+	private ExecutionManager runConfigurationManager;
+
 	@Autowired
 	private IdeContext ideContext;
 	
@@ -68,7 +67,7 @@ public class RunActions
 			return;
 		}
 		
-		executionEnvironmentManager.executeTestSuite(project, testSuite);
+		runConfigurationManager.execute(ExecutionType.TEST_SUITE, project, testSuite);
 	}
 	
 	@Action
@@ -91,7 +90,7 @@ public class RunActions
 			return;
 		}
 		
-		executionEnvironmentManager.executeTestCase(project, testCase);
+		runConfigurationManager.execute(ExecutionType.TEST_CASE, project, testCase);
 	}
 	
 	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
@@ -101,7 +100,7 @@ public class RunActions
 	
 	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback, String callbackMssg)
 	{
-		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
+		ExecutionEnvironment interactiveEnv = runConfigurationManager.getInteractiveEnvironment(project);
 		
 		if(interactiveEnv == null)
 		{
@@ -114,7 +113,7 @@ public class RunActions
 				{
 					logger.debug("Starting interactive environment for project: {}", project.getName());
 					
-					ExecutionEnvironment newInteractiveEnv = executionEnvironmentManager.startInteractiveEnvironment(project, true);
+					ExecutionEnvironment newInteractiveEnv = runConfigurationManager.execute(ExecutionType.INTERACTIVE, project, null);
 					inProgressDialog.setSubmessage("Waiting for environment to get started...");
 					
 					while(!newInteractiveEnv.isReadyToInteract() && !newInteractiveEnv.isTerminated())
@@ -192,7 +191,7 @@ public class RunActions
 		}
 		
 		Project project = fileEditor.getProject();
-		ExecutionEnvironment interactiveEnv = executionEnvironmentManager.getInteractiveEnvironment(project);
+		ExecutionEnvironment interactiveEnv = runConfigurationManager.getInteractiveEnvironment(project);
 		
 		if(interactiveEnv != null)
 		{
@@ -259,46 +258,21 @@ public class RunActions
 	@Action
 	public synchronized void executeTestSuiteFolder() 
 	{
-		//find the selected files
-		List<File> selectedFiles = ideContext.getSelectedFiles();
+		File activeFolder = ideContext.getActiveFile();
 		
-		if(selectedFiles == null || selectedFiles.isEmpty())
-		{
-			File activeFolder = ideContext.getActiveFile();
-			
-			if(activeFolder == null)
-			{
-				return;
-			}
-			
-			selectedFiles = new ArrayList<>();
-			selectedFiles.add(activeFolder);
-		}
-		
-		//filter folders only from selected files
-		List<File> filteredFolders = new ArrayList<>();
-		
-		for(File file : selectedFiles)
-		{
-			if(!file.isDirectory())
-			{
-				filteredFolders.add(file);
-			}
-		}
-
-		if(selectedFiles.isEmpty())
+		if(activeFolder == null || !activeFolder.isDirectory())
 		{
 			return;
 		}
-
+		
 		Project project = ideContext.getActiveProject();
-		executionEnvironmentManager.executeTestSuiteFolder(project, selectedFiles);	
+		runConfigurationManager.execute(ExecutionType.FOLDER, project, activeFolder.getPath());
 	}
 	
 	@Action
 	public synchronized void executeProject() 
 	{
 		Project project = ideContext.getActiveProject();
-		executionEnvironmentManager.executeProject(project);
+		runConfigurationManager.execute(ExecutionType.PROJECT, project, null);
 	}
 }

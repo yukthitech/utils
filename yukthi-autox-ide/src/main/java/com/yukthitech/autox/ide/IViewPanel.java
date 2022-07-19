@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.views;
+package com.yukthitech.autox.ide;
 
 import javax.swing.JTabbedPane;
 

@@ -21,6 +21,7 @@ import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.monitor.MonitorServer;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -62,7 +63,7 @@ public class ExecutionEnvironmentManager
 		}
 	}
 	
-	private ExecutionEnvironment startAutoxEnvironment(String envName, Project project, String... extraArgs)
+	private ExecutionEnvironment startAutoxEnvironment(ExecutionType executionType, String envName, Project project, String... extraArgs)
 	{
 		String classpath = project.getProjectClassLoader().toClassPath();
 		String javaCmd = "java";
@@ -107,8 +108,8 @@ public class ExecutionEnvironmentManager
 		
 		try
 		{
-			ExecutionEnvironment env = new ExecutionEnvironment(project, envName, builder.start(), ideContext.getProxy(), monitorPort, 
-					reportFolder, initMssg.toString(), uiLayout);
+			ExecutionEnvironment env = new ExecutionEnvironment(executionType, project, envName, builder.start(), ideContext.getProxy(), monitorPort, 
+					reportFolder, initMssg.toString(), uiLayout, extraArgs);
 			
 			ideContext.getProxy().newEnvironmentStarted(env);
 			
@@ -119,32 +120,32 @@ public class ExecutionEnvironmentManager
 		}
 	}
 	
-	public ExecutionEnvironment executeTestSuite(Project project, String testSuite)
+	private ExecutionEnvironment executeTestSuite(Project project, String testSuite)
 	{
-		return startAutoxEnvironment("ts-" + testSuite, project, "-ts", testSuite);
+		return startAutoxEnvironment(ExecutionType.TEST_SUITE, "ts-" + testSuite, project, "-ts", testSuite);
 	}
 	
-	public ExecutionEnvironment executeTestCase(Project project, String testCase)
+	private ExecutionEnvironment executeTestCase(Project project, String testCase)
 	{
-		return startAutoxEnvironment("tc-" + testCase, project, "-tc", testCase);
+		return startAutoxEnvironment(ExecutionType.TEST_CASE, "tc-" + testCase, project, "-tc", testCase);
 	}
 	
-	public ExecutionEnvironment executeTestSuiteFolder(Project project, List<File> testSuiteFolder)
+	private ExecutionEnvironment executeTestSuiteFolder(Project project, List<File> testSuiteFolder)
 	{
 		String foldersPath = testSuiteFolder.stream()
 			.map(file -> file.getPath())
 			.collect(Collectors.joining(","));
 		
 		String firstFolderName = testSuiteFolder.get(0).getName();
-		return startAutoxEnvironment("dir-" + firstFolderName, project, "-flmt", foldersPath);
+		return startAutoxEnvironment(ExecutionType.FOLDER, "dir-" + firstFolderName, project, "-flmt", foldersPath);
 	}
 
-	public ExecutionEnvironment executeProject(Project project)
+	private ExecutionEnvironment executeProject(Project project)
 	{
-		return startAutoxEnvironment(project.getName(), project);
+		return startAutoxEnvironment(ExecutionType.PROJECT, project.getName(), project);
 	}
 
-	public synchronized ExecutionEnvironment getInteractiveEnvironment(Project project)
+	synchronized ExecutionEnvironment getInteractiveEnvironment(Project project)
 	{
 		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());
 		
@@ -156,7 +157,7 @@ public class ExecutionEnvironmentManager
 		return null;
 	}
 
-	public synchronized ExecutionEnvironment startInteractiveEnvironment(Project project, boolean executeGlobalSetup)
+	private synchronized ExecutionEnvironment startInteractiveEnvironment(Project project, boolean executeGlobalSetup)
 	{
 		ExecutionEnvironment env = interactiveEnvironments.get(project.getProjectFilePath());
 		
@@ -165,7 +166,7 @@ public class ExecutionEnvironmentManager
 			throw new InvalidStateException("For project '{}' interactive environment is already running", project.getName());
 		}
 		
-		env = startAutoxEnvironment("*Interactive-" + project.getName(), project, 
+		env = startAutoxEnvironment(ExecutionType.INTERACTIVE, "*Interactive-" + project.getName(), project, 
 				"--interactive-environment", "true", 
 				"--interactive-execution-global", "" + executeGlobalSetup);
 		
@@ -173,5 +174,36 @@ public class ExecutionEnvironmentManager
 		interactiveEnvironments.put(project.getProjectFilePath(), env);
 		
 		return env;
+	}
+	
+	ExecutionEnvironment execute(ExecutionType executionType, Project project, String name)
+	{
+		switch (executionType)
+		{
+			case TEST_CASE:
+			{
+				return executeTestCase(project, name);
+			}
+			case TEST_SUITE:
+			{
+				return executeTestSuite(project, name);
+			}
+			case FOLDER:
+			{
+				return executeTestSuiteFolder(project, Arrays.asList(new File(name)));
+			}
+			case PROJECT:
+			{
+				return executeProject(project);
+			}
+			case INTERACTIVE:
+			{
+				return startInteractiveEnvironment(project, true);
+			}
+			default:
+			{
+				throw new InvalidArgumentException("Invalid execution type specified: {}", executionType);
+			}
+		}
 	}
 }

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.yukthitech.autox.ide.context;
 
 import java.io.File;
@@ -80,5 +83,13 @@ public interface IContextListener
 	 * @param source ui component which observed this change.
 	 */
 	public default void activeFileChanged(File file, Object source)
+	{}
+	
+	/**
+	 * Invoked by project manager when project is removed.
+	 *
+	 * @param project the project
+	 */
+	public default void projectRemoved(Project project)
 	{}
 }

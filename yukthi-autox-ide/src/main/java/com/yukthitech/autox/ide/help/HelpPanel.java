@@ -70,8 +70,8 @@ import com.yukthitech.autox.doc.StepInfo;
 import com.yukthitech.autox.doc.UiLocatorDoc;
 import com.yukthitech.autox.doc.ValidationInfo;
 import com.yukthitech.autox.ide.IIdeConstants;
+import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.autox.ide.views.IViewPanel;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @Component

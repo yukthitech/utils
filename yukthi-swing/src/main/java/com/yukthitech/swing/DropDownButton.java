@@ -4,10 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.Icon;
@@ -16,9 +13,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import com.yukthitech.swing.common.SwingUtils;
@@ -40,23 +34,6 @@ import com.yukthitech.swing.common.SwingUtils;
 public class DropDownButton extends JPanel
 {
 	private static final long serialVersionUID = 1L;
-	
-	/**
-	 * Border thickness.
-	 */
-	private static final int BORDER_THICKNESS = 3;
-	
-	/**
-	 * Empty border.
-	 */
-	private static final Border EMPTY_BORDER = new EmptyBorder(BORDER_THICKNESS, BORDER_THICKNESS, BORDER_THICKNESS, BORDER_THICKNESS);
-	
-	/**
-	 * Etched border with empty boundaries.
-	 */
-	private static final Border ETCHED_BORDER = new CompoundBorder(
-			new EtchedBorder(EtchedBorder.LOWERED, null, null), 
-			new EmptyBorder(BORDER_THICKNESS, BORDER_THICKNESS, BORDER_THICKNESS, BORDER_THICKNESS));
 	
 	private static final Icon DROP_DOWN_ICON = SwingUtils.loadIconWithoutBorder("/swing-icons/drop-down-arrow.svg", 8);
 	
@@ -84,7 +61,7 @@ public class DropDownButton extends JPanel
 	 * Standard menu items to be shown in drop down. As more than {@link #maximumItemCount} items are
 	 * added, the least used items will be removed.
 	 */
-	private List<JMenuItem> menuItems = new ArrayList<JMenuItem>();
+	private List<DropDownItem> menuItems = new ArrayList<>();
 	
 	/**
 	 * Static menu items to be shown in drop down. These items will never get removed and gets grouped at end.
@@ -104,34 +81,9 @@ public class DropDownButton extends JPanel
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
-			JMenuItem item = (JMenuItem) e.getSource();
-			
-			synchronized(DropDownButton.this)
-			{
-				menuItems.remove(item);
-				menuItems.add(0, item);
-				
-				resetMenuItems();
-			}
+			DropDownItem item = (DropDownItem) e.getSource();
+			moveToTop(item);
 		}
-	};
-	
-	/**
-	 * Mouse listener to highlight the border.
-	 */
-	private MouseListener borderHighlighter = new MouseAdapter()
-	{
-		public void mouseEntered(java.awt.event.MouseEvent e) 
-		{
-			mainButton.setBorder(ETCHED_BORDER);
-			arrowButton.setBorder(ETCHED_BORDER);
-		};
-		
-		public void mouseExited(java.awt.event.MouseEvent e) 
-		{
-			mainButton.setBorder(EMPTY_BORDER);
-			arrowButton.setBorder(EMPTY_BORDER);
-		};
 	};
 	
 	/**
@@ -159,13 +111,12 @@ public class DropDownButton extends JPanel
 		arrowButton.setContentAreaFilled(false);
 		arrowButton.setFocusable(false);
 		mainButton.setFocusable(false);
-		mainButton.setBorder(EMPTY_BORDER);
-		arrowButton.setBorder(EMPTY_BORDER);
 		
 		super.setOpaque(false);
 		
-		mainButton.addMouseListener(borderHighlighter);
-		arrowButton.addMouseListener(borderHighlighter);
+		BrdrHighligherMouseListener.applyTo(
+				new BrdrHighligherMouseListener.ComponentAndBorder(mainButton, 4, 3), 
+				new BrdrHighligherMouseListener.ComponentAndBorder(arrowButton, 3, 4));
 		
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] {0, 0};
@@ -257,7 +208,7 @@ public class DropDownButton extends JPanel
 	 *
 	 * @param item the item
 	 */
-	public void addItem(JMenuItem item)
+	public synchronized void addItem(DropDownItem item)
 	{
 		if(item == null || menuItems.contains(item))
 		{
@@ -278,7 +229,7 @@ public class DropDownButton extends JPanel
 		
 		if(itemCount > maximumItemCount)
 		{
-			removeItem((JMenuItem) popupMenu.getComponent(itemCount - 1));
+			removeItem((DropDownItem) popupMenu.getComponent(itemCount - 1));
 		}
 	}
 	
@@ -308,7 +259,7 @@ public class DropDownButton extends JPanel
 	 *
 	 * @param item the item
 	 */
-	public void removeItem(JMenuItem item)
+	public synchronized void removeItem(DropDownItem item)
 	{
 		if(!menuItems.remove(item))
 		{
@@ -320,9 +271,58 @@ public class DropDownButton extends JPanel
 	}
 	
 	/**
+	 * Removes the item with specified user-data.
+	 *
+	 * @param userData the user data
+	 * @return the drop down item which was removed
+	 */
+	public synchronized DropDownItem removeItemWithData(Object userData)
+	{
+		for(DropDownItem item : this.menuItems)
+		{
+			if(userData.equals(item.getUserData()))
+			{
+				removeItem(item);
+				return item;
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Moves the menu item with specified user data to the top.
+	 *
+	 * @param userData the user data
+	 * 
+	 * @return matching item which got moved to top. Null, if no match found.
+	 */
+	public synchronized DropDownItem moveToTop(Object userData)
+	{
+		for(DropDownItem item : this.menuItems)
+		{
+			if(userData.equals(item.getUserData()))
+			{
+				moveToTop(item);
+				return item;
+			}
+		}
+		
+		return null;
+	}
+	
+	private synchronized void moveToTop(DropDownItem item)
+	{
+		menuItems.remove(item);
+		menuItems.add(0, item);
+		
+		resetMenuItems();
+	}
+
+	/**
 	 * Resets the menu items in the popup.
 	 */
-	private void resetMenuItems()
+	private synchronized void resetMenuItems()
 	{
 		popupMenu.removeAll();
 		menuItems.forEach(item -> popupMenu.add(item));
@@ -339,9 +339,24 @@ public class DropDownButton extends JPanel
 	 *
 	 * @return the items
 	 */
-	public List<JMenuItem> getItems()
+	public List<DropDownItem> getItems()
 	{
-		return Collections.unmodifiableList(menuItems);
+		return new ArrayList<DropDownItem>(menuItems);
+	}
+	
+	/**
+	 * Gets the next active item.
+	 *
+	 * @return the active item
+	 */
+	public synchronized DropDownItem getActiveItem()
+	{
+		if(menuItems.isEmpty())
+		{
+			return null;
+		}
+		
+		return menuItems.get(0);
 	}
 	
 	/**

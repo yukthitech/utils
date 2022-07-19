@@ -24,6 +24,7 @@ import com.yukthitech.autox.test.mongo.MongoPlugin;
 import com.yukthitech.autox.test.sql.DbPlugin;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.persistence.repository.RepositoryFactory;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Application configuration for applications being automated.
@@ -167,7 +168,14 @@ public class ApplicationConfiguration
 		FileInputStream fis = new FileInputStream(appConfigurationFile);
 		
 		ApplicationConfiguration appConfig = new ApplicationConfiguration(appProperties);
-		XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
+		
+		try
+		{
+			XMLBeanParser.parse(fis, appConfig, new AppConfigParserHandler(appProperties));
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to load application configuration file: {}", appConfigurationFile.getPath(), ex);
+		}
 		
 		fis.close();
 		

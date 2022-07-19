@@ -33,6 +33,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class ExecutionEnvironment
 {
 	private static Logger logger = LogManager.getLogger(ExecutionEnvironment.class);
+	
+	private ExecutionType executionType;
 
 	private String name;
 
@@ -61,15 +63,20 @@ public class ExecutionEnvironment
 	private Project project;
 	
 	private UiLayout uiLayout;
+	
+	private String extraArgs[];
 
-	ExecutionEnvironment(Project project, String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, String initialMessage, UiLayout uiLayout)
+	ExecutionEnvironment(ExecutionType executionType, Project project, String name, Process process, IContextListener proxyListener, int monitoringPort, File reportFolder, 
+			String initialMessage, UiLayout uiLayout, String extraArgs[])
 	{
+		this.executionType = executionType;
 		this.project = project;
 		this.name = name;
 		this.process = process;
 		this.proxyListener = proxyListener;
 		this.reportFolder = reportFolder;
 		this.uiLayout = uiLayout;
+		this.extraArgs = extraArgs;
 		
 		logOnConsole(initialMessage, false);
 
@@ -97,6 +104,16 @@ public class ExecutionEnvironment
 			monitorClient = MonitorClient.startClient("localhost", monitoringPort);
 			addListeners();
 		}, 1);
+	}
+	
+	public String[] getExtraArgs()
+	{
+		return extraArgs;
+	}
+	
+	public ExecutionType getExecutionType()
+	{
+		return executionType;
 	}
 
 	public void terminate()

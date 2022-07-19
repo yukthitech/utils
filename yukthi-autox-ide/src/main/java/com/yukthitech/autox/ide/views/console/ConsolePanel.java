@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.views;
+package com.yukthitech.autox.ide.views.console;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.actions.FileActions;
 import com.yukthitech.autox.ide.context.IContextListener;

@@ -4,7 +4,7 @@ import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 
 import com.yukthitech.autox.ide.IdeUtils;
-import com.yukthitech.swing.ToolbarToggleButton;
+import com.yukthitech.swing.ToggleIconButton;
 
 /**
  * Toolbar icon.
@@ -20,10 +20,9 @@ public class ToolBarToggleIcon extends ToolBarIcon
 	 */
 	public JComponent toButton(ActionCollection actionCollection)
 	{
-		JToggleButton button = new ToolbarToggleButton();
-		button.setIcon(IdeUtils.loadIcon(icon, 20));
+		JToggleButton button = new ToggleIconButton();
+		button.setIcon(IdeUtils.loadIconWithoutBorder(icon, 20));
 		button.setToolTipText(tooltip);
-		button.setBorder(null);
 
 		if(action != null)
 		{

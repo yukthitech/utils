@@ -12,13 +12,11 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -56,7 +54,6 @@ import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.rest.RestRequest;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
@@ -112,8 +109,6 @@ public class ProjectExplorer extends JPanel
 	
 	@Autowired
 	private ActionCollection actionCollection;
-	
-	private Set<Project> projects = new HashSet<>();
 	
 	private BaseTreeNode activeTreeNode;
 	
@@ -245,25 +240,16 @@ public class ProjectExplorer extends JPanel
 			@Override
 			public void saveState(IdeState state)
 			{
-				state.retainProjects(projects);
-				
 				state.setAtribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE, editorLinkButton.isSelected());
 			}
 			
 			@Override
 			public void loadState(IdeState state)
 			{
-				for(ProjectState project : state.getOpenProjects())
-				{
-					openProject(project.getPath());
-				}
-				
 				if(Boolean.TRUE.equals(state.getAttribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE)))
 				{
 					editorLinkButton.setSelected(true);
 				}
-				
-				loadFilesToIndex();
 			}
 			
 			@Override
@@ -347,26 +333,6 @@ public class ProjectExplorer extends JPanel
 		this.activeTreeNode = activeTreeNode;
 	}
 
-	/**
-	 * Opens the project from specified base folder path.
-	 * @param path base folder path of project to open
-	 */
-	public Project openProject(String path)
-	{
-		logger.debug("Loading project at path: {}", path);
-		
-		Project project = Project.load(path);
-		
-		if(project == null)
-		{
-			logger.debug("Failed to load project from path: " + path);
-			return null;
-		}
-		
-		openProject(project);
-		return project;
-	}
-	
 	private void initDocs(Project project)
 	{
 		String documentTemplate = null;
@@ -417,16 +383,10 @@ public class ProjectExplorer extends JPanel
 	 * Called when an existing project object needs to be opened.
 	 * @param project
 	 */
-	private void openProject(Project project)
+	public void openProject(Project project)
 	{
-		if(projects.contains(project))
-		{
-			return;
-		}
-		
 		projectTreeModel.addProject(new ProjectTreeNode(project.getName(), this, project));
 		
-		projects.add(project);
 		initDocs(project);
 		
 		restRequest.addProject(project);
@@ -724,28 +684,10 @@ public class ProjectExplorer extends JPanel
 		}
 	}
 	
-	public void deleteProject(Project project, boolean deleteContent)
+	public void deleteProject(Project project)
 	{
-		if(!projects.contains(project))
-		{
-			logger.debug("Specified project is not found in open list. Ignoring project delete request: {}", project.getName());
-			return;
-		}
-		
 		projectTreeModel.deleteProject(project);
 		fileEditorTabbedPane.filePathRemoved(project.getBaseFolder());
-		projects.remove(project);
-		
-		if(deleteContent)
-		{
-			try
-			{
-				project.deleteProjectContents();
-			}catch(Exception ex)
-			{
-				JOptionPane.showMessageDialog(this, "Failed to delete project '" + project.getName() +"'. \nError: " + ex);
-			}
-		}
 	}
 	
 	public BaseTreeNode getActiveNode()

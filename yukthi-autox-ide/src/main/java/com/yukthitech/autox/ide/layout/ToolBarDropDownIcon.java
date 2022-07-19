@@ -20,13 +20,12 @@ public class ToolBarDropDownIcon extends ToolBarIcon
 	public JComponent toButton(ActionCollection actionCollection)
 	{
 		DropDownButton button = new DropDownButton();
-		button.setIcon(IdeUtils.loadIcon(icon, 20));
+		button.setIcon(IdeUtils.loadIconWithoutBorder(icon, 20));
 		button.setToolTipText(tooltip);
-		button.setBorder(null);
 
 		if(action != null)
 		{
-			button.addActionListener(actionCollection.getActionListener(action));
+			//button.addActionListener(actionCollection.getActionListener(action));
 		}
 		
 		String id = super.getId();
