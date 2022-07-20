@@ -28,9 +28,9 @@ public class ProjectClassLoader extends URLClassLoader
 		ClassLoader cl = ClassLoader.getSystemClassLoader();
 		List<URL> resUrls = new ArrayList<>();
 		
-		if(CollectionUtils.isNotEmpty(project.getClassPathEntriesList()))
+		if(CollectionUtils.isNotEmpty(project.getFullClassPathEntriesList()))
 		{
-			for(String entry : project.getClassPathEntriesList())
+			for(String entry : project.getFullClassPathEntriesList())
 			{
 				File file = new File(entry);
 				

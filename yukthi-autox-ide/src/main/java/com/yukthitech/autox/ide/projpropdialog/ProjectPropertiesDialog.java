@@ -12,7 +12,6 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JTabbedPane;
@@ -24,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.autox.ide.proj.ProjectManager;
 
 public class ProjectPropertiesDialog extends JDialog
 {
@@ -33,11 +32,15 @@ public class ProjectPropertiesDialog extends JDialog
 	private final JPanel contentPanel = new JPanel();
 	private Project project;
 
-	private ProjectPropTestSuiteFolderPanel projectPropertiesTestSuiteFolders;
-	private ProjectPropertiesClassPath projectPropertiesClassPath;
+	private ProjectSourceFolderPanel projectSourceFolderPanel;
+	private ProjectClassPathPanel projectPropertiesClassPath;
+	
+	private JTabbedPane tabbedPane;
 
 	@Autowired
-	private IdeContext ideContext;
+	private ProjectManager projectManager;
+	
+	private final ProjectBasicPropPanel projectBasicPropPanel = new ProjectBasicPropPanel();
 	
 	/**
 	 * Create the dialog.
@@ -52,14 +55,16 @@ public class ProjectPropertiesDialog extends JDialog
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new BorderLayout(0, 0));
 		{
-			JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			contentPanel.add(tabbedPane);
+			
+			tabbedPane.addTab("Basic", null, projectBasicPropPanel, null);
 			{
-				projectPropertiesTestSuiteFolders = new ProjectPropTestSuiteFolderPanel();
-				tabbedPane.addTab("TestSuites Folders", null, projectPropertiesTestSuiteFolders, null);
+				projectSourceFolderPanel = new ProjectSourceFolderPanel();
+				tabbedPane.addTab("Source Folders", null, projectSourceFolderPanel, null);
 			}
 			{
-				projectPropertiesClassPath = new ProjectPropertiesClassPath();
+				projectPropertiesClassPath = new ProjectClassPathPanel();
 				tabbedPane.addTab("ClassPath", null, projectPropertiesClassPath, null);
 			}
 		}
@@ -81,7 +86,7 @@ public class ProjectPropertiesDialog extends JDialog
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
-				JButton cancelButton = new JButton("Close");
+				JButton cancelButton = new JButton("Cancel");
 				cancelButton.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -121,9 +126,13 @@ public class ProjectPropertiesDialog extends JDialog
 	{
 		this.project = null;
 		this.project = ideContext.getActiveProject();
+		
+		projectBasicPropPanel.setProject(project);
 		projectPropertiesClassPath.setProject(project);
-		projectPropertiesTestSuiteFolders.setProject(project);
-		setTitle(project.getName() + " Properties");
+		projectSourceFolderPanel.setProject(project);
+		setTitle("Project Properties - " + project.getName());
+		
+		tabbedPane.setSelectedIndex(0);
 
 		IdeUtils.centerOnScreen(this);
 		super.setVisible(true);
@@ -133,19 +142,17 @@ public class ProjectPropertiesDialog extends JDialog
 
 	protected void saveProjectProperties()
 	{
-		try
+		if(!projectBasicPropPanel.applyChanges(projectManager))
 		{
-			project.setTestSuiteFolders(projectPropertiesTestSuiteFolders.saveChanges());
-			project.setClassPathEntries(projectPropertiesClassPath.saveChanges());
-		}catch(InvalidStateException ex)
-		{
-			JOptionPane.showMessageDialog(this, ex.getMessage());
+			tabbedPane.setSelectedIndex(0);
 			return;
 		}
-
-		project.save();
-		ideContext.getProxy().projectStateChanged(project);
 		
-		dispose();
+		projectSourceFolderPanel.applyChanges();
+		projectPropertiesClassPath.applyChanges();
+		
+		projectManager.updateProject(project);
+		
+		super.setVisible(false);
 	}
 }

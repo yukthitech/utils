@@ -119,4 +119,17 @@ public class ProjectManager
 		
 		return res;
 	}
+	
+	public void updateProject(Project project)
+	{
+		project.save();
+
+		//as the project name might have changed, remove existing one
+		//  by reference and readd modified project
+		this.projects.removeIf(proj -> (proj == project));
+		this.projects.add(project);
+		
+
+		ideContext.getProxy().projectStateChanged(project);
+	}
 }

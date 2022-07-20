@@ -176,7 +176,7 @@ public class Project implements Serializable
 
 	public void setTestSuiteFolders(Set<String> testSuitesFoldersList)
 	{
-		this.testSuitesFoldersList = testSuitesFoldersList;
+		this.testSuitesFoldersList = new HashSet<String>(testSuitesFoldersList);
 	}
 	
 	public void addTestSuiteFolder(String folder)
@@ -189,7 +189,8 @@ public class Project implements Serializable
 		this.testSuitesFoldersList.add(folder);
 	}
 
-	public Set<String> getClassPathEntriesList()
+	@JsonIgnore
+	public Set<String> getFullClassPathEntriesList()
 	{
 		if(finalClassPathEntries == null)
 		{
@@ -240,11 +241,27 @@ public class Project implements Serializable
 			finalClassPathEntries.addAll(classPathEntriesList);
 		}
 	}
+	
+	/**
+	 * Sets the class path entries list.
+	 * Added for backward compatibility.
+	 *
+	 * @param classPathEntriesList the new class path entries list
+	 */
+	public void setClassPathEntriesList(Set<String> classPathEntriesList)
+	{
+		this.setClassPathEntries(classPathEntriesList);
+	}
 
 	public void setClassPathEntries(Set<String> classPathEntriesList)
 	{
 		this.classPathEntriesList = classPathEntriesList;
 		finalClassPathEntries = null;
+	}
+	
+	public Set<String> getClassPathEntries()
+	{
+		return classPathEntriesList;
 	}
 	
 	public void reset()

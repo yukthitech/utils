@@ -79,7 +79,7 @@ public class IdeUtils
 				file.setWritable(true);
 			}
 			
-			objectMapper.writeValue(file, object);
+			objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, object);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while saving object [File: {}, Object: {}]", file.getPath(), object, ex);

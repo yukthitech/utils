@@ -35,6 +35,11 @@ public class ProjectTreeNode extends FolderTreeNode
 			return;
 		}
 		
+		if(!super.getLabel().equals(project.getName()))
+		{
+			super.setLabel(project.getName());
+		}
+		
 		super.reload(childReload);
 	}
 	

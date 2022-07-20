@@ -31,7 +31,7 @@ import com.yukthitech.swing.tree.cbox.CheckBoxTree;
  * Dialog that can be used to select one or more folders.
  * @author akranthikiran
  */
-public class DirectoryDialog extends JDialog
+public class DirectoryChooserDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
@@ -70,7 +70,7 @@ public class DirectoryDialog extends JDialog
 	/**
 	 * Create the dialog.
 	 */
-	public DirectoryDialog()
+	public DirectoryChooserDialog()
 	{
 		super.setModalityType(ModalityType.APPLICATION_MODAL);
 		

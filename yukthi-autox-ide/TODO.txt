@@ -1,4 +1,6 @@
-
+20/7/22
+=========
+when source folder is renamed, it should get auto update in project json also.
 
 11/10
 =====

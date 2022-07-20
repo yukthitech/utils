@@ -5,10 +5,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -19,37 +19,55 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.yukthitech.autox.ide.model.Project;
 
-public class ProjectPropertiesClassPath extends JPanel
+public class ProjectClassPathPanel extends JPanel
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel panel_1;
 	private JButton btnNewButton;
 	private JButton btnAddClasspath;
 	private JButton btnRemove;
-	private JFileChooser addJarfileChooser;
+	private JFileChooser addJarfileChooser = new JFileChooser();
 	private JFileChooser addClassPathFileChooser;
-	private Set<String> setOfEntries = new HashSet<>();
 	private DefaultListModel<String> listModel = new DefaultListModel<>();
 
 	private Project project = new Project();
+
 	private JList<String> list;
 	private JScrollPane scrollPane;
 
 	/**
 	 * Create the panel.
 	 */
-	public ProjectPropertiesClassPath()
+	public ProjectClassPathPanel()
 	{
 		setLayout(new BorderLayout(0, 0));
 		// add(getList_1(), BorderLayout.CENTER);
 		add(getScrollPane(), BorderLayout.CENTER);
 		add(getPanel_1(), BorderLayout.EAST);
 
+		addJarfileChooser.setAcceptAllFileFilterUsed(false);
+		
+		addJarfileChooser.setFileFilter(new FileFilter()
+		{
+			@Override
+			public String getDescription()
+			{
+				return "*.jar *.zip";
+			}
+
+			@Override
+			public boolean accept(File f)
+			{
+				return f.isDirectory() || f.getName().endsWith(".jar") || f.getName().endsWith(".zip");
+			}
+		});
+		
+		addClassPathFileChooser = new JFileChooser();
+		addClassPathFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	}
 
 	private JPanel getPanel_1()
@@ -60,9 +78,9 @@ public class ProjectPropertiesClassPath extends JPanel
 			panel_1.setBorder(new EmptyBorder(5, 5, 5, 5));
 			GridBagLayout gbl_panel_1 = new GridBagLayout();
 			gbl_panel_1.columnWidths = new int[] { 101, 0 };
-			gbl_panel_1.rowHeights = new int[] { 20, 20, 20, 20, 0 };
+			gbl_panel_1.rowHeights = new int[] {20, 20, 20};
 			gbl_panel_1.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-			gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+			gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0 };
 			panel_1.setLayout(gbl_panel_1);
 			GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 			gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
@@ -91,39 +109,7 @@ public class ProjectPropertiesClassPath extends JPanel
 		if(btnNewButton == null)
 		{
 			btnNewButton = new JButton("Add Jar");
-			btnNewButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					addJarfileChooser = new JFileChooser();
-					addJarfileChooser.setAcceptAllFileFilterUsed(false);
-					addJarfileChooser.setFileFilter(new FileFilter()
-					{
-						@Override
-						public String getDescription()
-						{
-							return "*.jar *.zip";
-						}
-
-						@Override
-						public boolean accept(File f)
-						{
-							return f.isDirectory() || f.getName().endsWith(".jar") || f.getName().endsWith(".zip");
-						}
-					});
-					int result = addJarfileChooser.showOpenDialog(getParent());
-					if(result == addJarfileChooser.APPROVE_OPTION)
-					{
-						String jarPath = addJarfileChooser.getSelectedFile().getAbsolutePath();
-						if(!listModel.contains(jarPath))
-						{
-							listModel.addElement(jarPath);
-							list.setModel(listModel);
-						}
-					}
-
-				}
-			});
+			btnNewButton.addActionListener(this::onAddJar);
 		}
 		return btnNewButton;
 	}
@@ -133,25 +119,9 @@ public class ProjectPropertiesClassPath extends JPanel
 		if(btnAddClasspath == null)
 		{
 			btnAddClasspath = new JButton("Add Directory");
-			btnAddClasspath.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					addClassPathFileChooser = new JFileChooser();
-					addClassPathFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					int result = addClassPathFileChooser.showOpenDialog(getParent());
-					if(result == addClassPathFileChooser.APPROVE_OPTION)
-					{
-						String jarPath = addClassPathFileChooser.getSelectedFile().getAbsolutePath();
-						if(!listModel.contains(jarPath))
-						{
-							listModel.addElement(jarPath);
-							list.setModel(listModel);
-						}
-					}
-				}
-			});
+			btnAddClasspath.addActionListener(this::onAddDir);
 		}
+		
 		return btnAddClasspath;
 	}
 
@@ -160,45 +130,19 @@ public class ProjectPropertiesClassPath extends JPanel
 		if(btnRemove == null)
 		{
 			btnRemove = new JButton("Remove");
-			btnRemove.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e)
-				{
-					listModel.remove(list.getSelectedIndex());
-					list.setModel(listModel);
-				}
-			});
+			btnRemove.addActionListener(this::onRemove);
 		}
 		return btnRemove;
 	}
-
-	public void setProject(Project project)
-	{
-
-		Set<String> set = project.getClassPathEntriesList();
-		if(set != null && !set.isEmpty())
-			for(String s : set)
-			{
-				listModel.addElement(s);
-			}
-		super.setVisible(true);
-	}
-
-	public Set<String> saveChanges()
-	{
-		for(int i = 0; i < listModel.size(); i++)
-		{
-			setOfEntries.add(listModel.getElementAt(i));
-		}
-		return setOfEntries;
-	}
-
-	private JList getList_1()
+	
+	private JList<String> getList_1()
 	{
 		if(list == null)
 		{
-			list = new JList();
+			list = new JList<String>();
+			list.setModel(listModel);
 		}
+		
 		return list;
 	}
 
@@ -208,6 +152,78 @@ public class ProjectPropertiesClassPath extends JPanel
 		{
 			scrollPane = new JScrollPane(getList_1());
 		}
+		
 		return scrollPane;
+	}
+
+	private void onAddJar(ActionEvent e)
+	{
+		int result = addJarfileChooser.showOpenDialog(getParent());
+		
+		if(result != JFileChooser.APPROVE_OPTION)
+		{
+			return;
+		}
+		
+		String jarPath = addJarfileChooser.getSelectedFile().getAbsolutePath();
+		
+		if(!listModel.contains(jarPath))
+		{
+			listModel.addElement(jarPath);
+		}
+	}
+
+	private void onAddDir(ActionEvent e)
+	{
+		int result = addClassPathFileChooser.showOpenDialog(getParent());
+		
+		if(result != JFileChooser.APPROVE_OPTION)
+		{
+			return;
+		}
+
+		String jarPath = addClassPathFileChooser.getSelectedFile().getAbsolutePath();
+		
+		if(!listModel.contains(jarPath))
+		{
+			listModel.addElement(jarPath);
+		}
+	}
+	
+	private void onRemove(ActionEvent e)
+	{
+		int idx = list.getSelectedIndex();
+		
+		if(idx < 0)
+		{
+			return;
+		}
+		
+		listModel.remove(list.getSelectedIndex());
+	}
+	
+	public void setProject(Project project)
+	{
+		Set<String> set = new TreeSet<String>(project.getClassPathEntries());
+		listModel.removeAllElements();
+		
+		if(CollectionUtils.isNotEmpty(set))
+		{
+			set.forEach(path -> listModel.addElement(path));
+		}
+		
+		super.setVisible(true);
+	}
+
+	public void applyChanges()
+	{
+		Set<String> setOfEntries = new HashSet<>();
+		
+		for(int i = 0; i < listModel.size(); i++)
+		{
+			setOfEntries.add(listModel.getElementAt(i));
+		}
+
+		project.setClassPathEntries(setOfEntries);
 	}
 }

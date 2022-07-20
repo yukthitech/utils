@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +44,12 @@ public class DirectoryDataProvider implements ILazyTreeDataProvider<CboxNodeData
 	 */
 	private List<File> readOnlyFolders = new ArrayList<File>();
 	
-	public DirectoryDataProvider(List<File> rootFolders)
+	public DirectoryDataProvider(File rootFolder)
+	{
+		this(Arrays.asList(rootFolder));
+	}
+	
+	public DirectoryDataProvider(Collection<File> rootFolders)
 	{
 		if(CollectionUtils.isEmpty(rootFolders))
 		{
@@ -62,7 +69,7 @@ public class DirectoryDataProvider implements ILazyTreeDataProvider<CboxNodeData
 		return selectedFolders;
 	}
 	
-	private List<File> canonlize(List<File> rootFolders)
+	private List<File> canonlize(Collection<File> rootFolders)
 	{
 		List<File> res = new ArrayList<File>(rootFolders.size());
 		
@@ -90,12 +97,12 @@ public class DirectoryDataProvider implements ILazyTreeDataProvider<CboxNodeData
 	 *
 	 * @param selectedFolders the new folders which are selected by default
 	 */
-	public void setSelectedFolders(List<File> selectedFolders)
+	public void setSelectedFolders(Collection<File> selectedFolders)
 	{
 		this.selectedFolders = CollectionUtils.isEmpty(selectedFolders) ? null : canonlize(selectedFolders);
 	}
 	
-	public void setReadOnlyFolders(List<File> readOnlyFolders)
+	public void setReadOnlyFolders(Collection<File> readOnlyFolders)
 	{
 		this.readOnlyFolders = CollectionUtils.isEmpty(readOnlyFolders) ? null : canonlize(readOnlyFolders);
 	}

@@ -180,11 +180,11 @@
 	<popup-menu label="projectPopup">
 		<item label="Delete Project" action="deleteProject" />
 		<item label="Refresh" action="refreshProject" />
-		<item label="Properties" action="projectProperties"></item>
+		<item label="Execute" action="executeProject" />
 
 		<item label="-" />
 		
-		<item label="Execute" action="executeProject" />
+		<item label="Properties" action="projectProperties"></item>
 	</popup-menu>
 
 	<popup-menu label="fileTabPopup">

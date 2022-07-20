@@ -553,6 +553,7 @@ public class ProjectExplorer extends JPanel
 		
 		node.reload(true);
 		projectTreeModel.reload(node);
+		projectTreeModel.nodeChanged(node);
 		
 		loadFilesToIndex();
 	}
