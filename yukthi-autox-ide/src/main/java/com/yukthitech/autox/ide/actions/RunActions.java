@@ -15,8 +15,8 @@ import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.editor.FileEditor;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.ide.exeenv.ExecutionType;
 import com.yukthitech.autox.ide.exeenv.ExecutionManager;
+import com.yukthitech.autox.ide.exeenv.ExecutionType;
 import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
@@ -266,7 +266,9 @@ public class RunActions
 		}
 		
 		Project project = ideContext.getActiveProject();
-		runConfigurationManager.execute(ExecutionType.FOLDER, project, activeFolder.getPath());
+		ExecutionType executionType = project.isTestSuiteFolder(activeFolder) ? ExecutionType.SOURCE_FOLDER : ExecutionType.FOLDER;
+
+		runConfigurationManager.execute(executionType, project, activeFolder.getPath());
 	}
 	
 	@Action

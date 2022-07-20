@@ -174,6 +174,12 @@ public class Project implements Serializable
 		return false;
 	}
 
+	public boolean isTestSuiteFolder(File file)
+	{
+		String relPath = IdeFileUtils.getRelativePath(getBaseFolder(), file);
+		return testSuitesFoldersList.contains(relPath);
+	}
+
 	public void setTestSuiteFolders(Set<String> testSuitesFoldersList)
 	{
 		this.testSuitesFoldersList = new HashSet<String>(testSuitesFoldersList);

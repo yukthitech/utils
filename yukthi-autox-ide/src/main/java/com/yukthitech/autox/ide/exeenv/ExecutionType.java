@@ -14,5 +14,7 @@ public enum ExecutionType
 	
 	FOLDER,
 	
+	SOURCE_FOLDER,
+	
 	INTERACTIVE
 }

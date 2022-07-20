@@ -130,7 +130,7 @@ public class ExecutionEnvironmentManager
 		return startAutoxEnvironment(ExecutionType.TEST_CASE, "tc-" + testCase, project, "-tc", testCase);
 	}
 	
-	private ExecutionEnvironment executeTestSuiteFolder(Project project, List<File> testSuiteFolder)
+	private ExecutionEnvironment executeFolder(Project project, List<File> testSuiteFolder)
 	{
 		String foldersPath = testSuiteFolder.stream()
 			.map(file -> file.getPath())
@@ -138,6 +138,11 @@ public class ExecutionEnvironmentManager
 		
 		String firstFolderName = testSuiteFolder.get(0).getName();
 		return startAutoxEnvironment(ExecutionType.FOLDER, "dir-" + firstFolderName, project, "-flmt", foldersPath);
+	}
+
+	private ExecutionEnvironment executeSourceFolder(Project project, File sourceFolder)
+	{
+		return startAutoxEnvironment(ExecutionType.SOURCE_FOLDER, "dir-" + sourceFolder.getName(), project, "-tsf", sourceFolder.getPath());
 	}
 
 	private ExecutionEnvironment executeProject(Project project)
@@ -190,7 +195,11 @@ public class ExecutionEnvironmentManager
 			}
 			case FOLDER:
 			{
-				return executeTestSuiteFolder(project, Arrays.asList(new File(name)));
+				return executeFolder(project, Arrays.asList(new File(name)));
+			}
+			case SOURCE_FOLDER:
+			{
+				return executeSourceFolder(project, new File(name));
 			}
 			case PROJECT:
 			{
