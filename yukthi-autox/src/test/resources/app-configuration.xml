@@ -8,7 +8,6 @@
 		<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
 	-->
 	<testSuiteFolder>./src/test/resources/test-suites</testSuiteFolder>
-	<testSuiteFolder>./src/test/resources/neg-test-suites</testSuiteFolder>
 	
 	<!-- Persistence related configuration -->
 	<storage-repository-factory createTables="true">

@@ -163,6 +163,11 @@ $.application.controller('testLogAppController', function($scope){
 			return "warnVal";
 		}
 		
+		if(level == "INFO")
+		{
+			return "infoVal";
+		}
+
 		return "defaultVal";
 	};
 	

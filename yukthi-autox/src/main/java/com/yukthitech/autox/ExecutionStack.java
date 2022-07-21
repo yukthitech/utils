@@ -82,7 +82,7 @@ public class ExecutionStack
 	{
 		object = unwrapStep(object);
 		
-		System.out.println("==========> Pushing object: " + object);
+		//System.out.println("==========> Pushing object: " + object);
 		objectStack.push(object);
 		
 		if(object instanceof IEntryPoint)
@@ -113,16 +113,18 @@ public class ExecutionStack
 		
 		if(object instanceof IEntryPoint)
 		{
-			Object popped = entryPointStack.pop();
+			//Object popped = entryPointStack.pop();
+			entryPointStack.pop();
 			objectStack.pop();
-			System.out.println("==========> Popping entry object: " + object + "  =========> " + popped);
+			//System.out.println("==========> Popping entry object: " + object + "  =========> " + popped);
 			return;
 		}
 		
-		StackElement popped = stackTrace.pop();
+		//StackElement popped = stackTrace.pop();
+		stackTrace.pop();
 		objectStack.pop();
 		
-		System.out.println("==========> Popping normal object: " + object + "  =========> " + popped.element);
+		//System.out.println("==========> Popping normal object: " + object + "  =========> " + popped.element);
 		
 		if(stackTrace.isEmpty())
 		{

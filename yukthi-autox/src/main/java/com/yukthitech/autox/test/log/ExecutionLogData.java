@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -17,12 +18,13 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 /**
  * Log data of the test case.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ExecutionLogData
 {
-	
 	/**
 	 * Represent log message information.
 	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Message implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
@@ -68,6 +70,34 @@ public class ExecutionLogData
 			this.time = time;
 		}
 		
+		public Message()
+		{}
+		
+		public void setSource(String source)
+		{
+			this.source = source;
+		}
+
+		public void setJavaSource(String javaSource)
+		{
+			this.javaSource = javaSource;
+		}
+
+		public void setLogLevel(LogLevel logLevel)
+		{
+			this.logLevel = logLevel;
+		}
+
+		public void setMessage(String message)
+		{
+			this.message = message;
+		}
+
+		public void setTime(Date time)
+		{
+			this.time = time;
+		}
+
 		/**
 		 * Gets the source location from where logging was done.
 		 *
@@ -137,6 +167,7 @@ public class ExecutionLogData
 		{}
 	}
 	
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class ImageMessage extends Message
 	{
 		private static final long serialVersionUID = 1L;
@@ -167,6 +198,24 @@ public class ExecutionLogData
 			this.imageFile = imageFile;
 		}
 		
+		public ImageMessage()
+		{}
+		
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public void setImageFile(File imageFile)
+		{
+			this.imageFile = imageFile;
+		}
+
 		/**
 		 * Gets the image file.
 		 *
@@ -208,6 +257,7 @@ public class ExecutionLogData
 		}
 	}
 	
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class FileMessage extends Message
 	{
 		private static final long serialVersionUID = 1L;
@@ -230,6 +280,9 @@ public class ExecutionLogData
 			super(source, javaSource, logLevel, message, time);
 			this.file = file;
 		}
+		
+		public FileMessage()
+		{}
 		
 		/**
 		 * Gets the image file.
@@ -287,6 +340,29 @@ public class ExecutionLogData
 	{
 		this.executorName = executorName;
 		this.executorDescription = executorDescription;
+	}
+	
+	public ExecutionLogData()
+	{}
+	
+	public void setExecutorName(String executorName)
+	{
+		this.executorName = executorName;
+	}
+
+	public void setExecutorDescription(String executorDescription)
+	{
+		this.executorDescription = executorDescription;
+	}
+
+	public void setMessages(List<Message> messages)
+	{
+		this.messages = messages;
+	}
+
+	public void setExecutionDate(Date executionDate)
+	{
+		this.executionDate = executionDate;
 	}
 
 	/**

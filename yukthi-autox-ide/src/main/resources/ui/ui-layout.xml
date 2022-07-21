@@ -22,8 +22,8 @@
 
 			<item label="-" />
 
-			<item label="Open File" mnemonic="F">
-				<short-key ctrl="true" shift="true" key="R" />
+			<item label="Open Resource" mnemonic="F" action="openResource">
+				<short-key ctrl="true" shift="true" key="R"/>
 			</item>
 			<item label="Save" mnemonic="S" icon="/ui/icons/save.svg"
 				action="saveFile">
@@ -73,10 +73,6 @@
 
 			<item label="Goto Line" action="gotoLine">
 				<short-key ctrl="true" key="L"/>
-			</item>
-
-			<item label="Open Resource" action="openResource">
-				<short-key ctrl="true" shift="true" key="O"/>
 			</item>
 
 			<item label="-" />

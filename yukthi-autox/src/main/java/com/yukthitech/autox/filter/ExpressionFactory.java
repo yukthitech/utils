@@ -345,7 +345,7 @@ public class ExpressionFactory
 			ExpressionParserDetails parser = context.getCurrentParser();
 			String exprTypeParams[] = context.getExpressionTypeParameters();
 			
-			exeLogger.trace("Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
+			exeLogger.info("Execution of property expression '{}' resulted in: {} [Type: {}]", expression, result, (result != null ? result.getClass().getName() : "") );
 	
 			if(!parser.isConversionHandled() && exprTypeParams != null)
 			{

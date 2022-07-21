@@ -9,7 +9,8 @@ public enum LogLevel
 	TRACE("  TRACE"), 
 	DEBUG("  DEBUG"), 
 	WARN("   WARN"),
-	ERROR("  ERROR"), 
+	ERROR("  ERROR"),
+	INFO("  INFO"),
 	
 	/**
 	 * Log level which would add messages to summary report.

@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -200,6 +202,15 @@ public class FileEditor extends JPanel
 				fileContentChanged(false);
 			}
 		});
+		
+		syntaxTextArea.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusGained(FocusEvent e)
+			{
+				onFocusGained(e);
+			}
+		});
 
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "dummy");
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl F1"), "dummy help");
@@ -208,19 +219,18 @@ public class FileEditor extends JPanel
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.VK_CONTROL | KeyEvent.VK_SHIFT), "dummy");
 	}
 	
+	private void onFocusGained(FocusEvent e)
+	{
+		ideContext.getProxy().activeFileChanged(file, this);
+	}
+	
 	private void handleHomeKey(KeyEvent e)
 	{
 		try
 		{
+			int curPos = syntaxTextArea.getCaretPosition();
 			int curLine = syntaxTextArea.getCaretLineNumber();
 			int stOffset = syntaxTextArea.getLineStartOffset(curLine);
-			
-			if(stOffset != syntaxTextArea.getCaretPosition())
-			{
-				syntaxTextArea.setCaretPosition(stOffset);
-				e.consume();
-				return;
-			}
 			
 			int endOffset = syntaxTextArea.getLineEndOffset(curLine);
 			char lineText[] = syntaxTextArea.getText().substring(stOffset, endOffset).toCharArray();
@@ -240,9 +250,17 @@ public class FileEditor extends JPanel
 			
 			e.consume();
 			
-			if(extraOffset > 0)
+			int textStartOffset = stOffset + extraOffset; 
+			int finalPos = (textStartOffset != curPos) ? textStartOffset : stOffset;
+			
+			if(e.isShiftDown())
 			{
-				syntaxTextArea.setCaretPosition(stOffset + extraOffset);
+				//select the text from current position to final position
+				syntaxTextArea.moveCaretPosition(finalPos);
+			}
+			else
+			{
+				syntaxTextArea.setCaretPosition(finalPos);
 			}
 		}catch(Exception ex)
 		{

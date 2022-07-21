@@ -314,7 +314,7 @@ public class ExecutionLogger
 	{
 		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
 		
-		String autoxStackTrace = automationContext.getExecutionStack().toStackTrace();
+		String autoxStackTrace = StringEscapeUtils.escapeHtml4(automationContext.getExecutionStack().toStackTrace());
 		
 		logger.error(finalMssg, autoxStackTrace);
 		
@@ -341,6 +341,19 @@ public class ExecutionLogger
 		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
 	}
 	
+	private void buildAndAddMssg(LogLevel logLevel, boolean escapeHtml, String mssgTemplate, Object... args)
+	{
+		if(disabled)
+		{
+			return;
+		}
+		
+		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
+
+		logger.debug(finalMssg);
+		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, finalMssg, new Date()));
+	}
+	
 	/**
 	 * Used to log debug messages as part of current execution.
 	 * @param source location from where logging is being done
@@ -349,7 +362,7 @@ public class ExecutionLogger
 	 */
 	public void debug(String mssgTemplate, Object... args)
 	{
-		debug(true, mssgTemplate, args);
+		buildAndAddMssg(LogLevel.DEBUG, true, mssgTemplate, args);
 	}
 
 	/**
@@ -361,17 +374,32 @@ public class ExecutionLogger
 	 */
 	public void debug(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
-		if(disabled)
-		{
-			return;
-		}
-		
-		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
-
-		logger.debug(finalMssg);
-		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.DEBUG, finalMssg, new Date()));
+		buildAndAddMssg(LogLevel.DEBUG, escapeHtml, mssgTemplate, args);
 	}
 	
+	/**
+	 * Used to log info messages as part of current execution.
+	 * @param source location from where logging is being done
+	 * @param mssgTemplate Message template with params.
+	 * @param args Arguments for message template.
+	 */
+	public void info(String mssgTemplate, Object... args)
+	{
+		buildAndAddMssg(LogLevel.INFO, true, mssgTemplate, args);
+	}
+
+	/**
+	 * Used to log info messages as part of current execution.
+	 * @param escapeHtml Whether html tags should be escaped in result content.
+	 * @param source location from where logging is being done
+	 * @param mssgTemplate Message template with params.
+	 * @param args Arguments for message template.
+	 */
+	public void info(boolean escapeHtml, String mssgTemplate, Object... args)
+	{
+		buildAndAddMssg(LogLevel.INFO, escapeHtml, mssgTemplate, args);
+	}
+
 	/**
 	 * Used to log warn messages as part of current execution.
 	 * @param source location from where logging is being done
@@ -380,7 +408,7 @@ public class ExecutionLogger
 	 */
 	public void warn(String mssgTemplate, Object... args)
 	{
-		warn(true, mssgTemplate, args);
+		buildAndAddMssg(LogLevel.WARN, true, mssgTemplate, args);
 	}
 
 	/**
@@ -392,15 +420,7 @@ public class ExecutionLogger
 	 */
 	public void warn(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
-		if(disabled)
-		{
-			return;
-		}
-		
-		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
-
-		logger.debug(finalMssg);
-		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.WARN, finalMssg, new Date()));
+		buildAndAddMssg(LogLevel.WARN, escapeHtml, mssgTemplate, args);
 	}
 
 	/**
@@ -411,7 +431,7 @@ public class ExecutionLogger
 	 */
 	public void trace(String mssgTemplate, Object... args)
 	{
-		trace(true, mssgTemplate, args);
+		buildAndAddMssg(LogLevel.TRACE, true, mssgTemplate, args);
 	}
 	
 	/**
@@ -423,15 +443,7 @@ public class ExecutionLogger
 	 */
 	public void trace(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
-		if(disabled)
-		{
-			return;
-		}
-		
-		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
-
-		logger.trace(finalMssg);
-		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.TRACE, finalMssg, new Date()));
+		buildAndAddMssg(LogLevel.TRACE, escapeHtml, mssgTemplate, args);
 	}
 
 	/**

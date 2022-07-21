@@ -296,13 +296,20 @@ public class OpenResourceDialog extends JDialog
 		String filterStr = fldResName.getText().trim();
 		Pattern filter = null;
 		
-		if(!filterStr.contains("*"))
-		{
-			filterStr = "*" + filterStr + "*";
-		}
-		
 		if(filterStr.length() > 0)
 		{
+			//Place * before each capital letters
+			filterStr = filterStr.replaceAll(".([A-Z])", "*$1");
+			
+			//place * before special characters
+			filterStr = filterStr.replaceAll(".(\\W)", "*$1");
+					
+			if(!filterStr.endsWith("*") && !filterStr.endsWith("?"))
+			{
+				filterStr = filterStr + "*";
+			}
+
+			filterStr = filterStr.replace("?", ".");
 			filterStr = filterStr.replace("*", ".*?");
 			filter = Pattern.compile(filterStr, Pattern.CASE_INSENSITIVE);
 		}

@@ -122,7 +122,6 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 
 				FileEditor editor = (FileEditor) FileEditorTabbedPane.this.getComponentAt(newIdx);
 				editor.getTextArea().requestFocus();
-				ideContext.getProxy().activeFileChanged(editor.getFile(), FileEditorTabbedPane.this);
 			}
 		});
 	}
@@ -359,7 +358,7 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		
 		if(fileEditor != null)
 		{
-			logger.debug("Selecting existing tab for file: {}", canonicalPath);
+			//logger.debug("Selecting existing tab for file: {}", canonicalPath);
 			super.setSelectedComponent(fileEditor);
 		}
 	}

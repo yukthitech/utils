@@ -29,6 +29,11 @@ td
 	color: red;
 }
 
+.infoVal
+{
+	color: blue;
+}
+
 .warnVal
 {
 	color: rgb(0, 147, 0);

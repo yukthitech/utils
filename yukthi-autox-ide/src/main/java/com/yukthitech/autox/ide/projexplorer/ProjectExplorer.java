@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -20,7 +19,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JToggleButton;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.event.TreeSelectionEvent;
@@ -55,9 +53,13 @@ import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.rest.RestRequest;
+import com.yukthitech.autox.ide.services.IdeEventHandler;
+import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.ui.BaseTreeNode;
 import com.yukthitech.autox.ide.ui.BaseTreeNodeRenderer;
 import com.yukthitech.autox.ide.ui.TestSuiteFolderTreeNode;
+import com.yukthitech.swing.IconButton;
+import com.yukthitech.swing.ToggleIconButton;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -69,6 +71,8 @@ public class ProjectExplorer extends JPanel
 	private static Logger logger = LogManager.getLogger(ProjectExplorer.class);
 	
 	private static ImageIcon EDITOR_LINK_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/toggle-button.svg", 16);
+	
+	private static ImageIcon COLLAPSE_ALL_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/minimize-all.svg", 16);
 	
 	private static final String STATE_ATTR_EDITOR_LINK_BUTTON_STATE = "ProjectExplorer.editorLinkState";
 	
@@ -117,7 +121,9 @@ public class ProjectExplorer extends JPanel
 	
 	private JPanel iconPanel = new JPanel();
 	
-	private JToggleButton editorLinkButton = new JToggleButton();
+	private ToggleIconButton editorSyncButton = new ToggleIconButton();
+	
+	private IconButton minimizeAllButton = new IconButton();
 
 	@Autowired
 	private FileEditorTabbedPane fileEditorTabbedPane;
@@ -174,38 +180,17 @@ public class ProjectExplorer extends JPanel
 		
 		//set tool bar panel
 		super.add(iconPanel, BorderLayout.NORTH);
-		iconPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 4, 4));
+		iconPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 1, 1));
 		
-		editorLinkButton.setIcon(EDITOR_LINK_ICON);
-		iconPanel.add(editorLinkButton);
+		minimizeAllButton.setIcon(COLLAPSE_ALL_ICON);
+		minimizeAllButton.setToolTipText("Collapse All");
+		minimizeAllButton.addActionListener(this::onCollapseAll);
+		iconPanel.add(minimizeAllButton);
+
+		editorSyncButton.setIcon(EDITOR_LINK_ICON);
+		iconPanel.add(editorSyncButton);
 		
-		editorLinkButton.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				if(!editorLinkButton.isSelected())
-				{
-					return;
-				}
-				
-				FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
-				
-				if(editor == null)
-				{
-					return;
-				}
-				
-				File file = editor.getFile();
-				
-				if(file == null)
-				{
-					return;
-				}
-				
-				setActiveFile(file);
-			}
-		});
+		editorSyncButton.addActionListener(this::onEditorSync);
 		
 		tree.addTreeSelectionListener(new TreeSelectionListener()
 		{
@@ -220,7 +205,7 @@ public class ProjectExplorer extends JPanel
 					FileTreeNode fileNode = (FileTreeNode) treeNode;
 					ideContext.setActiveDetails(fileNode.getProject(), fileNode.getFile());
 					
-					if(editorLinkButton.isSelected())
+					if(editorSyncButton.isSelected())
 					{
 						ideContext.getProxy().activeFileChanged(fileNode.getFile(), ProjectExplorer.this);
 					}
@@ -240,7 +225,7 @@ public class ProjectExplorer extends JPanel
 			@Override
 			public void saveState(IdeState state)
 			{
-				state.setAtribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE, editorLinkButton.isSelected());
+				state.setAtribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE, editorSyncButton.isSelected());
 			}
 			
 			@Override
@@ -248,7 +233,7 @@ public class ProjectExplorer extends JPanel
 			{
 				if(Boolean.TRUE.equals(state.getAttribute(STATE_ATTR_EDITOR_LINK_BUTTON_STATE)))
 				{
-					editorLinkButton.setSelected(true);
+					editorSyncButton.setSelected(true);
 				}
 			}
 			
@@ -284,9 +269,54 @@ public class ProjectExplorer extends JPanel
 		});
 	}
 	
+	@IdeEventHandler
+	public void onStartup(IdeStartedEvent e)
+	{
+		onEditorSync(null);
+	}
+	
+	private void onCollapseAll(ActionEvent e)
+	{
+		IdeUtils.execute(() -> 
+		{
+			int rowCount = tree.getRowCount() - 1;
+			
+			while(rowCount >= 0)
+			{
+				tree.collapseRow(rowCount);
+				rowCount--;
+			}
+			
+		}, 1);
+	}
+	
+	private void onEditorSync(ActionEvent e)
+	{
+		if(!editorSyncButton.isSelected())
+		{
+			return;
+		}
+		
+		FileEditor editor = fileEditorTabbedPane.getCurrentFileEditor();
+		
+		if(editor == null)
+		{
+			return;
+		}
+		
+		File file = editor.getFile();
+		
+		if(file == null)
+		{
+			return;
+		}
+		
+		setActiveFile(file);
+	}
+	
 	private void setActiveFile(File file)
 	{
-		if(!editorLinkButton.isSelected())
+		if(!editorSyncButton.isSelected())
 		{
 			return;
 		}

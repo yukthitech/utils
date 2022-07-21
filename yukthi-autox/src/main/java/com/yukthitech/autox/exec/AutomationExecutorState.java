@@ -226,7 +226,9 @@ public class AutomationExecutorState
 		reportGenerator.generateReports(context.getReportFolder(), fullExecutionDetails, context);
 		
 		System.out.println(String.format(
-			"[Total Test Cases: %s, Successful: %s, Failed: %s, Errored: %s, Skipped: %s]", 
+			"================================================================================================================\n"
+			+ "       Total Test Cases: %s, Successful: %s, Failed: %s, Errored: %s, Skipped: %s]\n"
+			+ "===============================================================================================================", 
 			fullExecutionDetails.getTestCaseCount(), 
 			fullExecutionDetails.getTestCaseSuccessCount(), 
 			fullExecutionDetails.getTestCaseFailureCount(),
@@ -572,6 +574,13 @@ public class AutomationExecutorState
 					fullExecutionDetails.setSetupSuccessful(false);
 					reportGenerator.createLogFiles(context, result, "_global-setup", null, "");
 					
+					//if setup is failed further execution should not happen
+					if(setupFailed)
+					{
+						completedBranchEntry(stackEntry);
+						popStackEntry(stackEntry, false, actualException);
+					}
+
 					stackEntry.completed(false);
 					break;
 				}
