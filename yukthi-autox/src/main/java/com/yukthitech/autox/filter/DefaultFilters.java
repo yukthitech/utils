@@ -24,6 +24,7 @@ import org.apache.commons.jxpath.JXPathContext;
 import org.apache.commons.jxpath.JXPathNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ContextMap;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -625,6 +626,7 @@ public class DefaultFilters
 	 * @param name name of the input
 	 * @return loaded object
 	 */
+	@SuppressWarnings("unchecked")
 	private Object loadInputStream(String data, String name, String exprType[], FilterContext parserContext) throws Exception
 	{
 		ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
@@ -650,7 +652,17 @@ public class DefaultFilters
 		if("true".equalsIgnoreCase(parserContext.getParameter("jel")) && name.toLowerCase().endsWith(".json"))
 		{
 			logger.debug("Parsing json content for JEL: {}", name);
-			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, new ContextMap(parserContext.getAutomationContext()));
+			
+			String contextExpr = parserContext.getParameter("contextExpr");
+			AutomationContext automationContext = parserContext.getAutomationContext();
+			Map<String, Object> context = new ContextMap(automationContext);
+			
+			if(StringUtils.isNotBlank(contextExpr))
+			{
+				context = (Map<String, Object>) FreeMarkerMethodManager.fetchValue("Jel-context-expr", contextExpr, automationContext);
+			}
+			
+			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, context);
 		}
 
 		//if input stream has to be loaded as simple text, simply return the current data string
@@ -703,6 +715,7 @@ public class DefaultFilters
 				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
 				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values."),
 				@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion. Applicable only for json content."),
+				@ParserParam(name = "contextExpr", type = "String", defaultValue = "none", description = "Fmarker expression to context object for JEL (used only when jel = true)."),
 				@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 			})
 	public IPropertyPath fileParser(FilterContext parserContext, String expression, String exprType[])
@@ -755,6 +768,7 @@ public class DefaultFilters
 				@ParserParam(name = "text", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be returned as text directly, without parsing into object."),
 				@ParserParam(name = "propExpr", type = "boolean", defaultValue = "false", description = "If true, the property expressions #{} will be replaced with corresponding values."),
 				@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion. Applicable only for json content."),
+				@ParserParam(name = "contextExpr", type = "String", defaultValue = "none", description = "Fmarker expression to context object for JEL (used only when jel = true)."),
 				@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 			})
 	public IPropertyPath resParser(FilterContext parserContext, String expression, String exprType[])
@@ -853,6 +867,7 @@ public class DefaultFilters
 			params = {
 					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 					@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion"),
+					@ParserParam(name = "contextExpr", type = "String", defaultValue = "none", description = "Fmarker expression to context object for JEL (used only when jel = true)."),
 					@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions"),
 					@ParserParam(name = "javaType", type = "String",  defaultValue = "null", description = "If specified, then json will be parsed to specified java type")
 				}
@@ -885,6 +900,7 @@ public class DefaultFilters
 			params = {
 					@ParserParam(name = "template", type = "boolean", defaultValue = "false", description = "If true, the loaded content will be parsed as freemarker template"),
 					@ParserParam(name = "jel", type = "boolean", defaultValue = "false", description = "If true, the json will be processed with Json expression language before object conversion"),
+					@ParserParam(name = "contextExpr", type = "String", defaultValue = "none", description = "Fmarker expression to context object for JEL (used only when jel = true)."),
 					@ParserParam(name = "expressions", type = "boolean", defaultValue = "false", description = "If true, then post parsing into object, values will be searched and processed as autox expressions")
 				}
 	)

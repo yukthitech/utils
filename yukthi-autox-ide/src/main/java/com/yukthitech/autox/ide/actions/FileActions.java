@@ -15,8 +15,11 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +114,7 @@ public class FileActions
 		projectExplorer.reloadActiveNode();
 	}
 
-	private File createFile(String templateName)
+	private File createFile(String templateName, String defaultExtension)
 	{
 		File activeFolder = ideContext.getActiveFile();
 		String newFile = JOptionPane.showInputDialog("Please provide new test-file name?");
@@ -123,6 +126,11 @@ public class FileActions
 
 		newFile = newFile.replace("\\", File.separator);
 		newFile = newFile.replace("/", File.separator);
+		
+		if(defaultExtension != null && !newFile.toLowerCase().endsWith(defaultExtension.toLowerCase()))
+		{
+			newFile += defaultExtension;
+		}
 
 		File finalFile = new File(activeFolder, newFile);
 
@@ -173,7 +181,7 @@ public class FileActions
 	@Action
 	public void newTestFile() throws IOException
 	{
-		File file = createFile(TEST_FILE_TEMPLATE);
+		File file = createFile(TEST_FILE_TEMPLATE, ".xml");
 		projectExplorer.reloadActiveNode();
 
 		if(file != null)
@@ -186,7 +194,7 @@ public class FileActions
 	@Action
 	public void newFile() throws IOException
 	{
-		File file = createFile(null);
+		File file = createFile(null, null);
 		projectExplorer.reloadActiveNode();
 
 		if(file != null)
@@ -212,61 +220,6 @@ public class FileActions
 
 	}
 
-	private void deleteActiveFolder(File activeFolder)
-	{
-		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
-				"Are you sure you want to delete folder '" + activeFolder.getName() 
-					+ "' and it's sub folders and files?", 
-				"Delete Folder", 
-				JOptionPane.YES_NO_OPTION);
-
-		if(res == JOptionPane.NO_OPTION)
-		{
-			return;
-		}
-
-		try
-		{
-			FileUtils.forceDelete(activeFolder);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while deleting folder: {}", activeFolder.getPath(), ex);
-		}
-
-		projectExplorer.reloadActiveNodeParent();
-		fileEditorTabbedPane.filePathChanged(activeFolder, activeFolder);
-	}
-	
-	public void deleteFile(File activeFile)
-	{
-		try
-		{
-			FileUtils.forceDelete(activeFile);
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while deleting file: {}", activeFile.getPath(), ex);
-		}
-
-		projectExplorer.reloadActiveNodeParent();
-		fileEditorTabbedPane.filePathChanged(activeFile, activeFile);
-	}
-	
-	private void deleteActiveFile(File activeFile)
-	{
-		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
-				"Are you sure you want to delete file '" + activeFile.getName() + "' ?",
-				"Delete File",
-				JOptionPane.YES_NO_OPTION
-				);
-		
-		if(res == JOptionPane.NO_OPTION)
-		{
-			return;
-		}
-		
-		deleteFile(activeFile);
-	}
-
 	@Action
 	public void deleteFile()
 	{
@@ -278,21 +231,46 @@ public class FileActions
 			return;
 		}
 		
-		File activeFile = ideContext.getActiveFile();
+		List<File> activeFiles = projectExplorer.getSelectedFiles();
 
-		if(activeFile == null)
+		if(CollectionUtils.isEmpty(activeFiles))
 		{
 			return;
 		}
+		
+		String mssg = "Delete these " + activeFiles.size() + " files/folders?";
+		
+		if(activeFiles.size() == 1)
+		{
+			mssg = String.format("Delete %s '%s'?", 
+					(activeFiles.get(0).isDirectory() ? "folder" : "file"),
+					activeFiles.get(0).getName());
+		}
+		
+		int res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), mssg, "Delete", JOptionPane.YES_NO_OPTION);
+		
+		if(res == JOptionPane.NO_OPTION)
+		{
+			return;
+		}
+		
+		List<File> filesRemoved = new ArrayList<File>();
 
-		if(activeFile.isDirectory())
+		for(File activeFile : activeFiles)
 		{
-			deleteActiveFolder(activeFile);
+			try
+			{
+				FileUtils.forceDelete(activeFile);
+				filesRemoved.add(activeFile);
+			}catch(Exception ex)
+			{
+				JOptionPane.showMessageDialog(IdeUtils.getCurrentWindow(), "Failed to delete file/folder: " + activeFile.getPath() + "\nError: " + ex.getMessage());
+				break;
+			}
 		}
-		else
-		{
-			deleteActiveFile(activeFile);
-		}
+		
+		projectExplorer.reloadActiveNodeParent();
+		//TODO: close files which might be already open
 	}
 
 	private void renameFile(File activeFile)
@@ -369,9 +347,33 @@ public class FileActions
 		File activeFile = ideContext.getActiveFile();
 		copyFile(activeFile);
 	}
+	
+	private File getNewNameFor(File file)
+	{
+		String name = FilenameUtils.getBaseName(file.getName());
+		String ext = FilenameUtils.getExtension(file.getName());
+		int idx = 1;
+		File parent = file.getParentFile();
+		
+		ext = StringUtils.isNotBlank(ext) ? "." + ext : "";
+		
+		while(file.exists())
+		{
+			file = new File(parent, name + "-" + idx + ext);
+			idx++;
+		}
+		
+		return file;
+	}
 
 	public void pasteFile(File activeFolder, List<File> list) throws IOException, InterruptedException
 	{
+		//if active folder is a file, consider its parent directory
+		if(activeFolder.isFile())
+		{
+			activeFolder = activeFolder.getParentFile();
+		}
+		
 		for(File srcFile : list)
 		{
 			String fname = srcFile.getName();
@@ -401,10 +403,7 @@ public class FileActions
 				
 				if(!destFile.isDirectory())
 				{
-					res = JOptionPane.showConfirmDialog(IdeUtils.getCurrentWindow(), 
-							String.format("A file with name '%s' already exist. Do you want to overwrite?", destFile.getName()), 
-							"Overwrite", 
-							JOptionPane.YES_NO_CANCEL_OPTION);
+					destFile = getNewNameFor(destFile);
 				}
 				else
 				{
@@ -439,7 +438,7 @@ public class FileActions
 			FileUtils.forceDelete(moveFile);
 		}
 
-		projectExplorer.reloadActiveNode();
+		projectExplorer.reloadActiveNodeParent();
 	}
 
 	public void pasteFile(File activeFolder) throws UnsupportedFlavorException, IOException, InterruptedException
@@ -459,7 +458,7 @@ public class FileActions
 	@Action
 	public void pasteFile() throws UnsupportedFlavorException, IOException, InterruptedException
 	{
-		File activeFolder = ideContext.getActiveFile();
+		File activeFolder = projectExplorer.getSelectedFile();
 		pasteFile(activeFolder);
 	}
 

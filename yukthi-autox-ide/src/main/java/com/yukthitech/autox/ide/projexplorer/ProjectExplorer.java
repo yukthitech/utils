@@ -443,7 +443,7 @@ public class ProjectExplorer extends JPanel
 	 * Fetches currently selected files.
 	 * @return
 	 */
-	private List<File> getSelectedFiles()
+	public List<File> getSelectedFiles()
 	{
 		TreePath selectedPaths[] = tree.getSelectionPaths();
 		List<File> selectedFiles = new ArrayList<>();
@@ -465,6 +465,24 @@ public class ProjectExplorer extends JPanel
 		return selectedFiles;
 	}
 	
+	public File getSelectedFile()
+	{
+		TreePath selectedPath = tree.getSelectionPath();
+		
+		Object selectedItem = selectedPath.getLastPathComponent();
+		
+		if(selectedItem instanceof FolderTreeNode)
+		{
+			return ((FolderTreeNode)selectedItem).getFolder();
+		}
+		else if(selectedItem instanceof FileTreeNode)
+		{
+			return ((FileTreeNode)selectedItem).getFile();
+		}
+		
+		return null;
+	}
+
 	private void selectRow(int row, boolean controlDown)
 	{
 		if(tree.isRowSelected(row))
@@ -661,7 +679,7 @@ public class ProjectExplorer extends JPanel
 		
 		if(fileManager != null)
 		{
-			logger.debug("Parsing and loading file: {}", file.getPath());
+			//logger.debug("Parsing and loading file: {}", file.getPath());
 			
 			FileParseCollector collector = new FileParseCollector(fileNode.getProject(), file);
 		

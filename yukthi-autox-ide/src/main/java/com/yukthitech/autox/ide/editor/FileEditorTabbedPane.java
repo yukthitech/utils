@@ -295,12 +295,12 @@ public class FileEditorTabbedPane extends MaximizableTabbedPane
 		
 		if(fileEditor != null)
 		{
-			logger.debug("Selecting existing tab for file: {}", canonicalPath);
+			logger.trace("Selecting existing tab for file: {}", canonicalPath);
 			super.setSelectedComponent(fileEditor);
 			return fileEditor;
 		}
 		
-		logger.debug("Opening new tab for file: {}", canonicalPath);
+		logger.trace("Opening new tab for file: {}", canonicalPath);
 		
 		int nextTabIndex = super.getTabCount();
 		

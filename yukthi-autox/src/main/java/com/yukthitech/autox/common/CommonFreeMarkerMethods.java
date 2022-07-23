@@ -605,4 +605,13 @@ public class CommonFreeMarkerMethods
 
 		return str;
 	}
+
+	@FreeMarkerMethod(
+			description = "Creates an empty map and returns the same.",
+			returnDescription = "Empty map"
+			)
+	public static Map<Object, Object> emptyMap()
+	{
+		return new HashMap<Object, Object>();
+	}
 }
