@@ -97,7 +97,7 @@ public class JsonExprEngine
 	}
 	
 	/**
-	 * Process the specified json with specified context and returns the result.
+	 * Process the specified json with specified context and returns the result as json string.
 	 * @param json json to process
 	 * @param context context to be used
 	 * @return processed json
@@ -122,6 +122,28 @@ public class JsonExprEngine
 		}, "An error occurred while writing json content.");
 	}
 	
+	
+	/**
+	 * Process the specified json with specified context and returns the result as object (not json).
+	 * @param json json to process
+	 * @param context context to be used
+	 * @return processed json
+	 */
+	public Object processJsonAsObject(String json, Map<String, Object> context)
+	{
+		Object jsonObj = null;
+		
+		try
+		{
+			jsonObj = OBJECT_MAPPER.readValue(json, Object.class);
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while parsing json template.", ex);
+		}
+		
+		return processObject(jsonObj, context, "");
+	}
+
 	/**
 	 * Process the specified object with specified context and returns the result.
 	 * @param object object to process
