@@ -8,6 +8,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -24,8 +25,8 @@ public class MongoQueryStep extends AbstractStep
 	/**
 	 * Query to execute.
 	 */
-	@Param(description = "Query to execute.")
-	private String query;
+	@Param(description = "Query to execute. Can be json string or a map object.", sourceType = SourceType.EXPRESSION)
+	private Object query;
 
 	/**
 	 * Mongo Resource to be used for query execution.
@@ -39,7 +40,7 @@ public class MongoQueryStep extends AbstractStep
 	@Param(description = "Name of the attribute to be used to set the result.", required = false, attrName = true, defaultValue = "result")
 	private String resultAttribute = "result";
 	
-	public void setQuery(String query)
+	public void setQuery(Object query)
 	{
 		this.query = query;
 	}

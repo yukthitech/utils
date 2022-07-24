@@ -22,23 +22,33 @@ public class AssertNotEqualStep extends AbstractValidation
 	/**
 	 * Value1 for comparison.
 	 */
-	@Param(description = "Value1 for comparison.", sourceType = SourceType.EXPRESSION)
-	private Object value1;
+	@Param(description = "Expected value for comparison.", sourceType = SourceType.EXPRESSION)
+	private Object expected;
 
 	/**
 	 * Value2 for comparison
 	 */
-	@Param(description = "Value2 for comparison", sourceType = SourceType.EXPRESSION)
-	private Object value2;
+	@Param(description = "Actual value for comparison", sourceType = SourceType.EXPRESSION)
+	private Object actual;
 
-	public void setValue1(Object value1)
+	/**
+	 * Sets the value1 for comparison.
+	 *
+	 * @param expected the new value1 for comparison
+	 */
+	public void setExpected(Object expected)
 	{
-		this.value1 = value1;
+		this.expected = expected;
 	}
 	
-	public void setValue2(Object value2)
+	/**
+	 * Sets the value2 for comparison.
+	 *
+	 * @param actual the new value2 for comparison
+	 */
+	public void setActual(Object actual)
 	{
-		this.value2 = value2;
+		this.actual = actual;
 	}
 
 	/* (non-Javadoc)
@@ -46,19 +56,19 @@ public class AssertNotEqualStep extends AbstractValidation
 	 */
 	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		exeLogger.debug(false, "Comparing values for NON equlity. <span style=\"white-space: pre-wrap\">[Value1: {} [{}], Value2: {} [{}]]</span>", 
-				value1, AssertEqualsStep.getType(value1),  
-				value2, AssertEqualsStep.getType(value2));
+		exeLogger.debug(false, "Comparing values for NON equlity. <span style=\"white-space: pre-wrap\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
+				expected, AssertEqualsStep.getType(expected),  
+				actual, AssertEqualsStep.getType(actual));
 
-		boolean isEqual = Objects.equal(value1, value2);
+		boolean isEqual = Objects.equal(expected, actual);
 		
 		if(isEqual)
 		{
 			exeLogger.debug("Found specified objects to be EQUAL");
 			
 			AssertNotEqualStep actualStep = (AssertNotEqualStep) super.sourceStep;
-			throw new AutoxValidationException(this, "Found specified values are same. [Value1: {}, Value2: {}]", 
-					actualStep.value1, actualStep.value2);
+			throw new AutoxValidationException(this, "Found specified values are same. [Expected: {}, Actual: {}]", 
+					actualStep.expected, actualStep.expected);
 		}
 		
 		exeLogger.debug("Found specified objects to be UNEQUAL");

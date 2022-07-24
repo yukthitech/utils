@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -761,7 +762,7 @@ public class AutomationUtils
 	{
 		if(value instanceof Map)
 		{
-			Map<Object, Object> newMap = new HashMap<>();
+			Map<Object, Object> newMap = new LinkedHashMap<Object, Object>();
 			Map<Object, Object> curMap = (Map<Object, Object>) value; 
 			
 			for(Object key : curMap.keySet())

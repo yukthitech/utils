@@ -13,6 +13,9 @@ import com.mongodb.client.MongoDatabase;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.mongojs.IMongoJsCustomizer;
+import com.yukthitech.mongojs.MongoJsEngine;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -34,7 +37,7 @@ public class MongoQuryUtils
 	 * @return result
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Map<String, Object> execute(AutomationContext context, ExecutionLogger exeLogger, String mongoResourceName, String query)
+	public static Map<String, Object> execute(AutomationContext context, ExecutionLogger exeLogger, String mongoResourceName, Object query)
 	{
 		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
 		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
@@ -48,14 +51,27 @@ public class MongoQuryUtils
 
 		Map<String, Object> queryMap = null;
 		
-		try
+		if(query instanceof String)
 		{
-			queryMap = OBJECT_MAPPER.readValue(query, QUERY_JAVA_TYPE);
-		}catch(Exception ex)
-		{
-			exeLogger.error("Invalid mongo-query json specified for execution: {}", query);
-			throw new InvalidStateException("Invalid mongo-query json specified for execution: {}", query, ex);
+			try
+			{
+				queryMap = OBJECT_MAPPER.readValue((String) query, QUERY_JAVA_TYPE);
+			}catch(Exception ex)
+			{
+				exeLogger.error("Invalid mongo-query json specified for execution: {}", query);
+				throw new InvalidStateException("Invalid mongo-query json specified for execution: {}", query, ex);
+			}
 		}
+		else if(query instanceof Map)
+		{
+			queryMap = (Map<String, Object>) query;
+		}
+		else
+		{
+			throw new InvalidArgumentException("Non-string/non-map value is specified as mongo query. Specified query: %s (Type: %s)", 
+					query, query.getClass().getName());
+		}
+		
 		
 		queryMap = AutomationUtils.replaceExpressions("mongoQuery", context, queryMap);
 		
@@ -78,4 +94,38 @@ public class MongoQuryUtils
 		return result;
 	}
 
+	public static Object executeJs(AutomationContext context, ExecutionLogger exeLogger, String mongoResourceName, String script)
+	{
+		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
+		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
+
+		if(mongoResource == null)
+		{
+			throw new InvalidStateException("No Mongo resource found with specified name - {}", mongoResourceName);
+		}
+		
+		exeLogger.debug(false, "On mongo-resource '{}' executing query: \n <code class='JSON'>{}</code>", mongoResourceName, script);
+
+		MongoClient client = mongoResource.getMongoClient();
+		MongoDatabase mongoDatabase = client.getDatabase(mongoResource.getDbName());
+
+		MongoJsEngine mongoEngine = new MongoJsEngine(mongoDatabase);
+		mongoEngine.setCustomizer(new IMongoJsCustomizer()
+		{
+			@Override
+			public boolean printLog(String mssg)
+			{
+				exeLogger.debug("[MongoJS] {}", mssg);
+				return true;
+			}
+		});
+		
+		try
+		{
+			return mongoEngine.executeScript(script);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while executing mongo-js script", ex);
+		}
+	}
 }

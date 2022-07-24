@@ -28,7 +28,7 @@
 		
 			<s:set expression="intAttr" value="int: 10"/>
 		
-			<s:assert-not-equals value1="prop:attr.intAttr" value2="int:11"/>
+			<s:assert-not-equals expected="prop:attr.intAttr" actual="int:11"/>
 		</testCase>
 	
 		<testCase name="assertSame">

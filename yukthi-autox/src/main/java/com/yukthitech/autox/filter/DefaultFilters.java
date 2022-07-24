@@ -649,6 +649,8 @@ public class DefaultFilters
 			data = AutomationUtils.replaceExpressionsInString(name, parserContext.getAutomationContext(), data);
 		}
 		
+		boolean textResExpected = "true".equalsIgnoreCase(parserContext.getParameter("text"));
+		
 		if("true".equalsIgnoreCase(parserContext.getParameter("jel")) && name.toLowerCase().endsWith(".json"))
 		{
 			logger.debug("Parsing json content for JEL: {}", name);
@@ -662,11 +664,18 @@ public class DefaultFilters
 				context = (Map<String, Object>) FreeMarkerMethodManager.fetchValue("Jel-context-expr", contextExpr, automationContext);
 			}
 			
+			//if no further conversion is required, use JEL to convert to final object
+			if(exprType == null && !textResExpected)
+			{
+				return IAutomationConstants.JSON_EXPR_ENGINE.processJsonAsObject(data, context);
+			}
+				
+			//if further conversion is required, then generate json string using JEL 
 			data = IAutomationConstants.JSON_EXPR_ENGINE.processJson(data, context);
 		}
 
 		//if input stream has to be loaded as simple text, simply return the current data string
-		if("true".equalsIgnoreCase(parserContext.getParameter("text")))
+		if(textResExpected)
 		{
 			logger.debug("Returning input data as string: {}", name);
 			return data;

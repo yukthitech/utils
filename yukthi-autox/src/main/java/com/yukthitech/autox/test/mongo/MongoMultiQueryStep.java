@@ -10,6 +10,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.SourceType;
 
 /**
  * Executes specified mongo Query on specified mongo resource defined in https://docs.mongodb.com/manual/reference/command.
@@ -25,8 +26,8 @@ public class MongoMultiQueryStep extends AbstractStep
 	/**
 	 * Query to execute.
 	 */
-	@Param(description = "Query(ies) to execute.")
-	private List<String> queries = new ArrayList<>();
+	@Param(description = "Query(ies) to execute. Query can be json-string or a map object.", sourceType = SourceType.EXPRESSION)
+	private List<Object> queries = new ArrayList<>();
 
 	/**
 	 * Mongo Resource to be used for query execution.
@@ -34,7 +35,7 @@ public class MongoMultiQueryStep extends AbstractStep
 	@Param(description = "Mongo Resource to be used for query execution.")
 	private String mongoResourceName;
 
-	public void addQuery(String query)
+	public void addQuery(Object query)
 	{
 		this.queries.add(query);
 	}
@@ -47,7 +48,7 @@ public class MongoMultiQueryStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, ExecutionLogger exeLogger)
 	{
-		for(String query : this.queries)
+		for(Object query : this.queries)
 		{
 			exeLogger.debug("Executing query: {}", query);
 			Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
