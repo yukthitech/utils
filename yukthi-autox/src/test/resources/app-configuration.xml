@@ -57,7 +57,7 @@
 	
 		<!-- Db plugin for sql base steps -->
 		<db-plugin>
-			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+			<dataSource name="dataSource" ccg:beanType="com.yukthitech.autox.ds.SimpleDataSource">
 				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
 				<url>jdbc:derby:#{derby.folder};create=true</url>
 			</dataSource>
