@@ -35,7 +35,7 @@ public class NewProjectDialog extends JDialog
 	private JTextField baseFolderPath;
 	private JTextField projectName;
 	private JFileChooser fileChooser = new JFileChooser();
-	private Project project = new Project();
+	private Project project;
 	private boolean projectCreated = false;
 
 	/**
@@ -65,7 +65,7 @@ public class NewProjectDialog extends JDialog
 		gbc_lblName.gridy = 0;
 		contentPanel.add(lblName, gbc_lblName);
 
-		projectName = new JTextField(project.getName());
+		projectName = new JTextField();
 		projectName.setColumns(10);
 		GridBagConstraints gbc_projectName = new GridBagConstraints();
 		gbc_projectName.anchor = GridBagConstraints.NORTH;

@@ -215,11 +215,16 @@ class ExecutionStackEntry implements IExecutionStackEntry
 	@Override
 	public void skipChildSteps()
 	{
-		childStepIndex = Integer.MAX_VALUE;
+		childStepIndex = steps.size();
 	}
 	
 	public void incrementChildStepIndex()
 	{
+		if(childStepIndex >= steps.size())
+		{
+			return;
+		}
+		
 		childStepIndex++;
 	}
 
@@ -375,6 +380,11 @@ class ExecutionStackEntry implements IExecutionStackEntry
 		return this.stackVariables.get(name);
 	}
 	
+	public void stepPreStart(IStep step)
+	{
+		this.runningStep = (step.getSourceStep() != null) ? step.getSourceStep() : step;
+	}
+
 	public void stepStarted(IStep step)
 	{
 		this.runningStep = (step.getSourceStep() != null) ? step.getSourceStep() : step;

@@ -151,6 +151,7 @@
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />
@@ -159,6 +160,7 @@
 	<popup-menu label="filePopup">
 		<item label="Open" action="openFile" />
 		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />
@@ -179,7 +181,7 @@
 		<item label="Execute" action="executeProject" />
 
 		<item label="-" />
-		
+		<item label="Copy Path" action="copyPath" />		
 		<item label="Properties" action="projectProperties"></item>
 	</popup-menu>
 
@@ -207,6 +209,7 @@
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />
@@ -227,6 +230,7 @@
 
 		<item label="-" />
 		<item label="Copy" action="copyFile" />
+		<item label="Copy Path" action="copyPath" />
 		<item label="Paste" action="pasteFile" />
 		<item label="Rename" action="renameFile" />
 		<item label="Delete" action="deleteFile" />

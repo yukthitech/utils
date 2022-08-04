@@ -39,7 +39,7 @@ public class RestClient
 			int status = response.getCode();
 			String value = null;
 			
-			logger.debug("Got response-status as {}", status);
+			logger.trace("Got response-status as {}", status);
 			
 			HttpEntity entity = response.getEntity();
 			
@@ -52,7 +52,7 @@ public class RestClient
 				value = null;
 			}
 			
-			logger.debug("Got response status as {} and body as: {}", status, truncate(value));
+			logger.trace("Got response status as {} and body as: {}", status, truncate(value));
 			
 			if(StringUtils.isBlank(value))
 			{
@@ -339,7 +339,6 @@ public class RestClient
 			return result;
 		}catch(Exception ex)
 		{
-			logger.error("An error occurred while invoking request: " + request.getUri(), ex);
 			throw new RestInvocationException("An error occurred while invoking request: " + request.getUri(), ex);
 		}
 	}

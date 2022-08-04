@@ -6,10 +6,11 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -38,7 +39,7 @@ public class ProjectSourceFolderPanel extends JPanel
 	
 	private DirectoryChooserDialog directoryChooserDialog = new DirectoryChooserDialog();
 	
-	private TreeMap<String, File> sourceFolders = new TreeMap<>();
+	private LinkedHashMap<String, File> sourceFolders = new LinkedHashMap<>();
 	
 	/**
 	 * Create the panel.
@@ -197,6 +198,6 @@ public class ProjectSourceFolderPanel extends JPanel
 
 	public void applyChanges()
 	{
-		project.setTestSuiteFolders(this.sourceFolders.keySet());
+		project.setTestSuiteFolders(new LinkedHashSet<String>(this.sourceFolders.keySet()));
 	}
 }

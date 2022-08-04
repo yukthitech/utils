@@ -48,8 +48,8 @@ public class Project implements Serializable
 	private String projectFilePath;
 	private String appConfigFilePath;
 	private String appPropertyFilePath;
-	private Set<String> testSuitesFoldersList;
-	private Set<String> classPathEntriesList;
+	private LinkedHashSet<String> testSuitesFoldersList;
+	private LinkedHashSet<String> classPathEntriesList;
 	private String resourcesFolder;
 	
 	private transient ProjectClassLoader projectClassLoader;
@@ -71,8 +71,13 @@ public class Project implements Serializable
 		name = "";
 		appConfigFilePath = "src/main/config/app-configuration.xml";
 		appPropertyFilePath = "src/main/config/app.properties";
-		testSuitesFoldersList = CommonUtils.toSet("src/main/test-suites");
+		testSuitesFoldersList = new LinkedHashSet<>(CommonUtils.toSet("src/main/test-suites"));
 		resourcesFolder = "src/main/resources";
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException
+	{
+		in.defaultReadObject();
 	}
 
 	public String getName()
@@ -180,16 +185,16 @@ public class Project implements Serializable
 		return testSuitesFoldersList.contains(relPath);
 	}
 
-	public void setTestSuiteFolders(Set<String> testSuitesFoldersList)
+	public void setTestSuiteFolders(LinkedHashSet<String> testSuitesFoldersList)
 	{
-		this.testSuitesFoldersList = new HashSet<String>(testSuitesFoldersList);
+		this.testSuitesFoldersList = new LinkedHashSet<String>(testSuitesFoldersList);
 	}
 	
 	public void addTestSuiteFolder(String folder)
 	{
 		if(this.testSuitesFoldersList == null)
 		{
-			this.testSuitesFoldersList = new HashSet<>();
+			this.testSuitesFoldersList = new LinkedHashSet<>();
 		}
 		
 		this.testSuitesFoldersList.add(folder);
@@ -208,35 +213,22 @@ public class Project implements Serializable
 	
 	private synchronized void addDefaultClasspathEntries()
 	{
-		finalClassPathEntries = new LinkedHashSet<>();
+		LinkedHashSet<String> pathEntries = new LinkedHashSet<>();
+		
+		File baseFolder = getBaseFolder();
 
 		//add main resources and config folders
-		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
-		finalClassPathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
-		finalClassPathEntries.add(new File(baseFolder, "target" + File.separator + "classes").getPath());
+		pathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "config").getPath());
+		pathEntries.add(new File(baseFolder, "src" + File.separator + "main" + File.separator + "resources").getPath());
+		pathEntries.add(new File(baseFolder, "target" + File.separator + "classes").getPath());
 
 		//add lib folder of project
 		File libFolder = new File(baseFolder, "lib");
 		
-		if(libFolder.exists())
-		{
-			for(File file : libFolder.listFiles())
-			{
-				if(!file.getName().toLowerCase().endsWith(".jar") && !file.getName().toLowerCase().endsWith(".zip"))
-				{
-					continue;
-				}
-				
-				finalClassPathEntries.add(file.getPath());
-			}
-		}
-		
-		String libJarPath = null;
-		
 		try
 		{
-			libJarPath = libFolder.getCanonicalPath() + File.separator + "*";
-			finalClassPathEntries.add(libJarPath);
+			String libJarPath = libFolder.getCanonicalPath() + File.separator + "*";
+			pathEntries.add(libJarPath);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while getting canonical path of lib folder: " + libFolder.getPath(), ex);
@@ -244,8 +236,10 @@ public class Project implements Serializable
 		
 		if(classPathEntriesList != null)
 		{
-			finalClassPathEntries.addAll(classPathEntriesList);
+			pathEntries.addAll(classPathEntriesList);
 		}
+		
+		this.finalClassPathEntries = pathEntries;
 	}
 	
 	/**
@@ -254,15 +248,16 @@ public class Project implements Serializable
 	 *
 	 * @param classPathEntriesList the new class path entries list
 	 */
-	public void setClassPathEntriesList(Set<String> classPathEntriesList)
+	public void setClassPathEntriesList(LinkedHashSet<String> classPathEntriesList)
 	{
 		this.setClassPathEntries(classPathEntriesList);
 	}
 
-	public void setClassPathEntries(Set<String> classPathEntriesList)
+	public void setClassPathEntries(LinkedHashSet<String> classPathEntriesList)
 	{
 		this.classPathEntriesList = classPathEntriesList;
 		finalClassPathEntries = null;
+		projectClassLoader = null;
 	}
 	
 	public Set<String> getClassPathEntries()
@@ -397,7 +392,7 @@ public class Project implements Serializable
 	{
 		if(projectClassLoader == null)
 		{
-			projectClassLoader = new ProjectClassLoader(this);
+			projectClassLoader = new ProjectClassLoader(getFullClassPathEntriesList());
 		}
 		
 		return projectClassLoader;
@@ -474,6 +469,7 @@ public class Project implements Serializable
 	
 	public void deleteProjectContents() throws IOException
 	{
+		File baseFolder = getBaseFolder();
 		logger.debug("Deleting project contents from base folder: {}", baseFolder);
 		FileUtils.forceDelete(baseFolder);
 	}
@@ -520,14 +516,5 @@ public class Project implements Serializable
 	public int hashCode()
 	{
 		return name.hashCode();
-	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		Project project = new Project();
-		project.setName("test");
-		project.setProjectFilePath("C:\\Users\\akiran\\Documents\\Sound recordings\\test\\" + PROJECT_FILE_NAME);
-		
-		project.createProject();
 	}
 }

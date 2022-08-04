@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -14,23 +15,23 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class ProjectClassLoader extends URLClassLoader
 {
-	public ProjectClassLoader(Project project)
+	public ProjectClassLoader(Set<String> projectClassPath)
 	{
-		super(getProjectClassPath(project), null);
+		super(getProjectClassPath(projectClassPath), null);
 	}
 
 	/**
 	 * Gets the urls of classpath of system classloader.
 	 * @return
 	 */
-	public static URL[] getProjectClassPath(Project project)
+	public static URL[] getProjectClassPath(Set<String> projectClassPath)
 	{
 		ClassLoader cl = ClassLoader.getSystemClassLoader();
 		List<URL> resUrls = new ArrayList<>();
 		
-		if(CollectionUtils.isNotEmpty(project.getFullClassPathEntriesList()))
+		if(CollectionUtils.isNotEmpty(projectClassPath))
 		{
-			for(String entry : project.getFullClassPathEntriesList())
+			for(String entry : projectClassPath)
 			{
 				File file = new File(entry);
 				

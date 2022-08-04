@@ -137,6 +137,11 @@ public class FreeMarkerMethodDocInfo extends AbstractDocInfo
 			return;
 		}
 		
+		if(this.examples == null)
+		{
+			this.examples = new ArrayList<Example>();
+		}
+		
 		this.examples.addAll(examples);
 	}
 

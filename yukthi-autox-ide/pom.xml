@@ -11,6 +11,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
+		<autox.version>2.0.3-SNAPSHOT</autox.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -21,7 +22,7 @@
 		<dependency>
 			<groupId>com.yukthitech</groupId>
 			<artifactId>yukthi-automation</artifactId>
-			<version>2.0.1-SNAPSHOT</version>
+			<version>${autox.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-webmvc</artifactId>

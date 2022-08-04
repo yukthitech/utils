@@ -17,6 +17,7 @@ import com.yukthitech.autox.ide.model.IdeState;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.model.ProjectState;
 import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Manager to manage projects.
@@ -33,7 +34,7 @@ public class ProjectManager
 	@Autowired
 	private ProjectExplorer projectExplorer;
 
-	private Set<Project> projects = new HashSet<Project>();
+	private Set<Project> projects = new HashSet<>();
 
 	@PostConstruct
 	private void init()
@@ -67,6 +68,16 @@ public class ProjectManager
 	{
 		logger.debug("Loading project at path: {}", path);
 		
+		Project existingProj = projects.stream()
+				.filter(proj -> proj.getProjectFilePath().equals(path))
+				.findFirst()
+				.orElse(null);
+		
+		if(existingProj != null)
+		{
+			return existingProj;
+		}
+		
 		Project project = Project.load(path);
 		
 		if(project == null)
@@ -77,7 +88,7 @@ public class ProjectManager
 		
 		if(projects.contains(project))
 		{
-			return project;
+			throw new InvalidStateException("A project specified name is already open: {}", project.getName());
 		}
 		
 		projectExplorer.openProject(project);

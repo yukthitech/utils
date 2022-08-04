@@ -5,6 +5,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -331,6 +332,7 @@ public class FileActions
 		copyFile(file);
 		moveFile=file;
 	}
+
 	public void copyFile(File activeFile) throws UnsupportedFlavorException, IOException
 	{
 		moveFile=null;
@@ -348,6 +350,16 @@ public class FileActions
 		copyFile(activeFile);
 	}
 	
+	@Action
+	public void copyPath() throws UnsupportedFlavorException, IOException
+	{
+		File activeFile = ideContext.getActiveFile();
+		
+		StringSelection selection = new StringSelection(activeFile.getPath());
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(selection, selection);
+	}
+
 	private File getNewNameFor(File file)
 	{
 		String name = FilenameUtils.getBaseName(file.getName());

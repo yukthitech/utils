@@ -59,7 +59,7 @@
 
 	<collection name="$parsers.json">
 		<example>
-			<description>Converting json into object</description>
+			<description>Converting json into object and setting it on context</description>
 			
 			<content><![CDATA[
 				<s:set expression="beanForTest">

@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -49,14 +50,14 @@ public class AboutAutoxDialog extends JDialog
 		
 		try
 		{
-			version = IOUtils.toString(is);
+			version = IOUtils.toString(is, Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while fetching current autox version", ex);
 		}
 
 		setTitle("About Autox");
-		setBounds(100, 100, 450, 219);
+		setBounds(100, 100, 576, 218);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBackground(Color.WHITE);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

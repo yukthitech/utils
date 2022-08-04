@@ -176,6 +176,8 @@ public class AutomationExecutor
 		{
 
 			context.setExecutionLogger(exeLogger);
+
+			parentStackEntry.stepPreStart(step);
 			
 			//clone the step, so that expression replacement will not affect actual step
 			step = sourceStep.clone();

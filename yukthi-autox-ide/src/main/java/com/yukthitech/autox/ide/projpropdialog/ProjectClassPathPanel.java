@@ -6,9 +6,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -34,7 +33,7 @@ public class ProjectClassPathPanel extends JPanel
 	private JFileChooser addClassPathFileChooser;
 	private DefaultListModel<String> listModel = new DefaultListModel<>();
 
-	private Project project = new Project();
+	private Project project;
 
 	private JList<String> list;
 	private JScrollPane scrollPane;
@@ -204,7 +203,9 @@ public class ProjectClassPathPanel extends JPanel
 	
 	public void setProject(Project project)
 	{
-		Set<String> set = new TreeSet<String>(project.getClassPathEntries());
+		this.project = project;
+		
+		Set<String> set = project.getClassPathEntries();
 		listModel.removeAllElements();
 		
 		if(CollectionUtils.isNotEmpty(set))
@@ -217,7 +218,7 @@ public class ProjectClassPathPanel extends JPanel
 
 	public void applyChanges()
 	{
-		Set<String> setOfEntries = new HashSet<>();
+		LinkedHashSet<String> setOfEntries = new LinkedHashSet<>();
 		
 		for(int i = 0; i < listModel.size(); i++)
 		{

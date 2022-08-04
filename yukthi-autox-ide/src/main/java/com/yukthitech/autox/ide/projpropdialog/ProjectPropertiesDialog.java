@@ -124,7 +124,6 @@ public class ProjectPropertiesDialog extends JDialog
 
 	public Project display(IdeContext ideContext)
 	{
-		this.project = null;
 		this.project = ideContext.getActiveProject();
 		
 		projectBasicPropPanel.setProject(project);
