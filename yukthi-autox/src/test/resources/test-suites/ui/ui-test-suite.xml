@@ -204,10 +204,16 @@
 			
 			<s:ui-switch-window locator="Index"/>
 			<s:ui-is-visible locator="id: button" name="visibFlag1"/>
-			<s:ui-close-window />
-			<s:sleep time="5000"/>
-
 			<s:assert-true value="attr: visibFlag1"/>
+			
+			<!-- 
+				Ensure window close is working
+				Close sub window and ensure main window is still accessible 
+			-->
+			<s:ui-close-window name="Index"/>
+						
+			<s:ui-switch-window />
+			<s:ui-assert-visibility locator="id: downloadLink"/>
 		</testCase>
 
 		<cleanup>

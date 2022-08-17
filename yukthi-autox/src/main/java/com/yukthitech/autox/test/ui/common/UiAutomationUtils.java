@@ -2,7 +2,6 @@ package com.yukthitech.autox.test.ui.common;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +21,6 @@ import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.exceptions.UnsupportedOperationException;
 
 /**
@@ -535,40 +533,6 @@ public class UiAutomationUtils
 		return builder.toString();
 	}
 
-	/**
-	 * Compares the current open window handles with last sync window handles. And returns new window handle if any.
-	 * @param context Context to use to fetch context window handles and all window handles
-	 * @return newly opened window handle
-	 */
-	public static String getNewWindowHandle(AutomationContext context)
-	{
-		SeleniumPlugin seleniumPlugin = context.getPlugin(SeleniumPlugin.class);
-		
-		Set<String> contextHandles = seleniumPlugin.getWindowHandles();
-		
-		WebDriver driver = seleniumPlugin.getWebDriver();
-		Set<String> newHandles = driver.getWindowHandles();
-		
-		if(newHandles == null)
-		{
-			throw new InvalidStateException("No open windows found on current context");
-		}
-		
-		newHandles.removeAll(contextHandles);
-		
-		if(newHandles.isEmpty())
-		{
-			throw new InvalidStateException("No new windows found on current context");
-		}
-		
-		if(newHandles.size() > 1)
-		{
-			throw new InvalidStateException("Multiple new windows found on current context");
-		}
-		
-		return newHandles.iterator().next();
-	}
-	
 	public static boolean isElementNotAvailableException(Exception ex)
 	{
 		if(ex instanceof ElementNotInteractableException)

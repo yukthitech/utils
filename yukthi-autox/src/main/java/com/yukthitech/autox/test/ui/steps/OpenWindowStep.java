@@ -66,8 +66,8 @@ public class OpenWindowStep extends AbstractStep
 	{
 		exeLogger.trace("Opening window '{}' with url: {}", name, url);
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPlugin seleniumPlugin = context.getPlugin(SeleniumPlugin.class);
+		WebDriver driver = seleniumPlugin.getWebDriver();
 		
 		String openScript = String.format("window.open('%s', '%s')", url, name);
 		

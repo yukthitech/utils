@@ -2,10 +2,8 @@ package com.yukthitech.autox.config;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,11 +60,6 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	 * Main window handler.
 	 */
 	private String mainWindowHandle;
-	
-	/**
-	 * Set of current window handles.
-	 */
-	private Set<String> windowHandles;
 	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.config.IPlugin#getArgumentBeanType()
@@ -308,32 +301,6 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		}
 	}
 	
-	/**
-	 * Gets the set of current window handles. If no handles are synced earlier, a set is returned with
-	 * main window handle alone.
-	 *
-	 * @return the set of current window handles
-	 */
-	public Set<String> getWindowHandles()
-	{
-		if(windowHandles == null || windowHandles.isEmpty())
-		{
-			return Collections.singleton(mainWindowHandle);
-		}
-		
-		return windowHandles;
-	}
-
-	/**
-	 * Sets the set of current window handles.
-	 *
-	 * @param windowHandles the new set of current window handles
-	 */
-	public void setWindowHandles(Set<String> windowHandles)
-	{
-		this.windowHandles = windowHandles;
-	}
-
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.config.IPlugin#handleError(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.config.ErrorDetails)
 	 */
