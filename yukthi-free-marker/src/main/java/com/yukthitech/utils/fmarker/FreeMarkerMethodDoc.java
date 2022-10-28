@@ -49,6 +49,8 @@ public class FreeMarkerMethodDoc implements Comparable<FreeMarkerMethodDoc>
 	
 	private String parameterString;
 	
+	private Method method;
+	
 	public FreeMarkerMethodDoc()
 	{}
 
@@ -67,6 +69,7 @@ public class FreeMarkerMethodDoc implements Comparable<FreeMarkerMethodDoc>
 		this.returnType = method.getReturnType().getName();
 		this.description = freeMarkerMethod.description();
 		this.returnDescription = freeMarkerMethod.returnDescription();
+		this.method = method;
 		
 		Parameter params[] = method.getParameters();
 		
@@ -197,6 +200,11 @@ public class FreeMarkerMethodDoc implements Comparable<FreeMarkerMethodDoc>
 		
 		parameterString = builder.toString();
 		return parameterString;
+	}
+	
+	public Method getMethod()
+	{
+		return method;
 	}
 
 	/* (non-Javadoc)

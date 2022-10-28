@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
@@ -165,12 +166,17 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 			return freeMarkerMethod.invoke(null, methodArgs);
 		}catch(Exception ex)
 		{
+			String argTypesStr = Arrays.asList(freeMarkerMethod.getParameterTypes())
+					.stream()
+					.map(typ -> typ.getName())
+					.collect(Collectors.joining(", "));
+			
 			throw new InvalidStateException("An error occurred while invoking method '{}'. "
-					+ "\nJava Method: {}.{}"
+					+ "\nJava Method: {}.{}({})"
 					+ "\nArguments used: {}"
-					+ "\nArguments type: {}",
+					+ "\nUsed arguments type: {}",
 					methodName, 
-					freeMarkerMethod.getDeclaringClass().getName(), freeMarkerMethod.getName(), 
+					freeMarkerMethod.getDeclaringClass().getName(), freeMarkerMethod.getName(), argTypesStr,
 					Arrays.toString( methodArgs ), Arrays.toString( getTypes(methodArgs) ), ex);
 		}
 	}
