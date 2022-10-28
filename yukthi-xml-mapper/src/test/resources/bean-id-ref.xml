@@ -1,0 +1,19 @@
+<listData xmlns:res="http://xmlbeanparser.yukthitech.com/reserved">
+	<res:bean id="strVal">
+		Some string value
+	</res:bean>
+	
+	<res:bean id="intLst">
+		int[]: 1, 2, 3, 4
+	</res:bean>
+
+	<objectList>
+		<res:element res:beanType="com.yukthitech.test.beans.TestBeanForRef">
+			<value1 res:beanRef="strVal"/>
+			<value2 res:beanRef="intLst"/>
+		</res:element>
+		<res:element res:beanType="com.yukthitech.test.beans.TestBeanForRef">
+			<value1>Other value</value1>
+		</res:element>
+	</objectList>
+</listData>

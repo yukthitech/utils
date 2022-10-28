@@ -150,17 +150,24 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 	 */
 	public Attribute remove(Object arg0)
 	{
-		return null;
+		throw new UnsupportedOperationException();
 	}
 	
 	/**
 	 * Removes specified attribute from this attribute map.
 	 * @param key Key to remove
-	 * @return Removed attribute.
+	 * @return Removed attribute value.
 	 */
-	public Attribute removeAttribute(Object key)
+	public String removeAttribute(Object key)
 	{
-		return super.remove(key);
+		Attribute attr = super.remove(key);
+		
+		if(attr == null)
+		{
+			return null;
+		}
+		
+		return attr.value;
 	}
 
 	/**

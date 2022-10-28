@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.yukthitech.utils.exceptions.InvalidStateException;
+
 public class BeanNode implements Cloneable
 {
 	public static final String SKIP_NODE_ELEMENT = new String("SKIP_NODE_ELEMENT");
@@ -64,7 +66,15 @@ public class BeanNode implements Cloneable
 	void setBean(Object bean)
 	{
 		if(textNode)
-			throw new IllegalStateException("Bean can not be set for text node.");
+		{
+			if(bean instanceof String)
+			{
+				buff = new StringBuffer((String) bean);
+				return;
+			}
+			
+			throw new InvalidStateException("Bean can not be set for text node. [Node: {}, Bean: {}]", this.getNodePath(), bean);
+		}
 
 		this.bean = bean;
 	}

@@ -5,8 +5,10 @@ import org.xml.sax.Locator;
 
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.DefaultParserHandler;
+import com.yukthitech.ccg.xml.FutureValue;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
+import com.yukthitech.ccg.xml.util.TypeConversionUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -16,15 +18,18 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 @NodeName(namePattern = "bean")
 public class BeanNodeHandler implements IReserveNodeHandler
 {
+	private static final String ATTR_TYPE = "type";
+	private static final String ATTR_ID = "id";
+	
 	@Override
 	public Object createCustomNodeBean(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
-		String beanType = att.get(DefaultParserHandler.ATTR_BEAN_TYPE, null);
-		String beanId = att.get(DefaultParserHandler.ATTR_BEAN_ID, null);
+		String beanType = att.removeAttribute(ATTR_TYPE);
+		String beanId = att.removeAttribute(ATTR_ID);
 		
 		if(StringUtils.isEmpty(beanType))
 		{
-			throw new InvalidStateException("No 'type' is specified for 'bean' node");
+			beanType = FutureValue.class.getName();
 		}
 				
 		if(StringUtils.isEmpty(beanId))
@@ -42,5 +47,22 @@ public class BeanNodeHandler implements IReserveNodeHandler
 	@Override
 	public void handleCustomNodeEnd(IParserHandler parserHandler, BeanNode node, XMLAttributeMap att, Locator locator)
 	{
+		Object actualBean = node.getActualBean();
+		
+		if(!(actualBean instanceof FutureValue))
+		{
+			return;
+		}
+		
+		FutureValue futureValue = (FutureValue) actualBean;
+		Object value = futureValue.getValue();
+		
+		if(!(value instanceof String))
+		{
+			return;
+		}
+		
+		String strVal = (String) value;
+		futureValue.setValue(TypeConversionUtils.strToObject(strVal.trim()));
 	}
 }

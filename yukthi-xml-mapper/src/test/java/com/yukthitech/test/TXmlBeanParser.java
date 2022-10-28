@@ -36,6 +36,7 @@ import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.test.beans.DynamicTestBean;
 import com.yukthitech.test.beans.ListBean;
 import com.yukthitech.test.beans.MapBean;
+import com.yukthitech.test.beans.TestBeanForRef;
 import com.yukthitech.test.beans.TestDataBean;
 import com.yukthitech.utils.CommonUtils;
 
@@ -125,5 +126,17 @@ public class TXmlBeanParser
 		Assert.assertEquals(bean.getIntMap(), CommonUtils.toMap(1, 10, 2, 20));
 		Assert.assertEquals(bean.getBeanMap(), CommonUtils.toMap("key1", new TestDataBean(5), "key2", new TestDataBean(6)));
 		Assert.assertEquals(bean.getObjectMap(), CommonUtils.toMap("key1", new TestDataBean(5)));
+	}
+
+	@Test
+	public void testBeanReferences()
+	{
+		ListBean bean = new ListBean();
+		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/bean-id-ref.xml"), bean);
+		
+		Assert.assertEquals(bean.getObjectList(), Arrays.asList(
+			new TestBeanForRef("Some string value", Arrays.asList(1, 2, 3, 4)),
+			new TestBeanForRef("Other value", null)
+		));
 	}
 }

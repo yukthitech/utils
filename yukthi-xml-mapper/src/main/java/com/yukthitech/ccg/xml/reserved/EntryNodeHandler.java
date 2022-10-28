@@ -56,7 +56,6 @@ public class EntryNodeHandler implements IReserveNodeHandler
 		
 		//parse the key 
 		Object key = XMLUtil.parseAttributeObject(keyStr, keyType, parserHandler.getDateFormat());
-		att.remove("key");
 		node.getAttributeMap().removeAttribute("key");
 		
 		if(att.containsReservedKey(DefaultParserHandler.ATTR_BEAN_TYPE))

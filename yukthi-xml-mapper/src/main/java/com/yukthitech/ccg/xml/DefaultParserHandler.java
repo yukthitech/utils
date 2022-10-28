@@ -383,6 +383,13 @@ public class DefaultParserHandler implements IParserHandler
 		{
 			return getExpressionObject(expr);
 		}
+		
+		Object refVal = getReferenceValue(node, att);
+		
+		if(refVal != null)
+		{
+			return refVal;
+		}
 
 		Object value = XMLUtil.parseAttributeObject(node.getText(), node.getType(), dateFormat);
 
@@ -410,6 +417,33 @@ public class DefaultParserHandler implements IParserHandler
 
 		return value;
 	}
+	
+	private Object getReferenceValue(BeanNode node, XMLAttributeMap att)
+	{
+		String objId = att.getReserved(ATTR_REF_BEAN, null);
+
+		if(objId == null)
+		{
+			return null;
+		}
+		
+		Object obj = objIdToObj.get(objId);
+
+		if(obj == null)
+			throw new IllegalStateException("No ID Bean found in cache with id: " + objId);
+
+		if(obj instanceof FutureValue)
+		{
+			obj = ((FutureValue) obj).getValue();
+		}
+
+		if(!node.getType().isAssignableFrom(obj.getClass()))
+		{
+			throw new IllegalStateException("Node required type \"" + node.getType() + "\" " + "is not compatible with the specified object-id object type: " + obj.getClass().getName());
+		}
+
+		return obj;
+	}
 
 	/**
 	 * Creates the bean.
@@ -424,21 +458,13 @@ public class DefaultParserHandler implements IParserHandler
 	 */
 	public Object createBean(BeanNode node, XMLAttributeMap att, ClassLoader loader)
 	{
-		String objId = att.getReserved(ATTR_REF_BEAN, null);
-
-		if(objId != null)
+		Object refVal = getReferenceValue(node, att);
+		
+		if(refVal != null)
 		{
-			Object obj = objIdToObj.get(objId);
-
-			if(obj == null)
-				throw new IllegalStateException("No ID Bean found in cache with id: " + objId);
-
-			if(!node.getType().isAssignableFrom(obj.getClass()))
-				throw new IllegalStateException("Node required type \"" + node.getType() + "\" " + "is not compatible with the specified object-id object type: " + obj.getClass().getName());
-
-			return obj;
+			return refVal;
 		}
-
+		
 		String beanType = att.getReserved(ATTR_BEAN_TYPE, null);
 		Class<?> btype = null;
 		String beanId = att.getReserved(ATTR_BEAN_ID, null);
@@ -873,7 +899,7 @@ public class DefaultParserHandler implements IParserHandler
 		{
 			if(type == null)
 				throw new IllegalArgumentException("Either of type or preferredType is mandatory.");
-
+			
 			try
 			{
 				if(loader != null)
