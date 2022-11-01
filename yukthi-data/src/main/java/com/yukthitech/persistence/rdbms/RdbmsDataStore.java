@@ -646,8 +646,29 @@ public class RdbmsDataStore implements IDataStore
 				params.add(value);
 				index++;
 			}
-			
-			logger.debug("Executing using params: {}", params);
+
+			if(logger.isDebugEnabled())
+			{
+				String paramStr = params.stream().map(param -> 
+				{
+					if(param == null)
+					{
+						return "null";
+					}
+					
+					String s = param.toString();
+					
+					//TODO: Below 50 limit should be configurable
+					if(s.length() > 50)
+					{
+						s = s.substring(0, 50) + "...";
+					}
+					
+					return s;
+				}).collect(Collectors.joining(", "));
+				
+				logger.debug("Executing using params: {}", paramStr);
+			}
 			
 			int count = pstmt.executeUpdate();
 			
