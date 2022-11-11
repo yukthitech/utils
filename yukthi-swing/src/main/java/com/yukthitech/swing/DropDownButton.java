@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -14,6 +15,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.border.EtchedBorder;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.swing.common.SwingUtils;
 
@@ -395,5 +398,23 @@ public class DropDownButton extends JPanel
 		}
 		
 		popupMenu.show(this, 0, super.getHeight());
+	}
+	
+	public void removeItems(Predicate<DropDownItem> filter)
+	{
+		if(CollectionUtils.isEmpty(menuItems))
+		{
+			return;
+		}
+		
+		List<DropDownItem> items = new ArrayList<>(menuItems);
+		
+		for(DropDownItem item : items)
+		{
+			if(filter.test(item))
+			{
+				removeItem(item);
+			}
+		}
 	}
 }

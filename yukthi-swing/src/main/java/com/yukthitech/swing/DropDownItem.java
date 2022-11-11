@@ -76,4 +76,14 @@ public class DropDownItem extends JMenuItem
 	{
 		this.userData = userData;
 	}
+	
+	public DropDownItem cloneItem()
+	{
+		DropDownItem clone = new DropDownItem(super.getText(), super.getIcon());
+		clone.setToolTipText(super.getToolTipText());
+		clone.userData = this.userData;
+		
+		return clone;
+	}
+	
 }
