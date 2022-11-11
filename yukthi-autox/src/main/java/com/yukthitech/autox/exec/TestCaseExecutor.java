@@ -14,7 +14,7 @@ import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class TestCaseExecutor extends BaseExecutor
+public class TestCaseExecutor extends Executor
 {
 	private TestCase testCase;
 	
@@ -22,11 +22,9 @@ public class TestCaseExecutor extends BaseExecutor
 	
 	private List<TestCaseExecutor> dependencies;
 	
-	private TestStatus status;
-	
-	public TestCaseExecutor(AutomationContext context, TestCase testCase)
+	public TestCaseExecutor(TestCase testCase)
 	{
-		super(context, "tc", testCase.getName(), testCase.getDescription());
+		super(testCase);
 		
 		this.testCase = testCase;
 		
@@ -35,6 +33,7 @@ public class TestCaseExecutor extends BaseExecutor
 			super.setup = testCase.getDataSetup();
 			super.cleanup = testCase.getDataCleanup();
 			super.parallelCount = testCase.getParallelExecutionCount();
+			super.expectedException = testCase.getExpectedException();
 		}
 		else
 		{
@@ -42,13 +41,18 @@ public class TestCaseExecutor extends BaseExecutor
 		}
 	}
 	
-	private TestCaseExecutor(AutomationContext context, TestCase testCase, TestCaseData testCaseData)
+	private TestCaseExecutor(TestCase testCase, TestCaseData testCaseData)
 	{
-		super(context, "tc", testCase.getName() + "[" + testCaseData.getName() + "]", testCase.getDescription());
+		super(testCase);
 		
 		this.testCase = testCase;
 		this.testCaseData = testCaseData;
 		super.childSteps = testCase.getSteps();
+	}
+	
+	public TestCaseData getTestCaseData()
+	{
+		return testCaseData;
 	}
 	
 	public void addDependency(TestCaseExecutor executor)
@@ -68,7 +72,7 @@ public class TestCaseExecutor extends BaseExecutor
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<IExecutor> getDependencies()
+	public List<Executor> getDependencies()
 	{
 		return (List) dependencies;
 	}
@@ -90,8 +94,9 @@ public class TestCaseExecutor extends BaseExecutor
 			
 			if(dep.status == TestStatus.SKIPPED || dep.status.isErrored())
 			{
-				ReportManager.getInstance().executionSkipped(automationContext, this, 
-						String.format("Skipped as required dependency test-case '%s' is found with status: %s", dep.testCase.getName(), dep.status));
+				ReportManager.getInstance().executionSkipped(ExecutionType.MAIN, this, 
+						String.format("Skipped as required dependency test-case '%s' is found with status: %s", 
+								dep.testCase.getName(), dep.status));
 				return false;
 			}
 		}
@@ -116,6 +121,7 @@ public class TestCaseExecutor extends BaseExecutor
 		}
 		
 		List<TestCaseData> dataLst = null;
+		AutomationContext automationContext = AutomationContext.getInstance();
 		automationContext.setActiveTestCase(testCase, null);
 		
 		try
@@ -134,7 +140,7 @@ public class TestCaseExecutor extends BaseExecutor
 		
 		for(TestCaseData data : dataLst)
 		{
-			super.addChildExector(new TestCaseExecutor(automationContext, testCase, data));
+			super.addChildExector(new TestCaseExecutor(testCase, data));
 		}
 	}
 }

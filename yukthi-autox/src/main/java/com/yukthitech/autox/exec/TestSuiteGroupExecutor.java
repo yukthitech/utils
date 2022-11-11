@@ -14,15 +14,16 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executor of test suite group.
  * @author akranthikiran
  */
-public class TestSuiteGroupExecutor extends BaseExecutor
+public class TestSuiteGroupExecutor extends Executor
 {
-	public TestSuiteGroupExecutor(AutomationContext context, TestSuiteGroup testSuiteGroup)
+	public TestSuiteGroupExecutor(TestSuiteGroup testSuiteGroup)
 	{
-		super(context, "", "global", "global");
+		super(testSuiteGroup);
 		
 		super.setup = testSuiteGroup.getSetup();
 		super.cleanup = testSuiteGroup.getCleanup();
 		
+		AutomationContext context = AutomationContext.getInstance();
 		String parallelExecutionCountStr = context.getOverridableProp(IAutomationConstants.AUTOX_PROP_PARALLEL_EXEC);
 		int parallelExecutionCount = 0;
 		
@@ -47,7 +48,7 @@ public class TestSuiteGroupExecutor extends BaseExecutor
 			.getTestSuites()
 			.stream()
 			.filter(ts -> limitedTestSuites == null || limitedTestSuites.contains(ts.getName()))
-			.map(ts -> new TestSuiteExecutor(context, ts))
+			.map(ts -> new TestSuiteExecutor(ts))
 			.forEach(exec -> addChildExector(exec));
 	}
 }

@@ -20,15 +20,15 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Executor for test suites.
  * @author akranthikiran
  */
-public class TestSuiteExecutor extends BaseExecutor
+public class TestSuiteExecutor extends Executor
 {
 	private static Logger logger = LogManager.getLogger(TestSuiteExecutor.class);
 	
 	private TestSuite testSuite;
 	
-	public TestSuiteExecutor(AutomationContext context, TestSuite testSuite)
+	public TestSuiteExecutor(TestSuite testSuite)
 	{
-		super(context, "ts", testSuite.getName(), testSuite.getDescription());
+		super(testSuite);
 		
 		this.testSuite = testSuite;
 		super.setup = testSuite.getSetup();
@@ -55,13 +55,13 @@ public class TestSuiteExecutor extends BaseExecutor
 				continue;
 			}
 			
-			if(testCase.isExecutable(context, excludedGroup))
+			if(testCase.isExecutable(excludedGroup))
 			{
 				logger.debug("Exluding test-case '{}' as it is part of excluded group: {}", testCase.getName(), excludedGroup.getValue());
 				continue;
 			}
 			
-			TestCaseExecutor executor = new TestCaseExecutor(context, testCase);
+			TestCaseExecutor executor = new TestCaseExecutor(testCase);
 			executorMap.put(testCase.getName(), executor);
 			super.addChildExector(executor);
 			
@@ -88,7 +88,7 @@ public class TestSuiteExecutor extends BaseExecutor
 	
 	private Set<String> getRestrictedTestCases()
 	{
-		Set<String> restrictedTestCases = automationContext.getBasicArguments().getTestCasesSet();
+		Set<String> restrictedTestCases = AutomationContext.getInstance().getBasicArguments().getTestCasesSet();
 		
 		if(CollectionUtils.isEmpty(restrictedTestCases))
 		{

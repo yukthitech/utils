@@ -2,7 +2,6 @@ package com.yukthitech.autox.config;
 
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
-import com.yukthitech.autox.test.TestCase;
 
 /**
  * Represent error details that needs to be sent to plugin for error handling.
@@ -14,11 +13,6 @@ public class ErrorDetails
 	 * Logger for logging messages.
 	 */
 	private ExecutionLogger executionLogger;
-	
-	/**
-	 * Test case which resulted in error.
-	 */
-	private TestCase testCase;
 	
 	/**
 	 * Step resulted in error.
@@ -34,14 +28,12 @@ public class ErrorDetails
 	 * Instantiates a new error details.
 	 *
 	 * @param executionLogger the execution logger
-	 * @param testCase the test case
 	 * @param step the step
 	 * @param exception the exception
 	 */
-	public ErrorDetails(ExecutionLogger executionLogger, TestCase testCase, IStep step, Exception exception)
+	public ErrorDetails(ExecutionLogger executionLogger, IStep step, Exception exception)
 	{
 		this.executionLogger = executionLogger;
-		this.testCase = testCase;
 		this.step = step;
 		this.exception = exception;
 	}
@@ -54,16 +46,6 @@ public class ErrorDetails
 	public ExecutionLogger getExecutionLogger()
 	{
 		return executionLogger;
-	}
-
-	/**
-	 * Gets the test case which resulted in error.
-	 *
-	 * @return the test case which resulted in error
-	 */
-	public TestCase getTestCase()
-	{
-		return testCase;
 	}
 
 	/**

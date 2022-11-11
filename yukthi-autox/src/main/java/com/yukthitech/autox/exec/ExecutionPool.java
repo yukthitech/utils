@@ -26,7 +26,7 @@ public class ExecutionPool
 	
 	private static class ExecutorRunnable implements Runnable
 	{
-		private IExecutor executor;
+		private Executor executor;
 		
 		private CountDownLatch countDownLatch;
 		
@@ -34,7 +34,7 @@ public class ExecutionPool
 		
 		private ExecutorService threadPool;
 		
-		public ExecutorRunnable(IExecutor executor, CountDownLatch countDownLatch, ExecutorService threadPool)
+		public ExecutorRunnable(Executor executor, CountDownLatch countDownLatch, ExecutorService threadPool)
 		{
 			this.executor = executor;
 			this.countDownLatch = countDownLatch;
@@ -85,7 +85,7 @@ public class ExecutionPool
 		return instance;
 	}
 	
-	private void executeSequentially(List<? extends IExecutor> executors)
+	private void executeSequentially(List<? extends Executor> executors)
 	{
 		//Note: in sequence execution, dependencies will not be considered as ordering would be done
 		// during build time
@@ -96,15 +96,15 @@ public class ExecutionPool
 		});
 	}
 
-	private void executeParallelly(List<? extends IExecutor> executors, int parallelCount)
+	private void executeParallelly(List<? extends Executor> executors, int parallelCount)
 	{
 		ExecutorService threadPool = Executors.newFixedThreadPool(parallelCount);
 		CountDownLatch latch = new CountDownLatch(executors.size());
 		
-		IdentityHashMap<IExecutor, ExecutorRunnable> runnableMap = new IdentityHashMap<>();
+		IdentityHashMap<Executor, ExecutorRunnable> runnableMap = new IdentityHashMap<>();
 		
 		//create runnable objects
-		for(IExecutor executor : executors)
+		for(Executor executor : executors)
 		{
 			ExecutorRunnable runnable = new ExecutorRunnable(executor, latch, threadPool);
 			runnableMap.put(executor, runnable);
@@ -114,9 +114,9 @@ public class ExecutionPool
 		//NOTE: Immediate execution is not done to ensure all dependents are added properly
 		List<ExecutorRunnable> directExecutables = new ArrayList<>();
 		
-		for(Map.Entry<IExecutor, ExecutorRunnable> entry : runnableMap.entrySet())
+		for(Map.Entry<Executor, ExecutorRunnable> entry : runnableMap.entrySet())
 		{
-			List<IExecutor> dependencies = entry.getKey().getDependencies();
+			List<Executor> dependencies = entry.getKey().getDependencies();
 			
 			if(CollectionUtils.isEmpty(dependencies))
 			{
@@ -142,7 +142,7 @@ public class ExecutionPool
 		}
 	}
 	
-	public void execute(List<? extends IExecutor> executors, int parallelCount)
+	public void execute(List<? extends Executor> executors, int parallelCount)
 	{
 		if(parallelCount <= 1)
 		{

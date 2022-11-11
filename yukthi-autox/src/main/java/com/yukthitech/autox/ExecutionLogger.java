@@ -37,11 +37,6 @@ public class ExecutionLogger
 	private static final Pattern PARAM_PATTERN = Pattern.compile("\\{(\\d*)\\}");
 	
 	/**
-	 * Context as part of which this logger is created.
-	 */
-	private AutomationContext automationContext;
-	
-	/**
 	 * Flag indicating if logging is disabled or not.
 	 */
 	private boolean disabled = false;
@@ -60,9 +55,9 @@ public class ExecutionLogger
 	
 	private File logsFolder;
 
-	public ExecutionLogger(AutomationContext automationContext, String fileName, String executorName, String executorDescription)
+	public ExecutionLogger(String fileName, String executorName, String executorDescription)
 	{
-		this.automationContext = automationContext;
+		AutomationContext automationContext = AutomationContext.getInstance();
 		
 		this.logsFolder = new File(automationContext.getReportFolder(), "logs");
 		File file = new File(logsFolder, fileName);
@@ -169,6 +164,7 @@ public class ExecutionLogger
 	 */
 	private String getSourceLocation()
 	{
+		AutomationContext automationContext = AutomationContext.getInstance();
 		return automationContext.getExecutionStack().getCurrentLocation();
 	}
 	
@@ -332,6 +328,7 @@ public class ExecutionLogger
 	{
 		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
 		
+		AutomationContext automationContext = AutomationContext.getInstance();
 		String autoxStackTrace = StringEscapeUtils.escapeHtml4(automationContext.getExecutionStack().toStackTrace());
 		
 		logger.error(finalMssg, autoxStackTrace);
@@ -545,6 +542,7 @@ public class ExecutionLogger
 	
 	public File createFile(String filePrefix, String fileSuffix)
 	{
+		AutomationContext automationContext = AutomationContext.getInstance();
 		File logsFolder = new File(automationContext.getReportFolder(), "logs");
 		String fileName = filePrefix + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + fileSuffix;
 
@@ -565,6 +563,7 @@ public class ExecutionLogger
 			logLevel = LogLevel.DEBUG;
 		}
 		
+		AutomationContext automationContext = AutomationContext.getInstance();
 		File logsFolder = new File(automationContext.getReportFolder(), "logs");
 		
 		if(!file.getParentFile().equals(logsFolder))
@@ -600,6 +599,7 @@ public class ExecutionLogger
 			message = "<b>[" + mode + "]</b> " + message;
 		}
 		
+		AutomationContext automationContext = AutomationContext.getInstance();
 		File logsFolder = new File(automationContext.getReportFolder(), "logs");
 		String fileName = filePrefix + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + fileSuffix;
 
@@ -610,9 +610,9 @@ public class ExecutionLogger
 		return tempFile;
 	}
 	
-	public void close(TestStatus status)
+	public void close(TestStatus status, Date endTime)
 	{
-		addMessage(new ExecutionLogData.Footer(status));
+		addMessage(new ExecutionLogData.Footer(status, endTime));
 		logWriter.close();
 	}
 }

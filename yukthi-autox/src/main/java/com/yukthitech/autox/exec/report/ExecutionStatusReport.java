@@ -1,13 +1,11 @@
 package com.yukthitech.autox.exec.report;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.test.TestStatus;
 
 /**
@@ -33,37 +31,19 @@ public class ExecutionStatusReport
 	private List<ExecutionStatusReport> childReports;
 	
 	/**
-	 * Status of the execution.
-	 * Null indicates execution is yet to be started.
+	 * Setup execution details.
 	 */
-	private TestStatus status;
-	
-	/**
-	 * Flag indicates setup steps are executed successfully or not.
-	 * Null indicates there was no setup.
-	 */
-	private Boolean setupSuccessful;
-	
-	/**
-	 * Flag indicates cleanup steps are executed successfully or not.
-	 * Null indicates there was no cleanup.
-	 */
-	private Boolean cleanupSuccessful;
+	private ExecutionDetails setupExecutionDetails;
 
 	/**
-	 * Status message.
+	 * Main execution details.
 	 */
-	private String statusMessage;
-	
+	private ExecutionDetails mainExecutionDetails;
+
 	/**
-	 * Start time.
+	 * Cleanup execution details.
 	 */
-	private Date startTime = new Date();
-	
-	/**
-	 * End time.
-	 */
-	private Date endTime;
+	private ExecutionDetails cleanupExecutionDetails;
 
 	public String getName()
 	{
@@ -95,71 +75,36 @@ public class ExecutionStatusReport
 		this.childReports = childReports;
 	}
 
-	public TestStatus getStatus()
+	public ExecutionDetails getSetupExecutionDetails()
 	{
-		return status;
+		return setupExecutionDetails;
 	}
 
-	public void setStatus(TestStatus status)
+	public void setSetupExecutionDetails(ExecutionDetails setupExecutionDetails)
 	{
-		this.status = status;
+		this.setupExecutionDetails = setupExecutionDetails;
 	}
 
-	public Boolean getSetupSuccessful()
+	public ExecutionDetails getMainExecutionDetails()
 	{
-		return setupSuccessful;
+		return mainExecutionDetails;
 	}
 
-	public void setSetupSuccessful(Boolean setupSuccessful)
+	public void setMainExecutionDetails(ExecutionDetails mainExecutionDetails)
 	{
-		this.setupSuccessful = setupSuccessful;
+		this.mainExecutionDetails = mainExecutionDetails;
 	}
 
-	public Boolean getCleanupSuccessful()
+	public ExecutionDetails getCleanupExecutionDetails()
 	{
-		return cleanupSuccessful;
+		return cleanupExecutionDetails;
 	}
 
-	public void setCleanupSuccessful(Boolean cleanupSuccessful)
+	public void setCleanupExecutionDetails(ExecutionDetails cleanupExecutionDetails)
 	{
-		this.cleanupSuccessful = cleanupSuccessful;
+		this.cleanupExecutionDetails = cleanupExecutionDetails;
 	}
 
-	public String getStatusMessage()
-	{
-		return statusMessage;
-	}
-
-	public void setStatusMessage(String statusMessage)
-	{
-		this.statusMessage = statusMessage;
-	}
-
-	public Date getStartTime()
-	{
-		return startTime;
-	}
-
-	public void setStartTime(Date startTime)
-	{
-		this.startTime = startTime;
-	}
-
-	public Date getEndTime()
-	{
-		return endTime;
-	}
-
-	public void setEndTime(Date endTime)
-	{
-		this.endTime = endTime;
-	}
-	
-	public String getTimeTaken()
-	{
-		return AutomationUtils.getTimeTaken(startTime, endTime);
-	}
-	
 	public void addChidReport(ExecutionStatusReport report)
 	{
 		if(childReports == null)
@@ -186,7 +131,7 @@ public class ExecutionStatusReport
 		
 		for(ExecutionStatusReport result : this.childReports)
 		{
-			if(result.getStatus() == status)
+			if(result.getMainExecutionDetails().getStatus() == status)
 			{
 				count ++;
 			}

@@ -196,14 +196,14 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	 * @param excludedGroup in case of exclusion, this wrapper will be set with group which is excluded.
 	 * @return
 	 */
-	public boolean isExecutable(AutomationContext context, ObjectWrapper<String> excludedGroup)
+	public boolean isExecutable(ObjectWrapper<String> excludedGroup)
 	{
 		if(groups.isEmpty())
 		{
 			return true;
 		}
 		
-		ApplicationConfiguration appConfig = context.getAppConfiguration();
+		ApplicationConfiguration appConfig = AutomationContext.getInstance().getAppConfiguration();
 		
 		for(String grp : this.groups)
 		{

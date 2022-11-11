@@ -385,11 +385,12 @@ public class ExecutionLogData
 		/**
 		 * Start time of this execution.
 		 */
-		private Date endTime = new Date();
+		private Date endTime;
 
-		public Footer(TestStatus status)
+		public Footer(TestStatus status, Date endTime)
 		{
 			this.status = status;
+			this.endTime = endTime;
 		}
 
 		public TestStatus getStatus()

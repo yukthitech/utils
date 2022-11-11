@@ -16,5 +16,7 @@ public enum ExecutionType
 	
 	POST_CHILD,
 	
-	CLEANUP
+	CLEANUP,
+	
+	MAIN
 }
