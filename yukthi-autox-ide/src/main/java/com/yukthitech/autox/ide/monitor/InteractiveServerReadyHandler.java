@@ -5,15 +5,15 @@ import java.io.Serializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.debug.client.IClientDataHandler;
+import com.yukthitech.autox.debug.common.InteractiveServerReadyServerMssg;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.monitor.IAsyncClientDataHandler;
-import com.yukthitech.autox.monitor.ienv.InteractiveServerReady;
 
 /**
  * Handler which would set interactive ready flag based on message received from server.
  * @author akiran
  */
-public class InteractiveServerReadyHandler implements IAsyncClientDataHandler
+public class InteractiveServerReadyHandler implements IClientDataHandler
 {
 	private static Logger logger = LogManager.getLogger(InteractiveServerReadyHandler.class);
 	
@@ -27,7 +27,7 @@ public class InteractiveServerReadyHandler implements IAsyncClientDataHandler
 	@Override
 	public void processData(Serializable data)
 	{
-		if(!(data instanceof InteractiveServerReady))
+		if(!(data instanceof InteractiveServerReadyServerMssg))
 		{
 			return;
 		}

@@ -667,13 +667,6 @@ public class AutomationExecutorState
 
 		//set test suite as active test suite
 		context.setActiveTestSuite(testSuite);
-		
-		//for interactive environment set the test suite on interactive context
-		// last test suite to be set when testcase is being executed (thats why it is kept inside loop)
-		if(context.getInteractiveEnvironmentContext() != null)
-		{
-			context.getInteractiveEnvironmentContext().setLastTestSuite(testSuite);
-		}
 	}
 
 	private void testSuiteCompleted(TestSuite testSuite, boolean successful, ExecutionBranch branch)

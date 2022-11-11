@@ -12,11 +12,14 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.monitor.MonitorLogMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * A simple internal logger to consolidate execution messages in test result.
@@ -27,8 +30,8 @@ public class ExecutionLogger
 {
 	private static Logger logger = LogManager.getLogger(ExecutionLogger.class);
 	
-	private static final String PROP_LOG_MAX_PROP_LEN = "autox.log.max.param.len";
-
+	private static ObjectMapper JSON_MAPPER = new ObjectMapper();
+	
 	private static AtomicInteger fileIndex = new AtomicInteger(1);
 	
 	private static final Pattern PARAM_PATTERN = Pattern.compile("\\{(\\d*)\\}");
@@ -37,11 +40,6 @@ public class ExecutionLogger
 	 * Context as part of which this logger is created.
 	 */
 	private AutomationContext automationContext;
-	
-	/**
-	 * Log data information.
-	 */
-	private ExecutionLogData executionLogData;
 	
 	/**
 	 * Flag indicating if logging is disabled or not.
@@ -57,15 +55,29 @@ public class ExecutionLogger
 	 * Maximum parameter length to be allowed in log messages.
 	 */
 	private int maxParamLength = 1000;
+	
+	private PrintWriter logWriter;
+	
+	private File logsFolder;
 
-	public ExecutionLogger(AutomationContext automationContext, String executorName, String executorDescription)
+	public ExecutionLogger(AutomationContext automationContext, String fileName, String executorName, String executorDescription)
 	{
 		this.automationContext = automationContext;
-		this.executionLogData = new ExecutionLogData(executorName, executorDescription);
+		
+		this.logsFolder = new File(automationContext.getReportFolder(), "logs");
+		File file = new File(logsFolder, fileName);
+		
+		try
+		{
+			this.logWriter = new PrintWriter(file);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to open print writer for log file: {}", file.getPath(), ex);
+		}
 		
 		if(automationContext.getAppConfiguration() != null && automationContext.getAppConfiguration().getApplicationProperties() != null)
 		{
-			String logMaxParamLenStr = automationContext.getAppConfiguration().getApplicationProperties().getProperty(PROP_LOG_MAX_PROP_LEN);
+			String logMaxParamLenStr = automationContext.getAppConfiguration().getApplicationProperties().getProperty(IAutomationConstants.PROP_LOG_MAX_PROP_LEN);
 			
 			if(logMaxParamLenStr != null)
 			{
@@ -80,14 +92,17 @@ public class ExecutionLogger
 					}
 					else
 					{
-						logger.warn("IGNORED: As the value specified by {} property is less than 100, it is ignored. Value specified: {}", PROP_LOG_MAX_PROP_LEN, maxLen);
+						logger.warn("IGNORED: As the value specified by {} property is less than 100, it is ignored. Value specified: {}", 
+								IAutomationConstants.PROP_LOG_MAX_PROP_LEN, maxLen);
 					}
 				}catch(Exception ex)
 				{
-					logger.warn("IGNORED ERROR: Invalid numerical value specified for {} property", PROP_LOG_MAX_PROP_LEN, ex);
+					logger.warn("IGNORED ERROR: Invalid numerical value specified for {} property", IAutomationConstants.PROP_LOG_MAX_PROP_LEN, ex);
 				}
 			}
 		}
+	
+		addMessage(new ExecutionLogData.Header(executorName, executorDescription));
 	}
 	
 	/**
@@ -253,18 +268,21 @@ public class ExecutionLogger
 		return finalMssg;
 	}
 	
-	private void addMessage(ExecutionLogData.Message mssg)
+	private void addMessage(Object mssg)
 	{
-		executionLogData.addMessage(mssg);
-		
-		automationContext.sendAsyncMonitorMessage(new MonitorLogMessage(
-				automationContext.getActiveTestSuite() != null ? automationContext.getActiveTestSuite().getName() : null, 
-				automationContext.getActiveTestCase() != null ? automationContext.getActiveTestCase().getName() : null, 
-				automationContext.getActiveTestCaseData() != null ? automationContext.getActiveTestCaseData().getName() : null, 
-				mssg, 
-				automationContext.isSetupExecution(),
-				automationContext.isCleanupExecution())
-		);
+		try
+		{
+			if(mssg instanceof ExecutionLogData.Message)
+			{
+				((ExecutionLogData.Message) mssg).copyResources(logsFolder);
+			}
+			
+			logWriter.println(JSON_MAPPER.writeValueAsString(mssg));
+			logWriter.flush();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while logging mssg", ex);
+		}
 	}
 
 	/**
@@ -592,13 +610,9 @@ public class ExecutionLogger
 		return tempFile;
 	}
 	
-	/**
-	 * Gets the log data information.
-	 *
-	 * @return the log data information
-	 */
-	public ExecutionLogData getExecutionLogData()
+	public void close(TestStatus status)
 	{
-		return executionLogData;
+		addMessage(new ExecutionLogData.Footer(status));
+		logWriter.close();
 	}
 }

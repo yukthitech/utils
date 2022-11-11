@@ -66,9 +66,9 @@ public class TAutomation
 		
 		FullExecutionDetails exeResult = objectMapper.readValue(new File("./output/test-results.json"), FullExecutionDetails.class);
 		
-		Assert.assertEquals(exeResult.getTestSuiteCount(), 4, "Found one more test suites.");
-		Assert.assertEquals(exeResult.getTestCaseCount(), 9, "Found one more test cases.");
-		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 2, "Found one more test cases errored.");
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 5, "Found one more test suites.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 10, "Found one more test cases.");
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 3, "Found one more test cases errored.");
 		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found one more test cases failed.");
 		Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 1, "Found one more test cases skipped.");
 		
@@ -108,6 +108,17 @@ public class TAutomation
 				), 
 				Arrays.asList("This is from testcase"));
 
+		/***********************************************/
+		// UI Error Test case validation
+		/***********************************************/
+		TestUtils.validateTestCase("screenShotOnError", exeResult, TestStatus.ERRORED, 
+				Arrays.asList(
+					Arrays.asList(
+						"Failed to find element with locator: [Locator: id: invalidId]",
+						"Screen shot during error"
+					)
+				), 
+				null);
 		/***********************************************/
 		// Skip Test case validation
 		/***********************************************/

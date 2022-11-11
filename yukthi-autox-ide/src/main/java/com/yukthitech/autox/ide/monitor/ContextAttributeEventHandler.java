@@ -2,11 +2,11 @@ package com.yukthitech.autox.ide.monitor;
 
 import java.io.Serializable;
 
+import com.yukthitech.autox.debug.client.IClientDataHandler;
+import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.monitor.IAsyncClientDataHandler;
-import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 
-public class ContextAttributeEventHandler implements IAsyncClientDataHandler
+public class ContextAttributeEventHandler implements IClientDataHandler
 {
 	private ExecutionEnvironment environment;
 

@@ -37,6 +37,7 @@ import com.yukthitech.autox.ide.projexplorer.ProjectExplorer;
 import com.yukthitech.autox.ide.services.IdeClosingEvent;
 import com.yukthitech.autox.ide.services.IdeEventManager;
 import com.yukthitech.autox.ide.services.IdeOpeningEvent;
+import com.yukthitech.autox.ide.services.IdePreStateLoadEvent;
 import com.yukthitech.autox.ide.services.IdeStartedEvent;
 import com.yukthitech.autox.ide.services.IdeStateManager;
 import com.yukthitech.autox.ide.views.console.ConsolePanel;
@@ -151,6 +152,9 @@ public class AutoxIDE extends JFrame
 		//load previous state from file
 		IdeState ideState = ideStateManager.getState();
 		
+		//send the pre-state-load event
+		ideEventManager.processEvent(new IdePreStateLoadEvent(ideState));
+
 		//old way of setting loaded distributed state
 		ideContext.getProxy().loadState(ideState);
 		

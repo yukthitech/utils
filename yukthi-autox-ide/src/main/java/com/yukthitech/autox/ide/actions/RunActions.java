@@ -9,6 +9,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.yukthitech.autox.debug.client.IMessageCallback;
+import com.yukthitech.autox.debug.common.ExecuteStepsClientMssg;
+import com.yukthitech.autox.debug.common.InteractiveTestCaseExecDetails;
+import com.yukthitech.autox.debug.common.MessageConfirmationServerMssg;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -21,10 +25,6 @@ import com.yukthitech.autox.ide.layout.Action;
 import com.yukthitech.autox.ide.layout.ActionHolder;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.ui.InProgressDialog;
-import com.yukthitech.autox.monitor.IMessageCallback;
-import com.yukthitech.autox.monitor.ienv.InteractiveExecuteSteps;
-import com.yukthitech.autox.monitor.ienv.InteractiveTestCaseExecDetails;
-import com.yukthitech.autox.monitor.ienv.MessageConfirmation;
 import com.yukthitech.utils.ObjectWrapper;
 
 @ActionHolder
@@ -93,6 +93,18 @@ public class RunActions
 		runConfigurationManager.execute(ExecutionType.TEST_CASE, project, testCase);
 	}
 	
+	@Action
+	public void debugTestSuite()
+	{
+		runTestSuite();
+	}
+	
+	@Action
+	public void debugTestCase()
+	{
+		runTestCase();
+	}
+
 	public void executeStepCode(String code, Project project, Consumer<ExecutionEnvironment> envCallback)
 	{
 		executeStepCode(code, project, envCallback, null);
@@ -129,7 +141,7 @@ public class RunActions
 					{
 						if(code != null)
 						{
-							newInteractiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
+							newInteractiveEnv.sendDataToServer(new ExecuteStepsClientMssg(code));
 						}
 						
 						if(envCallback != null)
@@ -147,7 +159,7 @@ public class RunActions
 		}
 		else
 		{
-			interactiveEnv.sendDataToServer(new InteractiveExecuteSteps(code));
+			interactiveEnv.sendDataToServer(new ExecuteStepsClientMssg(code));
 		}
 	}
 	
@@ -222,7 +234,7 @@ public class RunActions
 			env.sendDataToServer(new InteractiveTestCaseExecDetails(testCaseName, fileEditor.getFile().getPath(), stepLineNo), new IMessageCallback()
 			{
 				@Override
-				public void onProcess(MessageConfirmation confirmation)
+				public void onProcess(MessageConfirmationServerMssg confirmation)
 				{
 					logger.debug("Interactive environment testcase execution is completed. Environment is ready to use...");
 					testCaseExecuted.setValue(true);

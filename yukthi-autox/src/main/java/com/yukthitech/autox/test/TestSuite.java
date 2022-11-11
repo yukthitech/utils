@@ -78,6 +78,12 @@ public class TestSuite implements Validateable, IExecutable
 	private Map<String, Object> attributes = new HashMap<>();
 	
 	/**
+	 * If value specified is greater than 1, then underlying test cases will be executed
+	 * parallelly caping to max this value.
+	 */
+	private int parallelExecutionCount = 0;
+	
+	/**
 	 * Setup to be executed after every test case.
 	 */
 	private Setup beforeTestCase;
@@ -99,7 +105,7 @@ public class TestSuite implements Validateable, IExecutable
 	{
 		return author;
 	}
-
+	
 	public void setAuthor(String author)
 	{
 		if(StringUtils.isNotBlank(author))
@@ -107,6 +113,16 @@ public class TestSuite implements Validateable, IExecutable
 			Set<String> authors = new TreeSet<>(Arrays.asList(author.trim().split("\\s*\\,\\s*")));
 			this.author = authors.stream().collect(Collectors.joining(", "));
 		}
+	}
+
+	public int getParallelExecutionCount()
+	{
+		return parallelExecutionCount;
+	}
+
+	public void setParallelExecutionCount(int parallelExecutionCount)
+	{
+		this.parallelExecutionCount = parallelExecutionCount;
 	}
 
 	/**
@@ -496,7 +512,7 @@ public class TestSuite implements Validateable, IExecutable
 		ordered.add(testCaseName);
 	}
 	
-	List<TestCase> fetchOrderedTestCases()
+	public List<TestCase> fetchOrderedTestCases()
 	{
 		LinkedHashSet<String> ordered = new LinkedHashSet<String>();
 		List<String> inProgress = new ArrayList<String>();

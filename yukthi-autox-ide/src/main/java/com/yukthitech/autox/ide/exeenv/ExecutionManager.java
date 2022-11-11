@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import javax.annotation.PostConstruct;
 import javax.swing.Icon;
@@ -104,6 +105,7 @@ public class ExecutionManager
 	private void onNewExecution(RunConfig runConfig)
 	{
 		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
+		DropDownButton debugButton = (DropDownButton) UiIdElementsManager.getElement("debugList");
 		DropDownItem item = runButton.moveToTop(runConfig);
 		
 		if(item != null)
@@ -114,8 +116,11 @@ public class ExecutionManager
 		item = new DropDownItem(runConfig.getName(), getIcon(runConfig.getExecutionType()));
 		item.setUserData(runConfig);
 		item.addActionListener(this::onRunConfigItemClick);
-		
 		runButton.addItem(item);
+		
+		item = item.cloneItem();
+		item.addActionListener(this::onDebugConfigItemClick);
+		debugButton.addItem(item);
 	}
 	
 	private void onRunConfigItemClick(ActionEvent e)
@@ -136,30 +141,46 @@ public class ExecutionManager
 		}, 1);
 	}
 	
+	private void onDebugConfigItemClick(ActionEvent e)
+	{
+		IdeUtils.execute(() -> 
+		{
+			DropDownItem dropDownItem = (DropDownItem) e.getSource();
+			RunConfig runConfig = (RunConfig) dropDownItem.getUserData();
+			
+			Project project = projectManager.getProject(runConfig.getProjectName());
+			
+			if(project == null)
+			{
+				return;
+			}
+			
+			execute(runConfig.getExecutionType(), project, runConfig.getExecutableName());
+		}, 1);
+	}
+
 	private void onProjectRemove(Project project)
 	{
-		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
-		List<DropDownItem> items = runButton.getItems();
-		List<DropDownItem> itemsToRemove = new ArrayList<DropDownItem>();
 		String projName = project.getName();
 		
-		for(DropDownItem item : items)
+		Predicate<DropDownItem> removeFilter = item -> 
 		{
 			RunConfig config = (RunConfig) item.getUserData();
-			
-			if(config.getProjectName().equals(projName))
-			{
-				itemsToRemove.add(item);
-			}
-		}
+			return config.getProjectName().equals(projName);
+		};
+
+		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
+		DropDownButton debugButton = (DropDownButton) UiIdElementsManager.getElement("debugList");
 		
-		itemsToRemove.forEach(item -> runButton.removeItem(item));
+		runButton.removeItems(removeFilter);
+		debugButton.removeItems(removeFilter);
 	}
 	
 	private void onSaveState(IdeState state)
 	{
 		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
 		List<DropDownItem> items = runButton.getItems();
+		
 		
 		List<RunConfig> configs = new ArrayList<RunConfig>();
 		
@@ -190,6 +211,7 @@ public class ExecutionManager
 		
 		//add to drop down
 		DropDownButton runButton = (DropDownButton) UiIdElementsManager.getElement("runList");
+		DropDownButton debugButton = (DropDownButton) UiIdElementsManager.getElement("debugList");
 		
 		for(RunConfig config : configs)
 		{
@@ -197,8 +219,11 @@ public class ExecutionManager
 
 			item.setUserData(config);
 			item.addActionListener(this::onRunConfigItemClick);
-			
 			runButton.addItem(item);
+			
+			item = item.cloneItem();
+			item.addActionListener(this::onDebugConfigItemClick);
+			debugButton.addItem(item);
 		}
 	}
 }

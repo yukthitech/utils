@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor.ienv;
+package com.yukthitech.autox.debug.common;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Generic response object used to send confirmation with the processing details.
  * @author akiran
  */
-public class MessageConfirmation implements Serializable
+public class MessageConfirmationServerMssg implements Serializable
 {
 	
 	/**
@@ -36,7 +36,7 @@ public class MessageConfirmation implements Serializable
 	 * @param successful the successful
 	 * @param errorMessage the error message
 	 */
-	public MessageConfirmation(String requestId, boolean successful, String errorMessage)
+	public MessageConfirmationServerMssg(String requestId, boolean successful, String errorMessage)
 	{
 		this.requestId = requestId;
 		this.successful = successful;

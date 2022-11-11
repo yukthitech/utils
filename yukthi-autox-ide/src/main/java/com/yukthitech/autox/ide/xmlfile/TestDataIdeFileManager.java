@@ -34,6 +34,12 @@ public class TestDataIdeFileManager extends AbstractIdeFileManager
 	private IdeContext ideContext;
 	
 	@Override
+	public boolean isExecutionSupported()
+	{
+		return true;
+	}
+	
+	@Override
 	public boolean isSuppored(Project project, File file)
 	{
 		if(!file.getName().toLowerCase().endsWith(".xml"))

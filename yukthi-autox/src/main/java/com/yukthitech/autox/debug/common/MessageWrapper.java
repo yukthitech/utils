@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor;
+package com.yukthitech.autox.debug.common;
 
 import java.io.Serializable;
 import java.util.UUID;

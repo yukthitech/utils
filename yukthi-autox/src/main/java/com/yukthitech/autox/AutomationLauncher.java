@@ -15,10 +15,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.filter.ExpressionFactory;
-import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
@@ -235,7 +235,7 @@ public class AutomationLauncher
 	 */
 	private static Integer getMonitoringPort()
 	{
-		String portNumStr = System.getProperty(MonitorServer.SYS_PROP_MONITOR_PORT);
+		String portNumStr = System.getProperty(DebugServer.SYS_PROP_MONITOR_PORT);
 		
 		if(portNumStr == null)
 		{
@@ -301,8 +301,8 @@ public class AutomationLauncher
 		
 		if(monitorPort != null)
 		{
-			MonitorServer server = MonitorServer.startManager(monitorPort);
-			context.setMonitorServer(server);
+			DebugServer server = DebugServer.startManager(monitorPort);
+			context.setDebugServer(server);
 		}
 		
 		context.setBasicArguments(basicArguments);

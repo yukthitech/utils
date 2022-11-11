@@ -912,7 +912,7 @@ public class AutomationUtils
 			Thread.sleep(timeInMillis);
 		}catch(InterruptedException ex)
 		{
-			throw new IllegalStateException(ex);
+			throw new InvalidStateException("Thread was interrupted", ex);
 		}
 	}
 	

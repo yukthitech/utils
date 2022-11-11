@@ -13,6 +13,10 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.debug.client.DebugClient;
+import com.yukthitech.autox.debug.client.IMessageCallback;
+import com.yukthitech.autox.debug.common.ContextAttributeDetails;
+import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
@@ -21,10 +25,6 @@ import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.monitor.ContextAttributeEventHandler;
 import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
 import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
-import com.yukthitech.autox.monitor.IMessageCallback;
-import com.yukthitech.autox.monitor.MonitorClient;
-import com.yukthitech.autox.monitor.MonitorLogMessage;
-import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -46,9 +46,9 @@ public class ExecutionEnvironment
 
 	private boolean terminated = false;
 
-	private MonitorClient monitorClient;
+	private DebugClient monitorClient;
 
-	private List<MonitorLogMessage> reportMessages = new LinkedList<>();
+	private List<MonitorLogServerMssg> reportMessages = new LinkedList<>();
 
 	private File reportFolder;
 
@@ -101,7 +101,7 @@ public class ExecutionEnvironment
 		errThread.start();
 
 		IdeUtils.execute(() -> {
-			monitorClient = MonitorClient.startClient("localhost", monitoringPort);
+			monitorClient = DebugClient.startClient("localhost", monitoringPort);
 			addListeners();
 		}, 1);
 	}
@@ -242,7 +242,7 @@ public class ExecutionEnvironment
 		}
 	}
 
-	public void addReportMessage(MonitorLogMessage mssg)
+	public void addReportMessage(MonitorLogServerMssg mssg)
 	{
 		this.reportMessages.add(mssg);
 		proxyListener.environmentChanged(EnvironmentEvent.newReportLogEvent(this, mssg));
@@ -274,7 +274,7 @@ public class ExecutionEnvironment
 		return terminated;
 	}
 
-	public List<MonitorLogMessage> getReportMessages()
+	public List<MonitorLogServerMssg> getReportMessages()
 	{
 		return reportMessages;
 	}

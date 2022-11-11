@@ -15,13 +15,13 @@ import javax.swing.border.MatteBorder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
 import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEvent;
 import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.monitor.MonitorLogMessage;
 
 @Component
 public class ReportPanel extends JPanel implements IViewPanel
@@ -147,7 +147,7 @@ public class ReportPanel extends JPanel implements IViewPanel
 		model.reload(activeEnvironment);
 	}
 	
-	private void addNewReportLog(MonitorLogMessage logMsg)
+	private void addNewReportLog(MonitorLogServerMssg logMsg)
 	{
 		model.addLog(logMsg, true);
 	}

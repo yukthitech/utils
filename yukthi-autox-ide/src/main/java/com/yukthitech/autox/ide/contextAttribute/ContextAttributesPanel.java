@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.ide.IViewPanel;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
@@ -24,7 +25,6 @@ import com.yukthitech.autox.ide.exeenv.EnvironmentEventType;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
 import com.yukthitech.autox.ide.layout.ActionCollection;
 import com.yukthitech.autox.ide.layout.UiLayout;
-import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 
 @Component
 public class ContextAttributesPanel extends JPanel implements IViewPanel

@@ -12,8 +12,8 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
 
 public class ContextAttributeTableModel extends AbstractTableModel
 {

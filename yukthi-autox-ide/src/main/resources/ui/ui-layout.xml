@@ -81,13 +81,23 @@
 			</item>
 		</menu>
 
-		<menu label="Run" mnemonic="R">
+		<menu label="Run / Debug" mnemonic="R">
 			<item label="Run Test Suite" mnemonic="S" action="runTestSuite">
 				<short-key ctrl="true" key="F9" />
 			</item>
 			<item label="Run Test Case" mnemonic="C" action="runTestCase">
 				<short-key ctrl="true" shift="true" key="F9" />
 			</item>
+			
+			<item label="-" />
+			
+			<item label="Debug Test Suite" mnemonic="S" action="debugTestSuite">
+				<short-key alt="true" key="F9" />
+			</item>
+			<item label="Debug Test Case" mnemonic="C" action="debugTestCase">
+				<short-key alt="true" shift="true" key="F9" />
+			</item>
+
 			<item label="Run Selected Steps..." action="runSelectedSteps">
 				<short-key ctrl="true" key="ENTER" />
 			</item>
@@ -135,6 +145,7 @@
 		<item icon="-" />
 		
 		<drop-down-item id="runList" icon="/ui/icons/run.svg" tooltip="Run..."/>
+		<drop-down-item id="debugList" icon="/ui/icons/debug.svg" tooltip="Debug..."/>
 		
 		<item icon="-" />
 

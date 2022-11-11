@@ -41,11 +41,11 @@ import org.fife.ui.rsyntaxtextarea.LinkGeneratorResult;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaHighlighter;
 import org.fife.ui.rsyntaxtextarea.SquiggleUnderlineHighlightPainter;
-import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.IconRowHeader;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import com.yukthitech.autox.ide.FileParseCollector;
 import com.yukthitech.autox.ide.IIdeConstants;
@@ -55,6 +55,7 @@ import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.dialog.FindCommand;
 import com.yukthitech.autox.ide.dialog.FindOperation;
+import com.yukthitech.autox.ide.editor.FileEditorIconGroup.IconType;
 import com.yukthitech.autox.ide.model.Project;
 import com.yukthitech.autox.ide.xmlfile.MessageType;
 import com.yukthitech.autox.ide.xmlfile.XmlFileLocation;
@@ -70,6 +71,8 @@ public class FileEditor extends JPanel
 	
 	private static ImageIcon WARN_ICON = IdeUtils.loadIconWithoutBorder("/ui/icons/bookmark-warn.svg", 16);
 	
+	private static GutterPopup gutterPopup = new GutterPopup();
+	
 	private RTextScrollPane scrollPane;
 
 	private Project project;
@@ -81,6 +84,9 @@ public class FileEditor extends JPanel
 	private RSyntaxTextAreaHighlighter highlighter = new RSyntaxTextAreaHighlighter();
 
 	private IconRowHeader iconArea;
+	
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	@Autowired
 	private IdeContext ideContext;
@@ -101,6 +107,8 @@ public class FileEditor extends JPanel
 	private Object parsedFileContent;
 	
 	private ErrorHighLigherPanel errorHighLigherPanel;
+	
+	private FileEditorIconManager iconManager;
 	
 	public FileEditor(Project project, File file)
 	{
@@ -128,11 +136,21 @@ public class FileEditor extends JPanel
 			@Override
 			public void mouseClicked(MouseEvent e)
 			{
+				if(!iconManager.isExecutionSupported())
+				{
+					return;
+				}
+				
 				if(SwingUtilities.isRightMouseButton(e))
 				{
-					GutterPopup popup = new GutterPopup();
-					iconArea.add(popup);
-					popup.show(e.getComponent(), e.getX(), e.getY());
+					gutterPopup.setActiveEditor(FileEditor.this, e.getPoint());
+					
+					iconArea.add(gutterPopup);
+					gutterPopup.show(e.getComponent(), e.getX(), e.getY());
+				}
+				else if(e.getClickCount() > 1)
+				{
+					iconManager.toggleBreakPoint(e.getPoint());
 				}
 			}
 		});
@@ -219,6 +237,63 @@ public class FileEditor extends JPanel
 		syntaxTextArea.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.VK_CONTROL | KeyEvent.VK_SHIFT), "dummy");
 	}
 	
+	@PostConstruct
+	private void init()
+	{
+		this.currentFileManager = ideFileManagerFactory.getFileManager(project, file);
+		boolean executionSupported = this.currentFileManager.isExecutionSupported();
+		
+		iconManager = new FileEditorIconManager(this, executionSupported, iconArea, scrollPane.getGutter());
+		
+		if(this.currentFileManager != null)
+		{
+			IIdeCompletionProvider provider = currentFileManager.getCompletionProvider(this);
+			
+			if(provider != null)
+			{
+				AutoCompletion ac = new AutoCompletion(provider) 
+				{
+					@Override
+					protected void insertCompletion(Completion c, boolean typedParamListStartChar)
+					{
+						super.insertCompletion(c, typedParamListStartChar);
+						provider.onAutoCompleteInsert(c);
+					}
+				};
+				
+				// show documentation dialog box
+				ac.setShowDescWindow(true);
+				ac.install(syntaxTextArea);
+				
+				logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
+			}
+			
+			syntaxTextArea.setHyperlinksEnabled(true);
+			syntaxTextArea.setLinkGenerator(new LinkGenerator(){
+
+				@Override
+				public LinkGeneratorResult isLinkAtOffset(RSyntaxTextArea textArea, int offs)
+				{
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+			});
+		}
+
+		setSyntaxStyle();
+		syntaxTextArea.setCodeFoldingEnabled(true);
+
+		fileContentChanged(false);
+		
+		IdeUtils.autowireBean(applicationContext, iconManager);
+		
+		if(executionSupported)
+		{
+			iconManager.loadDebugPoints();
+		}
+	}
+	
 	private void onFocusGained(FocusEvent e)
 	{
 		ideContext.getProxy().activeFileChanged(file, this);
@@ -268,53 +343,6 @@ public class FileEditor extends JPanel
 		}
 	}
 	
-	@PostConstruct
-	private void init()
-	{
-		this.currentFileManager = ideFileManagerFactory.getFileManager(project, file);
-		
-		if(this.currentFileManager != null)
-		{
-			IIdeCompletionProvider provider = currentFileManager.getCompletionProvider(this);
-			
-			if(provider != null)
-			{
-				AutoCompletion ac = new AutoCompletion(provider) 
-				{
-					@Override
-					protected void insertCompletion(Completion c, boolean typedParamListStartChar)
-					{
-						super.insertCompletion(c, typedParamListStartChar);
-						provider.onAutoCompleteInsert(c);
-					}
-				};
-				
-				// show documentation dialog box
-				ac.setShowDescWindow(true);
-				ac.install(syntaxTextArea);
-				
-				logger.debug("For file {} installing auto-complete from provider: {}", file.getPath(), provider);
-			}
-			
-			syntaxTextArea.setHyperlinksEnabled(true);
-			syntaxTextArea.setLinkGenerator(new LinkGenerator(){
-
-				@Override
-				public LinkGeneratorResult isLinkAtOffset(RSyntaxTextArea textArea, int offs)
-				{
-					// TODO Auto-generated method stub
-					return null;
-				}
-				
-			});
-		}
-
-		setSyntaxStyle();
-		syntaxTextArea.setCodeFoldingEnabled(true);
-
-		fileContentChanged(false);
-	}
-	
 	public void setEditorFont(Font font)
 	{
 		syntaxTextArea.setFont(font);
@@ -329,6 +357,11 @@ public class FileEditor extends JPanel
 	public RSyntaxTextArea getTextArea()
 	{
 		return syntaxTextArea;
+	}
+	
+	public FileEditorIconManager getIconManager()
+	{
+		return iconManager;
 	}
 	
 	public void insertStepCode(String code)
@@ -395,6 +428,9 @@ public class FileEditor extends JPanel
 
 			FileUtils.write(file, syntaxTextArea.getText(), Charset.defaultCharset());
 			ideContext.getProxy().fileSaved(file);
+			
+			//update all existing break points with update line numbers
+			iconManager.resetDebugPoints();
 		} catch(Exception ex)
 		{
 			logger.debug("An error occurred while saving file: " + file.getPath(), ex);
@@ -448,13 +484,11 @@ public class FileEditor extends JPanel
 	
 	private void addMessage(FileParseMessage message)
 	{
-		Gutter gutter = scrollPane.getGutter();
-		
 		try
 		{
 			if(message.getMessageType() == MessageType.ERROR)
 			{
-				gutter.addLineTrackingIcon(message.getLineNo() - 1, ERROR_ICON, message.getMessage());
+				iconManager.addIcon(message.getLineNo() - 1, ERROR_ICON, message.getMessage(), IconType.ERROR);
 				
 				if(message.hasValidOffsets())
 				{
@@ -463,7 +497,7 @@ public class FileEditor extends JPanel
 			}
 			else
 			{
-				gutter.addLineTrackingIcon(message.getLineNo() - 1, WARN_ICON, message.getMessage());
+				iconManager.addIcon(message.getLineNo() - 1, WARN_ICON, message.getMessage(), IconType.WARNING);
 				
 				if(message.hasValidOffsets())
 				{
@@ -483,11 +517,13 @@ public class FileEditor extends JPanel
 	
 	private void clearAllMessages()
 	{
-		scrollPane.getGutter().removeAllTrackingIcons();
+		//remove all non debug points
+		iconManager.clearNonDebugIcons();
+
+		//remove high lights
 		highlighter.removeAllHighlights();
 		
 		this.currentHighlights.clear();
-		
 		this.errorHighLigherPanel.clear();
 	}
 	

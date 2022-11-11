@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor;
+package com.yukthitech.autox.debug.client;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -19,7 +19,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.monitor.ienv.MessageConfirmation;
+import com.yukthitech.autox.debug.common.DebuggerInitClientMssg;
+import com.yukthitech.autox.debug.common.MessageConfirmationServerMssg;
+import com.yukthitech.autox.debug.common.MessageWrapper;
 import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -27,9 +29,9 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Client to get monitor data.
  * @author akiran
  */
-public class MonitorClient
+public class DebugClient
 {
-	private static Logger logger = LogManager.getLogger(MonitorClient.class);
+	private static Logger logger = LogManager.getLogger(DebugClient.class);
 	
 	private static AtomicInteger counter = new AtomicInteger(); 
 	
@@ -81,7 +83,7 @@ public class MonitorClient
 	/**
 	 * Manager to manage listeners.
 	 */
-	private EventListenerManager<IAsyncClientDataHandler> listenerManager = EventListenerManager.newEventListenerManager(IAsyncClientDataHandler.class, false);
+	private EventListenerManager<IClientDataHandler> listenerManager = EventListenerManager.newEventListenerManager(IClientDataHandler.class, false);
 	
 	/**
 	 * Thread to invoke listeners.
@@ -98,13 +100,13 @@ public class MonitorClient
 	 */
 	private ReentrantLock callbackLock = new ReentrantLock();
 	
-	private MonitorClient(String serverHost, int serverPort)
+	private DebugClient(String serverHost, int serverPort)
 	{
 		this.serverHost = serverHost;
 		this.serverPort = serverPort;
 		
-		readerThread = new Thread(this::readDataFromServer, "Monitor Client Reader - " + counter.incrementAndGet());
-		listenerThread = new Thread(this::invokeListeners, "Monitor Client Listeners - " + counter.incrementAndGet());
+		readerThread = new Thread(this::readDataFromServer, "Debug Client Reader - " + counter.incrementAndGet());
+		listenerThread = new Thread(this::invokeListeners, "Debug Client Listeners - " + counter.incrementAndGet());
 	}
 	
 	/**
@@ -156,7 +158,7 @@ public class MonitorClient
 	 * Adds specified handler to this client listener list.
 	 * @param handler
 	 */
-	public void addAsyncClientDataHandler(IAsyncClientDataHandler handler)
+	public void addAsyncClientDataHandler(IClientDataHandler handler)
 	{
 		this.listenerManager.addListener(handler);
 	}
@@ -188,9 +190,9 @@ public class MonitorClient
 			
 			for(Serializable obj : data)
 			{
-				if(obj instanceof MessageConfirmation)
+				if(obj instanceof MessageConfirmationServerMssg)
 				{
-					MessageConfirmation confirm = (MessageConfirmation) obj;
+					MessageConfirmationServerMssg confirm = (MessageConfirmationServerMssg) obj;
 					handleConfirmMessage(confirm);
 					continue;
 				}
@@ -200,7 +202,7 @@ public class MonitorClient
 		}
 	}
 	
-	private void handleConfirmMessage(MessageConfirmation mssg)
+	private void handleConfirmMessage(MessageConfirmationServerMssg mssg)
 	{
 		logger.debug("For message with id {} got confirmation", mssg.getRequestId());
 		IMessageCallback callback = null;
@@ -276,11 +278,12 @@ public class MonitorClient
 		listenerThread.start();
 	}
 	
-	public static MonitorClient startClient(String serverHost, int serverPort)
+	public static DebugClient startClient(String serverHost, int serverPort, DebuggerInitClientMssg initMssg)
 	{
-		MonitorClient client = new MonitorClient(serverHost, serverPort);
+		DebugClient client = new DebugClient(serverHost, serverPort);
 		client.start();
 		
+		client.sendDataToServer(initMssg);
 		return client;
 	}
 	

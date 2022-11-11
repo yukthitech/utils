@@ -2,11 +2,11 @@ package com.yukthitech.autox.ide.monitor;
 
 import java.io.Serializable;
 
+import com.yukthitech.autox.debug.client.IClientDataHandler;
+import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.monitor.IAsyncClientDataHandler;
-import com.yukthitech.autox.monitor.MonitorLogMessage;
 
-public class ReportMessageDataHandler implements IAsyncClientDataHandler
+public class ReportMessageDataHandler implements IClientDataHandler
 {
 	/**
 	 * Environment whose events are being listened.
@@ -21,12 +21,12 @@ public class ReportMessageDataHandler implements IAsyncClientDataHandler
 	@Override
 	public void processData(Serializable data)
 	{
-		if(!(data instanceof MonitorLogMessage))
+		if(!(data instanceof MonitorLogServerMssg))
 		{
 			return;
 		}
 		
-		MonitorLogMessage mssg = (MonitorLogMessage) data;
+		MonitorLogServerMssg mssg = (MonitorLogServerMssg) data;
 		environment.addReportMessage(mssg);
 	}
 }

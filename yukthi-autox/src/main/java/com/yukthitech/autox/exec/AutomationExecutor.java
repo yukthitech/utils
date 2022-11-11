@@ -13,6 +13,8 @@ import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
+import com.yukthitech.autox.debug.server.DebugPointReachedException;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.autox.test.TestCaseValidationFailedException;
@@ -71,28 +73,35 @@ public class AutomationExecutor
 			boolean res = false;
 			boolean successul = true;
 			
-			if(stackEntry.isStepsEntry())
+			try
 			{
-				try
+				if(stackEntry.isStepsEntry())
 				{
-					res = executeNextStep(stackEntry);
-				}catch(ExecutionFlowFailed ex)
-				{
-					//when an execution flow fails, approp test case and others would have already been marked as errored/failed
-					/// so here we moved to next item on stack
-					continue;
+					try
+					{
+						res = executeNextStep(stackEntry);
+					}catch(ExecutionFlowFailed ex)
+					{
+						//when an execution flow fails, approp test case and others would have already been marked as errored/failed
+						/// so here we moved to next item on stack
+						continue;
+					}
 				}
-			}
-			else
+				else
+				{
+					res = executeNextBranch(stackEntry);
+					
+					TestCaseResult result = stackEntry.getBranch().result;
+	
+					if(result != null && result.getStatus() != TestStatus.SUCCESSFUL)
+					{
+						successul = false;
+					}
+				}
+			} catch(DebugPointReachedException ex)
 			{
-				res = executeNextBranch(stackEntry);
-				
-				TestCaseResult result = stackEntry.getBranch().result;
-
-				if(result != null && result.getStatus() != TestStatus.SUCCESSFUL)
-				{
-					successul = false;
-				}
+				logger.debug("Paused execution at debug point: {}:{}", ex.getLocation().getName(), ex.getLineNumber());
+				return;
 			}
 			
 			if(res)
@@ -122,12 +131,13 @@ public class AutomationExecutor
 			idx = 0;
 		}
 		
+		IStep step = steps.get(idx);
+		DebugFlowManager.getInstance().checkForDebugPoint(step);
+		
 		if(idx == 0)
 		{
 			stackEntry.started();
 		}
-		
-		IStep step = steps.get(idx);
 		
 		//on completion of step execution, move to next step
 		if(executeStep(step, stackEntry))

@@ -114,4 +114,13 @@ public interface IIdeFileManager
 	{
 		return null;
 	}
+	
+	/**
+	 * Checks if the execution/debug is supported by this file manager.
+	 * @return
+	 */
+	public default boolean isExecutionSupported()
+	{
+		return false;
+	}
 }

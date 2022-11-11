@@ -1,6 +1,6 @@
-package com.yukthitech.autox.monitor;
+package com.yukthitech.autox.debug.client;
 
-import com.yukthitech.autox.monitor.ienv.MessageConfirmation;
+import com.yukthitech.autox.debug.common.MessageConfirmationServerMssg;
 
 /**
  * Callback interface to be used to get callback in message processing.
@@ -12,7 +12,7 @@ public interface IMessageCallback
 	 * Invoked when target message is processed.
 	 * @param confirmation confirmation mssg received from server.
 	 */
-	public void onProcess(MessageConfirmation confirmation);
+	public void onProcess(MessageConfirmationServerMssg confirmation);
 	
 	/**
 	 * Invoked when child process gets terminated abruptly.

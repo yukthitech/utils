@@ -11,6 +11,14 @@ import com.yukthitech.jexpr.JsonExprEngine;
  */
 public interface IAutomationConstants
 {
+	/**
+	 * Used to specify if test suites should be executed parallely or not.
+	 * Overridable prop. 
+	 */
+	public String AUTOX_PROP_PARALLEL_EXEC = "autox.testSuites.parallelExecution";
+	
+	public String PROP_LOG_MAX_PROP_LEN = "autox.log.max.param.len";
+	
 	public String STEP_NAME_SPACE = "http://autox.yukthitech.com/steps";
 	
 	public String FUNC_NAME_SPACE = "http://autox.yukthitech.com/functions";

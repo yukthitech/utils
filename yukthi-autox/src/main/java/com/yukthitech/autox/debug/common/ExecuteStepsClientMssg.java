@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor.ienv;
+package com.yukthitech.autox.debug.common;
 
 import java.io.Serializable;
 
@@ -6,16 +6,16 @@ import java.io.Serializable;
  * Used in interactive environments to execute steps.
  * @author akiran
  */
-public class InteractiveExecuteSteps implements Serializable
+public class ExecuteStepsClientMssg implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	private String stepsToExecute;
 
-	public InteractiveExecuteSteps()
+	public ExecuteStepsClientMssg()
 	{}
 	
-	public InteractiveExecuteSteps(String stepsToExecute)
+	public ExecuteStepsClientMssg(String stepsToExecute)
 	{
 		this.stepsToExecute = stepsToExecute;
 	}

@@ -7,6 +7,11 @@ package com.yukthitech.autox.test;
 public enum TestStatus
 {
 	/**
+	 * Indicates execution is in progress.
+	 */
+	IN_PROGRESS(false),
+	
+	/**
 	 * Represents success state of test case.
 	 */
 	SUCCESSFUL(false),

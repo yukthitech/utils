@@ -1,30 +1,35 @@
-package com.yukthitech.autox.monitor;
+package com.yukthitech.autox.debug.server;
 
 import java.io.Serializable;
 
-import com.yukthitech.autox.monitor.ienv.MessageConfirmation;
+import com.yukthitech.autox.debug.common.MessageConfirmationServerMssg;
+import com.yukthitech.autox.debug.common.MessageWrapper;
+import com.yukthitech.autox.debug.server.handler.AbstractServerDataHandler;
 
 /**
  * Wrapper around data handler that is used to perform pre and post operations
  * of message handling.
  * @author akiran
  */
-public class ServerDataHandlerWrapper implements IAsyncServerDataHandler
+public class ServerDataHandlerWrapper extends AbstractServerDataHandler<Serializable>
 {
 	/**
 	 * Server on which this handler is registered.
 	 */
-	private MonitorServer monitorServer;
+	private DebugServer monitorServer;
 	
 	/**
 	 * Actual data handler which this wrapper is wrapping.
 	 */
-	private IAsyncServerDataHandler actualDataHandler;
+	private IServerDataHandler<Serializable> actualDataHandler;
 	
-	public ServerDataHandlerWrapper(MonitorServer monitorServer, IAsyncServerDataHandler actualDataHandler)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public ServerDataHandlerWrapper(DebugServer monitorServer, IServerDataHandler<? extends Serializable> actualDataHandler)
 	{
+		super(Serializable.class);
+		
 		this.monitorServer = monitorServer;
-		this.actualDataHandler = actualDataHandler;
+		this.actualDataHandler = (IServerDataHandler) actualDataHandler;
 	}
 
 	@Override
@@ -48,7 +53,7 @@ public class ServerDataHandlerWrapper implements IAsyncServerDataHandler
 		if(res && wrapper != null && wrapper.isConfirmationRequired())
 		{
 			boolean successful = (error == null);
-			monitorServer.sendAsync(new MessageConfirmation(wrapper.getId(), successful, error));
+			monitorServer.sendClientMessage(new MessageConfirmationServerMssg(wrapper.getId(), successful, error));
 		}
 		
 		return res;

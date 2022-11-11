@@ -9,8 +9,8 @@ import javax.swing.table.AbstractTableModel;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
 import com.yukthitech.autox.ide.exeenv.ExecutionEnvironment;
-import com.yukthitech.autox.monitor.MonitorLogMessage;
 
 public class ReportTreeTableModel extends AbstractTableModel
 {
@@ -35,7 +35,7 @@ public class ReportTreeTableModel extends AbstractTableModel
 		
 		if(newEnv != null)
 		{
-			for(MonitorLogMessage log : newEnv.getReportMessages())
+			for(MonitorLogServerMssg log : newEnv.getReportMessages())
 			{
 				addLog(log, false);
 			}
@@ -50,7 +50,7 @@ public class ReportTreeTableModel extends AbstractTableModel
 		this.testSuiteMap.put(testSuiteRow.getName(), testSuiteRow);
 	}
 	
-	public void addLog(MonitorLogMessage log, boolean refresh)
+	public void addLog(MonitorLogServerMssg log, boolean refresh)
 	{
 		String testSuiteName = log.getTestSuite();
 		String testCaseName = log.getTestCase();

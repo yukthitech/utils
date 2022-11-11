@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor;
+package com.yukthitech.autox.debug.client;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Handler to handle async data received from server.
  * @author akiran
  */
-public interface IAsyncClientDataHandler
+public interface IClientDataHandler
 {
 	/**
 	 * Invoked when a data is received from server.

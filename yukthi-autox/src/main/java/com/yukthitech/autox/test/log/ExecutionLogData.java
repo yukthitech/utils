@@ -2,9 +2,7 @@ package com.yukthitech.autox.test.log;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -33,22 +31,22 @@ public class ExecutionLogData
 		 * Source location from where logging was done.
 		 */
 		private String source;
-		
+
 		/**
 		 * Java source location where logging was done.
 		 */
 		private String javaSource;
-		
+
 		/**
 		 * Log level at which message is logged.
 		 */
 		private LogLevel logLevel;
-		
+
 		/**
 		 * Log message.
 		 */
 		private String message;
-		
+
 		/**
 		 * Time at which message is logged.
 		 */
@@ -69,10 +67,15 @@ public class ExecutionLogData
 			this.message = message;
 			this.time = time;
 		}
-		
+
 		public Message()
 		{}
-		
+
+		public String getType()
+		{
+			return "Message";
+		}
+
 		public void setSource(String source)
 		{
 			this.source = source;
@@ -107,7 +110,7 @@ public class ExecutionLogData
 		{
 			return source;
 		}
-		
+
 		/**
 		 * Gets the java source location where logging was done.
 		 *
@@ -147,7 +150,7 @@ public class ExecutionLogData
 		{
 			return time;
 		}
-		
+
 		/**
 		 * Gets the time at which message is logged.
 		 *
@@ -157,16 +160,16 @@ public class ExecutionLogData
 		{
 			return ApplicationConfiguration.getInstance().getTimeFormatObject().format(time);
 		}
-		
-		
+
 		/**
 		 * Copies required resources to output folder.
+		 * 
 		 * @param outFolder folder to copy
 		 */
 		public void copyResources(File outFolder)
 		{}
 	}
-	
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class ImageMessage extends Message
 	{
@@ -176,12 +179,12 @@ public class ExecutionLogData
 		 * Name of the image.
 		 */
 		private String name;
-		
+
 		/**
 		 * Image file.
 		 */
 		private File imageFile;
-		
+
 		/**
 		 * Instantiates a new image message.
 		 *
@@ -193,14 +196,14 @@ public class ExecutionLogData
 		public ImageMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, String name, File imageFile)
 		{
 			super(source, javaSource, logLevel, message, time);
-			
+
 			this.name = name;
 			this.imageFile = imageFile;
 		}
-		
+
 		public ImageMessage()
 		{}
-		
+
 		public String getName()
 		{
 			return name;
@@ -226,9 +229,10 @@ public class ExecutionLogData
 		{
 			return imageFile;
 		}
-		
+
 		/**
 		 * Fetches the target image file name.
+		 * 
 		 * @return image file name.
 		 */
 		public String getImageFileName()
@@ -238,25 +242,26 @@ public class ExecutionLogData
 
 		/**
 		 * Copies required resources to output folder.
+		 * 
 		 * @param outFolder folder to copy
 		 */
 		public void copyResources(File outFolder)
 		{
 			File copy = new File(outFolder, name);
-			
+
 			try
 			{
 				FileUtils.copyFile(imageFile, copy);
-				
+
 				imageFile.delete();
 				this.imageFile = copy;
-			}catch(Exception ex)
+			} catch(Exception ex)
 			{
 				throw new InvalidStateException("An error occurred while copying image fiel {} to {}", imageFile.getPath(), copy.getPath());
 			}
 		}
 	}
-	
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class FileMessage extends Message
 	{
@@ -266,7 +271,7 @@ public class ExecutionLogData
 		 * file.
 		 */
 		private File file;
-		
+
 		/**
 		 * Instantiates a new image message.
 		 *
@@ -280,10 +285,10 @@ public class ExecutionLogData
 			super(source, javaSource, logLevel, message, time);
 			this.file = file;
 		}
-		
+
 		public FileMessage()
 		{}
-		
+
 		/**
 		 * Gets the image file.
 		 *
@@ -294,9 +299,10 @@ public class ExecutionLogData
 		{
 			return file;
 		}
-		
+
 		/**
 		 * Fetches the target file name.
+		 * 
 		 * @return file name.
 		 */
 		public String getFileName()
@@ -305,154 +311,110 @@ public class ExecutionLogData
 		}
 	}
 
-	/**
-	 * Name of the executor.
-	 */
-	private String executorName;
-	
-	/**
-	 * Executor description.
-	 */
-	private String executorDescription;
-	
-	/**
-	 * Status of the execution.
-	 */
-	private TestStatus status;
-	
-	/**
-	 * Messages or sub loggers.
-	 */
-	private List<Message> messages = new ArrayList<>();
-	
-	/**
-	 * Execution date on which current test case was executed.
-	 */
-	private Date executionDate = new Date();
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Header
+	{
+		/**
+		 * Name of the executor.
+		 */
+		private String executorName;
 
-	/**
-	 * Instantiates a new execution log data.
-	 *
-	 * @param executorName the executor name
-	 * @param executorDescription the executor description
-	 */
-	public ExecutionLogData(String executorName, String executorDescription)
-	{
-		this.executorName = executorName;
-		this.executorDescription = executorDescription;
-	}
-	
-	public ExecutionLogData()
-	{}
-	
-	public void setExecutorName(String executorName)
-	{
-		this.executorName = executorName;
-	}
+		/**
+		 * Executor description.
+		 */
+		private String executorDescription;
 
-	public void setExecutorDescription(String executorDescription)
-	{
-		this.executorDescription = executorDescription;
-	}
+		/**
+		 * Start time of this execution.
+		 */
+		private Date startTime = new Date();
 
-	public void setMessages(List<Message> messages)
-	{
-		this.messages = messages;
-	}
+		public Header()
+		{}
 
-	public void setExecutionDate(Date executionDate)
-	{
-		this.executionDate = executionDate;
-	}
-
-	/**
-	 * Gets the name of the executor.
-	 *
-	 * @return the name of the executor
-	 */
-	public String getExecutorName()
-	{
-		return executorName;
-	}
-
-	/**
-	 * Gets the executor description.
-	 *
-	 * @return the executor description
-	 */
-	public String getExecutorDescription()
-	{
-		return executorDescription;
-	}
-	
-	/**
-	 * Gets the status of the execution.
-	 *
-	 * @return the status of the execution
-	 */
-	public TestStatus getStatus()
-	{
-		return status;
-	}
-	
-	/**
-	 * Sets the status of the execution.
-	 *
-	 * @param status the new status of the execution
-	 */
-	public void setStatus(TestStatus status)
-	{
-		this.status = status;
-	}
-
-	/**
-	 * Gets the messages or sub loggers.
-	 *
-	 * @return the messages or sub loggers
-	 */
-	public List<Message> getMessages()
-	{
-		return messages;
-	}
-	
-	/**
-	 * Adds the specified message to the log data.
-	 * @param message
-	 */
-	public void addMessage(Message message)
-	{
-		this.messages.add(message);
-	}
-	
-	/**
-	 * Copies required resources to output folder.
-	 * @param outFolder folder to copy
-	 */
-	public void copyResources(File outFolder)
-	{
-		for(Message message : messages)
+		public Header(String executorName, String executorDescription)
 		{
-			message.copyResources(outFolder);
+			this.executorName = executorName;
+			this.executorDescription = executorDescription;
+		}
+
+		public String getExecutorName()
+		{
+			return executorName;
+		}
+
+		public void setExecutorName(String executorName)
+		{
+			this.executorName = executorName;
+		}
+
+		public String getExecutorDescription()
+		{
+			return executorDescription;
+		}
+
+		public void setExecutorDescription(String executorDescription)
+		{
+			this.executorDescription = executorDescription;
+		}
+
+		public Date getStartTime()
+		{
+			return startTime;
+		}
+
+		public void setStartTime(Date startTime)
+		{
+			this.startTime = startTime;
+		}
+
+		public String getStartTimeStr()
+		{
+			return DateFormatUtils.format(startTime, ApplicationConfiguration.getInstance().getDateFomat());
 		}
 	}
-	
-	/**
-	 * Gets the execution date on which current test case was executed.
-	 *
-	 * @return the execution date on which current test case was executed
-	 */
-	public Date getExecutionDate()
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Footer
 	{
-		return executionDate;
-	}
-	
-	/**
-	 * Gets the execution date on which current test case was executed.
-	 *
-	 * @return the execution date on which current test case was executed
-	 */
-	public String getExecutionDateStr()
-	{
-		return DateFormatUtils.format(executionDate, ApplicationConfiguration.getInstance().getDateFomat());
+		/**
+		 * Status of the execution.
+		 */
+		private TestStatus status;
+
+		/**
+		 * Start time of this execution.
+		 */
+		private Date endTime = new Date();
+
+		public Footer(TestStatus status)
+		{
+			this.status = status;
+		}
+
+		public TestStatus getStatus()
+		{
+			return status;
+		}
+
+		public void setStatus(TestStatus status)
+		{
+			this.status = status;
+		}
+
+		public Date getEndTime()
+		{
+			return endTime;
+		}
+
+		public void setEndTime(Date endTime)
+		{
+			this.endTime = endTime;
+		}
+
+		public String getEndTimeStr()
+		{
+			return DateFormatUtils.format(endTime, ApplicationConfiguration.getInstance().getDateFomat());
+		}
 	}
 }

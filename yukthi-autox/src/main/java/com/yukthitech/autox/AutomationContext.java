@@ -22,14 +22,14 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.debug.common.ContextAttributeDetails;
+import com.yukthitech.autox.debug.common.InteractiveServerReadyServerMssg;
+import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
-import com.yukthitech.autox.monitor.MonitorServer;
-import com.yukthitech.autox.monitor.ienv.ContextAttributeDetails;
-import com.yukthitech.autox.monitor.ienv.InteractiveServerReady;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
@@ -153,7 +153,7 @@ public class AutomationContext
 	/**
 	 * Used to send monitor messages to connected client.
 	 */
-	private MonitorServer monitorServer;
+	private DebugServer debugServer;
 	
 	/**
 	 * Flag indicating if setup execution is currently going on.
@@ -174,11 +174,6 @@ public class AutomationContext
 	 * The test suite parser handler.
 	 */
 	private TestSuiteParserHandler testSuiteParserHandler;
-	
-	/**
-	 * The interactive environment context.
-	 */
-	private InteractiveEnvironmentContext interactiveEnvironmentContext;
 	
 	/**
 	 * Used to maintain parameter stack.
@@ -250,9 +245,14 @@ public class AutomationContext
 	 *
 	 * @param monitorServer the new used to send monitor messages to connected client
 	 */
-	public void setMonitorServer(MonitorServer monitorServer)
+	public void setDebugServer(DebugServer monitorServer)
 	{
-		this.monitorServer = monitorServer;
+		this.debugServer = monitorServer;
+	}
+	
+	public DebugServer getDebugServer()
+	{
+		return debugServer;
 	}
 	
 	/**
@@ -345,11 +345,6 @@ public class AutomationContext
 		this.nameToAttr.putAll(this.activeTestCase.getAttributes());
 		
 		this.activeTestCase.initAttributes(this.nameToAttr);
-		
-		if(this.interactiveEnvironmentContext != null)
-		{
-			this.interactiveEnvironmentContext.setLastTestCase(testCase, testCaseData);
-		}
 	}
 	
 	/**
@@ -469,9 +464,9 @@ public class AutomationContext
 			globalAttributes.put(name, value);
 		}
 		
-		if(monitorServer != null)
+		if(debugServer != null)
 		{
-			monitorServer.sendAsync(new ContextAttributeDetails(name, value));
+			debugServer.sendClientMessage(new ContextAttributeDetails(name, value));
 		}
 	}
 	
@@ -959,24 +954,12 @@ public class AutomationContext
 	}
 	
 	/**
-	 * Sends async monitor message to the connected client if any.
-	 * @param mssg message to be sent.
-	 */
-	public void sendAsyncMonitorMessage(Serializable mssg)
-	{
-		if(monitorServer != null)
-		{
-			monitorServer.sendAsync(mssg);
-		}
-	}
-	
-	/**
 	 * Send ready to interact.
 	 */
 	public void sendReadyToInteract()
 	{
 		readyToInteract = true;
-		sendAsyncMonitorMessage(new InteractiveServerReady());
+		sendAsyncMonitorMessage(new InteractiveServerReadyServerMssg());
 	}
 	
 	/**
@@ -996,7 +979,7 @@ public class AutomationContext
 	 */
 	public boolean isMonitoringEnabled()
 	{
-		return (monitorServer != null);
+		return (debugServer != null);
 	}
 	
 	/**
@@ -1019,26 +1002,6 @@ public class AutomationContext
 		this.testSuiteParserHandler = testSuiteParserHandler;
 	}
 
-	/**
-	 * Gets the interactive environment context.
-	 *
-	 * @return the interactive environment context
-	 */
-	public InteractiveEnvironmentContext getInteractiveEnvironmentContext()
-	{
-		return interactiveEnvironmentContext;
-	}
-
-	/**
-	 * Sets the interactive environment context.
-	 *
-	 * @param interactiveEnvironmentContext the new interactive environment context
-	 */
-	public void setInteractiveEnvironmentContext(InteractiveEnvironmentContext interactiveEnvironmentContext)
-	{
-		this.interactiveEnvironmentContext = interactiveEnvironmentContext;
-	}
-	
 	/**
 	 * Gets the manages the stack trace of execution.
 	 *
@@ -1067,6 +1030,18 @@ public class AutomationContext
 	public CustomUiLocator getCustomUiLocator(String name)
 	{
 		return this.customUiLocators.get(name);
+	}
+	
+	public String getOverridableProp(String name)
+	{
+		String val = System.getProperty(name);
+		
+		if(val != null)
+		{
+			return val;
+		}
+		
+		return appConfiguration.getApplicationProperties().getProperty(name);
 	}
 
 	/**

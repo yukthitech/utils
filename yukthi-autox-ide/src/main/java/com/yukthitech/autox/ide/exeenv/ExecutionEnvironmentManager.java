@@ -17,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.ide.context.IdeContext;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.monitor.MonitorServer;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -84,7 +84,7 @@ public class ExecutionEnvironmentManager
 			javaCmd, 
 			"-classpath", classpath,
 			debugArg,
-			"-D" + MonitorServer.SYS_PROP_MONITOR_PORT + "=" + monitorPort,
+			"-D" + DebugServer.SYS_PROP_MONITOR_PORT + "=" + monitorPort,
 			AutomationLauncher.class.getName(),
 			project.getAppConfigFilePath(),
 			"-prop", project.getAppPropertyFilePath(), 

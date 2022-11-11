@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor;
+package com.yukthitech.autox.debug.common;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ import com.yukthitech.autox.test.log.ExecutionLogData.Message;
  * Log message to be sent monitoring client.
  * @author akiran
  */
-public class MonitorLogMessage implements Serializable
+public class MonitorLogServerMssg implements Serializable
 {
 	
 	/**
@@ -60,7 +60,7 @@ public class MonitorLogMessage implements Serializable
 	 * @param setup the setup
 	 * @param cleanup the cleanup
 	 */
-	public MonitorLogMessage(String testSuite, String testCase, String testDataName, Message message, boolean setup, boolean cleanup)
+	public MonitorLogServerMssg(String testSuite, String testCase, String testDataName, Message message, boolean setup, boolean cleanup)
 	{
 		this.testSuite = testSuite;
 		this.testCase = testCase;

@@ -72,6 +72,12 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	private IDataProvider dataProvider;
 	
 	/**
+	 * Used only when data provider is specified. If value specified is greater than 1, then underlying data-test-cases will be executed
+	 * parallelly caping to max this value.
+	 */
+	private int parallelExecutionCount = 0;
+
+	/**
 	 * List of failure actions to be invoked when test case is failed.
 	 * This should include diagnosis of different components playing role
 	 * in this test case.
@@ -329,6 +335,16 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		this.setDataProvider(dataProvider);
 	}
 	
+	public int getParallelExecutionCount()
+	{
+		return parallelExecutionCount;
+	}
+
+	public void setParallelExecutionCount(int parallelExecutionCount)
+	{
+		this.parallelExecutionCount = parallelExecutionCount;
+	}
+
 	/**
 	 * Fetches dependencies as a set.
 	 * @return dependencies set

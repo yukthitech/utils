@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor.ienv;
+package com.yukthitech.autox.debug.server.handler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 
-public class StepHolder implements IStepContainer
+class StepHolder implements IStepContainer
 {
 	/**
 	 * Steps added for execution.

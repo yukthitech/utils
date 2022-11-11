@@ -1,4 +1,4 @@
-package com.yukthitech.autox.monitor.ienv;
+package com.yukthitech.autox.debug.common;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Used to indicate interactive server is ready for interaction.
  * @author akiran
  */
-public class InteractiveServerReady implements Serializable
+public class InteractiveServerReadyServerMssg implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 }

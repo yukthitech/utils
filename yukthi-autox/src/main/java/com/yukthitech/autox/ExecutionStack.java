@@ -1,6 +1,8 @@
 package com.yukthitech.autox;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.logging.log4j.ThreadContext;
 
@@ -14,7 +16,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ExecutionStack
 {
-	private static class StackElement
+	public static class StackElement
 	{
 		private IEntryPoint entryPoint;
 		
@@ -31,7 +33,12 @@ public class ExecutionStack
 		
 		public String getLocation()
 		{
-			return element.getLocation();
+			return element.getLocation().getPath();
+		}
+		
+		public int getLineNumber()
+		{
+			return element.getLineNumber();
 		}
 		
 		public String toString()
@@ -39,7 +46,7 @@ public class ExecutionStack
 			StringBuilder builder = new StringBuilder();
 			builder.append(entryPoint.toText());
 			
-			String location = element.getLocation();
+			String location = element.getLocation().getName() + ":" + element.getLineNumber();
 			builder.append("(").append(location).append(")");
 
 			return builder.toString();
@@ -60,6 +67,11 @@ public class ExecutionStack
 	 * Used internally to ensure, push and pop happens in same order.
 	 */
 	private LinkedList<Object> objectStack = new LinkedList<>();
+	
+	public List<StackElement> getStackTrace()
+	{
+		return new ArrayList<>(stackTrace);
+	}
 	
 	private Object unwrapStep(Object object)
 	{

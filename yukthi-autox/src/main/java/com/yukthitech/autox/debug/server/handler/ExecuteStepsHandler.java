@@ -1,7 +1,6 @@
-package com.yukthitech.autox.monitor.ienv;
+package com.yukthitech.autox.debug.server.handler;
 
 import java.io.ByteArrayInputStream;
-import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -12,8 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.IStep;
-import com.yukthitech.autox.InteractiveEnvironmentContext;
-import com.yukthitech.autox.monitor.IAsyncServerDataHandler;
+import com.yukthitech.autox.debug.common.ExecuteStepsClientMssg;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.IEntryPoint;
@@ -23,9 +21,9 @@ import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPoint
+public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsClientMssg> implements IEntryPoint
 {
-	private static Logger logger = LogManager.getLogger(InteractiveStepHandler.class);
+	private static Logger logger = LogManager.getLogger(ExecuteStepsHandler.class);
 
 	private static String stepHolderTemplate;
 	
@@ -33,7 +31,7 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 	{
 		try
 		{
-			stepHolderTemplate = IOUtils.toString(InteractiveStepHandler.class.getResourceAsStream("/step-holder-template.xml"), Charset.defaultCharset());
+			stepHolderTemplate = IOUtils.toString(ExecuteStepsHandler.class.getResourceAsStream("/step-holder-template.xml"), Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while loading resource: /step-holder-template.xml", ex);
@@ -46,26 +44,21 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 	
 	private TestCase testCase = new TestCase("[dynamic-tst-suite]");
 	
-	public InteractiveStepHandler(AutomationContext automationContext)
+	public ExecuteStepsHandler(AutomationContext automationContext)
 	{
+		super(ExecuteStepsClientMssg.class);
 		this.automationContext = automationContext;
 	}
 
 	@Override
-	public boolean processData(Serializable data)
+	public boolean processData(ExecuteStepsClientMssg steps)
 	{
-		if(!(data instanceof InteractiveExecuteSteps))
-		{
-			return false;
-		}
-		
 		if(!automationContext.isReadyToInteract())
 		{
 			logger.warn("As the server is not yet ready to interact, interactive steps send to server are ignored.");
 			return false;
 		}
 		
-		InteractiveExecuteSteps steps = (InteractiveExecuteSteps) data;
 		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
 		
 		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
@@ -122,20 +115,18 @@ public class InteractiveStepHandler implements IAsyncServerDataHandler, IEntryPo
 	
 	private void executeSteps(List<IStep> steps)
 	{
-		InteractiveEnvironmentContext interactiveContext = automationContext.getInteractiveEnvironmentContext();
-		
-		if(interactiveContext.getLastTestSuite() != null)
+		if(automationContext.getActiveTestSuite() != null)
 		{
-			automationContext.setActiveTestSuite(interactiveContext.getLastTestSuite());
+			automationContext.setActiveTestSuite(automationContext.getActiveTestSuite());
 		}
 		else
 		{
 			automationContext.setActiveTestSuite(testSuite);
 		}
 		
-		if(interactiveContext.getLastTestCase() != null)
+		if(automationContext.getActiveTestCase() != null)
 		{
-			automationContext.setActiveTestCase(interactiveContext.getLastTestCase(), null);
+			automationContext.setActiveTestCase(automationContext.getActiveTestCase(), null);
 		}
 		else
 		{
