@@ -7,15 +7,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.AutomationLauncher;
-import com.yukthitech.autox.test.FullExecutionDetails;
-import com.yukthitech.autox.test.TestCaseResult;
-import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.autox.test.TestSuiteResults;
 
 /**
  * Ensures basic flows are working properly and logs are coming
@@ -44,7 +37,8 @@ public class TFailureFlows
 			Assert.assertTrue(content.contains(str), String.format("File '%s' does not contain log: %s", file, str));
 		}
 	}
-	
+
+	/*
 	@SuppressWarnings("unchecked")
 	private void validTestSuiteSetupFail(FullExecutionDetails exeResult) throws Exception
 	{
@@ -328,4 +322,5 @@ public class TFailureFlows
 		validTsCleanupFail(exeResult);
 		validTsDataFail(exeResult);
 	}
+	*/
 }

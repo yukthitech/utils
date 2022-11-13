@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -337,7 +337,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	 * @param request Request to be populated
 	 */
 	@SuppressWarnings("rawtypes")
-	protected void populate(AutomationContext context, RestRequest<?> request, ExecutionLogger exeLogger)
+	protected void populate(AutomationContext context, RestRequest<?> request, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Populating {} with uri {}"
 				+ "\n\tHeaders: {}"
@@ -411,7 +411,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	 * @param request Request to be populated
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected void invoke(AutomationContext context, RestRequest<?> request, ExecutionLogger exeLogger)
+	protected void invoke(AutomationContext context, RestRequest<?> request, IExecutionLogger exeLogger)
 	{
 		RestPlugin restPlugin = context.getPlugin(RestPlugin.class);
 		
@@ -467,7 +467,7 @@ public abstract class AbstractRestStep extends AbstractStep
 		return AutomationUtils.deepClone(this);
 	}
 	
-	protected IRestResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
+	protected IRestResponseHandler<RestResult<?>> getRestResultHandler(IExecutionLogger exeLogger)
 	{
 		return null;
 	}

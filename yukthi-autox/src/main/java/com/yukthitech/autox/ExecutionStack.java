@@ -41,6 +41,11 @@ public class ExecutionStack
 			return element.getLineNumber();
 		}
 		
+		public String getSourceLocation()
+		{
+			return element.getLocation().getName() + ":" + element.getLineNumber();
+		}
+		
 		public String toString()
 		{
 			StringBuilder builder = new StringBuilder();
@@ -94,7 +99,7 @@ public class ExecutionStack
 	{
 		object = unwrapStep(object);
 		
-		//System.out.println("==========> Pushing object: " + object);
+		System.out.println("==========> Pushing object: " + object);
 		objectStack.push(object);
 		
 		if(object instanceof IEntryPoint)
@@ -190,6 +195,6 @@ public class ExecutionStack
 			return null;
 		}
 		
-		return stackTrace.getFirst().getLocation();
+		return stackTrace.getFirst().getSourceLocation();
 	}
 }

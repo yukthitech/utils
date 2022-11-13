@@ -20,8 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -187,7 +187,7 @@ public class SendMailStep extends AbstractStep
 	 * @return true, if successful
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		Properties props = new Properties();
 		props.put("mail.smtp.host", smptpHost);

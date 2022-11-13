@@ -17,7 +17,8 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.IAutomationListener;
-import com.yukthitech.autox.exec.AutomationExecutor;
+import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
+import com.yukthitech.autox.exec.report.ReportManager;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
@@ -118,7 +119,7 @@ public class AutomationLauncher
 			}
 			
 			testDataFile = new TestDataFile(context);
-			defaultParserHandler.setFileBeingParsed(xmlFile.getName());
+			defaultParserHandler.setFileBeingParsed(xmlFile);
 
 			try
 			{
@@ -152,7 +153,7 @@ public class AutomationLauncher
 					
 					if(testDataFile.getSetup().getLocation() == null)
 					{
-						testDataFile.getSetup().setLocation(filePath, -1);
+						testDataFile.getSetup().setLocation(xmlFile, -1);
 					}
 					
 					testSuiteGroup.setSetup(testDataFile.getSetup());
@@ -168,7 +169,7 @@ public class AutomationLauncher
 					
 					if(testDataFile.getCleanup().getLocation() == null)
 					{
-						testDataFile.getCleanup().setLocation(filePath, -1);
+						testDataFile.getCleanup().setLocation(xmlFile, -1);
 					}
 					
 					testSuiteGroup.setCleanup(testDataFile.getCleanup());
@@ -301,7 +302,7 @@ public class AutomationLauncher
 		
 		if(monitorPort != null)
 		{
-			DebugServer server = DebugServer.startManager(monitorPort);
+			DebugServer server = DebugServer.start(monitorPort);
 			context.setDebugServer(server);
 		}
 		
@@ -361,15 +362,6 @@ public class AutomationLauncher
 		validateCommandLineArguments(context, extendedCommandLineArgs);
 		
 		boolean loadTestSuites = true;
-		boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
-		boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
-		
-		if(isInteractive)
-		{
-			//test suites needs to be loaded only if global setup needs to be executed.
-			loadTestSuites = isInteractiveExeGlobal;
-		}
-		
 		// load test suites
 		TestSuiteGroup testSuiteGroup = loadTestSuites(context, appConfig, loadTestSuites);
 		
@@ -423,39 +415,18 @@ public class AutomationLauncher
 			TestSuiteGroup testSuiteGroup = loadTestFiles(args);
 			AutomationContext context = AutomationContext.getInstance();
 			
-			boolean isInteractive = context.getBasicArguments().isInteractiveEnvironment();
+			int debugPort = context.getBasicArguments().getDebugPort();
 	
 			//execute test suites
-			if(isInteractive)
+			if(debugPort > 0)
 			{
-				InteractiveEnvironmentContext interactiveEnvironmentContext = new InteractiveEnvironmentContext(testSuiteGroup);
-				context.setInteractiveEnvironmentContext(interactiveEnvironmentContext);
-				
-				if(!context.isMonitoringEnabled())
-				{
-					System.err.println("Tried to start interactive environment without monitoring.");
-					System.exit(-1);
-				}
-				
-				boolean isInteractiveExeGlobal = context.getBasicArguments().isInteractiveExecuteGlobal();
-				
-				if(isInteractiveExeGlobal)
-				{
-					logger.debug("As part of interactive environment, executing global setup...");
-					//testSuiteExecutor.executeGlobalSetup();
-				}
-				
-				logger.debug("Skipping actual test suite execution, as this is interactive environment exection.");
-				context.sendReadyToInteract();
-				return;
+				DebugServer.start(debugPort);
 			}
+	
+			TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
+			executor.execute(null, null);
 			
-			AutomationExecutor executor = new AutomationExecutor(context, testSuiteGroup, res -> 
-			{
-				automationCompleted(res, context);
-			});
-			
-			executor.start();
+			automationCompleted(ReportManager.getInstance().isSuccessful(), context);
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);

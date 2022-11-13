@@ -1,5 +1,6 @@
 package com.yukthitech.autox;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class TestSuiteParserHandler extends DefaultParserHandler
 	 *
 	 * @param fileBeingParsed the new maintains the file being parsed
 	 */
-	public void setFileBeingParsed(String fileBeingParsed)
+	public void setFileBeingParsed(File fileBeingParsed)
 	{
 		reserveNodeHandler.setFileBeingParsed(fileBeingParsed);
 	}

@@ -5,8 +5,8 @@ import java.util.Collection;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -45,7 +45,7 @@ public class CollectionAddStep extends AbstractStep
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("To collection of type {} adding value of type: {}", 
 				(collection != null) ? collection.getClass().getName() : "null", 

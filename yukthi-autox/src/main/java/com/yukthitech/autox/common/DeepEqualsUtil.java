@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -35,7 +35,7 @@ public class DeepEqualsUtil
 	 * @param exeLogger
 	 * @return
 	 */
-	public static String deepCompare(Object actual, Object expected, boolean ignoreExtraProperties, AutomationContext context, ExecutionLogger exeLogger)
+	public static String deepCompare(Object actual, Object expected, boolean ignoreExtraProperties, AutomationContext context, IExecutionLogger exeLogger)
 	{
 		//if both are null
 		if(actual == null && expected == null)
@@ -75,7 +75,7 @@ public class DeepEqualsUtil
 		}
 	}
 	
-	private boolean deepCompare(Map<String, Object> actual, Map<String, Object> expected, String propPath, AutomationContext context, ExecutionLogger logger)
+	private boolean deepCompare(Map<String, Object> actual, Map<String, Object> expected, String propPath, AutomationContext context, IExecutionLogger logger)
 	{
 		if(!ignoreExtraProperties)
 		{
@@ -83,7 +83,7 @@ public class DeepEqualsUtil
 			{
 				pathFailed = propPath;
 				
-				logger.warn("Comparision failed because of non-matching map-size at path: {} [Actual's size: {}, Expected's size: {}]", 
+				logger.warn("Comparison failed because of non-matching map-size at path: {} [Actual's size: {}, Expected's size: {}]", 
 						propPath, actual.size(), expected.size());
 				return false;
 			}
@@ -115,7 +115,7 @@ public class DeepEqualsUtil
 			{
 				pathFailed = propPath;
 				
-				logger.warn("Comparision failed because of expected map is not having key: {}", 
+				logger.warn("Comparison failed because of expected map is not having key: {}", 
 						propPath, key);
 				return false;
 			}
@@ -124,7 +124,7 @@ public class DeepEqualsUtil
 		return true;
 	}
 
-	private boolean deepCompare(List<Object> actual, List<Object> expected, String propPath, AutomationContext context, ExecutionLogger logger)
+	private boolean deepCompare(List<Object> actual, List<Object> expected, String propPath, AutomationContext context, IExecutionLogger logger)
 	{
 		if(!ignoreExtraProperties)
 		{
@@ -132,7 +132,7 @@ public class DeepEqualsUtil
 			{
 				pathFailed = propPath;
 				
-				logger.warn("Comparision failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
+				logger.warn("Comparison failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
 						propPath, actual.size(), expected.size());
 				return false;
 			}
@@ -146,7 +146,7 @@ public class DeepEqualsUtil
 		{
 			pathFailed = propPath;
 			
-			logger.warn("Comparision failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
+			logger.warn("Comparison failed because of non-matching list-size at path: {} [Actual's size: {}, Expected's size: {}]", 
 					propPath, actual.size(), expected.size());
 			return false;
 		}
@@ -166,7 +166,7 @@ public class DeepEqualsUtil
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean deepCompare(Object actual, Object expected, String propPath, AutomationContext context, ExecutionLogger logger)
+	private boolean deepCompare(Object actual, Object expected, String propPath, AutomationContext context, IExecutionLogger logger)
 	{
 		//if both are null
 		if(actual == null && expected == null)
@@ -179,7 +179,7 @@ public class DeepEqualsUtil
 		{
 			pathFailed = propPath;
 			
-			logger.warn("Comparision failed because of null value at path: {} [Actual is Null: {}, Expected is Null: {}]", 
+			logger.warn("Comparison failed because of null value at path: {} [Actual is Null: {}, Expected is Null: {}]", 
 					propPath, (actual == null), (expected == null));
 			return false;
 		}
@@ -188,7 +188,7 @@ public class DeepEqualsUtil
 		{
 			pathFailed = propPath;
 			
-			logger.warn("Comparision failed because of incompatible types at path: {} [Actual's type: {}, Expected's type: {}]", 
+			logger.warn("Comparison failed because of incompatible types at path: {} [Actual's type: {}, Expected's type: {}]", 
 					propPath, actual.getClass().getName(), expected.getClass().getName());
 			return false;
 		}
@@ -208,7 +208,7 @@ public class DeepEqualsUtil
 		if(!res)
 		{
 			pathFailed = propPath;
-			logger.warn("Comparision failed because of non-equal values at path: {} [Actual Val: {}, Expected Val: {}]", 
+			logger.warn("Comparison failed because of non-equal values at path: {} [Actual Val: {}, Expected Val: {}]", 
 					propPath, actual, expected);
 		}
 		

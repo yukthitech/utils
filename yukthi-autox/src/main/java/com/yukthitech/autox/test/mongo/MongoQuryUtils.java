@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.mongojs.IMongoJsCustomizer;
 import com.yukthitech.mongojs.MongoJsEngine;
@@ -37,7 +37,7 @@ public class MongoQuryUtils
 	 * @return result
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Map<String, Object> execute(AutomationContext context, ExecutionLogger exeLogger, String mongoResourceName, Object query)
+	public static Map<String, Object> execute(AutomationContext context, IExecutionLogger exeLogger, String mongoResourceName, Object query)
 	{
 		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
 		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
@@ -94,7 +94,7 @@ public class MongoQuryUtils
 		return result;
 	}
 
-	public static Object executeJs(AutomationContext context, ExecutionLogger exeLogger, String mongoResourceName, String script)
+	public static Object executeJs(AutomationContext context, IExecutionLogger exeLogger, String mongoResourceName, String script)
 	{
 		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
 		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);

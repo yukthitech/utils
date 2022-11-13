@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -75,7 +75,7 @@ public class RegexFreeMarkerMethods
 			@FmParam(name = "content", description = "String in which specified regex match needs to be found") String content, 
 			@FmParam(name = "regex", description = "Regex with group names to be extracted from match") String regex)
 	{
-		ExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
+		IExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
 		Matcher matcher = getMatcher(content, regex);
 		
 		if(!matcher.find())
@@ -99,7 +99,7 @@ public class RegexFreeMarkerMethods
 			@FmParam(name = "content", description = "String in which specified regex match needs to be found") String content, 
 			@FmParam(name = "regex", description = "Regex with group names to be extracted from match") String regex)
 	{
-		ExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
+		IExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
 		Matcher matcher = getMatcher(content, regex);
 		
 		if(!matcher.matches())
@@ -123,7 +123,7 @@ public class RegexFreeMarkerMethods
 			@FmParam(name = "content", description = "String in which specified regex match needs to be found") String content, 
 			@FmParam(name = "regex", description = "Regex with group names to be extracted from match") String regex)
 	{
-		ExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
+		IExecutionLogger exeLogger = AutomationContext.getInstance().getExecutionLogger();
 		Matcher matcher = getMatcher(content, regex);
 		
 		Set<String> grpNames = fetchGroupNames(regex);

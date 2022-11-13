@@ -209,9 +209,18 @@ public class DebugServer
 	 */
 	private void start()
 	{
+		logger.debug("Starting debug-server on port: {}", serverPort);
+		
 		try
 		{
 			serverSocket = new ServerSocket(serverPort);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to start debug server on port: " + serverPort, ex);
+		}
+		
+		try
+		{
 			logger.info("Waiting for client to connect. Monitor port: {}", serverPort);
 			
 			clientSocket = serverSocket.accept();
@@ -244,7 +253,7 @@ public class DebugServer
 	 * @param port
 	 * @return
 	 */
-	public static DebugServer startManager(int port)
+	public static DebugServer start(int port)
 	{
 		if(port <= 0)
 		{

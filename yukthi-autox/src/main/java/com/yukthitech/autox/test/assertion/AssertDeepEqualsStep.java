@@ -4,8 +4,8 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -42,7 +42,7 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	@Param(description = "If true, extra properties in actual will be ignored and will only ensure expected structure is found in actual object. Default: false", required = false)
 	private boolean ignoreExtraProperties = false;
 
-	@Param(description = "If false, instead of checking for equlity, check will be done for non equality. Default: true", required = false)
+	@Param(description = "If false, instead of checking for equality, check will be done for non equality. Default: true", required = false)
 	private boolean checkEquality = true;
 	
 	@Param(description = "Failed path, if any, will be set on context with this attribute. Default: failedPath", attrName = true, defaultValue = "failedPath", required = false)
@@ -102,9 +102,9 @@ public class AssertDeepEqualsStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.debug(false, "Comparing values for deep-equlity. <span style=\"white-space: pre-wrap\">[\nExpected: {} [{}], \nActual: {} [{}], \nIgnore exta Properties: {}]</span>", 
+		exeLogger.debug(false, "Comparing values for deep-equality. <span style=\"white-space: pre-wrap\">[\nExpected: {} [{}], \nActual: {} [{}], \nIgnore exta Properties: {}]</span>", 
 				expected, getType(expected),  
 				actual, getType(actual),
 				ignoreExtraProperties);
@@ -114,7 +114,7 @@ public class AssertDeepEqualsStep extends AbstractValidation
 		
 		context.setAttribute(failedPathAttr, diffPath);
 		
-		exeLogger.debug("Result of comparision is: {}", isEqual);
+		exeLogger.debug("Result of comparison is: {}", isEqual);
 		
 		if(!checkEquality)
 		{

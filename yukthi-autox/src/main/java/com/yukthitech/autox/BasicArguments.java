@@ -60,17 +60,11 @@ public class BasicArguments
 	private boolean reportOpeningDisalbed;
 
 	/**
-	 * Used by ide. Flag used to indicate an interactive environment has to be started.
+	 * If specified, debugging will get enabled on specified port.
 	 */
-	@CliArgument(name = "ienv", longName = "interactive-environment", description = "Used by ide. Flag used to indicate an interactive environment has to be started.", required = false)
-	private boolean interactiveEnvironment = false;
-
-	/**
-	 * Used only in interactive environment, indicates if global setup should be executed during start.
-	 */
-	@CliArgument(name = "ieglobal", longName = "interactive-execution-global", description = "Used only in interactive environment, indicates if global setup should be executed during start.", required = false)
-	private boolean interactiveExecuteGlobal = false;
-
+	@CliArgument(name = "dport", longName = "debug-port", description = "If specified, debugging will get enabled on specified port", required = false)
+	private int debugPort;
+	
 	/**
 	 * Comma separated folder paths to which execution should be limited.
 	 */
@@ -251,44 +245,14 @@ public class BasicArguments
 		this.reportOpeningDisalbed = reportOpeningDisalbed;
 	}
 
-	/**
-	 * Gets the used by ide. Flag used to indicate an interactive environment has to be started.
-	 *
-	 * @return the used by ide
-	 */
-	public boolean isInteractiveEnvironment()
+	public int getDebugPort()
 	{
-		return interactiveEnvironment;
+		return debugPort;
 	}
 
-	/**
-	 * Sets the used by ide. Flag used to indicate an interactive environment has to be started.
-	 *
-	 * @param interactiveEnvironment the new used by ide
-	 */
-	public void setInteractiveEnvironment(boolean interactiveEnvironment)
+	public void setDebugPort(int debugPort)
 	{
-		this.interactiveEnvironment = interactiveEnvironment;
-	}
-
-	/**
-	 * Gets the used only in interactive environment, indicates if global setup should be executed during start.
-	 *
-	 * @return the used only in interactive environment, indicates if global setup should be executed during start
-	 */
-	public boolean isInteractiveExecuteGlobal()
-	{
-		return interactiveExecuteGlobal;
-	}
-
-	/**
-	 * Sets the used only in interactive environment, indicates if global setup should be executed during start.
-	 *
-	 * @param interactiveExecuteGlobal the new used only in interactive environment, indicates if global setup should be executed during start
-	 */
-	public void setInteractiveExecuteGlobal(boolean interactiveExecuteGlobal)
-	{
-		this.interactiveExecuteGlobal = interactiveExecuteGlobal;
+		this.debugPort = debugPort;
 	}
 
 	/**

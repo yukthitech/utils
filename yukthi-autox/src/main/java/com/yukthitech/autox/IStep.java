@@ -14,7 +14,7 @@ public interface IStep extends Cloneable, Serializable, ILocationBased
 	 * @param logger Logger to log messages.
 	 * value will be checked for success.
 	 */
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception;
+	public void execute(AutomationContext context, IExecutionLogger logger) throws Exception;
 	
 	/**
 	 * Clones and makes a copy of current step.

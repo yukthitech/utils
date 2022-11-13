@@ -1,5 +1,7 @@
 package com.yukthitech.autox;
 
+import java.io.File;
+
 /**
  * Base class for location based classes.
  * @author akiran
@@ -9,7 +11,7 @@ public abstract class AbstractLocationBased implements ILocationBased
 	/**
 	 * Location set by framework.
 	 */
-	private String location;
+	private File location;
 	
 	/**
 	 * Line number.
@@ -17,7 +19,7 @@ public abstract class AbstractLocationBased implements ILocationBased
 	private int lineNumber;
 	
 	@Override
-	public void setLocation(String location, int lineNumber)
+	public void setLocation(File location, int lineNumber)
 	{
 		this.location = location;
 		this.lineNumber = lineNumber;
@@ -30,7 +32,7 @@ public abstract class AbstractLocationBased implements ILocationBased
 	}
 
 	@Override
-	public String getLocation()
+	public File getLocation()
 	{
 		return location;
 	}

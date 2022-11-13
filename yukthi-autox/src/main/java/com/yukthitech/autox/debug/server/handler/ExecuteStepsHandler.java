@@ -133,7 +133,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 			automationContext.setActiveTestCase(testCase, null);
 		}
 		
-		automationContext.getAutomationExecutor().newSteps("Dynamic-steps", this, steps);
+		//automationContext.getAutomationExecutor().newSteps("Dynamic-steps", this, steps);
 	}
 	
 	@Override

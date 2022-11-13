@@ -186,10 +186,10 @@
 				</tr>
 				<tr ng-repeat="result in testSuiteResults" ng-show="result.display">
 					<td class="defaultVal" style=" white-space: nowrap;">
-						<a href="#{{result.suiteName}}">{{result.suiteName}}</a>
+						<a href="#{{result.suiteName}}">{{result.report.name}}</a>
 					</td>
 					<td ng-class="result.status == 'SUCCESSFUL' ? 'successVal' : 'errorVal'">
-						{{result.status}}	
+						{{result.report.mainExecutionDetails.statusStr}}	
 					</td>
 					<td class="timeDisplay">
 						{{result.timeTaken}}	

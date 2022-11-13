@@ -9,14 +9,16 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
+import com.yukthitech.autox.IMultiPartStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -28,7 +30,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 @Executable(name = "if", group = Group.Lang, message = "Evaluates specified condition and if evaluates to true execute 'then' otherwise execute 'else'. "
 		+ "For ease 'if' supports direct addition of steps which would be added to then block.")
-public class IfConditionStep extends AbstractStep implements IStepContainer
+public class IfConditionStep extends AbstractStep implements IStepContainer, IMultiPartStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -47,12 +49,16 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	private List<IStep> then = new ArrayList<IStep>();
 
 	/**
-	 * Group of steps/validations to be executed when condition evaluated to be
-	 * false.
+	 * Else-if blocks.
 	 */
 	@SkipParsing
-	@Param(name = "else", description = "Group of steps/validations to be executed when condition evaluated to be false.", required = false)
-	private List<IStep> elseGroup = new ArrayList<IStep>();
+	private List<ElseIfStep> elseIfBlocks;
+	
+	/**
+	 * Else block.
+	 */
+	@SkipParsing
+	private ElseStep elseBlock;
 
 	/**
 	 * Sets the freemarker condition to be evaluated.
@@ -83,12 +89,13 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	@ChildElement(description = "Used to group steps to be executed when this if condition is false.")
 	public void setElse(Function elseGroup)
 	{
-		if(CollectionUtils.isNotEmpty(this.elseGroup))
+		if(elseBlock != null)
 		{
-			throw new InvalidStateException("else group is already defined.");
+			throw new InvalidStateException("else block is already defined.");
 		}
 		
-		this.elseGroup.addAll(elseGroup.getSteps());
+		this.elseBlock = new ElseStep();
+		this.elseBlock.setSteps(elseGroup.getSteps());
 	}
 	
 	@Override
@@ -102,28 +109,70 @@ public class IfConditionStep extends AbstractStep implements IStepContainer
 	{
 		return then;
 	}
-
+	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void addChildStep(IStep step)
 	{
-		boolean res = AutomationUtils.evaluateCondition(context, condition);
-		
-		exeLogger.debug("Condition evaluation resulted in '{}'. Condition: {}", res, condition);
-		
-		if(res)
+		if(step instanceof ElseIfStep)
 		{
-			context.getAutomationExecutor()
-				.newSteps("if-then-steps", this, then)
-				.execute();
+			if(elseBlock != null)
+			{
+				throw new InvalidStateException("else-if block cannot be used after else block.");
+			}
+
+			if(this.elseIfBlocks == null)
+			{
+				this.elseIfBlocks = new ArrayList<>();
+			}
+			
+			this.elseIfBlocks.add((ElseIfStep) step);
 		}
 		else
 		{
-			if(CollectionUtils.isNotEmpty(elseGroup))
+			if(elseBlock != null)
 			{
-				context.getAutomationExecutor()
-					.newSteps("if-then-steps", this, elseGroup)
-					.execute();
+				throw new InvalidStateException("else block is already defined.");
 			}
+
+			this.elseBlock = (ElseStep) step;
+		}
+	}
+
+	@Override
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
+	{
+		boolean res = AutomationUtils.evaluateCondition(context, condition);
+		
+		exeLogger.trace("If-condition evaluation resulted in '{}'. Condition: {}", res, condition);
+		
+		if(res)
+		{
+			StepsExecutor.execute(exeLogger, then, null);
+			return;
+		}
+		
+		boolean matched = false;
+		
+		if(CollectionUtils.isNotEmpty(elseIfBlocks))
+		{
+			for(ElseIfStep elseIfBlock : this.elseIfBlocks)
+			{
+				res = AutomationUtils.evaluateCondition(context, condition);
+				exeLogger.trace("Else-if-condition evaluation resulted in '{}'. Condition: {}", res, condition);
+				
+				if(res)
+				{
+					matched = true;
+					StepsExecutor.execute(exeLogger, elseIfBlock.getSteps(), null);
+					break;
+				}
+			}
+		}
+		
+		if(!matched && elseBlock != null)
+		{
+			exeLogger.trace("Executing else block");
+			StepsExecutor.execute(exeLogger, elseBlock.getSteps(), null);
 		}
 	}
 }

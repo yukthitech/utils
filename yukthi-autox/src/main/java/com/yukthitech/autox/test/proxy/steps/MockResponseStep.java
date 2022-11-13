@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -185,7 +185,7 @@ public class MockResponseStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		logger.debug(true, "Adding mock response for [Method: {}, Uri: {}] as [Status code: {}, <br>Headers: {}, <br>Body: {}, <br>Wait Config: {}]", 
 				method, uri, responseStatusCode, responseHeaders, responseBody, waitConfig);

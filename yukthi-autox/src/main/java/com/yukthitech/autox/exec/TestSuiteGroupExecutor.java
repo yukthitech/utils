@@ -7,6 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.test.Cleanup;
+import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -43,12 +46,33 @@ public class TestSuiteGroupExecutor extends Executor
 		
 		BasicArguments basicArguments = context.getBasicArguments();
 		Set<String> limitedTestSuites = basicArguments.getTestSuitesSet();
+		Set<String> restrictedTestCases = basicArguments.getTestCasesSet();
 		
 		testSuiteGroup
 			.getTestSuites()
 			.stream()
-			.filter(ts -> limitedTestSuites == null || limitedTestSuites.contains(ts.getName()))
+			.filter(ts -> 
+			{
+				if(limitedTestSuites != null && !limitedTestSuites.contains(ts.getName()))
+				{
+					return false;
+				}
+				
+				if(restrictedTestCases != null && !ts.hasAnyTestCases(restrictedTestCases))
+				{
+					return false;
+				}
+				
+				return true;
+			})
 			.map(ts -> new TestSuiteExecutor(ts))
 			.forEach(exec -> addChildExector(exec));
+	}
+	
+	@Override
+	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
+	{
+		super.execute(beforeChildFromParent, afterChildFromParent);
+		ReportManager.getInstance().generateReport();
 	}
 }

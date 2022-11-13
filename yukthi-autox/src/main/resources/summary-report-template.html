@@ -118,11 +118,11 @@
 					<#if result.totalCount gt 0>
 						<tr style="<#if result_index % 2 == 0>background-color: #eee</#if>">
 							<td style="${tableCell}">
-								${result.suiteName}<br/>
-								<#if result.author??><span style="font-size: 10px;">[${result.author}]</span></#if>
+								${result.report.name}<br/>
+								<#if result.author??><span style="font-size: 10px;">[${result.report.author}]</span></#if>
 							</td>
-							<td style="${tableCell}  <#if result.status == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
-								${result.status}	
+							<td style="${tableCell}  <#if result.report.mainExecutionDetails.statusStr == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
+								${result.report.mainExecutionDetails.statusStr}	
 							</td>
 							<td style="${tableCell}">
 								${result.totalCount}	
@@ -140,7 +140,7 @@
 								${result.skipCount}
 							</td>
 							<td style="${tableCell}">
-								${result.statusMessage!' '}
+								${result.report.mainExecutionDetails.statusMessage!' '}
 							</td>
 						</tr>
 					</#if>
@@ -155,7 +155,7 @@
 					<table  style="${tableStyle}">
 						<tr>
 							<td colspan="3" style="${titleStyle}">
-									${result.suiteName}
+									${result.report.name}
 							</td>
 						</tr>
 						<tr>
@@ -163,17 +163,17 @@
 							<th style="${tableHeader}">Status</th>
 							<th style="${tableHeader}">Message</th>
 						</tr>
-						<#list result.testCaseResults as suiteResult>
-							<tr  style="<#if suiteResult_index % 2 == 0>background-color: #eee</#if>">
+						<#list result.testCaseResults as tcResult>
+							<tr  style="<#if tcResult_index % 2 == 0>background-color: #eee</#if>">
 								<td  style="${tableCell} color: #3973ac;width: 20%;">
-									${suiteResult.testCaseName}<br/>
-									<#if suiteResult.author??><span style="font-size: 10px;">[${suiteResult.author}]</span></#if>
+									${tcResult.name}<br/>
+									<#if tcResult.author??><span style="font-size: 10px;">[${tcResult.author}]</span></#if>
 								</td>
-								<td style="${tableCell} width: 20%; <#if suiteResult.status == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
-									${suiteResult.status}
+								<td style="${tableCell} width: 20%; <#if tcResult.mainExecutionDetails.statusStr == 'SUCCESSFUL'>${successStyle}<#else>${errorStyle}</#if>">
+									${tcResult.mainExecutionDetails.statusStr}
 								</td>
 								<td style="${tableCell} text-align: left; padding-left: 1em;">
-									${suiteResult.message!''}
+									${tcResult.message!''}
 								</td>
 							</tr>
 						</#list>

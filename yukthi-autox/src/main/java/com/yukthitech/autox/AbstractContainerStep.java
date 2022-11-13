@@ -33,4 +33,9 @@ public abstract class AbstractContainerStep extends AbstractStep implements ISte
 	{
 		return steps;
 	}
+	
+	public void setSteps(List<IStep> steps)
+	{
+		this.steps = steps;
+	}
 }

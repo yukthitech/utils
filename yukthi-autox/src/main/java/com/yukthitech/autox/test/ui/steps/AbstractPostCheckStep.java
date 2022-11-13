@@ -1,7 +1,7 @@
 package com.yukthitech.autox.test.ui.steps;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -51,7 +51,7 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 		return (postVisibilityLocator != null || postHideLocator != null);
 	}
 
-	protected boolean doPostCheck(AutomationContext context, ExecutionLogger exeLogger, String purpose)
+	protected boolean doPostCheck(AutomationContext context, IExecutionLogger exeLogger, String purpose)
 	{
 		if(postVisibilityLocator != null)
 		{

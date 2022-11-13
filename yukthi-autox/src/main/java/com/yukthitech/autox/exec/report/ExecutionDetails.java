@@ -68,6 +68,11 @@ public class ExecutionDetails
 		return status;
 	}
 
+	public String getStatusStr()
+	{
+		return status != null ? status.name() : "";
+	}
+
 	public void setStatus(TestStatus status)
 	{
 		this.status = status;
@@ -95,6 +100,11 @@ public class ExecutionDetails
 
 	public String getEndTimeStr()
 	{
+		if(endTime == null)
+		{
+			return "";
+		}
+		
 		return ApplicationConfiguration.getInstance().getTimeFormatObject().format(endTime);
 	}
 }

@@ -17,9 +17,9 @@ public class ReportInfoProviders
 	
 	public ReportInfoProviders()
 	{
-		addProvider(TestSuiteGroup.class, new ReportInfoProvider<>(grp -> "", grp -> "global", grp -> "global"));
-		addProvider(TestSuite.class, new ReportInfoProvider<>(ts -> "ts", ts -> ts.getName(), ts -> ts.getDescription()));
-		addProvider(TestCase.class, new ReportInfoProvider<>(tc -> "tc", tc -> tc.getName(), tc -> tc.getDescription()));
+		addProvider(TestSuiteGroup.class, new ReportInfoProvider<>(false, grp -> "", grp -> "global", grp -> "global", grp -> ""));
+		addProvider(TestSuite.class, new ReportInfoProvider<>(false, ts -> "ts", ts -> ts.getName(), ts -> ts.getDescription(), ts -> ts.getAuthor()));
+		addProvider(TestCase.class, new ReportInfoProvider<>(true, tc -> "tc", tc -> tc.getName(), tc -> tc.getDescription(), tc -> tc.getAuthor()));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -43,6 +43,11 @@ public class ReportInfoProviders
 	public String getCode(Executor executor)
 	{
 		return getProvider(executor.getExecutable()).getCode(executor.getExecutable());
+	}
+	
+	public String getAuthor(Executor executor)
+	{
+		return getProvider(executor.getExecutable()).getAuthor(executor.getExecutable());
 	}
 	
 	public String getName(Executor executor)
@@ -77,5 +82,10 @@ public class ReportInfoProviders
 		}
 
 		return getProvider(executor.getExecutable()).getDescription(executor.getExecutable());
+	}
+	
+	public boolean isSingleLogger(Executor executor)
+	{
+		return getProvider(executor.getExecutable()).isSingleLogger();
 	}
 }

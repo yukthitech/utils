@@ -12,6 +12,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.test.Cleanup;
+import com.yukthitech.autox.test.Setup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -34,11 +36,17 @@ public class ExecutionPool
 		
 		private ExecutorService threadPool;
 		
-		public ExecutorRunnable(Executor executor, CountDownLatch countDownLatch, ExecutorService threadPool)
+		private Setup beforeChildFromParent;
+		
+		private Cleanup afterChildFromParent;
+		
+		public ExecutorRunnable(Executor executor, CountDownLatch countDownLatch, ExecutorService threadPool, Setup beforeChildFromParent, Cleanup afterChildFromParent)
 		{
 			this.executor = executor;
 			this.countDownLatch = countDownLatch;
 			this.threadPool = threadPool;
+			this.beforeChildFromParent = beforeChildFromParent;
+			this.afterChildFromParent = afterChildFromParent;
 		}
 		
 		public void addDependent(ExecutorRunnable executorRunnable)
@@ -55,8 +63,11 @@ public class ExecutionPool
 		{
 			try
 			{
-				executor.init();
-				executor.execute();
+				//if init fail, consider execution to be failed and dont invoke execute()
+				if(!executor.init())
+				{
+					executor.execute(beforeChildFromParent, afterChildFromParent);
+				}
 			} catch(Exception ex)
 			{
 				logger.error("An error occurred while executing executor: " + executor, ex);
@@ -85,18 +96,20 @@ public class ExecutionPool
 		return instance;
 	}
 	
-	private void executeSequentially(List<? extends Executor> executors)
+	private void executeSequentially(List<? extends Executor> executors, Setup beforeChild, Cleanup afterChild)
 	{
 		//Note: in sequence execution, dependencies will not be considered as ordering would be done
 		// during build time
 		executors.forEach(executor -> 
 		{
-			executor.init();
-			executor.execute();
+			if(executor.init())
+			{
+				executor.execute(beforeChild, afterChild);
+			}
 		});
 	}
 
-	private void executeParallelly(List<? extends Executor> executors, int parallelCount)
+	private void executeParallelly(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, int parallelCount)
 	{
 		ExecutorService threadPool = Executors.newFixedThreadPool(parallelCount);
 		CountDownLatch latch = new CountDownLatch(executors.size());
@@ -106,7 +119,7 @@ public class ExecutionPool
 		//create runnable objects
 		for(Executor executor : executors)
 		{
-			ExecutorRunnable runnable = new ExecutorRunnable(executor, latch, threadPool);
+			ExecutorRunnable runnable = new ExecutorRunnable(executor, latch, threadPool, beforeChildFromParent, afterChildFromParent);
 			runnableMap.put(executor, runnable);
 		}
 		
@@ -142,15 +155,15 @@ public class ExecutionPool
 		}
 	}
 	
-	public void execute(List<? extends Executor> executors, int parallelCount)
+	public void execute(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, int parallelCount)
 	{
 		if(parallelCount <= 1)
 		{
-			executeSequentially(executors);
+			executeSequentially(executors, beforeChildFromParent, afterChildFromParent);
 		}
 		else
 		{
-			executeParallelly(executors, parallelCount);
+			executeParallelly(executors, beforeChildFromParent, afterChildFromParent, parallelCount);
 		}
 	}
 }

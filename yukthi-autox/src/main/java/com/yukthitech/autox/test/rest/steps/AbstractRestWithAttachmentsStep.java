@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.resource.IResource;
 import com.yukthitech.autox.resource.ResourceFactory;
@@ -56,7 +56,7 @@ public abstract class AbstractRestWithAttachmentsStep<T extends RestRequestWithB
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		T postRestRequest = newRequest(uri);
 		postRestRequest.setMultipartRequest(true);

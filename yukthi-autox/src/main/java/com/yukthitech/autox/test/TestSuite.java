@@ -12,13 +12,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.config.ApplicationConfiguration;
-import com.yukthitech.autox.exec.ExecutionBranch;
-import com.yukthitech.autox.exec.ExecutionBranchBuilder;
-import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -30,7 +28,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-public class TestSuite implements Validateable, IExecutable
+public class TestSuite extends AbstractLocationBased implements Validateable
 {
 	/**
 	 * Name of the test suite.
@@ -282,6 +280,11 @@ public class TestSuite implements Validateable, IExecutable
 	{
 		return testCases.get(name);
 	}
+	
+	public boolean hasAnyTestCases(Set<String> names)
+	{
+		return CollectionUtils.containsAny(testCases.keySet(), names);
+	}
 
 	/**
 	 * Gets the list of test cases to be executed in this test suite.
@@ -526,35 +529,6 @@ public class TestSuite implements Validateable, IExecutable
 		ordered.forEach(name -> orderedTestCases.add(testCases.get(name)));
 		
 		return orderedTestCases;
-	}
-	
-	@Override
-	public ExecutionBranch buildExecutionBranch(AutomationContext context)
-	{
-		Set<String> restrictedTestCases = context.getBasicArguments().getTestCasesSet();
-		
-		return ExecutionBranchBuilder
-				.newBranchBuilder(context, name, description, this, fetchOrderedTestCases())
-				.childFilter(tc -> 
-				{
-					if(restrictedTestCases != null && !restrictedTestCases.contains(tc.getName()))
-					{
-						return false;
-					}
-					
-					if(!tc.isExecutable(context, null))
-					{
-						return false;
-					}
-					
-					return true;
-				})
-				.childBranchesRequired()
-				.setup(setup)
-				.cleanup(cleanup)
-				.beforeChild(beforeTestCase)
-				.afterChild(afterTestCase)
-				.build();
 	}
 
 	@Override

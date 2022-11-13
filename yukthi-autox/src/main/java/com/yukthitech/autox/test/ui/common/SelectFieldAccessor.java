@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -125,7 +125,7 @@ public class SelectFieldAccessor implements IFieldAccessor
 		else
 		{
 			AutomationContext automationContext = AutomationContext.getInstance();
-			ExecutionLogger exeLogger = automationContext.getExecutionLogger();
+			IExecutionLogger exeLogger = automationContext.getExecutionLogger();
 			
 			try
 			{

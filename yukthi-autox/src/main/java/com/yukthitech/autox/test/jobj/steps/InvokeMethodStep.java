@@ -10,8 +10,8 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -215,7 +215,7 @@ public class InvokeMethodStep extends AbstractStep
 	 * @return the object
 	 * @throws Exception the exception
 	 */
-	private Object invokeMethod(ExecutionLogger logger) throws Exception
+	private Object invokeMethod(IExecutionLogger logger) throws Exception
 	{
 		Object params[] = parameters.isEmpty() ? null : parameters.toArray(new Object[0]);
 		Class<?> types[] = getParameterTypes(this.paramTypes);
@@ -305,7 +305,7 @@ public class InvokeMethodStep extends AbstractStep
 	 * @see com.yukthitech.automation.IStep#execute(com.yukthitech.automation.AutomationContext, com.yukthitech.automation.ExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		Object result = invokeMethod(logger);
 		context.setAttribute(resultParameter, result);

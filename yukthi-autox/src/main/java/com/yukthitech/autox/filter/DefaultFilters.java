@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ContextMap;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -606,7 +606,7 @@ public class DefaultFilters
 				String randomVarName = "tmp_" + Long.toHexString(System.currentTimeMillis());
 				String fmCode = "${setAttr('" + randomVarName + "', " + expression.trim() + ")}";
 				
-				ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
+				IExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
 				
 				logger.debug("Evaluating expression {} using code snippet: {}", expression, fmCode);
 				
@@ -629,7 +629,7 @@ public class DefaultFilters
 	@SuppressWarnings("unchecked")
 	private Object loadInputStream(String data, String name, String exprType[], FilterContext parserContext) throws Exception
 	{
-		ExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
+		IExecutionLogger logger = parserContext.getAutomationContext().getExecutionLogger();
 		name = name.trim();
 		
 		//if the input stream needs app prop replacement

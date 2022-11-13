@@ -20,9 +20,6 @@ import com.yukthitech.autox.AbstractLocationBasedStepContainer;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.config.ApplicationConfiguration;
-import com.yukthitech.autox.exec.ExecutionBranch;
-import com.yukthitech.autox.exec.ExecutionBranchBuilder;
-import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.ObjectWrapper;
@@ -30,7 +27,7 @@ import com.yukthitech.utils.ObjectWrapper;
 /**
  * Test case with validations to be executed.
  */
-public class TestCase extends AbstractLocationBasedStepContainer implements IStepContainer, Validateable, IEntryPoint, IExecutable
+public class TestCase extends AbstractLocationBasedStepContainer implements IStepContainer, Validateable, IEntryPoint
 {
 	private static Logger logger = LogManager.getLogger(TestCase.class);
 	
@@ -391,6 +388,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		this.setup = setup;
 	}
 	
+	public Setup getSetup()
+	{
+		return setup;
+	}
+	
 	/**
 	 * Sets the steps for cleanup for this test case.
 	 *
@@ -399,6 +401,11 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	public void setCleanup(Cleanup cleanup)
 	{
 		this.cleanup = cleanup;
+	}
+	
+	public Cleanup getCleanup()
+	{
+		return cleanup;
 	}
 
 	/**
@@ -539,20 +546,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 		{
 			throw new ValidateException("No steps specified for execution of test case - " + name);
 		}
-	}
-
-	@Override
-	public ExecutionBranch buildExecutionBranch(AutomationContext context)
-	{
-		return ExecutionBranchBuilder
-				.newBranchNode(context, this.name, this.description, this, steps)
-				.dependencies(dependencies)
-				.setup(setup)
-				.cleanup(cleanup)
-				.dataProvider(dataProvider)
-				.dataSetup(dataSetup)
-				.dataCleanup(dataCleanup)
-				.build();
 	}
 	
 	@Override

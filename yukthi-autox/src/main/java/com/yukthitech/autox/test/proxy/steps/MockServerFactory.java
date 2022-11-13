@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -28,7 +28,7 @@ public class MockServerFactory
 	public static synchronized void startMockServer(AutomationContext context, String name, int port)
 	{
 		MockServer server = nameToServer.get(name);
-		ExecutionLogger logger = context.getExecutionLogger();
+		IExecutionLogger logger = context.getExecutionLogger();
 		
 		if(server != null)
 		{
@@ -56,7 +56,7 @@ public class MockServerFactory
 	public static synchronized void stopMockServer(AutomationContext context, String name)
 	{
 		MockServer server = nameToServer.get(name);
-		ExecutionLogger logger = context.getExecutionLogger();
+		IExecutionLogger logger = context.getExecutionLogger();
 		
 		if(server == null)
 		{

@@ -6,8 +6,8 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -45,7 +45,7 @@ public class SwitchFrame extends AbstractStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		if(index != null)
 		{

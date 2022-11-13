@@ -11,16 +11,15 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.exec.AutomationExecutor;
+import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.test.Function;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Evaluates specified condition and if evaluates to true execute 'then'
@@ -28,7 +27,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-@Executable(name = "pollAndCheck", group = Group.Lang, message = "Used to execute polling steps till check condition is met with specified interval gap. Validation will fail if required condition is not met or exceeds timeout.")
+@Executable(name = "pollAndCheck", group = Group.Lang, message = "Used to execute polling steps till check condition is met with specified interval gap. "
+		+ "Validation will fail if required condition is not met or exceeds timeout.")
 public class PollAndCheckStep extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
@@ -134,7 +134,7 @@ public class PollAndCheckStep extends AbstractValidation
 		this.timeOutUnit = timeOutUnit;
 	}
 	
-	private boolean checkCondition(AutomationContext context, ExecutionLogger exeLogger)
+	private boolean checkCondition(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		boolean res = AutomationUtils.evaluateCondition(context, checkCondition);
 		
@@ -147,44 +147,33 @@ public class PollAndCheckStep extends AbstractValidation
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		Date startTime = new Date();
 		exeLogger.debug("Starting time: {}. Check Condition: {}", TIME_FORMAT.format(startTime), checkCondition);
 		
-		AutomationExecutor executor = context.getAutomationExecutor();
-		
-		executor.newSteps("pool-n-check-steps", this, poll)
-			.isReexecutionNeeded(entry -> 
+		while(true)
+		{
+			StepsExecutor.execute(exeLogger, poll, null);
+			
+			boolean conditionSuccessful = checkCondition(context, exeLogger);
+			
+			if(conditionSuccessful)
 			{
-				boolean conditionSuccessful = checkCondition(context, exeLogger);
-				
-				if(conditionSuccessful)
-				{
-					return false;
-				}
-				
-				long diff = System.currentTimeMillis() - startTime.getTime();
-				
-				if(diff > timeOutUnit.toMillis((Long) timeOut))
-				{
-					exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
-					throw new AutoxValidationException(this, "Check condition '{}' is not met till timeout of {} {}", checkCondition, timeOut, timeOutUnit);
-				}
-				
-				exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
-				
-				try
-				{
-					Thread.sleep(pollingIntervalUnit.toMillis((Long) pollingInterval));
-				}catch(Exception ex)
-				{
-					throw new InvalidStateException("Thread was interruped while waiting as part of polling step", ex);
-				}
-
-				return true;
-			})
-			.execute();
-		;
+				return;
+			}
+			
+			long diff = System.currentTimeMillis() - startTime.getTime();
+			
+			if(diff > timeOutUnit.toMillis((Long) timeOut))
+			{
+				exeLogger.error("Check condition '{}' is not met till timeout of {} {}. Error Time: {}", checkCondition, timeOut, timeOutUnit, TIME_FORMAT.format(new Date()));
+				throw new AutoxValidationException(this, "Check condition '{}' is not met till timeout of {} {}", checkCondition, timeOut, timeOutUnit);
+			}
+			
+			exeLogger.trace("Check condition was not met. Process will wait for {} {} before re-executing polling steps", pollingInterval, pollingIntervalUnit);
+			
+			AutomationUtils.sleep(pollingIntervalUnit.toMillis((Long) pollingInterval));
+		}
 	}
 }

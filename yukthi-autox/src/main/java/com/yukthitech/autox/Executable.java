@@ -44,5 +44,5 @@ public @interface Executable
 	 * in conjunction with preceding step.
 	 * @return
 	 */
-	public Class<? extends IMultiPartStep> partOf() default IMultiPartStep.class;
+	public Class<? extends IMultiPartStep>[] partOf() default {};
 }

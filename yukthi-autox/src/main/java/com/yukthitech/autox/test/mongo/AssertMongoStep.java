@@ -6,8 +6,8 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.DeepEqualsUtil;
@@ -58,7 +58,7 @@ public class AssertMongoStep extends AbstractValidation
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
 		

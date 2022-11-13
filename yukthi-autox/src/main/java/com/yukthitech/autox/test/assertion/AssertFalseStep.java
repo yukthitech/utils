@@ -4,8 +4,8 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -41,7 +41,7 @@ public class AssertFalseStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Checking the value is false [value : {}]", value);
 		boolean isTrue = false;

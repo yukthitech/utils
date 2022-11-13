@@ -6,8 +6,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.config.ErrorDetails;
@@ -83,8 +84,9 @@ public abstract class Executor
 	 * This is invoked once all dependencies (if any) are completed and this executor is ready to execute.
 	 * In this method data-provider execution (and child population) should occur.
 	 */
-	public void init()
+	public boolean init()
 	{
+		return true;
 	}
 	
 	public Object getExecutable()
@@ -108,70 +110,64 @@ public abstract class Executor
 		this.childExecutors.add(executor);
 	}
 	
-	public void execute()
+	public List<Executor> getChildExecutors()
+	{
+		return childExecutors;
+	}
+	
+	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
 	{
 		status = TestStatus.IN_PROGRESS;
-				
-		//Execute setup
-		if(setup != null)
-		{
-			ExecutionLogger setupLogger = reportManager.getSetupExecutionLogger(this);
-			
-			try
-			{
-				reportManager.executionStarted(ExecutionType.SETUP, this);
-				
-				StepsExecutor.execute(setupLogger, setup.getSteps(), null);
-				reportManager.executionCompleted(ExecutionType.SETUP, this);
-			}catch(Exception ex)
-			{
-				status = TestStatus.ERRORED;
-				
-				logger.error("An error occurred during setup execution", ex);
-				reportManager.executionErrored(ExecutionType.SETUP, this, "Setup failed with error: " + ex.getMessage());
-				return;
-			}
-		}
+		reportManager.executionStarted(ExecutionType.MAIN, this);
+
+		AutomationContext.getInstance().getExecutionStack().push(executable);
 		
 		try
 		{
-			//execute children
-			if(childExecutors != null)
+			if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this))
 			{
-				executeChildExecutors();
+				return;
 			}
-			else
+					
+			//Execute setup
+			if(!ExecutorUtils.executeSetup(setup, "Setup", this))
 			{
-				executeChildSteps();
+				return;
+			}
+			
+			try
+			{
+				//execute children
+				if(childExecutors != null)
+				{
+					executeChildExecutors();
+				}
+				else
+				{
+					executeChildSteps();
+				}
+			} finally
+			{
+				//Pre cleanup is expected to take care of tasks like data-clean-up
+				preCleanup();
+				
+				//execute cleanup
+				ExecutorUtils.executeCleanup(cleanup, "Cleanup", this);
+	
+				ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this);
 			}
 		} finally
 		{
-			//execute cleanup
-			if(cleanup != null)
-			{
-				ExecutionLogger cleanupLogger = reportManager.getCleanupExecutionLogger(this);
-				
-				try
-				{
-					reportManager.executionStarted(ExecutionType.CLEANUP, this);
-					
-					StepsExecutor.execute(cleanupLogger, cleanup.getSteps(), null);
-					reportManager.executionCompleted(ExecutionType.CLEANUP, this);
-				}catch(Exception ex)
-				{
-					status = TestStatus.ERRORED;
-					
-					logger.error("An error occurred during cleanup execution", ex);
-					reportManager.executionErrored(ExecutionType.CLEANUP, this, "Cleanup failed with error: " + ex.getMessage());
-					return;
-				}
-			}
+			AutomationContext.getInstance().getExecutionStack().pop(executable);
 		}
 	}
+	
+	protected void preCleanup()
+	{}
 
 	private void executeChildExecutors()
 	{
-		ExecutionPool.getInstance().execute(childExecutors, parallelCount);
+		ExecutionPool.getInstance().execute(childExecutors, beforeChild, afterChild, parallelCount);
 		
 		TestStatus finalStatus = TestStatus.SUCCESSFUL;
 		
@@ -213,7 +209,7 @@ public abstract class Executor
 	
 	private void executeChildSteps()
 	{
-		ExecutionLogger logger = ReportManager.getInstance().getExecutionLogger(this);
+		IExecutionLogger logger = ReportManager.getInstance().getExecutionLogger(this);
 		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
 
 		//NOTE: Even parallel execution is used by test-suites or data-test-cases, final test case
@@ -229,7 +225,7 @@ public abstract class Executor
 		}
 	}
 	
-	private void handleException(IStep step, ExecutionLogger exeLogger, Exception ex)
+	private void handleException(IStep step, IExecutionLogger exeLogger, Exception ex)
 	{
 		//from exception, try to find the step which caused the problem
 		//	so that approp plugin handlers can be called.
@@ -277,7 +273,7 @@ public abstract class Executor
 				return;
 			}catch(InvalidArgumentException iex)
 			{
-				exeLogger.error(ex, ex.getMessage());
+				exeLogger.error(ex.getMessage(), ex);
 				ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
 				
 				reportManager.executionErrored(ExecutionType.MAIN, this, 

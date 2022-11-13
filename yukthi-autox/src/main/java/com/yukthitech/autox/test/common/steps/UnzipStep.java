@@ -10,8 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.ZipUtils;
@@ -85,7 +85,7 @@ public class UnzipStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		File outFolder = new File(this.outFolder);
 		

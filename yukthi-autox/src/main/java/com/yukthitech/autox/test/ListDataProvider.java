@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.filter.ExpressionConfig;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -48,21 +47,7 @@ public class ListDataProvider extends AbstractDataProvider implements Validateab
 	public void addStepDataList(Object data)
 	{
 		ExpressionFactory expressionFactory = ExpressionFactory.getExpressionFactory();
-		AutomationContext automationContext = AutomationContext.getInstance();
-		boolean loggerSet = false;
-		
-		if(automationContext.getExecutionLogger() == null)
-		{
-			automationContext.setExecutionLogger(new ExecutionLogger(automationContext, "<data-provider-load>", "Data provider load"));
-			loggerSet = true;
-		}
-		
 		Object result = expressionFactory.parseExpression(AutomationContext.getInstance(), data, new ExpressionConfig(null, TestCaseDataList.class));
-		
-		if(loggerSet)
-		{
-			automationContext.setExecutionLogger(null);
-		}
 		
 		if(!(result instanceof List))
 		{

@@ -7,8 +7,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.IDataProvider;
+import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestStatus;
@@ -22,16 +25,23 @@ public class TestCaseExecutor extends Executor
 	
 	private List<TestCaseExecutor> dependencies;
 	
+	private Setup dataSetup;
+	
+	private Cleanup dataCleanup;
+	
 	public TestCaseExecutor(TestCase testCase)
 	{
 		super(testCase);
 		
 		this.testCase = testCase;
+		super.setup = testCase.getSetup();
+		super.cleanup = testCase.getCleanup();
 		
 		if(testCase.getDataProvider() != null)
 		{
-			super.setup = testCase.getDataSetup();
-			super.cleanup = testCase.getDataCleanup();
+			this.dataSetup = testCase.getDataSetup();
+			this.dataCleanup = testCase.getDataCleanup();
+			
 			super.parallelCount = testCase.getParallelExecutionCount();
 			super.expectedException = testCase.getExpectedException();
 		}
@@ -104,33 +114,48 @@ public class TestCaseExecutor extends Executor
 		return true;
 	}
 	
+	private List<TestCaseData> executeDataProvider(IDataProvider dataProvider)
+	{
+		AutomationContext automationContext = AutomationContext.getInstance();
+		
+		automationContext.setActiveTestCase(testCase, null);
+		
+		IExecutionLogger executionLogger = ReportManager.getInstance().getSetupExecutionLogger(this);
+		executionLogger.setMode("Data-Provider");
+		automationContext.setExecutionLogger(executionLogger);
+		
+		try
+		{
+			return dataProvider.getStepData();
+		} finally
+		{
+			automationContext.setExecutionLogger(null);
+			automationContext.clearActiveTestCase();
+		}
+	}
+	
 	@Override
-	public void init()
+	public boolean init()
 	{
 		//dont consider data provider, for already data-based executors
 		if(testCaseData != null)
 		{
-			return;
+			return true;
 		}
 		
 		IDataProvider dataProvider = testCase.getDataProvider();
 		
 		if(dataProvider == null)
 		{
-			return;
+			return true;
 		}
 		
-		List<TestCaseData> dataLst = null;
-		AutomationContext automationContext = AutomationContext.getInstance();
-		automationContext.setActiveTestCase(testCase, null);
-		
-		try
+		if(!ExecutorUtils.executeSetup(dataSetup, "Data-Setup", this))
 		{
-			dataLst = dataProvider.getStepData();
-		} finally
-		{
-			automationContext.clearActiveTestCase();
+			return false;
 		}
+		
+		List<TestCaseData> dataLst = executeDataProvider(dataProvider);
 		
 		if(CollectionUtils.isEmpty(dataLst))
 		{
@@ -142,5 +167,13 @@ public class TestCaseExecutor extends Executor
 		{
 			super.addChildExector(new TestCaseExecutor(testCase, data));
 		}
+		
+		return true;
+	}
+	
+	@Override
+	protected void preCleanup()
+	{
+		ExecutorUtils.executeCleanup(dataCleanup, "Data-Cleanup", this);
 	}
 }

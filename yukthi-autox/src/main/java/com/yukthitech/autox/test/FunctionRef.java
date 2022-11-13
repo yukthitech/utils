@@ -8,8 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -44,6 +44,15 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 	@Param(description = "Attribute name to be used to specify return value. If not specified, return value will be ignored. Default: null", required = false)
 	private String returnAttr;
 	
+	public FunctionRef()
+	{}
+	
+	public FunctionRef(String name, String returnAttr)
+	{
+		this.name = name;
+		this.returnAttr = returnAttr;
+	}
+
 	/**
 	 * Sets the name of the step group to execute.
 	 *
@@ -108,7 +117,7 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		Function function = context.getFunction(name);
 		
@@ -136,18 +145,18 @@ public class FunctionRef extends AbstractStep implements IDynamicAttributeAccept
 		
 		function.setParams(paramValues);
 
-		function.execute(context, logger, resVal -> 
+		Object resVal = function.execute(context, logger);
+		
+		if(returnAttr != null)
 		{
-			if(returnAttr != null)
-			{
-				logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
-				context.setAttribute(returnAttr, resVal);
-			}
-			else if(resVal != null)
-			{
-				logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
-			}
-		});
+			logger.debug("Seting return attr '{}' with function return value: {}", returnAttr, resVal);
+			context.setAttribute(returnAttr, resVal);
+		}
+		else if(resVal != null)
+		{
+			logger.debug("Non-null return value is ignored as no return-attr is set. Return value was: {}", resVal);
+		}
+
 	}
 	
 	@Override

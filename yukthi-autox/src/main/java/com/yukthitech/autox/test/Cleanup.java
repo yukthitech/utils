@@ -6,14 +6,10 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AbstractLocationBased;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ILocationBased;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.exec.ExecutionBranch;
-import com.yukthitech.autox.exec.ExecutionBranchBuilder;
-import com.yukthitech.autox.exec.IExecutable;
 import com.yukthitech.ccg.xml.IParentAware;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -21,7 +17,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
 /**
  * Represents list of steps that needs to be executed after executing testing unit.
  */
-public class Cleanup extends AbstractLocationBased implements IStepContainer, Validateable, ILocationBased, IEntryPoint, IParentAware, IExecutable
+public class Cleanup extends AbstractLocationBased implements IStepContainer, Validateable, ILocationBased, IEntryPoint, IParentAware
 {
 	/**
 	 * Name for logger and other purposes.
@@ -91,14 +87,6 @@ public class Cleanup extends AbstractLocationBased implements IStepContainer, Va
 		{
 			throw new ValidateException("No steps provided for setup");
 		}
-	}
-
-	@Override
-	public ExecutionBranch buildExecutionBranch(AutomationContext context)
-	{
-		return ExecutionBranchBuilder
-				.newBranchNode(context, "cleanup", "cleanup", this, getSteps())
-				.build();
 	}
 
 	@Override

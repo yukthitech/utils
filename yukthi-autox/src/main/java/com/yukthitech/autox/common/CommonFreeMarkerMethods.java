@@ -196,8 +196,8 @@ public class CommonFreeMarkerMethods
 	 * @return
 	 */
 	@FreeMarkerMethod(
-			description = "Compares the specified values and returns the comparision result as int.",
-			returnDescription = "Comparision result."
+			description = "Compares the specified values and returns the comparison result as int.",
+			returnDescription = "Comparison result."
 			)
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static int compare(
@@ -537,7 +537,7 @@ public class CommonFreeMarkerMethods
 	
 	@FreeMarkerMethod(
 			description = "Used for normalizing xml content, by removing trailing whitespaces between nodes, "
-					+ "which in turn can be used during xml content comparision",
+					+ "which in turn can be used during xml content comparison",
 			returnDescription = "Nomralized xml content (witout white spaces)."
 			)
 	public static String normalizeXml(String xmlContent) throws Exception

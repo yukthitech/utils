@@ -8,8 +8,8 @@ import com.jcraft.jsch.JSchException;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -67,7 +67,7 @@ public class StartSessionStep extends AbstractStep
 	 * AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		RemoteSession remoteSession = new RemoteSession();
 		remoteSession.setHost(host);

@@ -131,7 +131,7 @@ public class ExecutionStatusReport
 		
 		for(ExecutionStatusReport result : this.childReports)
 		{
-			if(result.getMainExecutionDetails().getStatus() == status)
+			if(result.getMainExecutionDetails() != null && result.getMainExecutionDetails().getStatus() == status)
 			{
 				count ++;
 			}
@@ -186,6 +186,11 @@ public class ExecutionStatusReport
 	 */
 	public int getTotalCount()
 	{
+		if(childReports == null)
+		{
+			return 0;
+		}
+		
 		return childReports.size();
 	}
 

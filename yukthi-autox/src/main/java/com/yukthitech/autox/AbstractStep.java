@@ -1,5 +1,7 @@
 package com.yukthitech.autox;
 
+import java.io.File;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -27,7 +29,7 @@ public abstract class AbstractStep implements IStep, Validateable
 	/**
 	 * Used to maintain the location of step.
 	 */
-	protected String location;
+	protected File location;
 	
 	/**
 	 * Line number where this step is defined.
@@ -94,7 +96,7 @@ public abstract class AbstractStep implements IStep, Validateable
 	 * @see com.yukthitech.autox.ILocationBased#setLocation(java.lang.String, int)
 	 */
 	@Override
-	public void setLocation(String location, int lineNumber)
+	public void setLocation(File location, int lineNumber)
 	{
 		this.location = location;
 		this.lineNumber = lineNumber;
@@ -104,7 +106,7 @@ public abstract class AbstractStep implements IStep, Validateable
 	 * @see com.yukthitech.autox.IStep#getLocation()
 	 */
 	@Override
-	public String getLocation()
+	public File getLocation()
 	{
 		return location;
 	}

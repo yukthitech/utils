@@ -1,13 +1,14 @@
 package com.yukthitech.autox;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -26,7 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-public class ExecutionLogger
+public class ExecutionLogger implements IExecutionLogger
 {
 	private static Logger logger = LogManager.getLogger(ExecutionLogger.class);
 	
@@ -64,7 +64,14 @@ public class ExecutionLogger
 		
 		try
 		{
-			this.logWriter = new PrintWriter(file);
+			if(!logsFolder.exists())
+			{
+				FileUtils.forceMkdir(logsFolder);
+			}
+			
+			//open file in append mode, so that if logger is created for same resource, the logs
+			// gets appended
+			this.logWriter = new PrintWriter(new FileOutputStream(file, true));
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("Failed to open print writer for log file: {}", file.getPath(), ex);
@@ -105,6 +112,7 @@ public class ExecutionLogger
 	 *
 	 * @param mode the new mode to be prepended for every log message
 	 */
+	@Override
 	public void setMode(String mode)
 	{
 		this.mode = mode;
@@ -113,6 +121,7 @@ public class ExecutionLogger
 	/**
 	 * Clears the mode from the logger.
 	 */
+	@Override
 	public void clearMode()
 	{
 		this.mode = null;
@@ -123,6 +132,7 @@ public class ExecutionLogger
 	 *
 	 * @param disabled the new flag indicating if logging is disabled or not
 	 */
+	@Override
 	public void setDisabled(boolean disabled)
 	{
 		this.disabled = disabled;
@@ -133,6 +143,7 @@ public class ExecutionLogger
 	 *
 	 * @return the flag indicating if logging is disabled or not
 	 */
+	@Override
 	public boolean isDisabled()
 	{
 		return disabled;
@@ -288,6 +299,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void error(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
 		error(escapeHtml, null, mssgTemplate, args);
@@ -299,63 +311,12 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void error(String mssgTemplate, Object... args)
 	{
 		error(true, null, mssgTemplate, args);
 	}
 
-	/**
-	 * Used to log error messages as part of current execution.
-	 * @param source location from where logging is being done
-	 * @param th Throwable stack trace.
-	 * @param mssgTemplate Message template with params.
-	 * @param args Arguments for message template.
-	 */
-	public void error(Throwable th, String mssgTemplate, Object... args)
-	{
-		error(true, th, mssgTemplate, args);
-	}
-	
-	/**
-	 * Used to log error messages as part of current execution.
-	 * @param escapeHtml Whether html tags should be escaped in result content.
-	 * @param source location from where logging is being done
-	 * @param th Throwable stack trace.
-	 * @param mssgTemplate Message template with params.
-	 * @param args Arguments for message template.
-	 */
-	public void error(boolean escapeHtml, Throwable th, String mssgTemplate, Object... args)
-	{
-		String finalMssg = buildMessage(escapeHtml, mssgTemplate, args);
-		
-		AutomationContext automationContext = AutomationContext.getInstance();
-		String autoxStackTrace = StringEscapeUtils.escapeHtml4(automationContext.getExecutionStack().toStackTrace());
-		
-		logger.error(finalMssg, autoxStackTrace);
-		
-		if(th != null)
-		{
-			if(!(th instanceof LangException))
-			{
-				logger.error(finalMssg, th);
-			}
-			
-			StringWriter stringWriter = new StringWriter();
-			PrintWriter printWriter = new PrintWriter(stringWriter);
-			
-			printWriter.println(finalMssg);
-			printWriter.println(autoxStackTrace);
-			
-			printWriter.println("\nJava Stack Trace: ");
-			th.printStackTrace(printWriter);
-			printWriter.flush();
-			
-			finalMssg = stringWriter.toString();
-		}
-		
-		addMessage(new ExecutionLogData.Message( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), LogLevel.ERROR, finalMssg, new Date()));
-	}
-	
 	private void buildAndAddMssg(LogLevel logLevel, boolean escapeHtml, String mssgTemplate, Object... args)
 	{
 		if(disabled)
@@ -375,6 +336,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void debug(String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.DEBUG, true, mssgTemplate, args);
@@ -387,6 +349,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void debug(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.DEBUG, escapeHtml, mssgTemplate, args);
@@ -398,6 +361,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void info(String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.INFO, true, mssgTemplate, args);
@@ -410,6 +374,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void info(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.INFO, escapeHtml, mssgTemplate, args);
@@ -421,6 +386,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void warn(String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.WARN, true, mssgTemplate, args);
@@ -433,6 +399,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void warn(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.WARN, escapeHtml, mssgTemplate, args);
@@ -444,6 +411,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void trace(String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.TRACE, true, mssgTemplate, args);
@@ -456,6 +424,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate Message template with params.
 	 * @param args Arguments for message template.
 	 */
+	@Override
 	public void trace(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
 		buildAndAddMssg(LogLevel.TRACE, escapeHtml, mssgTemplate, args);
@@ -468,6 +437,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate msg template
 	 * @param args arguments for message
 	 */
+	@Override
 	public void log(LogLevel logLevel, String mssgTemplate, Object... args)
 	{
 		log(true, logLevel, mssgTemplate, args);
@@ -481,6 +451,7 @@ public class ExecutionLogger
 	 * @param mssgTemplate msg template
 	 * @param args arguments for message
 	 */
+	@Override
 	public void log(boolean escapeHtml, LogLevel logLevel, String mssgTemplate, Object... args)
 	{
 		if(disabled)
@@ -502,6 +473,7 @@ public class ExecutionLogger
 	 * @param imageFile Image to be logged
 	 * @param logLevel level to be used.
 	 */
+	@Override
 	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
 	{
 		if(disabled)
@@ -540,6 +512,7 @@ public class ExecutionLogger
 		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
 	}
 	
+	@Override
 	public File createFile(String filePrefix, String fileSuffix)
 	{
 		AutomationContext automationContext = AutomationContext.getInstance();
@@ -551,6 +524,7 @@ public class ExecutionLogger
 		return tempFile;
 	}
 	
+	@Override
 	public void logFile(String message, LogLevel logLevel, File file)
 	{
 		if(disabled)
@@ -581,6 +555,7 @@ public class ExecutionLogger
 		addMessage(new ExecutionLogData.FileMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), file));
 	}
 
+	@Override
 	public File logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
 	{
 		if(disabled)
@@ -610,6 +585,7 @@ public class ExecutionLogger
 		return tempFile;
 	}
 	
+	@Override
 	public void close(TestStatus status, Date endTime)
 	{
 		addMessage(new ExecutionLogData.Footer(status, endTime));

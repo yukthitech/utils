@@ -6,8 +6,8 @@ import java.util.Map;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -46,7 +46,7 @@ public class CollectionRemoveStep extends AbstractStep
 
 	@SuppressWarnings({ "rawtypes" })
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("From collection/map of type {} removing value of type: {}", 
 				(collection != null) ? collection.getClass().getName() : "null", 

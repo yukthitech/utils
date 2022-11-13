@@ -6,8 +6,8 @@ import org.openqa.selenium.interactions.Actions;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
@@ -72,7 +72,7 @@ public class StepDoubleClick extends AbstractPostCheckStep
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception 
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception 
 	{
 		exeLogger.trace("Double-Clicking the element specified by locator: {}", locator);
 		

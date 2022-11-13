@@ -5,8 +5,8 @@ import org.openqa.selenium.InvalidArgumentException;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -54,7 +54,7 @@ public class StartMockServerStep extends AbstractStep
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		logger.debug("Starting Mock Server '{}' on port: {}", name, port);
 

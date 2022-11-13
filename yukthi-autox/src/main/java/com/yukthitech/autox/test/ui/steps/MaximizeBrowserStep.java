@@ -5,8 +5,8 @@ import org.openqa.selenium.WebDriver.Window;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.config.SeleniumPlugin;
 
 /**
@@ -19,7 +19,7 @@ public class MaximizeBrowserStep extends AbstractStep
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		Window window = context.getPlugin(SeleniumPlugin.class).getWebDriver().manage().window();
 		

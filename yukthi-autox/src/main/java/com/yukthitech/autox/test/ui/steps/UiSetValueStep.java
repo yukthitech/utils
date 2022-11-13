@@ -7,8 +7,8 @@ import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
@@ -57,7 +57,7 @@ public class UiSetValueStep extends AbstractUiStep
 	 * @param exeLogger
 	 *            logger.
 	 */
-	private void pressEnter(AutomationContext context, ExecutionLogger exeLogger)
+	private void pressEnter(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		WebElement webElement = UiAutomationUtils.findElement(context, parentElement, locator);
 		webElement.sendKeys(Keys.ENTER);
@@ -73,7 +73,7 @@ public class UiSetValueStep extends AbstractUiStep
 	 *            Current automation context
 	 */
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger)
+	public void execute(AutomationContext context, IExecutionLogger logger)
 	{
 		logger.debug("Populating field {} with value - {}", getLocatorWithParent(locator), value);
 		

@@ -1,20 +1,9 @@
 package com.yukthitech.test;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.test.FullExecutionDetails;
-import com.yukthitech.autox.test.TestCaseResult;
-import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.autox.test.TestSuiteResults;
-import com.yukthitech.autox.test.log.ExecutionLogData;
-import com.yukthitech.autox.test.log.LogLevel;
 
 public class TestUtils
 {
@@ -48,7 +37,7 @@ public class TestUtils
 			foundMssgs.add(mssg);
 		}
 	}
-	
+	/*
 	public static void validateLogFile(File logFile, String name, List<Object> expectedErrorMssgs, List<Object> expectedMssgs) throws Exception
 	{
 		ExecutionLogData logData = objectMapper.readValue(logFile, ExecutionLogData.class);
@@ -117,5 +106,5 @@ public class TestUtils
 		validateLogFile(new File("./output/logs/" + testSuiteResult.getSuiteName() + "_" + testCaseResult.getTestCaseName() + "_log.json"), 
 				name, expectedErrorMssgs, expectedMssgs);
 	}
-
+*/
 }

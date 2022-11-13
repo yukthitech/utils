@@ -1,7 +1,6 @@
 package com.yukthitech.autox;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,11 +22,9 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.debug.common.ContextAttributeDetails;
-import com.yukthitech.autox.debug.common.InteractiveServerReadyServerMssg;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
-import com.yukthitech.autox.exec.AutomationExecutor;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.storage.PersistenceStorage;
@@ -148,7 +145,7 @@ public class AutomationContext
 	/**
 	 * Current execution logger. Can be null.
 	 */
-	private ExecutionLogger executionLogger;
+	private IExecutionLogger executionLogger;
 	
 	/**
 	 * Used to send monitor messages to connected client.
@@ -191,11 +188,6 @@ public class AutomationContext
 	private Map<String, CustomUiLocator> customUiLocators = new HashMap<>();
 	
 	/**
-	 * Current automation executor.
-	 */
-	private AutomationExecutor automationExecutor;
-	
-	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
 	 */
@@ -230,16 +222,6 @@ public class AutomationContext
 		this.persistenceStorage = new PersistenceStorage(appConfiguration);
 	}
 	
-	public AutomationExecutor getAutomationExecutor()
-	{
-		return automationExecutor;
-	}
-
-	public void setAutomationExecutor(AutomationExecutor automationExecutor)
-	{
-		this.automationExecutor = automationExecutor;
-	}
-
 	/**
 	 * Sets the used to send monitor messages to connected client.
 	 *
@@ -938,8 +920,13 @@ public class AutomationContext
 	 *
 	 * @return the current execution logger
 	 */
-	public ExecutionLogger getExecutionLogger()
+	public IExecutionLogger getExecutionLogger()
 	{
+		if(executionLogger == null)
+		{
+			return Log4jExecutionLogger.getInstance();
+		}
+		
 		return executionLogger;
 	}
 
@@ -948,7 +935,7 @@ public class AutomationContext
 	 *
 	 * @param executionLogger the new current execution logger
 	 */
-	public void setExecutionLogger(ExecutionLogger executionLogger)
+	public void setExecutionLogger(IExecutionLogger executionLogger)
 	{
 		this.executionLogger = executionLogger;
 	}
@@ -959,7 +946,6 @@ public class AutomationContext
 	public void sendReadyToInteract()
 	{
 		readyToInteract = true;
-		sendAsyncMonitorMessage(new InteractiveServerReadyServerMssg());
 	}
 	
 	/**

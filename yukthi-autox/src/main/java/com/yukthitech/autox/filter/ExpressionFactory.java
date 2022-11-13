@@ -17,7 +17,7 @@ import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.utils.CommonUtils;
@@ -258,7 +258,7 @@ public class ExpressionFactory
 	
 	private IPropertyPath getPropertyPath(FilterContext context, String expression)
 	{
-		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
+		IExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		
 		exeLogger.debug("Fetching expression parser for value and parsing expression: {}", expression);
 		
@@ -336,7 +336,7 @@ public class ExpressionFactory
 			return expression;
 		}
 		
-		ExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
+		IExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
 		logger.debug("Executing expression: {}", expression);
 		
 		try
@@ -393,7 +393,7 @@ public class ExpressionFactory
 	{
 		FilterContext expressionParserContext = new FilterContext(context, effectiveContext);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
-		ExecutionLogger exeLogger = context.getExecutionLogger();
+		IExecutionLogger exeLogger = context.getExecutionLogger();
 		
 		if(propertyPath == null)
 		{
@@ -430,7 +430,7 @@ public class ExpressionFactory
 	{
 		FilterContext expressionParserContext = new FilterContext(context, effectiveContext);
 		IPropertyPath propertyPath = getPropertyPath(expressionParserContext, expression);
-		ExecutionLogger exeLogger = context.getExecutionLogger();
+		IExecutionLogger exeLogger = context.getExecutionLogger();
 		
 		if(propertyPath == null)
 		{

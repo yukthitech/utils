@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.test.TestStatus;
@@ -30,7 +33,7 @@ public class ReportManager
 		
 		private ExecutionStatusReport statusReport = new ExecutionStatusReport();
 		
-		public ExecutionLogger getLoggerIfPresent(ExecutionType executionType)
+		public IExecutionLogger getLoggerIfPresent(ExecutionType executionType)
 		{
 			if(loggers == null)
 			{
@@ -40,8 +43,15 @@ public class ReportManager
 			return loggers.get(executionType);
 		}
 		
-		public ExecutionLogger getLogger(Executor executor, ExecutionType executionType, String suffix)
+		public IExecutionLogger getLogger(Executor executor, ExecutionType executionType, String suffix, String mainSuffix)
 		{
+			//for single logger type, all logs gets into single log file
+			if(reportInfoProviders.isSingleLogger(executor))
+			{
+				suffix = mainSuffix;
+				executionType = ExecutionType.MAIN;
+			}
+
 			ExecutionLogger logger = null;
 			
 			if(loggers == null)
@@ -71,6 +81,8 @@ public class ReportManager
 	
 	private ExecutorDetails rootExecutorDetails;
 	
+	private ReportGenerator reportGenerator = new ReportGenerator();
+	
 	public static ReportManager getInstance()
 	{
 		return instance;
@@ -92,7 +104,7 @@ public class ReportManager
 			
 			if(executor.getParentExecutor() != null)
 			{
-				ExecutorDetails parentDetails = executorDetailsMap.get(executor.getParentExecutor());
+				ExecutorDetails parentDetails = getExecutorDetails(executor.getParentExecutor());
 				parentDetails.statusReport.addChidReport(details.statusReport);
 			}
 		}
@@ -100,29 +112,34 @@ public class ReportManager
 		return details;
 	}
 	
-	public synchronized ExecutionLogger getSetupExecutionLogger(Executor executor)
+	public synchronized IExecutionLogger getSetupExecutionLogger(Executor executor)
 	{
-		return getExecutorDetails(executor).getLogger(executor, ExecutionType.SETUP, "-setup.log");
+		return getExecutorDetails(executor).getLogger(executor, ExecutionType.SETUP, "-setup.log", ".log");
 	}
 
-	public synchronized ExecutionLogger getCleanupExecutionLogger(Executor executor)
+	public synchronized IExecutionLogger getCleanupExecutionLogger(Executor executor)
 	{
-		return getExecutorDetails(executor).getLogger(executor, ExecutionType.CLEANUP, "-cleanup.log");
+		return getExecutorDetails(executor).getLogger(executor, ExecutionType.CLEANUP, "-cleanup.log", ".log");
 	}
 
-	public synchronized ExecutionLogger getExecutionLogger(Executor executor)
+	public synchronized IExecutionLogger getExecutionLogger(Executor executor)
 	{
-		return getExecutorDetails(executor).getLogger(executor, ExecutionType.MAIN, ".log");
+		return getExecutorDetails(executor).getLogger(executor, ExecutionType.MAIN, ".log", ".log");
 	}
 	
-	private void generateReport()
+	private void generateJsonReport()
 	{
 		File reportFolder = AutomationContext.getInstance().getReportFolder();
 		File reportFile = new File(reportFolder, "test-results.json");
 		
 		try
 		{
-			objectMapper.writeValue(reportFile, rootExecutorDetails);
+			if(!reportFolder.exists())
+			{
+				FileUtils.forceMkdir(reportFolder);
+			}
+			
+			objectMapper.writeValue(reportFile, rootExecutorDetails.statusReport);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("Failed to generate report file: " + reportFile.getPath(), ex);
@@ -147,6 +164,9 @@ public class ReportManager
 			}
 			case MAIN:
 			{
+				executorDetails.statusReport.setName(reportInfoProviders.getName(executor));
+				executorDetails.statusReport.setAuthor(reportInfoProviders.getAuthor(executor));
+				
 				executorDetails.statusReport.setMainExecutionDetails(new ExecutionDetails());
 				break;
 			}
@@ -156,14 +176,14 @@ public class ReportManager
 			}
 		}
 		
-		generateReport();
+		generateJsonReport();
 	}
 	
 	private void setEndDetails(ExecutionType executionType, Executor executor, TestStatus status, String mssg)
 	{
 		ExecutorDetails executorDetails = getExecutorDetails(executor);
 		Date endTime = null;
-		ExecutionLogger logger = null;
+		IExecutionLogger logger = null;
 		
 		switch (executionType)
 		{
@@ -196,7 +216,14 @@ public class ReportManager
 			logger.close(status, endTime);
 		}
 		
-		generateReport();
+		generateJsonReport();
+	}
+	
+	public void generateReport()
+	{
+		reportGenerator.generateReports(new FinalReport(
+				AutomationContext.getInstance().getAppConfiguration().getReportName(), 
+				rootExecutorDetails.statusReport));
 	}
 	
 	public synchronized void executionCompleted(ExecutionType executionType, Executor executor)
@@ -217,5 +244,12 @@ public class ReportManager
 	public synchronized void executionSkipped(ExecutionType executionType, Executor executor, String reason)
 	{
 		setEndDetails(executionType, executor, TestStatus.SKIPPED, reason);
+	}
+	
+	public synchronized boolean isSuccessful()
+	{
+		int totalCount = rootExecutorDetails.statusReport.getTotalCount();
+		int successCount = rootExecutorDetails.statusReport.getSuccessCount();
+		return (totalCount == successCount);
 	}
 }

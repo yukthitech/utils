@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.filter.ExpressionFactory;
@@ -590,7 +590,7 @@ public class AutomationUtils
 	 * @param defaultType Default type expected as result. Can be null.
 	 * @return parsed value
 	 */
-	public static Object parseObjectSource(AutomationContext context, ExecutionLogger exeLogger, Object source, JavaType defaultType)
+	public static Object parseObjectSource(AutomationContext context, IExecutionLogger exeLogger, Object source, JavaType defaultType)
 	{
 		if(source instanceof IReference)
 		{
@@ -813,7 +813,7 @@ public class AutomationUtils
 	 * @return
 	 * @throws Exception
 	 */
-	public static Object loadObjectContent(String data, String name, Class<?> type, ExecutionLogger logger) throws Exception
+	public static Object loadObjectContent(String data, String name, Class<?> type, IExecutionLogger logger) throws Exception
 	{
 		InputStream is = new ByteArrayInputStream(data.getBytes());
 		

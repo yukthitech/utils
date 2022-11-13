@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -51,13 +51,13 @@ public class CollectionFreeMarkerFunctions
 
 	@FreeMarkerMethod(
 			description = "Checks if specified submap is submap of supermap",
-			returnDescription = "true if comparision is susccessful."
+			returnDescription = "true if comparison is susccessful."
 			)
 	public static boolean isSubmap(
 			@FmParam(name = "superMap", description = "Super-set map in which submap has to be checked") Map<Object, Object> superMap, 
 			@FmParam(name = "superMap", description = "Sub-set map which needs to be checked") Map<Object, Object> submap)
 	{
-		ExecutionLogger logger = AutomationContext.getInstance().getExecutionLogger();
+		IExecutionLogger logger = AutomationContext.getInstance().getExecutionLogger();
 		
 		for(Object key : submap.keySet())
 		{

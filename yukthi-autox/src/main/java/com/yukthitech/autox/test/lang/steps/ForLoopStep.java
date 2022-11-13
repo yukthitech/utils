@@ -2,21 +2,18 @@ package com.yukthitech.autox.test.lang.steps;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.exec.AutomationExecutor;
-import com.yukthitech.autox.exec.IExecutionStackEntry;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
@@ -29,12 +26,6 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
 public class ForLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
-
-	private static final String VAR_INDEX = "index";
-
-	private static final String VAR_START = "start";
-
-	private static final String VAR_END = "end";
 
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
@@ -109,7 +100,8 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 		return steps;
 	}
 	
-	private boolean populateRange(ExecutionLogger exeLogger, IExecutionStackEntry stackEntry)
+	@Override
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		int start = 0, end = 0;
 		
@@ -133,63 +125,30 @@ public class ForLoopStep extends AbstractStep implements IStepContainer
 		
 		if(start > end)
 		{
-			return false;
+			return;
 		}
 		
-		stackEntry.setVariable(VAR_START, start);
-		stackEntry.setVariable(VAR_END, end);
-		stackEntry.setVariable(VAR_INDEX, new AtomicInteger(start));
-		return true;
-	}
-	
-	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
-	{
-		AutomationExecutor executor = context.getAutomationExecutor();
-		
-		executor.newSteps("for-each-steps", this, steps)
-			.onInit(entry -> 
+		for(int i = start; i <= end; i++)
+		{
+			context.setAttribute(loopVar, i);
+			
+			try
 			{
-				return populateRange(exeLogger, entry);
-			})
-			.onPreexecute(entry -> 
-			{
-				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
-				int idx = loopIndex.get();
 				
-				//execute the steps
-				context.setAttribute(loopVar, idx);
-			})
-			.exceptionHandler((entry, ex) -> 
+			}catch(Exception ex)
 			{
-				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
-				Integer end = (Integer) entry.getVariable(VAR_END);
-				
 				if(ex instanceof BreakException)
 				{
-					entry.skipChildSteps();
-					loopIndex.set(end + 1);
-					return true;
+					break;
 				}
 				
 				if(ex instanceof ContinueException)
 				{
-					entry.skipChildSteps();
-					return true;
+					continue;
 				}
 				
-				return false;
-			})
-			.isReexecutionNeeded(entry -> 
-			{
-				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
-				Integer end = (Integer) entry.getVariable(VAR_END);
-				
-				int idx = loopIndex.incrementAndGet();
-				
-				return (idx <= end);
-			})
-			.execute();
-		;
+				throw ex;
+			}
+		}
 	}
 }

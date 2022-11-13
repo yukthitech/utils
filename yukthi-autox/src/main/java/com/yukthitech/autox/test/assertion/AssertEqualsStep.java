@@ -9,8 +9,8 @@ import com.yukthitech.autox.AbstractValidation;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -89,9 +89,9 @@ public class AssertEqualsStep extends AbstractValidation
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.IStep#execute(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.ExecutionLogger)
 	 */
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		exeLogger.info(false, "Comparing values for equlity. <span style=\"white-space: pre-wrap\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
+		exeLogger.info(false, "Comparing values for equality. <span style=\"white-space: pre-wrap\">[Expected: {} [{}], Actual: {} [{}]]</span>", 
 				expected, getType(expected),  
 				actual, getType(actual));
 
@@ -99,7 +99,7 @@ public class AssertEqualsStep extends AbstractValidation
 		
 		if((expected instanceof byte[]) && (actual instanceof byte[]))
 		{
-			exeLogger.debug("Performing byte-array comparision..");
+			exeLogger.debug("Performing byte-array comparison..");
 			isEqual = Arrays.equals((byte[]) expected, (byte[]) actual);
 		}
 		else
@@ -107,7 +107,7 @@ public class AssertEqualsStep extends AbstractValidation
 			isEqual = Objects.equals(expected, actual);
 		}
 		
-		exeLogger.debug("Result of comparision is: {}", isEqual);
+		exeLogger.debug("Result of comparison is: {}", isEqual);
 		
 		if(!isEqual)
 		{

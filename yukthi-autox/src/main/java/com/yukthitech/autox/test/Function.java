@@ -6,15 +6,15 @@ package com.yukthitech.autox.test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
 
@@ -24,8 +24,6 @@ import com.yukthitech.ccg.xml.IParentAware;
  */
 public class Function extends AbstractLocationBased implements IStepContainer, Cloneable, IEntryPoint, IParentAware
 {
-	private static final String VAR_RET_VAL = "returnVal";
-	
 	/**
 	 * Name of this group.
 	 */
@@ -166,41 +164,28 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		return steps;
 	}
 	
-	public void execute(AutomationContext context, ExecutionLogger logger, Consumer<Object> callback)
+	public Object execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
-		context.getAutomationExecutor()
-			.newSteps("function-" + name + "-steps", this, steps)
-			.onInit(entry -> 
+		context.pushParameters(params);
+
+		try
+		{
+			StepsExecutor.execute(logger, steps, null);
+		} catch(Exception ex)
+		{
+			//occurs during return statement execution
+			if(ex instanceof ReturnException)
 			{
-				context.pushParameters(params);
-				context.getExecutionStack().push(this);
-				return true;
-			})
-			.exceptionHandler((entry, ex) -> 
-			{
-				//occurs during return statement execution
-				//Note: even for return false is returned, to ensure current function is removed
-				//  from current execution stack and further execution does not occur.
-				if(ex instanceof ReturnException)
-				{
-					entry.setVariable(VAR_RET_VAL, ((ReturnException) ex).getValue() );
-					entry.skipChildSteps();
-					return true;
-				}
-				
-				return false;
-			})
-			.onSuccess(entry -> 
-			{
-				callback.accept(entry.getVariable(VAR_RET_VAL));
-			})
-			.onComplete(entry -> 
-			{
-				context.getExecutionStack().pop(this);
-				context.popParameters();
-			})
-			.execute();
-			;
+				return ((ReturnException) ex).getValue();
+			}
+			
+			throw ex;
+		} finally
+		{
+			context.popParameters();
+		}
+		
+		return null;
 	}
 	
 	@Override

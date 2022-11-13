@@ -1,11 +1,14 @@
 package com.yukthitech.autox;
 
+import java.io.File;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +58,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	/**
 	 * Maintains the file being parsed.
 	 */
-	private String fileBeingParsed;
+	private File fileBeingParsed;
 	
 	/**
 	 * Base packages to be used for loading.
@@ -92,12 +95,12 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	 *
 	 * @param fileBeingParsed the new maintains the file being parsed
 	 */
-	public void setFileBeingParsed(String fileBeingParsed)
+	public void setFileBeingParsed(File fileBeingParsed)
 	{
 		this.fileBeingParsed = fileBeingParsed;
 	}
 	
-	public String getFileBeingParsed()
+	public File getFileBeingParsed()
 	{
 		return fileBeingParsed;
 	}
@@ -167,7 +170,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			{
 				FunctionRef funcRef = new FunctionRef();
 				funcRef.setName(beanNode.getName());
-				funcRef.setLocation(fileBeingParsed + ":" + locator.getLineNumber(), locator.getLineNumber());
+				funcRef.setLocation(fileBeingParsed, locator.getLineNumber());
 				
 				return funcRef;
 			}
@@ -176,7 +179,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 
 			if(step != null)
 			{
-				step.setLocation(fileBeingParsed + ":" + locator.getLineNumber(), locator.getLineNumber());
+				step.setLocation(fileBeingParsed, locator.getLineNumber());
 				return step;
 			}
 			
@@ -218,13 +221,14 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			Executable executable = bean.getClass().getAnnotation(Executable.class);
 			
 			//if current step is expected part of another step
-			if(!IMultiPartStep.class.equals(executable.partOf()))
+			if(executable.partOf().length > 0)
 			{
 				//get preceding step of current step
 				// Note: required validations were performed as part of step pojo creation.
 				List<IStep> steps = ((IStepContainer) parent).getSteps();
-				IStep lastStep = CollectionUtils.isEmpty(steps) ? null : steps.get(steps.size() - 1);
-				
+				IStep lastStep = steps.get(steps.size() - 1);
+
+				//Note: The parent multi step validation is already done in method newStep()
 				//add current step as child step to prev multi step
 				((IMultiPartStep) lastStep).addChildStep((IStep) bean);
 			}
@@ -233,6 +237,34 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 				((IStepContainer) parent).addStep((IStep) bean);
 			}
 		}
+	}
+	
+	private String getStepName(Class<?> cls)
+	{
+		Executable executable = cls.getAnnotation(Executable.class);
+		return executable.name();
+	}
+	
+	private void validateForParentStep(Class<?> currentStepType, IStep lastStep, Class<? extends IMultiPartStep>[] expectedTypes)
+	{
+		if(lastStep != null)
+		{
+			for(Class<?> typ : expectedTypes)
+			{
+				if(typ.isAssignableFrom(lastStep.getClass()))
+				{
+					return;
+				}
+			}
+		}
+		
+		String expNames = Arrays.asList(expectedTypes)
+				.stream()
+				.map(step -> getStepName(step))
+				.collect(Collectors.joining(", "));
+				
+		throw new InvalidStateException("Step {} is expected to be preceeded by one of the steps: {}",
+				getStepName(currentStepType), expNames);
 	}
 	
 	/**
@@ -256,16 +288,12 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 		Executable executable = stepType.getAnnotation(Executable.class);
 		
 		//if current step is expected part of another step
-		if(!IMultiPartStep.class.equals(executable.partOf()))
+		if(executable.partOf().length > 0)
 		{
 			List<IStep> steps = parent.getSteps();
 			IStep lastStep = CollectionUtils.isEmpty(steps) ? null : steps.get(steps.size() - 1);
 			
-			if(lastStep == null || !executable.partOf().isAssignableFrom(lastStep.getClass()))
-			{
-				Executable partOfExecutable = lastStep.getClass().getAnnotation(Executable.class);
-				throw new InvalidStateException("Step '{}' is not preceeded by step: {}", stepTypeName, partOfExecutable.name());
-			}
+			validateForParentStep(stepType, lastStep, executable.partOf());
 		}
 		
 		IPlugin<?> plugin = null;

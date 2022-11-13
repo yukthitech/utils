@@ -1,6 +1,6 @@
 package com.yukthitech.autox.config;
 
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 
 /**
@@ -12,7 +12,7 @@ public class ErrorDetails
 	/**
 	 * Logger for logging messages.
 	 */
-	private ExecutionLogger executionLogger;
+	private IExecutionLogger executionLogger;
 	
 	/**
 	 * Step resulted in error.
@@ -31,7 +31,7 @@ public class ErrorDetails
 	 * @param step the step
 	 * @param exception the exception
 	 */
-	public ErrorDetails(ExecutionLogger executionLogger, IStep step, Exception exception)
+	public ErrorDetails(IExecutionLogger executionLogger, IStep step, Exception exception)
 	{
 		this.executionLogger = executionLogger;
 		this.step = step;
@@ -43,7 +43,7 @@ public class ErrorDetails
 	 *
 	 * @return the logger for logging messages
 	 */
-	public ExecutionLogger getExecutionLogger()
+	public IExecutionLogger getExecutionLogger()
 	{
 		return executionLogger;
 	}

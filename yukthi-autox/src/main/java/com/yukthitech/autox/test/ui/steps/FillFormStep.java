@@ -10,8 +10,8 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
@@ -59,7 +59,7 @@ public class FillFormStep extends AbstractStep
 	 * @param exeLogger
 	 *            Logger to be used.
 	 */
-	private void fillWithStandardBean(Object data, AutomationContext context, ExecutionLogger exeLogger)
+	private void fillWithStandardBean(Object data, AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
 		
@@ -86,7 +86,7 @@ public class FillFormStep extends AbstractStep
 				}
 			} catch(Exception ex)
 			{
-				exeLogger.error(ex, "An error occurred while setting property - " + desc.getName());
+				exeLogger.error("An error occurred while setting property - " + desc.getName(), ex);
 				continue;
 			}
 
@@ -116,7 +116,7 @@ public class FillFormStep extends AbstractStep
 	 * @param exeLogger
 	 *            logger
 	 */
-	private void fillWithMap(Map<String, Object> properties, AutomationContext context, ExecutionLogger exeLogger)
+	private void fillWithMap(Map<String, Object> properties, AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
 		
@@ -161,7 +161,7 @@ public class FillFormStep extends AbstractStep
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		Object resObj = AutomationUtils.parseObjectSource(context, exeLogger, data, null);
 		

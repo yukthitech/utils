@@ -5,8 +5,8 @@ import java.util.Map;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 
@@ -55,7 +55,7 @@ public class MongoQueryStep extends AbstractStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		Map<String, Object> result = MongoQuryUtils.execute(context, exeLogger, mongoResourceName, query);
 		

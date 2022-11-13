@@ -7,7 +7,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -48,7 +48,7 @@ public class ResourceFactory
 	 */
 	public static final String TYPE_STRING = "string";
 
-	public static IResource getResource(AutomationContext context, String resource, ExecutionLogger exeLogger, boolean parseExpressions)
+	public static IResource getResource(AutomationContext context, String resource, IExecutionLogger exeLogger, boolean parseExpressions)
 	{
 		IResource resourceObj = getResource(context, resource, exeLogger);
 		
@@ -74,7 +74,7 @@ public class ResourceFactory
 		}
 	}
 	
-	public static IResource getResource(AutomationContext context, ExecutionLogger exeLogger, String resType, String resValue)
+	public static IResource getResource(AutomationContext context, IExecutionLogger exeLogger, String resType, String resValue)
 	{
 		if(resType == null)
 		{
@@ -152,7 +152,7 @@ public class ResourceFactory
 	 * @param exeLogger logger to log messages
 	 * @return Resource object representing resource
 	 */
-	private static IResource getResource(AutomationContext context, String resource, ExecutionLogger exeLogger)
+	private static IResource getResource(AutomationContext context, String resource, IExecutionLogger exeLogger)
 	{
 		Matcher matcher = RESOURCE_PATTERN.matcher( (String) resource );
 		

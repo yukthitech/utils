@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test;
+package com.yukthitech.autox.exec.report;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,6 +36,8 @@ import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.SummaryNotificationConfig;
 import com.yukthitech.autox.logmon.LogMonitorContext;
+import com.yukthitech.autox.test.ResourceManager;
+import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -73,15 +75,18 @@ public class ReportGenerator
 	 */
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
-	public void generateReports(File reportFolder, FullExecutionDetails fullExecutionDetails, AutomationContext automationContext)
+	public void generateReports(FinalReport finalReport)
 	{
+		AutomationContext automationContext = AutomationContext.getInstance();
+		File reportFolder = automationContext.getReportFolder();
+		
 		ApplicationConfiguration applicationConfiguration = automationContext.getAppConfiguration();
 		
 		List<String> summaryMessages = automationContext.getSummaryMessages();
 		
 		if(summaryMessages != null && !summaryMessages.isEmpty())
 		{
-			fullExecutionDetails.setSummaryMessages(automationContext.getSummaryMessages());
+			//fullExecutionDetails.setSummaryMessages(automationContext.getSummaryMessages());
 		}
 		
 		// copy the resource files into output folder
@@ -90,7 +95,7 @@ public class ReportGenerator
 		// create final report files
 		try
 		{
-			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(fullExecutionDetails);
+			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(finalReport);
 			String jsContent = "var reportData = " + jsonContent;
 
 			FileUtils.write(new File(reportFolder, "test-results.json"), jsonContent, Charset.defaultCharset());
@@ -104,7 +109,7 @@ public class ReportGenerator
 		try
 		{
 			Map<String, Object> context = new HashMap<>();
-			context.put("report", fullExecutionDetails);
+			context.put("report", finalReport);
 			context.put("reportFolder", reportFolder.getPath());
 			context.put("reportFolderName", reportFolder.getName());
 			context.put("context", automationContext);
@@ -135,7 +140,7 @@ public class ReportGenerator
 			}
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while generating summary report");
+			throw new InvalidStateException(ex, "An error occurred while generating summary report", ex);
 		}
 		
 	}
@@ -248,9 +253,9 @@ public class ReportGenerator
 			return;
 		}
 		
-		executionLogData.setStatus(testCaseResult.getStatus());
+		//executionLogData.setStatus(testCaseResult.getStatus());
 		
-		executionLogData.copyResources(logsFolder);
+		//executionLogData.copyResources(logsFolder);
 		
 		try
 		{

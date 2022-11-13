@@ -6,8 +6,8 @@ import java.io.PrintStream;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.Command;
 import com.yukthitech.autox.test.log.LogLevel;
@@ -68,7 +68,7 @@ public class ExecuteCommandStep extends AbstractStep
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		Command command = new Command(name, this.command, workingDirectory);
 		

@@ -3,10 +3,8 @@ package com.yukthitech.autox.test.lang.steps;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -14,14 +12,14 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
-import com.yukthitech.autox.exec.AutomationExecutor;
+import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -33,10 +31,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class ForEachLoopStep extends AbstractStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
-	
-	private static final String VAR_LIST = "list";
-	
-	private static final String VAR_INDEX = "index";
 
 	/**
 	 * Group of steps/validations to be executed when condition evaluated to be
@@ -145,7 +139,7 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private List<Object> fetchExpressionList(ExecutionLogger exeLogger)
+	private List<Object> fetchExpressionList(IExecutionLogger exeLogger)
 	{
 		List<Object> collection = null;
 		
@@ -173,9 +167,8 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 		return collection;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		if(expression == null)
 		{
@@ -183,70 +176,41 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			return;
 		}
 		
-		AutomationExecutor executor = context.getAutomationExecutor();
+		List<Object> collection = fetchExpressionList(exeLogger);
 		
-		executor.newSteps("for-each-steps", this, steps)
-			.onInit(entry -> 
+		if(CollectionUtils.isEmpty(collection))
+		{
+			ForEachLoopStep parentStep = (ForEachLoopStep) sourceStep;
+			exeLogger.debug("Collection expression '{}' evaluated to empty collection", parentStep.expression);
+			return;
+		}
+		
+		int index = 0;
+		
+		for(Object obj : collection)
+		{
+			context.setAttribute(loopVar, obj);
+			context.setAttribute(loopIdxVar, index);
+			
+			try
 			{
-				List<Object> collection = fetchExpressionList(exeLogger);
-				
-				if(CollectionUtils.isEmpty(collection))
-				{
-					ForEachLoopStep parentStep = (ForEachLoopStep) sourceStep;
-					exeLogger.debug("Collection expression '{}' evaluated to empty collection", parentStep.expression);
-					return false;
-				}
-				
-				collection = CollectionUtils.isEmpty(collection) ? Collections.emptyList() : collection;
-				
-				AtomicInteger index = new AtomicInteger(0);
-				
-				entry.setVariable(VAR_LIST, collection)
-					.setVariable(VAR_INDEX, index);
-				
-				return true;
-			})
-			.onPreexecute(entry -> 
+				StepsExecutor.execute(exeLogger, steps, null);
+			}catch(Exception ex)
 			{
-				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
-				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
-				
-				int idx = loopIndex.get();
-				
-				Object val = loopCollection.get(idx);
-				context.setAttribute(loopVar, val);
-				context.setAttribute(loopIdxVar, idx);
-			})
-			.exceptionHandler((entry, ex) -> 
-			{
-				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
-				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
-				
 				if(ex instanceof BreakException)
 				{
-					entry.skipChildSteps();
-					loopIndex.set(loopCollection.size());
-					return true;
+					break;
 				}
 				
 				if(ex instanceof ContinueException)
 				{
-					entry.skipChildSteps();
-					return true;
+					continue;
 				}
 				
-				return false;
-			})
-			.isReexecutionNeeded(entry -> 
-			{
-				AtomicInteger loopIndex = (AtomicInteger) entry.getVariable(VAR_INDEX);
-				List<Object> loopCollection = (List<Object>) entry.getVariable(VAR_LIST);
-				
-				int idx = loopIndex.incrementAndGet();
-				
-				return (idx < loopCollection.size());
-			})
-			.execute();
-		;
+				throw ex;
+			}
+
+			index++;
+		}
 	}
 }

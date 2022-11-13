@@ -1,10 +1,7 @@
 package com.yukthitech.autox.test;
 
-import java.util.concurrent.CountDownLatch;
-
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -116,61 +113,45 @@ public class CustomUiLocator extends AbstractLocationBased
 	
 	public boolean setValue(String query, Object value)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		CountDownLatch latch = new CountDownLatch(1);
-		ObjectWrapper<Boolean> resWrapper = new ObjectWrapper<Boolean>(false);
-		
-		setter.execute(context, context.getExecutionLogger(), resObj -> 
-		{
-			boolean res = true;
-
-			if(resObj != null && "false".equalsIgnoreCase(resObj.toString()))
-			{
-				res = false;
-			}
-			
-			resWrapper.setValue(res);
-			latch.countDown();
-		});
-		
 		try
 		{
-			latch.await();
-		} catch(InterruptedException ex)
+			AutomationContext context = AutomationContext.getInstance();
+			Object resObj = setter.execute(context, context.getExecutionLogger());
+			
+			if(resObj != null && "false".equalsIgnoreCase(resObj.toString()))
+			{
+				return false;
+			}
+			
+			return true;
+		} catch(RuntimeException ex)
 		{
-			throw new InvalidStateException("Thread is interrupted", ex);
+			throw ex;
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An exception occurred while trying to set value", ex);
 		}
-		
-		return resWrapper.getValue();
 	}
 	
 	public String getValue(String query)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		CountDownLatch latch = new CountDownLatch(1);
-		ObjectWrapper<String> resWrapper = new ObjectWrapper<String>();
-		
-		setter.execute(context, context.getExecutionLogger(), resObj -> 
-		{
-			String res = null;
-
-			if(resObj != null)
-			{
-				res = resObj.toString();
-			}
-			
-			resWrapper.setValue(res);
-		});
-		
-		
 		try
 		{
-			latch.await();
-		} catch(InterruptedException ex)
+			AutomationContext context = AutomationContext.getInstance();
+			Object resObj = getter.execute(context, context.getExecutionLogger());
+			
+			if(resObj != null)
+			{
+				return resObj.toString();
+			}
+			
+			return null;
+		} catch(RuntimeException ex)
 		{
-			throw new InvalidStateException("Thread is interrupted", ex);
+			throw ex;
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An exception occurred while trying to get value", ex);
 		}
-		
-		return resWrapper.getValue();
 	}
 }

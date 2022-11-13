@@ -12,8 +12,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.RestPlugin;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -36,9 +36,9 @@ public class InvokeGetFileStep extends AbstractRestStep
 	static class FileResultHandler implements IRestResponseHandler<RestResult<String>>
 	{
 		private File outFile;
-		private ExecutionLogger exeLogger;
+		private IExecutionLogger exeLogger;
 		
-		public FileResultHandler(File outFile, ExecutionLogger logger)
+		public FileResultHandler(File outFile, IExecutionLogger logger)
 		{
 			this.outFile = outFile;
 			this.exeLogger = logger;
@@ -110,7 +110,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 	}
 	
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		GetRestRequest getRestRequest = new GetRestRequest(uri);
 		
@@ -120,7 +120,7 @@ public class InvokeGetFileStep extends AbstractRestStep
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	protected IRestResponseHandler<RestResult<?>> getRestResultHandler(ExecutionLogger exeLogger)
+	protected IRestResponseHandler<RestResult<?>> getRestResultHandler(IExecutionLogger exeLogger)
 	{
 		File file = null;
 		

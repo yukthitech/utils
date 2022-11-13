@@ -55,7 +55,7 @@ public class TestSuiteExecutor extends Executor
 				continue;
 			}
 			
-			if(testCase.isExecutable(excludedGroup))
+			if(!testCase.isExecutable(excludedGroup))
 			{
 				logger.debug("Exluding test-case '{}' as it is part of excluded group: {}", testCase.getName(), excludedGroup.getValue());
 				continue;
@@ -83,6 +83,11 @@ public class TestSuiteExecutor extends Executor
 				
 				executor.addDependency(depExecutor);
 			}
+		}
+		
+		if(CollectionUtils.isEmpty(super.getChildExecutors()))
+		{
+			throw new InvalidStateException("For test-suite '{}' no child test cases found", testSuite.getName());
 		}
 	}
 	

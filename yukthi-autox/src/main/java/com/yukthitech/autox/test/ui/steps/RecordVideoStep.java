@@ -24,15 +24,15 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.config.SeleniumPlugin;
-import com.yukthitech.autox.exec.AutomationExecutor;
+import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -100,7 +100,7 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger) throws Exception
+	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
 		exeLogger.debug("Recording started with name: {}", name);
 		
@@ -187,30 +187,24 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 			}
 		};
 		
-		AutomationExecutor executor = context.getAutomationExecutor();
+		StepsExecutor.addStepListener(listener);
 		
-		executor.newSteps("record-video-steps", this, steps)
-			.onInit(entry -> 
-			{
-				entry.setStepListener(listener);
-				return true;
-			})
-			.onComplete(entry -> 
-			{
-				try
-				{
-					// Finalize the encoding, i.e. clear the buffers, write the header, etc.
-				    encoder.finish();
-				    NIOUtils.closeQuietly(channel);
-				}catch(Exception ex)
-				{
-					exeLogger.error("An error occurred while creating video file: {}", ex);
-					return;
-				}
-			    
-			    entry.setStepListener(null);
-			    exeLogger.logFile("Recoding completed and can be seen in below file", LogLevel.DEBUG, videoFile);
-			})
-			.execute();
+		try
+		{
+			StepsExecutor.execute(exeLogger, steps, null);
+
+			// Finalize the encoding, i.e. clear the buffers, write the header, etc.
+		    encoder.finish();
+		    NIOUtils.closeQuietly(channel);
+		    
+		    exeLogger.logFile("Video is generated", LogLevel.INFO, videoFile);
+		} catch(Exception ex)
+		{
+			exeLogger.error("An error occurred while creating video file: {}", ex);
+			return;
+		} finally
+		{
+			StepsExecutor.removeStepListener(listener);
+		}
 	}
 }

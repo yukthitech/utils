@@ -11,8 +11,8 @@ import org.openqa.selenium.interactions.Actions;
 import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.test.TestCaseFailedException;
@@ -41,7 +41,7 @@ public class DragAndDropStep extends AbstractStep
 	private String destination;
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger logger)
+	public void execute(AutomationContext context, IExecutionLogger logger)
 	{
 		logger.debug("Dragging element '{}' to element - {}", source, destination);
 		
@@ -59,7 +59,7 @@ public class DragAndDropStep extends AbstractStep
 	 * @param destinationElement
 	 *            area to be dropped.
 	 */
-	private void dragAndDrop(AutomationContext context, WebElement sourceElement, WebElement destinationElement, ExecutionLogger logger)
+	private void dragAndDrop(AutomationContext context, WebElement sourceElement, WebElement destinationElement, IExecutionLogger logger)
 	{
 		if(!sourceElement.isDisplayed())
 		{

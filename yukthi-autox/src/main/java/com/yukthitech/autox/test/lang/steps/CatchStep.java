@@ -3,11 +3,10 @@ package com.yukthitech.autox.test.lang.steps;
 import com.yukthitech.autox.AbstractContainerStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.ExecutionLogger;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.exec.AutomationExecutor;
 
 /**
  * Represents catch block.
@@ -15,7 +14,7 @@ import com.yukthitech.autox.exec.AutomationExecutor;
  * @author akiran
  */
 @Executable(name = "catch", group = Group.Lang, partOf = TryStep.class, message = "Represents steps to be executed on error. This step has to be preceeded by try-step.")
-public class TryCatchStep extends AbstractContainerStep implements IStepContainer
+public class CatchStep extends AbstractContainerStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
 
@@ -36,11 +35,8 @@ public class TryCatchStep extends AbstractContainerStep implements IStepContaine
 	}
 
 	@Override
-	public void execute(AutomationContext context, ExecutionLogger exeLogger)
+	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		AutomationExecutor executor = context.getAutomationExecutor();
-		
-		executor.newSteps("catch-steps", this, super.steps)
-			.execute();
+		throw new UnsupportedOperationException("Catch cannot be used without try block.");
 	}
 }
