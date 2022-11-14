@@ -10,9 +10,9 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
  * Validation to Compare specified values for equality.

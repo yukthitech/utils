@@ -1,4 +1,4 @@
-package com.yukthitech.autox;
+package com.yukthitech.autox.exec.report;
 
 import java.io.File;
 import java.util.Date;
@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.autox.test.log.LogLevel;
 
 public class Log4jExecutionLogger implements IExecutionLogger
 {

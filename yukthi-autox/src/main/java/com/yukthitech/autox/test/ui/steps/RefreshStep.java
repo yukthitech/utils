@@ -5,11 +5,11 @@ import org.openqa.selenium.WebDriver;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 

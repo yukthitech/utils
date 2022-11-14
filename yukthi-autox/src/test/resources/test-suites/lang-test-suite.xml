@@ -113,6 +113,7 @@
 				<s:set expression="res" value=""/>
 			
 				<s:for end="5" start="1">
+					<s:log message="for loop..."/>
 					<s:set expression="res" value="${attr.res}|${attr.loopVar}"/>
 				</s:for>
 			
@@ -404,6 +405,7 @@
 		
 			<cleanup>
 				<s:set expression="setupVar" value="int: 10"/>
+				<s:log message="As part of cleanup attr is setup as: ${attr.setupVar}"/>
 			</cleanup>
 		</testCase>
 	

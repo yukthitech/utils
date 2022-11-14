@@ -99,7 +99,7 @@ public class ExecutionStack
 	{
 		object = unwrapStep(object);
 		
-		System.out.println("==========> Pushing object: " + object);
+		//System.out.println("==========> Pushing object: " + object);
 		objectStack.push(object);
 		
 		if(object instanceof IEntryPoint)
@@ -114,7 +114,7 @@ public class ExecutionStack
 		StackElement stackElement = new StackElement(entryPoint, element, entryPointStack.size());
 		stackTrace.push(stackElement);
 		
-		ThreadContext.put("xmlLoc", stackElement.getLocation());
+		ThreadContext.put("xmlLoc", stackElement.getSourceLocation());
 	}
 	
 	public void pop(Object object)
@@ -149,7 +149,7 @@ public class ExecutionStack
 		}
 		else
 		{
-			ThreadContext.put("xmlLoc", stackTrace.peek().getLocation());
+			ThreadContext.put("xmlLoc", stackTrace.peek().getSourceLocation());
 		}
 			
 	}

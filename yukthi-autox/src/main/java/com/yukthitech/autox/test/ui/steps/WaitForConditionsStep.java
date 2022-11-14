@@ -6,8 +6,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 
 /**

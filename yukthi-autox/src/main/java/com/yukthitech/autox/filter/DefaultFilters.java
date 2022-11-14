@@ -26,13 +26,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ContextMap;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.common.PropertyAccessor;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.ccg.xml.util.StringUtil;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;

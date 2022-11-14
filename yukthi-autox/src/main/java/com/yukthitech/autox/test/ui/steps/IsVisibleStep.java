@@ -3,10 +3,10 @@ package com.yukthitech.autox.test.ui.steps;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
 
 /**

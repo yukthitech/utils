@@ -7,7 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.IDataProvider;
@@ -43,11 +43,11 @@ public class TestCaseExecutor extends Executor
 			this.dataCleanup = testCase.getDataCleanup();
 			
 			super.parallelCount = testCase.getParallelExecutionCount();
-			super.expectedException = testCase.getExpectedException();
 		}
 		else
 		{
 			super.childSteps = testCase.getSteps();
+			super.expectedException = testCase.getExpectedException();
 		}
 	}
 	
@@ -58,6 +58,7 @@ public class TestCaseExecutor extends Executor
 		this.testCase = testCase;
 		this.testCaseData = testCaseData;
 		super.childSteps = testCase.getSteps();
+		super.expectedException = testCase.getExpectedException();
 	}
 	
 	public TestCaseData getTestCaseData()
@@ -175,5 +176,25 @@ public class TestCaseExecutor extends Executor
 	protected void preCleanup()
 	{
 		ExecutorUtils.executeCleanup(dataCleanup, "Data-Cleanup", this);
+	}
+
+	@Override
+	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
+	{
+		AutomationContext.getInstance().setActiveTestCase(testCase, testCaseData);
+		
+		if(testCaseData != null)
+		{
+			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName(), testCaseData.getValue());
+			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName() + ".name", testCaseData.getName());
+		}
+		
+		try
+		{
+			super.execute(beforeChildFromParent, afterChildFromParent);
+		} finally
+		{
+			AutomationContext.getInstance().clearActiveTestCase();
+		}
 	}
 }

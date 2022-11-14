@@ -9,12 +9,12 @@ import java.util.Map;
 
 import com.yukthitech.autox.AbstractLocationBased;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.exec.StepsExecutor;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
 import com.yukthitech.ccg.xml.IParentAware;
 

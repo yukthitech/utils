@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

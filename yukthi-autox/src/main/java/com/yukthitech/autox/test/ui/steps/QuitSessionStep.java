@@ -4,8 +4,8 @@ import com.yukthitech.autox.AbstractStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
  * Quits the driver. In order to user driver again it has to be initialized.

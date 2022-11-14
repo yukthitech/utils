@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;

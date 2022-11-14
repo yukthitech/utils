@@ -6,9 +6,9 @@ import org.openqa.selenium.interactions.Actions;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
  * Simulates the click event on the specified button.

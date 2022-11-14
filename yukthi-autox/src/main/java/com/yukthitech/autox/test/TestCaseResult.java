@@ -7,7 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.test.log.ExecutionLogData;
+import com.yukthitech.autox.exec.report.ExecutionLogData;
 
 /**
  * Represents result of a test case.

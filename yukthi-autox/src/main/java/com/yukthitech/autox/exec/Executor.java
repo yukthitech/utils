@@ -3,15 +3,17 @@ package com.yukthitech.autox.exec;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ErrorDetails;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportManager;
 import com.yukthitech.autox.test.AutoxException;
 import com.yukthitech.autox.test.Cleanup;
@@ -50,6 +52,8 @@ public abstract class Executor
 	private Executor parentExecutor;
 	
 	protected TestStatus status;
+	
+	protected String statusMessage;
 	
 	protected ExpectedException expectedException;
 	
@@ -118,9 +122,9 @@ public abstract class Executor
 	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
 	{
 		status = TestStatus.IN_PROGRESS;
-		reportManager.executionStarted(ExecutionType.MAIN, this);
 
 		AutomationContext.getInstance().getExecutionStack().push(executable);
+		reportManager.executionStarted(ExecutionType.MAIN, this);
 		
 		try
 		{
@@ -158,12 +162,39 @@ public abstract class Executor
 			}
 		} finally
 		{
+			closeReportManager();
 			AutomationContext.getInstance().getExecutionStack().pop(executable);
 		}
 	}
 	
 	protected void preCleanup()
 	{}
+	
+	protected void setStatus(TestStatus status, String mssg)
+	{
+		this.status = status;
+		this.statusMessage = mssg;
+	}
+	
+	private void closeReportManager()
+	{
+		if(status == TestStatus.ERRORED)
+		{
+			reportManager.executionErrored(ExecutionType.MAIN, this, statusMessage);
+		}
+		else if(status == TestStatus.FAILED)
+		{
+			reportManager.executionFailed(ExecutionType.MAIN, this, statusMessage);
+		}
+		if(status == TestStatus.SKIPPED)
+		{
+			reportManager.executionSkipped(ExecutionType.MAIN, this, statusMessage);
+		}
+		else
+		{
+			reportManager.executionCompleted(ExecutionType.MAIN, this);
+		}
+	}
 
 	private void executeChildExecutors()
 	{
@@ -189,22 +220,20 @@ public abstract class Executor
 		
 		if(finalStatus == TestStatus.ERRORED)
 		{
-			reportManager.executionErrored(ExecutionType.MAIN, this, "Child execution(s) errored");
+			setStatus(TestStatus.ERRORED, "Child execution(s) errored");
 		}
 		else if(finalStatus == TestStatus.FAILED)
 		{
-			reportManager.executionFailed(ExecutionType.MAIN, this, "Child execution(s) failed");
+			setStatus(TestStatus.FAILED, "Child execution(s) failed");
 		}
 		if(finalStatus == TestStatus.SKIPPED)
 		{
-			reportManager.executionSkipped(ExecutionType.MAIN, this, "Child execution(s) skipped");
+			setStatus(TestStatus.SKIPPED, "Child execution(s) skipped");
 		}
 		else
 		{
-			reportManager.executionCompleted(ExecutionType.MAIN, this);
+			setStatus(TestStatus.SUCCESSFUL, null);
 		}
-		
-		status = finalStatus;
 	}
 	
 	private void executeChildSteps()
@@ -218,7 +247,7 @@ public abstract class Executor
 		try
 		{
 			StepsExecutor.execute(logger, childSteps, currentStep);
-			reportManager.executionCompleted(ExecutionType.MAIN, this);
+			setStatus(TestStatus.SUCCESSFUL, null);
 		} catch(Exception ex)
 		{
 			handleException(currentStep.getValue(), logger, ex);
@@ -249,35 +278,35 @@ public abstract class Executor
 		if(ex instanceof TestCaseValidationFailedException)
 		{
 			ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
-			reportManager.executionFailed(ExecutionType.MAIN, this, ex.getMessage());
+			setStatus(TestStatus.FAILED, ex.getMessage());
 			return;
 		}
 		
 		if((ex instanceof TestCaseFailedException) || (ex instanceof LangException))
 		{
 			ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
-			reportManager.executionErrored(ExecutionType.MAIN, this, 
-					String.format("%s (%s) Errored: %s", stepType, name, ex.getMessage()));
-		
+			setStatus(TestStatus.ERRORED, String.format("%s (%s) Errored: %s", stepType, name, ex.getMessage()));
 			return;
 		}
 		
 		if(expectedException != null)
 		{
+			ExpectedException expectedException = AutomationUtils.replaceExpressions("expected-exception", 
+					AutomationContext.getInstance(), 
+					SerializationUtils.clone(this.expectedException));
 			try
 			{
 				expectedException.validateMatch(ex);
 				
-				exeLogger.debug("Expected excpetion occurred: {}", ex);
-				reportManager.executionCompleted(ExecutionType.MAIN, this);
+				exeLogger.debug("Expected exception occurred: {}", ex);
+				setStatus(TestStatus.SUCCESSFUL, null);
 				return;
 			}catch(InvalidArgumentException iex)
 			{
-				exeLogger.error(ex.getMessage(), ex);
+				exeLogger.error(iex.getMessage(), iex);
 				ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
 				
-				reportManager.executionErrored(ExecutionType.MAIN, this, 
-						stepType + " errored: " + name);
+				setStatus(TestStatus.ERRORED, stepType + " errored: " + name);
 				return;
 			}
 		}
@@ -285,8 +314,6 @@ public abstract class Executor
 		//for unhandled exceptions log on ui
 		//exeLogger.error(ex, "An error occurred while executing " + stepType + ": " + name);
 		ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
-		
-		reportManager.executionErrored(ExecutionType.MAIN, this, 
-				stepType + " errored: " + executable.name());
+		setStatus(TestStatus.ERRORED, stepType + " errored: " + executable.name());
 	}
 }

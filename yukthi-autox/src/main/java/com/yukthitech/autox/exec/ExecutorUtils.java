@@ -10,9 +10,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Function;

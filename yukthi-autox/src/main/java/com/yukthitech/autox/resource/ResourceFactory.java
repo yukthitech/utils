@@ -7,8 +7,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 

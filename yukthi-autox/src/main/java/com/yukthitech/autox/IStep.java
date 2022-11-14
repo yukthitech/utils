@@ -2,6 +2,8 @@ package com.yukthitech.autox;
 
 import java.io.Serializable;
 
+import com.yukthitech.autox.exec.report.IExecutionLogger;
+
 /**
  * Represents automation step to be performed.
  * @author akiran

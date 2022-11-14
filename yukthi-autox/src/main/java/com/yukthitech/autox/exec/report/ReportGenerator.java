@@ -38,7 +38,6 @@ import com.yukthitech.autox.config.SummaryNotificationConfig;
 import com.yukthitech.autox.logmon.LogMonitorContext;
 import com.yukthitech.autox.test.ResourceManager;
 import com.yukthitech.autox.test.TestCaseResult;
-import com.yukthitech.autox.test.log.ExecutionLogData;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 import freemarker.template.Configuration;

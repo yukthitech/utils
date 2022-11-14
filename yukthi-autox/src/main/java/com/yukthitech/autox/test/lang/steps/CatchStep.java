@@ -4,9 +4,9 @@ import com.yukthitech.autox.AbstractContainerStep;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
  * Represents catch block.

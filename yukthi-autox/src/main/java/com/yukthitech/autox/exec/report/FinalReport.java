@@ -162,12 +162,30 @@ public class FinalReport
 	
 	private List<TestSuiteResult> testSuiteResults = new ArrayList<>();
 	
+	/**
+	 * Setup execution details.
+	 */
+	private ExecutionDetails setupExecutionDetails;
+
+	/**
+	 * Main execution details.
+	 */
+	private ExecutionDetails mainExecutionDetails;
+
+	/**
+	 * Cleanup execution details.
+	 */
+	private ExecutionDetails cleanupExecutionDetails;
+	
 	public FinalReport()
 	{}
 	
 	public FinalReport(String reportName, ExecutionStatusReport testSuiteGroupReport)
 	{
 		this.reportName = reportName;
+		this.setupExecutionDetails = testSuiteGroupReport.getSetupExecutionDetails();
+		this.mainExecutionDetails = testSuiteGroupReport.getMainExecutionDetails();
+		this.cleanupExecutionDetails = testSuiteGroupReport.getCleanupExecutionDetails();
 		
 		if(testSuiteGroupReport.getChildReports() == null)
 		{
@@ -338,5 +356,35 @@ public class FinalReport
 	public void setTestSuiteResults(List<TestSuiteResult> testSuiteResults)
 	{
 		this.testSuiteResults = testSuiteResults;
+	}
+
+	public ExecutionDetails getSetupExecutionDetails()
+	{
+		return setupExecutionDetails;
+	}
+
+	public void setSetupExecutionDetails(ExecutionDetails setupExecutionDetails)
+	{
+		this.setupExecutionDetails = setupExecutionDetails;
+	}
+
+	public ExecutionDetails getMainExecutionDetails()
+	{
+		return mainExecutionDetails;
+	}
+
+	public void setMainExecutionDetails(ExecutionDetails mainExecutionDetails)
+	{
+		this.mainExecutionDetails = mainExecutionDetails;
+	}
+
+	public ExecutionDetails getCleanupExecutionDetails()
+	{
+		return cleanupExecutionDetails;
+	}
+
+	public void setCleanupExecutionDetails(ExecutionDetails cleanupExecutionDetails)
+	{
+		this.cleanupExecutionDetails = cleanupExecutionDetails;
 	}
 }

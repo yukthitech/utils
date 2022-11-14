@@ -1,4 +1,4 @@
-package com.yukthitech.autox;
+package com.yukthitech.autox.exec.report;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,10 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.autox.test.log.ExecutionLogData;
-import com.yukthitech.autox.test.log.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -54,6 +53,10 @@ public class ExecutionLogger implements IExecutionLogger
 	private PrintWriter logWriter;
 	
 	private File logsFolder;
+	
+	private int logIndex = 0;
+	
+	private Date startTime;
 
 	public ExecutionLogger(String fileName, String executorName, String executorDescription)
 	{
@@ -72,6 +75,8 @@ public class ExecutionLogger implements IExecutionLogger
 			//open file in append mode, so that if logger is created for same resource, the logs
 			// gets appended
 			this.logWriter = new PrintWriter(new FileOutputStream(file, true));
+			this.logWriter.println("var logs = [];");
+			this.logWriter.flush();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("Failed to open print writer for log file: {}", file.getPath(), ex);
@@ -105,6 +110,7 @@ public class ExecutionLogger implements IExecutionLogger
 		}
 	
 		addMessage(new ExecutionLogData.Header(executorName, executorDescription));
+		startTime = new Date();
 	}
 	
 	/**
@@ -275,7 +281,7 @@ public class ExecutionLogger implements IExecutionLogger
 		return finalMssg;
 	}
 	
-	private void addMessage(Object mssg)
+	private synchronized void addMessage(Object mssg)
 	{
 		try
 		{
@@ -284,8 +290,10 @@ public class ExecutionLogger implements IExecutionLogger
 				((ExecutionLogData.Message) mssg).copyResources(logsFolder);
 			}
 			
-			logWriter.println(JSON_MAPPER.writeValueAsString(mssg));
+			logWriter.println("logs[" + logIndex + "] = " + JSON_MAPPER.writeValueAsString(mssg) + ";");
 			logWriter.flush();
+			
+			logIndex++;
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while logging mssg", ex);
@@ -302,7 +310,7 @@ public class ExecutionLogger implements IExecutionLogger
 	@Override
 	public void error(boolean escapeHtml, String mssgTemplate, Object... args)
 	{
-		error(escapeHtml, null, mssgTemplate, args);
+		buildAndAddMssg(LogLevel.ERROR, escapeHtml, mssgTemplate, args);
 	}
 
 	/**
@@ -314,7 +322,7 @@ public class ExecutionLogger implements IExecutionLogger
 	@Override
 	public void error(String mssgTemplate, Object... args)
 	{
-		error(true, null, mssgTemplate, args);
+		error(true, mssgTemplate, args);
 	}
 
 	private void buildAndAddMssg(LogLevel logLevel, boolean escapeHtml, String mssgTemplate, Object... args)
@@ -588,7 +596,8 @@ public class ExecutionLogger implements IExecutionLogger
 	@Override
 	public void close(TestStatus status, Date endTime)
 	{
-		addMessage(new ExecutionLogData.Footer(status, endTime));
+		addMessage(new ExecutionLogData.Footer(status, startTime, endTime));
 		logWriter.close();
+		logWriter = null;
 	}
 }

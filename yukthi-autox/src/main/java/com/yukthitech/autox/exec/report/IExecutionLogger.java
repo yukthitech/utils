@@ -1,10 +1,9 @@
-package com.yukthitech.autox;
+package com.yukthitech.autox.exec.report;
 
 import java.io.File;
 import java.util.Date;
 
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.autox.test.log.LogLevel;
 
 public interface IExecutionLogger
 {

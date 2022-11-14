@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**

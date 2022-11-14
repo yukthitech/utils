@@ -120,6 +120,10 @@
 				</expected>
 			</s:assert-equals>
 		</test-case>
+		
+		<cleanup>
+			<s:log message="Message from TS cleanup"/>
+		</cleanup>
 	</test-suite>
 
 </test-file>

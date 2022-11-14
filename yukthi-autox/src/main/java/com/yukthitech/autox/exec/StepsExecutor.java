@@ -3,12 +3,14 @@ package com.yukthitech.autox.exec;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseValidationFailedException;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.ObjectWrapper;
@@ -20,6 +22,8 @@ import com.yukthitech.utils.event.EventListenerManager;
  */
 public class StepsExecutor
 {
+	private static Logger logger = LogManager.getLogger(StepsExecutor.class);
+	
 	private static ThreadLocal<Boolean> topLevelStep = new ThreadLocal<>();
 	
 	private static EventListenerManager<IStepListener> stepListeners = EventListenerManager.newEventListenerManager(IStepListener.class, false);
@@ -59,10 +63,10 @@ public class StepsExecutor
 	 * @param exeLogger logger to be used
 	 * @param step step to be executed
 	 */
-	private static void executeStep(IExecutionLogger exeLogger, IStep step) throws Exception
+	private static void executeStep(IExecutionLogger exeLogger, IStep sourceStep) throws Exception
 	{
 		//if step is marked not to log anything
-		if(step.isLoggingDisabled())
+		if(sourceStep.isLoggingDisabled())
 		{
 			//disable logging
 			exeLogger.setDisabled(true);
@@ -72,7 +76,8 @@ public class StepsExecutor
 		context.setExecutionLogger(exeLogger);
 		
 		//clone the step, so that expression replacement will not affect actual step
-		step = step.clone();
+		IStep step = sourceStep.clone();
+		step.setSourceStep(sourceStep);
 
 		context.getExecutionStack().push(step);
 		boolean isTopLevel = checkForTopLevel();
@@ -98,7 +103,10 @@ public class StepsExecutor
 			//only top level step in stack should log the error
 			if(isTopLevel)
 			{
-				exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), context.getExecutionStack().toStackTrace());
+				String stackTrace = context.getExecutionStack().toStackTrace();
+				
+				logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);
+				exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), stackTrace);
 			}
 			
 			throw ex;

@@ -33,8 +33,8 @@ public class TAutomation
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-rf", "./output", 
 				"-prop", "./src/test/resources/app.properties", 
-				//"-ts", "rest-test-suites"
-				"-tc", "assertEquals"
+				//"-ts", "invoke_Method_With_Data_Provder"
+				//"-tc", "testCaseSetupCleanup"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

@@ -5,8 +5,8 @@ import java.io.Serializable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.yukthitech.autox.test.log.ExecutionLogData;
-import com.yukthitech.autox.test.log.ExecutionLogData.Message;
+import com.yukthitech.autox.exec.report.ExecutionLogData;
+import com.yukthitech.autox.exec.report.ExecutionLogData.Message;
 
 /**
  * Log message to be sent monitoring client.

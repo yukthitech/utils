@@ -28,7 +28,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-public class TestSuite extends AbstractLocationBased implements Validateable
+public class TestSuite extends AbstractLocationBased implements Validateable, IEntryPoint
 {
 	/**
 	 * Name of the test suite.
@@ -529,6 +529,12 @@ public class TestSuite extends AbstractLocationBased implements Validateable
 		ordered.forEach(name -> orderedTestCases.add(testCases.get(name)));
 		
 		return orderedTestCases;
+	}
+
+	@Override
+	public String toText()
+	{
+		return toString();
 	}
 
 	@Override

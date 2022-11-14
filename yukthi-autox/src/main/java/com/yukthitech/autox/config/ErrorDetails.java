@@ -1,7 +1,7 @@
 package com.yukthitech.autox.config;
 
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
  * Represent error details that needs to be sent to plugin for error handling.

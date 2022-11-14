@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.log;
+package com.yukthitech.autox.exec.report;
 
 public enum ExecutorType
 {

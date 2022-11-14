@@ -1,4 +1,4 @@
-package com.yukthitech.autox.test.log;
+package com.yukthitech.autox.exec.report;
 
 import java.io.File;
 import java.io.Serializable;
@@ -9,6 +9,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -370,7 +371,12 @@ public class ExecutionLogData
 
 		public String getStartTimeStr()
 		{
-			return DateFormatUtils.format(startTime, ApplicationConfiguration.getInstance().getDateFomat());
+			return DateFormatUtils.format(startTime, ApplicationConfiguration.getInstance().getDateTimeFomat());
+		}
+
+		public String getType()
+		{
+			return "Header";
 		}
 	}
 
@@ -386,11 +392,18 @@ public class ExecutionLogData
 		 * Start time of this execution.
 		 */
 		private Date endTime;
+		
+		/**
+		 * Time taken by execution.
+		 */
+		private String timeTaken;
 
-		public Footer(TestStatus status, Date endTime)
+		public Footer(TestStatus status, Date startTime, Date endTime)
 		{
 			this.status = status;
 			this.endTime = endTime;
+			
+			this.timeTaken = AutomationUtils.getTimeTaken(startTime, endTime);
 		}
 
 		public TestStatus getStatus()
@@ -415,7 +428,22 @@ public class ExecutionLogData
 
 		public String getEndTimeStr()
 		{
-			return DateFormatUtils.format(endTime, ApplicationConfiguration.getInstance().getDateFomat());
+			return ApplicationConfiguration.getInstance().getTimeFormatObject().format(endTime);
+		}
+		
+		public String getTimeTaken()
+		{
+			return timeTaken;
+		}
+
+		public void setTimeTaken(String timeTaken)
+		{
+			this.timeTaken = timeTaken;
+		}
+
+		public String getType()
+		{
+			return "Footer";
 		}
 	}
 }

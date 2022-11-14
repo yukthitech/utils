@@ -10,8 +10,6 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ExecutionLogger;
-import com.yukthitech.autox.IExecutionLogger;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.test.TestStatus;
@@ -114,17 +112,17 @@ public class ReportManager
 	
 	public synchronized IExecutionLogger getSetupExecutionLogger(Executor executor)
 	{
-		return getExecutorDetails(executor).getLogger(executor, ExecutionType.SETUP, "-setup.log", ".log");
+		return getExecutorDetails(executor).getLogger(executor, ExecutionType.SETUP, "-setup.js", ".js");
 	}
 
 	public synchronized IExecutionLogger getCleanupExecutionLogger(Executor executor)
 	{
-		return getExecutorDetails(executor).getLogger(executor, ExecutionType.CLEANUP, "-cleanup.log", ".log");
+		return getExecutorDetails(executor).getLogger(executor, ExecutionType.CLEANUP, "-cleanup.js", ".js");
 	}
 
 	public synchronized IExecutionLogger getExecutionLogger(Executor executor)
 	{
-		return getExecutorDetails(executor).getLogger(executor, ExecutionType.MAIN, ".log", ".log");
+		return getExecutorDetails(executor).getLogger(executor, ExecutionType.MAIN, ".js", ".js");
 	}
 	
 	private void generateJsonReport()

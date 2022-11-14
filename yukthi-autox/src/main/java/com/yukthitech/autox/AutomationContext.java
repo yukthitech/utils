@@ -25,6 +25,8 @@ import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.DummyAutomationListener;
 import com.yukthitech.autox.event.IAutomationListener;
+import com.yukthitech.autox.exec.report.IExecutionLogger;
+import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.logmon.ILogMonitor;
 import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.storage.PersistenceStorage;

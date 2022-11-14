@@ -39,15 +39,33 @@ $.application.controller('testLogAppController', function($scope){
 	$scope.displayLogs = function(){
 		
 		//logData global variable present in included js file.
-		$scope.testLogs = logData;
+		$scope.testLogs = {};
+		$scope.messages = [];
+		var lineNo = 1;
 		
-		$scope.messages = $scope.testLogs.messages;
-		
-		for(var i = 0 ; i < $scope.messages.length ; i++)
+		for(var i = 0 ; i < logs.length ; i++)
 		{
-			var obj = $scope.messages[i];
-			obj.lineNo = i + 1;
-			obj.display = true;
+			if(logs[i].type == 'Header')
+			{
+				$scope.testLogs.name = logs[i].executorName;
+				$scope.testLogs.description = logs[i].executorDescription;
+				$scope.testLogs.startTimeStr = logs[i].startTimeStr;
+				continue;
+			}
+			
+			if(logs[i].type == 'Footer')
+			{
+				$scope.testLogs.status = logs[i].status;
+				$scope.testLogs.endTimeStr = logs[i].endTimeStr;
+				$scope.testLogs.timeTaken = logs[i].timeTaken;
+				continue;
+			}
+
+			$scope.messages.push(logs[i]);
+			logs[i].display = true;
+			logs[i].lineNo = lineNo;
+			
+			lineNo++;
 		}
 		
 		try
