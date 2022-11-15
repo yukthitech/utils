@@ -1,4 +1,4 @@
-package com.yukthitech.test;
+package com.yukthitech.test.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

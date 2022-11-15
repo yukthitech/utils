@@ -8,7 +8,7 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.IDataProvider;
 import com.yukthitech.autox.test.Setup;
@@ -61,6 +61,11 @@ public class TestCaseExecutor extends Executor
 		super.expectedException = testCase.getExpectedException();
 	}
 	
+	public TestCase getTestCase()
+	{
+		return testCase;
+	}
+	
 	public TestCaseData getTestCaseData()
 	{
 		return testCaseData;
@@ -105,7 +110,7 @@ public class TestCaseExecutor extends Executor
 			
 			if(dep.status == TestStatus.SKIPPED || dep.status.isErrored())
 			{
-				ReportManager.getInstance().executionSkipped(ExecutionType.MAIN, this, 
+				ReportDataManager.getInstance().executionSkipped(ExecutionType.MAIN, this, 
 						String.format("Skipped as required dependency test-case '%s' is found with status: %s", 
 								dep.testCase.getName(), dep.status));
 				return false;
@@ -121,7 +126,7 @@ public class TestCaseExecutor extends Executor
 		
 		automationContext.setActiveTestCase(testCase, null);
 		
-		IExecutionLogger executionLogger = ReportManager.getInstance().getSetupExecutionLogger(this);
+		IExecutionLogger executionLogger = ReportDataManager.getInstance().getSetupExecutionLogger(this);
 		executionLogger.setMode("Data-Provider");
 		automationContext.setExecutionLogger(executionLogger);
 		

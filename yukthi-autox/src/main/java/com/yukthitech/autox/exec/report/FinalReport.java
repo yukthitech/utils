@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FinalReport
 {
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class TestSuiteResult
 	{
 		private ExecutionStatusReport report;
@@ -37,6 +40,11 @@ public class FinalReport
 		
 		private void addTestCases(ExecutionStatusReport parent)
 		{
+			if(CollectionUtils.isEmpty(parent.getChildReports()))
+			{
+				return;
+			}
+			
 			for(ExecutionStatusReport report : parent.getChildReports())
 			{
 				if(CollectionUtils.isNotEmpty(report.getChildReports()))
@@ -128,6 +136,15 @@ public class FinalReport
 		public List<ExecutionStatusReport> getTestCaseResults()
 		{
 			return testCaseResults;
+		}
+		
+		public ExecutionStatusReport getTestCaseResult(String name)
+		{
+			return testCaseResults
+					.stream()
+					.filter(res -> name.equals(res.getName()))
+					.findFirst()
+					.orElse(null);
 		}
 
 		public void setTestCaseResults(List<ExecutionStatusReport> testCaseResults)
@@ -351,6 +368,15 @@ public class FinalReport
 	public List<TestSuiteResult> getTestSuiteResults()
 	{
 		return testSuiteResults;
+	}
+	
+	public TestSuiteResult getTestSuiteResult(String name)
+	{
+		return this.testSuiteResults
+				.stream()
+				.filter(res -> res.getReport().getName().equals(name))
+				.findFirst()
+				.orElse(null);
 	}
 
 	public void setTestSuiteResults(List<TestSuiteResult> testSuiteResults)

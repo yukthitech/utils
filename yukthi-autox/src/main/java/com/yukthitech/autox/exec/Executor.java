@@ -8,20 +8,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.AutoxException;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.ExpectedException;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCaseFailedException;
-import com.yukthitech.autox.test.TestCaseValidationFailedException;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.ObjectWrapper;
@@ -31,7 +31,7 @@ public abstract class Executor
 {
 	private static Logger logger = LogManager.getLogger(Executor.class);
 	
-	private ReportManager reportManager = ReportManager.getInstance();
+	private ReportDataManager reportManager = ReportDataManager.getInstance();
 	
 	protected Object executable;
 	
@@ -150,6 +150,10 @@ public abstract class Executor
 				{
 					executeChildSteps();
 				}
+			} catch(RuntimeException ex) 
+			{
+				logger.error("An error occurred during exection", ex);
+				throw ex;
 			} finally
 			{
 				//Pre cleanup is expected to take care of tasks like data-clean-up
@@ -186,7 +190,7 @@ public abstract class Executor
 		{
 			reportManager.executionFailed(ExecutionType.MAIN, this, statusMessage);
 		}
-		if(status == TestStatus.SKIPPED)
+		else if(status == TestStatus.SKIPPED)
 		{
 			reportManager.executionSkipped(ExecutionType.MAIN, this, statusMessage);
 		}
@@ -238,7 +242,7 @@ public abstract class Executor
 	
 	private void executeChildSteps()
 	{
-		IExecutionLogger logger = ReportManager.getInstance().getExecutionLogger(this);
+		IExecutionLogger logger = ReportDataManager.getInstance().getExecutionLogger(this);
 		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
 
 		//NOTE: Even parallel execution is used by test-suites or data-test-cases, final test case
@@ -275,7 +279,7 @@ public abstract class Executor
 		
 		String stepType = (step instanceof IValidation) ? "Validation" : "Step";
 		
-		if(ex instanceof TestCaseValidationFailedException)
+		if(ex instanceof AutoxValidationException)
 		{
 			ExecutorUtils.invokeErrorHandling(executable, new ErrorDetails(exeLogger, step, ex));
 			setStatus(TestStatus.FAILED, ex.getMessage());

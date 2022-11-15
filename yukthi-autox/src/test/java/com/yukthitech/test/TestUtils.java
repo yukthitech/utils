@@ -1,9 +1,26 @@
 package com.yukthitech.test;
 
+import java.io.File;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import org.apache.commons.io.FileUtils;
+import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.exec.report.ExecutionLogData;
+import com.yukthitech.autox.exec.report.ExecutionStatusReport;
+import com.yukthitech.autox.exec.report.FinalReport;
+import com.yukthitech.autox.exec.report.FinalReport.TestSuiteResult;
+import com.yukthitech.autox.exec.report.LogLevel;
+import com.yukthitech.autox.test.TestStatus;
+import com.yukthitech.test.beans.TestLogData;
 
 public class TestUtils
 {
@@ -37,14 +54,22 @@ public class TestUtils
 			foundMssgs.add(mssg);
 		}
 	}
-	/*
+	
 	public static void validateLogFile(File logFile, String name, List<Object> expectedErrorMssgs, List<Object> expectedMssgs) throws Exception
 	{
-		ExecutionLogData logData = objectMapper.readValue(logFile, ExecutionLogData.class);
+		String fileContent = FileUtils.readFileToString(logFile, Charset.defaultCharset());
+		fileContent += "var logDataJson = JSON.stringify({header: logs[0], footer: logs[logs.length-1], messages: logs.slice(1, logs.length-1)});";
+	
+		ScriptEngine JS_ENGINE = new ScriptEngineManager().getEngineByName("nashorn");
+		JS_ENGINE.eval(fileContent);
+		String resJson = (String) JS_ENGINE.get("logDataJson");
+		
+		TestLogData testLogData = objectMapper.readValue(resJson, TestLogData.class);
+		
 		List<Object> foundErrMssgs = new ArrayList<Object>();
 		List<Object> foundMssgs = new ArrayList<Object>();
 		
-		for(ExecutionLogData.Message mssg : logData.getMessages())
+		for(ExecutionLogData.Message mssg : testLogData.getMessages())
 		{
 			if(mssg.getLogLevel() == LogLevel.ERROR)
 			{
@@ -77,17 +102,17 @@ public class TestUtils
 		}
 	}
 	
-	public static void validateTestCase(String name, FullExecutionDetails details, TestStatus expectedStatus, 
-			List<Object> expectedErrorMssgs, List<Object> expectedMssgs) throws Exception
+	public static void validateTestCase(String name, FinalReport details, TestStatus expectedStatus, 
+			List<Object> expectedErrorMssgs, List<Object> expectedMssgs, String outputFolder) throws Exception
 	{
-		TestCaseResult testCaseResult = null;
-		TestSuiteResults testSuiteResult = null;
+		ExecutionStatusReport testCaseResult = null;
+		TestSuiteResult testSuiteResult = null;
 		
-		for(TestSuiteResults testSuite : details.getTestSuiteResults())
+		for(TestSuiteResult testSuite : details.getTestSuiteResults())
 		{
-			for(TestCaseResult tsRes : testSuite.getTestCaseResults())
+			for(ExecutionStatusReport tsRes : testSuite.getTestCaseResults())
 			{
-				if(name.equals(tsRes.getTestCaseName()))
+				if(name.equals(tsRes.getName()))
 				{
 					testSuiteResult = testSuite;
 					testCaseResult = tsRes;
@@ -96,15 +121,15 @@ public class TestUtils
 			}
 		}
 		
-		Assert.assertEquals(testCaseResult.getStatus(), expectedStatus);
+		Assert.assertEquals(testCaseResult.getMainExecutionDetails().getStatus(), expectedStatus);
 		
 		if(expectedErrorMssgs == null || expectedMssgs == null)
 		{
 			return;
 		}
 		
-		validateLogFile(new File("./output/logs/" + testSuiteResult.getSuiteName() + "_" + testCaseResult.getTestCaseName() + "_log.json"), 
+		String filePath = String.format("./output/%s/logs/tc_%s_%s.js", outputFolder, testSuiteResult.getReport().getName(), testCaseResult.getName());
+		validateLogFile(new File(filePath), 
 				name, expectedErrorMssgs, expectedMssgs);
 	}
-*/
 }

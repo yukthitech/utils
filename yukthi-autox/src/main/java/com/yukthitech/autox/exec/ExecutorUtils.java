@@ -13,7 +13,7 @@ import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.Setup;
@@ -88,7 +88,7 @@ public class ExecutorUtils
 			return true;
 		}
 		
-		ReportManager reportManager = ReportManager.getInstance();
+		ReportDataManager reportManager = ReportDataManager.getInstance();
 		IExecutionLogger setupLogger = reportManager.getSetupExecutionLogger(executor);
 		setupLogger.setMode(mode);
 		
@@ -102,11 +102,12 @@ public class ExecutorUtils
 			return true;
 		}catch(Exception ex)
 		{
-			executor.status = TestStatus.ERRORED;
+			executor.setStatus(TestStatus.ERRORED, "Setup failed with error: " + ex.getMessage());
 			
-			logger.error("An error occurred during setup execution", ex);
+			//logger.error("An error occurred during setup execution", ex);
 			reportManager.executionErrored(ExecutionType.SETUP, executor, "Setup failed with error: " + ex.getMessage());
-			reportManager.executionErrored(ExecutionType.MAIN, executor, "Setup failed with error: " + ex.getMessage());
+			//reportManager.executionErrored(ExecutionType.MAIN, executor, "Setup failed with error: " + ex.getMessage());
+			
 			return false;
 		}finally
 		{
@@ -121,7 +122,7 @@ public class ExecutorUtils
 			return true;
 		}
 
-		ReportManager reportManager = ReportManager.getInstance();
+		ReportDataManager reportManager = ReportDataManager.getInstance();
 		IExecutionLogger cleanupLogger = reportManager.getCleanupExecutionLogger(executor);
 		cleanupLogger.setMode(mode);
 		
@@ -135,11 +136,11 @@ public class ExecutorUtils
 			return true;
 		}catch(Exception ex)
 		{
-			executor.status = TestStatus.ERRORED;
+			executor.setStatus(TestStatus.ERRORED, "Cleanup failed with error: " + ex.getMessage());
 			
-			logger.error("An error occurred during cleanup execution", ex);
+			//logger.error("An error occurred during cleanup execution", ex);
 			reportManager.executionErrored(ExecutionType.CLEANUP, executor, "Cleanup failed with error: " + ex.getMessage());
-			reportManager.executionErrored(ExecutionType.MAIN, executor, "Cleanup failed with error: " + ex.getMessage());
+			//reportManager.executionErrored(ExecutionType.MAIN, executor, "Cleanup failed with error: " + ex.getMessage());
 			return false;
 		}finally
 		{

@@ -102,7 +102,7 @@ public class ExecutionPool
 		// during build time
 		executors.forEach(executor -> 
 		{
-			if(executor.init())
+			if(executor.init() && executor.isReadyToExecute())
 			{
 				executor.execute(beforeChild, afterChild);
 			}

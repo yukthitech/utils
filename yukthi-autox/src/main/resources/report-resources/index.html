@@ -250,7 +250,7 @@
 						{{tcResult.statusMessage}}
 					</td>
 					<td style="width: 10%; text-align: left; padding-left: 1em;">
-						<a href="./log.html?tc_{{tcResult.name}}" style="display: block;">System Log</a>
+						<a href="./log.html?tc_{{result.report.name}}_{{tcResult.name}}" style="display: block;">System Log</a>
 						<a  ng-repeat="(key,val) in tcResult.monitorLogs" href="logs/{{val}}" style="color: brown; display: block;">
 							{{key}}
 						</a>

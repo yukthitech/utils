@@ -18,7 +18,7 @@ import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
-import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
@@ -426,7 +426,7 @@ public class AutomationLauncher
 			TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
 			executor.execute(null, null);
 			
-			automationCompleted(ReportManager.getInstance().isSuccessful(), context);
+			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);

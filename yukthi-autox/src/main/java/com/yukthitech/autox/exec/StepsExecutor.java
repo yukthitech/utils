@@ -7,11 +7,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
-import com.yukthitech.autox.test.TestCaseValidationFailedException;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.event.EventListenerManager;
@@ -57,7 +57,7 @@ public class StepsExecutor
 	}
 	
 	/**
-	 * Executes specified step/validation. In case of validations, ensures result is true, in not {@link TestCaseValidationFailedException} will 
+	 * Executes specified step/validation. In case of validations, ensures result is true, in not {@link AutoxValidationException} will 
 	 * be thrown.
 	 * @param context context to be used
 	 * @param exeLogger logger to be used

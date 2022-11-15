@@ -68,6 +68,33 @@ public class ReportInfoProviders
 		return name;
 	}
 
+	/**
+	 * Name to be used for log files.
+	 * @param executor
+	 * @return
+	 */
+	public String getLogName(Executor executor)
+	{
+		String name = getProvider(executor.getExecutable()).getName(executor.getExecutable());
+		
+		if(executor instanceof TestCaseExecutor)
+		{
+			TestCaseExecutor tcExecutor = (TestCaseExecutor) executor;
+			TestCase testCase = tcExecutor.getTestCase();
+			
+			name = testCase.getParentTestSuite().getName() + "_" + name;
+					
+			TestCaseData testCaseData = tcExecutor.getTestCaseData();
+			
+			if(testCaseData != null)
+			{
+				name += " [" + testCaseData.getName() + "]";
+			}
+		}
+		
+		return name;
+	}
+
 	public String getDescription(Executor executor)
 	{
 		if(executor instanceof TestCaseExecutor)

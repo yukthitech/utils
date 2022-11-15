@@ -19,9 +19,9 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * Manages the report generation.
  * @author akranthikiran
  */
-public class ReportManager
+public class ReportDataManager
 {
-	private static ReportManager instance = new ReportManager();
+	private static ReportDataManager instance = new ReportDataManager();
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
@@ -63,7 +63,7 @@ public class ReportManager
 			
 			if(logger == null)
 			{
-				String fileName = reportInfoProviders.getCode(executor) + "_" + reportInfoProviders.getName(executor) + suffix;
+				String fileName = reportInfoProviders.getCode(executor) + "_" + reportInfoProviders.getLogName(executor) + suffix;
 				logger = new ExecutionLogger(fileName, reportInfoProviders.getName(executor), reportInfoProviders.getDescription(executor));
 				
 				loggers.put(executionType, logger);
@@ -81,7 +81,7 @@ public class ReportManager
 	
 	private ReportGenerator reportGenerator = new ReportGenerator();
 	
-	public static ReportManager getInstance()
+	public static ReportDataManager getInstance()
 	{
 		return instance;
 	}
@@ -241,6 +241,13 @@ public class ReportManager
 
 	public synchronized void executionSkipped(ExecutionType executionType, Executor executor, String reason)
 	{
+		//during skip flow, the execution would be skipped without starting
+		//  so start the execution before marking it as skipped
+		if(executionType == ExecutionType.MAIN)
+		{
+			executionStarted(executionType, executor);
+		}
+		
 		setEndDetails(executionType, executor, TestStatus.SKIPPED, reason);
 	}
 	

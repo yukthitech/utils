@@ -397,6 +397,9 @@ public class ExecutionLogData
 		 * Time taken by execution.
 		 */
 		private String timeTaken;
+		
+		public Footer()
+		{}
 
 		public Footer(TestStatus status, Date startTime, Date endTime)
 		{

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
-import com.yukthitech.autox.exec.report.ReportManager;
+import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestSuiteGroup;
@@ -73,6 +73,6 @@ public class TestSuiteGroupExecutor extends Executor
 	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
 	{
 		super.execute(beforeChildFromParent, afterChildFromParent);
-		ReportManager.getInstance().generateReport();
+		ReportDataManager.getInstance().generateReport();
 	}
 }
