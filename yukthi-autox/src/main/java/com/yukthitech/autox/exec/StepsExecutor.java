@@ -38,7 +38,7 @@ public class StepsExecutor
 		stepListeners.removeListener(listener);
 	}
 	
-	private static boolean checkForTopLevel()
+	private static boolean isTopLevel()
 	{
 		Boolean val = topLevelStep.get();
 		
@@ -80,7 +80,6 @@ public class StepsExecutor
 		step.setSourceStep(sourceStep);
 
 		context.getExecutionStack().push(step);
-		boolean isTopLevel = checkForTopLevel();
 		
 		try
 		{
@@ -91,32 +90,23 @@ public class StepsExecutor
 			step.execute(context, exeLogger);
 			
 			stepListeners.get().stepCompleted(step);
-		} catch(RuntimeException ex)
+		} catch(HandledException | LangException ex)
 		{
-			stepListeners.get().stepErrored(step, ex);
-			
-			if(ex instanceof LangException)
-			{
-				throw ex;
-			}
-			
-			//only top level step in stack should log the error
-			if(isTopLevel)
-			{
-				String stackTrace = context.getExecutionStack().toStackTrace();
-				
-				logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);
-				exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), stackTrace);
-			}
-			
+			//already handled exception and lang exception should be thrown
+			// without logging
 			throw ex;
+		} catch(Exception ex)
+		{
+			//log the unhandled exception
+			stepListeners.get().stepErrored(step, ex);
+			String stackTrace = context.getExecutionStack().toStackTrace();
+			
+			logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);
+			exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), stackTrace);
+			
+			throw new HandledException(ex);
 		}finally
 		{
-			if(isTopLevel)
-			{
-				clearTopLevel();
-			}
-			
 			context.getExecutionStack().pop(step);
 			
 			//re-enable logging, in case it is disabled
@@ -133,14 +123,37 @@ public class StepsExecutor
 			return;
 		}
 		
-		for(IStep step : steps)
+		boolean topLevel = isTopLevel();
+		
+		
+		try
 		{
-			if(currentStep != null)
+			for(IStep step : steps)
 			{
-				currentStep.setValue(step);
+				if(currentStep != null)
+				{
+					currentStep.setValue(step);
+				}
+				
+				executeStep(logger, step);
+			}
+		}catch(HandledException ex)
+		{
+			//only top level should unwrap the exception and throw it back
+			// only deepest level will log error
+			//  rest of levels will ignore this exception and rethrow
+			if(topLevel)
+			{
+				throw (Exception) ex.getCause();
 			}
 			
-			executeStep(logger, step);
+			throw ex;
+		} finally
+		{
+			if(topLevel)
+			{
+				clearTopLevel();
+			}
 		}
 	}
 }

@@ -157,8 +157,8 @@ public class IfConditionStep extends AbstractStep implements IStepContainer, IMu
 		{
 			for(ElseIfStep elseIfBlock : this.elseIfBlocks)
 			{
-				res = AutomationUtils.evaluateCondition(context, condition);
-				exeLogger.trace("Else-if-condition evaluation resulted in '{}'. Condition: {}", res, condition);
+				res = AutomationUtils.evaluateCondition(context, elseIfBlock.getCondition());
+				exeLogger.trace("Else-if-condition evaluation resulted in '{}'. Condition: {}", res, elseIfBlock.getCondition());
 				
 				if(res)
 				{

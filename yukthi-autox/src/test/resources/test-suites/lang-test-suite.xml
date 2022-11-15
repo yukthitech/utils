@@ -88,6 +88,36 @@
 			</wrap:steps>
 		</testCase>
 	
+		<function name="fetchProductOf10">
+			<s:if condition="param.input == 1">
+				<s:return value="int: 10"/>
+			</s:if>
+			<s:else-if condition="param.input == 2">
+				<s:return value="int: 20"/>
+			</s:else-if>
+			<s:else-if condition="param.input == 3">
+				<s:return value="int: 30"/>
+			</s:else-if>
+			<s:else>
+				<s:return value="int: 100"/>
+			</s:else>
+		</function>
+
+		<testCase name="testExternalIfElse">
+			<description>
+				Tests if condition bocks stacked next to each other.
+			</description>
+		
+			<f:fetchProductOf10 input="int: 1" return-attr="prodVal"/>
+			<s:assert-equals actual="attr: prodVal" expected="int: 10"/>
+
+			<f:fetchProductOf10 input="int: 2" return-attr="prodVal"/>
+			<s:assert-equals actual="attr: prodVal" expected="int: 20"/>
+
+			<f:fetchProductOf10 input="int: 5" return-attr="prodVal"/>
+			<s:assert-equals actual="attr: prodVal" expected="int: 100"/>
+		</testCase>
+
 		<testCase name="testReturn">
 			<description>Tests return step</description>
 		

@@ -38,7 +38,7 @@ public class TAutomation
 				"-rf", "./output/success", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "invoke_Method_With_Data_Provder"
-				//"-tc", "testCaseSetupCleanup"
+				//"-tc", "testExternalIfElse"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		
@@ -61,7 +61,7 @@ public class TAutomation
 				"-rf", "./output/negCases", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "rest-test-suites"
-				//"-tc", "basicAssertFailure"
+				//"-tc", "errorInLoop"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		
@@ -94,8 +94,8 @@ public class TAutomation
 		TestUtils.validateTestCase("tcSetupFail", exeResult, TestStatus.ERRORED, 
 				Arrays.asList(
 					Arrays.asList(
-						"[setup]",
-						"TC [Name: tcSetupFail, Location: neg-lang-test-suite.xml:53].&lt;setup&gt;(neg-lang-test-suite.xml:59)"
+						"[Setup]",
+						"[TC: tcSetupFail](neg-lang-test-suite.xml:59)"
 					)
 				), 
 				null, "negCases");
@@ -114,10 +114,8 @@ public class TAutomation
 		/***********************************************/
 		TestUtils.validateTestCase("screenShotOnError", exeResult, TestStatus.ERRORED, 
 				Arrays.asList(
-					Arrays.asList(
-						"Failed to find element with locator: [Locator: id: invalidId]",
-						"Screen shot during error"
-					)
+					"Failed to find element with locator: [Locator: id: invalidId]",
+					"Screen shot during error"
 				), 
 				null, "negCases");
 		/***********************************************/

@@ -9,6 +9,7 @@ import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IMultiPartStep;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
+import com.yukthitech.autox.exec.HandledException;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
@@ -53,6 +54,11 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 				throw ex;
 			}
 			
+			if(ex instanceof HandledException)
+			{
+				ex = (Exception) ex.getCause();
+			}
+
 			exeLogger.warn("Exception occurred while executing try-block. Executing catch block. Exception: {}", ex);
 			
 			context.setAttribute(catchStep.getErrorAttr(), ex);

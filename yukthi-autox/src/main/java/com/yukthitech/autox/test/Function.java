@@ -167,7 +167,8 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	public Object execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		context.pushParameters(params);
-
+		context.getExecutionStack().push(this);
+		
 		try
 		{
 			StepsExecutor.execute(logger, steps, null);
@@ -182,6 +183,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 			throw ex;
 		} finally
 		{
+			context.getExecutionStack().pop(this);
 			context.popParameters();
 		}
 		

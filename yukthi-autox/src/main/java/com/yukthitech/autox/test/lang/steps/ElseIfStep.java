@@ -14,7 +14,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * 
  * @author akiran
  */
-@Executable(name = "elseIf", group = Group.Lang, partOf = TryStep.class, message = "Represents steps to be executed based on condition when prior if condition fails.")
+@Executable(name = "elseIf", group = Group.Lang, partOf = IfConditionStep.class, message = "Represents steps to be executed based on condition when prior if condition fails.")
 public class ElseIfStep extends AbstractContainerStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
@@ -28,6 +28,11 @@ public class ElseIfStep extends AbstractContainerStep implements IStepContainer
 	public void setCondition(String condition)
 	{
 		this.condition = condition;
+	}
+	
+	public String getCondition()
+	{
+		return condition;
 	}
 	
 	@Override

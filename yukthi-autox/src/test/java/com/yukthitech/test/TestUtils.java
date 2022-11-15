@@ -108,7 +108,7 @@ public class TestUtils
 		ExecutionStatusReport testCaseResult = null;
 		TestSuiteResult testSuiteResult = null;
 		
-		for(TestSuiteResult testSuite : details.getTestSuiteResults())
+		OUTER: for(TestSuiteResult testSuite : details.getTestSuiteResults())
 		{
 			for(ExecutionStatusReport tsRes : testSuite.getTestCaseResults())
 			{
@@ -116,14 +116,14 @@ public class TestUtils
 				{
 					testSuiteResult = testSuite;
 					testCaseResult = tsRes;
-					break;
+					break OUTER;
 				}
 			}
 		}
 		
 		Assert.assertEquals(testCaseResult.getMainExecutionDetails().getStatus(), expectedStatus);
 		
-		if(expectedErrorMssgs == null || expectedMssgs == null)
+		if(expectedErrorMssgs == null && expectedMssgs == null)
 		{
 			return;
 		}
