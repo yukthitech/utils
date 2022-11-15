@@ -61,25 +61,25 @@ public class TAutomation
 				"-rf", "./output/negCases", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "rest-test-suites"
-				//"-tc", "errorInLoop"
+				//"-tc", "screenShotInCleanupErr"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		
 		FinalReport exeResult = objectMapper.readValue(new File("./output/negCases/test-results.json"), FinalReport.class);
 		
-		Assert.assertEquals(exeResult.getTestSuiteCount(), 5, "Found one more test suites.");
-		Assert.assertEquals(exeResult.getTestCaseCount(), 10, "Found one more test cases.");
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 7, "Found one more test suites.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 11, "Found one more test cases.");
 		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 3, "Found one more test cases errored.");
 		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found one more test cases failed.");
 		Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 1, "Found one more test cases skipped.");
 		
 		TestUtils.validateTestCase("basicAssertFailure", exeResult, TestStatus.FAILED, 
 				Arrays.asList("[TC: basicAssertFailure](neg-lang-test-suite.xml:12)"), 
-				null, "negCases");
+				null, null, "negCases");
 
 		TestUtils.validateTestCase("errorInLoop", exeResult, TestStatus.FAILED, 
 				Arrays.asList("[TC: errorInLoop](neg-lang-test-suite.xml:25)"), 
-				null, "negCases");
+				null, null, "negCases");
 
 		TestUtils.validateTestCase("deepFail", exeResult, TestStatus.FAILED, 
 				Arrays.asList(
@@ -89,7 +89,7 @@ public class TAutomation
 						"[TC: deepFail](neg-lang-test-suite.xml:50)"
 					)
 				), 
-				null, "negCases");
+				null, null, "negCases");
 
 		TestUtils.validateTestCase("tcSetupFail", exeResult, TestStatus.ERRORED, 
 				Arrays.asList(
@@ -98,7 +98,7 @@ public class TAutomation
 						"[TC: tcSetupFail](neg-lang-test-suite.xml:59)"
 					)
 				), 
-				null, "negCases");
+				null, null, "negCases");
 
 		TestUtils.validateTestCase("tcCleanupFail", exeResult, TestStatus.ERRORED, 
 				Arrays.asList(
@@ -107,7 +107,8 @@ public class TAutomation
 						"[TC: tcCleanupFail](neg-lang-test-suite.xml:74)"
 					)
 				), 
-				Arrays.asList("This is from testcase"), "negCases");
+				Arrays.asList("This is from testcase"), 
+				null, "negCases");
 
 		/***********************************************/
 		// UI Error Test case validation
@@ -117,21 +118,33 @@ public class TAutomation
 					"Failed to find element with locator: [Locator: id: invalidId]",
 					"Screen shot during error"
 				), 
-				null, "negCases");
+				null, Arrays.asList("error-screenshot"), "negCases");
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_neg-ui-test-suites-setupErr-setup.js"), 
+				"test-suite-setup-err",
+				Arrays.asList("[TS: neg-ui-test-suites-setupErr](neg-ui-test-suite.xml:22)"), 
+				null,
+				Arrays.asList("error-screenshot"));
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_neg-ui-test-suites-cleanupErr-cleanup.js"), 
+				"test-suite-cleanup-err",
+				Arrays.asList("[TS: neg-ui-test-suites-cleanupErr](neg-ui-test-suite.xml:48)"), 
+				null,
+				Arrays.asList("error-screenshot"));
 		/***********************************************/
 		// Skip Test case validation
 		/***********************************************/
 		TestUtils.validateTestCase("skip_success", exeResult, TestStatus.SUCCESSFUL, 
 				null, 
-				Arrays.asList("Mssg from skip_success"), "negCases");
+				Arrays.asList("Mssg from skip_success"), null, "negCases");
 
 		TestUtils.validateTestCase("skip_fail", exeResult, TestStatus.FAILED, 
 				Arrays.asList("[TC: skip_fail](skip-test-suite.xml:20)"), 
-				null, "negCases");
+				null, null, "negCases");
 
 		TestUtils.validateTestCase("skip_skip", exeResult, TestStatus.SKIPPED, 
 				null, 
-				null, "negCases");
+				null, null, "negCases");
 
 		/***********************************************/
 		// Test suite setup and cleanup error validation
@@ -139,21 +152,21 @@ public class TAutomation
 		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_test-suite-setup-err-setup.js"), 
 				"_testSuiteSetup",
 				Arrays.asList("[TS: test-suite-setup-err](test-suite-setup-err.xml:8)"), 
-				null);
+				null, null);
 
 		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_test-suite-cleanup-err-setup.js"), 
 				"_testSuiteSetup",
 				null, 
-				Arrays.asList("This is from setup"));
+				Arrays.asList("This is from setup"), null);
 
 		TestUtils.validateTestCase("tsCleanupErr_test", exeResult, TestStatus.SUCCESSFUL, 
 				null, 
-				Arrays.asList("From testcase"), "negCases");
+				Arrays.asList("From testcase"), null, "negCases");
 		
 		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_test-suite-cleanup-err-cleanup.js"), 
 				"_testSuiteCleanup",
 				Arrays.asList("[TS: test-suite-cleanup-err](test-suite-cleanup-err.xml:20)"), 
-				null);
+				null, null);
 	}
 
 	@Test
@@ -176,7 +189,7 @@ public class TAutomation
 		TestUtils.validateLogFile(new File("./output/globalSetupErr/logs/_global-setup.js"), 
 				"_globalSetup",
 				Arrays.asList("&lt;Test-Suite-Group&gt;(common.xml:4)"), 
-				null);
+				null, null);
 	}
 
 	@Test
@@ -199,15 +212,15 @@ public class TAutomation
 		TestUtils.validateLogFile(new File("./output/globalCleanupErr/logs/_global-setup.js"), 
 				"_globalSetup",
 				null,
-				Arrays.asList("Message from global setup"));
+				Arrays.asList("Message from global setup"), null);
 
 		TestUtils.validateTestCase("test", exeResult, TestStatus.SUCCESSFUL, 
 				null, 
-				Arrays.asList("Message from testcase"), "globalCleanupErr");
+				Arrays.asList("Message from testcase"), null, "globalCleanupErr");
 
 		TestUtils.validateLogFile(new File("./output/globalCleanupErr/logs/_global-cleanup.js"), 
 				"_globalCleanup",
 				Arrays.asList("&lt;Test-Suite-Group&gt;(common.xml:8)"),
-				null);
+				null, null);
 	}
 }

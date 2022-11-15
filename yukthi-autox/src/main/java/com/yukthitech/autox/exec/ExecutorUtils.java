@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
+import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
@@ -18,6 +19,7 @@ import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestStatus;
+import com.yukthitech.utils.ObjectWrapper;
 
 public class ExecutorUtils
 {
@@ -92,11 +94,13 @@ public class ExecutorUtils
 		IExecutionLogger setupLogger = reportManager.getSetupExecutionLogger(executor);
 		setupLogger.setMode(mode);
 		
+		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
+		
 		try
 		{
 			reportManager.executionStarted(ExecutionType.SETUP, executor);
 			
-			StepsExecutor.execute(setupLogger, setup.getSteps(), null);
+			StepsExecutor.execute(setupLogger, setup.getSteps(), currentStep);
 			reportManager.executionCompleted(ExecutionType.SETUP, executor);
 			
 			return true;
@@ -104,6 +108,9 @@ public class ExecutorUtils
 		{
 			executor.setStatus(TestStatus.ERRORED, "Setup failed with error: " + ex.getMessage());
 			
+			Executable executable = currentStep.getValue().getClass().getAnnotation(Executable.class);
+			invokeErrorHandling(executable, new ErrorDetails(setupLogger, currentStep.getValue(), ex));
+
 			//logger.error("An error occurred during setup execution", ex);
 			reportManager.executionErrored(ExecutionType.SETUP, executor, "Setup failed with error: " + ex.getMessage());
 			//reportManager.executionErrored(ExecutionType.MAIN, executor, "Setup failed with error: " + ex.getMessage());
@@ -126,11 +133,13 @@ public class ExecutorUtils
 		IExecutionLogger cleanupLogger = reportManager.getCleanupExecutionLogger(executor);
 		cleanupLogger.setMode(mode);
 		
+		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
+		
 		try
 		{
 			reportManager.executionStarted(ExecutionType.CLEANUP, executor);
 			
-			StepsExecutor.execute(cleanupLogger, cleanup.getSteps(), null);
+			StepsExecutor.execute(cleanupLogger, cleanup.getSteps(), currentStep);
 			reportManager.executionCompleted(ExecutionType.CLEANUP, executor);
 			
 			return true;
@@ -138,9 +147,13 @@ public class ExecutorUtils
 		{
 			executor.setStatus(TestStatus.ERRORED, "Cleanup failed with error: " + ex.getMessage());
 			
+			Executable executable = currentStep.getValue().getClass().getAnnotation(Executable.class);
+			invokeErrorHandling(executable, new ErrorDetails(cleanupLogger, currentStep.getValue(), ex));
+
 			//logger.error("An error occurred during cleanup execution", ex);
 			reportManager.executionErrored(ExecutionType.CLEANUP, executor, "Cleanup failed with error: " + ex.getMessage());
 			//reportManager.executionErrored(ExecutionType.MAIN, executor, "Cleanup failed with error: " + ex.getMessage());
+
 			return false;
 		}finally
 		{

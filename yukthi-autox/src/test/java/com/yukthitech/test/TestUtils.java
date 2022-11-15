@@ -14,7 +14,6 @@ import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.exec.report.ExecutionLogData;
 import com.yukthitech.autox.exec.report.ExecutionStatusReport;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.FinalReport.TestSuiteResult;
@@ -55,7 +54,9 @@ public class TestUtils
 		}
 	}
 	
-	public static void validateLogFile(File logFile, String name, List<Object> expectedErrorMssgs, List<Object> expectedMssgs) throws Exception
+	public static void validateLogFile(File logFile, String name, 
+			List<Object> expectedErrorMssgs, List<Object> expectedMssgs,
+			List<String> expectedImageNames) throws Exception
 	{
 		String fileContent = FileUtils.readFileToString(logFile, Charset.defaultCharset());
 		fileContent += "var logDataJson = JSON.stringify({header: logs[0], footer: logs[logs.length-1], messages: logs.slice(1, logs.length-1)});";
@@ -68,9 +69,21 @@ public class TestUtils
 		
 		List<Object> foundErrMssgs = new ArrayList<Object>();
 		List<Object> foundMssgs = new ArrayList<Object>();
+		List<Object> foundImages = new ArrayList<Object>();
 		
-		for(ExecutionLogData.Message mssg : testLogData.getMessages())
+		for(TestLogData.ImgMessage mssg : testLogData.getMessages())
 		{
+			if(expectedImageNames != null && mssg.getImageFileName() != null)
+			{
+				for(String imgName : expectedImageNames)
+				{
+					if(mssg.getImageFileName().contains(imgName))
+					{
+						foundImages.add(imgName);
+					}
+				}
+			}
+			
 			if(mssg.getLogLevel() == LogLevel.ERROR)
 			{
 				checkForMessages(mssg.getMessage(), expectedErrorMssgs, foundErrMssgs);
@@ -100,10 +113,21 @@ public class TestUtils
 					expectedMssgs.stream().map(obj -> obj.toString()).collect(Collectors.joining("\n\t"))
 					));
 		}
+
+		if(expectedImageNames != null && expectedImageNames.size() != foundImages.size())
+		{
+			expectedImageNames = new ArrayList<>(expectedImageNames);
+			
+			expectedMssgs.removeAll(foundImages);
+			Assert.fail(String.format("For test-case '%s' below expected Image files-names are not found: \n\t%s", name,
+					expectedMssgs.stream().map(obj -> obj.toString()).collect(Collectors.joining("\n\t"))
+					));
+		}
 	}
 	
 	public static void validateTestCase(String name, FinalReport details, TestStatus expectedStatus, 
-			List<Object> expectedErrorMssgs, List<Object> expectedMssgs, String outputFolder) throws Exception
+			List<Object> expectedErrorMssgs, List<Object> expectedMssgs, List<String> expectedImages, 
+			String outputFolder) throws Exception
 	{
 		ExecutionStatusReport testCaseResult = null;
 		TestSuiteResult testSuiteResult = null;
@@ -123,13 +147,13 @@ public class TestUtils
 		
 		Assert.assertEquals(testCaseResult.getMainExecutionDetails().getStatus(), expectedStatus);
 		
-		if(expectedErrorMssgs == null && expectedMssgs == null)
+		if(expectedErrorMssgs == null && expectedMssgs == null && expectedImages == null)
 		{
 			return;
 		}
 		
 		String filePath = String.format("./output/%s/logs/tc_%s_%s.js", outputFolder, testSuiteResult.getReport().getName(), testCaseResult.getName());
 		validateLogFile(new File(filePath), 
-				name, expectedErrorMssgs, expectedMssgs);
+				name, expectedErrorMssgs, expectedMssgs, expectedImages);
 	}
 }

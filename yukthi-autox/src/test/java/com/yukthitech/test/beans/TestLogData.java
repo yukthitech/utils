@@ -6,9 +6,26 @@ import com.yukthitech.autox.exec.report.ExecutionLogData;
 
 public class TestLogData
 {
+	public static class ImgMessage extends  ExecutionLogData.Message
+	{
+		private static final long serialVersionUID = 1L;
+		
+		private String imageFileName;
+
+		public String getImageFileName()
+		{
+			return imageFileName;
+		}
+
+		public void setImageFileName(String imageFileName)
+		{
+			this.imageFileName = imageFileName;
+		}
+	}
+	
 	private ExecutionLogData.Header header;
 	
-	private List<ExecutionLogData.Message> messages;
+	private List<ImgMessage> messages;
 	
 	private ExecutionLogData.Footer footer;
 
@@ -22,12 +39,12 @@ public class TestLogData
 		this.header = header;
 	}
 
-	public List<ExecutionLogData.Message> getMessages()
+	public List<ImgMessage> getMessages()
 	{
 		return messages;
 	}
 
-	public void setMessages(List<ExecutionLogData.Message> messages)
+	public void setMessages(List<ImgMessage> messages)
 	{
 		this.messages = messages;
 	}
