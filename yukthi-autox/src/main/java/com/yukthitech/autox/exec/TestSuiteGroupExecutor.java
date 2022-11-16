@@ -21,7 +21,7 @@ public class TestSuiteGroupExecutor extends Executor
 {
 	public TestSuiteGroupExecutor(TestSuiteGroup testSuiteGroup)
 	{
-		super(testSuiteGroup);
+		super(testSuiteGroup, "Test-Suite");
 		
 		super.setup = testSuiteGroup.getSetup();
 		super.cleanup = testSuiteGroup.getCleanup();

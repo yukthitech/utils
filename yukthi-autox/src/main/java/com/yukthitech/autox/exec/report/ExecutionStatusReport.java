@@ -44,6 +44,25 @@ public class ExecutionStatusReport
 	 * Cleanup execution details.
 	 */
 	private ExecutionDetails cleanupExecutionDetails;
+	
+	/**
+	 * Type of this report entry. Used in final report
+	 * for certain distinctions.
+	 */
+	private ExecutionStatusReportType type = ExecutionStatusReportType.STANDARD;
+	
+	public ExecutionStatusReport()
+	{}
+	
+	public ExecutionStatusReport(String name, ExecutionDetails setupExecutionDetails, ExecutionDetails cleanupExecutionDetails, ExecutionStatusReportType type)
+	{
+		this.name = name;
+		this.setupExecutionDetails = setupExecutionDetails;
+		this.cleanupExecutionDetails = cleanupExecutionDetails;
+		this.type = type;
+	}
+
+
 
 	public String getName()
 	{
@@ -93,6 +112,16 @@ public class ExecutionStatusReport
 	public void setMainExecutionDetails(ExecutionDetails mainExecutionDetails)
 	{
 		this.mainExecutionDetails = mainExecutionDetails;
+	}
+	
+	public ExecutionStatusReportType getType()
+	{
+		return type;
+	}
+
+	public void setType(ExecutionStatusReportType type)
+	{
+		this.type = type;
 	}
 
 	public ExecutionDetails getCleanupExecutionDetails()

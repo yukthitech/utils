@@ -1,0 +1,212 @@
+package com.yukthitech.test;
+
+import java.io.File;
+import java.util.Arrays;
+
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.exec.report.FinalReport;
+import com.yukthitech.autox.test.TestStatus;
+
+public class TErrorCases
+{
+	private ObjectMapper objectMapper = new ObjectMapper(); 
+	
+	@BeforeClass
+	public void setup() throws Exception
+	{
+		AutomationLauncher.systemExitEnabled = false;
+		TestServer.start(null);
+	}
+	
+	@AfterClass
+	public void close() throws Exception
+	{
+		TestServer.stop();
+	}
+	
+	/**
+	 * Ensures failures are happening at right places and with right stack trace.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	public void testNegativeCases() throws Exception
+	{
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
+				"-tsf", "./src/test/resources/neg-test-suites",
+				"-rf", "./output/negCases", 
+				"-prop", "./src/test/resources/app.properties", 
+				//"-ts", "data-provider-err"
+				//"-tc", "screenShotInCleanupErr"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		FinalReport exeResult = objectMapper.readValue(new File("./output/negCases/test-results.json"), FinalReport.class);
+		
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 8, "Found one more test suites.");
+		Assert.assertEquals(exeResult.getTestCaseCount(), 17, "Found one more test cases.");
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 6, "Found one more test cases errored.");
+		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found one more test cases failed.");
+		Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 1, "Found one more test cases skipped.");
+		
+		validateStackTraces(exeResult);
+
+		validateTsSeupCleanupErr(exeResult);
+
+		validateUiErrors(exeResult);
+		
+		validateSkipFlows(exeResult);
+
+		validateSetupCleanupErrors(exeResult);
+		
+		validateDataproviderErrors(exeResult);
+	}
+
+	private void validateStackTraces(FinalReport exeResult) throws Exception
+	{
+		TestUtils.validateTestCase("basicAssertFailure", exeResult, TestStatus.FAILED, 
+				Arrays.asList("[TC: basicAssertFailure](neg-lang-test-suite.xml:12)"), 
+				null, null, "negCases");
+
+		TestUtils.validateTestCase("errorInLoop", exeResult, TestStatus.FAILED, 
+				Arrays.asList("[TC: errorInLoop](neg-lang-test-suite.xml:25)"), 
+				null, null, "negCases");
+
+		TestUtils.validateTestCase("deepFail", exeResult, TestStatus.FAILED, 
+				Arrays.asList(
+					Arrays.asList(
+						"[TS: negative-lang-suites].level2(neg-lang-test-suite.xml:37)",
+						"[TS: negative-lang-suites].level1(neg-lang-test-suite.xml:42)",
+						"[TC: deepFail](neg-lang-test-suite.xml:50)"
+					)
+				), 
+				null, null, "negCases");
+	}
+
+	private void validateTsSeupCleanupErr(FinalReport exeResult) throws Exception
+	{
+		TestUtils.validateTestCase("tcSetupFail", exeResult, TestStatus.ERRORED, 
+				Arrays.asList(
+					Arrays.asList(
+						"[Setup]",
+						"[TC: tcSetupFail](neg-lang-test-suite.xml:59)"
+					)
+				), 
+				null, null, "negCases");
+
+		TestUtils.validateTestCase("tcCleanupFail", exeResult, TestStatus.ERRORED, 
+				Arrays.asList(
+					Arrays.asList(
+						"[Cleanup]",
+						"[TC: tcCleanupFail](neg-lang-test-suite.xml:74)"
+					)
+				), 
+				Arrays.asList("This is from testcase"), 
+				null, "negCases");
+	}
+
+	private void validateSetupCleanupErrors(FinalReport exeResult) throws Exception
+	{
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_test-suite-setup-err-setup.js"), 
+				"_testSuiteSetup",
+				Arrays.asList("[TS: test-suite-setup-err](test-suite-setup-err.xml:8)"), 
+				null, null);
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_test-suite-cleanup-err-setup.js"), 
+				"_testSuiteSetup",
+				null, 
+				Arrays.asList("This is from setup"), null);
+
+		TestUtils.validateTestCase("tsCleanupErr_test", exeResult, TestStatus.SUCCESSFUL, 
+				null, 
+				Arrays.asList("From testcase"), null, "negCases");
+		
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_test-suite-cleanup-err-cleanup.js"), 
+				"_testSuiteCleanup",
+				Arrays.asList("[TS: test-suite-cleanup-err](test-suite-cleanup-err.xml:20)"), 
+				null, null);
+	}
+
+	private void validateSkipFlows(FinalReport exeResult) throws Exception
+	{
+		TestUtils.validateTestCase("skip_success", exeResult, TestStatus.SUCCESSFUL, 
+				null, 
+				Arrays.asList("Mssg from skip_success"), null, "negCases");
+
+		TestUtils.validateTestCase("skip_fail", exeResult, TestStatus.FAILED, 
+				Arrays.asList("[TC: skip_fail](skip-test-suite.xml:20)"), 
+				null, null, "negCases");
+
+		TestUtils.validateTestCase("skip_skip", exeResult, TestStatus.SKIPPED, 
+				null, 
+				null, null, "negCases");
+	}
+
+	private void validateUiErrors(FinalReport exeResult) throws Exception
+	{
+		TestUtils.validateTestCase("screenShotOnError", exeResult, TestStatus.ERRORED, 
+				Arrays.asList(
+					"Failed to find element with locator: [Locator: id: invalidId]",
+					"Screen shot during error"
+				), 
+				null, Arrays.asList("error-screenshot"), "negCases");
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_neg-ui-test-suites-setupErr-setup.js"), 
+				"test-suite-setup-err",
+				Arrays.asList("[TS: neg-ui-test-suites-setupErr](neg-ui-test-suite.xml:22)"), 
+				null,
+				Arrays.asList("error-screenshot"));
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/ts_neg-ui-test-suites-cleanupErr-cleanup.js"), 
+				"test-suite-cleanup-err",
+				Arrays.asList("[TS: neg-ui-test-suites-cleanupErr](neg-ui-test-suite.xml:48)"), 
+				null,
+				Arrays.asList("error-screenshot"));
+	}
+
+	private void validateDataproviderErrors(FinalReport exeResult) throws Exception
+	{
+		TestUtils.validateLogFile(new File("./output/negCases/logs/tc_data-provider-err_dataProviderSetupErr.js"), 
+				"dataProviderSetupErr",
+				Arrays.asList(
+					Arrays.asList(
+						"[Data-Setup]",
+						"An error occurred with message - fail: Failing the data-setup"
+					)
+				),
+				null,
+				null);
+
+		TestUtils.validateTestCase("dataProviderCleanupErr [case1]", exeResult, TestStatus.SUCCESSFUL, null, null, null, "negCases");
+		TestUtils.validateTestCase("dataProviderCleanupErr [case2]", exeResult, TestStatus.SUCCESSFUL, null, null, null, "negCases");
+		TestUtils.validateTestCase("dataProviderCleanupErr [case3]", exeResult, TestStatus.SUCCESSFUL, null, null, null, "negCases");
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/tc_data-provider-err_dataProviderCleanupErr.js"), 
+				"dataProviderCleanupErr",
+				Arrays.asList(
+					Arrays.asList(
+						"[Data-Cleanup]",
+						"An error occurred with message - fail: Failing the data-setup."
+					)
+				),
+				null,
+				null);
+
+		TestUtils.validateLogFile(new File("./output/negCases/logs/tc_data-provider-err_dataProviderEmptyRes.js"), 
+				"dataProviderEmptyRes",
+				Arrays.asList(
+					Arrays.asList(
+						"[Data-Provider]",
+						"Data provider resulted in null or empty data list"
+					)
+				),
+				null,
+				null);
+	}
+}

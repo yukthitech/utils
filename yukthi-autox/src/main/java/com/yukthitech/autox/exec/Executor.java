@@ -57,9 +57,12 @@ public abstract class Executor
 	
 	protected ExpectedException expectedException;
 	
-	protected Executor(Object executable)
+	private String childName;
+	
+	protected Executor(Object executable, String childName)
 	{
 		this.executable = executable;
+		this.childName = childName != null ? childName : "Execution";
 	}
 	
 	/**
@@ -88,7 +91,7 @@ public abstract class Executor
 	 * This is invoked once all dependencies (if any) are completed and this executor is ready to execute.
 	 * In this method data-provider execution (and child population) should occur.
 	 */
-	public boolean init()
+	protected boolean init()
 	{
 		return true;
 	}
@@ -139,6 +142,11 @@ public abstract class Executor
 				return;
 			}
 			
+			if(!init())
+			{
+				return;
+			}
+
 			try
 			{
 				//execute children
@@ -206,38 +214,61 @@ public abstract class Executor
 		
 		TestStatus finalStatus = TestStatus.SUCCESSFUL;
 		
+		int errorCount = 0, failureCount = 0, skipCount = 0;
+		
 		for(Executor cexecutor : childExecutors)
 		{
 			if(cexecutor.status == TestStatus.ERRORED)
 			{
+				errorCount++;
 				finalStatus = TestStatus.ERRORED;
 			}
-			else if(cexecutor.status == TestStatus.FAILED && finalStatus != TestStatus.ERRORED)
+			else if(cexecutor.status == TestStatus.FAILED)
 			{
-				finalStatus = TestStatus.FAILED;
+				failureCount++;
+				
+				if(finalStatus != TestStatus.ERRORED)
+				{
+					finalStatus = TestStatus.FAILED;
+				}
 			}
-			else if(cexecutor.status == TestStatus.SKIPPED && !finalStatus.isErrored())
+			else if(cexecutor.status == TestStatus.SKIPPED)
 			{
-				finalStatus = TestStatus.SKIPPED;
+				skipCount++;
+				
+				if(!finalStatus.isErrored())
+				{
+					finalStatus = TestStatus.SKIPPED;
+				}
 			}
 		}
 		
-		if(finalStatus == TestStatus.ERRORED)
-		{
-			setStatus(TestStatus.ERRORED, "Child execution(s) errored");
-		}
-		else if(finalStatus == TestStatus.FAILED)
-		{
-			setStatus(TestStatus.FAILED, "Child execution(s) failed");
-		}
-		if(finalStatus == TestStatus.SKIPPED)
-		{
-			setStatus(TestStatus.SKIPPED, "Child execution(s) skipped");
-		}
-		else
+		if(finalStatus == TestStatus.SUCCESSFUL)
 		{
 			setStatus(TestStatus.SUCCESSFUL, null);
+			return;
 		}
+
+		StringBuilder mssg = new StringBuilder();
+		
+		if(errorCount > 0)
+		{
+			mssg.append(errorCount).append(" ").append(childName).append("(s) Errored");
+		}
+		
+		if(failureCount > 0)
+		{
+			mssg.append(mssg.length() > 0 ? ", " : "");
+			mssg.append(failureCount).append(" ").append(childName).append("(s) Failed");
+		}
+		
+		if(skipCount > 0)
+		{
+			mssg.append(mssg.length() > 0 ? ", " : "");
+			mssg.append(failureCount).append(" ").append(childName).append("(s) Skipped");
+		}
+
+		setStatus(finalStatus, mssg.toString());
 	}
 	
 	private void executeChildSteps()

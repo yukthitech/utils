@@ -55,6 +55,24 @@
 				font-size: 0.8em;
 				white-space: nowrap;
 			}
+			
+			.dataProviderDiv
+			{
+				display: inline-block;
+				background: #484848;
+				color: white;
+				font-size: 0.9em;
+				width: 100%;
+				padding: 5px;
+				text-align: left;
+				border-radius: 5px;
+			}
+			
+			.dataProviderDiv a
+			{
+				color: white;
+				font-size: 0.85em;
+			}
 		</style>
 	</head>
 	
@@ -116,12 +134,14 @@
 								<th>Total Test Suites</th>
 								<th>Success Count</th>
 								<th>Failure Count</th>
+								<th>Error Count</th>
 								<th>Skip Count</th>
 							</tr>
 							<tr>
 								<td class="defaultVal">{{testResults.testSuiteCount}}</td>
 								<td class="successVal">{{testResults.testSuiteSuccessCount}}</td>
 								<td class="{{testResults.testSuiteFailureCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testSuiteFailureCount}}</td>
+								<td class="{{testResults.testSuiteErrorCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testSuiteErrorCount}}</td>
 								<td class="{{testResults.testSuiteSkippedCount == 0? 'defaultVal' : 'errorVal'}}">{{testResults.testSuiteSkippedCount}}</td>
 							</tr>
 						</table>
@@ -162,7 +182,7 @@
 					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
 						<a href="./log.html?_global-setup" 
 							ng-show="testResults.setupExecutionDetails"
-							style="color: white; padding: 3px; background-color: {{(testResults.setupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Common Startup Log</a>
+							style="color: white; padding: 3px; background-color: {{(testResults.setupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Common Setup Log</a>
 					</td>
 					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
 						<a href="./log.html?_global-cleanup"
@@ -213,8 +233,8 @@
 					<td class="{{result.skipCount == 0? 'defaultVal' : 'errorVal'}}">
 						{{result.skipCount}}
 					</td>
-					<td>
-						{{replaceMessage(result.statusMessage)}}
+					<td style="text-align: left; padding-left: 1em;">
+						{{replaceMessage(result.report.mainExecutionDetails.statusMessage)}}
 					</td>
 				</tr>
 			</table>
@@ -237,19 +257,37 @@
 					<th>Log</th>
 				</tr>
 				<tr ng-repeat="tcResult in result.testCaseResults" ng-show="tcResult.display">
-					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;">
+					<td style="font-weight: bold; padding: 3px;" colspan="5" ng-if="tcResult.type == 'DATA_PROVIDER'">
+						<div class="dataProviderDiv">
+							<table style="width: 100%;">
+								<tr>
+									<td style="text-align: left;">
+										{{tcResult.name}}
+									</td>
+									<td style="text-align: right;">
+										<a href="./log.html?tc_{{result.report.name}}_{{tcResult.name}}" 
+											style="display: block; {{result.report.mainExecutionDetails.statusStr != 'SUCCESSFUL' ? 'color: red': ''}}">
+												Data Provider Log
+										</a>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+
+					<td style="color: #3973ac; font-weight: bold;" style="width: 20%;" ng-if="tcResult.type != 'DATA_PROVIDER'">
 						{{tcResult.name}}
 					</td>
-					<td ng-class="tcResult.mainExecutionDetails.statusStr != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 15%;">
+					<td ng-class="tcResult.mainExecutionDetails.statusStr != 'SUCCESSFUL' ? 'errorVal' : 'successVal'" style="width: 15%;"  ng-if="tcResult.type != 'DATA_PROVIDER'">
 						{{tcResult.mainExecutionDetails.statusStr}}
 					</td>
-					<td style="width: 5%; text-align: left; padding-left: 1em; white-space: nowrap;" class="timeDisplay">
+					<td style="width: 5%; text-align: left; padding-left: 1em; white-space: nowrap;" class="timeDisplay"  ng-if="tcResult.type != 'DATA_PROVIDER'"> 
 						{{tcResult.mainExecutionDetails.timeTaken}}
 					</td>
-					<td style="width: 50%; text-align: left; padding-left: 1em; word-break: break-word;">
-						{{tcResult.statusMessage}}
+					<td style="width: 50%; text-align: left; padding-left: 1em; word-break: break-word;"  ng-if="tcResult.type != 'DATA_PROVIDER'">
+						{{tcResult.mainExecutionDetails.statusMessage}}
 					</td>
-					<td style="width: 10%; text-align: left; padding-left: 1em;">
+					<td style="width: 10%; text-align: left; padding-left: 1em;"  ng-if="tcResult.type != 'DATA_PROVIDER'">
 						<a href="./log.html?tc_{{result.report.name}}_{{tcResult.name}}" style="display: block;">System Log</a>
 						<a  ng-repeat="(key,val) in tcResult.monitorLogs" href="logs/{{val}}" style="color: brown; display: block;">
 							{{key}}
@@ -279,7 +317,7 @@
 					<td style="text-align: left; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
 						<a href="./log.html?ts_{{result.report.name}}-setup" 
 							ng-show="result.report.setupExecutionDetails"
-							style="color: white; padding: 3px; background-color: {{(result.report.setupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Startup Log</a>
+							style="color: white; padding: 3px; background-color: {{(result.report.setupExecutionDetails.statusStr == 'SUCCESSFUL')? 'inherit' : 'red'}};">Setup Log</a>
 					</td>
 					<td style="text-align: right; background-color: #8585ad; font-weight: bold; font-size: 0.9em; padding: 0.4em;">
 						<a href="./log.html?ts_{{result.report.name}}-cleanup"

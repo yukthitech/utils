@@ -64,10 +64,7 @@ public class ExecutionPool
 			try
 			{
 				//if init fail, consider execution to be failed and dont invoke execute()
-				if(!executor.init())
-				{
-					executor.execute(beforeChildFromParent, afterChildFromParent);
-				}
+				executor.execute(beforeChildFromParent, afterChildFromParent);
 			} catch(Exception ex)
 			{
 				logger.error("An error occurred while executing executor: " + executor, ex);
@@ -102,7 +99,7 @@ public class ExecutionPool
 		// during build time
 		executors.forEach(executor -> 
 		{
-			if(executor.init() && executor.isReadyToExecute())
+			if(executor.isReadyToExecute())
 			{
 				executor.execute(beforeChild, afterChild);
 			}

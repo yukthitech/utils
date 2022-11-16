@@ -164,7 +164,11 @@
 							<th style="${tableHeader}">Message</th>
 						</tr>
 						<#list result.testCaseResults as tcResult>
-							<tr  style="<#if tcResult_index % 2 == 0>background-color: #eee</#if>">
+							<#if !(tcResult.mainExecutionDetails??)>
+								<#continue>
+							</#if>
+							
+							<tr style="<#if tcResult_index % 2 == 0>background-color: #eee</#if>">
 								<td  style="${tableCell} color: #3973ac;width: 20%;">
 									${tcResult.name}<br/>
 									<#if tcResult.author??><span style="font-size: 10px;">[${tcResult.author}]</span></#if>

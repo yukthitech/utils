@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
+import com.yukthitech.autox.exec.TestCaseExecutor;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -104,6 +105,17 @@ public class ReportDataManager
 			{
 				ExecutorDetails parentDetails = getExecutorDetails(executor.getParentExecutor());
 				parentDetails.statusReport.addChidReport(details.statusReport);
+			}
+			
+			if(executor instanceof TestCaseExecutor)
+			{
+				TestCaseExecutor testCaseExecutor = (TestCaseExecutor) executor;
+				
+				if(testCaseExecutor.isDataProviderType())
+				{
+					details.statusReport.setName(testCaseExecutor.getTestCase().getName());
+					details.statusReport.setType(ExecutionStatusReportType.DATA_PROVIDER);
+				}
 			}
 		}
 		

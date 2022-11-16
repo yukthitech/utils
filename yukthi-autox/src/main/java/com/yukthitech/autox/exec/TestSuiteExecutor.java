@@ -30,7 +30,7 @@ public class TestSuiteExecutor extends Executor
 	
 	public TestSuiteExecutor(TestSuite testSuite)
 	{
-		super(testSuite);
+		super(testSuite, "Test-Case");
 		
 		this.testSuite = testSuite;
 		super.setup = testSuite.getSetup();

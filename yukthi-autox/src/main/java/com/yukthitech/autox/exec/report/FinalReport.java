@@ -47,12 +47,6 @@ public class FinalReport
 			
 			for(ExecutionStatusReport report : parent.getChildReports())
 			{
-				if(CollectionUtils.isNotEmpty(report.getChildReports()))
-				{
-					addTestCases(report);
-					continue;
-				}
-				
 				switch(report.getMainExecutionDetails().getStatus())
 				{
 					case ERRORED:
@@ -68,7 +62,19 @@ public class FinalReport
 						successCount++;
 				}
 				
-				testCaseResults.add(report);
+				if(CollectionUtils.isNotEmpty(report.getChildReports()) || report.getType() == ExecutionStatusReportType.DATA_PROVIDER)
+				{
+					addTestCases(report);
+
+					//add entry of parent test case to expose data-provider logs
+					this.testCaseResults.add(new ExecutionStatusReport(report.getName(), report.getSetupExecutionDetails(), 
+							report.getCleanupExecutionDetails(), ExecutionStatusReportType.DATA_PROVIDER));
+				}
+				else
+				{
+					testCaseResults.add(report);
+				}
+				
 				totalCount++;
 			}
 		}

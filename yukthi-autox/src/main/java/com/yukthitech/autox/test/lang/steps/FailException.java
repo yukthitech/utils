@@ -18,6 +18,6 @@ public class FailException extends AutoxValidationException
 
 	public FailException(IStep step, String message)
 	{
-		super(step, null);
+		super(step, message);
 	}
 }

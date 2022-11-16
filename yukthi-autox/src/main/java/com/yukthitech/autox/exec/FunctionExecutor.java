@@ -16,7 +16,7 @@ public class FunctionExecutor extends Executor
 	
 	public FunctionExecutor(Function function)
 	{
-		super(function);
+		super(function, null);
 		super.childSteps = Arrays.asList(new FunctionRef(function.getName(), RETURN_ATTR));
 	}
 

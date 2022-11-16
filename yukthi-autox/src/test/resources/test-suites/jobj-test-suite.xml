@@ -211,6 +211,7 @@
 			
 			<data-setup>
 				<s:set expression="counterVal" value="int: 0"/>
+				<s:log message="Message as part of data setup..."/>
 			</data-setup>
 		
 			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
@@ -220,6 +221,10 @@
 				
 				<s:assert-equals actual="prop: attr.extDataProvider.expression" expected="prop: attr.extDataProvider.expectedVal"/>				
 			</wrap:steps>
+			
+			<data-cleanup>
+				<s:log message="Message as part of data cleaup..."/>
+			</data-cleanup>
 		
 		</testCase>
 

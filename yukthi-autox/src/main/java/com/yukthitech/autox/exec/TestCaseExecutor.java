@@ -15,7 +15,6 @@ import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class TestCaseExecutor extends Executor
 {
@@ -29,9 +28,14 @@ public class TestCaseExecutor extends Executor
 	
 	private Cleanup dataCleanup;
 	
+	/**
+	 * Flag indicating if {@link #init()} method is executed successfully.
+	 */
+	private boolean initialized = false;
+	
 	public TestCaseExecutor(TestCase testCase)
 	{
-		super(testCase);
+		super(testCase, "Test-Case");
 		
 		this.testCase = testCase;
 		super.setup = testCase.getSetup();
@@ -53,7 +57,7 @@ public class TestCaseExecutor extends Executor
 	
 	private TestCaseExecutor(TestCase testCase, TestCaseData testCaseData)
 	{
-		super(testCase);
+		super(testCase, null);
 		
 		this.testCase = testCase;
 		this.testCaseData = testCaseData;
@@ -64,6 +68,11 @@ public class TestCaseExecutor extends Executor
 	public TestCase getTestCase()
 	{
 		return testCase;
+	}
+	
+	public boolean isDataProviderType()
+	{
+		return (testCaseData == null && testCase.getDataProvider() != null);
 	}
 	
 	public TestCaseData getTestCaseData()
@@ -132,7 +141,14 @@ public class TestCaseExecutor extends Executor
 		
 		try
 		{
-			return dataProvider.getStepData();
+			List<TestCaseData> data = dataProvider.getStepData();
+			
+			if(CollectionUtils.isEmpty(data))
+			{
+				executionLogger.error("Data provider resulted in null or empty data list");
+			}
+			
+			return data;
 		} finally
 		{
 			automationContext.setExecutionLogger(null);
@@ -141,7 +157,7 @@ public class TestCaseExecutor extends Executor
 	}
 	
 	@Override
-	public boolean init()
+	protected boolean init()
 	{
 		//dont consider data provider, for already data-based executors
 		if(testCaseData != null)
@@ -165,8 +181,8 @@ public class TestCaseExecutor extends Executor
 		
 		if(CollectionUtils.isEmpty(dataLst))
 		{
-			//testCaseBranch.result = new TestCaseResult(testCase, TestStatus.ERRORED, null, "No data from data-provider. Data Provider: " + dataProvider.getName(), startTime, new Date());
-			throw new InvalidStateException("No data provided by data provider: {}", dataProvider.getName());
+			super.setStatus(TestStatus.ERRORED, String.format("No data provided by data provider: %s", dataProvider.getName()));
+			return false;
 		}
 		
 		for(TestCaseData data : dataLst)
@@ -174,12 +190,19 @@ public class TestCaseExecutor extends Executor
 			super.addChildExector(new TestCaseExecutor(testCase, data));
 		}
 		
+		initialized = true;
 		return true;
 	}
 	
 	@Override
 	protected void preCleanup()
 	{
+		//if data init is not done or failed, no need to do cleaup
+		if(!initialized)
+		{
+			return;
+		}
+		
 		ExecutorUtils.executeCleanup(dataCleanup, "Data-Cleanup", this);
 	}
 
