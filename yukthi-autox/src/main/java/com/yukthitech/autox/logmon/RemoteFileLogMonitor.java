@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpProgressMonitor;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.test.TestCaseResult;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.test.ssh.steps.RemoteSession;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -219,7 +219,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 * @see com.yukthitech.autox.logmon.ILogMonitor#stopMonitoring()
 	 */
 	@Override
-	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
+	public List<ReportLogFile> stopMonitoring(AutomationContext context)
 	{
 		if(!super.isEnabled())
 		{
@@ -246,12 +246,12 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 			}
 		}
 		
-		List<LogFile> logFiles = new ArrayList<>(pathToSession.size());
+		List<ReportLogFile> logFiles = new ArrayList<>(pathToSession.size());
 		
 		for(String remotePath : pathToSession.keySet())
 		{
 			RemoteSessionWithPosition remoteSession = pathToSession.get(remotePath);
-			LogFile logFile = stopMonitoringSession(remotePath, remoteSession);
+			ReportLogFile logFile = stopMonitoringSession(remotePath, remoteSession);
 			
 			if(logFile != null)
 			{
@@ -268,7 +268,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 	 * @return corresponding log file
 	 */
 	@SuppressWarnings("unchecked")
-	private LogFile stopMonitoringSession(String remoteFilePath, RemoteSessionWithPosition remoteSession)
+	private ReportLogFile stopMonitoringSession(String remoteFilePath, RemoteSessionWithPosition remoteSession)
 	{
 		try
 		{
@@ -284,23 +284,15 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				return null;
 			}
 			
-			File tempFile = null;
+			ReportLogFile tempFile = AutomationContext.getInstance().newLogFile(super.getName(), ".log");
 			
-			try
-			{
-				tempFile = File.createTempFile(super.getName(), ".log");
-			}catch(Exception ex)
-			{
-				throw new InvalidStateException("An error occurred while creating temp file", ex);
-			}
-
 			ChannelSftp.LsEntry lsEntry = lsEntries.get(0);
 			long currentSize = lsEntry.getAttrs().getSize();
 			
 			//if there is no content simply return empty file.
 			if(currentSize == 0)
 			{
-				return new LogFile(super.getName(), tempFile);
+				return tempFile;
 			}
 
 			//if current size is less than start size
@@ -336,7 +328,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 					}
 				};
 				
-				FileOutputStream fos = new FileOutputStream(tempFile);
+				FileOutputStream fos = new FileOutputStream(tempFile.getFile());
 				
 				sftp.get(remoteFilePath, fos, progressMonitor, ChannelSftp.RESUME, remoteSession.position);
 				
@@ -346,7 +338,7 @@ public class RemoteFileLogMonitor extends AbstractLogMonitor implements Validate
 				throw new InvalidStateException("An error occurred while creating monitoring log.", ex);
 			}
 			
-			return new LogFile(super.getName(), tempFile);
+			return tempFile;
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while getting remote file size. Remote file - {}", remoteFilePath, ex);

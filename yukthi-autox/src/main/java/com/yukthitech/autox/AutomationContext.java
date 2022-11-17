@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.debug.common.ContextAttributeDetails;
@@ -28,13 +29,11 @@ import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.logmon.ILogMonitor;
-import com.yukthitech.autox.logmon.LogFile;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestCaseData;
-import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
@@ -691,6 +690,32 @@ public class AutomationContext
 	{
 		return (Map) appConfiguration.getApplicationProperties();
 	}
+	
+	public ReportLogFile newLogFile(String name, String extension)
+	{
+		if(!extension.startsWith("."))
+		{
+			extension = "." + extension;
+		}
+		
+		if(name.toLowerCase().endsWith(extension.toLowerCase()))
+		{
+			name = name.substring(0, name.length() - extension.length());
+		}
+		
+		File logFolder = new File(reportFolder, IAutomationConstants.LOGS_FOLDER_NAME);
+		String namePrefix = name + "_" + Long.toHexString(System.currentTimeMillis()).toLowerCase();
+		File file = new File(logFolder, name + extension);
+		int index = 1;
+		
+		while(file.exists())
+		{
+			file = new File(logFolder, namePrefix + "_" + index + extension);
+			index++;
+		}
+		
+		return new ReportLogFile(file);
+	}
 
 	/**
 	 * Starts all registered log monitors.
@@ -717,14 +742,14 @@ public class AutomationContext
 	 * Stops the log monitors and collects the log files generated.
 	 * @return Collected log files
 	 */
-	public synchronized Map<String, File> stopLogMonitoring(TestCaseResult testCaseResult)
+	public synchronized Map<String, ReportLogFile> stopLogMonitoring(boolean flowErrored)
 	{
 		if(logMonitors == null)
 		{
 			return null;
 		}
 		
-		Map<String, File> logFiles = new HashMap<>();
+		Map<String, ReportLogFile> logFiles = new HashMap<>();
 		
 		for(Map.Entry<String, ILogMonitor> entry : this.logMonitors.entrySet())
 		{
@@ -735,22 +760,22 @@ public class AutomationContext
 				continue;
 			}
 			
-			if(monitor.isOnErrorOnly() && !testCaseResult.getStatus().isErrored())
+			if(monitor.isOnErrorOnly() && !flowErrored)
 			{
 				continue;
 			}
 
-			List<LogFile> monitorLogFiles = monitor.stopMonitoring(this, testCaseResult);
+			List<ReportLogFile> monitorLogFiles = monitor.stopMonitoring(this);
 			
 			if(CollectionUtils.isEmpty(monitorLogFiles))
 			{
 				continue;
 			}
 			
-			for(LogFile logFile : monitorLogFiles)
+			for(ReportLogFile logFile : monitorLogFiles)
 			{
 				String key = entry.getKey();
-				logFiles.put(key, logFile.getFile());
+				logFiles.put(key, logFile);
 			}
 		}
 		

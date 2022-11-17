@@ -1,18 +1,28 @@
 package com.yukthitech.autox.exec.report;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ReportLogFile;
+import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.TestCaseExecutor;
+import com.yukthitech.autox.logmon.LogMonitorContext;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -22,9 +32,24 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ReportDataManager
 {
+	private static Logger logger = LogManager.getLogger(ReportDataManager.ExecutorDetails.class);
+	
 	private static ReportDataManager instance = new ReportDataManager();
 	
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	private static String MONITOR_HTML_TEMPLATE;
+	
+	static
+	{
+		try
+		{
+			MONITOR_HTML_TEMPLATE = IOUtils.resourceToString("/monitor-log-template.html", Charset.defaultCharset());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while loading monitor html template", ex);
+		}
+	}
 	
 	private class ExecutorDetails
 	{
@@ -268,5 +293,70 @@ public class ReportDataManager
 		int totalCount = rootExecutorDetails.statusReport.getTotalCount();
 		int successCount = rootExecutorDetails.statusReport.getSuccessCount();
 		return (totalCount == successCount);
+	}
+	
+	public synchronized boolean isErrored(Executor executor)
+	{
+		ExecutorDetails executorDetails = getExecutorDetails(executor);
+		TestStatus testStatus = executorDetails.statusReport.getMainExecutionDetails() == null ? null : executorDetails.statusReport.getMainExecutionDetails().getStatus();
+		
+		return (testStatus != null && testStatus.isErrored());
+	}
+	
+	@SuppressWarnings("deprecation")
+	private ReportLogFile generateMonitorHtml(Executor executor, ExecutorDetails executorDetails, String name, ReportLogFile logFile)
+	{
+		try
+		{
+			ReportLogFile logHtmlFile = AutomationContext.getInstance().newLogFile(logFile.getFile().getName(), ".html");
+			String logContent = FileUtils.readFileToString(logFile.getFile(), Charset.defaultCharset());
+			
+			if(StringUtils.isBlank(logContent))
+			{
+				return null;
+			}
+			
+			logContent = StringEscapeUtils.escapeHtml4(logContent);
+			
+			String processedContent = FreeMarkerMethodManager.replaceExpressions("monitoring-log", 
+					new LogMonitorContext(
+						reportInfoProviders.getName(executor), 
+						name, 
+						logContent, 
+						executorDetails.statusReport.getMainExecutionDetails().getStatus(), 
+						reportInfoProviders.getDescription(executor)), 
+					MONITOR_HTML_TEMPLATE);
+			
+			FileUtils.write(logHtmlFile.getFile(), processedContent, Charset.defaultCharset());
+			
+			return logHtmlFile;
+		}catch(Exception ex)
+		{
+			logger.error("An error occurred while creating monitoring log file - {}. Ignoring log error.", name, ex);
+		}
+
+		return null;
+	}
+	
+	public synchronized void setMonitoringLogs(Executor executor, Map<String, ReportLogFile> monitorLogs)
+	{
+		if(MapUtils.isEmpty(monitorLogs))
+		{
+			return;
+		}
+
+		ExecutorDetails executorDetails = getExecutorDetails(executor);
+		
+		for(Map.Entry<String, ReportLogFile> entry : monitorLogs.entrySet())
+		{
+			ReportLogFile htmlLogFile = generateMonitorHtml(executor, executorDetails, entry.getKey(), entry.getValue());
+			
+			if(htmlLogFile == null)
+			{
+				continue;
+			}
+			
+			executorDetails.statusReport.addMonitorLog(entry.getKey(), htmlLogFile.getFile().getName());
+		}
 	}
 }

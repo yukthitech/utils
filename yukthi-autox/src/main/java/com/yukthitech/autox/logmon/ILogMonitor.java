@@ -3,7 +3,7 @@ package com.yukthitech.autox.logmon;
 import java.util.List;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.test.TestCaseResult;
+import com.yukthitech.autox.ReportLogFile;
 
 /**
  * Interface representing log monitors. Used to fetch logs from different sources for test cases.
@@ -45,8 +45,7 @@ public interface ILogMonitor
 	 * After test case execution is completed {@link #stopMonitoring()} method would be invoked which should fetch the log from start location 
 	 * till current point.
 	 * @param context current context
-	 * @param testCaseResult Current test case result
 	 * @return Log files content from start location till current point.
 	 */
-	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult);
+	public List<ReportLogFile> stopMonitoring(AutomationContext context);
 }

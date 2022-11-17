@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.test.TestCaseResult;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -66,7 +66,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 	}
 
 	@Override
-	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
+	public List<ReportLogFile> stopMonitoring(AutomationContext context)
 	{
 		File file = new File(path);
 		
@@ -76,22 +76,14 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 			return null;
 		}
 		
-		File tempFile = null;
+		ReportLogFile tempFile = context.newLogFile(super.getName(), ".log");
 		
-		try
-		{
-			tempFile = File.createTempFile("file-monitoring", ".log");
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while creating temp file");
-		}
-
 		long currentSize = file.length();
 		
 		//if there is no content simply return empty file.
 		if(currentSize == 0)
 		{
-			return Arrays.asList(new LogFile(tempFile.getName(), tempFile));
+			return Arrays.asList(tempFile);
 		}
 		
 		//if current size is less than start size
@@ -111,7 +103,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 			
 			byte buff[] = new byte[2048];
 			int read = 0;
-			FileOutputStream fos = new FileOutputStream(tempFile);
+			FileOutputStream fos = new FileOutputStream(tempFile.getFile());
 			long totalRead = 0;
 			
 			while( (read = inputFile.read(buff)) > 0)
@@ -134,7 +126,7 @@ public class FileLogMonitor extends AbstractLogMonitor implements Validateable
 			throw new InvalidStateException(ex, "An error occurred while creating monitoring log.");
 		}
 		
-		return Arrays.asList(new LogFile(super.getName(), tempFile));
+		return Arrays.asList(tempFile);
 	}
 
 	@Override

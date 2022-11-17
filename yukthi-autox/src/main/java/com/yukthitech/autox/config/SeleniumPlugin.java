@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,6 +19,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -315,7 +317,10 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		try
 		{
 			File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
-			errorDetails.getExecutionLogger().logImage("error-screenshot", "Screen shot during error", file, LogLevel.ERROR);
+			ReportLogFile reportLogFile = context.newLogFile("error-screenshot", FilenameUtils.getExtension(file.getName()));
+			reportLogFile.copyContent(file);
+			
+			errorDetails.getExecutionLogger().logImage("Screen shot during error", reportLogFile, LogLevel.ERROR);
 			
 			errorDetails.getExecutionLogger().error("During error browser details are: [Postition: {}, Size: {}]",
 					activeDriver.manage().window().getPosition(),

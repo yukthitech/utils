@@ -40,9 +40,9 @@
 			</table>
 		</div>
 
-		<textarea id="logContentContainer" style="display: none;">
+		<pre id="logContentContainer" style="display: none;">
 			${content}
-		</textarea>
+		</pre>
 
 		<div class="resultBox" style="border: 2px solid black; margin-top: 5em;">
 			<table class="table table-hover table-bordered table-striped" style="width: 100%; table-layout: fixed; overflow-wrap: break-word; word-wrap: break-word;">
@@ -96,7 +96,7 @@
 						<a style="color: white;" data-line-no="{{message.lineNo}}">{{message.lineNo}}</a>
 					</th>
 					<td id="line_{{message.lineNo}}" style="text-align: left; padding: 0px; padding-left: 1em; padding-right: 1em; border-width: 0px;">
-						<span ng-bind-html="message.line | unsafe">
+						<span ng-bind-html="message.line">
 						</span>
 					</td>
 				</tr>

@@ -1,6 +1,5 @@
 package com.yukthitech.autox.logmon;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -17,10 +16,9 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.Logs;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.config.SeleniumPlugin;
-import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Local file monitor to monitor the changes in local file.
@@ -105,7 +103,7 @@ public class BrowserLogMonitor extends AbstractLogMonitor implements Validateabl
 	}
 
 	@Override
-	public List<LogFile> stopMonitoring(AutomationContext context, TestCaseResult testCaseResult)
+	public List<ReportLogFile> stopMonitoring(AutomationContext context)
 	{
 		if(currentLogs == null)
 		{
@@ -113,16 +111,7 @@ public class BrowserLogMonitor extends AbstractLogMonitor implements Validateabl
 			return null;
 		}
 		
-		File tempFile = null;
-		
-		try
-		{
-			tempFile = File.createTempFile("file-monitoring", ".log");
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while creating temp file");
-		}
-
+		ReportLogFile tempFile = context.newLogFile(super.getName(), ".log");
 		
 		try
 		{
@@ -150,13 +139,13 @@ public class BrowserLogMonitor extends AbstractLogMonitor implements Validateabl
 				return null;
 			}
 
-			FileUtils.write(tempFile, mssg, Charset.defaultCharset());
+			FileUtils.write(tempFile.getFile(), mssg, Charset.defaultCharset());
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while creating monitoring log.", ex);
 			return null;
 		}
 		
-		return Arrays.asList(new LogFile(super.getName(), tempFile));
+		return Arrays.asList(tempFile);
 	}
 }

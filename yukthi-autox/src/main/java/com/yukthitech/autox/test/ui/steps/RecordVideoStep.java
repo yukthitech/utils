@@ -29,6 +29,7 @@ import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.exec.StepsExecutor;
@@ -104,8 +105,8 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 	{
 		exeLogger.debug("Recording started with name: {}", name);
 		
-		File videoFile = exeLogger.createFile(name, ".mp4"); 
-		SeekableByteChannel channel = NIOUtils.writableChannel(videoFile);
+		ReportLogFile videoFile = exeLogger.createFile(name, ".mp4"); 
+		SeekableByteChannel channel = NIOUtils.writableChannel(videoFile.getFile());
 		
 		AWTSequenceEncoder encoder = new AWTSequenceEncoder(channel, Rational.R(framesPerSec, 1));
 		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,9 +14,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -30,8 +29,6 @@ public class ExecutionLogger implements IExecutionLogger
 	private static Logger logger = LogManager.getLogger(ExecutionLogger.class);
 	
 	private static ObjectMapper JSON_MAPPER = new ObjectMapper();
-	
-	private static AtomicInteger fileIndex = new AtomicInteger(1);
 	
 	private static final Pattern PARAM_PATTERN = Pattern.compile("\\{(\\d*)\\}");
 	
@@ -62,7 +59,7 @@ public class ExecutionLogger implements IExecutionLogger
 	{
 		AutomationContext automationContext = AutomationContext.getInstance();
 		
-		this.logsFolder = new File(automationContext.getReportFolder(), "logs");
+		this.logsFolder = new File(automationContext.getReportFolder(), IAutomationConstants.LOGS_FOLDER_NAME);
 		File file = new File(logsFolder, fileName);
 		
 		try
@@ -285,11 +282,6 @@ public class ExecutionLogger implements IExecutionLogger
 	{
 		try
 		{
-			if(mssg instanceof ExecutionLogData.Message)
-			{
-				((ExecutionLogData.Message) mssg).copyResources(logsFolder);
-			}
-			
 			logWriter.println("logs[" + logIndex + "] = " + JSON_MAPPER.writeValueAsString(mssg) + ";");
 			logWriter.flush();
 			
@@ -482,7 +474,7 @@ public class ExecutionLogger implements IExecutionLogger
 	 * @param logLevel level to be used.
 	 */
 	@Override
-	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
+	public void logImage(String message, ReportLogFile imageFile, LogLevel logLevel)
 	{
 		if(disabled)
 		{
@@ -500,40 +492,19 @@ public class ExecutionLogger implements IExecutionLogger
 			message = "<b>[" + mode + "]</b> " + message;
 		}
 		
-		int dotIdx = imageFile.getName().lastIndexOf(".");
-		String extension = "";
-		
-		if(dotIdx > 0)
-		{
-			extension = imageFile.getName().substring(dotIdx);
-		}
-		
-		if(name != null)
-		{
-			name = name + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + extension;
-		}
-		else
-		{
-			name = System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + extension;
-		}
-		
-		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), name, imageFile));
+		addMessage(new ExecutionLogData.ImageMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), 
+				imageFile.getFile().getName(), imageFile));
 	}
 	
 	@Override
-	public File createFile(String filePrefix, String fileSuffix)
+	public ReportLogFile createFile(String filePrefix, String fileSuffix)
 	{
 		AutomationContext automationContext = AutomationContext.getInstance();
-		File logsFolder = new File(automationContext.getReportFolder(), "logs");
-		String fileName = filePrefix + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + fileSuffix;
-
-		File tempFile = new File(logsFolder, fileName);
-
-		return tempFile;
+		return automationContext.newLogFile(filePrefix, fileSuffix);
 	}
 	
 	@Override
-	public void logFile(String message, LogLevel logLevel, File file)
+	public void logFile(String message, LogLevel logLevel, ReportLogFile file)
 	{
 		if(disabled)
 		{
@@ -543,15 +514,6 @@ public class ExecutionLogger implements IExecutionLogger
 		if(logLevel == null)
 		{
 			logLevel = LogLevel.DEBUG;
-		}
-		
-		AutomationContext automationContext = AutomationContext.getInstance();
-		File logsFolder = new File(automationContext.getReportFolder(), "logs");
-		
-		if(!file.getParentFile().equals(logsFolder))
-		{
-			throw new InvalidArgumentException("Specified file is not part of report-logs folder files. [File: {}, Report Folder: {}]", 
-					file.getPath(), automationContext.getReportFolder().getPath());
 		}
 		
 		if(mode != null)
@@ -564,7 +526,7 @@ public class ExecutionLogger implements IExecutionLogger
 	}
 
 	@Override
-	public File logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
+	public ReportLogFile logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
 	{
 		if(disabled)
 		{
@@ -583,13 +545,9 @@ public class ExecutionLogger implements IExecutionLogger
 		}
 		
 		AutomationContext automationContext = AutomationContext.getInstance();
-		File logsFolder = new File(automationContext.getReportFolder(), "logs");
-		String fileName = filePrefix + "_" + System.currentTimeMillis() + "_" + fileIndex.incrementAndGet() + fileSuffix;
-
-		File tempFile = new File(logsFolder, fileName);
+		ReportLogFile tempFile = automationContext.newLogFile(filePrefix, fileSuffix);
 		
 		addMessage(new ExecutionLogData.FileMessage( getSourceLocation(), getSource(Thread.currentThread().getStackTrace()), logLevel, message, new Date(), tempFile));
-		
 		return tempFile;
 	}
 	

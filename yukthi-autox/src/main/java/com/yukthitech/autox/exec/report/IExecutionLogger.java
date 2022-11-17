@@ -1,8 +1,8 @@
 package com.yukthitech.autox.exec.report;
 
-import java.io.File;
 import java.util.Date;
 
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 
 public interface IExecutionLogger
@@ -141,18 +141,17 @@ public interface IExecutionLogger
 	/**
 	 * Adds the specified image file to the debug log.
 	 * @param source location from where logging is being done
-	 * @param name Name of the image file for easy identification
 	 * @param message Message to be logged along with image
 	 * @param imageFile Image to be logged
 	 * @param logLevel level to be used.
 	 */
-	void logImage(String name, String message, File imageFile, LogLevel logLevel);
+	void logImage(String message, ReportLogFile imageFile, LogLevel logLevel);
 
-	File createFile(String filePrefix, String fileSuffix);
+	ReportLogFile createFile(String filePrefix, String fileSuffix);
 
-	void logFile(String message, LogLevel logLevel, File file);
+	void logFile(String message, LogLevel logLevel, ReportLogFile file);
 
-	File logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix);
+	ReportLogFile logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix);
 
 	void close(TestStatus status, Date endTime);
 

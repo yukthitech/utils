@@ -1,18 +1,16 @@
 package com.yukthitech.autox.exec.report;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.test.TestStatus;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Log data of the test case.
@@ -161,14 +159,6 @@ public class ExecutionLogData
 		{
 			return ApplicationConfiguration.getInstance().getTimeFormatObject().format(time);
 		}
-
-		/**
-		 * Copies required resources to output folder.
-		 * 
-		 * @param outFolder folder to copy
-		 */
-		public void copyResources(File outFolder)
-		{}
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -184,7 +174,7 @@ public class ExecutionLogData
 		/**
 		 * Image file.
 		 */
-		private File imageFile;
+		private ReportLogFile imageFile;
 
 		/**
 		 * Instantiates a new image message.
@@ -194,7 +184,7 @@ public class ExecutionLogData
 		 * @param time the time
 		 * @param imageFile the image file
 		 */
-		public ImageMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, String name, File imageFile)
+		public ImageMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, String name, ReportLogFile imageFile)
 		{
 			super(source, javaSource, logLevel, message, time);
 
@@ -215,7 +205,7 @@ public class ExecutionLogData
 			this.name = name;
 		}
 
-		public void setImageFile(File imageFile)
+		public void setImageFile(ReportLogFile imageFile)
 		{
 			this.imageFile = imageFile;
 		}
@@ -226,7 +216,7 @@ public class ExecutionLogData
 		 * @return the image file
 		 */
 		@JsonIgnore
-		public File getImageFile()
+		public ReportLogFile getImageFile()
 		{
 			return imageFile;
 		}
@@ -238,28 +228,7 @@ public class ExecutionLogData
 		 */
 		public String getImageFileName()
 		{
-			return imageFile.getName();
-		}
-
-		/**
-		 * Copies required resources to output folder.
-		 * 
-		 * @param outFolder folder to copy
-		 */
-		public void copyResources(File outFolder)
-		{
-			File copy = new File(outFolder, name);
-
-			try
-			{
-				FileUtils.copyFile(imageFile, copy);
-
-				imageFile.delete();
-				this.imageFile = copy;
-			} catch(Exception ex)
-			{
-				throw new InvalidStateException("An error occurred while copying image fiel {} to {}", imageFile.getPath(), copy.getPath());
-			}
+			return imageFile.getFile().getName();
 		}
 	}
 
@@ -271,7 +240,7 @@ public class ExecutionLogData
 		/**
 		 * file.
 		 */
-		private File file;
+		private ReportLogFile file;
 
 		/**
 		 * Instantiates a new image message.
@@ -281,7 +250,7 @@ public class ExecutionLogData
 		 * @param time the time
 		 * @param imageFile the image file
 		 */
-		public FileMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, File file)
+		public FileMessage(String source, String javaSource, LogLevel logLevel, String message, Date time, ReportLogFile file)
 		{
 			super(source, javaSource, logLevel, message, time);
 			this.file = file;
@@ -296,7 +265,7 @@ public class ExecutionLogData
 		 * @return the image file
 		 */
 		@JsonIgnore
-		public File getFile()
+		public ReportLogFile getFile()
 		{
 			return file;
 		}
@@ -308,7 +277,7 @@ public class ExecutionLogData
 		 */
 		public String getFileName()
 		{
-			return file.getName();
+			return file.getFile().getName();
 		}
 	}
 

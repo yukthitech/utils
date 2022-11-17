@@ -70,4 +70,6 @@ public interface IAutomationConstants
 	public int ONE_SECOND = 1000;
 	
 	public int TWO_MIN_MILLIS = 2 * 60000;
+	
+	public String LOGS_FOLDER_NAME = "logs";
 }

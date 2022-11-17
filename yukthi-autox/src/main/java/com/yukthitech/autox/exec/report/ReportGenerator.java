@@ -1,9 +1,7 @@
 package com.yukthitech.autox.exec.report;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,17 +29,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.SummaryNotificationConfig;
-import com.yukthitech.autox.logmon.LogMonitorContext;
 import com.yukthitech.autox.test.ResourceManager;
-import com.yukthitech.autox.test.TestCaseResult;
 import com.yukthitech.utils.exceptions.InvalidStateException;
-
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 /**
  * Responsible for generating output reports.
@@ -53,21 +45,6 @@ public class ReportGenerator
 	private static final String SUMMARY_REPORT_TEMPLATE = "/summary-report-template.html";
 
 	private static Logger logger = LogManager.getLogger(ReportGenerator.class);
-
-	/**
-	 * Free marker configuration.
-	 */
-	private static Configuration freemarkerConfiguration = new Configuration(Configuration.getVersion());
-
-	/**
-	 * The log json file extension.
-	 **/
-	private static String LOG_JSON = "_log.json";
-	
-	/**
-	 * log js file extension.
-	 */
-	private static String LOG_JS = ".js";
 
 	/**
 	 * Used to generate json files.
@@ -226,83 +203,5 @@ public class ReportGenerator
 		Transport.send(msg);
 		
 		logger.debug("Summary mail is sent successfully!");
-	}
-
-	/**
-	 * Creates log files from specified test case result.
-	 * @param testCaseResult result from which log data needs to be fetched
-	 * @param logFilePrefix log file name prefix
-	 * @param monitoringLogs Monitoring logs to be copied
-	 * @param description Description about the test case.
-	 */
-	public void createLogFiles(AutomationContext context, TestCaseResult testCaseResult, String logFilePrefix, Map<String, File> monitoringLogs, String description)
-	{
-		// create logs folder
-		File logsFolder = new File(context.getReportFolder(), "logs");
-		
-		if(!logsFolder.exists())
-		{
-			logsFolder.mkdirs();
-		}
-
-		ExecutionLogData executionLogData = testCaseResult.getExecutionLog();
-		
-		if( executionLogData == null)
-		{
-			return;
-		}
-		
-		//executionLogData.setStatus(testCaseResult.getStatus());
-		
-		//executionLogData.copyResources(logsFolder);
-		
-		try
-		{
-			String jsonContent = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(executionLogData);
-			String jsContent = "var logData = " + jsonContent;
-			
-			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JSON), jsonContent, Charset.defaultCharset());
-			FileUtils.write(new File(logsFolder, logFilePrefix + LOG_JS), jsContent, Charset.defaultCharset());
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException(ex, "An error occurred while creating test log json file - {}", new File(logsFolder, logFilePrefix + LOG_JSON));
-		}
-
-		if(monitoringLogs != null)
-		{
-			for(Map.Entry<String, File> log : monitoringLogs.entrySet())
-			{
-				if(log.getValue() == null)
-				{
-					continue;
-				}
-				
-				try
-				{
-					FileUtils.copyFile(log.getValue(), new File(logsFolder, logFilePrefix + "_" + log.getKey() + ".log"));
-					
-					Template freemarkerTemplate = new Template("monitor-log-template", 
-							new InputStreamReader(AutomationLauncher.class.getResourceAsStream("/monitor-log-template.html")), freemarkerConfiguration);
-
-					File logHtmlFile = new File(logsFolder, logFilePrefix + "_" + log.getKey() + ".log.html");
-					FileWriter writer = new FileWriter(logHtmlFile);
-					String logContent = FileUtils.readFileToString(log.getValue(), Charset.defaultCharset());
-					
-					freemarkerTemplate.process(new LogMonitorContext(testCaseResult.getTestCaseName(), log.getKey(), logContent, testCaseResult.getStatus(), description), writer);
-
-					testCaseResult.setMonitorLog(log.getKey(), logHtmlFile.getName());
-					
-					writer.flush();
-					writer.close();
-					
-					log.getValue().delete();
-				}catch(Exception ex)
-				{
-					logger.error("An error occurred while creating monitoring log file - {}. Ignoring log error.", log.getKey(), ex);
-				}
-			}
-		}
-		
-		testCaseResult.setSystemLogName(logFilePrefix);
 	}
 }

@@ -1,11 +1,11 @@
 package com.yukthitech.autox.exec.report;
 
-import java.io.File;
 import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 
 public class Log4jExecutionLogger implements IExecutionLogger
@@ -113,25 +113,25 @@ public class Log4jExecutionLogger implements IExecutionLogger
 	}
 
 	@Override
-	public void logImage(String name, String message, File imageFile, LogLevel logLevel)
+	public void logImage(String message, ReportLogFile imageFile, LogLevel logLevel)
 	{
 		logger.debug(message);
 	}
 
 	@Override
-	public File createFile(String filePrefix, String fileSuffix)
+	public ReportLogFile createFile(String filePrefix, String fileSuffix)
 	{
 		return null;
 	}
 
 	@Override
-	public void logFile(String message, LogLevel logLevel, File file)
+	public void logFile(String message, LogLevel logLevel, ReportLogFile file)
 	{
 		logger.debug(message);
 	}
 
 	@Override
-	public File logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
+	public ReportLogFile logFile(String message, LogLevel logLevel, String filePrefix, String fileSuffix)
 	{
 		logger.debug(message);
 		return null;

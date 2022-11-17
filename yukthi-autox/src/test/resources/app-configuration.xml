@@ -87,8 +87,10 @@
 		
 	<!-- Specify log monitors -->
 	<wrap:logMonitors>
-		<file-log-monitor name="client-output" path="c:\automation.log"/>
+		<file-log-monitor name="autox-log" path="E:\logs\autox-out.log" onErrorOnly="true"/>
+		<!-- 
 		<browser-log-monitor name="browser-console"/>
+		 -->
 	</wrap:logMonitors>
 	
 	<!-- 

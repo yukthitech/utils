@@ -1,6 +1,5 @@
 package com.yukthitech.autox.test.common.steps;
 
-import java.io.File;
 import java.io.PrintStream;
 
 import com.yukthitech.autox.AbstractStep;
@@ -8,6 +7,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.config.Command;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
@@ -72,8 +72,8 @@ public class ExecuteCommandStep extends AbstractStep
 	{
 		Command command = new Command(name, this.command, workingDirectory);
 		
-		File outFile = exeLogger.logFile("Executing command and output is redirected to below file:\n", LogLevel.DEBUG, name, ".log");
-		PrintStream out = new PrintStream(outFile);
+		ReportLogFile outFile = exeLogger.logFile("Executing command and output is redirected to below file:\n", LogLevel.DEBUG, name, ".log");
+		PrintStream out = new PrintStream(outFile.getFile());
 		
 		try
 		{

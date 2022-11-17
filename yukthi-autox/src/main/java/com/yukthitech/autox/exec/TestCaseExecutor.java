@@ -2,11 +2,13 @@ package com.yukthitech.autox.exec;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
@@ -217,11 +219,16 @@ public class TestCaseExecutor extends Executor
 			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName() + ".name", testCaseData.getName());
 		}
 		
+		AutomationContext.getInstance().startLogMonitoring();
+		
 		try
 		{
 			super.execute(beforeChildFromParent, afterChildFromParent);
 		} finally
 		{
+			Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(ReportDataManager.getInstance().isErrored(this));
+			ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
+			
 			AutomationContext.getInstance().clearActiveTestCase();
 		}
 	}

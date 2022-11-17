@@ -1,7 +1,9 @@
 package com.yukthitech.autox.exec.report;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -51,6 +53,8 @@ public class ExecutionStatusReport
 	 */
 	private ExecutionStatusReportType type = ExecutionStatusReportType.STANDARD;
 	
+	private Map<String, String> monitorLogs;
+	
 	public ExecutionStatusReport()
 	{}
 	
@@ -61,8 +65,6 @@ public class ExecutionStatusReport
 		this.cleanupExecutionDetails = cleanupExecutionDetails;
 		this.type = type;
 	}
-
-
 
 	public String getName()
 	{
@@ -223,4 +225,23 @@ public class ExecutionStatusReport
 		return childReports.size();
 	}
 
+	public void addMonitorLog(String name, String fileName)
+	{
+		if(this.monitorLogs == null)
+		{
+			this.monitorLogs = new LinkedHashMap<>();
+		}
+		
+		this.monitorLogs.put(name, fileName);
+	}
+
+	public Map<String, String> getMonitorLogs()
+	{
+		return monitorLogs;
+	}
+
+	public void setMonitorLogs(Map<String, String> monitorLogs)
+	{
+		this.monitorLogs = monitorLogs;
+	}
 }

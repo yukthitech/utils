@@ -2,6 +2,7 @@ package com.yukthitech.autox.test.ui.steps;
 
 import java.io.File;
 
+import org.apache.commons.io.FilenameUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -11,6 +12,7 @@ import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.config.SeleniumPlugin;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
@@ -79,7 +81,10 @@ public class LogScreenShotStep extends AbstractStep
 		WebDriver driver = seleniumConfiguration.getWebDriver();
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-		exeLogger.logImage(name, message, file, level);
+		ReportLogFile reportLogFile = context.newLogFile(name, FilenameUtils.getExtension(file.getName()));
+		reportLogFile.copyContent(file);
+		
+		exeLogger.logImage(message, reportLogFile, level);
 	}
 	
 	/* (non-Javadoc)
