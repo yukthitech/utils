@@ -8,12 +8,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -24,7 +25,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * @author Pritam.
  */
 @Executable(name = "uiDragAndDrop", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Drags the specified element to specified target")
-public class DragAndDropStep extends AbstractStep
+public class DragAndDropStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,8 +46,8 @@ public class DragAndDropStep extends AbstractStep
 	{
 		logger.debug("Dragging element '{}' to element - {}", source, destination);
 		
-		WebElement sourceElement = UiAutomationUtils.findElement(context, (WebElement) null, source);
-		WebElement destinationElement = UiAutomationUtils.findElement(context, (WebElement) null, destination);
+		WebElement sourceElement = UiAutomationUtils.findElement(driverName, (WebElement) null, source);
+		WebElement destinationElement = UiAutomationUtils.findElement(driverName, (WebElement) null, destination);
 
 		dragAndDrop(context, sourceElement, destinationElement, logger);
 	}
@@ -77,12 +78,12 @@ public class DragAndDropStep extends AbstractStep
 
 		try
 		{
-			SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-			seleniumConfiguration.getWebDriver().manage().timeouts().implicitlyWait(10000, TimeUnit.MILLISECONDS);
+			SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+			seleniumSession.getWebDriver(driverName).manage().timeouts().implicitlyWait(10000, TimeUnit.MILLISECONDS);
 			
 			Thread.sleep(2000);
 			
-			Actions actions = new Actions(seleniumConfiguration.getWebDriver());
+			Actions actions = new Actions(seleniumSession.getWebDriver(driverName));
 
 			//actions.dragAndDrop(sourceElement, destinationElement).build().perform();
 			

@@ -7,13 +7,14 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
 
@@ -22,7 +23,7 @@ import com.yukthitech.autox.exec.report.LogLevel;
  * @author akiran
  */
 @Executable(name = "uiLogScreenShot", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Takes current screen snapshot and adds to the log")
-public class LogScreenShotStep extends AbstractStep
+public class LogScreenShotStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -77,8 +78,8 @@ public class LogScreenShotStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) 
 	{
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 	
 		File file = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 		ReportLogFile reportLogFile = context.newLogFile(name, FilenameUtils.getExtension(file.getName()));

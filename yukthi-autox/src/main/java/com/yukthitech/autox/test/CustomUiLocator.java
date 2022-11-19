@@ -1,7 +1,7 @@
 package com.yukthitech.autox.test;
 
 import com.yukthitech.autox.AbstractLocationBased;
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

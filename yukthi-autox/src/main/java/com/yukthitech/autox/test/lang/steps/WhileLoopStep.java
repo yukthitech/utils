@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -14,6 +13,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 

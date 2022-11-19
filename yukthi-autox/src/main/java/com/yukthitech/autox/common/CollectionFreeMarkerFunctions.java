@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;

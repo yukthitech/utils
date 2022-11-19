@@ -6,8 +6,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 
 /**
  * Accessor to access value of simple field types like - TEXT, Text area, int, etc.
@@ -28,10 +30,10 @@ public class ValueAttrAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.selenium.WebElement, java.lang.String)
 	 */
 	@Override
-	public void setValue(AutomationContext context, WebElement element, Object value)
+	public void setValue(String driverName, WebElement element, Object value)
 	{
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		try
 		{
@@ -39,7 +41,7 @@ public class ValueAttrAccessor implements IFieldAccessor
 	                element, "value", "" + value);
 		}catch(Exception ex)
 		{
-			context.getExecutionLogger().debug("Failed to set the field value using JS set attribute.", ex);
+			AutomationContext.getInstance().getExecutionLogger().debug("Failed to set the field value using JS set attribute.", ex);
 			throw ex;
 		}
 	}

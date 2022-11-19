@@ -71,11 +71,6 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	private File file;
 	
 	/**
-	 * Attributes which are set at test suite level.
-	 */
-	private Map<String, Object> attributes = new HashMap<>();
-	
-	/**
 	 * If value specified is greater than 1, then underlying test cases will be executed
 	 * parallelly caping to max this value.
 	 */
@@ -418,16 +413,6 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	public Function getFunction(String name)
 	{
 		return nameToFunction.get(name);
-	}
-	
-	public void setAttribute(String name, Object value)
-	{
-		this.attributes.put(name, value);
-	}
-	
-	public Map<String, Object> getAttributes()
-	{
-		return attributes;
 	}
 	
 	public Setup getBeforeTestCase()

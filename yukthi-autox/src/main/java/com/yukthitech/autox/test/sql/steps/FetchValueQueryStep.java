@@ -14,13 +14,15 @@ import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.ResultSetHandler;
 
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.sql.DbPlugin;
+import com.yukthitech.autox.test.sql.DbPluginSession;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -91,8 +93,8 @@ public class FetchValueQueryStep extends AbstractStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		DbPlugin dbConfiguration = context.getPlugin(DbPlugin.class);
-		DataSource dataSource = dbConfiguration.getDataSource(dataSourceName);
+		DbPluginSession dbSession = ExecutionContextManager.getInstance().getPluginSession(DbPlugin.class);
+		DataSource dataSource = dbSession.getDataSource(dataSourceName);
 
 		if(dataSource == null)
 		{

@@ -4,11 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -17,7 +19,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * @author akiran
  */
 @Executable(name = "uiSwitchWindow", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching between windows")
-public class SwitchWindow extends AbstractStep
+public class SwitchWindow extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -32,13 +34,13 @@ public class SwitchWindow extends AbstractStep
 	{
 		exeLogger.trace("Switching to window: {}", locator);
 
-		SeleniumPlugin seleniumPlugin = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumPlugin.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		if(StringUtils.isBlank(locator))
 		{
 			exeLogger.debug("As no locator is specified switching to main window");
-			locator = seleniumPlugin.getMainWindowHandle();
+			locator = seleniumSession.getMainWindowHandle(driverName);
 		}
 
 		driver.switchTo().window(locator);

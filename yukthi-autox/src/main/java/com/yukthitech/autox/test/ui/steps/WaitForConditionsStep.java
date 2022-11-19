@@ -3,10 +3,12 @@ package com.yukthitech.autox.test.ui.steps;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 
@@ -28,8 +30,8 @@ public class WaitForConditionsStep extends BaseConditions
 	{
 		exeLogger.debug("Waiting for {} conditions", conditions.size());
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		try
 		{

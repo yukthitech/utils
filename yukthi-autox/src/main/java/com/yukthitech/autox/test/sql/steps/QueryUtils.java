@@ -11,8 +11,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.filter.ExpressionFactory;
 
 /**

@@ -3,7 +3,6 @@ package com.yukthitech.autox.test.mongo;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
@@ -12,7 +11,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
 /**
  * The Class MongoPlugin.
  */
-public class MongoPlugin implements IPlugin<Object>, Validateable
+public class MongoPlugin implements IPlugin<Object, MongoPluginSession>, Validateable
 {
 	/**
 	 * Application data sources.
@@ -35,14 +34,6 @@ public class MongoPlugin implements IPlugin<Object>, Validateable
 		return null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.config.IPlugin#initialize(com.yukthitech.autox.AutomationContext, java.lang.Object)
-	 */
-	@Override
-	public void initialize(AutomationContext context, Object args)
-	{
-	}
-	
 	/**
 	 * Maps specified name with specified resource.
 	 * @param name
@@ -63,27 +54,17 @@ public class MongoPlugin implements IPlugin<Object>, Validateable
 	 * @param name
 	 * @return
 	 */
-	public MongoResource getMongoResource(String name)
+	MongoResource getMongoResource(String name)
 	{
 		return this.mongoResourceMap.get(name);
 	}
 	
 	/**
-	 * Gets the application data sources.
-	 *
-	 * @return the application data sources
-	 */
-	public Map<String, MongoResource> getMongoResourceMap()
-	{
-		return mongoResourceMap;
-	}
-
-	/**
 	 * Gets the name of the default data source name.
 	 *
 	 * @return the name of the default data source name
 	 */
-	public String getDefaultMongoResource()
+	String getDefaultMongoResource()
 	{
 		return defaultMongoResource;
 	}
@@ -96,6 +77,12 @@ public class MongoPlugin implements IPlugin<Object>, Validateable
 	public void setDefaultMongoResource(String defaultMongoResource)
 	{
 		this.defaultMongoResource = defaultMongoResource;
+	}
+	
+	@Override
+	public MongoPluginSession newSession()
+	{
+		return new MongoPluginSession(this);
 	}
 	
 	@Override

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -28,10 +27,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.SummaryNotificationConfig;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.ResourceManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -58,12 +57,14 @@ public class ReportGenerator
 		
 		ApplicationConfiguration applicationConfiguration = automationContext.getAppConfiguration();
 		
+		/*
 		List<String> summaryMessages = automationContext.getSummaryMessages();
 		
 		if(summaryMessages != null && !summaryMessages.isEmpty())
 		{
 			//fullExecutionDetails.setSummaryMessages(automationContext.getSummaryMessages());
 		}
+		*/
 		
 		// copy the resource files into output folder
 		ResourceManager.getInstance().copyReportResources(reportFolder);

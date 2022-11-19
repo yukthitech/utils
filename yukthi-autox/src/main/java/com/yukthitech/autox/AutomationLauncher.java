@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,8 +16,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.config.PluginManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.server.DebugServer;
-import com.yukthitech.autox.event.IAutomationListener;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.filter.ExpressionFactory;
@@ -188,7 +191,7 @@ public class AutomationLauncher
 			throw new InvalidStateException("Failed to load test suite files. Following errors occurred: \n\t{}", errorStr);
 		}
 
-		logger.debug("Found required configurations by this context to be: {}", context.getPlugins());
+		logger.debug("Found required plugins by this context to be: {}", PluginManager.getInstance().getPlugins());
 		
 		return testSuiteGroup;
 	}
@@ -201,7 +204,8 @@ public class AutomationLauncher
 	private static void validateCommandLineArguments(AutomationContext context, String extendedCommandLineArgs[])
 	{
 		//fetch the argument configuration types required
-		List<Class<?>> argBeanTypes = context.getPlugins().stream()
+		Collection<IPlugin<?, ?>> plugins = PluginManager.getInstance().getPlugins();
+ 		List<Class<?>> argBeanTypes = plugins.stream()
 				.map(config -> config.getArgumentBeanType())
 				.filter(type -> (type != null))
 				.collect(Collectors.toList());
@@ -309,14 +313,6 @@ public class AutomationLauncher
 		context.setBasicArguments(basicArguments);
 		context.setReportFolder(reportFolder);
 		
-		if(basicArguments.getAutomationListener() != null)
-		{
-			Class<?> listenerType = Class.forName(basicArguments.getAutomationListener());
-			IAutomationListener listener = (IAutomationListener) listenerType.newInstance();
-			
-			context.setAutomationListener(listener);
-		}
-		
 		return context;
 	}
 	
@@ -387,7 +383,6 @@ public class AutomationLauncher
 		try
 		{
 			repoFactory.close();
-			context.close();
 		}catch(Exception ex)
 		{
 			logger.error("An error occurred while closing the resources", ex);

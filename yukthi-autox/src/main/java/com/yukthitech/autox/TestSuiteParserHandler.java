@@ -11,6 +11,7 @@ import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.ref.ContextAttributeReference;
 import com.yukthitech.autox.ref.ContextAttributeXpathReference;
 import com.yukthitech.ccg.xml.BeanNode;

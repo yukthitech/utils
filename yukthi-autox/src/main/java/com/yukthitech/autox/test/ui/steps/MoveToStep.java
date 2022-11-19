@@ -6,13 +6,15 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -25,7 +27,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiMoveTo", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Moves the mouse to specified target and optionally clicks the element.")
-public class MoveToStep extends AbstractUiStep
+public class MoveToStep extends AbstractParentUiStep
 {
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
@@ -99,7 +101,7 @@ public class MoveToStep extends AbstractUiStep
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
-				WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+				WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
 
 				if(webElement == null)
 				{
@@ -107,8 +109,8 @@ public class MoveToStep extends AbstractUiStep
 					throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 				}
 
-				SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-				WebDriver driver = seleniumConfiguration.getWebDriver();
+				SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+				WebDriver driver = seleniumSession.getWebDriver(driverName);
 				
 				exeLogger.debug("Aliging element to {}", alignToTop ? "Top" : "Bottom");
 				//before performing move-to ensure the target element is in view port of browser
@@ -156,7 +158,7 @@ public class MoveToStep extends AbstractUiStep
 			}catch(Exception ex)
 			{}
 
-			WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+			WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
 
 			if(webElement == null)
 			{

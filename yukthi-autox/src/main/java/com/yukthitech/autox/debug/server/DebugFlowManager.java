@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ILocationBased;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
 
 /**

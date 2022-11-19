@@ -7,7 +7,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -15,6 +14,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -27,7 +27,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiFillForm", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Fills the form with specified data")
-public class FillFormStep extends AbstractStep
+public class FillFormStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -63,7 +63,7 @@ public class FillFormStep extends AbstractStep
 	{
 		exeLogger.debug("Filling form '{}' with standard bean - {}", locator, data);
 		
-		WebElement parentElement = UiAutomationUtils.findElement(context, (WebElement) null, locator);
+		WebElement parentElement = UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
 
 		PropertyDescriptor propDescLst[] = PropertyUtils.getPropertyDescriptors(data.getClass());
 		Object value = null;
@@ -92,7 +92,7 @@ public class FillFormStep extends AbstractStep
 
 			exeLogger.debug("Populating field {} with value - {}", desc.getName(), value);
 
-			if(!UiAutomationUtils.populateField(context, parentElement, desc.getName(), value))
+			if(!UiAutomationUtils.populateField(driverName, parentElement, desc.getName(), value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), locator, value);
 				throw new TestCaseFailedException(this, "Failed to fill element '{}' under parent '{}' with value - {}", desc.getName(), locator, value);
@@ -120,7 +120,7 @@ public class FillFormStep extends AbstractStep
 	{
 		exeLogger.debug("Filling form '{}' with dynamic bean - {}", locator, data);
 		
-		WebElement parentElement = UiAutomationUtils.findElement(context, (WebElement) null, locator);
+		WebElement parentElement = UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
 
 		Object value = null;
 
@@ -136,7 +136,7 @@ public class FillFormStep extends AbstractStep
 
 			exeLogger.debug("Populating field '{}' with value - {}", name, value);
 			
-			if(!UiAutomationUtils.populateField(context, parentElement, name, value))
+			if(!UiAutomationUtils.populateField(driverName, parentElement, name, value))
 			{
 				exeLogger.error("Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);
 				throw new TestCaseFailedException(this, "Failed to fill element '{}' under parent '{}' with value - {}", name, locator, value);

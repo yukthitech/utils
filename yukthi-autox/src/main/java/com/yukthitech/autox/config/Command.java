@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.context.AutomationContext;
 
 /**
  * OS command to execute.

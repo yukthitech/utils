@@ -31,15 +31,15 @@ public class UiExpressionParsers
 				
 				if(parent == null)
 				{
-					UiAutomationUtils.populateField(parserContext.getAutomationContext(), (WebElement) null, expression, value);
+					UiAutomationUtils.populateField(parserContext.getParameter("driverName"), (WebElement) null, expression, value);
 				}
 				else if(parent instanceof String)
 				{
-					UiAutomationUtils.populateField(parserContext.getAutomationContext(), (String) parent, expression, value);
+					UiAutomationUtils.populateField(parserContext.getParameter("driverName"), (String) parent, expression, value);
 				}
 				else
 				{
-					UiAutomationUtils.populateField(parserContext.getAutomationContext(), (WebElement) parent, expression, value);
+					UiAutomationUtils.populateField(parserContext.getParameter("driverName"), (WebElement) parent, expression, value);
 				}
 			}
 			
@@ -57,15 +57,15 @@ public class UiExpressionParsers
 				
 				if(parent == null)
 				{
-					element = UiAutomationUtils.findElement(parserContext.getAutomationContext(), (String) null, expression);
+					element = UiAutomationUtils.findElement(parserContext.getParameter("driverName"), (String) null, expression);
 				}
 				else if(parent instanceof String)
 				{
-					element = UiAutomationUtils.findElement(parserContext.getAutomationContext(), (String) parent, expression);
+					element = UiAutomationUtils.findElement(parserContext.getParameter("driverName"), (String) parent, expression);
 				}
 				else
 				{
-					element = UiAutomationUtils.findElement(parserContext.getAutomationContext(), (WebElement) parent, expression);
+					element = UiAutomationUtils.findElement(parserContext.getParameter("driverName"), (WebElement) parent, expression);
 				}
 				
 				String value = null;

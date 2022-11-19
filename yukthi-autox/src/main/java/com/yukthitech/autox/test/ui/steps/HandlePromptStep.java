@@ -3,12 +3,13 @@ package com.yukthitech.autox.test.ui.steps;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -17,7 +18,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiHandlePrompt", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Used to validate, feed and accept/cancel prompt.")
-public class HandlePromptStep extends AbstractStep
+public class HandlePromptStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -75,8 +76,8 @@ public class HandlePromptStep extends AbstractStep
 			exeLogger.debug("Handling confirm without validation of message..");
 		}
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		Alert alert = driver.switchTo().alert();
 		

@@ -7,7 +7,6 @@ import java.util.List;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractValidation;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.Executable;
@@ -17,6 +16,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.FieldOption;
 import com.yukthitech.autox.test.ui.common.FormFieldType;
@@ -193,6 +193,9 @@ public class AssertFormFields extends AbstractValidation
 		}
 	}
 
+	@Param(description = "Name of the driver to be used for the step. Defaults to default driver.", required = false)
+	protected String driverName;
+
 	/**
 	 * Locator for the form.
 	 */
@@ -204,6 +207,11 @@ public class AssertFormFields extends AbstractValidation
 	 */
 	private List<FormField> fields;
 
+	public void setDriverName(String driverName)
+	{
+		this.driverName = driverName;
+	}
+	
 	/**
 	 * Sets the locator for the form.
 	 *
@@ -250,13 +258,13 @@ public class AssertFormFields extends AbstractValidation
 		
 		exeLogger.debug("Validating form  - {}", locator);
 		
-		WebElement formElement = UiAutomationUtils.findElement(context, (WebElement) null, locator);
+		WebElement formElement = UiAutomationUtils.findElement(driverName, (WebElement) null, locator);
 		List<WebElement> fieldElements = null;
 		FormFieldType fieldType = null;
 
 		for(FormField field : this.fields)
 		{
-			fieldElements = UiAutomationUtils.findElements(context, formElement, field.locator);
+			fieldElements = UiAutomationUtils.findElements(driverName, formElement, field.locator);
 
 			if(fieldElements == null || fieldElements.isEmpty())
 			{

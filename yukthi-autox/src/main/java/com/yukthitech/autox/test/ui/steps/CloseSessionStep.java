@@ -1,12 +1,13 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -14,7 +15,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * @author akiran
  */
 @Executable(name = "uiCloseSession", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current browser window.")
-public class CloseSessionStep extends AbstractStep
+public class CloseSessionStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -28,15 +29,15 @@ public class CloseSessionStep extends AbstractStep
 	{
 		this.resetDriver = resetDriver;
 	}
-
+	
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.debug("Closing current session");
 		
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		
-		seleniumConfiguration.getWebDriver().quit();
+		seleniumSession.getWebDriver(driverName).close();
 		//seleniumConfiguration.getWebDriver().close();
 		
 		if(resetDriver)
@@ -44,8 +45,9 @@ public class CloseSessionStep extends AbstractStep
 			exeLogger.debug("Waiting for 2 Secs, for current session to close completely before resetting driver");
 			
 			AutomationUtils.sleep(2000);
-			
-			seleniumConfiguration.resetDriver();
+		
+			seleniumSession.getWebDriver(driverName).quit();
+			seleniumSession.resetDriver(driverName);
 		}
 	}
 	

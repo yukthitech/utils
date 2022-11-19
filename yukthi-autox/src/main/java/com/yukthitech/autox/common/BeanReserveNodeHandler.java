@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.InvalidArgumentException;
 import org.xml.sax.Locator;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;

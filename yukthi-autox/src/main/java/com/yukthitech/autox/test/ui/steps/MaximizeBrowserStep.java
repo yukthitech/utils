@@ -2,11 +2,12 @@ package com.yukthitech.autox.test.ui.steps;
 
 import org.openqa.selenium.WebDriver.Window;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -14,14 +15,15 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * @author akiran
  */
 @Executable(name = "uiMaximizeBrowser", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Maximizes the current browser window.")
-public class MaximizeBrowserStep extends AbstractStep
+public class MaximizeBrowserStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		Window window = context.getPlugin(SeleniumPlugin.class).getWebDriver().manage().window();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		Window window = seleniumSession.getWebDriver(driverName).manage().window();
 		
 		exeLogger.debug("Maximizing the browser window. Before maximize browser details are: [Position: {}, Size: {}]",
 				window.getPosition(), window.getSize());

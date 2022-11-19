@@ -3,12 +3,13 @@ package com.yukthitech.autox.test.ui.steps;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
@@ -18,7 +19,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * @author akiran
  */
 @Executable(name = "uiSwitchFrame", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Helps in switching the frames")
-public class SwitchFrame extends AbstractStep
+public class SwitchFrame extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -56,8 +57,8 @@ public class SwitchFrame extends AbstractStep
 			exeLogger.trace("Switching to frame with locator: {}", locator);
 		}
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		if(index != null)
 		{

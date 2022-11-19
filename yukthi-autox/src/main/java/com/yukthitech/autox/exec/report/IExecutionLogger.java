@@ -2,7 +2,7 @@ package com.yukthitech.autox.exec.report;
 
 import java.util.Date;
 
-import com.yukthitech.autox.ReportLogFile;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 
 public interface IExecutionLogger

@@ -3,7 +3,7 @@ package com.yukthitech.autox.filter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 
 /**
  * Context used by expression parsers.

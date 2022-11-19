@@ -1,4 +1,4 @@
-package com.yukthitech.autox;
+package com.yukthitech.autox.context;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.logging.log4j.ThreadContext;
 
+import com.yukthitech.autox.ILocationBased;
+import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.test.IEntryPoint;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 

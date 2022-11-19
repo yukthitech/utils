@@ -22,6 +22,8 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.config.PluginManager;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.FunctionRef;
 import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
@@ -51,11 +53,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	private ApplicationConfiguration applicationConfiguration;
 	
 	/**
-	 * Current context.
-	 */
-	private AutomationContext context;
-	
-	/**
 	 * Maintains the file being parsed.
 	 */
 	private File fileBeingParsed;
@@ -73,7 +70,6 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 	 */
 	public AutomationReserveNodeHandler(AutomationContext context, ApplicationConfiguration appConfiguraion)
 	{
-		this.context = context;
 		this.applicationConfiguration = appConfiguraion;
 		
 		Set<String> basePackages = appConfiguraion.getBasePackages();
@@ -296,7 +292,8 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 			validateForParentStep(stepType, lastStep, executable.partOf());
 		}
 		
-		IPlugin<?> plugin = null;
+		IPlugin<?, ?> plugin = null;
+		PluginManager pluginManager = PluginManager.getInstance();
 		
 		for(Class<? extends IPlugin> pluginType : executable.requiredPluginTypes())
 		{
@@ -307,7 +304,7 @@ public class AutomationReserveNodeHandler implements IReserveNodeHandler
 				throw new InvalidStateException("Plugin-type {} is not specified by application-configuration which is required by step: {}", pluginType.getName(), stepTypeName);
 			}
 			
-			context.addRequirePlugin(plugin);
+			pluginManager.addRequirePlugin(plugin);
 		}
 
 		return createStepInstance(stepType);

@@ -3,7 +3,7 @@ package com.yukthitech.autox.test.proxy.steps;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;

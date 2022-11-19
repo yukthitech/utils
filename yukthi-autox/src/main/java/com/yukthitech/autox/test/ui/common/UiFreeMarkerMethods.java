@@ -6,8 +6,10 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -32,9 +34,8 @@ public class UiFreeMarkerMethods
 	 * @param parent
 	 * @return
 	 */
-	private static WebElement getElementByLocator(Object locator, String parent)
+	private static WebElement getElementByLocator(String driverName, Object locator, String parent)
 	{
-		AutomationContext context = AutomationContext.getInstance();
 		WebElement webElement = null;
 		
 		if(locator instanceof WebElement)
@@ -43,7 +44,7 @@ public class UiFreeMarkerMethods
 		}
 		else if(locator instanceof String)
 		{
-			webElement =  UiAutomationUtils.findElement(context, parent, (String)locator);
+			webElement =  UiAutomationUtils.findElement(driverName, parent, (String)locator);
 		}
 		else
 		{
@@ -66,7 +67,9 @@ public class UiFreeMarkerMethods
 			)
 	public static String uiValue(
 			@FmParam(name = "locator", description = "Locator of the ui element whose element needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			)
 	{
 		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
 		CustomUiLocator customUiLocator = UiAutomationUtils.getCustomUiLocator(AutomationContext.getInstance(), locator.toString(), queryWrapper);
@@ -76,7 +79,7 @@ public class UiFreeMarkerMethods
 			return customUiLocator.getValue(queryWrapper.getValue());
 		}
 
-		WebElement element = getElementByLocator(locator, parent);
+		WebElement element = getElementByLocator(driverName, locator, parent);
 
 		if(element == null)
 		{
@@ -105,7 +108,9 @@ public class UiFreeMarkerMethods
 			)
 	public static String uiDisplayValue(
 			@FmParam(name = "locator", description = "Locator of the ui element whose display value needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			)
 	{
 		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
 		CustomUiLocator customUiLocator = UiAutomationUtils.getCustomUiLocator(AutomationContext.getInstance(), locator.toString(), queryWrapper);
@@ -116,7 +121,7 @@ public class UiFreeMarkerMethods
 		}
 
 
-		WebElement element = getElementByLocator(locator, parent);
+		WebElement element = getElementByLocator(driverName, locator, parent);
 
 		if(element == null)
 		{
@@ -147,9 +152,11 @@ public class UiFreeMarkerMethods
 	public static String uiElemAttr(
 			@FmParam(name = "attrName", description = "Name of the attribute whose value to be fetched.") String attrName, 
 			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			)
 	{
-		WebElement webElement = getElementByLocator(locator, parent);
+		WebElement webElement = getElementByLocator(driverName, locator, parent);
 		
 		if(webElement == null)
 		{
@@ -171,11 +178,13 @@ public class UiFreeMarkerMethods
 			)
 	public static boolean uiIsVisible(
 			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") Object locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			)
 	{
 		try
 		{
-			WebElement element = getElementByLocator(locator, parent);
+			WebElement element = getElementByLocator(driverName, locator, parent);
 			return (element != null && element.isDisplayed());
 		}catch(StaleElementReferenceException ex)
 		{
@@ -195,9 +204,11 @@ public class UiFreeMarkerMethods
 			)
 	public static boolean uiIsPresent(
 			@FmParam(name = "locator", description = "Locator of the ui element whose attribute value needs to be fetched.") String locator, 
-			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent)
+			@FmParam(name = "parent", description = "Optional. Context attribute name which should hold parent web element.") String parent,
+			@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName
+			)
 	{
-		WebElement element = getElementByLocator(locator, parent);
+		WebElement element = getElementByLocator(driverName, locator, parent);
 		return (element != null);
 	}
 
@@ -246,23 +257,19 @@ public class UiFreeMarkerMethods
 			description = "Fetches the size of the browser",
 			returnDescription = "Size of the browser"
 			)
-	public static Dimension uiBrowserSize()
+	public static Dimension uiBrowserSize(@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
-		
-		return plugin.getWebDriver().manage().window().getSize();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		return seleniumSession.getWebDriver(driverName).manage().window().getSize();
 	}
 
 	@FreeMarkerMethod(
 			description = "Fetches the position of the browser",
 			returnDescription = "Position of the browser"
 			)
-	public static Point uiBrowserPosition()
+	public static Point uiBrowserPosition(@FmParam(name = "driverName", description = "Optional. Name of ui driver to use.") String driverName)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
-		
-		return plugin.getWebDriver().manage().window().getPosition();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		return seleniumSession.getWebDriver(driverName).manage().window().getPosition();
 	}
 }

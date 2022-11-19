@@ -2,12 +2,13 @@ package com.yukthitech.autox.test.ui.steps;
 
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -15,7 +16,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * @author akiran
  */
 @Executable(name = "uiGotoUrl", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Loads page with specified url")
-public class GotoUrlStep extends AbstractStep
+public class GotoUrlStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -34,9 +35,9 @@ public class GotoUrlStep extends AbstractStep
 	{
 		exeLogger.debug("Going to page with url - {}", url);
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		driver.navigate().to(url);
 	}
 

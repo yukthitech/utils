@@ -3,11 +3,11 @@ package com.yukthitech.autox.test.lang.steps;
 import java.io.File;
 
 import com.yukthitech.autox.AbstractValidation;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**

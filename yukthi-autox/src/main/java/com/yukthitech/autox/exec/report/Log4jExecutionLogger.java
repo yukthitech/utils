@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.ReportLogFile;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 
 public class Log4jExecutionLogger implements IExecutionLogger

@@ -3,11 +3,12 @@ package com.yukthitech.autox.test.webutils.validations;
 import org.openqa.selenium.WebElement;
 
 import com.yukthitech.autox.AbstractValidation;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
+import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.autox.test.ui.steps.WaitForStep;
@@ -19,6 +20,9 @@ import com.yukthitech.autox.test.ui.steps.WaitForStep;
 public class ValidateAlert extends AbstractValidation
 {
 	private static final long serialVersionUID = 1L;
+
+	@Param(description = "Name of the driver to be used for the step. Defaults to default driver.", required = false)
+	protected String driverName;
 
 	/**
 	 * Expected alert message.
@@ -65,8 +69,8 @@ public class ValidateAlert extends AbstractValidation
 		waitStep.execute(context, exeLogger);
 		
 		//ensure alert has required message
-		WebElement alertBox = UiAutomationUtils.findElement(context, (WebElement) null, "id: webutilsAlertDialog");
-		WebElement bodyElement = UiAutomationUtils.findElement(context, alertBox, "xpath: .//div[@class='modal-body']");
+		WebElement alertBox = UiAutomationUtils.findElement(driverName, (WebElement) null, "id: webutilsAlertDialog");
+		WebElement bodyElement = UiAutomationUtils.findElement(driverName, alertBox, "xpath: .//div[@class='modal-body']");
 		String bodyText = bodyElement.getAttribute("innerHTML");
 		
 		if(!bodyText.equals(message))
@@ -77,7 +81,7 @@ public class ValidateAlert extends AbstractValidation
 					bodyText, message);
 		}
 		
-		WebElement buttonElement = UiAutomationUtils.findElement(context, alertBox, "xpath: .//button");
+		WebElement buttonElement = UiAutomationUtils.findElement(driverName, alertBox, "xpath: .//button");
 		buttonElement.click();
 	}
 	

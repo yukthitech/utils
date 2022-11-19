@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.openqa.selenium.InvalidArgumentException;
 
-import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ReportLogFile;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
@@ -135,8 +135,6 @@ public class TestCaseExecutor extends Executor
 	{
 		AutomationContext automationContext = AutomationContext.getInstance();
 		
-		automationContext.setActiveTestCase(testCase, null);
-		
 		IExecutionLogger executionLogger = ReportDataManager.getInstance().getSetupExecutionLogger(this);
 		executionLogger.setMode("Data-Provider");
 		automationContext.setExecutionLogger(executionLogger);
@@ -154,7 +152,6 @@ public class TestCaseExecutor extends Executor
 		} finally
 		{
 			automationContext.setExecutionLogger(null);
-			automationContext.clearActiveTestCase();
 		}
 	}
 	
@@ -207,29 +204,23 @@ public class TestCaseExecutor extends Executor
 		
 		ExecutorUtils.executeCleanup(dataCleanup, "Data-Cleanup", this);
 	}
-
+	
 	@Override
-	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
+	protected void preexecute()
 	{
-		AutomationContext.getInstance().setActiveTestCase(testCase, testCaseData);
-		
 		if(testCaseData != null)
 		{
 			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName(), testCaseData.getValue());
 			AutomationContext.getInstance().setAttribute(testCase.getDataProvider().getName() + ".name", testCaseData.getName());
 		}
-		
+
 		AutomationContext.getInstance().startLogMonitoring();
-		
-		try
-		{
-			super.execute(beforeChildFromParent, afterChildFromParent);
-		} finally
-		{
-			Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(ReportDataManager.getInstance().isErrored(this));
-			ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
-			
-			AutomationContext.getInstance().clearActiveTestCase();
-		}
+	}
+	
+	@Override
+	protected void postExecute()
+	{
+		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(ReportDataManager.getInstance().isErrored(this));
+		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
 	}
 }

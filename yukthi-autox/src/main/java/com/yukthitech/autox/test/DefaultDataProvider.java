@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.filter.ExpressionConfig;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.ccg.xml.util.ValidateException;

@@ -6,11 +6,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.ObjectWrapper;
@@ -79,7 +81,8 @@ public class StepsExecutor
 		IStep step = sourceStep.clone();
 		step.setSourceStep(sourceStep);
 
-		context.getExecutionStack().push(step);
+		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+		executionStack.push(step);
 		
 		try
 		{
@@ -99,7 +102,7 @@ public class StepsExecutor
 		{
 			//log the unhandled exception
 			stepListeners.get().stepErrored(step, ex);
-			String stackTrace = context.getExecutionStack().toStackTrace();
+			String stackTrace = executionStack.toStackTrace();
 			
 			logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);
 			exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), stackTrace);
@@ -107,7 +110,7 @@ public class StepsExecutor
 			throw new HandledException(ex);
 		}finally
 		{
-			context.getExecutionStack().pop(step);
+			executionStack.pop(step);
 			
 			//re-enable logging, in case it is disabled
 			exeLogger.setDisabled(false);

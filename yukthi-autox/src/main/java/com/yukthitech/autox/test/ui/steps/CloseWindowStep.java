@@ -4,12 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -18,7 +19,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * @author akiran
  */
 @Executable(name = "uiCloseWindow", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the specified/current window.")
-public class CloseWindowStep extends AbstractStep
+public class CloseWindowStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -37,14 +38,14 @@ public class CloseWindowStep extends AbstractStep
 	{
 		this.name = name;
 	}
-
+	
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
 		exeLogger.trace("Closing window with name: {}", name);
 		
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		if(StringUtils.isEmpty(name))
 		{

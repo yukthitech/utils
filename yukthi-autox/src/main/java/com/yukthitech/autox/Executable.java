@@ -31,7 +31,7 @@ public @interface Executable
 	 * Plugin types required by current executable (step or validator)
 	 * @return required plugin type.
 	 */
-	public Class<? extends IPlugin<?>>[] requiredPluginTypes() default {};
+	public Class<? extends IPlugin<?, ?>>[] requiredPluginTypes() default {};
 	
 	/**
 	 * Group to which current executable belongs to. 

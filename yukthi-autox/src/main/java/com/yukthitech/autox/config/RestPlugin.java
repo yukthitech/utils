@@ -5,20 +5,18 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
-import com.yukthitech.utils.rest.RestClient;
 
 /**
  * Plugin for REST based steps and validations.
  * @author akiran
  */
 @Executable(name = "RestPlugin", group = Group.NONE, message = "Plugin for REST based steps and validations.")
-public class RestPlugin implements IPlugin<Object>, Validateable
+public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validateable
 {
 	/**
 	 * Base url for REST api invocation.
@@ -33,11 +31,6 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 			+ "<b>The values can contain free-marker expressions.</b>", required = false)
 	private Map<String, String> defaultHeaders = new HashMap<>();
 	
-	/**
-	 * Mapping from base url to client.
-	 */
-	private Map<String, RestClient> urlToClient = new HashMap<>();
-	
 	@Override
 	public Class<Object> getArgumentBeanType()
 	{
@@ -45,7 +38,7 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 	}
 
 	@Override
-	public void initialize(AutomationContext context, Object args)
+	public void initialize(Object args)
 	{
 	}
 
@@ -84,9 +77,15 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 	 *
 	 * @return the default headers to be passed with every method invocation
 	 */
-	public Map<String, String> getDefaultHeaders()
+	Map<String, String> getDefaultHeaders()
 	{
 		return defaultHeaders;
+	}
+	
+	@Override
+	public RestPluginSession newSession()
+	{
+		return new RestPluginSession(this);
 	}
 	
 	@Override
@@ -96,43 +95,5 @@ public class RestPlugin implements IPlugin<Object>, Validateable
 		{
 			throw new ValidateException("Base url can not be null.");
 		}
-	}
-	
-	@Override
-	public void close() throws Exception
-	{
-		for(RestClient restClient : this.urlToClient.values())
-		{
-			restClient.close();
-		}
-	}
-
-	/**
-	 * Gets rest client for specified base url. If base url is not, default base url will be used.
-	 * @param baseUrl Base url
-	 * @param proxy to be used.
-	 * @return Client with specified base url.
-	 */
-	public synchronized RestClient getRestClient(String baseUrl, String proxy)
-	{
-		baseUrl = StringUtils.isBlank(baseUrl) ? this.baseUrl : baseUrl;
-
-		//determine the cache key to be used
-		String cacheKey = baseUrl;
-		
-		if(StringUtils.isNotBlank(proxy))
-		{
-			cacheKey = cacheKey + "@" + proxy;
-		}
-		
-		RestClient client = urlToClient.get(cacheKey);
-		
-		if(client == null)
-		{
-			client = new RestClient(baseUrl, proxy);
-			urlToClient.put(cacheKey, client);
-		}
-		
-		return client;
 	}
 }

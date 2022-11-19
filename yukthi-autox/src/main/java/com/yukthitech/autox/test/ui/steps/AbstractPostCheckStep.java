@@ -1,13 +1,13 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
 
-public abstract class AbstractPostCheckStep extends AbstractUiStep
+public abstract class AbstractPostCheckStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -59,7 +59,7 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 			
 			boolean isVisible = UiAutomationUtils.waitWithPoll(() ->
 			{
-				return UiFreeMarkerMethods.uiIsVisible(postVisibilityLocator, null);
+				return UiFreeMarkerMethods.uiIsVisible(postVisibilityLocator, null, driverName);
 			}, postVerificationDelay, 100);
 			
 			//if visible locator is not visible, return false
@@ -80,7 +80,7 @@ public abstract class AbstractPostCheckStep extends AbstractUiStep
 			
 			boolean isVisible = UiAutomationUtils.waitWithPoll(() ->
 			{
-				return UiFreeMarkerMethods.uiIsVisible(postHideLocator, null);
+				return UiFreeMarkerMethods.uiIsVisible(postHideLocator, null, driverName);
 			}, postVerificationDelay, 100);
 			
 			//if hide locator is visible 

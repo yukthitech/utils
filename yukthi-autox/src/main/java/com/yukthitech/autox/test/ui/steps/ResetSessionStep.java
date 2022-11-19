@@ -1,10 +1,11 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**
@@ -12,7 +13,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * @author akiran
  */
 @Executable(name = "uiResetSession", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Resets the driver for usage.")
-public class ResetSessionStep extends AbstractStep
+public class ResetSessionStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -21,9 +22,8 @@ public class ResetSessionStep extends AbstractStep
 	{
 		exeLogger.debug("Resetting current session");
 		
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		
-		seleniumConfiguration.resetDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		seleniumSession.resetDriver(driverName);
 	}
 	
 	/* (non-Javadoc)

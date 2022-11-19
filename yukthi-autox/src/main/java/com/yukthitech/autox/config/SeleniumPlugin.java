@@ -1,26 +1,16 @@
 package com.yukthitech.autox.config;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.NoSuchSessionException;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.InvalidArgumentException;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.ReportLogFile;
-import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -30,10 +20,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "SeleniumPlugin", group = Group.NONE, message = "Plugin needed by selenium/ui-automation based steps or validators.")
-public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
+public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs, SeleniumPluginSession>, Validateable
 {
-	
-	/** The logger. */
 	private static Logger logger = LogManager.getLogger(SeleniumPlugin.class);
 	
 	/**
@@ -43,25 +31,15 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	private Map<String, SeleniumDriverConfig> drivers = new LinkedHashMap<>();
 	
 	/**
-	 * Active driver to be used for the current automation execution.
-	 */
-	private WebDriver activeDriver;
-	
-	/**
 	 * Active driver name, useful during driver reset.
 	 */
-	private String activeDriverName;
+	private String defaultDriverName;
 	
 	/**
 	 * Base url of the application.
 	 */
 	@Param(description = "Base url to be used for ui automation", required = true)
 	private String baseUrl;
-	
-	/**
-	 * Main window handler.
-	 */
-	private String mainWindowHandle;
 	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.config.IPlugin#getArgumentBeanType()
@@ -88,7 +66,7 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	 * is specified, first driver will be used as default one. 
 	 * @return Default driver name
 	 */
-	private String getDefaultDriverName()
+	private String findDefaultDriverName()
 	{
 		String firstName = null;
 		
@@ -103,6 +81,18 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 		}
 		
 		return firstName;
+	}
+	
+	public SeleniumDriverConfig getDriverConfig(String name)
+	{
+		SeleniumDriverConfig driverConfig = drivers.get(name);
+
+		if(driverConfig == null)
+		{
+			throw new InvalidArgumentException("No driver-config found with name: " + name);
+		}
+		
+		return driverConfig;
 	}
 	
 	/**
@@ -125,38 +115,27 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 	 *
 	 * @return the base url of the application
 	 */
-	public String getBaseUrl()
+	String getBaseUrl()
 	{
 		return baseUrl;
 	}
 	
-	/**
-	 * Gets the resource url.
-	 *
-	 * @param resource the resource
-	 * @return the resource url
-	 */
-	public String getResourceUrl(String resource)
+	String getDefaultDriverName()
 	{
-		if(!resource.startsWith("/"))
-		{
-			resource = "/" + resource;
-		}
-		
-		return baseUrl + resource;
+		return defaultDriverName;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.automation.config.IConfiguration#initialize(com.yukthitech.automation.AutomationContext, java.lang.Object)
 	 */
 	@Override
-	public void initialize(AutomationContext context, SeleniumPluginArgs args)
+	public void initialize(SeleniumPluginArgs args)
 	{
 		String driverName = args.getWebDriver();
 		
 		if(driverName == null)
 		{
-			driverName = getDefaultDriverName();
+			driverName = findDefaultDriverName();
 			
 			logger.debug("As no web driver is specified in command line arguments, using default driver - " + driverName);
 		}
@@ -172,177 +151,15 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs>, Validateable
 			throw new InvalidStateException("No web driver is defined with name - {}", driverName);
 		}
 		
-		try
-		{
-			activeDriverName = driverName;
-			resetActiveDriver(driverConfig);
-			
-			logger.debug("Got main handle as: {}", mainWindowHandle);
-		}catch(Exception ex)
-		{
-			logger.error("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
-			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", driverConfig.getName(), driverConfig.getClassName(), ex);
-		}
-	}
-	
-	private void resetActiveDriver(SeleniumDriverConfig driverConfig) throws Exception
-	{
-		if(driverConfig.getDriver() != null)
-		{
-			activeDriver = driverConfig.getDriver();
-		}
-		else
-		{
-			Class<?> driverClass = Class.forName(driverConfig.getClassName());
-			
-			try
-			{
-				Constructor<?> configConstr = driverClass.getConstructor(SeleniumDriverConfig.class);
-				activeDriver = (WebDriver) configConstr.newInstance(driverConfig);
-			}catch(NoSuchMethodException ex)
-			{
-				activeDriver = (WebDriver) driverClass.newInstance();					
-			}
-		}
-		
-		if(driverConfig.getDefaultPage() != null)
-		{
-			logger.debug("Taking driver to default page: " + driverConfig.getDefaultPage());
-			activeDriver.get(driverConfig.getDefaultPage());
-		}
-		
-		if(activeDriver.getWindowHandle() != null)
-		{
-			mainWindowHandle = activeDriver.getWindowHandle();
-		}
-	}
-	
-	/**
-	 * Gets the main window handler.
-	 *
-	 * @return the main window handler
-	 */
-	public String getMainWindowHandle()
-	{
-		return mainWindowHandle;
-	}
-	
-	/**
-	 * Fetches the current web driver.
-	 * @return current web driver.
-	 */
-	public WebDriver getWebDriver()
-	{
-		return activeDriver;
-	}
-	
-	/**
-	 * Recreates the driver object. Note this method will not close
-	 * the existing driver.
-	 */
-	public void resetDriver()
-	{
-		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
-		
-		try
-		{
-			resetActiveDriver(driverConfig);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while creating web driver {} of type - {}", 
-					driverConfig.getName(), driverConfig.getClassName(), ex);
-		}
-	}
-	
-	/**
-	 * Returns true if downloads are supported by current driver.
-	 * @return true if download automation is supported.
-	 */
-	public boolean isDownloadsSupported()
-	{
-		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
-		return (driverConfig.getDownloadFolder() != null);
-	}
-	
-	/**
-	 * Fetches folder path when downloaded files can be expected.
-	 * @return
-	 */
-	public String getDownloadFolder()
-	{
-		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
-		return driverConfig.getDownloadFolder(); 
-	}
-	
-	/**
-	 * Cleans the download folder.
-	 */
-	public void cleanDownloadFolder()
-	{
-		SeleniumDriverConfig driverConfig = drivers.get(activeDriverName);
-		String downloadFolder = driverConfig.getDownloadFolder(); 
-				
-		if(downloadFolder == null)
-		{
-			return;
-		}
-		
-		try
-		{
-			File folder = new File(downloadFolder);
-			
-			if(folder.exists())
-			{
-				FileUtils.forceDelete(folder);
-			}
-			
-			FileUtils.forceMkdir(folder);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("Failed to clean download folder: {}", downloadFolder, ex);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.yukthitech.autox.config.IPlugin#handleError(com.yukthitech.autox.AutomationContext, com.yukthitech.autox.config.ErrorDetails)
-	 */
-	@Override
-	public void handleError(AutomationContext context, ErrorDetails errorDetails)
-	{
-		if(activeDriver == null)
-		{
-			return;
-		}
-
-		try
-		{
-			File file = ((TakesScreenshot) activeDriver).getScreenshotAs(OutputType.FILE);
-			ReportLogFile reportLogFile = context.newLogFile("error-screenshot", FilenameUtils.getExtension(file.getName()));
-			reportLogFile.copyContent(file);
-			
-			errorDetails.getExecutionLogger().logImage("Screen shot during error", reportLogFile, LogLevel.ERROR);
-			
-			errorDetails.getExecutionLogger().error("During error browser details are: [Postition: {}, Size: {}]",
-					activeDriver.manage().window().getPosition(),
-					activeDriver.manage().window().getSize());
-		}catch(NoSuchSessionException ex)
-		{
-			logger.warn("Found the session to be closed, so skipping taking screen shot");
-		}
+		defaultDriverName = driverName;
 	}
 	
 	@Override
-	public void close() throws Exception
+	public SeleniumPluginSession newSession()
 	{
-		for(SeleniumDriverConfig config : this.drivers.values())
-		{
-			if(config.getDriver() != null)
-			{
-				config.getDriver().close();
-			}
-		}
+		return new SeleniumPluginSession(this, defaultDriverName);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.ccg.xml.util.Validateable#validate()
 	 */

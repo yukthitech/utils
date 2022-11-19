@@ -11,7 +11,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
@@ -91,7 +91,7 @@ public class SelectFieldAccessor implements IFieldAccessor
 	 * @see com.yukthitech.ui.automation.common.IFieldAccessor#setValue(org.openqa.selenium.WebElement, java.lang.String)
 	 */
 	@Override
-	public void setValue(AutomationContext context, WebElement element, Object valueObj)
+	public void setValue(String driverName, WebElement element, Object valueObj)
 	{
 		if(element instanceof Select)
 		{

@@ -2,7 +2,7 @@ package com.yukthitech.autox.exec;
 
 import java.util.Arrays;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.Function;
 import com.yukthitech.autox.test.FunctionRef;
 

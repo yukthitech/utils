@@ -4,9 +4,9 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Setup;

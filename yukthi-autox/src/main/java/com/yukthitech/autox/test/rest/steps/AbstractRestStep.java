@@ -10,12 +10,14 @@ import java.util.regex.Matcher;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.ChildElement;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.RestPlugin;
+import com.yukthitech.autox.config.RestPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.rest.HttpClientFactory;
@@ -345,9 +347,9 @@ public abstract class AbstractRestStep extends AbstractStep
 				+ "\n\tForm Fields: {}"
 				+ "\n\tParams: {}", request.getClass().getSimpleName(), uri, headers, pathVariables, formFields, params);
 		
-		RestPlugin restPlugin = context.getPlugin(RestPlugin.class);
+		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
 		
-		Map<String, String> defaultHeaders = new HashMap<>( restPlugin.getDefaultHeaders() );
+		Map<String, String> defaultHeaders = new HashMap<>( restPluginSession.getDefaultHeaders() );
 		Map<String, String> headers = toMap(context, "header", this.headers);
 		
 		if(!defaultHeaders.isEmpty())
@@ -413,7 +415,7 @@ public abstract class AbstractRestStep extends AbstractStep
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void invoke(AutomationContext context, RestRequest<?> request, IExecutionLogger exeLogger)
 	{
-		RestPlugin restPlugin = context.getPlugin(RestPlugin.class);
+		RestPluginSession restPluginSession = ExecutionContextManager.getInstance().getPluginSession(RestPlugin.class);
 		
 		if(baseUrl != null)
 		{
@@ -421,10 +423,11 @@ public abstract class AbstractRestStep extends AbstractStep
 		}
 		else
 		{
-			exeLogger.debug("With [Base url: {}, Proxy: {}, Expected Response Type: {}] invoking request: \n {}", restPlugin.getBaseUrl(), proxyHostPort, expectedResponseType, request);
+			exeLogger.debug("With [Base url: {}, Proxy: {}, Expected Response Type: {}] invoking request: \n {}", 
+					restPluginSession.getParentPlugin().getBaseUrl(), proxyHostPort, expectedResponseType, request);
 		}
 		
-		RestClient client = restPlugin.getRestClient(baseUrl, proxyHostPort);
+		RestClient client = restPluginSession.getRestClient(baseUrl, proxyHostPort);
 		
 		RestResult<Object> result = null;
 		

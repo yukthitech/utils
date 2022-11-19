@@ -5,11 +5,13 @@ import org.openqa.selenium.InvalidArgumentException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 
@@ -19,7 +21,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  */
 @Executable(name = "uiExecuteJs", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, 
 	message = "Can be used to execute js code. If the result needs to be set on context, from js code 'return' should be used to return approp value.")
-public class UiExecuteJsStep extends AbstractUiStep
+public class UiExecuteJsStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -70,8 +72,8 @@ public class UiExecuteJsStep extends AbstractUiStep
 	{
 		exeLogger.trace("Executing JS script - {}", script);
 		
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		
 		Object res = ((JavascriptExecutor)driver).executeScript(script);
 		

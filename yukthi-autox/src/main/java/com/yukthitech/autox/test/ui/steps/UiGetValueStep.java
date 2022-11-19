@@ -1,11 +1,11 @@
 package com.yukthitech.autox.test.ui.steps;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
 
@@ -14,7 +14,7 @@ import com.yukthitech.autox.test.ui.common.UiFreeMarkerMethods;
  * @author akiran
  */
 @Executable(name = "uiGetValue", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
-public class UiGetValueStep extends AbstractUiStep
+public class UiGetValueStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -72,7 +72,9 @@ public class UiGetValueStep extends AbstractUiStep
 	{
 		exeLogger.trace("Fetching ui element value for locator - {} [Display Value Flag: {}]", getLocatorWithParent(locator), displayValue);
 		
-		String elementValue = displayValue? UiFreeMarkerMethods.uiDisplayValue(locator, parentElement) : UiFreeMarkerMethods.uiValue(locator, parentElement);
+		String elementValue = displayValue? 
+				UiFreeMarkerMethods.uiDisplayValue(locator, parentElement, driverName) : 
+				UiFreeMarkerMethods.uiValue(locator, parentElement, driverName);
 		
 		exeLogger.debug("Setting context attribute '{}' with value of loctor '{}'. Value of locator was found to be: {}", name, getLocatorWithParent(locator), elementValue);
 		context.setAttribute(name, elementValue);

@@ -10,7 +10,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCase;
@@ -126,20 +126,6 @@ public class TestSuiteExecutor extends Executor
 		return tcWithDep;
 	}
 	
-	@Override
-	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
-	{
-		AutomationContext.getInstance().setActiveTestSuite(testSuite);
-		
-		try
-		{
-			super.execute(beforeChildFromParent, afterChildFromParent);
-		} finally
-		{
-			AutomationContext.getInstance().clearActiveTestSuite();
-		}
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -154,6 +140,4 @@ public class TestSuiteExecutor extends Executor
 		builder.append("]");
 		return builder.toString();
 	}
-
-	
 }

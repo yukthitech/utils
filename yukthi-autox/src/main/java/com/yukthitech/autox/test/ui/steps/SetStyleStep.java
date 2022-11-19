@@ -7,12 +7,14 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 
@@ -22,7 +24,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * @author akiran
  */
 @Executable(name = "uiSetStyle", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Used to manipulate the style of the element.")
-public class SetStyleStep extends AbstractUiStep
+public class SetStyleStep extends AbstractParentUiStep
 {
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
@@ -47,7 +49,7 @@ public class SetStyleStep extends AbstractUiStep
 	{
 		exeLogger.trace("On locator '{}' setting styles: {}", locator, styles);
 
-		WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+		WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
 
 		if(webElement == null)
 		{
@@ -55,8 +57,8 @@ public class SetStyleStep extends AbstractUiStep
 			throw new NullPointerException("Failed to find element with locator: " + getLocatorWithParent(locator));
 		}
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 		String code = null;
 
 		for(String style: styles.keySet())

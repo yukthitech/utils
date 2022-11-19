@@ -19,8 +19,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.InvalidArgumentException;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ExecutionPausedServerMssg;
 import com.yukthitech.autox.debug.common.MessageWrapper;
@@ -285,6 +285,7 @@ public class DebugServer
 	
 	void executionPaused(AutomationContext context, DebugPoint debugPoint)
 	{
+		/*
 		List<ExecutionPausedServerMssg.StackElement> stackTrace = context.getExecutionStack()
 			.getStackTrace()
 			.stream()
@@ -293,5 +294,6 @@ public class DebugServer
 		
 		ExecutionPausedServerMssg pauseMssg = new ExecutionPausedServerMssg(debugPoint.getFilePath(), debugPoint.getLineNumber(), stackTrace);
 		sendClientMessage(pauseMssg);
+		*/
 	}
 }

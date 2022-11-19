@@ -8,11 +8,12 @@ import java.util.Collection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.config.ErrorDetails;
-import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.config.IPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
@@ -30,29 +31,29 @@ public class ExecutorUtils
 		logger.debug( "Invoking plugin error handling for executable: {}", executable.name() );
 		
 		AutomationContext context = AutomationContext.getInstance();
-		Collection< IPlugin<?> > pluginTypes = context.getPlugins();
+		Collection<IPluginSession> pluginSessions = ExecutionContextManager.getInstance().getExecutionContextStack().getPluginSessions();
 		
-		if(pluginTypes == null || pluginTypes.isEmpty())
+		if(pluginSessions == null)
 		{
 			logger.debug( "No associated plugins found in current context.");
 			return;
 		}
 		
-		for(IPlugin<?>  plugin : pluginTypes)
+		for(IPluginSession  pluginSession : pluginSessions)
 		{
-			if(plugin == null)
+			if(pluginSession == null)
 			{
 				continue;
 			}
 			
-			logger.debug("Invoking error handling of plugin - {}", plugin.getClass().getName());
+			logger.debug("Invoking error handling of plugin - {}", pluginSession.getClass().getName());
 			
 			try
 			{
-				plugin.handleError(context, errorDetails);
+				pluginSession.handleError(context, errorDetails);
 			}catch(Exception ex)
 			{
-				logger.error("An error occurred during plugin-error-handling with plugin: {}", plugin, ex);
+				logger.error("An error occurred during plugin-error-handling with plugin: {}", pluginSession, ex);
 			}
 		}
 	}

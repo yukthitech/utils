@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -21,7 +20,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * @author akiran
  */
 @Executable(name = "DbPlugin", group = Group.NONE, message = "Plugin related to db related steps or validators.")
-public class DbPlugin implements IPlugin<Object>, Validateable
+public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
 {
 	/**
 	 * Application data sources.
@@ -35,12 +34,6 @@ public class DbPlugin implements IPlugin<Object>, Validateable
 	@Param(description = "Name of the default data source name.", required = false)
 	private String defaultDataSource;
 
-	@Override
-	public Class<Object> getArgumentBeanType()
-	{
-		return null;
-	}
-	
 	/**
 	 * Sets the name of the default data source name.
 	 *
@@ -76,7 +69,7 @@ public class DbPlugin implements IPlugin<Object>, Validateable
 	 * @param name Name of the data source.
 	 * @return Matching data source name.
 	 */
-	public DataSource getDataSource(String name)
+	DataSource getDataSource(String name)
 	{
 		return dataSourceMap.get(name);
 	}
@@ -85,14 +78,15 @@ public class DbPlugin implements IPlugin<Object>, Validateable
 	 * Fetches default data source if one is configured.
 	 * @return default data source, if any.
 	 */
-	public DataSource getDefaultDataSource()
+	DataSource getDefaultDataSource()
 	{
 		return dataSourceMap.get(defaultDataSource);
 	}
 
 	@Override
-	public void initialize(AutomationContext context, Object args)
+	public DbPluginSession newSession()
 	{
+		return new DbPluginSession(this);
 	}
 	
 	@Override

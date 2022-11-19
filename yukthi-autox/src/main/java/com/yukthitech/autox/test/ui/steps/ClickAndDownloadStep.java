@@ -8,7 +8,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
@@ -16,6 +15,9 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -29,7 +31,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiClickAndDownload", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Clicks the specified target and download the result file. If no  file is downloaded, this will throw exception.")
-public class ClickAndDownloadStep extends AbstractUiStep
+public class ClickAndDownloadStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -129,14 +131,14 @@ public class ClickAndDownloadStep extends AbstractUiStep
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		SeleniumPlugin plugin = (SeleniumPlugin) context.getPlugin(SeleniumPlugin.class);
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		
-		if(!plugin.isDownloadsSupported())
+		if(!seleniumSession.isDownloadsSupported(driverName))
 		{
 			throw new InvalidStateException("Current driver does not support download automation"); 
 		}
 		
-		plugin.cleanDownloadFolder();
+		seleniumSession.cleanDownloadFolder(driverName);
 		
 		exeLogger.trace("For download clicking the element specified by locator: {}", getLocatorWithParent(locator));
 
@@ -144,7 +146,7 @@ public class ClickAndDownloadStep extends AbstractUiStep
 		{
 			UiAutomationUtils.validateWithWait(() -> 
 			{
-				WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+				WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
 
 				if(webElement == null)
 				{
@@ -173,16 +175,16 @@ public class ClickAndDownloadStep extends AbstractUiStep
 			
 			if(StringUtils.isBlank(extensions))
 			{
-				file = waitAndDownload(plugin.getDownloadFolder());
+				file = waitAndDownload(seleniumSession.getDownloadFolder(driverName));
 			}
 			else
 			{
-				file = pollAndDownload(plugin.getDownloadFolder(), extensions);
+				file = pollAndDownload(seleniumSession.getDownloadFolder(driverName), extensions);
 			}
 			
 			if(file == null)
 			{
-				throw new InvalidStateException("No file found in download folder: {}", plugin.getDownloadFolder());
+				throw new InvalidStateException("No file found in download folder: {}", seleniumSession.getDownloadFolder(driverName));
 			}
 
 			exeLogger.trace("Setting downloaded file path '{}' on context with name: {}", file.getPath(), pathName);

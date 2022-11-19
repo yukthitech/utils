@@ -13,9 +13,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -178,8 +179,9 @@ public class ExecutionLogger implements IExecutionLogger
 	 */
 	private String getSourceLocation()
 	{
-		AutomationContext automationContext = AutomationContext.getInstance();
-		return automationContext.getExecutionStack().getCurrentLocation();
+		return ExecutionContextManager.getInstance()
+				.getExecutionStack()
+				.getCurrentLocation();
 	}
 	
 	/**

@@ -16,9 +16,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.autox.AutomationContext;
-import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.ExecutionType;
 import com.yukthitech.autox.exec.Executor;
 import com.yukthitech.autox.exec.TestCaseExecutor;

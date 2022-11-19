@@ -21,17 +21,18 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.IStepListener;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.ReportLogFile;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
@@ -43,7 +44,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "recordVideo", group = Group.Ui, message = "Records the browser screen as video for all the steps under current step")
-public class RecordVideoStep extends AbstractStep implements IStepContainer
+public class RecordVideoStep extends AbstractUiStep implements IStepContainer
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -109,8 +110,8 @@ public class RecordVideoStep extends AbstractStep implements IStepContainer
 		SeekableByteChannel channel = NIOUtils.writableChannel(videoFile.getFile());
 		
 		AWTSequenceEncoder encoder = new AWTSequenceEncoder(channel, Rational.R(framesPerSec, 1));
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 	
 		IStepListener listener = new IStepListener()
 		{

@@ -5,11 +5,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.utils.CommonUtils;
@@ -127,11 +127,6 @@ public class LogStep extends AbstractStep
 		else
 		{
 			exeLogger.log(false, level, finalMssg.toString());
-		}
-		
-		if(level == LogLevel.SUMMARY)
-		{
-			context.addSumarryMessage(finalMssg.toString());
 		}
 	}
 }

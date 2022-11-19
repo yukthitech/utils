@@ -3,13 +3,13 @@ package com.yukthitech.autox.test.mongo;
 import java.util.Map;
 
 import com.yukthitech.autox.AbstractValidation;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.DeepEqualsUtil;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**

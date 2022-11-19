@@ -3,7 +3,7 @@ package com.yukthitech.autox.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**

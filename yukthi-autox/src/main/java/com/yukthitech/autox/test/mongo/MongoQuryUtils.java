@@ -10,8 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.mongojs.IMongoJsCustomizer;
 import com.yukthitech.mongojs.MongoJsEngine;
@@ -39,8 +40,8 @@ public class MongoQuryUtils
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Map<String, Object> execute(AutomationContext context, IExecutionLogger exeLogger, String mongoResourceName, Object query)
 	{
-		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
-		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
+		MongoPluginSession mongoSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoResource mongoResource = mongoSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)
 		{
@@ -96,8 +97,8 @@ public class MongoQuryUtils
 
 	public static Object executeJs(AutomationContext context, IExecutionLogger exeLogger, String mongoResourceName, String script)
 	{
-		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
-		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
+		MongoPluginSession mongoSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoResource mongoResource = mongoSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)
 		{

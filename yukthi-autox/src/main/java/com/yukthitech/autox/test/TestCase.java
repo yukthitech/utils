@@ -3,10 +3,8 @@ package com.yukthitech.autox.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -17,9 +15,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.AbstractLocationBasedStepContainer;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.utils.ObjectWrapper;
@@ -112,11 +110,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	 * Parent test suite.
 	 */
 	private TestSuite parentTestSuite;
-	
-	/**
-	 * Attributes which are set at test case level.
-	 */
-	private Map<String, Object> attributes = new HashMap<>();
 	
 	/**
 	 * Instantiates a new test case.
@@ -501,27 +494,6 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	public void setFailureActions(List<TestCaseFailureAction> failureActions)
 	{
 		this.failureActions = failureActions;
-	}
-
-	
-	public void setAttribute(String name, Object value)
-	{
-		this.attributes.put(name, value);
-	}
-	
-	public void initAttributes(Map<String, Object> attrMap)
-	{
-		if(attrMap == null)
-		{
-			return;
-		}
-		
-		this.attributes.putAll(attrMap);
-	}
-	
-	public Map<String, Object> getAttributes()
-	{
-		return attributes;
 	}
 
 	/*

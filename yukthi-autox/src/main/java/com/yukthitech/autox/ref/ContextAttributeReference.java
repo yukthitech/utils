@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 
 /**
  * Represents a reference to context attribute.

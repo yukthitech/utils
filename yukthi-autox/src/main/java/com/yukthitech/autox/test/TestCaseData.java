@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.ccg.xml.DynamicBean;
 
 /**

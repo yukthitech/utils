@@ -15,7 +15,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * Base or wrapper object to hold ui conditions.
  * @author akiran
  */
-public abstract class BaseConditions extends AbstractUiStep
+public abstract class BaseConditions extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 

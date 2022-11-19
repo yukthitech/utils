@@ -3,7 +3,7 @@ package com.yukthitech.autox.debug.server.handler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebuggerInitClientMssg;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
 

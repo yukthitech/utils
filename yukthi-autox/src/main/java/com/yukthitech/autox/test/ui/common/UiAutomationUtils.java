@@ -15,9 +15,11 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.config.AutomationConfiguration;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -108,10 +110,10 @@ public class UiAutomationUtils
 	 *            Value to be populated
 	 * @return True, if population was successful.
 	 */
-	public static boolean populateField(AutomationContext context, String parentName, String locator, Object value)
+	public static boolean populateField(String driverName, String parentName, String locator, Object value)
 	{
-		WebElement parent = getParentElement(context, parentName);
-		return populateField(context, parent, locator, value);
+		WebElement parent = getParentElement(parentName);
+		return populateField(driverName, parent, locator, value);
 	}
 	
 	public static CustomUiLocator getCustomUiLocator(AutomationContext context, String locator, ObjectWrapper<String> query)
@@ -147,11 +149,12 @@ public class UiAutomationUtils
 	 *            Value to be populated
 	 * @return True, if population was successful.
 	 */
-	public static boolean populateField(AutomationContext context, WebElement parent, String locator, Object value)
+	public static boolean populateField(String driverName, WebElement parent, String locator, Object value)
 	{
 		logger.trace("For field {} under parent {} setting value - {}", locator, parent, value);
 		
 		ObjectWrapper<String> queryWrapper = new ObjectWrapper<String>();
+		AutomationContext context = AutomationContext.getInstance();
 		CustomUiLocator customUiLocator = getCustomUiLocator(context, locator, queryWrapper);
 		
 		if(customUiLocator != null)
@@ -166,7 +169,7 @@ public class UiAutomationUtils
 			locator = LocatorType.NAME.getKey() + ":" + locator;
 		}
 
-		List<WebElement> elements = findElements(context, parent, locator);
+		List<WebElement> elements = findElements(driverName, parent, locator);
 
 		// if no elements found with specified name
 		if(elements == null || elements.isEmpty())
@@ -184,7 +187,7 @@ public class UiAutomationUtils
 		{
 			if(type.isMultiFieldAccessor())
 			{
-				type.getFieldAccessor().setValue(context, elements, value);
+				type.getFieldAccessor().setValue(driverName, elements, value);
 			}
 			else
 			{
@@ -193,7 +196,7 @@ public class UiAutomationUtils
 					logger.warn("Multiple elements found for locator '{}'. Choosing the first element for population", locator);
 				}
 				
-				type.getFieldAccessor().setValue(context, element, value);
+				type.getFieldAccessor().setValue(driverName, element, value);
 			}
 		}
 		else
@@ -216,9 +219,9 @@ public class UiAutomationUtils
 	 *            Locator to be used for searching
 	 * @return Matching element
 	 */
-	public static WebElement findElement(AutomationContext context, String parentName, String locator)
+	public static WebElement findElement(String driverName, String parentName, String locator)
 	{
-		List<WebElement> elements = findElements(context, parentName, locator);
+		List<WebElement> elements = findElements(driverName, parentName, locator);
 
 		if(elements == null || elements.size() == 0)
 		{
@@ -239,9 +242,9 @@ public class UiAutomationUtils
 	 *            Locator to be used for searching
 	 * @return Matching element
 	 */
-	public static WebElement findElement(AutomationContext context, WebElement parent, String locator)
+	public static WebElement findElement(String driverName, WebElement parent, String locator)
 	{
-		List<WebElement> elements = findElements(context, parent, locator);
+		List<WebElement> elements = findElements(driverName, parent, locator);
 
 		if(elements == null || elements.size() == 0)
 		{
@@ -257,12 +260,13 @@ public class UiAutomationUtils
 	 * @param parentName
 	 * @return
 	 */
-	private static WebElement getParentElement(AutomationContext context, String parentName)
+	private static WebElement getParentElement(String parentName)
 	{
 		WebElement parent = null;
 		
 		if(parentName != null)
 		{
+			AutomationContext context = AutomationContext.getInstance();
 			Object parentObj = context.getAttribute(parentName);
 			
 			if(parentObj == null)
@@ -292,11 +296,11 @@ public class UiAutomationUtils
 	 *            Locator to be used for searching
 	 * @return Matching elements
 	 */
-	public static List<WebElement> findElements(AutomationContext context, String parentName, String locator)
+	public static List<WebElement> findElements(String driverName, String parentName, String locator)
 	{
-		WebElement parent = getParentElement(context, parentName);
+		WebElement parent = getParentElement(parentName);
 		
-		return findElements(context, parent, locator);
+		return findElements(driverName, parent, locator);
 	}
 	
 	public static By getLocator(String locator)
@@ -363,12 +367,12 @@ public class UiAutomationUtils
 	 *            Locator to be used for searching
 	 * @return Matching elements
 	 */
-	public static List<WebElement> findElements(AutomationContext context, WebElement parent, String locator)
+	public static List<WebElement> findElements(String driverName, WebElement parent, String locator)
 	{
 		logger.trace("Trying to find element with location '{}' under parent - {}", locator, parent);
 
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		By locatorBy = getLocator(locator);
 
@@ -412,7 +416,7 @@ public class UiAutomationUtils
 
 		if(logger.isTraceEnabled())
 		{
-			logger.trace("For locator '{}' found elements as - {}", locator, toString(context, result));
+			logger.trace("For locator '{}' found elements as - {}", locator, toString(driverName, result));
 		}
 
 		return result;
@@ -501,13 +505,13 @@ public class UiAutomationUtils
 	 *            Elements to be converted
 	 * @return Converted string.
 	 */
-	public static String toString(AutomationContext context, Collection<WebElement> elements)
+	public static String toString(String driverName, Collection<WebElement> elements)
 	{
 		StringBuilder builder = new StringBuilder(OPENBRACKET);
 		boolean first = true;
 		
-		SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-		JavascriptExecutor jsExecutor = (JavascriptExecutor) seleniumConfiguration.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		JavascriptExecutor jsExecutor = (JavascriptExecutor) seleniumSession.getWebDriver(driverName);
 
 		for(WebElement element : elements)
 		{

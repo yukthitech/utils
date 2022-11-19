@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 
 /**
  * Abstract type for accessing field data information.
@@ -36,7 +36,7 @@ public interface IFieldAccessor
 	 * @param element Element on which value needs to be set.
 	 * @param value Value to set.
 	 */
-	public default void setValue(AutomationContext context, WebElement element, Object value)
+	public default void setValue(String driverName, WebElement element, Object value)
 	{}
 	
 	/**
@@ -44,7 +44,7 @@ public interface IFieldAccessor
 	 * @param elements elements to set value on
 	 * @param value value to set
 	 */
-	public default void setValue(AutomationContext context, List<WebElement> elements, Object value)
+	public default void setValue(String driverName, List<WebElement> elements, Object value)
 	{}
 	
 	/**

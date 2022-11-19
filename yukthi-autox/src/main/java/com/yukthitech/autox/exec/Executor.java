@@ -7,13 +7,14 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IValidation;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.config.ErrorDetails;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.AutoxException;
@@ -122,12 +123,20 @@ public abstract class Executor
 		return childExecutors;
 	}
 	
+	protected void preexecute()
+	{}
+	
+	protected void postExecute()
+	{}
+
 	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
 	{
 		status = TestStatus.IN_PROGRESS;
 
-		AutomationContext.getInstance().getExecutionStack().push(executable);
+		ExecutionContextManager.getInstance().push(this);
 		reportManager.executionStarted(ExecutionType.MAIN, this);
+		
+		preexecute();
 		
 		try
 		{
@@ -174,8 +183,9 @@ public abstract class Executor
 			}
 		} finally
 		{
+			postExecute();
 			closeReportManager();
-			AutomationContext.getInstance().getExecutionStack().pop(executable);
+			ExecutionContextManager.getInstance().pop(this);
 		}
 	}
 	

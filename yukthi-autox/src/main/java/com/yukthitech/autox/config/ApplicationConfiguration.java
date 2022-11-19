@@ -54,7 +54,7 @@ public class ApplicationConfiguration
 	/**
 	 * Plugins configured which would be required by different steps and validators.
 	 */
-	private Map<Class<?>, IPlugin<?>> plugins = new HashMap<>();
+	private Map<Class<?>, IPlugin<?, ?>> plugins = new HashMap<>();
 	
 	/**
 	 * Test data beans that can be used by test cases.
@@ -260,7 +260,7 @@ public class ApplicationConfiguration
 	 * Generic adder for adding any type of plugin object. 
 	 * @param plugin plugin to be added.
 	 */
-	public void addPlugin(IPlugin<?> plugin)
+	public void addPlugin(IPlugin<?, ?> plugin)
 	{
 		this.plugins.put(plugin.getClass(), plugin);
 	}
@@ -307,7 +307,7 @@ public class ApplicationConfiguration
 	 * @return Matching plugin.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends IPlugin<?>> T getPlugin(Class<T> pluginType)
+	public <T extends IPlugin<?, ?>> T getPlugin(Class<T> pluginType)
 	{
 		return (T) plugins.get(pluginType);
 	}
@@ -317,7 +317,7 @@ public class ApplicationConfiguration
 	 * @return all plugins
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Collection<IPlugin<?>> getAllPlugins()
+	public Collection<IPlugin<?, ?>> getAllPlugins()
 	{
 		return (Collection) plugins.values();
 	}

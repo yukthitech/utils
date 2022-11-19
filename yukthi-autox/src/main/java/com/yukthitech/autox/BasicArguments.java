@@ -48,12 +48,6 @@ public class BasicArguments
 	private String reportsFolder;
 	
 	/**
-	 * Listener to be used for automation.
-	 */
-	@CliArgument(name = "list", longName = "automation-listener", description = "Automation listener to be configured.", required = false)
-	private String automationListener;
-	
-	/**
 	 * Flag to indicate report opening.
 	 */
 	@CliArgument(name = "rod", longName = "report-opening-disabled", description = "Boolean value to disable report opening at end. Which is not desired in CI/CD.", required = false)
@@ -203,26 +197,6 @@ public class BasicArguments
 	public void setReportsFolder(String reportsFolder)
 	{
 		this.reportsFolder = reportsFolder;
-	}
-
-	/**
-	 * Gets the listener to be used for automation.
-	 *
-	 * @return the listener to be used for automation
-	 */
-	public String getAutomationListener()
-	{
-		return automationListener;
-	}
-
-	/**
-	 * Sets the listener to be used for automation.
-	 *
-	 * @param automationListener the new listener to be used for automation
-	 */
-	public void setAutomationListener(String automationListener)
-	{
-		this.automationListener = automationListener;
 	}
 
 	/**

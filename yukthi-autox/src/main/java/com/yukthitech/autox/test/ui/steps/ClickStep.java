@@ -6,13 +6,15 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -88,7 +90,7 @@ public class ClickStep extends AbstractPostCheckStep
 			{
 				try
 				{
-					WebElement webElement = UiAutomationUtils.findElement(context, super.parentElement, locator);
+					WebElement webElement = UiAutomationUtils.findElement(driverName, super.parentElement, locator);
 
 					if(webElement == null)
 					{
@@ -114,8 +116,8 @@ public class ClickStep extends AbstractPostCheckStep
 						{
 							exeLogger.debug("As per config clicking the target element using js..");
 
-							SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-							WebDriver driver = seleniumConfiguration.getWebDriver();
+							SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+							WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
 							return doPostCheck(context, exeLogger, "Post Click");
@@ -132,8 +134,9 @@ public class ClickStep extends AbstractPostCheckStep
 							exeLogger.debug(
 									"Click element failed with error twice or more than twice. So trying to click the element using JS. Error: {} "
 									, "" + ex);
-							SeleniumPlugin seleniumConfiguration = context.getPlugin(SeleniumPlugin.class);
-							WebDriver driver = seleniumConfiguration.getWebDriver();
+							
+							SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+							WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 							((JavascriptExecutor) driver).executeScript("arguments[0].click();", webElement);
 							return doPostCheck(context, exeLogger, "Post Click");

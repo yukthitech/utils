@@ -2,13 +2,13 @@ package com.yukthitech.autox.test.ui.assertion;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.AutoxValidationException;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 
@@ -54,7 +54,7 @@ public class UiAssertValue extends AbstractUiAssert
 		
 		exeLogger.trace("Validating if locator '{}' has value - {}", getLocatorWithParent(locator), value);
 		
-		WebElement element = UiAutomationUtils.findElement(context, parentElement, locator);
+		WebElement element = UiAutomationUtils.findElement(driverName, parentElement, locator);
 		String actualMessage = null;
 		
 		if("input".equals(element.getTagName().toLowerCase()))

@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.WebDriver;
 
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
@@ -38,11 +37,6 @@ public class SeleniumDriverConfig implements Validateable
 	 */
 	private String defaultPage;
 	
-	/**
-	 * Direct driver.
-	 */
-	private WebDriver driver;
-
 	/**
 	 * Folder in which downloaded files can be expected.
 	 */
@@ -154,26 +148,6 @@ public class SeleniumDriverConfig implements Validateable
 	}
 
 	/**
-	 * Gets the direct driver.
-	 *
-	 * @return the direct driver
-	 */
-	public WebDriver getDriver()
-	{
-		return driver;
-	}
-
-	/**
-	 * Sets the direct driver.
-	 *
-	 * @param driver the new direct driver
-	 */
-	public void setDriver(WebDriver driver)
-	{
-		this.driver = driver;
-	}
-	
-	/**
 	 * Gets the folder in which downloaded files can be expected.
 	 *
 	 * @return the folder in which downloaded files can be expected
@@ -252,9 +226,9 @@ public class SeleniumDriverConfig implements Validateable
 			throw new ValidateException("Name can not be null or empty.");
 		}
 		
-		if(StringUtils.isBlank(className) && driver == null)
+		if(StringUtils.isBlank(className))
 		{
-			throw new ValidateException("Class-name can not be null or empty when driver is not specified.");
+			throw new ValidateException("Class-name can not be null or empty.");
 		}
 	}
 }

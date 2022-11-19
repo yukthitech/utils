@@ -9,8 +9,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.IStep;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.ExecuteStepsClientMssg;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
@@ -53,6 +53,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 	@Override
 	public boolean processData(ExecuteStepsClientMssg steps)
 	{
+		/*
 		if(!automationContext.isReadyToInteract())
 		{
 			logger.warn("As the server is not yet ready to interact, interactive steps send to server are ignored.");
@@ -70,6 +71,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 				automationContext.addOrReplaceCustomUiLocator(customUiLocator);
 			}
 		}
+		
 		
 		if(CollectionUtils.isNotEmpty(stepHolder.getFunctions()))
 		{
@@ -89,6 +91,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 		}
 		
 		executeSteps(stepHolder.getSteps());
+		*/
 		return true;
 	}
 	
@@ -115,6 +118,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 	
 	private void executeSteps(List<IStep> steps)
 	{
+		/*
 		if(automationContext.getActiveTestSuite() != null)
 		{
 			automationContext.setActiveTestSuite(automationContext.getActiveTestSuite());
@@ -134,6 +138,8 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 		}
 		
 		//automationContext.getAutomationExecutor().newSteps("Dynamic-steps", this, steps);
+	
+	*/
 	}
 	
 	@Override

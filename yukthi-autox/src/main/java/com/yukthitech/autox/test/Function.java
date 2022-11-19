@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.yukthitech.autox.AbstractLocationBased;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.common.SkipParsing;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.lang.steps.ReturnException;
@@ -167,7 +169,9 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 	public Object execute(AutomationContext context, IExecutionLogger logger) throws Exception
 	{
 		context.pushParameters(params);
-		context.getExecutionStack().push(this);
+		
+		ExecutionStack executionStack = ExecutionContextManager.getInstance().getExecutionStack();
+		executionStack.push(this);
 		
 		try
 		{
@@ -183,7 +187,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 			throw ex;
 		} finally
 		{
-			context.getExecutionStack().pop(this);
+			executionStack.pop(this);
 			context.popParameters();
 		}
 		

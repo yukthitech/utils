@@ -5,12 +5,12 @@ import java.util.List;
 
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
 
@@ -19,7 +19,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * @author akiran
  */
 @Executable(name = "uiGetElements", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Fetches value of specified ui element")
-public class UiGetElementsStep extends AbstractUiStep
+public class UiGetElementsStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -65,7 +65,7 @@ public class UiGetElementsStep extends AbstractUiStep
 		exeLogger.trace("Fetching ui element value for locator - {}", locator);
 		
 		
-		List<WebElement> webElements = UiAutomationUtils.findElements(context, parentElement, locator);
+		List<WebElement> webElements = UiAutomationUtils.findElements(driverName, parentElement, locator);
 		
 		if(webElements == null || webElements.isEmpty())
 		{

@@ -5,12 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.TestCaseFailedException;
 import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
@@ -21,7 +21,7 @@ import com.yukthitech.autox.test.ui.common.UiAutomationUtils;
  * @author Pritam.
  */
 @Executable(name = "uiSetValue", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Populates specified field with specified value")
-public class UiSetValueStep extends AbstractUiStep
+public class UiSetValueStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 
@@ -59,7 +59,7 @@ public class UiSetValueStep extends AbstractUiStep
 	 */
 	private void pressEnter(AutomationContext context, IExecutionLogger exeLogger)
 	{
-		WebElement webElement = UiAutomationUtils.findElement(context, parentElement, locator);
+		WebElement webElement = UiAutomationUtils.findElement(driverName, parentElement, locator);
 		webElement.sendKeys(Keys.ENTER);
 
 		logger.debug("Successfully enter key is pressed");
@@ -82,7 +82,7 @@ public class UiSetValueStep extends AbstractUiStep
 			value = "";
 		}
 		
-		if(!UiAutomationUtils.populateField(context, parentElement, locator, value))
+		if(!UiAutomationUtils.populateField(driverName, parentElement, locator, value))
 		{
 			logger.error("Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);
 			throw new TestCaseFailedException(this, "Failed to fill element '{}' with value - {}", getLocatorWithParent(locator), value);

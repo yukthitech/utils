@@ -10,8 +10,9 @@ import org.bson.types.ObjectId;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.test.mongo.MongoPlugin;
+import com.yukthitech.autox.test.mongo.MongoPluginSession;
 import com.yukthitech.autox.test.mongo.MongoResource;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -37,9 +38,8 @@ public class MongoFreeMarkerMethods
 	
 	private static FindIterable<Document> findDocuments(String mongoResourceName, String collection, Object... conditions)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
-		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
+		MongoPluginSession mongoPluginSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoResource mongoResource = mongoPluginSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)
 		{
@@ -137,9 +137,8 @@ public class MongoFreeMarkerMethods
 			@FmParam(name = "conditions", description = "Name-value pairs to be used as conditions") Object... conditions
 			)
 	{
-		AutomationContext context = AutomationContext.getInstance();
-		MongoPlugin dbConfiguration = context.getPlugin(MongoPlugin.class);
-		MongoResource mongoResource = dbConfiguration.getMongoResource(mongoResourceName);
+		MongoPluginSession mongoPluginSession = ExecutionContextManager.getInstance().getPluginSession(MongoPlugin.class);
+		MongoResource mongoResource = mongoPluginSession.getMongoResource(mongoResourceName);
 
 		if(mongoResource == null)
 		{

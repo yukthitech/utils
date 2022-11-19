@@ -11,7 +11,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
 /**
- * Represents a action plan that can be executed with automation engine.
+ * Represents group of steps that get executed when testcase fails.
  * @author akiran
  */
 public class TestCaseFailureAction implements IStepContainer, Validateable

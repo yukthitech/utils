@@ -2,6 +2,7 @@ package com.yukthitech.autox;
 
 import java.io.Serializable;
 
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
 /**

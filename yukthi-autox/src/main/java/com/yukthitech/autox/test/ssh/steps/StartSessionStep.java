@@ -6,10 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jcraft.jsch.JSchException;
 import com.yukthitech.autox.AbstractStep;
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.utils.exceptions.InvalidStateException;

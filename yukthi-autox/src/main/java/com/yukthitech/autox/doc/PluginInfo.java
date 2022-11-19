@@ -50,7 +50,7 @@ public class PluginInfo implements Comparable<PluginInfo>
 	 * @param pluginClass the plugin class
 	 * @param executablAnnot the executabl annot
 	 */
-	public PluginInfo(Class<? extends IPlugin<?>> pluginClass, Executable executablAnnot)
+	public PluginInfo(Class<? extends IPlugin<?, ?>> pluginClass, Executable executablAnnot)
 	{
 		this.name = Arrays.asList( executablAnnot.name() ).stream().collect(Collectors.joining(","));
 		this.description = executablAnnot.message();
@@ -99,9 +99,9 @@ public class PluginInfo implements Comparable<PluginInfo>
 	 * Fetches cli arguments and details for specified plugin type.
 	 * @param pluginClass Plugin type for which cli arguments has to be fetched.
 	 */
-	private void fetchCliArguments(Class<? extends IPlugin<?>> pluginClass) throws Exception
+	private void fetchCliArguments(Class<? extends IPlugin<?, ?>> pluginClass) throws Exception
 	{
-		IPlugin<?> pluginInst = pluginClass.newInstance();
+		IPlugin<?, ?> pluginInst = pluginClass.newInstance();
 		Class<?> cliArgHolderType = pluginInst.getArgumentBeanType();
 		
 		if(cliArgHolderType == null)

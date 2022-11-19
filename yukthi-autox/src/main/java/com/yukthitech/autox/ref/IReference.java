@@ -1,6 +1,6 @@
 package com.yukthitech.autox.ref;
 
-import com.yukthitech.autox.AutomationContext;
+import com.yukthitech.autox.context.AutomationContext;
 
 /**
  * Abstraction of object references.

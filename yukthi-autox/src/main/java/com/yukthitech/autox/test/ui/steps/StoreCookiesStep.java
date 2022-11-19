@@ -8,11 +8,13 @@ import java.util.Set;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
-import com.yukthitech.autox.AutomationContext;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
 import com.yukthitech.autox.config.SeleniumPlugin;
+import com.yukthitech.autox.config.SeleniumPluginSession;
+import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.ui.common.IUiConstants;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -24,7 +26,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "uiStoreCookies", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Stores the current session cookies into specified file.")
-public class StoreCookiesStep extends AbstractUiStep
+public class StoreCookiesStep extends AbstractParentUiStep
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -49,8 +51,8 @@ public class StoreCookiesStep extends AbstractUiStep
 	{
 		exeLogger.trace("Stroring current cookies into file: {}", path);
 
-		SeleniumPlugin plugin = context.getPlugin(SeleniumPlugin.class);
-		WebDriver driver = plugin.getWebDriver();
+		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
+		WebDriver driver = seleniumSession.getWebDriver(driverName);
 
 		Set<Cookie> cookies = driver.manage().getCookies();
 		
