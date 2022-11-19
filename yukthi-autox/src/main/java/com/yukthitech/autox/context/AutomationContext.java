@@ -16,6 +16,7 @@ import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.config.IPluginSession;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
+import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.storage.PersistenceStorage;
 import com.yukthitech.autox.test.CustomUiLocator;
 import com.yukthitech.autox.test.Function;
@@ -471,7 +472,13 @@ public class AutomationContext
 	 */
 	public IExecutionLogger getExecutionLogger()
 	{
-		return ExecutionContextManager.getExecutionContext().getExecutionLogger();
+		try
+		{
+			return ExecutionContextManager.getExecutionContext().getExecutionLogger();
+		}catch(NonExecutionThreadException ex)
+		{
+			return Log4jExecutionLogger.getInstance();
+		}
 	}
 
 	/**

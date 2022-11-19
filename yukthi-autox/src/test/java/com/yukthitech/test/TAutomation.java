@@ -38,7 +38,7 @@ public class TAutomation
 				"-rf", "./output/success", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"-ts", "mockServer"
-				//"-tc", "button_Click"
+				"-tc", "button_Click"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

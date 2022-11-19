@@ -58,7 +58,7 @@ public class ExecutionContextManager
 	{
 		ExecutionThreadStack executionContextStack = executionThreadLocal.get();
 		
-		if(executionContextStack == null || executionContextStack.isExecutionContextEmpty() || executionContextStack.peekExecutionContext().executor == executor)
+		if(executionContextStack == null || executionContextStack.isExecutionContextEmpty() || executionContextStack.peekExecutionContext().executor != executor)
 		{
 			throw new InvalidStateException("Executor being poped is not same executor found on stack. [Executor on stack: {}, Executor being poped: {}]", 
 					executionContextStack.peekExecutionContext().executor, executor);
@@ -85,7 +85,7 @@ public class ExecutionContextManager
 		
 		if(executionContextStack == null || executionContextStack.isExecutionContextEmpty())
 		{
-			throw new InvalidStateException("Execution context method is invoked by non-executor thread");
+			throw new NonExecutionThreadException("Execution context method is invoked by non-executor thread");
 		}
 
 		return executionContextStack;

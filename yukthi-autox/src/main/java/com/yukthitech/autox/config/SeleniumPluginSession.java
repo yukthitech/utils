@@ -286,8 +286,14 @@ public class SeleniumPluginSession implements IPluginSession
 	{
 		for(WebDriver driver : this.drivers.values())
 		{
-			driver.close();
-			driver.quit();
+			try
+			{
+				driver.close();
+				driver.quit();
+			}catch(NoSuchSessionException ex)
+			{
+				//ignore if session is already closed
+			}
 		}
 	}
 }
