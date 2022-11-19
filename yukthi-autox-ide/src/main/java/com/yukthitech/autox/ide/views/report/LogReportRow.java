@@ -3,7 +3,7 @@ package com.yukthitech.autox.ide.views.report;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.yukthitech.autox.test.log.LogLevel;
+import com.yukthitech.autox.exec.report.LogLevel;
 
 public class LogReportRow implements IReportRow
 {

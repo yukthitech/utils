@@ -1,6 +1,6 @@
 package com.yukthitech.autox.ide.views.report;
 
-import com.yukthitech.autox.test.log.ExecutionLogData;
+import com.yukthitech.autox.exec.report.ExecutionLogData;
 
 public class TestCaseRow extends MinimizableRow<LogReportRow> implements IReportRow
 {

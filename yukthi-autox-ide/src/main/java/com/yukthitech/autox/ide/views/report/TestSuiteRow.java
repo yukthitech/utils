@@ -3,7 +3,7 @@ package com.yukthitech.autox.ide.views.report;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.yukthitech.autox.test.log.ExecutionLogData;
+import com.yukthitech.autox.exec.report.ExecutionLogData;
 
 /**
  * Represents a test suite row.
