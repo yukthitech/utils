@@ -193,6 +193,11 @@ public class AutomationContext
 		ExecutionContextManager.getInstance().setGlobalAttribute(name, value);
 	}
 	
+	public Object getGlobalAttribute(String name)
+	{
+		return ExecutionContextManager.getInstance().getGlobalAttribute(name);
+	}
+	
 	/**
 	 * Sets internal context attribute which will be accessible within the java code.
 	 * @param name name of the attribute

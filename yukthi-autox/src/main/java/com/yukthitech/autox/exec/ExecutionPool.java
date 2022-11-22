@@ -9,9 +9,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.common.IAutomationConstants;
+import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Setup;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -88,6 +91,41 @@ public class ExecutionPool
 		}
 	}
 	
+	private ExecutorService threadPool;
+	
+	private ExecutionPool()
+	{
+		String parallelExecutionCountStr = AutomationContext.getInstance().getOverridableProp(IAutomationConstants.AUTOX_PROP_PARALLEL_POOL_SIZE);
+		int parallelExecutionCount = 0;
+		
+		if(StringUtils.isNotBlank(parallelExecutionCountStr))
+		{
+			try
+			{
+				parallelExecutionCount = Integer.parseInt(parallelExecutionCountStr);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("Invalid value specified for parallel execution count config '{}'. Value specified: {}", 
+						IAutomationConstants.AUTOX_PROP_PARALLEL_POOL_SIZE, parallelExecutionCountStr, ex);
+			}
+			
+			if(parallelExecutionCount > 0)
+			{
+				threadPool = Executors.newFixedThreadPool(parallelExecutionCount);
+				logger.debug("Created parallel execution pool with size: {}", parallelExecutionCount);
+			}
+			else
+			{
+				logger.debug("Parallel execution is disabled as parallel pool size is specified (Config Name: {}) with zero or negative value: {}"
+						, IAutomationConstants.AUTOX_PROP_PARALLEL_POOL_SIZE, parallelExecutionCount);		
+			}
+		}
+		else
+		{
+			logger.debug("Parallel execution is disabled as no parallel pool size is specified (Config Name: {})", IAutomationConstants.AUTOX_PROP_PARALLEL_POOL_SIZE);
+		}
+	}
+	
 	public static ExecutionPool getInstance()
 	{
 		return instance;
@@ -106,9 +144,8 @@ public class ExecutionPool
 		});
 	}
 
-	private void executeParallelly(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, int parallelCount)
+	private void executeParallelly(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent)
 	{
-		ExecutorService threadPool = Executors.newFixedThreadPool(parallelCount);
 		CountDownLatch latch = new CountDownLatch(executors.size());
 		
 		IdentityHashMap<Executor, ExecutorRunnable> runnableMap = new IdentityHashMap<>();
@@ -152,15 +189,15 @@ public class ExecutionPool
 		}
 	}
 	
-	public void execute(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, int parallelCount)
+	public void execute(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, boolean parallelExecutionEnabled)
 	{
-		if(parallelCount <= 1)
+		if(parallelExecutionEnabled && threadPool != null)
 		{
-			executeSequentially(executors, beforeChildFromParent, afterChildFromParent);
+			executeParallelly(executors, beforeChildFromParent, afterChildFromParent);
 		}
 		else
 		{
-			executeParallelly(executors, beforeChildFromParent, afterChildFromParent, parallelCount);
+			executeSequentially(executors, beforeChildFromParent, afterChildFromParent);
 		}
 	}
 }

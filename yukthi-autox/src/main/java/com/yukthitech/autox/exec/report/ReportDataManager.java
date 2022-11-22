@@ -295,14 +295,6 @@ public class ReportDataManager
 		return (totalCount == successCount);
 	}
 	
-	public synchronized boolean isErrored(Executor executor)
-	{
-		ExecutorDetails executorDetails = getExecutorDetails(executor);
-		TestStatus testStatus = executorDetails.statusReport.getMainExecutionDetails() == null ? null : executorDetails.statusReport.getMainExecutionDetails().getStatus();
-		
-		return (testStatus != null && testStatus.isErrored());
-	}
-	
 	@SuppressWarnings("deprecation")
 	private ReportLogFile generateMonitorHtml(Executor executor, ExecutorDetails executorDetails, String name, ReportLogFile logFile)
 	{

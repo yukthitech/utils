@@ -71,10 +71,9 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 	private File file;
 	
 	/**
-	 * If value specified is greater than 1, then underlying test cases will be executed
-	 * parallelly caping to max this value.
+	 * If enabled, underlying test-cases will be executed in parallel. 
 	 */
-	private int parallelExecutionCount = 0;
+	private boolean parallelExecutionEnabled = false;
 	
 	/**
 	 * Setup to be executed after every test case.
@@ -108,14 +107,14 @@ public class TestSuite extends AbstractLocationBased implements Validateable, IE
 		}
 	}
 
-	public int getParallelExecutionCount()
+	public boolean isParallelExecutionEnabled()
 	{
-		return parallelExecutionCount;
+		return parallelExecutionEnabled;
 	}
 
-	public void setParallelExecutionCount(int parallelExecutionCount)
+	public void setParallelExecutionEnabled(boolean parallelExecutionEnabled)
 	{
-		this.parallelExecutionCount = parallelExecutionCount;
+		this.parallelExecutionEnabled = parallelExecutionEnabled;
 	}
 
 	/**

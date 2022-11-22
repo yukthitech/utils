@@ -3,6 +3,7 @@ package com.yukthitech.autox.exec;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,7 @@ public abstract class Executor
 	
 	protected Cleanup afterChild;
 
-	protected int parallelCount;
+	protected boolean parallelExecutionEnabled;
 
 	private List<Executor> childExecutors;
 	
@@ -59,6 +60,18 @@ public abstract class Executor
 	protected ExpectedException expectedException;
 	
 	private String childName;
+	
+	/**
+	 * Flag to be set, when child status(es) has to be considered along
+	 * with current executor.
+	 */
+	protected boolean includeChildStauts;
+	
+	/**
+	 * Flag indicating that this executor should share
+	 * context (attributes) with parent context.
+	 */
+	protected boolean parentContextShared;
 	
 	protected Executor(Object executable, String childName)
 	{
@@ -86,6 +99,11 @@ public abstract class Executor
 	public boolean isReadyToExecute()
 	{
 		return true;
+	}
+	
+	public boolean isParentContextShared()
+	{
+		return parentContextShared;
 	}
 	
 	/**
@@ -138,13 +156,13 @@ public abstract class Executor
 		
 		preexecute();
 		
+		if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this))
+		{
+			return;
+		}
+
 		try
 		{
-			if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this))
-			{
-				return;
-			}
-					
 			//Execute setup
 			if(!ExecutorUtils.executeSetup(setup, "Setup", this))
 			{
@@ -155,7 +173,7 @@ public abstract class Executor
 			{
 				return;
 			}
-
+			
 			try
 			{
 				//execute children
@@ -178,11 +196,13 @@ public abstract class Executor
 				
 				//execute cleanup
 				ExecutorUtils.executeCleanup(cleanup, "Cleanup", this);
-	
-				ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this);
 			}
 		} finally
 		{
+			//execute after child even if setup of test case fails
+			// but should not execute if before-child fails
+			ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this);
+			
 			postExecute();
 			closeReportManager();
 			ExecutionContextManager.getInstance().pop(this);
@@ -217,43 +237,42 @@ public abstract class Executor
 			reportManager.executionCompleted(ExecutionType.MAIN, this);
 		}
 	}
-
-	private void executeChildExecutors()
+	
+	private void getStatusDetails(StatusTracker tracker, List<Executor> childExecutors)
 	{
-		ExecutionPool.getInstance().execute(childExecutors, beforeChild, afterChild, parallelCount);
-		
-		TestStatus finalStatus = TestStatus.SUCCESSFUL;
-		
-		int errorCount = 0, failureCount = 0, skipCount = 0;
-		
 		for(Executor cexecutor : childExecutors)
 		{
+			if(cexecutor.includeChildStauts && CollectionUtils.isNotEmpty(cexecutor.childExecutors))
+			{
+				getStatusDetails(tracker, cexecutor.childExecutors);
+				continue;
+			}
+
 			if(cexecutor.status == TestStatus.ERRORED)
 			{
-				errorCount++;
-				finalStatus = TestStatus.ERRORED;
+				tracker.errorCount++;
 			}
 			else if(cexecutor.status == TestStatus.FAILED)
 			{
-				failureCount++;
-				
-				if(finalStatus != TestStatus.ERRORED)
-				{
-					finalStatus = TestStatus.FAILED;
-				}
+				tracker.failureCount++;
 			}
 			else if(cexecutor.status == TestStatus.SKIPPED)
 			{
-				skipCount++;
-				
-				if(!finalStatus.isErrored())
-				{
-					finalStatus = TestStatus.SKIPPED;
-				}
+				tracker.skipCount++;
 			}
+			
+			tracker.status = TestStatus.getEffectiveStatus(tracker.status, cexecutor.status);
 		}
+	}
+
+	private void executeChildExecutors()
+	{
+		ExecutionPool.getInstance().execute(childExecutors, beforeChild, afterChild, parallelExecutionEnabled);
+
+		StatusTracker statusTracker = new StatusTracker();
+		getStatusDetails(statusTracker, childExecutors);
 		
-		if(finalStatus == TestStatus.SUCCESSFUL)
+		if(statusTracker.status == TestStatus.SUCCESSFUL)
 		{
 			setStatus(TestStatus.SUCCESSFUL, null);
 			return;
@@ -261,24 +280,26 @@ public abstract class Executor
 
 		StringBuilder mssg = new StringBuilder();
 		
-		if(errorCount > 0)
+		if(statusTracker.errorCount > 0)
 		{
-			mssg.append(errorCount).append(" ").append(childName).append("(s) Errored");
+			mssg.append("Errored");
 		}
 		
-		if(failureCount > 0)
+		if(statusTracker.failureCount > 0)
 		{
-			mssg.append(mssg.length() > 0 ? ", " : "");
-			mssg.append(failureCount).append(" ").append(childName).append("(s) Failed");
+			mssg.append(mssg.length() > 0 ? " / " : "");
+			mssg.append("Failed");
 		}
 		
-		if(skipCount > 0)
+		if(statusTracker.skipCount > 0)
 		{
-			mssg.append(mssg.length() > 0 ? ", " : "");
-			mssg.append(failureCount).append(" ").append(childName).append("(s) Skipped");
+			mssg.append(mssg.length() > 0 ? " / " : "");
+			mssg.append("Skipped");
 		}
+		
+		mssg.insert(0, "One or more " + childName + "(s) ");
 
-		setStatus(finalStatus, mssg.toString());
+		setStatus(statusTracker.status, mssg.toString());
 	}
 	
 	private void executeChildSteps()

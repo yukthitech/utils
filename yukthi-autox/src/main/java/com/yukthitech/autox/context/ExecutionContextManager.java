@@ -115,4 +115,14 @@ public class ExecutionContextManager
 		
 		globalContext.setAttribute(name, value);
 	}
+	
+	public Object getGlobalAttribute(String name)
+	{
+		if(globalContext == null)
+		{
+			throw new InvalidStateException("No global context is created yet");
+		}
+		
+		return globalContext.getAttribute(name);
+	}
 }

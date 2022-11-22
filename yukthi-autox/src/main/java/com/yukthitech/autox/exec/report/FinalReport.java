@@ -8,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yukthitech.autox.config.ApplicationConfiguration;
+import com.yukthitech.autox.test.TestStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FinalReport
@@ -45,9 +46,28 @@ public class FinalReport
 				return;
 			}
 			
+			TestStatus status = null;
+			
 			for(ExecutionStatusReport report : parent.getChildReports())
 			{
-				switch(report.getMainExecutionDetails().getStatus())
+				if(CollectionUtils.isNotEmpty(report.getChildReports()) || report.getType() == ExecutionStatusReportType.DATA_PROVIDER)
+				{
+					addTestCases(report);
+					
+					//add entry of parent test case to expose data-provider logs
+					ExecutionStatusReport statusReport = new ExecutionStatusReport(report.getName(), report.getSetupExecutionDetails(), 
+							report.getCleanupExecutionDetails(), ExecutionStatusReportType.DATA_PROVIDER);
+					
+					this.testCaseResults.add(statusReport);
+					status = statusReport.getMainExecutionDetails().getStatus();
+				}
+				else
+				{
+					testCaseResults.add(report);
+					status = report.getMainExecutionDetails().getStatus();
+				}
+				
+				switch(status)
 				{
 					case ERRORED:
 						errorCount++;
@@ -61,20 +81,7 @@ public class FinalReport
 					default:
 						successCount++;
 				}
-				
-				if(CollectionUtils.isNotEmpty(report.getChildReports()) || report.getType() == ExecutionStatusReportType.DATA_PROVIDER)
-				{
-					addTestCases(report);
 
-					//add entry of parent test case to expose data-provider logs
-					this.testCaseResults.add(new ExecutionStatusReport(report.getName(), report.getSetupExecutionDetails(), 
-							report.getCleanupExecutionDetails(), ExecutionStatusReportType.DATA_PROVIDER));
-				}
-				else
-				{
-					testCaseResults.add(report);
-				}
-				
 				totalCount++;
 			}
 		}

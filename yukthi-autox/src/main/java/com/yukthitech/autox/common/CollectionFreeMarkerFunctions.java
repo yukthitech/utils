@@ -88,4 +88,28 @@ public class CollectionFreeMarkerFunctions
 		//return the size
 		return intersection.size();
 	}
+
+	@FreeMarkerMethod(
+			description = "Adds to specified value to specified collection",
+			returnDescription = "empty string"
+			)
+	public static String push(
+			@FmParam(name = "collection", description = "Collection to which value should be added") Collection<Object> collection, 
+			@FmParam(name = "value", description = "Value to add") Object val
+			)
+	{
+		collection.add(val);
+		return "";
+	}
+
+	@FreeMarkerMethod(
+			description = "Removes the element from the end. If list is empty null will be returned.",
+			returnDescription = "Returns the element removed"
+			)
+	public static Object pop(
+			@FmParam(name = "list", description = "Collection to which value should be added") List<Object> collection
+			)
+	{
+		return collection.remove(collection.size() - 1);
+	}
 }

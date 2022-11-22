@@ -11,8 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.test.Cleanup;
-import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestCase;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.utils.ObjectWrapper;
@@ -37,7 +35,7 @@ public class TestSuiteExecutor extends Executor
 		super.cleanup = testSuite.getCleanup();
 		super.beforeChild = testSuite.getBeforeTestCase();
 		super.afterChild = testSuite.getAfterTestCase();
-		super.parallelCount = testSuite.getParallelExecutionCount();
+		super.parallelExecutionEnabled = testSuite.isParallelExecutionEnabled();
 		
 		//fetch restricted test-cases along with dependencies
 		Set<String> restrictedTestCases = getRestrictedTestCases();

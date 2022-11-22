@@ -42,13 +42,14 @@ public class TestCaseExecutor extends Executor
 		this.testCase = testCase;
 		super.setup = testCase.getSetup();
 		super.cleanup = testCase.getCleanup();
+		super.includeChildStauts = true;
 		
 		if(testCase.getDataProvider() != null)
 		{
 			this.dataSetup = testCase.getDataSetup();
 			this.dataCleanup = testCase.getDataCleanup();
 			
-			super.parallelCount = testCase.getParallelExecutionCount();
+			super.parallelExecutionEnabled = testCase.isParallelExecutionEnabled();
 		}
 		else
 		{
@@ -184,9 +185,14 @@ public class TestCaseExecutor extends Executor
 			return false;
 		}
 		
+		boolean shareContext = (testCase.isSharedContext() && !testCase.isParallelExecutionEnabled());
+		
 		for(TestCaseData data : dataLst)
 		{
-			super.addChildExector(new TestCaseExecutor(testCase, data));
+			TestCaseExecutor newExecutor = new TestCaseExecutor(testCase, data);
+			newExecutor.parentContextShared = shareContext;
+			
+			super.addChildExector(newExecutor);
 		}
 		
 		initialized = true;
@@ -220,7 +226,8 @@ public class TestCaseExecutor extends Executor
 	@Override
 	protected void postExecute()
 	{
-		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(ReportDataManager.getInstance().isErrored(this));
+		boolean isErrored = (super.status != null && super.status.isErrored());
+		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(isErrored);
 		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
 	}
 }

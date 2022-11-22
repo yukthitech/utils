@@ -109,6 +109,12 @@ public class TestCaseData
 				}
 			};
 		}
+
+		@Override
+		public String toString()
+		{
+			return "TestCaseData$OnFetchEvalMap";
+		}
 	}
 	
 	/**

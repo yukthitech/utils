@@ -204,9 +204,10 @@
 			</expectedException>
 		</testCase>
 
-		<testCase name="dataProviderOnFetch">
+		<testCase name="dataProviderOnFetchSharedCtx" sharedContext="true">
 			<description>
 				Tests on fetch expression functionality of data provider.
+				And ensure context is shared between all data provider test cases.
 			</description>
 			
 			<data-setup>
@@ -225,7 +226,25 @@
 			<data-cleanup>
 				<s:log message="Message as part of data cleaup..."/>
 			</data-cleanup>
+		</testCase>
+
+		<testCase name="dataProviderOnFetchIndependentCtx">
+			<description>
+				Ensure context attributes are independent when context is not shared (without setting sharedContext for testcase).
+			</description>
+			
+			<data-setup>
+				<s:set expression="counterVal" value="int: 0"/>
+				<s:log message="Message as part of data setup..."/>
+			</data-setup>
 		
+			<default-data-provider name="extDataProvider" stepDataList="res:/data/onFetchExpr-data-provider.xml"/>
+		
+			<wrap:steps>
+				<s:set expression="counterVal" value="int: ${(attr.counterVal + 1)?c}"/>
+				
+				<s:assert-equals actual="prop: attr.counterVal" expected="int: 1"/>				
+			</wrap:steps>
 		</testCase>
 
 		<testCase name="xpath_test">

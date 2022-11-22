@@ -67,10 +67,15 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	private IDataProvider dataProvider;
 	
 	/**
-	 * Used only when data provider is specified. If value specified is greater than 1, then underlying data-test-cases will be executed
-	 * parallelly caping to max this value.
+	 * Used only when data provider is specified. If enabled data provider test cases executes in parallel.
 	 */
-	private int parallelExecutionCount = 0;
+	private boolean parallelExecutionEnabled = false;
+	
+	/**
+	 * Flag indicating context has to be shared between data-provider executions.
+	 * In parallel execution, this flag will be ignored.
+	 */
+	private boolean sharedContext = false;
 
 	/**
 	 * List of failure actions to be invoked when test case is failed.
@@ -324,15 +329,25 @@ public class TestCase extends AbstractLocationBasedStepContainer implements ISte
 	{
 		this.setDataProvider(dataProvider);
 	}
-	
-	public int getParallelExecutionCount()
+
+	public boolean isParallelExecutionEnabled()
 	{
-		return parallelExecutionCount;
+		return parallelExecutionEnabled;
 	}
 
-	public void setParallelExecutionCount(int parallelExecutionCount)
+	public void setParallelExecutionEnabled(boolean parallelExecutionEnabled)
 	{
-		this.parallelExecutionCount = parallelExecutionCount;
+		this.parallelExecutionEnabled = parallelExecutionEnabled;
+	}
+
+	public boolean isSharedContext()
+	{
+		return sharedContext;
+	}
+
+	public void setSharedContext(boolean sharedContext)
+	{
+		this.sharedContext = sharedContext;
 	}
 
 	/**

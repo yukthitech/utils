@@ -61,8 +61,14 @@ public class ExecutionStatusReport
 	public ExecutionStatusReport(String name, ExecutionDetails setupExecutionDetails, ExecutionDetails cleanupExecutionDetails, ExecutionStatusReportType type)
 	{
 		this.name = name;
-		this.setupExecutionDetails = setupExecutionDetails;
-		this.cleanupExecutionDetails = cleanupExecutionDetails;
+		
+		this.mainExecutionDetails = new ExecutionDetails();
+		this.mainExecutionDetails.setEndDetails(
+				TestStatus.getEffectiveStatus(
+						setupExecutionDetails != null ? setupExecutionDetails.getStatus() : null, 
+						cleanupExecutionDetails != null ? cleanupExecutionDetails.getStatus() : null), 
+				"N/A");
+		
 		this.type = type;
 	}
 

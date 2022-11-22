@@ -37,8 +37,8 @@ public class TAutomation
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-rf", "./output/success", 
 				"-prop", "./src/test/resources/app.properties", 
-				//"-ts", "mockServer"
-				"-tc", "button_Click"
+				"-ts", "jobj-test-suites"
+				//"-tc", "dataProviderOnFetchIndependentCtx"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

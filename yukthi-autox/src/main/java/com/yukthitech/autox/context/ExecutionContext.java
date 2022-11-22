@@ -53,7 +53,7 @@ public class ExecutionContext
 	private IExecutionLogger executionLogger;
 
 	private List<ILogMonitorSession> monitorSessions;
-
+	
 	public ExecutionContext(ExecutionContextManager parent, Executor executor)
 	{
 		this.parent = parent;
@@ -64,11 +64,32 @@ public class ExecutionContext
 			if(this.executor.getParentExecutor() != null)
 			{
 				this.parentContext = parent.executorContexts.get(executor.getParentExecutor());
+				
+				if(executor.isParentContextShared())
+				{
+					this.nameToAttr = parentContext.nameToAttr;
+					this.internalContextAtt = parentContext.internalContextAtt;
+				}
+				else
+				{
+					this.parentContext.populateParentAttributes(nameToAttr);
+				}
 			}
 
+			//note: data-provider data test-cases (not the main one) will not have dependencies
 			populateDependecyAttributes();
 			parent.executorContexts.put(executor, this);
 		}
+	}
+	
+	private void populateParentAttributes(Map<String, Object> newMap)
+	{
+		if(parentContext != null)
+		{
+			parentContext.populateParentAttributes(newMap);
+		}
+		
+		newMap.putAll(nameToAttr);
 	}
 	
 	private void populateDependecyAttributes()
@@ -185,6 +206,7 @@ public class ExecutionContext
 	
 	public synchronized Map<String, ReportLogFile> stopMonitoring(boolean flowErrored)
 	{
+		System.out.println(executor.getExecutable());
 		if(monitorSessions == null)
 		{
 			return null;

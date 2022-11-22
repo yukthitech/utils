@@ -15,7 +15,12 @@ public interface IAutomationConstants
 	 * Used to specify if test suites should be executed parallely or not.
 	 * Overridable prop. 
 	 */
-	public String AUTOX_PROP_PARALLEL_EXEC = "autox.testSuites.parallelExecution";
+	public String AUTOX_PROP_PARALLEL_POOL_SIZE = "autox.parallelExecution.poolSize";
+	
+	/**
+	 * Used to specify if test suites can be executed parallelly or not.
+	 */
+	public String AUTOX_PROP_PARALLEL_EXEC_ENABLED = "autox.testSuites.parallelExecutionEnabled";
 	
 	public String PROP_LOG_MAX_PROP_LEN = "autox.log.max.param.len";
 	

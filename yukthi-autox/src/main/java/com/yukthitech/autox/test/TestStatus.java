@@ -42,4 +42,29 @@ public enum TestStatus
 	{
 		return errored;
 	}
+	
+	public static TestStatus getEffectiveStatus(TestStatus status1, TestStatus status2)
+	{
+		if(status1 == TestStatus.ERRORED || status2 == TestStatus.ERRORED)
+		{
+			return ERRORED;
+		}
+		
+		if(status1 == TestStatus.FAILED || status2 == TestStatus.FAILED)
+		{
+			return FAILED;
+		}
+
+		if(status1 == TestStatus.SKIPPED || status2 == TestStatus.SKIPPED)
+		{
+			return SKIPPED;
+		}
+
+		if(status1 == TestStatus.IN_PROGRESS || status2 == TestStatus.IN_PROGRESS)
+		{
+			return IN_PROGRESS;
+		}
+		
+		return SUCCESSFUL;
+	}
 }
