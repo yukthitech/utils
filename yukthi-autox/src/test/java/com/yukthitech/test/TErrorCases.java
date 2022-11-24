@@ -21,9 +21,10 @@ public class TErrorCases extends BaseTestCases
 	public void testNegativeCases() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
-				"-tsf", "./src/test/resources/neg-test-suites",
+				"-tsf", "./src/test/resources/new-test-suites/neg-test-suites",
 				"-rf", "./output/negCases", 
 				"-prop", "./src/test/resources/app.properties", 
+				"--report-opening-disabled", "true",
 				//"-ts", "data-provider-err"
 				//"-tc", "screenShotInCleanupErr"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"

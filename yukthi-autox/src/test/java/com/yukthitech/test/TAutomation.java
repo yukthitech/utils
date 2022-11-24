@@ -34,9 +34,10 @@ public class TAutomation extends BaseTestCases
 	public void testGlobalSetupError() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
-				"-tsf", "./src/test/resources/global-setup-err",
+				"-tsf", "./src/test/resources/new-test-suites/global-setup-err",
 				"-rf", "./output/globalSetupErr", 
 				"-prop", "./src/test/resources/app.properties", 
+				"--report-opening-disabled", "true",
 				//"-ts", "rest-test-suites"
 				//"-tc", "testGroupRecursion"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
@@ -57,9 +58,10 @@ public class TAutomation extends BaseTestCases
 	public void testGlobalCleanupError() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml",
-				"-tsf", "./src/test/resources/global-cleanup-err",
+				"-tsf", "./src/test/resources/new-test-suites/global-cleanup-err",
 				"-rf", "./output/globalCleanupErr", 
 				"-prop", "./src/test/resources/app.properties", 
+				"--report-opening-disabled", "true",
 				//"-ts", "rest-test-suites"
 				//"-tc", "testGroupRecursion"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"

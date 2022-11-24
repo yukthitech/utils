@@ -45,7 +45,7 @@ public class TAutomationFlows extends BaseTestCases
 	public void testFlowOrder() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
-				"-tsf", "./src/test/resources/test-suite-flows",
+				"-tsf", "./src/test/resources/new-test-suites/test-suite-flows",
 				"-rf", "./output/flows", 
 				"-prop", "./src/test/resources/app.properties",
 				"--report-opening-disabled", "true",
@@ -67,7 +67,7 @@ public class TAutomationFlows extends BaseTestCases
 		System.setProperty("autox.parallelExecution.poolSize", "10");
 		
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
-				"-tsf", "./src/test/resources/multi-thread-flows",
+				"-tsf", "./src/test/resources/new-test-suites/multi-thread-flows",
 				"-rf", "./output/multi-thread-flows", 
 				"-prop", "./src/test/resources/app.properties", 
 				"--report-opening-disabled", "true",
