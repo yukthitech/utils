@@ -59,27 +59,23 @@ public class ExecutionContext
 		this.parent = parent;
 		this.executor = executor;
 
-		synchronized(parent.executorContexts)
+		if(this.executor.getParentExecutor() != null)
 		{
-			if(this.executor.getParentExecutor() != null)
+			this.parentContext = parent.getContext(executor.getParentExecutor());
+			
+			if(executor.isParentContextShared())
 			{
-				this.parentContext = parent.executorContexts.get(executor.getParentExecutor());
-				
-				if(executor.isParentContextShared())
-				{
-					this.nameToAttr = parentContext.nameToAttr;
-					this.internalContextAtt = parentContext.internalContextAtt;
-				}
-				else
-				{
-					this.parentContext.populateParentAttributes(nameToAttr);
-				}
+				this.nameToAttr = parentContext.nameToAttr;
+				this.internalContextAtt = parentContext.internalContextAtt;
 			}
-
-			//note: data-provider data test-cases (not the main one) will not have dependencies
-			populateDependecyAttributes();
-			parent.executorContexts.put(executor, this);
+			else
+			{
+				this.parentContext.populateParentAttributes(nameToAttr);
+			}
 		}
+
+		//note: data-provider data test-cases (not the main one) will not have dependencies
+		populateDependecyAttributes();
 	}
 	
 	private void populateParentAttributes(Map<String, Object> newMap)
@@ -103,7 +99,7 @@ public class ExecutionContext
 
 		for(Executor depExecutor : dependencies)
 		{
-			ExecutionContext depContext = parent.executorContexts.get(depExecutor);
+			ExecutionContext depContext = parent.getContext(depExecutor);
 			
 			if(depContext.nameToAttr != null)
 			{
@@ -206,7 +202,6 @@ public class ExecutionContext
 	
 	public synchronized Map<String, ReportLogFile> stopMonitoring(boolean flowErrored)
 	{
-		System.out.println(executor.getExecutable());
 		if(monitorSessions == null)
 		{
 			return null;
@@ -240,6 +235,7 @@ public class ExecutionContext
 			}
 		}
 		
+		this.monitorSessions.clear();
 		return logFiles;
 	}
 }

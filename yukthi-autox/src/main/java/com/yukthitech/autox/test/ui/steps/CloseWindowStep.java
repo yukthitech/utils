@@ -18,7 +18,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * 
  * @author akiran
  */
-@Executable(name = "uiCloseWindow", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the specified/current window.")
+@Executable(name = "uiCloseWindow", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the specified/current window. But does not close the session.")
 public class CloseWindowStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;

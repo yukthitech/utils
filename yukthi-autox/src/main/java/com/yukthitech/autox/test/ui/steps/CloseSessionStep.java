@@ -14,7 +14,7 @@ import com.yukthitech.autox.exec.report.IExecutionLogger;
  * Simulates the click event on the specified button.
  * @author akiran
  */
-@Executable(name = "uiCloseSession", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current browser window.")
+@Executable(name = "uiCloseSession", group = Group.Ui, requiredPluginTypes = SeleniumPlugin.class, message = "Closes the current session (not only window but also driver).")
 public class CloseSessionStep extends AbstractUiStep
 {
 	private static final long serialVersionUID = 1L;
@@ -37,17 +37,16 @@ public class CloseSessionStep extends AbstractUiStep
 		
 		SeleniumPluginSession seleniumSession = ExecutionContextManager.getInstance().getPluginSession(SeleniumPlugin.class);
 		
-		seleniumSession.getWebDriver(driverName).close();
-		//seleniumConfiguration.getWebDriver().close();
-		
 		if(resetDriver)
 		{
 			exeLogger.debug("Waiting for 2 Secs, for current session to close completely before resetting driver");
 			
 			AutomationUtils.sleep(2000);
-		
-			seleniumSession.getWebDriver(driverName).quit();
 			seleniumSession.resetDriver(driverName);
+		}
+		else
+		{
+			seleniumSession.closeDriver(driverName);
 		}
 	}
 	

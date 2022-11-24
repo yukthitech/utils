@@ -24,7 +24,7 @@ public class ExecutionThreadStack
 {
 	private static Logger logger = LogManager.getLogger(ExecutionThreadStack.class);
 	
-	private Stack<ExecutionContext> executionContextStack = new Stack<>();
+	private ExecutionContext executionContext;
 	
 	private Map<Class<?>, IPluginSession> pluginSessions = new HashMap<>();
 	
@@ -38,24 +38,24 @@ public class ExecutionThreadStack
 	 */
 	ExecutionStack executionStack = new ExecutionStack();
 	
-	public void pushExecutionContext(ExecutionContext context)
+	public ExecutionThreadStack(ExecutionContext context)
 	{
-		this.executionContextStack.push(context);
+		this.executionContext = context;
 	}
 	
-	public ExecutionContext popExecutionContext()
+	public void setExecutionContext(ExecutionContext executionContext)
 	{
-		return this.executionContextStack.pop();
+		this.executionContext = executionContext;
+	}
+
+	public ExecutionContext getExecutionContext()
+	{
+		return executionContext;
 	}
 	
-	public ExecutionContext peekExecutionContext()
+	public void clearExecutionContext()
 	{
-		return this.executionContextStack.peek();
-	}
-	
-	public boolean isExecutionContextEmpty()
-	{
-		return this.executionContextStack.isEmpty();
+		this.executionContext = null;
 	}
 
 	@SuppressWarnings("unchecked")

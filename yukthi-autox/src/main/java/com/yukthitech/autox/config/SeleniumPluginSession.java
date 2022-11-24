@@ -280,6 +280,19 @@ public class SeleniumPluginSession implements IPluginSession
 			}
 		}
 	}
+	
+	public void closeDriver(String driverName)
+	{
+		WebDriver driver = this.drivers.remove(driverName);
+		
+		if(driver == null)
+		{
+			return;
+		}
+		
+		driver.close();
+		driver.quit();
+	}
 
 	@Override
 	public void close() throws Exception
@@ -295,5 +308,7 @@ public class SeleniumPluginSession implements IPluginSession
 				//ignore if session is already closed
 			}
 		}
+		
+		drivers.clear();
 	}
 }

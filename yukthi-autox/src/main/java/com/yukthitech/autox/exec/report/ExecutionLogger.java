@@ -52,6 +52,8 @@ public class ExecutionLogger implements IExecutionLogger
 	
 	private File logsFolder;
 	
+	private File logFile;
+	
 	private int logIndex = 0;
 	
 	private Date startTime;
@@ -61,7 +63,7 @@ public class ExecutionLogger implements IExecutionLogger
 		AutomationContext automationContext = AutomationContext.getInstance();
 		
 		this.logsFolder = new File(automationContext.getReportFolder(), IAutomationConstants.LOGS_FOLDER_NAME);
-		File file = new File(logsFolder, fileName);
+		logFile = new File(logsFolder, fileName);
 		
 		try
 		{
@@ -72,12 +74,12 @@ public class ExecutionLogger implements IExecutionLogger
 			
 			//open file in append mode, so that if logger is created for same resource, the logs
 			// gets appended
-			this.logWriter = new PrintWriter(new FileOutputStream(file, true));
+			this.logWriter = new PrintWriter(new FileOutputStream(logFile, true));
 			this.logWriter.println("var logs = [];");
 			this.logWriter.flush();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException("Failed to open print writer for log file: {}", file.getPath(), ex);
+			throw new InvalidStateException("Failed to open print writer for log file: {}", logFile.getPath(), ex);
 		}
 		
 		if(automationContext.getAppConfiguration() != null && automationContext.getAppConfiguration().getApplicationProperties() != null)
@@ -282,6 +284,11 @@ public class ExecutionLogger implements IExecutionLogger
 	
 	private synchronized void addMessage(Object mssg)
 	{
+		if(logWriter == null)
+		{
+			throw new InvalidStateException("Logger [File: {}] is already closed", logFile.getName());
+		}
+		
 		try
 		{
 			logWriter.println("logs[" + logIndex + "] = " + JSON_MAPPER.writeValueAsString(mssg) + ";");
@@ -556,6 +563,8 @@ public class ExecutionLogger implements IExecutionLogger
 	@Override
 	public void close(TestStatus status, Date endTime)
 	{
+		logger.debug("Closing exuection-logger [File: {}, Status: {}]", logFile.getName(), status);
+		
 		addMessage(new ExecutionLogData.Footer(status, startTime, endTime));
 		logWriter.close();
 		logWriter = null;

@@ -5,9 +5,6 @@ import java.util.Set;
 import com.yukthitech.autox.BasicArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.exec.report.ReportDataManager;
-import com.yukthitech.autox.test.Cleanup;
-import com.yukthitech.autox.test.Setup;
 import com.yukthitech.autox.test.TestSuiteGroup;
 
 /**
@@ -50,12 +47,5 @@ public class TestSuiteGroupExecutor extends Executor
 			})
 			.map(ts -> new TestSuiteExecutor(ts))
 			.forEach(exec -> addChildExector(exec));
-	}
-	
-	@Override
-	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
-	{
-		super.execute(beforeChildFromParent, afterChildFromParent);
-		ReportDataManager.getInstance().generateReport();
 	}
 }

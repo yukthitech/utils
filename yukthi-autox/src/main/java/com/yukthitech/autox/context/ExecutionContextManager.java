@@ -2,6 +2,10 @@ package com.yukthitech.autox.context;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.config.IPluginSession;
@@ -14,11 +18,13 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ExecutionContextManager
 {
+	private static Logger logger = LogManager.getLogger(ExecutionContextManager.class);
+	
 	private static ExecutionContextManager instance = new ExecutionContextManager();
 	
-	private ThreadLocal<ExecutionThreadStack> executionThreadLocal = new ThreadLocal<>();
+	private Map<Thread, ExecutionThreadStack> executionThreadLocal = new IdentityHashMap<>();
 	
-	Map<Executor, ExecutionContext> executorContexts = new IdentityHashMap<>();
+	private Map<Executor, ExecutionContext> executorContexts = new IdentityHashMap<>();
 	
 	/**
 	 * Context which is created first (which would be test-suite-group based in general).
@@ -33,45 +39,114 @@ public class ExecutionContextManager
 		return instance;
 	}
 	
-	public void push(Executor executor)
+	public static void reset()
 	{
-		ExecutionThreadStack executionContextStack = executionThreadLocal.get();
+		instance.executionThreadLocal.values().forEach(stack -> stack.close());
+		instance.executionThreadLocal.clear();
+		
+		instance.executorContexts.clear();
+	}
+	
+	/**
+	 * Executes specified supplier in the context of specified executor.
+	 * @param <T>
+	 * @param executor
+	 * @param suppier
+	 * @return
+	 */
+	public static <T> T executeInContext(Executor executor, Supplier<T> suppier)
+	{
+		Thread currentThread = Thread.currentThread();
+		String actName = currentThread.getName();
+		
+		instance.setExecutor(executor);
+		currentThread.setName(executor.getUniqueId());
+		
+		try
+		{
+			return suppier.get();
+		}catch(RuntimeException ex) 
+		{
+			logger.error("An error occurred during context based execution: " + ex);
+			throw ex;
+		} finally
+		{
+			currentThread.setName(actName);
+			instance.clearExecutor(executor);
+		}
+	}
+	
+	public static void executeInContext(Executor executor, Runnable suppier)
+	{
+		Supplier<Object> adapter = new Supplier<Object>()
+		{
+			@Override
+			public Object get()
+			{
+				suppier.run();
+				return null;
+			}
+		};
+
+		executeInContext(executor, adapter);
+	}
+
+	synchronized ExecutionContext getContext(Executor executor)
+	{
+		ExecutionContext context = this.executorContexts.get(executor);
+		
+		if(context != null)
+		{
+			return context;
+		}
+		
+		context = new ExecutionContext(this, executor);
+		this.executorContexts.put(executor, context);
+		
+		return context;
+	}
+	
+	private synchronized void setExecutor(Executor executor)
+	{
+		ExecutionThreadStack executionContextStack = executionThreadLocal.get(Thread.currentThread());
+		ExecutionContext context = getContext(executor);
 		
 		if(executionContextStack == null)
 		{
-			executionContextStack = new ExecutionThreadStack();
-			executionThreadLocal.set(executionContextStack);
+			executionContextStack = new ExecutionThreadStack(context);
+			executionThreadLocal.put(Thread.currentThread(), executionContextStack);
 		}
-		
-		ExecutionContext executionContext = new ExecutionContext(this, executor);
-		executionContextStack.pushExecutionContext(executionContext);
+		else
+		{
+			if(executionContextStack.getExecutionContext() != null)
+			{
+				throw new InvalidStateException("New executor being set without clearing old one. [Executor on stack: {}, Executor being set: {}]", 
+						executionContextStack.getExecutionContext().executor, executor);
+			}
+			
+			executionContextStack.setExecutionContext(context);
+		}
 		
 		if(globalContext == null)
 		{
-			globalContext = executionContext;
+			globalContext = context;
 		}
 		
 		executionContextStack.executionStack.push(executor.getExecutable());
 	}
 
-	public void pop(Executor executor)
+	public synchronized void clearExecutor(Executor executor)
 	{
-		ExecutionThreadStack executionContextStack = executionThreadLocal.get();
+		ExecutionThreadStack executionContextStack = executionThreadLocal.get(Thread.currentThread());
 		
-		if(executionContextStack == null || executionContextStack.isExecutionContextEmpty() || executionContextStack.peekExecutionContext().executor != executor)
+		if(executionContextStack == null || executionContextStack.getExecutionContext().executor != executor)
 		{
-			throw new InvalidStateException("Executor being poped is not same executor found on stack. [Executor on stack: {}, Executor being poped: {}]", 
-					executionContextStack.peekExecutionContext().executor, executor);
+			throw new InvalidStateException("Executor being cleared is not same executor found on stack. [Executor on stack: {}, Executor being poped: {}]", 
+					executionContextStack.getExecutionContext().executor, executor);
 		}
 		
 		executionContextStack.executionStack.pop(executor.getExecutable());
-		executionContextStack.popExecutionContext();
-		
-		if(executionContextStack.isExecutionContextEmpty())
-		{
-			executionContextStack.close();
-			executionThreadLocal.remove();
-		}
+		executionContextStack.clearExecutionContext();
 	}
 	
 	public static ExecutionContext getExecutionContext()
@@ -79,11 +154,11 @@ public class ExecutionContextManager
 		return instance.getCurrentContext();
 	}
 	
-	public ExecutionThreadStack getExecutionContextStack()
+	public synchronized ExecutionThreadStack getExecutionContextStack()
 	{
-		ExecutionThreadStack executionContextStack = executionThreadLocal.get();
+		ExecutionThreadStack executionContextStack = executionThreadLocal.get(Thread.currentThread());
 		
-		if(executionContextStack == null || executionContextStack.isExecutionContextEmpty())
+		if(executionContextStack == null || executionContextStack.getExecutionContext() == null)
 		{
 			throw new NonExecutionThreadException("Execution context method is invoked by non-executor thread");
 		}
@@ -93,7 +168,7 @@ public class ExecutionContextManager
 	
 	private ExecutionContext getCurrentContext()
 	{
-		return getExecutionContextStack().peekExecutionContext();
+		return getExecutionContextStack().getExecutionContext();
 	}
 	
 	public <P, S extends IPluginSession> S getPluginSession(Class<? extends IPlugin<?, S>> pluginType)
@@ -124,5 +199,11 @@ public class ExecutionContextManager
 		}
 		
 		return globalContext.getAttribute(name);
+	}
+	
+	public synchronized void close()
+	{
+		this.executionThreadLocal.values().forEach(contextStck -> contextStck.close());
+		this.executionThreadLocal.clear();
 	}
 }

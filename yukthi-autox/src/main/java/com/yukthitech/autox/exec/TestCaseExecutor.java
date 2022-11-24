@@ -66,6 +66,8 @@ public class TestCaseExecutor extends Executor
 		this.testCaseData = testCaseData;
 		super.childSteps = testCase.getSteps();
 		super.expectedException = testCase.getExpectedException();
+		
+		super.uniqueId = testCase.getName() + "[" + testCaseData.getName() + "]";
 	}
 	
 	public TestCase getTestCase()
@@ -229,5 +231,26 @@ public class TestCaseExecutor extends Executor
 		boolean isErrored = (super.status != null && super.status.isErrored());
 		Map<String, ReportLogFile> monitorLogs = AutomationContext.getInstance().stopLogMonitoring(isErrored);
 		ReportDataManager.getInstance().setMonitoringLogs(this, monitorLogs);
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder(super.toString());
+		builder.append("[");
+
+		builder.append("Name: ").append(testCase.getName());
+		
+		if(testCaseData != null)
+		{
+			builder.append(", ").append("Data: ").append(testCaseData.getName());
+		}
+
+		builder.append("]");
+		return builder.toString();
 	}
 }

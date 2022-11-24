@@ -118,6 +118,16 @@ public class AutomationContext
 		this.persistenceStorage = new PersistenceStorage(appConfiguration);
 	}
 	
+	public static void reset() throws Exception
+	{
+		if(instance != null)
+		{
+			ApplicationConfiguration.reset();
+		}
+		
+		instance = null;
+	}
+	
 	/**
 	 * Sets the used to send monitor messages to connected client.
 	 *

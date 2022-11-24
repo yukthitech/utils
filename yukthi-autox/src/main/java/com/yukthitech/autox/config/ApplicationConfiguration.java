@@ -94,7 +94,6 @@ public class ApplicationConfiguration
 	 */
 	private Properties applicationProperties;
 	
-	
 	/**
 	 * Defines the summary notification configuration. This is optional.
 	 */
@@ -146,6 +145,16 @@ public class ApplicationConfiguration
 	public static ApplicationConfiguration getInstance()
 	{
 		return applicationConfiguration;
+	}
+	
+	public static void reset() throws Exception
+	{
+		if(applicationConfiguration != null)
+		{
+			applicationConfiguration.storageRepositoryFactory.close();
+		}
+		
+		applicationConfiguration = null;
 	}
 	
 	/**

@@ -112,6 +112,12 @@ public class ReportDataManager
 		return instance;
 	}
 	
+	public static void reset()
+	{
+		instance.executorDetailsMap.clear();
+		instance.rootExecutorDetails = null;
+	}
+	
 	private ExecutorDetails getExecutorDetails(Executor executor)
 	{
 		ExecutorDetails details = executorDetailsMap.get(executor);
@@ -160,6 +166,11 @@ public class ReportDataManager
 	public synchronized IExecutionLogger getExecutionLogger(Executor executor)
 	{
 		return getExecutorDetails(executor).getLogger(executor, ExecutionType.MAIN, ".js", ".js");
+	}
+	
+	public String getRep(Executor executor)
+	{
+		return reportInfoProviders.getName(executor);
 	}
 	
 	private void generateJsonReport()

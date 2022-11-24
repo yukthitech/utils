@@ -33,6 +33,11 @@ public abstract class Executor
 {
 	private static Logger logger = LogManager.getLogger(Executor.class);
 	
+	/**
+	 * Unique id of this executor for ease of logging and debugging.
+	 */
+	protected String uniqueId;
+	
 	private ReportDataManager reportManager = ReportDataManager.getInstance();
 	
 	protected Object executable;
@@ -77,6 +82,13 @@ public abstract class Executor
 	{
 		this.executable = executable;
 		this.childName = childName != null ? childName : "Execution";
+		
+		this.uniqueId = reportManager.getRep(this);
+	}
+	
+	public String getUniqueId()
+	{
+		return uniqueId;
 	}
 	
 	/**
@@ -115,6 +127,11 @@ public abstract class Executor
 		return true;
 	}
 	
+	public boolean isStarted()
+	{
+		return (status != null);
+	}
+	
 	public Object getExecutable()
 	{
 		return executable;
@@ -147,20 +164,104 @@ public abstract class Executor
 	protected void postExecute()
 	{}
 
-	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent)
+	public void execute(Setup beforeChildFromParent, Cleanup afterChildFromParent, AsyncTryCatchBlock parent)
 	{
-		status = TestStatus.IN_PROGRESS;
-
-		ExecutionContextManager.getInstance().push(this);
-		reportManager.executionStarted(ExecutionType.MAIN, this);
-		
-		preexecute();
-		
-		if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this))
+		synchronized(this)
 		{
-			return;
+			//ensure because of multi threading, multiple executions does not happen
+			//  this usecase is more feasible in case of dependent test cases
+			if(status != null)
+			{
+				return;
+			}
+			
+			status = TestStatus.IN_PROGRESS;
 		}
 
+		ExecutionContextManager.executeInContext(this, () -> 
+		{
+			reportManager.executionStarted(ExecutionType.MAIN, this);
+		});
+		
+		
+		ObjectWrapper<Boolean> beforeChildCompleted = new ObjectWrapper<>(false);
+			
+		AsyncTryCatchBlock.doTry(uniqueId, mainCallback -> 
+		{
+			boolean exeRes = ExecutionContextManager.executeInContext(Executor.this, () -> 
+			{
+				if(!ExecutorUtils.executeSetup(beforeChildFromParent, "Before-Child", this))
+				{
+					return false;
+				}
+				
+				beforeChildCompleted.setValue(true);
+	
+				preexecute();
+	
+				//Execute setup
+				if(!ExecutorUtils.executeSetup(setup, "Setup", Executor.this))
+				{
+					return false;
+				}
+				
+				if(!init())
+				{
+					return false;
+				}
+				
+				return true;
+			});
+			
+			if(!exeRes)
+			{
+				return;
+			}
+			
+			mainCallback.newChild(uniqueId + "-childExecution", childCallback -> 
+			{
+				//execute children
+				if(childExecutors != null)
+				{
+					executeChildExecutors(childCallback);
+				}
+				else
+				{
+					executeChildSteps();
+				}
+			}).onError((childCallback, ex) -> 
+			{
+				logger.error("An error occurred during execution", ex);
+				throw ex;
+			}).onFinally(childCallback -> 
+			{
+				ExecutionContextManager.executeInContext(Executor.this, () -> 
+				{
+					//Pre cleanup is expected to take care of tasks like data-clean-up
+					preCleanup();
+					
+					//execute cleanup
+					ExecutorUtils.executeCleanup(cleanup, "Cleanup", this);
+				});
+			});
+			
+		}).onFinally(mainCallback ->
+		{
+			ExecutionContextManager.executeInContext(Executor.this, () -> 
+			{
+				//execute after child even if setup of test case fails
+				// but should not execute if before-child fails
+				if(beforeChildCompleted.getValue())
+				{
+					ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this);
+					postExecute();
+				}
+				
+				closeReportManager();
+			});
+		}).executeWithParent(parent);
+
+		/*
 		try
 		{
 			//Execute setup
@@ -207,6 +308,7 @@ public abstract class Executor
 			closeReportManager();
 			ExecutionContextManager.getInstance().pop(this);
 		}
+		*/
 	}
 	
 	protected void preCleanup()
@@ -265,59 +367,74 @@ public abstract class Executor
 		}
 	}
 
-	private void executeChildExecutors()
+	private void executeChildExecutors(AsyncTryCatchBlock parent)
 	{
-		ExecutionPool.getInstance().execute(childExecutors, beforeChild, afterChild, parallelExecutionEnabled);
+		Thread currentThread = Thread.currentThread();
+		String actName = currentThread.getName();
 
-		StatusTracker statusTracker = new StatusTracker();
-		getStatusDetails(statusTracker, childExecutors);
-		
-		if(statusTracker.status == TestStatus.SUCCESSFUL)
-		{
-			setStatus(TestStatus.SUCCESSFUL, null);
-			return;
-		}
-
-		StringBuilder mssg = new StringBuilder();
-		
-		if(statusTracker.errorCount > 0)
-		{
-			mssg.append("Errored");
-		}
-		
-		if(statusTracker.failureCount > 0)
-		{
-			mssg.append(mssg.length() > 0 ? " / " : "");
-			mssg.append("Failed");
-		}
-		
-		if(statusTracker.skipCount > 0)
-		{
-			mssg.append(mssg.length() > 0 ? " / " : "");
-			mssg.append("Skipped");
-		}
-		
-		mssg.insert(0, "One or more " + childName + "(s) ");
-
-		setStatus(statusTracker.status, mssg.toString());
+		parent
+			.newChild(uniqueId + "-subexecutors", callback -> 
+			{
+				//currentThread.setName(uniqueId);
+				ExecutionPool.getInstance().execute(this, childExecutors, beforeChild, afterChild, parallelExecutionEnabled, callback);
+			}).onComplete(subtaskCallback -> 
+			{
+				StatusTracker statusTracker = new StatusTracker();
+				getStatusDetails(statusTracker, childExecutors);
+				
+				if(statusTracker.status == TestStatus.SUCCESSFUL)
+				{
+					setStatus(TestStatus.SUCCESSFUL, null);
+					return;
+				}
+	
+				StringBuilder mssg = new StringBuilder();
+				
+				if(statusTracker.errorCount > 0)
+				{
+					mssg.append("Errored");
+				}
+				
+				if(statusTracker.failureCount > 0)
+				{
+					mssg.append(mssg.length() > 0 ? " / " : "");
+					mssg.append("Failed");
+				}
+				
+				if(statusTracker.skipCount > 0)
+				{
+					mssg.append(mssg.length() > 0 ? " / " : "");
+					mssg.append("Skipped");
+				}
+				
+				mssg.insert(0, "One or more " + childName + "(s) ");
+	
+				setStatus(statusTracker.status, mssg.toString());
+			}).onFinally(callback -> 
+			{
+				Thread.currentThread().setName(actName);
+			});
 	}
 	
 	private void executeChildSteps()
 	{
-		IExecutionLogger logger = ReportDataManager.getInstance().getExecutionLogger(this);
-		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
-
-		//NOTE: Even parallel execution is used by test-suites or data-test-cases, final test case
-		// execution happens with child steps which should happen here. Hence exception handling is done
-		// here only
-		try
+		ExecutionContextManager.executeInContext(this, () -> 
 		{
-			StepsExecutor.execute(logger, childSteps, currentStep);
-			setStatus(TestStatus.SUCCESSFUL, null);
-		} catch(Exception ex)
-		{
-			handleException(currentStep.getValue(), logger, ex);
-		}
+			IExecutionLogger logger = ReportDataManager.getInstance().getExecutionLogger(this);
+			ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
+	
+			//NOTE: Even parallel execution is used by test-suites or data-test-cases, final test case
+			// execution happens with child steps which should happen here. Hence exception handling is done
+			// here only
+			try
+			{
+				StepsExecutor.execute(logger, childSteps, currentStep);
+				setStatus(TestStatus.SUCCESSFUL, null);
+			} catch(Exception ex)
+			{
+				handleException(currentStep.getValue(), logger, ex);
+			}
+		});
 	}
 	
 	private void handleException(IStep step, IExecutionLogger exeLogger, Exception ex)

@@ -4,32 +4,14 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.test.TestStatus;
 
-public class TErrorCases
+public class TErrorCases extends BaseTestCases
 {
-	private ObjectMapper objectMapper = new ObjectMapper(); 
-	
-	@BeforeClass
-	public void setup() throws Exception
-	{
-		AutomationLauncher.systemExitEnabled = false;
-		TestServer.start(null);
-	}
-	
-	@AfterClass
-	public void close() throws Exception
-	{
-		TestServer.stop();
-	}
-	
 	/**
 	 * Ensures failures are happening at right places and with right stack trace.
 	 *
@@ -51,7 +33,8 @@ public class TErrorCases
 		
 		Assert.assertEquals(exeResult.getTestSuiteCount(), 8, "Found one more test suites.");
 		Assert.assertEquals(exeResult.getTestCaseCount(), 17, "Found one more test cases.");
-		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 6, "Found one more test cases errored.");
+		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 7, "Found one more test cases errored.");
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 5, "Found one more test cases errored.");
 		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found one more test cases failed.");
 		Assert.assertEquals(exeResult.getTestCaseSkippedCount(), 1, "Found one more test cases skipped.");
 		

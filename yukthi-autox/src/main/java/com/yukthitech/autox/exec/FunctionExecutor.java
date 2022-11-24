@@ -22,7 +22,7 @@ public class FunctionExecutor extends Executor
 
 	public Object executeFunction()
 	{
-		super.execute(null, null);
+		super.execute(null, null, null);
 		return AutomationContext.getInstance().getAttribute(RETURN_ATTR);
 	}
 }

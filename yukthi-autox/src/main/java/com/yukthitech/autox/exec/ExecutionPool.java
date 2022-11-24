@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.yukthitech.autox.common.AutoxCountDownLatch;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.Cleanup;
@@ -27,13 +27,13 @@ public class ExecutionPool
 {
 	private static Logger logger = LogManager.getLogger(ExecutionPool.class);
 
-	private static ExecutionPool instance = new ExecutionPool();
+	private static ExecutionPool instance;
 	
 	private static class ExecutorRunnable implements Runnable
 	{
 		private Executor executor;
 		
-		private CountDownLatch countDownLatch;
+		private AutoxCountDownLatch countDownLatch;
 		
 		private List<ExecutorRunnable> dependentItems;
 		
@@ -43,7 +43,7 @@ public class ExecutionPool
 		
 		private Cleanup afterChildFromParent;
 		
-		public ExecutorRunnable(Executor executor, CountDownLatch countDownLatch, ExecutorService threadPool, Setup beforeChildFromParent, Cleanup afterChildFromParent)
+		public ExecutorRunnable(Executor executor, AutoxCountDownLatch countDownLatch, ExecutorService threadPool, Setup beforeChildFromParent, Cleanup afterChildFromParent)
 		{
 			this.executor = executor;
 			this.countDownLatch = countDownLatch;
@@ -62,32 +62,40 @@ public class ExecutionPool
 			this.dependentItems.add(executorRunnable);
 		}
 		
-		public void run() 
+		private void checkDependencyItems()
 		{
-			try
+			if(CollectionUtils.isEmpty(dependentItems))
 			{
-				//if init fail, consider execution to be failed and dont invoke execute()
-				executor.execute(beforeChildFromParent, afterChildFromParent);
-			} catch(Exception ex)
-			{
-				logger.error("An error occurred while executing executor: " + executor, ex);
-			} finally
-			{
-				countDownLatch.countDown();
+				return;
 			}
 			
-			if(CollectionUtils.isNotEmpty(dependentItems))
+			dependentItems.forEach(executorRunnable -> 
 			{
-				dependentItems.forEach(executorRunnable -> 
+				//NOTE: for skipped executor in all parent executors this condition will fail
+				// and never gets executed
+				if(!executorRunnable.executor.isStarted() && executorRunnable.executor.isReadyToExecute())
 				{
-					//NOTE: for skipped executor in all parent executors this condition will fail
-					// and never gets executed
-					if(executorRunnable.executor.isReadyToExecute())
-					{
-						threadPool.execute(executorRunnable);
-					}
-				});
-			}
+					threadPool.execute(executorRunnable);
+				}
+			});
+		}
+		
+		public void run() 
+		{
+			AsyncTryCatchBlock.doTry(executor.getUniqueId(), callback -> 
+			{
+				//if init fail, consider execution to be failed and dont invoke execute()
+				executor.execute(beforeChildFromParent, afterChildFromParent, callback);
+			}).onError((callback, ex) -> 
+			{
+				logger.error("An error occurred while executing executor: " + executor, ex);
+			}).onFinally(callback -> 
+			{
+				checkDependencyItems();
+				
+				logger.debug("Execution completed: {}", executor.getUniqueId());
+				countDownLatch.countDown();
+			}).execute();
 		}
 	}
 	
@@ -126,27 +134,67 @@ public class ExecutionPool
 		}
 	}
 	
-	public static ExecutionPool getInstance()
+	public synchronized static ExecutionPool getInstance()
 	{
+		if(instance == null)
+		{
+			instance = new ExecutionPool();
+		}
+		
 		return instance;
 	}
 	
-	private void executeSequentially(List<? extends Executor> executors, Setup beforeChild, Cleanup afterChild)
+	public static void reset()
+	{
+		if(instance != null && instance.threadPool != null)
+		{
+			instance.threadPool.shutdownNow();
+		}
+		
+		instance = null;
+	}
+	
+	private void executeSequentially(Executor parent, List<? extends Executor> executors, Setup beforeChild, Cleanup afterChild, AsyncTryCatchBlock parentCallback)
 	{
 		//Note: in sequence execution, dependencies will not be considered as ordering would be done
-		// during build time
-		executors.forEach(executor -> 
+		// during load time
+		AutoxCountDownLatch latch = new AutoxCountDownLatch(executors.size());
+		
+		latch.setCallback(() -> 
 		{
-			if(executor.isReadyToExecute())
-			{
-				executor.execute(beforeChild, afterChild);
-			}
+			logger.debug("{} SERIAL execution completed", parent.getUniqueId());
+			//Note: for sequential execution auto-complete of parent is not disable
+			//  so no need to call triggerComplete method
 		});
+		
+		for(Executor executor : executors)
+		{
+			parentCallback.newChild(executor.getUniqueId(), callback -> 
+			{
+				if(executor.isReadyToExecute())
+				{
+					executor.execute(beforeChild, afterChild, null);
+				}
+			}).onError((callback, ex) -> 
+			{
+				parentCallback.triggerError(ex);
+			}).onFinally(callback -> 
+			{
+				latch.countDown();
+			});
+		}
 	}
 
-	private void executeParallelly(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent)
+	private void executeParallelly(Executor parent, List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, AsyncTryCatchBlock parentCallback)
 	{
-		CountDownLatch latch = new CountDownLatch(executors.size());
+		AutoxCountDownLatch latch = new AutoxCountDownLatch(executors.size());
+		
+		latch.setCallback(() -> 
+		{
+			logger.debug("{} PARALLEL execution completed.", parent.getUniqueId());
+			parentCallback.triggerComplete();
+		});
+		
 		
 		IdentityHashMap<Executor, ExecutorRunnable> runnableMap = new IdentityHashMap<>();
 		
@@ -177,27 +225,26 @@ public class ExecutionPool
 			});
 		}
 		
+		//parent callback should be considered completed only
+		// after all tasks are completed
+		parentCallback.setAutoComplete(false);
+		
 		//once dependents are added, execute the executors
 		directExecutables.forEach(runnable -> threadPool.execute(runnable));
-		
-		try
-		{
-			latch.await();
-		} catch(InterruptedException ex)
-		{
-			throw new InvalidStateException("Thread was interrupted", ex);
-		}
 	}
 	
-	public void execute(List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, boolean parallelExecutionEnabled)
+	public void execute(Executor parent, List<? extends Executor> executors, Setup beforeChildFromParent, Cleanup afterChildFromParent, 
+			boolean parallelExecutionEnabled, AsyncTryCatchBlock parentCallback)
 	{
 		if(parallelExecutionEnabled && threadPool != null)
 		{
-			executeParallelly(executors, beforeChildFromParent, afterChildFromParent);
+			logger.debug("Executor {} executing {} child executors in PARALLEL", parent.getUniqueId(), executors.size());
+			executeParallelly(parent, executors, beforeChildFromParent, afterChildFromParent, parentCallback);
 		}
 		else
 		{
-			executeSequentially(executors, beforeChildFromParent, afterChildFromParent);
+			logger.debug("Executor {}  executing {} child executors in SERIAL", parent.getUniqueId(), executors.size());
+			executeSequentially(parent, executors, beforeChildFromParent, afterChildFromParent, parentCallback);
 		}
 	}
 }

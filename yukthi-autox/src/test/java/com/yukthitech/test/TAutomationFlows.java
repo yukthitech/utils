@@ -1,25 +1,24 @@
 package com.yukthitech.test;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.exec.report.FinalReport;
 
-public class TAutomationFlows
+/**
+ * Ensure the flow of execution and context attribute scope is proper.
+ * @author akranthikiran
+ */
+public class TAutomationFlows extends BaseTestCases
 {
-	@BeforeClass
-	public void setup() throws Exception
-	{
-		AutomationLauncher.systemExitEnabled = false;
-	}
-	
 	private List<String> loadFlows(String resource) throws Exception
 	{
 		String content = IOUtils.resourceToString(resource, Charset.defaultCharset());
@@ -43,12 +42,13 @@ public class TAutomationFlows
 
 	@SuppressWarnings({ "unchecked" })
 	@Test
-	public void testSuccessCases() throws Exception
+	public void testFlowOrder() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-tsf", "./src/test/resources/test-suite-flows",
 				"-rf", "./output/flows", 
-				"-prop", "./src/test/resources/app.properties", 
+				"-prop", "./src/test/resources/app.properties",
+				"--report-opening-disabled", "true",
 				//"-ts", "jobj-test-suites"
 				//"-tc", "dataProviderOnFetchIndependentCtx"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
@@ -58,5 +58,32 @@ public class TAutomationFlows
 		System.out.println(flowPoints);
 		
 		Assert.assertEquals(flowPoints, loadFlows("/data/test-flow-order.txt"));
+	}
+
+	@Test
+	public void testMultiThread_flow() throws Exception
+	{
+		System.setProperty("autox.testSuites.parallelExecutionEnabled", "true");
+		System.setProperty("autox.parallelExecution.poolSize", "10");
+		
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+				"-tsf", "./src/test/resources/multi-thread-flows",
+				"-rf", "./output/multi-thread-flows", 
+				"-prop", "./src/test/resources/app.properties", 
+				"--report-opening-disabled", "true",
+				//"-ts", "jobj-test-suites"
+				//"-tc", "dataProviderOnFetchIndependentCtx"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		FinalReport exeResult = objectMapper.readValue(new File("./output/multi-thread-flows/test-results.json"), FinalReport.class);
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 7, "Found wrong number of test suites");
+		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 3, "Found wrong number of SUCCESS test suites");
+		Assert.assertEquals(exeResult.getTestSuiteErrorCount(), 4, "Found wrong number of ERROR test suites");
+		
+		Assert.assertEquals(exeResult.getTestCaseCount(), 35, "Found wrong number of test cases");
+		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 27, "Found wrong number of SUCCESS test cases");
+		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found wrong number of FAIL test cases");
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 4, "Found wrong number of ERROR test cases");
 	}
 }

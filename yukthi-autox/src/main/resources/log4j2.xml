@@ -6,7 +6,7 @@
 		</Console>
 
 		<RollingFile name="logFile" fileName="c:\logs\autox-out.log"
-			 filePattern="${sys:weaver.log.path}-%d{yyyy-MM-dd}-%i.log.gz">
+			 filePattern="${sys:weaver.log.path}-%d{yyyy-MM-dd}-%i.log.gz" append="false">
 			 
 			 <PatternLayout pattern="%5p %d [%t] (%F:%L) (%X{xmlLoc}) - %m%n" />
              <Policies>

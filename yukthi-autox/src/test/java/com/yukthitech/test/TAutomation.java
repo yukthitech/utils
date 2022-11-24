@@ -4,40 +4,22 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.autox.AutomationLauncher;
 import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.test.TestStatus;
 import com.yukthitech.test.beans.ExecutionResult;
 
-public class TAutomation
+public class TAutomation extends BaseTestCases
 {
-	private ObjectMapper objectMapper = new ObjectMapper(); 
-	
-	@BeforeClass
-	public void setup() throws Exception
-	{
-		AutomationLauncher.systemExitEnabled = false;
-		TestServer.start(null);
-	}
-	
-	@AfterClass
-	public void close() throws Exception
-	{
-		TestServer.stop();
-	}
-	
 	@Test
 	public void testSuccessCases() throws Exception
 	{
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-rf", "./output/success", 
 				"-prop", "./src/test/resources/app.properties", 
-				"-ts", "jobj-test-suites"
+				//"-ts", "jobj-test-suites"
 				//"-tc", "dataProviderOnFetchIndependentCtx"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});

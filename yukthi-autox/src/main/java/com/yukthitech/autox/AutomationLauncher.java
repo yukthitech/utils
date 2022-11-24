@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +20,10 @@ import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.config.PluginManager;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.debug.server.DebugServer;
+import com.yukthitech.autox.exec.AsyncTryCatchBlock;
+import com.yukthitech.autox.exec.ExecutionPool;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.filter.ExpressionFactory;
@@ -45,6 +49,14 @@ public class AutomationLauncher
 	private static final String COMMAND_SYNTAX = String.format("java %s <app-config-file> extended-args...", AutomationLauncher.class.getName());
 	
 	public static boolean systemExitEnabled = true;
+	
+	public static void resetState() throws Exception
+	{
+		AutomationContext.reset();
+		ExecutionContextManager.reset();
+		ReportDataManager.reset();
+		ExecutionPool.reset();
+	}
 
 	/**
 	 * Loads test suites from the test suite folder specified by app
@@ -419,9 +431,24 @@ public class AutomationLauncher
 			}
 	
 			TestSuiteGroupExecutor executor = new TestSuiteGroupExecutor(testSuiteGroup);
-			executor.execute(null, null);
+			CountDownLatch latch = new CountDownLatch(1);
 			
-			automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);
+			AsyncTryCatchBlock.doTry(AutomationLauncher.class.getSimpleName(), callback -> 
+			{
+				executor.execute(null, null, callback);
+			}).onComplete(callback -> 
+			{
+				ReportDataManager.getInstance().generateReport();
+				ExecutionContextManager.getInstance().close();
+				
+				automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
+			}).onFinally(callback -> 
+			{
+				latch.countDown();
+			}).execute();
+			
+			latch.await();
+			logger.debug("Automation completed...");
 		}catch(Exception ex)
 		{
 			logger.error("An unhandled error occurred during execution. Error: {}", ex.getMessage(), ex);
