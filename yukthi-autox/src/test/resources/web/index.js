@@ -1,3 +1,23 @@
+
+function onLoad()
+{
+	var windowId = localStorage.getItem("windowId");
+	
+	if(!windowId)
+	{
+		windowId = 100;
+	}
+	else
+	{
+		windowId = parseInt("" + windowId) + 1;
+	}
+	
+	localStorage.setItem("windowId", windowId);
+	
+	var fld = document.getElementById("windowIdFld");
+	fld.value = "" + windowId;
+}
+
 function changeStatusTo(status)
 {
 	console.log("Changing status to: ", status);

@@ -36,7 +36,7 @@ public class SeleniumPluginSession implements IPluginSession
 	private String defaultDriverName;
 	
 	private String sessionId = UUID.randomUUID().toString();
-
+	
 	public SeleniumPluginSession(SeleniumPlugin parentPlugin, String defaultDriverName)
 	{
 		this.parentPlugin = parentPlugin;
@@ -293,9 +293,15 @@ public class SeleniumPluginSession implements IPluginSession
 		driver.close();
 		driver.quit();
 	}
+	
+	@Override
+	public void release()
+	{
+		parentPlugin.releaseSession(this);
+	}
 
 	@Override
-	public void close() throws Exception
+	public void close()
 	{
 		for(WebDriver driver : this.drivers.values())
 		{

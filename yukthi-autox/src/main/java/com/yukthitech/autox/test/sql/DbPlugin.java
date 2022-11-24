@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -22,6 +24,8 @@ import com.yukthitech.ccg.xml.util.Validateable;
 @Executable(name = "DbPlugin", group = Group.NONE, message = "Plugin related to db related steps or validators.")
 public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
 {
+	private static Logger logger = LogManager.getLogger(DbPlugin.class);
+	
 	/**
 	 * Application data sources.
 	 */
@@ -90,13 +94,19 @@ public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
 	}
 	
 	@Override
-	public void close() throws Exception
+	public void close()
 	{
 		for(DataSource dataSource : this.dataSourceMap.values())
 		{
 			if(dataSource instanceof BasicDataSource)
 			{
-				((BasicDataSource) dataSource).close();
+				try
+				{
+					((BasicDataSource) dataSource).close();
+				}catch(Exception ex)
+				{
+					logger.warn("An error occurred while closing the data source", ex);
+				}
 			}
 		}
 	}

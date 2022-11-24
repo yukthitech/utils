@@ -66,9 +66,15 @@ public class RestPluginSession implements IPluginSession
 		
 		return client;
 	}
+	
+	@Override
+	public void release()
+	{
+		parentPlugin.releaseSession(this);
+	}
 
 	@Override
-	public void close() throws Exception
+	public void close()
 	{
 		for(RestClient restClient : this.urlToClient.values())
 		{

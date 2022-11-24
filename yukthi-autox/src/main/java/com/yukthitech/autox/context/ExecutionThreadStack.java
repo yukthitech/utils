@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.config.IPluginSession;
 import com.yukthitech.autox.config.PluginManager;
@@ -22,8 +19,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ExecutionThreadStack
 {
-	private static Logger logger = LogManager.getLogger(ExecutionThreadStack.class);
-	
 	private ExecutionContext executionContext;
 	
 	private Map<Class<?>, IPluginSession> pluginSessions = new HashMap<>();
@@ -56,6 +51,9 @@ public class ExecutionThreadStack
 	public void clearExecutionContext()
 	{
 		this.executionContext = null;
+		
+		pluginSessions.values().forEach(session -> session.release());
+		pluginSessions.clear();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -77,21 +75,6 @@ public class ExecutionThreadStack
 	public Collection<IPluginSession> getPluginSessions()
 	{
 		return pluginSessions.values();
-	}
-
-	public void close()
-	{
-		pluginSessions.values().forEach(session -> 
-		{
-			try
-			{
-				logger.debug("Closing plugin: " + session.getClass().getName());
-				session.close();
-			}catch(Exception ex)
-			{
-				logger.error("An error occurred while closing session: " + session, ex);
-			}
-		});
 	}
 
 	public void pushParameters(Map<String, Object> parameters)

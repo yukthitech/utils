@@ -49,7 +49,7 @@ public class PluginManager
 	 * Adds required plugin to the context.
 	 * @param plugin plugin to add
 	 */
-	public void addRequirePlugin(IPlugin<?, ?> plugin)
+	public synchronized void addRequirePlugin(IPlugin<?, ?> plugin)
 	{
 		this.requiredPlugins.put(plugin.getClass(), plugin);
 	}
@@ -121,7 +121,7 @@ public class PluginManager
 	 * @return matching plugin
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends IPlugin<?, ?>> T getPlugin(Class<T> pluginType)
+	public synchronized <T extends IPlugin<?, ?>> T getPlugin(Class<T> pluginType)
 	{
 		if(!initializedPlugins.contains(pluginType))
 		{

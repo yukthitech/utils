@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -31,6 +32,11 @@ public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validatea
 			+ "<b>The values can contain free-marker expressions.</b>", required = false)
 	private Map<String, String> defaultHeaders = new HashMap<>();
 	
+	@Param(description = "Maximum number of sessions that can be opened simultaneously. Defaults to 10.")
+	private int maxSessions = 10;
+	
+	private PluginCache<RestPluginSession> sessionCache;
+
 	@Override
 	public Class<Object> getArgumentBeanType()
 	{
@@ -40,6 +46,17 @@ public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validatea
 	@Override
 	public void initialize(Object args)
 	{
+		sessionCache = new PluginCache<>(() -> new RestPluginSession(this), maxSessions);
+	}
+	
+	public void setMaxSessions(int maxSessions)
+	{
+		if(maxSessions < 1)
+		{
+			throw new InvalidArgumentException("Invalid number of max sessions specified: " + maxSessions);
+		}
+		
+		this.maxSessions = maxSessions;
 	}
 
 	/**
@@ -85,7 +102,12 @@ public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validatea
 	@Override
 	public RestPluginSession newSession()
 	{
-		return new RestPluginSession(this);
+		return sessionCache.getSession();
+	}
+	
+	void releaseSession(RestPluginSession session)
+	{
+		sessionCache.release(session);
 	}
 	
 	@Override

@@ -29,9 +29,9 @@ public interface IPlugin<AT, S extends IPluginSession>
 	
 	/**
 	 * Called when close is called on global execution context. Which generally happens before destroying
-	 * global execution context.
+	 * global execution context. And this should take care of closing any open/cached sessions.
 	 */
-	public default void close() throws Exception
+	public default void close()
 	{
 	}
 	

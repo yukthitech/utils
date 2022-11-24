@@ -36,7 +36,7 @@
 	<wrap:plugins>
 	
 		<!-- Selenium plugin for web based automation -->	
-		<selenium-plugin>
+		<selenium-plugin maxSessions="3">
 			<base-url>#{base.url}</base-url>
 			
 			<wrap:drivers>

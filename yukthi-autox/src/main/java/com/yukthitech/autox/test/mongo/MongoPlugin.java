@@ -86,7 +86,7 @@ public class MongoPlugin implements IPlugin<Object, MongoPluginSession>, Validat
 	}
 	
 	@Override
-	public void close() throws Exception
+	public void close()
 	{
 		for(MongoResource res : mongoResourceMap.values())
 		{

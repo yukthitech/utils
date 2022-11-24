@@ -86,4 +86,33 @@ public class TAutomationFlows extends BaseTestCases
 		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found wrong number of FAIL test cases");
 		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 4, "Found wrong number of ERROR test cases");
 	}
+
+	@Test
+	public void testMultiThread_sessions() throws Exception
+	{
+		System.setProperty("autox.testSuites.parallelExecutionEnabled", "true");
+		System.setProperty("autox.parallelExecution.poolSize", "10");
+		
+		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
+				"-tsf", "./src/test/resources/new-test-suites/multi-thread-sessions",
+				"-rf", "./output/multi-thread-flows", 
+				"-prop", "./src/test/resources/app.properties", 
+				//"--report-opening-disabled", "true",
+				//"-ts", "jobj-test-suites"
+				//"-tc", "dataProviderOnFetchIndependentCtx"
+				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
+			});
+		
+		/*
+		FinalReport exeResult = objectMapper.readValue(new File("./output/multi-thread-flows/test-results.json"), FinalReport.class);
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 7, "Found wrong number of test suites");
+		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 3, "Found wrong number of SUCCESS test suites");
+		Assert.assertEquals(exeResult.getTestSuiteErrorCount(), 4, "Found wrong number of ERROR test suites");
+		
+		Assert.assertEquals(exeResult.getTestCaseCount(), 35, "Found wrong number of test cases");
+		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 27, "Found wrong number of SUCCESS test cases");
+		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found wrong number of FAIL test cases");
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 4, "Found wrong number of ERROR test cases");
+		*/
+	}
 }

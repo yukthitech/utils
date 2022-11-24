@@ -41,9 +41,7 @@ public class ExecutionContextManager
 	
 	public static void reset()
 	{
-		instance.executionThreadLocal.values().forEach(stack -> stack.close());
 		instance.executionThreadLocal.clear();
-		
 		instance.executorContexts.clear();
 	}
 	
@@ -135,7 +133,7 @@ public class ExecutionContextManager
 		executionContextStack.executionStack.push(executor.getExecutable());
 	}
 
-	public synchronized void clearExecutor(Executor executor)
+	private synchronized void clearExecutor(Executor executor)
 	{
 		ExecutionThreadStack executionContextStack = executionThreadLocal.get(Thread.currentThread());
 		
@@ -203,7 +201,6 @@ public class ExecutionContextManager
 	
 	public synchronized void close()
 	{
-		this.executionThreadLocal.values().forEach(contextStck -> contextStck.close());
 		this.executionThreadLocal.clear();
 	}
 }

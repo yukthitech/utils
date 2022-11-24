@@ -441,6 +441,11 @@ public class AutomationLauncher
 				ReportDataManager.getInstance().generateReport();
 				ExecutionContextManager.getInstance().close();
 				
+				AutomationContext.getInstance()
+					.getAppConfiguration()
+					.getAllPlugins()
+					.forEach(plugin -> plugin.close());
+				
 				automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
 			}).onFinally(callback -> 
 			{
