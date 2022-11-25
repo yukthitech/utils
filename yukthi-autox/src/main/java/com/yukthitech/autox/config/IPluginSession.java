@@ -19,14 +19,10 @@ public interface IPluginSession
 	 * This will be called when current thread is done with this session and releases it. In this
 	 * case plugin may decide to cache the session for future usage.
 	 */
-	public default void release()
-	{
-		close();
-	}
+	public void release();
 
 	/**
-	 * By default release calls this method at end of usage. Its up to the plugin if the session 
-	 * needs to be cached.
+	 * Called when session has to be fully closed.
 	 */
 	public default void close()
 	{

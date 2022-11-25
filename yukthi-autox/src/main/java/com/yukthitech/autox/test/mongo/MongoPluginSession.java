@@ -1,22 +1,14 @@
 package com.yukthitech.autox.test.mongo;
 
-import com.yukthitech.autox.config.IPluginSession;
+import com.yukthitech.autox.config.AbstractPluginSession;
 
-public class MongoPluginSession implements IPluginSession
+public class MongoPluginSession extends AbstractPluginSession<MongoPluginSession, MongoPlugin>
 {
-	private MongoPlugin parentPlugin;
-	
 	public MongoPluginSession(MongoPlugin parentPlugin)
 	{
-		this.parentPlugin = parentPlugin;
+		super(parentPlugin);
 	}
 	
-	@Override
-	public MongoPlugin getParentPlugin()
-	{
-		return parentPlugin;
-	}
-
 	/**
 	 * Fetches a mongo resource with specified name.
 	 * @param name
@@ -26,5 +18,4 @@ public class MongoPluginSession implements IPluginSession
 	{
 		return parentPlugin.getMongoResource(name);
 	}
-
 }

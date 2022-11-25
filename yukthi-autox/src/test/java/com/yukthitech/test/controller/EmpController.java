@@ -35,7 +35,7 @@ public class EmpController
 	}
 	
 	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-	public Employee getEmplyoee(@PathVariable("id") int id, HttpServletResponse response)
+	public synchronized Employee getEmplyoee(@PathVariable("id") int id, HttpServletResponse response)
 	{
 		if(!empMap.containsKey(id))
 		{
@@ -47,7 +47,7 @@ public class EmpController
 	}
 	
 	@RequestMapping(value = "/saveForm", method = RequestMethod.POST)
-	public SaveResult saveEmployeeForm(Employee emp)
+	public synchronized SaveResult saveEmployeeForm(Employee emp)
 	{
 		if(StringUtils.isBlank(emp.getName()))
 		{
@@ -66,7 +66,7 @@ public class EmpController
 	}
 
 	@RequestMapping(value = "/saveEncodedForm", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-	public SaveResult saveEmployeeEncodedForm(Employee emp)
+	public synchronized SaveResult saveEmployeeEncodedForm(Employee emp)
 	{
 		if(StringUtils.isBlank(emp.getName()))
 		{
@@ -85,7 +85,7 @@ public class EmpController
 	}
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public SaveResult saveEmployee(@RequestBody Employee emp)
+	public synchronized SaveResult saveEmployee(@RequestBody Employee emp)
 	{
 		emp.setId(empMap.size() + 1);
 		empMap.put(emp.getId(), emp);
@@ -94,13 +94,13 @@ public class EmpController
 	}
 	
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
-	public void removeEmplyoee(@PathVariable("id") int id)
+	public synchronized void removeEmplyoee(@PathVariable("id") int id)
 	{
 		empMap.remove(id);
 	}
 
 	@RequestMapping(value = "/saveWithFile", method = RequestMethod.POST)
-	public SaveResult saveWithFile(@RequestPart("details") Employee emp, MultipartHttpServletRequest servletRequest) throws Exception
+	public synchronized SaveResult saveWithFile(@RequestPart("details") Employee emp, MultipartHttpServletRequest servletRequest) throws Exception
 	{
 		emp.setId(empMap.size() + 1);
 		empMap.put(emp.getId(), emp);
@@ -119,7 +119,7 @@ public class EmpController
 	}
 	
 	@RequestMapping(value = "/getFile/{id}", method = RequestMethod.GET)
-	public void getFileById(@PathVariable("id") Integer fileId, HttpServletResponse response) throws Exception
+	public synchronized void getFileById(@PathVariable("id") Integer fileId, HttpServletResponse response) throws Exception
 	{
 		File file = fileMap.get(fileId);
 		

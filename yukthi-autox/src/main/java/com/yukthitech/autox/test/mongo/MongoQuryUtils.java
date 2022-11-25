@@ -123,7 +123,8 @@ public class MongoQuryUtils
 		
 		try
 		{
-			return mongoEngine.executeScript(script);
+			String finalScript = String.format("function dynMongoJsFunc(){%s} dynMongoJsFunc();", script);
+			return mongoEngine.executeScript(finalScript);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while executing mongo-js script", ex);

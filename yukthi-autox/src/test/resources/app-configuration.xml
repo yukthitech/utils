@@ -57,12 +57,24 @@
 	
 		<!-- Db plugin for sql base steps -->
 		<db-plugin>
+			<!--  
 			<dataSource name="dataSource" ccg:beanType="com.yukthitech.autox.ds.DataSourceWrapper">
 				<dataSourceType>org.apache.commons.dbcp2.BasicDataSource</dataSourceType>
 				<maxCloseCount>500</maxCloseCount>
 				
-				<property name="driverClassName">org.apache.derby.jdbc.EmbeddedDriver</property>
-				<property name="url">jdbc:derby:#{derby.folder};create=true</property>
+				<property name="driverClassName">com.mysql.jdbc.Driver</property>
+				<property name="url">jdbc:mysql://localhost:3306/test?autoReconnect=true</property>
+				<property name="defaultAutoCommit">false</property>
+				<property name="username">test</property>
+				<property name="password">test</property>
+			</dataSource>
+			-->
+			<dataSource name="dataSource" ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>com.mysql.jdbc.Driver</driverClassName>
+				<url>jdbc:mysql://localhost:3306/test?autoReconnect=true</url>
+				<defaultAutoCommit>false</defaultAutoCommit>
+				<username>test</username>
+				<password>test</password>
 			</dataSource>
 		</db-plugin>
 

@@ -321,7 +321,7 @@ public class ReportDataManager
 			
 			logContent = StringEscapeUtils.escapeHtml4(logContent);
 			
-			String processedContent = FreeMarkerMethodManager.replaceExpressions("monitoring-log", 
+			String processedContent = FreeMarkerMethodManager.replaceExpressions("monitor-log-template.html", 
 					new LogMonitorContext(
 						reportInfoProviders.getName(executor), 
 						name, 

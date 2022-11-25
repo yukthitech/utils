@@ -447,7 +447,11 @@ public class AutomationLauncher
 					.forEach(plugin -> plugin.close());
 				
 				automationCompleted(ReportDataManager.getInstance().isSuccessful(), context);				
-			}).onFinally(callback -> 
+			}).onError((callback, ex) -> 
+			{
+				logger.error("An error occurred during automation execution", ex);
+			})
+			.onFinally(callback -> 
 			{
 				latch.countDown();
 			}).execute();

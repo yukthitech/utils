@@ -15,6 +15,7 @@ import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.lang.steps.LangException;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.event.EventListenerManager;
 
@@ -105,7 +106,7 @@ public class StepsExecutor
 			String stackTrace = executionStack.toStackTrace();
 			
 			logger.error("An error occurred with message at stack trace: \n{}", stackTrace, ex);
-			exeLogger.error("An error occurred with message - {}. Stack Trace: {}", ex.getMessage(), stackTrace);
+			exeLogger.error("Execution result in error: \n{}.\nStack Trace:{}", CommonUtils.getRootCauseMessages(ex), stackTrace);
 			
 			throw new HandledException(ex);
 		}finally

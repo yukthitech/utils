@@ -95,24 +95,21 @@ public class TAutomationFlows extends BaseTestCases
 		
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-tsf", "./src/test/resources/new-test-suites/multi-thread-sessions",
-				"-rf", "./output/multi-thread-flows", 
+				"-rf", "./output/multi-thread-sessions", 
 				"-prop", "./src/test/resources/app.properties", 
 				//"--report-opening-disabled", "true",
-				//"-ts", "jobj-test-suites"
+				//"-ts", "ml-rest-sessions"
 				//"-tc", "dataProviderOnFetchIndependentCtx"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		
-		/*
-		FinalReport exeResult = objectMapper.readValue(new File("./output/multi-thread-flows/test-results.json"), FinalReport.class);
-		Assert.assertEquals(exeResult.getTestSuiteCount(), 7, "Found wrong number of test suites");
-		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 3, "Found wrong number of SUCCESS test suites");
-		Assert.assertEquals(exeResult.getTestSuiteErrorCount(), 4, "Found wrong number of ERROR test suites");
+		FinalReport exeResult = objectMapper.readValue(new File("./output/multi-thread-sessions/test-results.json"), FinalReport.class);
+		Assert.assertEquals(exeResult.getTestSuiteCount(), 4, "Found wrong number of test suites");
+		Assert.assertEquals(exeResult.getTestSuiteSuccessCount(), 4, "Found wrong number of SUCCESS test suites");
 		
-		Assert.assertEquals(exeResult.getTestCaseCount(), 35, "Found wrong number of test cases");
-		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 27, "Found wrong number of SUCCESS test cases");
-		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 4, "Found wrong number of FAIL test cases");
-		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 4, "Found wrong number of ERROR test cases");
-		*/
+		Assert.assertEquals(exeResult.getTestCaseCount(), 29, "Found wrong number of test cases");
+		Assert.assertEquals(exeResult.getTestCaseSuccessCount(), 29, "Found wrong number of SUCCESS test cases");
+		Assert.assertEquals(exeResult.getTestCaseFailureCount(), 0, "Found wrong number of FAIL test cases");
+		Assert.assertEquals(exeResult.getTestCaseErroredCount(), 0, "Found wrong number of ERROR test cases");
 	}
 }

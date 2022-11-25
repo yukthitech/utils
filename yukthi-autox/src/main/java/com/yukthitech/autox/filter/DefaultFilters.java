@@ -229,6 +229,12 @@ public class DefaultFilters
 				return IOUtils.toString(clob.getBinaryStream(), Charset.defaultCharset());
 			}
 
+			if(curVal instanceof byte[])
+			{
+				byte[] byteArr = (byte[]) curVal;
+				return IOUtils.toString(byteArr, Charset.defaultCharset().name());
+			}
+
 			return curVal.toString().trim();
 		}
 		

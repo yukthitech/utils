@@ -18,7 +18,7 @@
 				(
 					NAME	VARCHAR(100),
 					BDATA	BLOB,
-					CDATA	CLOB
+					CDATA	LONGTEXT
 				)
 			</query>
 		</s:sql-ddl-query>

@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.config.AbstractPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
 /**
  * The Class MongoPlugin.
  */
-public class MongoPlugin implements IPlugin<Object, MongoPluginSession>, Validateable
+public class MongoPlugin extends AbstractPlugin<Object, MongoPluginSession> implements Validateable
 {
 	/**
 	 * Application data sources.
@@ -80,7 +80,7 @@ public class MongoPlugin implements IPlugin<Object, MongoPluginSession>, Validat
 	}
 	
 	@Override
-	public MongoPluginSession newSession()
+	protected MongoPluginSession createSession()
 	{
 		return new MongoPluginSession(this);
 	}

@@ -107,7 +107,7 @@
 			<s:mongo-js mongoResourceName="mongoResource" resultAttribute="objFromDb">
 				<script>
 					print("This is first line");
-					db.AUTOX_TEST.findOne({"name": "testObj"}, {"_id": 0});
+					return db.AUTOX_TEST.findOne({"name": "testObj"}, {"_id": 0});
 				</script>
 			</s:mongo-js>
 

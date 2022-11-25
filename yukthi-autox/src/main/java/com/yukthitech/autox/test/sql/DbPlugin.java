@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
 import com.yukthitech.autox.Param;
-import com.yukthitech.autox.config.IPlugin;
+import com.yukthitech.autox.config.AbstractPlugin;
 import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 
@@ -22,7 +22,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * @author akiran
  */
 @Executable(name = "DbPlugin", group = Group.NONE, message = "Plugin related to db related steps or validators.")
-public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
+public class DbPlugin extends AbstractPlugin<Object, DbPluginSession> implements Validateable
 {
 	private static Logger logger = LogManager.getLogger(DbPlugin.class);
 	
@@ -37,7 +37,7 @@ public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
 	 */
 	@Param(description = "Name of the default data source name.", required = false)
 	private String defaultDataSource;
-
+	
 	/**
 	 * Sets the name of the default data source name.
 	 *
@@ -46,6 +46,12 @@ public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
 	public void setDefaultDataSource(String defaultDataSource)
 	{
 		this.defaultDataSource = defaultDataSource;
+	}
+	
+	@Override
+	protected DbPluginSession createSession()
+	{
+		return new DbPluginSession(this);
 	}
 	
 	/**
@@ -87,12 +93,6 @@ public class DbPlugin implements IPlugin<Object, DbPluginSession>, Validateable
 		return dataSourceMap.get(defaultDataSource);
 	}
 
-	@Override
-	public DbPluginSession newSession()
-	{
-		return new DbPluginSession(this);
-	}
-	
 	@Override
 	public void close()
 	{

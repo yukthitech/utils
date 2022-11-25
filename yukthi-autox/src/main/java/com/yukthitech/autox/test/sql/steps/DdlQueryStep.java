@@ -40,6 +40,9 @@ public class DdlQueryStep extends AbstractStep
 	@Param(description = "Data source to be used for sql execution.")
 	private String dataSourceName;
 	
+	@Param(description = "If set to true, exceptions during query execution will be ignored. Helpful to rest the db without assuming initial state.")
+	private boolean ignoreErrors;
+	
 	/**
 	 * Sets the ddl query to execute.
 	 *
@@ -58,6 +61,11 @@ public class DdlQueryStep extends AbstractStep
 	public void setDataSourceName(String dataSourceName)
 	{
 		this.dataSourceName = dataSourceName;
+	}
+	
+	public void setIgnoreErrors(boolean ignoreErrors)
+	{
+		this.ignoreErrors = ignoreErrors;
 	}
 
 	@Override
@@ -85,7 +93,15 @@ public class DdlQueryStep extends AbstractStep
 		} catch(SQLException ex)
 		{
 			//exeLogger.error(ex, "An error occurred while executing DDL query");
-			throw new TestCaseFailedException(this, "An erorr occurred while executing DDL query - {}", query, ex);
+			
+			if(ignoreErrors)
+			{
+				exeLogger.info("IGNORED Error: An error occurred while executing DDL query. Error: " + ex);
+			}
+			else
+			{
+				throw new TestCaseFailedException(this, "An erorr occurred while executing DDL query - {}", query, ex);
+			}
 		} finally
 		{
 			DbUtils.closeQuietly(connection, statement, null);

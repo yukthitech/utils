@@ -2,26 +2,18 @@ package com.yukthitech.autox.test.sql;
 
 import javax.sql.DataSource;
 
-import com.yukthitech.autox.config.IPluginSession;
+import com.yukthitech.autox.config.AbstractPluginSession;
 
 /**
  * DB Plugin session.
  * 
  * @author akranthikiran
  */
-public class DbPluginSession implements IPluginSession
+public class DbPluginSession extends AbstractPluginSession<DbPluginSession, DbPlugin>
 {
-	private DbPlugin parentPlugin;
-
 	public DbPluginSession(DbPlugin parentPlugin)
 	{
-		this.parentPlugin = parentPlugin;
-	}
-	
-	@Override
-	public DbPlugin getParentPlugin()
-	{
-		return parentPlugin;
+		super(parentPlugin);
 	}
 	
 	/**
@@ -33,14 +25,4 @@ public class DbPluginSession implements IPluginSession
 	{
 		return parentPlugin.getDataSource(name);
 	}
-	
-	/**
-	 * Fetches default data source if one is configured.
-	 * @return default data source, if any.
-	 */
-	public DataSource getDefaultDataSource()
-	{
-		return parentPlugin.getDefaultDataSource();
-	}
-
 }

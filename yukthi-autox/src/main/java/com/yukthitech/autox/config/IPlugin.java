@@ -28,6 +28,12 @@ public interface IPlugin<AT, S extends IPluginSession>
 	public S newSession();
 	
 	/**
+	 * Will be called by session itself during release.
+	 * @param session
+	 */
+	public void releaseSession(S session);
+	
+	/**
 	 * Called when close is called on global execution context. Which generally happens before destroying
 	 * global execution context. And this should take care of closing any open/cached sessions.
 	 */

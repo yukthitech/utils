@@ -82,6 +82,7 @@ public class PluginManager
 		
 		if(pluginArgType == null || Object.class.equals(pluginArgType))
 		{
+			plugin.initialize(null);
 			initializedPlugins.add(pluginType);
 			return;
 		}

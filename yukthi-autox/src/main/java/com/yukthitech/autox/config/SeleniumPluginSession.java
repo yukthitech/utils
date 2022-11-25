@@ -20,11 +20,9 @@ import com.yukthitech.autox.context.ReportLogFile;
 import com.yukthitech.autox.exec.report.LogLevel;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class SeleniumPluginSession implements IPluginSession
+public class SeleniumPluginSession extends AbstractPluginSession<SeleniumPluginSession, SeleniumPlugin>
 {
 	private static Logger logger = LogManager.getLogger(SeleniumPluginSession.class);
-	
-	private SeleniumPlugin parentPlugin;
 	
 	private Map<String, WebDriver> drivers = new HashMap<>();
 	
@@ -39,14 +37,8 @@ public class SeleniumPluginSession implements IPluginSession
 	
 	public SeleniumPluginSession(SeleniumPlugin parentPlugin, String defaultDriverName)
 	{
-		this.parentPlugin = parentPlugin;
+		super(parentPlugin);
 		this.defaultDriverName = defaultDriverName;
-	}
-	
-	@Override
-	public SeleniumPlugin getParentPlugin()
-	{
-		return parentPlugin;
 	}
 	
 	/**
@@ -294,12 +286,6 @@ public class SeleniumPluginSession implements IPluginSession
 		driver.quit();
 	}
 	
-	@Override
-	public void release()
-	{
-		parentPlugin.releaseSession(this);
-	}
-
 	@Override
 	public void close()
 	{

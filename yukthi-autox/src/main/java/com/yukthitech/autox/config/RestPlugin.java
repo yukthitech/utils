@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.Executable;
 import com.yukthitech.autox.Group;
@@ -17,7 +16,7 @@ import com.yukthitech.ccg.xml.util.Validateable;
  * @author akiran
  */
 @Executable(name = "RestPlugin", group = Group.NONE, message = "Plugin for REST based steps and validations.")
-public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validateable
+public class RestPlugin extends AbstractPlugin<Object, RestPluginSession> implements Validateable
 {
 	/**
 	 * Base url for REST api invocation.
@@ -32,31 +31,10 @@ public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validatea
 			+ "<b>The values can contain free-marker expressions.</b>", required = false)
 	private Map<String, String> defaultHeaders = new HashMap<>();
 	
-	@Param(description = "Maximum number of sessions that can be opened simultaneously. Defaults to 10.")
-	private int maxSessions = 10;
-	
-	private PluginCache<RestPluginSession> sessionCache;
-
 	@Override
 	public Class<Object> getArgumentBeanType()
 	{
 		return null;
-	}
-
-	@Override
-	public void initialize(Object args)
-	{
-		sessionCache = new PluginCache<>(() -> new RestPluginSession(this), maxSessions);
-	}
-	
-	public void setMaxSessions(int maxSessions)
-	{
-		if(maxSessions < 1)
-		{
-			throw new InvalidArgumentException("Invalid number of max sessions specified: " + maxSessions);
-		}
-		
-		this.maxSessions = maxSessions;
 	}
 
 	/**
@@ -100,14 +78,9 @@ public class RestPlugin implements IPlugin<Object, RestPluginSession>, Validatea
 	}
 	
 	@Override
-	public RestPluginSession newSession()
+	protected RestPluginSession createSession()
 	{
-		return sessionCache.getSession();
-	}
-	
-	void releaseSession(RestPluginSession session)
-	{
-		sessionCache.release(session);
+		return new RestPluginSession(this);
 	}
 	
 	@Override

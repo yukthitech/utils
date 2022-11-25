@@ -8,10 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.utils.rest.RestClient;
 
-public class RestPluginSession implements IPluginSession
+public class RestPluginSession extends AbstractPluginSession<RestPluginSession, RestPlugin>
 {
-	private RestPlugin parentPlugin;
-	
 	/**
 	 * Mapping from base url to client.
 	 */
@@ -19,13 +17,7 @@ public class RestPluginSession implements IPluginSession
 
 	public RestPluginSession(RestPlugin parentPlugin)
 	{
-		this.parentPlugin = parentPlugin;
-	}
-	
-	@Override
-	public RestPlugin getParentPlugin()
-	{
-		return parentPlugin;
+		super(parentPlugin);
 	}
 	
 	/**
@@ -65,12 +57,6 @@ public class RestPluginSession implements IPluginSession
 		}
 		
 		return client;
-	}
-	
-	@Override
-	public void release()
-	{
-		parentPlugin.releaseSession(this);
 	}
 
 	@Override

@@ -20,7 +20,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * @author akiran
  */
 @Executable(name = "SeleniumPlugin", group = Group.NONE, message = "Plugin needed by selenium/ui-automation based steps or validators.")
-public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs, SeleniumPluginSession>, Validateable
+public class SeleniumPlugin extends AbstractPlugin<SeleniumPluginArgs, SeleniumPluginSession> implements Validateable
 {
 	private static Logger logger = LogManager.getLogger(SeleniumPlugin.class);
 	
@@ -40,11 +40,6 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs, SeleniumPlugi
 	 */
 	@Param(description = "Base url to be used for ui automation", required = true)
 	private String baseUrl;
-	
-	@Param(description = "Maximum number of sessions that can be opened simultaneously. Defaults to 10.")
-	private int maxSessions = 10;
-	
-	private PluginCache<SeleniumPluginSession> sessionCache;
 	
 	/* (non-Javadoc)
 	 * @see com.yukthitech.autox.config.IPlugin#getArgumentBeanType()
@@ -115,16 +110,6 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs, SeleniumPlugi
 		this.baseUrl = baseUrl;
 	}
 	
-	public void setMaxSessions(int maxSessions)
-	{
-		if(maxSessions < 1)
-		{
-			throw new InvalidArgumentException("Invalid number of max sessions specified: " + maxSessions);
-		}
-		
-		this.maxSessions = maxSessions;
-	}
-	
 	/**
 	 * Gets the base url of the application.
 	 *
@@ -168,22 +153,13 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs, SeleniumPlugi
 		
 		defaultDriverName = driverName;
 		
-		logger.debug("Creating selenium session cache of size: {}", maxSessions);
-		
-		sessionCache = new PluginCache<>(
-				() -> new SeleniumPluginSession(this, defaultDriverName), 
-				maxSessions);
+		super.initialize(args);
 	}
 	
 	@Override
-	public SeleniumPluginSession newSession()
+	protected SeleniumPluginSession createSession()
 	{
-		return sessionCache.getSession();
-	}
-	
-	void releaseSession(SeleniumPluginSession session)
-	{
-		sessionCache.release(session);
+		return new SeleniumPluginSession(this, defaultDriverName);
 	}
 	
 	/* (non-Javadoc)
@@ -201,11 +177,5 @@ public class SeleniumPlugin implements IPlugin<SeleniumPluginArgs, SeleniumPlugi
 		{
 			throw new ValidateException("No base url is specified.");
 		}
-	}
-	
-	@Override
-	public void close()
-	{
-		sessionCache.close();
 	}
 }
