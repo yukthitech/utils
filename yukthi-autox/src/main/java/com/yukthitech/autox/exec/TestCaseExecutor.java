@@ -40,8 +40,6 @@ public class TestCaseExecutor extends Executor
 		super(testCase, "Test-Case");
 		
 		this.testCase = testCase;
-		super.setup = testCase.getSetup();
-		super.cleanup = testCase.getCleanup();
 		super.includeChildStauts = true;
 		
 		if(testCase.getDataProvider() != null)
@@ -55,6 +53,11 @@ public class TestCaseExecutor extends Executor
 		{
 			super.childSteps = testCase.getSteps();
 			super.expectedException = testCase.getExpectedException();
+			
+			//setup and cleanup should be assigned for normal test cases
+			// without data proovider
+			super.setup = testCase.getSetup();
+			super.cleanup = testCase.getCleanup();
 		}
 	}
 	
@@ -66,6 +69,10 @@ public class TestCaseExecutor extends Executor
 		this.testCaseData = testCaseData;
 		super.childSteps = testCase.getSteps();
 		super.expectedException = testCase.getExpectedException();
+		
+		//setup and cleanup should be executed with every data based test cases
+		super.setup = testCase.getSetup();
+		super.cleanup = testCase.getCleanup();
 		
 		super.uniqueId = testCase.getName() + "[" + testCaseData.getName() + "]";
 	}
