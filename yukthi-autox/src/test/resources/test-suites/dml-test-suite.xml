@@ -27,7 +27,7 @@
 					</expectedRow>
 				</s:sql-assert>
 
-				<s:sql-assert-value dataSourceName="dataSource" expectedValue="int: 1">
+				<s:sql-assert-value dataSourceName="dataSource" expectedValue="long: 1">
 					<query>
 						SELECT count(*) FROM EMPLOYEE WHERE NAME = 'employee1'
 					</query>

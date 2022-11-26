@@ -24,6 +24,11 @@ public class SummaryNotificationConfig
 	private boolean ttlsEnabled = true;
 	
 	/**
+	 * Flag indicating ssl should be used.
+	 */
+	private boolean enableSsl = false;
+	
+	/**
 	 * Smtp user name to be used.
 	 */
 	private String userName;
@@ -320,4 +325,14 @@ public class SummaryNotificationConfig
 	{
 		this.enabled = enabled;
 	}
-}
+
+	public boolean isEnableSsl()
+	{
+		return enableSsl;
+	}
+
+	public void setEnableSsl(boolean enableSsl)
+	{
+		this.enableSsl = enableSsl;
+	}
+} 

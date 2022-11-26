@@ -22,6 +22,8 @@
 			</description>
 		
 			<wrap:steps>
+				<s:set expression="attr(global=true): someGlobalAttr" value="int: 100"/>
+				
 				<s:log>
 					<message>
 						Invoking method using object from app config:
@@ -525,6 +527,9 @@
 				<s:assert-equals actual="xpath: /attr/bean/arr" expected="list(int): 1, 2, 4, 5, 6"/>
 				<s:assert-equals actual="xpath: /attr/bean/strArr" expected="list: one, three, four"/>
 				<s:assert-equals actual="xpath: /attr/bean/mapAttr" expected="map: key2=val2, key3=val3"/>
+				
+				<!-- Ensure global attr set in prev test case is accesible here -->
+				<s:assert-equals actual="attr: someGlobalAttr" expected="int: 100"/>
 			</wrap:steps>
 		</testCase>
 	</testSuite>

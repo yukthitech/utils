@@ -60,7 +60,7 @@ public abstract class AbstractPostCheckStep extends AbstractParentUiStep
 			boolean isVisible = UiAutomationUtils.waitWithPoll(() ->
 			{
 				return UiFreeMarkerMethods.uiIsVisible(postVisibilityLocator, null, driverName);
-			}, postVerificationDelay, 100);
+			}, postVerificationDelay, 200);
 			
 			//if visible locator is not visible, return false
 			if(!isVisible)
@@ -81,7 +81,7 @@ public abstract class AbstractPostCheckStep extends AbstractParentUiStep
 			boolean isVisible = UiAutomationUtils.waitWithPoll(() ->
 			{
 				return UiFreeMarkerMethods.uiIsVisible(postHideLocator, null, driverName);
-			}, postVerificationDelay, 100);
+			}, postVerificationDelay, 200);
 			
 			//if hide locator is visible 
 			if(isVisible)

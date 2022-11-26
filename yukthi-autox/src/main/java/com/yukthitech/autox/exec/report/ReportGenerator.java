@@ -151,14 +151,11 @@ public class ReportGenerator
 	private void sendSummaryMail(final SummaryNotificationConfig notificationConfig, File summaryHtml, Object freeMarkerContext) throws MessagingException, IOException
 	{
 		Properties props = new Properties();
-		props.put("mail.smtp.host", notificationConfig.getSmptpHost()); // SMTP
-																		// Host
-		props.put("mail.smtp.port", "" + notificationConfig.getSmptpPort()); // TLS
-																				// Port
-		props.put("mail.smtp.auth", "" + notificationConfig.isAuthEnabled()); // enable
-																				// authentication
-		props.put("mail.smtp.starttls.enable", "" + notificationConfig.isTtlsEnabled()); // enable
-																							// STARTTLS
+		props.put("mail.smtp.host", notificationConfig.getSmptpHost()); // SMTP Host
+		props.put("mail.smtp.port", "" + notificationConfig.getSmptpPort()); // TLS Port
+		props.put("mail.smtp.auth", "" + notificationConfig.isAuthEnabled()); // enable authentication
+		props.put("mail.smtp.starttls.enable", "" + notificationConfig.isTtlsEnabled()); // enable STARTTLS
+		props.put("mail.smtp.ssl.enable", "" + notificationConfig.isEnableSsl());
 
 		Authenticator auth = null;
 

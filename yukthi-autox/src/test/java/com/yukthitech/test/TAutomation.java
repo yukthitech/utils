@@ -19,8 +19,8 @@ public class TAutomation extends BaseTestCases
 		AutomationLauncher.main(new String[] {"./src/test/resources/app-configuration.xml", 
 				"-rf", "./output/success", 
 				"-prop", "./src/test/resources/app.properties", 
-				//"-ts", "jobj-test-suites"
-				//"-tc", "dataProviderOnFetchIndependentCtx"
+				//"-ts", "ui-test-suites"
+				"-tc", "xpath_test"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		

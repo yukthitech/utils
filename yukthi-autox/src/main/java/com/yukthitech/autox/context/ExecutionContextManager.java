@@ -187,6 +187,16 @@ public class ExecutionContextManager
 		}
 		
 		globalContext.setAttribute(name, value);
+		
+		executorContexts.values().forEach(context -> 
+		{
+			if(context == globalContext)
+			{
+				return;
+			}
+			
+			context.setAttribute(name, value);
+		});
 	}
 	
 	public Object getGlobalAttribute(String name)
