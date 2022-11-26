@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +21,6 @@ import org.openqa.selenium.InvalidArgumentException;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
-import com.yukthitech.autox.debug.common.ExecutionPausedServerMssg;
 import com.yukthitech.autox.debug.common.MessageWrapper;
 import com.yukthitech.autox.debug.server.handler.DebuggerInitHandler;
 import com.yukthitech.autox.debug.server.handler.ExecuteStepsHandler;
@@ -35,11 +33,6 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class DebugServer
 {
 	private static Logger logger = LogManager.getLogger(DebugServer.class);
-	
-	/**
-	 * System property usng which monitoring will be enabled on specified port.
-	 */
-	public static final String SYS_PROP_MONITOR_PORT = "autox.monitor.port";
 	
 	/**
 	 * Port on which monitoring manager should run.

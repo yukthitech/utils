@@ -25,6 +25,7 @@ import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
 import com.yukthitech.autox.exec.ExecutionPool;
 import com.yukthitech.autox.exec.TestSuiteGroupExecutor;
+import com.yukthitech.autox.exec.report.FinalReport;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.autox.test.TestDataFile;
@@ -246,35 +247,6 @@ public class AutomationLauncher
 		}
 	}
 	
-	/**
-	 * Fetches the monitoring port from system property if one is specified.
-	 * @return
-	 */
-	private static Integer getMonitoringPort()
-	{
-		String portNumStr = System.getProperty(DebugServer.SYS_PROP_MONITOR_PORT);
-		
-		if(portNumStr == null)
-		{
-			return null;
-		}
-		
-		try
-		{
-			int port = Integer.parseInt(portNumStr);
-			
-			if(port <= 0)
-			{
-				throw new InvalidStateException("Invalid monitoring port is configured: {}", portNumStr);
-			}
-			
-			return port;
-		}catch(NumberFormatException ex)
-		{
-			throw new InvalidStateException("Invalid monitoring port is configured: {}", portNumStr);
-		}
-	}
-	
 	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[]) throws Exception
 	{
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
@@ -313,15 +285,6 @@ public class AutomationLauncher
 		
 		ExpressionFactory.init(null, appConfig.getBasePackages());
 
-		//set monitoring port info
-		Integer monitorPort = getMonitoringPort();
-		
-		if(monitorPort != null)
-		{
-			DebugServer server = DebugServer.start(monitorPort);
-			context.setDebugServer(server);
-		}
-		
 		context.setBasicArguments(basicArguments);
 		context.setReportFolder(reportFolder);
 		
@@ -406,6 +369,19 @@ public class AutomationLauncher
 		}
 	}
 	
+	private static void printSummary(FinalReport report)
+	{
+		String summary = String.format(""
+				+ "\n\n======================================================================\n"
+				+ "    Test Suite Summary ==> Total: %s, Failures: %s, Errors: %s, Skips: %s\n"
+				+ "    Test Case Summary ==> Total: %s, Failures: %s, Errors: %s, Skips: %s\n"
+				+ "======================================================================\n\n", 
+				report.getTestSuiteCount(), report.getTestSuiteFailureCount(), report.getTestSuiteErrorCount(), report.getTestSuiteSkippedCount(),
+				report.getTestCaseCount(), report.getTestCaseFailureCount(), report.getTestCaseErroredCount(), report.getTestCaseSkippedCount());
+		
+		System.out.println(summary);
+	}
+	
 	/**
 	 * Automation entry point.
 	 * 
@@ -438,7 +414,9 @@ public class AutomationLauncher
 				executor.execute(null, null, callback);
 			}).onComplete(callback -> 
 			{
-				ReportDataManager.getInstance().generateReport();
+				FinalReport finalReport = ReportDataManager.getInstance().generateReport();
+				printSummary(finalReport);
+				
 				ExecutionContextManager.getInstance().close();
 				
 				AutomationContext.getInstance()

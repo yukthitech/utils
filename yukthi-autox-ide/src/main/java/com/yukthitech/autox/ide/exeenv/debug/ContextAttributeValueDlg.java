@@ -1,4 +1,4 @@
-package com.yukthitech.autox.ide.contextAttribute;
+package com.yukthitech.autox.ide.exeenv.debug;
 
 import java.awt.BorderLayout;
 import java.awt.Font;

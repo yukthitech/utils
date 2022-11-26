@@ -24,7 +24,7 @@ public class TErrorCases extends BaseTestCases
 				"-tsf", "./src/test/resources/new-test-suites/neg-test-suites",
 				"-rf", "./output/negCases", 
 				"-prop", "./src/test/resources/app.properties", 
-				"--report-opening-disabled", "true",
+				//"--report-opening-disabled", "true",
 				//"-ts", "data-provider-err"
 				//"-tc", "screenShotInCleanupErr"
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
@@ -161,7 +161,7 @@ public class TErrorCases extends BaseTestCases
 				Arrays.asList(
 					Arrays.asList(
 						"[Data-Setup]",
-						"An error occurred with message - fail: Failing the data-setup"
+						"fail: Failing the data-setup"
 					)
 				),
 				null,
@@ -176,7 +176,7 @@ public class TErrorCases extends BaseTestCases
 				Arrays.asList(
 					Arrays.asList(
 						"[Data-Cleanup]",
-						"An error occurred with message - fail: Failing the data-setup."
+						"fail: Failing the data-setup."
 					)
 				),
 				null,

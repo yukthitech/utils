@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,14 +13,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.debug.client.DebugClient;
 import com.yukthitech.autox.debug.client.IMessageCallback;
-import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
-import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IContextListener;
 import com.yukthitech.autox.ide.layout.ConsoleLinePattern;
 import com.yukthitech.autox.ide.layout.UiLayout;
 import com.yukthitech.autox.ide.model.Project;
-import com.yukthitech.autox.ide.monitor.ContextAttributeEventHandler;
 import com.yukthitech.autox.ide.monitor.InteractiveServerReadyHandler;
 import com.yukthitech.autox.ide.monitor.ReportMessageDataHandler;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -56,7 +51,7 @@ public class ExecutionEnvironment
 
 	private boolean readyToInteract = false;
 
-	private LinkedHashMap<String, ContextAttributeDetails> contextAttributes = new LinkedHashMap<>();
+	//private LinkedHashMap<String, ContextAttributeDetails> contextAttributes = new LinkedHashMap<>();
 	
 	private File reportFile;
 	
@@ -100,10 +95,12 @@ public class ExecutionEnvironment
 
 		errThread.start();
 
+		/*
 		IdeUtils.execute(() -> {
 			monitorClient = DebugClient.startClient("localhost", monitoringPort);
 			addListeners();
 		}, 1);
+		*/
 	}
 	
 	public String[] getExtraArgs()
@@ -128,7 +125,7 @@ public class ExecutionEnvironment
 
 	private void addListeners()
 	{
-		monitorClient.addAsyncClientDataHandler(new ContextAttributeEventHandler(this));
+		//monitorClient.addAsyncClientDataHandler(new ContextAttributeEventHandler(this));
 		monitorClient.addAsyncClientDataHandler(new ReportMessageDataHandler(this));
 		monitorClient.addAsyncClientDataHandler(new InteractiveServerReadyHandler(this));
 	}
@@ -248,11 +245,13 @@ public class ExecutionEnvironment
 		proxyListener.environmentChanged(EnvironmentEvent.newReportLogEvent(this, mssg));
 	}
 	
+	/*
 	public void addContextAttribute(ContextAttributeDetails ctx)
 	{
 		this.contextAttributes.put(ctx.getName(), ctx);
 		proxyListener.environmentChanged(EnvironmentEvent.newContextAttributeEvent(this, ctx));
 	}
+	*/
 
 	public String getName()
 	{
@@ -279,10 +278,12 @@ public class ExecutionEnvironment
 		return reportMessages;
 	}
 
+	/*
 	public Collection<ContextAttributeDetails> getContextAttributes()
 	{
 		return contextAttributes.values();
 	}
+	*/
 
 	public File getReportFolder()
 	{

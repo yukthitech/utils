@@ -9,10 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.yukthitech.autox.debug.client.IMessageCallback;
 import com.yukthitech.autox.debug.common.ExecuteStepsClientMssg;
-import com.yukthitech.autox.debug.common.InteractiveTestCaseExecDetails;
-import com.yukthitech.autox.debug.common.MessageConfirmationServerMssg;
 import com.yukthitech.autox.ide.IIdeConstants;
 import com.yukthitech.autox.ide.IdeUtils;
 import com.yukthitech.autox.ide.context.IdeContext;
@@ -231,6 +228,7 @@ public class RunActions
 			ObjectWrapper<Boolean> testCaseExecuted = new ObjectWrapper<>(false);
 			ObjectWrapper<Boolean> isTerminated = new ObjectWrapper<>(false);
 			
+			/*
 			env.sendDataToServer(new InteractiveTestCaseExecDetails(testCaseName, fileEditor.getFile().getPath(), stepLineNo), new IMessageCallback()
 			{
 				@Override
@@ -248,6 +246,7 @@ public class RunActions
 					isTerminated.setValue(true);
 				}
 			});
+			*/
 			
 			logger.debug("Interactive environment is started. Waiting for test case execution to completed to come to current point...");
 			

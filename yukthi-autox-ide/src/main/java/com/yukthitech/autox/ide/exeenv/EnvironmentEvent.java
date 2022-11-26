@@ -1,6 +1,5 @@
 package com.yukthitech.autox.ide.exeenv;
 
-import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.debug.common.MonitorLogServerMssg;
 
 /**
@@ -29,7 +28,7 @@ public class EnvironmentEvent
 	 */
 	private MonitorLogServerMssg newReportLog;
 	
-	private ContextAttributeDetails newContextAttribute;
+	//private ContextAttributeDetails newContextAttribute;
 
 	/**
 	 * Instantiates a new environment event.
@@ -73,6 +72,7 @@ public class EnvironmentEvent
 		return event;
 	}
 	
+	/*
 	public static EnvironmentEvent newContextAttributeEvent(ExecutionEnvironment env, ContextAttributeDetails ctx)
 	{
 		EnvironmentEvent event = new EnvironmentEvent(env, EnvironmentEventType.CONTEXT_ATTRIBUTE_CHANGED);
@@ -80,6 +80,7 @@ public class EnvironmentEvent
 		
 		return event;
 	}
+	*/
 
 	/**
 	 * Gets the environment in which change occurred.
@@ -121,9 +122,11 @@ public class EnvironmentEvent
 		return newReportLog;
 	}
 
+	/*
 	public ContextAttributeDetails getNewContextAttribute()
 	{
 		return newContextAttribute;
 	}
+	*/
 	
 }

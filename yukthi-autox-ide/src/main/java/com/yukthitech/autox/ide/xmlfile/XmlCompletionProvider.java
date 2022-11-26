@@ -23,7 +23,6 @@ import com.yukthitech.autox.IStepContainer;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
-import com.yukthitech.autox.debug.common.ContextAttributeDetails;
 import com.yukthitech.autox.doc.ElementInfo;
 import com.yukthitech.autox.doc.ExpressionParserDoc;
 import com.yukthitech.autox.doc.FreeMarkerMethodDocInfo;
@@ -543,6 +542,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 				}
 			}
 		}
+		/*
 		else if(contentType == ParserContentType.ATTRIBUTE && ideContext.getActiveEnvironment() != null)
 		{
 			Collection<ContextAttributeDetails> contextAttrs = ideContext.getActiveEnvironment().getContextAttributes();
@@ -560,6 +560,7 @@ public class XmlCompletionProvider extends AbstractCompletionProvider implements
 				completions.add( new IdeShortHandCompletion(this, name, complText, name, name) );
 			}
 		}
+		*/
 
 		return completions;
 	}

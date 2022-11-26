@@ -2,8 +2,8 @@ package com.yukthitech.autox.ide;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.FlowLayout;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.WindowAdapter;
@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.yukthitech.autox.ide.context.IdeContext;
-import com.yukthitech.autox.ide.contextAttribute.ContextAttributesPanel;
 import com.yukthitech.autox.ide.editor.FileEditorTabbedPane;
 import com.yukthitech.autox.ide.help.HelpPanel;
 import com.yukthitech.autox.ide.layout.Action;
@@ -89,8 +88,8 @@ public class AutoxIDE extends JFrame
 	@Autowired
 	private HelpPanel helpPanel;
 	
-	@Autowired
-	private ContextAttributesPanel contextAttributePanel;
+	//@Autowired
+	//private ContextAttributesPanel contextAttributePanel;
 	
 	@Autowired
 	private IdeEventManager ideEventManager;
@@ -303,7 +302,7 @@ public class AutoxIDE extends JFrame
 		rightBottomTabbedPane.addTab("Console", null, consolePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
-		rightBottomTabbedPane.addTab("Context Attributes", null, contextAttributePanel, null);
+		//rightBottomTabbedPane.addTab("Context Attributes", null, contextAttributePanel, null);
 		consolePanel.setParent(rightBottomTabbedPane);
 		
 		rightBottomTabbedPane.addTab("Help", null, helpPanel, null);

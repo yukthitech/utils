@@ -84,7 +84,7 @@ public class ExecutionEnvironmentManager
 			javaCmd, 
 			"-classpath", classpath,
 			debugArg,
-			"-D" + DebugServer.SYS_PROP_MONITOR_PORT + "=" + monitorPort,
+			//"-D" + DebugServer.SYS_PROP_MONITOR_PORT + "=" + monitorPort,
 			AutomationLauncher.class.getName(),
 			project.getAppConfigFilePath(),
 			"-prop", project.getAppPropertyFilePath(), 

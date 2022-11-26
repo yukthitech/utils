@@ -265,11 +265,14 @@ public class ReportDataManager
 		generateJsonReport();
 	}
 	
-	public void generateReport()
+	public FinalReport generateReport()
 	{
-		reportGenerator.generateReports(new FinalReport(
+		FinalReport finalReport = new FinalReport(
 				AutomationContext.getInstance().getAppConfiguration().getReportName(), 
-				rootExecutorDetails.statusReport));
+				rootExecutorDetails.statusReport);
+		
+		reportGenerator.generateReports(finalReport);
+		return finalReport;
 	}
 	
 	public synchronized void executionCompleted(ExecutionType executionType, Executor executor)

@@ -26,7 +26,7 @@ public abstract class AbstractPlugin<AT, S extends IPluginSession> implements IP
 	}
 
 	@Override
-	public void initialize(Object args)
+	public void initialize(AT args)
 	{
 		logger.debug("Creating cache with size: {}", maxSessions);
 		sessionCache = new PluginCache<>(this::createSession, maxSessions);
