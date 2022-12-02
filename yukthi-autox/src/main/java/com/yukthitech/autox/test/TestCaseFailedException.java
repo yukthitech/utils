@@ -2,7 +2,7 @@ package com.yukthitech.autox.test;
 
 import com.yukthitech.autox.IStep;
 
-public class TestCaseFailedException extends AutoxException
+public class TestCaseFailedException extends AutoxTestException
 {
 	private static final long serialVersionUID = 1L;
 

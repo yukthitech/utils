@@ -16,6 +16,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
+import com.yukthitech.autox.common.AutoxInfoException;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
@@ -256,6 +257,16 @@ public class ExpressionFactory
 		return result;
 	}
 	
+	public static boolean isExpression(String str)
+	{
+		str = str.trim();
+
+		Matcher matcher = IAutomationConstants.EXPRESSION_PATTERN.matcher(str);
+		Matcher matcherWithType = IAutomationConstants.EXPRESSION_WITH_PARAMS_PATTERN.matcher(str);
+		
+		return (matcher.matches() || matcherWithType.matches());
+	}
+	
 	private IPropertyPath getPropertyPath(FilterContext context, String expression)
 	{
 		IExecutionLogger exeLogger = context.getAutomationContext().getExecutionLogger();
@@ -374,6 +385,12 @@ public class ExpressionFactory
 		}catch(Exception ex)
 		{
 			exeLogger.error("Evaluation of expression {} resulted in error: \n{}", expression, CommonUtils.getRootCauseMessages(ex));
+			
+			if(ex instanceof AutoxInfoException)
+			{
+				throw (AutoxInfoException) ex;
+			}
+			
 			throw new InvalidStateException("An error occurred while evaluating expression '{}'", expression, ex);
 		}
 	}

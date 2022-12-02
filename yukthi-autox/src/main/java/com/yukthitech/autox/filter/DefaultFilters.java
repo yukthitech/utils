@@ -28,6 +28,8 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.FreeMarkerMethodManager;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.common.PropertyAccessor;
+import com.yukthitech.autox.common.ResourceNotFoundException;
+import com.yukthitech.autox.common.ResourceNotFoundException.ResourceType;
 import com.yukthitech.autox.config.AppConfigParserHandler;
 import com.yukthitech.autox.config.AppConfigValueProvider;
 import com.yukthitech.autox.context.AutomationContext;
@@ -715,7 +717,7 @@ public class DefaultFilters
 		
 		if(!file.exists() || !file.isFile())
 		{
-			throw new InvalidArgumentException("Invalid/non-existing file specified for loading: {}", filePath);
+			throw new ResourceNotFoundException(ResourceType.FILE, filePath);
 		}
 		
 		return FileUtils.readFileToString(file, Charset.defaultCharset());
@@ -763,7 +765,14 @@ public class DefaultFilters
 			{
 				parserContext.getAutomationContext().getExecutionLogger().debug("Loading binary content from file: {}", expression);
 				
-				return FileUtils.readFileToByteArray(new File(expression));
+				File file = new File(expression);
+				
+				if(!file.exists())
+				{
+					throw new ResourceNotFoundException(ResourceType.FILE, expression);
+				}
+				
+				return FileUtils.readFileToByteArray(file);
 			}
 			
 			@Override
@@ -814,7 +823,7 @@ public class DefaultFilters
 
 					if(is == null)
 					{
-						throw new InvalidArgumentException("Invalid/non-existing resource specified for loading: {}", expression);
+						throw new ResourceNotFoundException(ResourceType.RESOURCE, expression);
 					}
 					
 					data = IOUtils.toString(is, Charset.defaultCharset());
@@ -864,7 +873,7 @@ public class DefaultFilters
 
 					if(is == null)
 					{
-						throw new InvalidArgumentException("Invalid/non-existing resource specified for loading: {}", expression);
+						throw new ResourceNotFoundException(ResourceType.RESOURCE, expression);
 					}
 					
 					data = IOUtils.toByteArray(is);

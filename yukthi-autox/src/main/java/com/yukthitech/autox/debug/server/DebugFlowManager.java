@@ -1,13 +1,14 @@
 package com.yukthitech.autox.debug.server;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import com.yukthitech.autox.ILocationBased;
-import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.debug.common.DebugPoint;
 
 /**
@@ -26,7 +27,7 @@ public class DebugFlowManager
 	/**
 	 * Maintains list of live debug points (points where execution has stopped) along with callbacks.
 	 */
-	private Map<DebugPoint, Runnable> livePoints = new HashMap<>();
+	private Map<String, LiveDebugPoint> livePoints = new HashMap<>();
 	
 	private DebugFlowManager()
 	{}
@@ -36,25 +37,39 @@ public class DebugFlowManager
 		return instance;
 	}
 	
-	public synchronized DebugFlowManager addDebugPoints(Collection<DebugPoint> points)
+	public void reset()
 	{
-		if(CollectionUtils.isEmpty(points))
+		synchronized(livePoints)
 		{
-			return this;
+			List<LiveDebugPoint> points = new ArrayList<>(this.livePoints.values());
+			
+			points.forEach(livePoint -> 
+			{
+				livePoint.clearThread();
+			});
+			
+			this.livePoints.clear();
 		}
-		
-		points.forEach(point -> debugPoints.put(point.getFilePath() + ":" + point.getLineNumber(), point));
-		return this;
+
+		synchronized(debugPoints)
+		{
+			this.debugPoints.clear();
+		}
 	}
 	
-	public synchronized DebugFlowManager removeDebugPoints(Collection<DebugPoint> points)
+	public DebugFlowManager setDebugPoints(Collection<DebugPoint> points)
 	{
 		if(CollectionUtils.isEmpty(points))
 		{
 			return this;
 		}
 		
-		points.forEach(point -> debugPoints.remove(point.getFilePath() + ":" + point.getLineNumber()));
+		synchronized(debugPoints)
+		{
+			this.debugPoints.clear();
+			points.forEach(point -> debugPoints.put(point.getFilePath() + ":" + point.getLineNumber(), point));
+		}
+		
 		return this;
 	}
 	
@@ -64,34 +79,64 @@ public class DebugFlowManager
 	 * NOTE: Callback is supported for future use-cases, where multiple threads may participate in execution and only
 	 * one thread is getting paused. 
 	 * 
-	 * @param executionName Name of the current execution (in future this would be current thread flow name)
 	 * @param step step whose location should be checked for debug point 
-	 * @param callback callback to be called once debugger chooses to execute and cross this step
 	 */
-	public synchronized void checkForDebugPoint(AutomationContext context, String executionName, ILocationBased step, Runnable callback)
+	public void checkForDebugPoint(ILocationBased step)
 	{
+		if(!DebugServer.isRunningInDebugMode())
+		{
+			return;
+		}
+		
+		LiveDebugPoint currentLivePoint = LiveDebugPoint.getLivePoint();
+		
+		if(currentLivePoint != null)
+		{
+			//when dynamic steps under execution dont look for debug points
+			if(currentLivePoint.isDynamicExecutionInProgress())
+			{
+				return;
+			}
+			
+			currentLivePoint.checkForPause(step);
+			return;
+		}
+
 		String debugRef = step.getLocation().getPath() + ":" + step.getLineNumber();
-		DebugPoint point = debugPoints.get(debugRef);
+		DebugPoint point = null;
+		
+		synchronized(debugPoints)
+		{
+			point = debugPoints.get(debugRef);
+		}
 		
 		if(point == null)
 		{
 			return;
 		}
 		
-		//if the specified point was already live
-		// and re-execution is started then point should be removed from live
-		// and return
-		
-		if(livePoints.remove(point) != null)
+		LiveDebugPoint.pauseAtDebugPoint(step, point, livePoint -> 
 		{
-			return;
+			synchronized(livePoints)
+			{
+				this.livePoints.put(livePoint.getId(), livePoint);	
+			}
+		});
+	}
+	
+	public LiveDebugPoint getLiveDebugPoint(String id)
+	{
+		synchronized(livePoints)
+		{
+			return livePoints.get(id);
 		}
-		
-		livePoints.put(point, callback);
-		
-		//inform execution is paused and once reexeucte, how to resume from that point
-		context.getDebugServer().executionPaused(context, point);
-		
-		throw new DebugPointReachedException(step.getLocation(), step.getLineNumber());
+	}
+	
+	public void removeLivePoint(String id)
+	{
+		synchronized(livePoints)
+		{
+			livePoints.remove(id);
+		}
 	}
 }

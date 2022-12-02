@@ -18,7 +18,7 @@ import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
-import com.yukthitech.autox.test.AutoxException;
+import com.yukthitech.autox.test.AutoxTestException;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.ExpectedException;
 import com.yukthitech.autox.test.Function;
@@ -441,9 +441,9 @@ public abstract class Executor
 	{
 		//from exception, try to find the step which caused the problem
 		//	so that approp plugin handlers can be called.
-		if(ex instanceof AutoxException)
+		if(ex instanceof AutoxTestException)
 		{
-			AutoxException autoxException = (AutoxException) ex;
+			AutoxTestException autoxException = (AutoxTestException) ex;
 			IStep srcStep = autoxException.getSourceStep();
 			
 			if(srcStep != null)

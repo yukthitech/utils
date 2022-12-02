@@ -3,15 +3,16 @@ package com.yukthitech.autox.debug.server.handler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.debug.common.DebuggerInitClientMssg;
+import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
+import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.autox.debug.server.DebugFlowManager;
+import com.yukthitech.autox.debug.server.DebugServer;
 
 /**
  * Used to execute test case fully/partially in interactive environment.
  * @author akiran
  */
-public class DebuggerInitHandler extends AbstractServerDataHandler<DebuggerInitClientMssg>
+public class DebuggerInitHandler extends AbstractServerDataHandler<ClientMssgDebuggerInit>
 {
 	private static Logger logger = LogManager.getLogger(DebuggerInitHandler.class);
 	
@@ -20,9 +21,9 @@ public class DebuggerInitHandler extends AbstractServerDataHandler<DebuggerInitC
 	 */
 	private static boolean initialized = false;
 
-	public DebuggerInitHandler(AutomationContext automationContext)
+	public DebuggerInitHandler()
 	{
-		super(DebuggerInitClientMssg.class);
+		super(ClientMssgDebuggerInit.class);
 	}
 	
 	public static boolean isInitialized()
@@ -31,12 +32,13 @@ public class DebuggerInitHandler extends AbstractServerDataHandler<DebuggerInitC
 	}
 
 	@Override
-	public boolean processData(DebuggerInitClientMssg data)
+	public void processData(ClientMssgDebuggerInit data)
 	{
 		logger.debug("Executing interactive test case command: {}", data);
 		
-		DebugFlowManager.getInstance().addDebugPoints(data.getDebugPoints());
+		DebugFlowManager.getInstance().setDebugPoints(data.getDebugPoints());
 		initialized = true;
-		return true;
+		
+		DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(data.getRequestId(), true, null));
 	}
 }

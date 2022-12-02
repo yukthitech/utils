@@ -2,26 +2,23 @@ package com.yukthitech.autox.debug.server.handler;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.IStep;
 import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.debug.common.ExecuteStepsClientMssg;
-import com.yukthitech.autox.test.CustomUiLocator;
-import com.yukthitech.autox.test.Function;
-import com.yukthitech.autox.test.IEntryPoint;
-import com.yukthitech.autox.test.TestCase;
-import com.yukthitech.autox.test.TestSuite;
+import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
+import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
+import com.yukthitech.autox.debug.server.DebugServer;
+import com.yukthitech.autox.debug.server.LiveDebugPoint;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsClientMssg> implements IEntryPoint
+public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExecuteSteps>
 {
 	private static Logger logger = LogManager.getLogger(ExecuteStepsHandler.class);
 
@@ -38,30 +35,26 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 		}
 	}
 
-	private AutomationContext automationContext;
-	
-	private TestSuite testSuite = new TestSuite("[dynamic-test-case]");
-	
-	private TestCase testCase = new TestCase("[dynamic-tst-suite]");
-	
-	public ExecuteStepsHandler(AutomationContext automationContext)
+	public ExecuteStepsHandler()
 	{
-		super(ExecuteStepsClientMssg.class);
-		this.automationContext = automationContext;
+		super(ClientMssgExecuteSteps.class);
 	}
 
 	@Override
-	public boolean processData(ExecuteStepsClientMssg steps)
+	public void processData(ClientMssgExecuteSteps steps)
 	{
-		/*
-		if(!automationContext.isReadyToInteract())
+		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(steps.getLivePointId());
+		
+		if(livepoint == null)
 		{
-			logger.warn("As the server is not yet ready to interact, interactive steps send to server are ignored.");
-			return false;
+			logger.warn("Invalid live point id specified: " + steps.getLivePointId());
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "Invalid live point id specified: %s", steps.getLivePointId()));
+			return;
 		}
 		
 		StepHolder stepHolder = parseSteps(steps.getStepsToExecute());
 		
+		/*
 		if(CollectionUtils.isNotEmpty(stepHolder.getCustomUiLocators()))
 		{
 			for(CustomUiLocator customUiLocator : stepHolder.getCustomUiLocators())
@@ -84,15 +77,15 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 				activeTestSuite.addOrReplaceFunction(func);
 			}
 		}
+		*/
 
 		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
 		{
-			return true;
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getLivePointId()));
+			return;
 		}
 		
-		executeSteps(stepHolder.getSteps());
-		*/
-		return true;
+		livepoint.executeSteps(steps.getRequestId(), stepHolder.getSteps());
 	}
 	
 	private StepHolder parseSteps(String xml)
@@ -106,7 +99,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 		try
 		{
 			ByteArrayInputStream bis = new ByteArrayInputStream(stepXml.getBytes());
-			XMLBeanParser.parse(bis, stepHolder, automationContext.getTestSuiteParserHandler());
+			XMLBeanParser.parse(bis, stepHolder, AutomationContext.getInstance().getTestSuiteParserHandler());
 			
 			return stepHolder;
 		} catch(Exception ex)
@@ -114,37 +107,5 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ExecuteStepsC
 			logger.error("Failed to parse step list from interactive step xml:\n", xml, ex);
 			return null;
 		}
-	}
-	
-	private void executeSteps(List<IStep> steps)
-	{
-		/*
-		if(automationContext.getActiveTestSuite() != null)
-		{
-			automationContext.setActiveTestSuite(automationContext.getActiveTestSuite());
-		}
-		else
-		{
-			automationContext.setActiveTestSuite(testSuite);
-		}
-		
-		if(automationContext.getActiveTestCase() != null)
-		{
-			automationContext.setActiveTestCase(automationContext.getActiveTestCase(), null);
-		}
-		else
-		{
-			automationContext.setActiveTestCase(testCase, null);
-		}
-		
-		//automationContext.getAutomationExecutor().newSteps("Dynamic-steps", this, steps);
-	
-	*/
-	}
-	
-	@Override
-	public String toText()
-	{
-		return "[Interactive]";
 	}
 }

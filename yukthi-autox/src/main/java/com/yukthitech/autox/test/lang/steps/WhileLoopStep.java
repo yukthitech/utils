@@ -14,6 +14,7 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 
@@ -70,8 +71,18 @@ public class WhileLoopStep extends AbstractStep implements IStepContainer
 	@Override
 	public void execute(AutomationContext context, IExecutionLogger exeLogger) throws Exception
 	{
+		int index = -1;
+		
 		while(AutomationUtils.evaluateCondition(context, condition))
 		{
+			index++;
+			
+			//from second time check for debug point for current step
+			if(index > 0)
+			{
+				DebugFlowManager.getInstance().checkForDebugPoint(this);
+			}
+
 			try
 			{
 				StepsExecutor.execute(exeLogger, steps, null);

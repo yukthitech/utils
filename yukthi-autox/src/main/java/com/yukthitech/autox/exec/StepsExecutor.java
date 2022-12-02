@@ -13,6 +13,7 @@ import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
 import com.yukthitech.autox.context.ExecutionStack;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.lang.steps.LangException;
 import com.yukthitech.utils.CommonUtils;
@@ -129,9 +130,10 @@ public class StepsExecutor
 		
 		boolean topLevel = isTopLevel();
 		
-		
 		try
 		{
+			DebugFlowManager debugFlowManager = DebugFlowManager.getInstance();
+			
 			for(IStep step : steps)
 			{
 				if(currentStep != null)
@@ -139,6 +141,7 @@ public class StepsExecutor
 					currentStep.setValue(step);
 				}
 				
+				debugFlowManager.checkForDebugPoint(step);
 				executeStep(logger, step);
 			}
 		}catch(HandledException ex)

@@ -15,7 +15,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.BasicArguments;
+import com.yukthitech.autox.AutoxCliArguments;
 import com.yukthitech.autox.logmon.BrowserLogMonitor;
 import com.yukthitech.autox.logmon.FileLogMonitor;
 import com.yukthitech.autox.logmon.ILogMonitor;
@@ -164,7 +164,7 @@ public class ApplicationConfiguration
 	 *            Application config file to load.
 	 * @return Loaded application config.
 	 */
-	public static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile, BasicArguments basicArguments) throws Exception
+	public static ApplicationConfiguration loadApplicationConfiguration(File appConfigurationFile, AutoxCliArguments basicArguments) throws Exception
 	{
 		Properties appProperties = new Properties();
 		

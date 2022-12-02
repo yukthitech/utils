@@ -19,9 +19,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.yukthitech.autox.debug.common.DebuggerInitClientMssg;
-import com.yukthitech.autox.debug.common.MessageConfirmationServerMssg;
-import com.yukthitech.autox.debug.common.MessageWrapper;
+import com.yukthitech.autox.debug.common.ClientMessage;
+import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
+import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
 import com.yukthitech.utils.event.EventListenerManager;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -83,7 +83,7 @@ public class DebugClient
 	/**
 	 * Manager to manage listeners.
 	 */
-	private EventListenerManager<IClientDataHandler> listenerManager = EventListenerManager.newEventListenerManager(IClientDataHandler.class, false);
+	private EventListenerManager<IDebugClientHandler> listenerManager = EventListenerManager.newEventListenerManager(IDebugClientHandler.class, false);
 	
 	/**
 	 * Thread to invoke listeners.
@@ -100,6 +100,8 @@ public class DebugClient
 	 */
 	private ReentrantLock callbackLock = new ReentrantLock();
 	
+	private ClientMssgDebuggerInit initMssg;
+	
 	private DebugClient(String serverHost, int serverPort)
 	{
 		this.serverHost = serverHost;
@@ -109,6 +111,14 @@ public class DebugClient
 		listenerThread = new Thread(this::invokeListeners, "Debug Client Listeners - " + counter.incrementAndGet());
 	}
 	
+	public static DebugClient newClient(String serverHost, int serverPort, ClientMssgDebuggerInit initMssg)
+	{
+		DebugClient client = new DebugClient(serverHost, serverPort);
+		client.initMssg = initMssg;
+
+		return client;
+	}
+
 	/**
 	 * Method to read data from server and add it to read buffer.
 	 */
@@ -158,9 +168,10 @@ public class DebugClient
 	 * Adds specified handler to this client listener list.
 	 * @param handler
 	 */
-	public void addAsyncClientDataHandler(IClientDataHandler handler)
+	public DebugClient addDataHandler(IDebugClientHandler handler)
 	{
 		this.listenerManager.addListener(handler);
+		return this;
 	}
 	
 	/**
@@ -190,9 +201,9 @@ public class DebugClient
 			
 			for(Serializable obj : data)
 			{
-				if(obj instanceof MessageConfirmationServerMssg)
+				if(obj instanceof ServerMssgConfirmation)
 				{
-					MessageConfirmationServerMssg confirm = (MessageConfirmationServerMssg) obj;
+					ServerMssgConfirmation confirm = (ServerMssgConfirmation) obj;
 					handleConfirmMessage(confirm);
 					continue;
 				}
@@ -202,9 +213,9 @@ public class DebugClient
 		}
 	}
 	
-	private void handleConfirmMessage(MessageConfirmationServerMssg mssg)
+	private void handleConfirmMessage(ServerMssgConfirmation mssg)
 	{
-		logger.debug("For message with id {} got confirmation", mssg.getRequestId());
+		logger.debug("For message with id {} got confirmation: {}", mssg.getRequestId(), mssg);
 		IMessageCallback callback = null;
 		
 		callbackLock.lock();
@@ -235,7 +246,7 @@ public class DebugClient
 	/**
 	 * Starts the client which will wait till is connected to server.
 	 */
-	private void start()
+	public DebugClient start()
 	{
 		logger.debug("Waiting for server to be up and running...");
 		
@@ -276,23 +287,19 @@ public class DebugClient
 		logger.debug("Successfully connected to server...");
 		readerThread.start();
 		listenerThread.start();
-	}
-	
-	public static DebugClient startClient(String serverHost, int serverPort, DebuggerInitClientMssg initMssg)
-	{
-		DebugClient client = new DebugClient(serverHost, serverPort);
-		client.start();
 		
-		client.sendDataToServer(initMssg);
-		return client;
+		logger.debug("Sending init-mssg to server..");
+		sendDataToServer(initMssg);
+
+		return this;
 	}
 	
-	public void sendDataToServer(Serializable data)
+	public void sendDataToServer(ClientMessage data)
 	{
 		sendDataToServer(data, null);
 	}
 	
-	public void sendDataToServer(Serializable data, IMessageCallback callback)
+	public void sendDataToServer(ClientMessage data, IMessageCallback callback)
 	{
 		if(clientSocket == null)
 		{
@@ -301,18 +308,17 @@ public class DebugClient
 		
 		try
 		{
+			logger.debug("Sending client message {} with id: {}", data, data.getRequestId());
+			
 			if(callback != null)
 			{
-				MessageWrapper wrapper = new MessageWrapper(data, true);
-				logger.debug("For message {} generated id: {}", data, wrapper.getId());
-				
-				this.writerStream.writeObject(wrapper);
+				this.writerStream.writeObject(data);
 				
 				callbackLock.lock();
 				
 				try
 				{
-					idToCallback.put(wrapper.getId(), callback);
+					idToCallback.put(data.getRequestId(), callback);
 				}finally
 				{
 					callbackLock.unlock();

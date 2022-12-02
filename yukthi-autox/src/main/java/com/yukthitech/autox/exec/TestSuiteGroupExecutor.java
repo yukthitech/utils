@@ -2,7 +2,7 @@ package com.yukthitech.autox.exec;
 
 import java.util.Set;
 
-import com.yukthitech.autox.BasicArguments;
+import com.yukthitech.autox.AutoxCliArguments;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.test.TestSuiteGroup;
@@ -24,7 +24,7 @@ public class TestSuiteGroupExecutor extends Executor
 		String parallelExecutionEnabled = context.getOverridableProp(IAutomationConstants.AUTOX_PROP_PARALLEL_EXEC_ENABLED);
 		super.parallelExecutionEnabled = "true".equalsIgnoreCase(parallelExecutionEnabled);
 		
-		BasicArguments basicArguments = context.getBasicArguments();
+		AutoxCliArguments basicArguments = context.getBasicArguments();
 		Set<String> limitedTestSuites = basicArguments.getTestSuitesSet();
 		Set<String> restrictedTestCases = basicArguments.getTestCasesSet();
 		

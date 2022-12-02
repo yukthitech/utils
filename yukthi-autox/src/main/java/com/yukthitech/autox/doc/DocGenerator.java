@@ -209,7 +209,7 @@ public class DocGenerator
 	
 	private static void loadFreeMarmerMethodDocs(DocInformation docInfo, String basePackages[], ExampleCollectionFile exampleCollections)
 	{
-		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)));
+		FreeMarkerMethodManager.reload(null, new HashSet<>(Arrays.asList(basePackages)), true);
 		Collection<FreeMarkerMethodDoc> methodDocs = FreeMarkerMethodManager.getRegisterMethodDocuments();
 
 		for(FreeMarkerMethodDoc doc : methodDocs)

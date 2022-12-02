@@ -15,7 +15,7 @@ import com.yukthitech.utils.cli.CliArgument;
  * Command line mapper bean to accept basic extended arguments.
  * @author akiran
  */
-public class BasicArguments
+public class AutoxCliArguments
 {
 	/**
 	 * Test suites folders from where test suites has to be loaded. This overrides folder specified in app config file.

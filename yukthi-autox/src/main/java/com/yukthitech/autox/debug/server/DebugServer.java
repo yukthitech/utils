@@ -1,5 +1,6 @@
 package com.yukthitech.autox.debug.server;
 
+import java.io.Closeable;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -19,10 +20,12 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.common.AutomationUtils;
-import com.yukthitech.autox.context.AutomationContext;
-import com.yukthitech.autox.debug.common.DebugPoint;
-import com.yukthitech.autox.debug.common.MessageWrapper;
+import com.yukthitech.autox.debug.common.ClientMessage;
+import com.yukthitech.autox.debug.common.ServerMssgConfirmation;
+import com.yukthitech.autox.debug.server.handler.DebugOpHandler;
+import com.yukthitech.autox.debug.server.handler.DebugPointsHandler;
 import com.yukthitech.autox.debug.server.handler.DebuggerInitHandler;
+import com.yukthitech.autox.debug.server.handler.EvalExpressionHandler;
 import com.yukthitech.autox.debug.server.handler.ExecuteStepsHandler;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -33,6 +36,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class DebugServer
 {
 	private static Logger logger = LogManager.getLogger(DebugServer.class);
+	
+	private static DebugServer instance;
 	
 	/**
 	 * Port on which monitoring manager should run.
@@ -84,6 +89,8 @@ public class DebugServer
 	 */
 	private Map<Class<?>, IServerDataHandler<Serializable>> dataHandlers = new HashMap<>();
 	
+	private boolean stopped = false;
+	
 	private DebugServer(int serverPort)
 	{
 		this.serverPort = serverPort;
@@ -91,29 +98,65 @@ public class DebugServer
 		writeThread = new Thread(this::sendDataToClient, "Debug Writer");
 		readThread = new Thread(this::readDataFromClient, "Debug Reader");
 		
-		addAsyncServerDataHandler( wrap(new ExecuteStepsHandler(AutomationContext.getInstance())) );
-		addAsyncServerDataHandler( wrap(new DebuggerInitHandler(AutomationContext.getInstance())) );
+		addAsyncServerDataHandler(new ExecuteStepsHandler());
+		addAsyncServerDataHandler(new DebuggerInitHandler());
+		addAsyncServerDataHandler(new DebugPointsHandler());
+		addAsyncServerDataHandler(new EvalExpressionHandler());
+		addAsyncServerDataHandler(new DebugOpHandler());
 	}
 	
-	private IServerDataHandler<Serializable> wrap(IServerDataHandler<? extends Serializable> handler)
+	public static boolean isRunningInDebugMode()
 	{
-		return new ServerDataHandlerWrapper(this, handler);
+		return (instance != null);
+	}
+	
+	public void reset()
+	{
+		stopped = true;
+		writeThread.interrupt();
+		readThread.interrupt();
+		
+		close(clientOutputStream);
+		close(clientInputStream);
+		close(clientSocket);
+		close(serverSocket);
+
+		try
+		{
+			writeThread.join();
+			readThread.join();
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		
+		instance = null;
+	}
+	
+	private void close(Closeable closeable)
+	{
+		try
+		{
+			closeable.close();
+		}catch(Exception ex)
+		{}
 	}
 	
 	/**
 	 * Adds the listener to the server.
 	 * @param handler handler to add
 	 */
-	public void addAsyncServerDataHandler(IServerDataHandler<Serializable> handler)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void addAsyncServerDataHandler(IServerDataHandler<?> handler)
 	{
-		this.dataHandlers.put(handler.getClass(), handler);
+		this.dataHandlers.put(handler.getSupportedDataType(), (IServerDataHandler) handler);
 	}
 	
 	private void sendDataToClient()
 	{
 		List<Serializable> dataBuff = null;
 		
-		while(true)
+		while(!stopped)
 		{
 			clientDataBufferLock.lock();
 			
@@ -146,6 +189,15 @@ public class DebugServer
 			{
 				logger.error("An error occurred while sending data to client. There might be some data loss being sent to client", ex);
 			}
+			
+			
+			try
+			{
+				Thread.sleep(Long.MAX_VALUE);
+			}catch(InterruptedException ex)
+			{
+				//ignore
+			}
 		}
 	}
 	
@@ -155,25 +207,16 @@ public class DebugServer
 	private void readDataFromClient()
 	{
 		//wait till client socket is closed
-		while(clientSocket != null && !clientSocket.isClosed())
+		while(!stopped && clientSocket != null && !clientSocket.isClosed())
 		{
 			try
 			{
-				Serializable object = (Serializable) clientInputStream.readObject();
+				ClientMessage object = (ClientMessage) clientInputStream.readObject();
 				logger.debug("Received command from client: {}", object);
 				
-				Class<?> dataType = null;
+				Class<?> mssgType = object.getClass();
 				
-				if(object instanceof MessageWrapper)
-				{
-					dataType = ((MessageWrapper) object).getMessage().getClass();
-				}
-				else
-				{
-					dataType = object.getClass();
-				}
-				
-				IServerDataHandler<Serializable> handler = this.dataHandlers.get(dataType);
+				IServerDataHandler<Serializable> handler = this.dataHandlers.get(mssgType);
 				
 				if(handler != null)
 				{
@@ -182,6 +225,7 @@ public class DebugServer
 				else
 				{
 					logger.warn("Unsupported debug-message received: {}", object);
+					sendClientMessage(new ServerMssgConfirmation(object.getRequestId(), false, "Unsupported debug-message received: %s", object));
 				}
 			}catch(Exception ex)
 			{
@@ -246,17 +290,28 @@ public class DebugServer
 	 * @param port
 	 * @return
 	 */
-	public static DebugServer start(int port)
+	public static synchronized DebugServer start(int port)
 	{
 		if(port <= 0)
 		{
 			throw new InvalidArgumentException("Invalid monitor port specified: " + port);
 		}
 		
-		DebugServer monitorManager = new DebugServer(port);
-		monitorManager.start();
+		if(instance != null)
+		{
+			throw new InvalidStateException("Debug server is already started.");
+		}
 		
-		return monitorManager;
+		DebugServer debugServer = new DebugServer(port);
+		instance = debugServer;
+		
+		debugServer.start();
+		return debugServer;
+	}
+	
+	public static DebugServer getInstance()
+	{
+		return instance;
 	}
 	
 	/**
@@ -270,23 +325,10 @@ public class DebugServer
 		try
 		{
 			clientDataBuffer.add(data);
+			writeThread.interrupt();
 		}finally
 		{
 			clientDataBufferLock.unlock();
 		}
-	}
-	
-	void executionPaused(AutomationContext context, DebugPoint debugPoint)
-	{
-		/*
-		List<ExecutionPausedServerMssg.StackElement> stackTrace = context.getExecutionStack()
-			.getStackTrace()
-			.stream()
-			.map(elem -> new ExecutionPausedServerMssg.StackElement(elem.getLocation(), elem.getLineNumber()))
-			.collect(Collectors.toList());
-		
-		ExecutionPausedServerMssg pauseMssg = new ExecutionPausedServerMssg(debugPoint.getFilePath(), debugPoint.getLineNumber(), stackTrace);
-		sendClientMessage(pauseMssg);
-		*/
 	}
 }

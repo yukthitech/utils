@@ -17,7 +17,6 @@ public interface IServerDataHandler<D extends Serializable>
 	/**
 	 * Invoked when a data is received from client.
 	 * @param data
-	 * @return true if data is processed.
 	 */
-	public boolean processData(D data);
+	public void processData(D data);
 }

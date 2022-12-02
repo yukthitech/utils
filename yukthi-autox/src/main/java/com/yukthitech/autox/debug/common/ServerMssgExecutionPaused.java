@@ -3,12 +3,13 @@ package com.yukthitech.autox.debug.common;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Used when execution is paused because of debug point.
  * @author akranthikiran
  */
-public class ExecutionPausedServerMssg implements Serializable
+public class ServerMssgExecutionPaused implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -43,8 +44,7 @@ public class ExecutionPausedServerMssg implements Serializable
 	}
 	
 	/**
-	 * Unique id which should be used when the current execution which is paused
-	 * has to be moved to next step.
+	 * Unique id representing current step or execution.
 	 */
 	private String executionId;
 	
@@ -62,12 +62,16 @@ public class ExecutionPausedServerMssg implements Serializable
 	 * Stack trace of current execution.
 	 */
 	private List<StackElement> stackTrace;
+	
+	private Map<String, byte[]> contextAttr;
 
-	public ExecutionPausedServerMssg(String debugFilePath, int lineNumber, List<StackElement> stackTrace)
+	public ServerMssgExecutionPaused(String executionId, String debugFilePath, int lineNumber, List<StackElement> stackTrace, Map<String, byte[]> contextAttr)
 	{
+		this.executionId = executionId;
 		this.debugFilePath = debugFilePath;
 		this.lineNumber = lineNumber;
 		this.stackTrace = new ArrayList<>(stackTrace);
+		this.contextAttr = contextAttr;
 	}
 
 	public String getExecutionId()
@@ -88,5 +92,10 @@ public class ExecutionPausedServerMssg implements Serializable
 	public List<StackElement> getStackTrace()
 	{
 		return stackTrace;
+	}
+
+	public Map<String, byte[]> getContextAttr()
+	{
+		return contextAttr;
 	}
 }

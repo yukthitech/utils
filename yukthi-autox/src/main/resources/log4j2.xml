@@ -17,7 +17,7 @@
 		</RollingFile>
 	</Appenders>
 	<Loggers>
-		<Logger name="com.yukthitech" level="debug" />
+		<Logger name="com.yukthitech" level="trace" />
 		<Logger name="com.yukthitech.utils.rest.RestClient" level="trace" />
 		
 		<Root level="error">

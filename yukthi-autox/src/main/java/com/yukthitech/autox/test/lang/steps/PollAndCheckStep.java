@@ -17,6 +17,7 @@ import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.test.Function;
@@ -152,8 +153,18 @@ public class PollAndCheckStep extends AbstractValidation
 		Date startTime = new Date();
 		exeLogger.debug("Starting time: {}. Check Condition: {}", TIME_FORMAT.format(startTime), checkCondition);
 		
+		int index = -1;
+		
 		while(true)
 		{
+			index++;
+			
+			//from second time check for debug point for current step
+			if(index > 0)
+			{
+				DebugFlowManager.getInstance().checkForDebugPoint(this);
+			}
+			
 			StepsExecutor.execute(exeLogger, poll, null);
 			
 			boolean conditionSuccessful = checkCondition(context, exeLogger);

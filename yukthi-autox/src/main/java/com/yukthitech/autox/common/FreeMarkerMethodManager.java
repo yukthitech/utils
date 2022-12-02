@@ -39,10 +39,10 @@ public class FreeMarkerMethodManager
 			throw new InvalidStateException("An error occurred while init freemarker context", ex);
 		}
 		
-		reload(null);
+		reload(null, getBasePackages(), false);
 	}
 	
-	public static void reload(ClassLoader classLoader)
+	private static Set<String> getBasePackages()
 	{
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
 		Set<String> basePackages = applicationConfiguration != null ? applicationConfiguration.getBasePackages() : null;
@@ -53,12 +53,22 @@ public class FreeMarkerMethodManager
 		}
 
 		basePackages.add("com.yukthitech");
-		reload(classLoader, basePackages);
+
+		return basePackages;
 	}
 	
-	public static void reload(ClassLoader classLoader, Set<String> basePackages)
+	public static void reload(ClassLoader classLoader)
 	{
-		freeMarkerEngine.reset();
+		reload(classLoader, getBasePackages(), true);
+	}
+	
+	public static void reload(ClassLoader classLoader, Set<String> basePackages, boolean reset)
+	{
+		if(reset)
+		{
+			freeMarkerEngine.reset();
+		}
+		
 		loadFreeMarkerMethods(classLoader, basePackages);
 	}
 	

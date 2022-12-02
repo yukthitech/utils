@@ -12,15 +12,18 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.autox.common.AutomationUtils;
+import com.yukthitech.autox.common.AutoxInfoException;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.config.PluginManager;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.exec.AsyncTryCatchBlock;
 import com.yukthitech.autox.exec.ExecutionPool;
@@ -32,7 +35,9 @@ import com.yukthitech.autox.test.TestDataFile;
 import com.yukthitech.autox.test.TestSuite;
 import com.yukthitech.autox.test.TestSuiteGroup;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.ccg.xml.XMLLoadException;
 import com.yukthitech.persistence.repository.RepositoryFactory;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.cli.CommandLineOptions;
 import com.yukthitech.utils.cli.MissingArgumentException;
 import com.yukthitech.utils.cli.OptionsFactory;
@@ -57,6 +62,50 @@ public class AutomationLauncher
 		ExecutionContextManager.reset();
 		ReportDataManager.reset();
 		ExecutionPool.reset();
+		
+		DebugFlowManager.getInstance().reset();
+		
+		if(DebugServer.getInstance() != null)
+		{
+			DebugServer.getInstance().reset();
+		}
+	}
+	
+	private static void handleLoadError(File xmlFile, Set<String> errors, Exception ex)
+	{
+		String error = null;
+		
+		if(ex instanceof XMLLoadException)
+		{
+			XMLLoadException xmlLoadException = (XMLLoadException) ex;
+			String mainError = null;
+			
+			if(xmlLoadException.getCause() instanceof AutoxInfoException)
+			{
+				mainError = xmlLoadException.getCause().getMessage();
+			}
+			else
+			{
+				mainError = CommonUtils.getRootCauseMessages(ex.getCause());
+			}
+			
+			error = String.format("File: %s\n"
+					+ "Location: [Line: %s, Column: %s]\n"
+					+ "Error: %s", xmlFile.getPath(), 
+						xmlLoadException.hasLocation() ? xmlLoadException.getLineNumber() : "<unknown>", 
+						xmlLoadException.hasLocation() ? xmlLoadException.getColumn() : "<unknown>",
+						mainError);
+		}
+		else
+		{
+			//only non-load exceptions log it. Loading exceptions should be displayed in proper format
+			logger.error("An error occurred while loading file: {}", xmlFile.getPath(), ex);
+			
+			error = String.format("File: %s\n"
+					+ "Error: %s", xmlFile.getPath(), CommonUtils.getRootCauseMessages(ex.getCause()));
+		}
+		
+		errors.add(error);
 	}
 
 	/**
@@ -193,15 +242,20 @@ public class AutomationLauncher
 				}
 			} catch(Exception ex)
 			{
-				logger.error("An error occurred while loading file: {}", xmlFile.getPath(), ex);
-				errors.add(String.format("Error File: %s\n\t\tError: %s\n\t\tCaused by: %s", xmlFile.getPath(), ex, ex.getCause()));
+				handleLoadError(xmlFile, errors, ex);
 			}
 		}
 		
 		if(!errors.isEmpty())
 		{
-			String errorStr = errors.stream().collect(Collectors.joining("\n\n\t"));
-			throw new InvalidStateException("Failed to load test suite files. Following errors occurred: \n\t{}", errorStr);
+			String errorStr = errors.stream().collect(Collectors.joining("\n"));
+			
+			System.err.println("\n\n\n==============================================================\n");
+			System.err.println("Failed to load test files because of below errors: \n");
+			System.err.println(errorStr);
+			System.err.println("\n\n==============================================================");
+			
+			System.exit(-1);
 		}
 
 		logger.debug("Found required plugins by this context to be: {}", PluginManager.getInstance().getPlugins());
@@ -226,7 +280,7 @@ public class AutomationLauncher
 		argBeanTypes = new ArrayList<>(argBeanTypes);
 		
 		//Add basic arguments type, so that on error its properties are not skipped in error message
-		argBeanTypes.add(BasicArguments.class);
+		argBeanTypes.add(AutoxCliArguments.class);
 
 		//if any type is required creation command line options and parse command line arguments
 		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(argBeanTypes.toArray(new Class<?>[0]));
@@ -249,13 +303,13 @@ public class AutomationLauncher
 	
 	public static AutomationContext loadAutomationContext(File appConfigurationFile, String extendedCommandLineArgs[]) throws Exception
 	{
-		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
-		BasicArguments basicArguments = null;
+		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(AutoxCliArguments.class);
+		AutoxCliArguments basicArguments = null;
 		
 		try
 		{
-			basicArguments = (BasicArguments) commandLineOptions.parseBean(extendedCommandLineArgs);
-		}catch(MissingArgumentException ex)
+			basicArguments = (AutoxCliArguments) commandLineOptions.parseBean(extendedCommandLineArgs);
+		}catch(MissingArgumentException | UnrecognizedOptionException ex)
 		{
 			System.err.println("Error: " + ex.getMessage());
 			System.err.println(commandLineOptions.fetchHelpInfo(COMMAND_SYNTAX));
@@ -295,7 +349,7 @@ public class AutomationLauncher
 	{
 		File currentFolder = new File(".");
 		
-		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(BasicArguments.class);
+		CommandLineOptions commandLineOptions = OptionsFactory.buildCommandLineOptions(AutoxCliArguments.class);
 
 		logger.debug("Executing from folder: " + currentFolder.getCanonicalPath());
 

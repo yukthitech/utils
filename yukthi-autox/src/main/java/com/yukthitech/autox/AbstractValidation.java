@@ -103,7 +103,14 @@ public abstract class AbstractValidation implements IValidation, Validateable
 	@Override
 	public void setLocation(File location, int lineNumber)
 	{
-		this.location = location;
+		try
+		{
+			this.location = location.getCanonicalFile();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to construct cannoical file", ex);
+		}
+
 		this.lineNumber = lineNumber;
 	}
 

@@ -18,6 +18,7 @@ import com.yukthitech.autox.Param;
 import com.yukthitech.autox.SourceType;
 import com.yukthitech.autox.common.SkipParsing;
 import com.yukthitech.autox.context.AutomationContext;
+import com.yukthitech.autox.debug.server.DebugFlowManager;
 import com.yukthitech.autox.exec.StepsExecutor;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -185,10 +186,18 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 			return;
 		}
 		
-		int index = 0;
+		int index = -1;
 		
 		for(Object obj : collection)
 		{
+			index++;
+			
+			//from second time check for debug point for current step
+			if(index > 0)
+			{
+				DebugFlowManager.getInstance().checkForDebugPoint(this);
+			}
+			
 			context.setAttribute(loopVar, obj);
 			context.setAttribute(loopIdxVar, index);
 			
@@ -209,8 +218,6 @@ public class ForEachLoopStep extends AbstractStep implements IStepContainer
 				
 				throw ex;
 			}
-
-			index++;
 		}
 	}
 }

@@ -38,6 +38,11 @@ public class ExecutionStack
 			return element.getLocation().getPath();
 		}
 		
+		public String getLocationName()
+		{
+			return element.getLocation().getName();
+		}
+		
 		public int getLineNumber()
 		{
 			return element.getLineNumber();
@@ -46,6 +51,26 @@ public class ExecutionStack
 		public String getSourceLocation()
 		{
 			return element.getLocation().getName() + ":" + element.getLineNumber();
+		}
+		
+		public boolean isSameLocation(ILocationBased element)
+		{
+			if(element == null)
+			{
+				return false;
+			}
+			
+			if(this.element == element)
+			{
+				return true;
+			}
+			
+			if(this.element.getLocation().equals(element.getLocation()) && this.element.getLineNumber() == element.getLineNumber())
+			{
+				return true;
+			}
+			
+			return false;
 		}
 		
 		public String toString()
@@ -166,6 +191,29 @@ public class ExecutionStack
 	{
 		object = unwrapStep(object);
 		return (objectStack.peek() == object);
+	}
+	
+	/**
+	 * Returns true if specified element is part of stack.
+	 * @param element
+	 * @return
+	 */
+	public boolean isSubexecutionOf(ILocationBased element)
+	{
+		if(stackTrace.isEmpty())
+		{
+			return false;
+		}
+		
+		for(StackElement elem : this.stackTrace)
+		{
+			if(elem.isSameLocation(element))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	public String toStackTrace()

@@ -7,14 +7,13 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.autox.BasicArguments;
+import com.yukthitech.autox.AutoxCliArguments;
 import com.yukthitech.autox.TestSuiteParserHandler;
 import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.common.IAutomationConstants;
 import com.yukthitech.autox.config.ApplicationConfiguration;
 import com.yukthitech.autox.config.IPlugin;
 import com.yukthitech.autox.config.IPluginSession;
-import com.yukthitech.autox.debug.server.DebugServer;
 import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.Log4jExecutionLogger;
 import com.yukthitech.autox.storage.PersistenceStorage;
@@ -37,7 +36,7 @@ public class AutomationContext
 	/**
 	 * Basic arguments specified from command line context.
 	 */
-	private BasicArguments basicArguments;
+	private AutoxCliArguments basicArguments;
 	
 	/**
 	 * Application configuration.
@@ -71,11 +70,6 @@ public class AutomationContext
 	private File reportFolder;
 	
 	/**
-	 * Used to send monitor messages to connected client.
-	 */
-	private DebugServer debugServer;
-	
-	/**
 	 * The test suite parser handler.
 	 */
 	private TestSuiteParserHandler testSuiteParserHandler;
@@ -85,11 +79,6 @@ public class AutomationContext
 	 */
 	private Map<String, CustomUiLocator> customUiLocators = new HashMap<>();
 	
-	/**
-	 * Flag indicating if this context ready for client interaction.
-	 */
-	private boolean readyToInteract;
-
 	/**
 	 * Constructor.
 	 * @param appConfiguration Application configuration
@@ -129,21 +118,6 @@ public class AutomationContext
 	}
 	
 	/**
-	 * Sets the used to send monitor messages to connected client.
-	 *
-	 * @param monitorServer the new used to send monitor messages to connected client
-	 */
-	public void setDebugServer(DebugServer monitorServer)
-	{
-		this.debugServer = monitorServer;
-	}
-	
-	public DebugServer getDebugServer()
-	{
-		return debugServer;
-	}
-	
-	/**
 	 * Gets the automation context that can be accessed anywhere needed.
 	 *
 	 * @return the automation context that can be accessed anywhere needed
@@ -173,7 +147,7 @@ public class AutomationContext
 	 *
 	 * @param basicArguments the new basic arguments specified from command line context
 	 */
-	public void setBasicArguments(BasicArguments basicArguments)
+	public void setBasicArguments(AutoxCliArguments basicArguments)
 	{
 		this.basicArguments = basicArguments;
 	}
@@ -183,7 +157,7 @@ public class AutomationContext
 	 *
 	 * @return the basic arguments specified from command line context
 	 */
-	public BasicArguments getBasicArguments()
+	public AutoxCliArguments getBasicArguments()
 	{
 		return basicArguments;
 	}
@@ -504,34 +478,6 @@ public class AutomationContext
 	public void setExecutionLogger(IExecutionLogger executionLogger)
 	{
 		ExecutionContextManager.getExecutionContext().setExecutionLogger(executionLogger);
-	}
-	
-	/**
-	 * Send ready to interact.
-	 */
-	public void sendReadyToInteract()
-	{
-		readyToInteract = true;
-	}
-	
-	/**
-	 * Gets the flag indicating if this context ready for client interaction.
-	 *
-	 * @return the flag indicating if this context ready for client interaction
-	 */
-	public boolean isReadyToInteract()
-	{
-		return readyToInteract;
-	}
-	
-	/**
-	 * Checks if is monitoring enabled.
-	 *
-	 * @return true, if is monitoring enabled
-	 */
-	public boolean isMonitoringEnabled()
-	{
-		return (debugServer != null);
 	}
 	
 	/**

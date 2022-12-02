@@ -49,12 +49,7 @@ public interface IAutomationConstants
 	/**
 	 * Used to process json expressions.
 	 */
-	public JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine()
-	{
-		{
-			super.setFreeMarkerEngine(FreeMarkerMethodManager.getFreeMarkerEngine());
-		}
-	};
+	public JsonExprEngine JSON_EXPR_ENGINE = new JsonExprEngine(FreeMarkerMethodManager.getFreeMarkerEngine());
 
 	/**
 	 * Five seconds.

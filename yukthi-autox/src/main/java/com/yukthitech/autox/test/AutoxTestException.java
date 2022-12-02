@@ -3,7 +3,7 @@ package com.yukthitech.autox.test;
 import com.yukthitech.autox.IStep;
 import com.yukthitech.utils.exceptions.UtilsException;
 
-public class AutoxException extends UtilsException
+public class AutoxTestException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -19,7 +19,7 @@ public class AutoxException extends UtilsException
 	 * @param message the message
 	 * @param args the args
 	 */
-	public AutoxException(IStep sourceStep, String message, Object... args)
+	public AutoxTestException(IStep sourceStep, String message, Object... args)
 	{
 		super(message, args);
 		this.sourceStep = sourceStep;
