@@ -67,7 +67,7 @@ public class JsonExprEngine
 	/**
 	 * Free marker engine for expression processing.
 	 */
-	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+	private FreeMarkerEngine freeMarkerEngine;
 	
 	/**
 	 * Conversion functionality.
@@ -76,6 +76,12 @@ public class JsonExprEngine
 	
 	public JsonExprEngine()
 	{
+		this(new FreeMarkerEngine());
+	}
+
+	public JsonExprEngine(FreeMarkerEngine freeMarkerEngine)
+	{
+		this.freeMarkerEngine = freeMarkerEngine;
 		this.conversions = new Conversions(freeMarkerEngine);
 	}
 

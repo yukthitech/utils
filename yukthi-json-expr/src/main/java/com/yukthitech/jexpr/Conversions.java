@@ -59,7 +59,7 @@ public class Conversions
 	/**
 	 * Free marker engine for expression processing.
 	 */
-	private FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+	private FreeMarkerEngine freeMarkerEngine;
 	
 	public Conversions(FreeMarkerEngine freeMarkerEngine)
 	{
