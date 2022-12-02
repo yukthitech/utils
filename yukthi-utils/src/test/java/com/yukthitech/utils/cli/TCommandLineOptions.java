@@ -12,7 +12,7 @@ public class TCommandLineOptions
 	 * @throws MissingArgumentException
 	 */
 	@Test
-	public void testWithSingleBean_shortNames() throws MissingArgumentException
+	public void testWithSingleBean_shortNames() throws Exception
 	{
 		CommandLineOptions options = OptionsFactory.buildCommandLineOptions(MappedBean1.class);
 		MappedBean1 bean = (MappedBean1) options.parseBean("-n", "kranthi", "-a", "36");
@@ -26,7 +26,7 @@ public class TCommandLineOptions
 	 * @throws MissingArgumentException
 	 */
 	@Test
-	public void testWithSingleBean_longNames() throws MissingArgumentException
+	public void testWithSingleBean_longNames() throws Exception
 	{
 		CommandLineOptions options = OptionsFactory.buildCommandLineOptions(MappedBean1.class);
 		MappedBean1 bean = (MappedBean1) options.parseBean("--name", "kranthi", "--age", "36");
@@ -40,7 +40,7 @@ public class TCommandLineOptions
 	 * @throws MissingArgumentException
 	 */
 	@Test
-	public void testWithSingleBean_missingOptionalParam() throws MissingArgumentException
+	public void testWithSingleBean_missingOptionalParam() throws Exception
 	{
 		CommandLineOptions options = OptionsFactory.buildCommandLineOptions(MappedBean1.class);
 		MappedBean1 bean = (MappedBean1) options.parseBean("--name", "kranthi");
@@ -55,7 +55,7 @@ public class TCommandLineOptions
 	 */
 	@Test(expectedExceptions = MissingArgumentException.class, 
 		expectedExceptionsMessageRegExp = "Required command line argument \\'\\-n\\' \\(\\-\\-name\\) is not specified\\.")
-	public void testWithSingleBean_missingRequiredParam() throws MissingArgumentException
+	public void testWithSingleBean_missingRequiredParam() throws Exception
 	{
 		CommandLineOptions options = OptionsFactory.buildCommandLineOptions(MappedBean1.class);
 		options.parseBean("--age", "20");
@@ -79,7 +79,7 @@ public class TCommandLineOptions
 	 * @throws MissingArgumentException
 	 */
 	@Test
-	public void testWithMultipleBeans() throws MissingArgumentException
+	public void testWithMultipleBeans() throws Exception
 	{
 		CommandLineOptions options = OptionsFactory.buildCommandLineOptions(MappedBean1.class, MappedBean2.class);
 		System.out.println(options.fetchHelpInfo("test"));

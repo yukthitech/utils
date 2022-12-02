@@ -15,6 +15,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -135,7 +136,7 @@ public class CommandLineOptions
 	 * @return Bean of configured type
 	 * @throws MissingArgumentException Thrown if any mandatory argument is not specified
 	 */
-	public Object parseBean(String... args) throws MissingArgumentException
+	public Object parseBean(String... args) throws MissingArgumentException, UnrecognizedOptionException
 	{
 		if(beanTypes.size() > 1)
 		{
@@ -159,7 +160,7 @@ public class CommandLineOptions
 	 * @return Beans of configured types as map
 	 * @throws MissingArgumentException Thrown if any mandatory argument is not specified
 	 */
-	public Map<Class<?>, Object> parseBeans(String... args) throws MissingArgumentException
+	public Map<Class<?>, Object> parseBeans(String... args) throws MissingArgumentException, UnrecognizedOptionException
 	{
 		Map<Class<?>, Object> beans = new HashMap<Class<?>, Object>();
 		
@@ -210,7 +211,7 @@ public class CommandLineOptions
 			}
 			
 			return beans;
-		} catch(MissingArgumentException ex)
+		} catch(MissingArgumentException | UnrecognizedOptionException ex)
 		{
 			throw ex;
 		} catch(Exception ex)
