@@ -41,7 +41,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 	{
 		try
 		{
-			StepsExecutor.execute(exeLogger, steps, null);
+			StepsExecutor.execute(steps, null);
 		}catch(Exception ex)
 		{
 			if(catchStep == null)
@@ -62,7 +62,7 @@ public class TryStep extends AbstractContainerStep implements IStepContainer, IM
 			exeLogger.warn("Exception occurred while executing try-block. Executing catch block. Exception: {}", ex);
 			
 			context.setAttribute(catchStep.getErrorAttr(), ex);
-			StepsExecutor.execute(exeLogger, catchStep.getSteps(), null);
+			StepsExecutor.execute(catchStep.getSteps(), null);
 		}
 	}
 }

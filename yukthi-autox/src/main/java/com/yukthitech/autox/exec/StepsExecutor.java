@@ -67,17 +67,17 @@ public class StepsExecutor
 	 * @param exeLogger logger to be used
 	 * @param step step to be executed
 	 */
-	private static void executeStep(IExecutionLogger exeLogger, IStep sourceStep) throws Exception
+	private static void executeStep(IStep sourceStep) throws Exception
 	{
+		AutomationContext context = AutomationContext.getInstance();
+		IExecutionLogger exeLogger = context.getExecutionLogger();
+		
 		//if step is marked not to log anything
 		if(sourceStep.isLoggingDisabled())
 		{
 			//disable logging
 			exeLogger.setDisabled(true);
 		}
-
-		AutomationContext context = AutomationContext.getInstance();
-		context.setExecutionLogger(exeLogger);
 		
 		//clone the step, so that expression replacement will not affect actual step
 		IStep step = sourceStep.clone();
@@ -116,12 +116,11 @@ public class StepsExecutor
 			
 			//re-enable logging, in case it is disabled
 			exeLogger.setDisabled(false);
-			context.setExecutionLogger(null);
 		}
 
 	}
 	
-	public static void execute(IExecutionLogger logger, List<IStep> steps, ObjectWrapper<IStep> currentStep) throws Exception
+	public static void execute(List<IStep> steps, ObjectWrapper<IStep> currentStep) throws Exception
 	{
 		if(CollectionUtils.isEmpty(steps))
 		{
@@ -142,7 +141,7 @@ public class StepsExecutor
 				}
 				
 				debugFlowManager.checkForDebugPoint(step);
-				executeStep(logger, step);
+				executeStep(step);
 			}
 		}catch(HandledException ex)
 		{

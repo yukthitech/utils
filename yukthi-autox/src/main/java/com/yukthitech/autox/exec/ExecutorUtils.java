@@ -14,7 +14,6 @@ import com.yukthitech.autox.config.ErrorDetails;
 import com.yukthitech.autox.config.IPluginSession;
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ExecutionContextManager;
-import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.Function;
@@ -92,8 +91,8 @@ public class ExecutorUtils
 		}
 		
 		ReportDataManager reportManager = ReportDataManager.getInstance();
-		IExecutionLogger setupLogger = reportManager.getSetupExecutionLogger(executor);
-		setupLogger.setMode(mode);
+		executor.activeExecutionLogger = reportManager.getSetupExecutionLogger(executor);
+		executor.activeExecutionLogger.setMode(mode);
 		
 		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
 		
@@ -101,7 +100,7 @@ public class ExecutorUtils
 		{
 			reportManager.executionStarted(ExecutionType.SETUP, executor);
 			
-			StepsExecutor.execute(setupLogger, setup.getSteps(), currentStep);
+			StepsExecutor.execute(setup.getSteps(), currentStep);
 			reportManager.executionCompleted(ExecutionType.SETUP, executor);
 			
 			return true;
@@ -110,7 +109,7 @@ public class ExecutorUtils
 			executor.setStatus(TestStatus.ERRORED, "Setup failed with error: " + ex.getMessage());
 			
 			Executable executable = currentStep.getValue().getClass().getAnnotation(Executable.class);
-			invokeErrorHandling(executable, new ErrorDetails(setupLogger, currentStep.getValue(), ex));
+			invokeErrorHandling(executable, new ErrorDetails(executor.activeExecutionLogger, currentStep.getValue(), ex));
 
 			//logger.error("An error occurred during setup execution", ex);
 			reportManager.executionErrored(ExecutionType.SETUP, executor, "Setup failed with error: " + ex.getMessage());
@@ -119,7 +118,7 @@ public class ExecutorUtils
 			return false;
 		}finally
 		{
-			setupLogger.clearMode();
+			executor.activeExecutionLogger.clearMode();
 		}
 	}
 	
@@ -131,8 +130,8 @@ public class ExecutorUtils
 		}
 
 		ReportDataManager reportManager = ReportDataManager.getInstance();
-		IExecutionLogger cleanupLogger = reportManager.getCleanupExecutionLogger(executor);
-		cleanupLogger.setMode(mode);
+		executor.activeExecutionLogger = reportManager.getCleanupExecutionLogger(executor);
+		executor.activeExecutionLogger.setMode(mode);
 		
 		ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
 		
@@ -140,7 +139,7 @@ public class ExecutorUtils
 		{
 			reportManager.executionStarted(ExecutionType.CLEANUP, executor);
 			
-			StepsExecutor.execute(cleanupLogger, cleanup.getSteps(), currentStep);
+			StepsExecutor.execute(cleanup.getSteps(), currentStep);
 			reportManager.executionCompleted(ExecutionType.CLEANUP, executor);
 			
 			return true;
@@ -149,7 +148,7 @@ public class ExecutorUtils
 			executor.setStatus(TestStatus.ERRORED, "Cleanup failed with error: " + ex.getMessage());
 			
 			Executable executable = currentStep.getValue().getClass().getAnnotation(Executable.class);
-			invokeErrorHandling(executable, new ErrorDetails(cleanupLogger, currentStep.getValue(), ex));
+			invokeErrorHandling(executable, new ErrorDetails(executor.activeExecutionLogger, currentStep.getValue(), ex));
 
 			//logger.error("An error occurred during cleanup execution", ex);
 			reportManager.executionErrored(ExecutionType.CLEANUP, executor, "Cleanup failed with error: " + ex.getMessage());
@@ -158,7 +157,7 @@ public class ExecutorUtils
 			return false;
 		}finally
 		{
-			cleanupLogger.clearMode();
+			executor.activeExecutionLogger.clearMode();
 		}
 	}
 

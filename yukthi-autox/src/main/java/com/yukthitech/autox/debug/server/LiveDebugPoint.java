@@ -29,7 +29,6 @@ import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionReleased;
 import com.yukthitech.autox.debug.common.ServerMssgStepExecuted;
 import com.yukthitech.autox.exec.StepsExecutor;
-import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.filter.ExpressionFactory;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -78,6 +77,8 @@ public class LiveDebugPoint
 	
 	private ReentrantLock pauseLock = new ReentrantLock();
 	private Condition releaseRequestCondition = pauseLock.newCondition();
+	
+	private AtomicBoolean requestExecutionInProgress = new AtomicBoolean(false);
 	
 	private LiveDebugPoint(ILocationBased location, DebugPoint debugPoint, Consumer<LiveDebugPoint> callback)
 	{
@@ -209,8 +210,7 @@ public class LiveDebugPoint
 	{
 		try
 		{
-			IExecutionLogger logger = ExecutionContextManager.getExecutionContext().getExecutionLogger();
-			StepsExecutor.execute(logger, steps, null);
+			StepsExecutor.execute(steps, null);
 			
 			DebugServer.getInstance().sendClientMessage(new ServerMssgStepExecuted(reqId, true, getContextAttr(), null));
 		}catch(Exception ex)
@@ -244,29 +244,37 @@ public class LiveDebugPoint
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void handleOnHoldTasks()
 	{
-		List<Request> currentRequests = new ArrayList<>();
+		requestExecutionInProgress.set(true);
 		
-		synchronized(requests)
+		try
 		{
-			if(requests.isEmpty())
+			List<Request> currentRequests = new ArrayList<>();
+			
+			synchronized(requests)
 			{
-				return;
+				if(requests.isEmpty())
+				{
+					return;
+				}
+	
+				currentRequests.addAll(this.requests);
+				this.requests.clear();
 			}
-
-			currentRequests.addAll(this.requests);
-			this.requests.clear();
-		}
-
-		for(Request req : currentRequests)
+	
+			for(Request req : currentRequests)
+			{
+				if(req.data instanceof List)
+				{
+					executeStepsRequest(req.requestId, (List) req.data);
+				}
+				else
+				{
+					evalExprRequest(req.requestId, (String) req.data);
+				}
+			}
+		}finally
 		{
-			if(req.data instanceof List)
-			{
-				executeStepsRequest(req.requestId, (List) req.data);
-			}
-			else
-			{
-				evalExprRequest(req.requestId, (String) req.data);
-			}
+			requestExecutionInProgress.set(false);
 		}
 	}
 	
@@ -329,12 +337,12 @@ public class LiveDebugPoint
 	
 	public boolean release(String reqId, DebugOp debugOp)
 	{
-		logger.trace("LivePOINT: Release operation request with op: {}", debugOp);
-		
 		pauseLock.lock();
 		
 		try
 		{
+			logger.trace("LivePOINT: Release operation request with op: {}", debugOp);
+
 			if(!onPause.get())
 			{
 				DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(reqId, false, "Current live-point is not in paused state"));
@@ -371,6 +379,12 @@ public class LiveDebugPoint
 		
 		try
 		{
+			//if dyn request execution in progress, dont pause anywhere
+			if(requestExecutionInProgress.get())
+			{
+				return;
+			}
+			
 			DebugOp lastDebugOp = this.lastDebugOp;
 			
 			//when stepping into function, hold irrespective of location

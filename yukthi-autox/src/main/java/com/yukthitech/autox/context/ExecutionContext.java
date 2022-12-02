@@ -47,11 +47,6 @@ public class ExecutionContext
 	 */
 	private ExecutionContext parentContext;
 
-	/**
-	 * Current execution logger. Can be null.
-	 */
-	private IExecutionLogger executionLogger;
-
 	private List<ILogMonitorSession> monitorSessions;
 	
 	public ExecutionContext(ExecutionContextManager parent, Executor executor)
@@ -162,17 +157,14 @@ public class ExecutionContext
 	
 	public IExecutionLogger getExecutionLogger()
 	{
+		IExecutionLogger executionLogger = executor.getActiveExecutionLogger();
+		
 		if(executionLogger == null)
 		{
 			return Log4jExecutionLogger.getInstance();
 		}
 		
 		return executionLogger;
-	}
-
-	public void setExecutionLogger(IExecutionLogger executionLogger)
-	{
-		this.executionLogger = executionLogger;
 	}
 	
 	public synchronized void startLogMonitoring()

@@ -98,7 +98,7 @@ public enum LocatorType
 	 * @param key Key for which locator type to be fetched
 	 * @return Matching locator type
 	 */
-	public static LocatorType getLocatorType(String key)
+	public static synchronized LocatorType getLocatorType(String key)
 	{
 		if(keyToType != null)
 		{

@@ -5,17 +5,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.yukthitech.autox.AutomationLauncher;
+import com.yukthitech.autox.common.AutomationUtils;
 import com.yukthitech.autox.debug.client.DebugClient;
 import com.yukthitech.autox.debug.client.IDebugClientHandler;
 import com.yukthitech.autox.debug.common.ClientMssgDebugOp;
 import com.yukthitech.autox.debug.common.ClientMssgDebuggerInit;
+import com.yukthitech.autox.debug.common.ClientMssgExecuteSteps;
 import com.yukthitech.autox.debug.common.DebugOp;
 import com.yukthitech.autox.debug.common.DebugPoint;
 import com.yukthitech.autox.debug.common.ServerMssgExecutionPaused;
@@ -37,6 +41,8 @@ public class TDebugFlows extends BaseTestCases
 		
 		private DebugOp debugOp;
 		
+		private BiConsumer<ServerMssgExecutionPaused, DebugClientHandler> pauseConsumer;
+		
 		public DebugClientHandler(DebugClient debugClient, String expectedFile, DebugOp debugOp)
 		{
 			this.debugClient = debugClient;
@@ -57,6 +63,11 @@ public class TDebugFlows extends BaseTestCases
 				logger.debug("Debug with execution-id {} is pasused at {}:{}", 
 						mssg.getExecutionId(), mssg.getDebugFilePath(), mssg.getLineNumber());
 				
+				if(pauseConsumer != null)
+				{
+					pauseConsumer.accept(mssg, this);
+				}
+				
 				debugClient.sendDataToServer(new ClientMssgDebugOp(mssg.getExecutionId(), debugOp));
 			}
 			else if(data instanceof ServerMssgExecutionReleased)
@@ -67,7 +78,10 @@ public class TDebugFlows extends BaseTestCases
 		}
 	}
 	
-	public void testDebugFlow(DebugOp debugOp, List<Integer> debugPointLines, List<Integer> expectedPauses) throws Exception
+	public void testDebugFlow(DebugOp debugOp, List<Integer> debugPointLines, 
+			BiConsumer<ServerMssgExecutionPaused, DebugClientHandler> pauseConsumer, 
+			String testCase,
+			List<Integer> expectedPauses) throws Exception
 	{
 		ObjectWrapper<DebugClientHandler> clientHandler = new ObjectWrapper<>();
 		
@@ -90,6 +104,7 @@ public class TDebugFlows extends BaseTestCases
 					
 					DebugClient debugClient = DebugClient.newClient("localhost", 9876, initDebugPoints);
 					DebugClientHandler handler = new DebugClientHandler(debugClient, debugFile, debugOp);
+					handler.pauseConsumer = pauseConsumer;
 					
 					clientHandler.setValue(handler);
 					
@@ -112,7 +127,7 @@ public class TDebugFlows extends BaseTestCases
 				"--debug-port", "9876",
 				"--report-opening-disabled", "true",
 				//"-ts", "data-provider-err"
-				//"-tc", "screenShotInCleanupErr"
+				"-tc", testCase
 				//"-list", "com.yukthitech.autox.event.DemoModeAutomationListener"
 			});
 		
@@ -131,7 +146,7 @@ public class TDebugFlows extends BaseTestCases
 	@Test
 	public void testStepIntoFlow() throws Exception
 	{
-		testDebugFlow(DebugOp.STEP_INTO, Arrays.asList(8), Arrays.asList(
+		testDebugFlow(DebugOp.STEP_INTO, Arrays.asList(8), null, "debugTest1", Arrays.asList(
 				//setup
 				8, 9,
 				
@@ -143,14 +158,14 @@ public class TDebugFlows extends BaseTestCases
 					13, 14,
 					
 				//cleanup	
-				36, 37
+				47, 48
 			));
 	}
 
 	@Test
 	public void testStepOverFlow() throws Exception
 	{
-		testDebugFlow(DebugOp.STEP_OVER, Arrays.asList(8), Arrays.asList(
+		testDebugFlow(DebugOp.STEP_OVER, Arrays.asList(8), null, "debugTest1", Arrays.asList(
 				//setup
 				8, 9,
 				
@@ -158,14 +173,41 @@ public class TDebugFlows extends BaseTestCases
 				29, 30, 32,
 					
 				//cleanup	
-				36, 37
+				47, 48
 			));
 	}
 	
 	@Test
 	public void testStepReturnFlow() throws Exception
 	{
-		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(8, 13, 36), Arrays.asList(8, 13, 36));
+		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(8, 13, 48), null, "debugTest1", Arrays.asList(8, 13, 48));
+	}
+
+	@Test
+	public void testExpressionEvaluation() throws Exception
+	{
+		ObjectWrapper<Boolean> consumerExectued = new ObjectWrapper<>(false);
+		
+		BiConsumer<ServerMssgExecutionPaused, DebugClientHandler> onPause = (mssg, handler) -> 
+		{
+			consumerExectued.setValue(true);
+			
+			//check whether attr is coming properly
+			Object value = SerializationUtils.deserialize(mssg.getContextAttr().get("someAttr"));
+			Assert.assertEquals(value, 10);
+			
+			//using step evaluation set attr to 100
+			String steps = "<s:log message=\"This is from dyn step execution..\"/>\n"
+					+ "<s:set expression=\"someAttr\" value=\"int: 100\"/>\n";
+			
+			handler.debugClient.sendDataToServer(new ClientMssgExecuteSteps(mssg.getExecutionId(), steps));
+			
+			//wait for 5 seconds, so that step execution is completed
+			AutomationUtils.sleep(5000);
+		};
+		
+		testDebugFlow(DebugOp.STEP_RETURN, Arrays.asList(41), onPause, "debugExprTest", Arrays.asList(41));
+		Assert.assertTrue(consumerExectued.getValue());
 	}
 
 }

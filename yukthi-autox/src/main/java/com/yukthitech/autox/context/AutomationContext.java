@@ -471,16 +471,6 @@ public class AutomationContext
 	}
 
 	/**
-	 * Sets the current execution logger. Can be null.
-	 *
-	 * @param executionLogger the new current execution logger
-	 */
-	public void setExecutionLogger(IExecutionLogger executionLogger)
-	{
-		ExecutionContextManager.getExecutionContext().setExecutionLogger(executionLogger);
-	}
-	
-	/**
 	 * Gets the test suite parser handler.
 	 *
 	 * @return the test suite parser handler

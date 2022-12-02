@@ -9,7 +9,6 @@ import org.openqa.selenium.InvalidArgumentException;
 
 import com.yukthitech.autox.context.AutomationContext;
 import com.yukthitech.autox.context.ReportLogFile;
-import com.yukthitech.autox.exec.report.IExecutionLogger;
 import com.yukthitech.autox.exec.report.ReportDataManager;
 import com.yukthitech.autox.test.Cleanup;
 import com.yukthitech.autox.test.IDataProvider;
@@ -143,26 +142,17 @@ public class TestCaseExecutor extends Executor
 	
 	private List<TestCaseData> executeDataProvider(IDataProvider dataProvider)
 	{
-		AutomationContext automationContext = AutomationContext.getInstance();
+		super.activeExecutionLogger = ReportDataManager.getInstance().getSetupExecutionLogger(this);
+		super.activeExecutionLogger.setMode("Data-Provider");
 		
-		IExecutionLogger executionLogger = ReportDataManager.getInstance().getSetupExecutionLogger(this);
-		executionLogger.setMode("Data-Provider");
-		automationContext.setExecutionLogger(executionLogger);
+		List<TestCaseData> data = dataProvider.getStepData();
 		
-		try
+		if(CollectionUtils.isEmpty(data))
 		{
-			List<TestCaseData> data = dataProvider.getStepData();
-			
-			if(CollectionUtils.isEmpty(data))
-			{
-				executionLogger.error("Data provider resulted in null or empty data list");
-			}
-			
-			return data;
-		} finally
-		{
-			automationContext.setExecutionLogger(null);
+			super.activeExecutionLogger.error("Data provider resulted in null or empty data list");
 		}
+		
+		return data;
 	}
 	
 	@Override

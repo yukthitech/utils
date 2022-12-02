@@ -78,6 +78,11 @@ public abstract class Executor
 	 */
 	protected boolean parentContextShared;
 	
+	/**
+	 * Active execution logger.
+	 */
+	IExecutionLogger activeExecutionLogger;
+	
 	protected Executor(Object executable, String childName)
 	{
 		this.executable = executable;
@@ -90,7 +95,12 @@ public abstract class Executor
 	{
 		return uniqueId;
 	}
-	
+
+	public IExecutionLogger getActiveExecutionLogger()
+	{
+		return activeExecutionLogger;
+	}
+
 	/**
 	 * Invoked before execution. If this method returns null execution occurs immediately.
 	 * If other executors are returned, then this method will be invoked again post execution
@@ -260,55 +270,6 @@ public abstract class Executor
 				closeReportManager();
 			});
 		}).executeWithParent(parent);
-
-		/*
-		try
-		{
-			//Execute setup
-			if(!ExecutorUtils.executeSetup(setup, "Setup", this))
-			{
-				return;
-			}
-			
-			if(!init())
-			{
-				return;
-			}
-			
-			try
-			{
-				//execute children
-				if(childExecutors != null)
-				{
-					executeChildExecutors();
-				}
-				else
-				{
-					executeChildSteps();
-				}
-			} catch(RuntimeException ex) 
-			{
-				logger.error("An error occurred during exection", ex);
-				throw ex;
-			} finally
-			{
-				//Pre cleanup is expected to take care of tasks like data-clean-up
-				preCleanup();
-				
-				//execute cleanup
-				ExecutorUtils.executeCleanup(cleanup, "Cleanup", this);
-			}
-		} finally
-		{
-			//execute after child even if setup of test case fails
-			// but should not execute if before-child fails
-			ExecutorUtils.executeCleanup(afterChildFromParent, "After-Child", this);
-			
-			postExecute();
-			closeReportManager();
-			ExecutionContextManager.getInstance().pop(this);
-		}
-		*/
 	}
 	
 	protected void preCleanup()
@@ -420,7 +381,7 @@ public abstract class Executor
 	{
 		ExecutionContextManager.executeInContext(this, () -> 
 		{
-			IExecutionLogger logger = ReportDataManager.getInstance().getExecutionLogger(this);
+			activeExecutionLogger = ReportDataManager.getInstance().getExecutionLogger(this);
 			ObjectWrapper<IStep> currentStep = new ObjectWrapper<>();
 	
 			//NOTE: Even parallel execution is used by test-suites or data-test-cases, final test case
@@ -428,11 +389,11 @@ public abstract class Executor
 			// here only
 			try
 			{
-				StepsExecutor.execute(logger, childSteps, currentStep);
+				StepsExecutor.execute(childSteps, currentStep);
 				setStatus(TestStatus.SUCCESSFUL, null);
 			} catch(Exception ex)
 			{
-				handleException(currentStep.getValue(), logger, ex);
+				handleException(currentStep.getValue(), activeExecutionLogger, ex);
 			}
 		});
 	}

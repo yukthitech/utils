@@ -175,7 +175,7 @@ public class Function extends AbstractLocationBased implements IStepContainer, C
 		
 		try
 		{
-			StepsExecutor.execute(logger, steps, null);
+			StepsExecutor.execute(steps, null);
 		} catch(Exception ex)
 		{
 			//occurs during return statement execution
