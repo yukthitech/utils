@@ -12,6 +12,12 @@ import org.xml.sax.Locator;
 public class XMLLoadException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
+	
+	private Integer lineNumber;
+	
+	private Integer column;
+	
+	private String nodePath;
 
 	/**
 	 * Build XMLLoadException with specified values.
@@ -26,6 +32,17 @@ public class XMLLoadException extends RuntimeException
 	public XMLLoadException(String mssg, Throwable thr, BeanNode node, Locator locator)
 	{
 		super(buildMessage(mssg, node, locator), thr);
+		
+		if(locator != null)
+		{
+			this.lineNumber = locator.getLineNumber();
+			this.column = locator.getColumnNumber();
+		}
+		
+		if(node != null)
+		{
+			this.nodePath = node.getNodePath();
+		}
 	}
 
 	/**
@@ -52,6 +69,26 @@ public class XMLLoadException extends RuntimeException
 	public XMLLoadException(String mssg, Throwable thr, Locator locator)
 	{
 		this(mssg, thr, null, locator);
+	}
+	
+	public int getLineNumber()
+	{
+		return lineNumber;
+	}
+
+	public int getColumn()
+	{
+		return column;
+	}
+
+	public String getNodePath()
+	{
+		return nodePath;
+	}
+	
+	public boolean hasLocation()
+	{
+		return (lineNumber != null);
 	}
 
 	/**
