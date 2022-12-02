@@ -21,12 +21,12 @@ public class EvalExpressionHandler extends AbstractServerDataHandler<ClientMssgE
 	@Override
 	public void processData(ClientMssgEvalExpression evalExpr)
 	{
-		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(evalExpr.getLivePointId());
+		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(evalExpr.getExecutionId());
 		
 		if(livepoint == null)
 		{
-			logger.warn("Invalid live point id specified: " + evalExpr.getLivePointId());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(evalExpr.getRequestId(), false, "Invalid live point id specified: %s", evalExpr.getLivePointId()));
+			logger.warn("Invalid live point id specified: " + evalExpr.getExecutionId());
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(evalExpr.getRequestId(), false, "Invalid live point id specified: %s", evalExpr.getExecutionId()));
 			return;
 		}
 		

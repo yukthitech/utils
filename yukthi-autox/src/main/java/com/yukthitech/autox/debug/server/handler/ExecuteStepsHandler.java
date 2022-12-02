@@ -43,12 +43,12 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 	@Override
 	public void processData(ClientMssgExecuteSteps steps)
 	{
-		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(steps.getLivePointId());
+		LiveDebugPoint livepoint = DebugFlowManager.getInstance().getLiveDebugPoint(steps.getExecutionId());
 		
 		if(livepoint == null)
 		{
-			logger.warn("Invalid live point id specified: " + steps.getLivePointId());
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "Invalid live point id specified: %s", steps.getLivePointId()));
+			logger.warn("Invalid execution id specified: " + steps.getExecutionId());
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "Invalid live point id specified: %s", steps.getExecutionId()));
 			return;
 		}
 		
@@ -81,7 +81,7 @@ public class ExecuteStepsHandler extends AbstractServerDataHandler<ClientMssgExe
 
 		if(CollectionUtils.isEmpty(stepHolder.getSteps()))
 		{
-			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getLivePointId()));
+			DebugServer.getInstance().sendClientMessage(new ServerMssgConfirmation(steps.getRequestId(), false, "No steps found to execute: %s", steps.getExecutionId()));
 			return;
 		}
 		

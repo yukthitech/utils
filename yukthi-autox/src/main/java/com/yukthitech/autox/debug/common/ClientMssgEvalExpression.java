@@ -13,11 +13,11 @@ public class ClientMssgEvalExpression extends ClientMessage
 {
 	private static final long serialVersionUID = 1L;
 	
-	private String livePointId;
+	private String executionId;
 
 	private String expression;
 
-	public ClientMssgEvalExpression(String livePointId, String expression)
+	public ClientMssgEvalExpression(String executionId, String expression)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -26,18 +26,18 @@ public class ClientMssgEvalExpression extends ClientMessage
 			throw new InvalidArgumentException("Expresion cannot be empty");
 		}
 
-		if(StringUtils.isEmpty(livePointId))
+		if(StringUtils.isEmpty(executionId))
 		{
-			throw new InvalidArgumentException("Live point-id cannot be empty");
+			throw new InvalidArgumentException("Execution-id cannot be empty");
 		}
 
-		this.livePointId = livePointId;
+		this.executionId = executionId;
 		this.expression = expression;
 	}
 	
-	public String getLivePointId()
+	public String getExecutionId()
 	{
-		return livePointId;
+		return executionId;
 	}
 
 	public String getExpression()

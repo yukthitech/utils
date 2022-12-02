@@ -13,11 +13,11 @@ public class ClientMssgExecuteSteps extends ClientMessage
 {
 	private static final long serialVersionUID = 1L;
 	
-	private String livePointId;
+	private String executionId;
 
 	private String stepsToExecute;
 
-	public ClientMssgExecuteSteps(String livePointId, String stepsToExecute)
+	public ClientMssgExecuteSteps(String executionId, String stepsToExecute)
 	{
 		super(UUID.randomUUID().toString());
 		
@@ -26,18 +26,18 @@ public class ClientMssgExecuteSteps extends ClientMessage
 			throw new InvalidArgumentException("Steps to execute cannot be empty");
 		}
 
-		if(StringUtils.isEmpty(livePointId))
+		if(StringUtils.isEmpty(executionId))
 		{
-			throw new InvalidArgumentException("Live point-id cannot be empty");
+			throw new InvalidArgumentException("Execution-id cannot be empty");
 		}
 		
-		this.livePointId = livePointId;
+		this.executionId = executionId;
 		this.stepsToExecute = stepsToExecute;
 	}
 	
-	public String getLivePointId()
+	public String getExecutionId()
 	{
-		return livePointId;
+		return executionId;
 	}
 
 	public String getStepsToExecute()
