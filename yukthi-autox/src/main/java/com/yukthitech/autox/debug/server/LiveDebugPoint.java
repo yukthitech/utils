@@ -366,7 +366,13 @@ public class LiveDebugPoint
 		}
 	}
 	
-	public void checkForPause(ILocationBased step)
+	/**
+	 * Checks if pause should happen because of this live debug point. Which in turn
+	 * depends on operation that was taken current live point.
+	 * @param step
+	 * @return true if this live point is responsible for pausing or skipping
+	 */
+	public boolean checkForPause(ILocationBased step)
 	{
 		if(threadOnHold != Thread.currentThread())
 		{
@@ -382,7 +388,9 @@ public class LiveDebugPoint
 			//if dyn request execution in progress, dont pause anywhere
 			if(requestExecutionInProgress.get())
 			{
-				return;
+				//if request is in progress current point nor other points
+				// should hold the flow
+				return true;
 			}
 			
 			DebugOp lastDebugOp = this.lastDebugOp;
@@ -394,7 +402,9 @@ public class LiveDebugPoint
 				//  by this pause
 				this.lastDebugOp = null;
 				pause(step, null);
-				return;
+				
+				//as pause is taken care by current live point
+				return true;
 			}
 			//when moving to next step, dont stop in case child steps are getting executed
 			//  like steps in function call invoked from last location
@@ -408,9 +418,14 @@ public class LiveDebugPoint
 					//  by this pause
 					this.lastDebugOp = null;
 					pause(step, null);
+
+					//as pause is taken care by current live point
+					return true;
 				}
 				
-				return;
+				//as pause is not taken care by current point
+				// return false so that other points are evaluated for pause
+				return false;
 			}
 			
 			//Note: In case of step-return this live-point should have been released

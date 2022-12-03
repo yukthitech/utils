@@ -98,10 +98,14 @@ public class DebugFlowManager
 				return;
 			}
 			
-			currentLivePoint.checkForPause(step);
-			return;
+			//if live point is able to handle the flow, return 
+			if(currentLivePoint.checkForPause(step))
+			{
+				return;
+			}
 		}
 
+		//if live point is not present or unable to determine, check for other debug points
 		String debugRef = step.getLocation().getPath() + ":" + step.getLineNumber();
 		DebugPoint point = null;
 		
@@ -113,6 +117,12 @@ public class DebugFlowManager
 		if(point == null)
 		{
 			return;
+		}
+		
+		//if live point is present, then before pausing at other debug point, release current live point
+		if(currentLivePoint != null)
+		{
+			currentLivePoint.clearThread();
 		}
 		
 		LiveDebugPoint.pauseAtDebugPoint(step, point, livePoint -> 

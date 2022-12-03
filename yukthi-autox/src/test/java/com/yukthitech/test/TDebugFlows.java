@@ -177,6 +177,29 @@ public class TDebugFlows extends BaseTestCases
 			));
 	}
 	
+	/**
+	 * Test the same step over functionality but with a extra break point in middle
+	 * which will not be in general covered by first debug point during step-over.
+	 * @throws Exception
+	 */
+	@Test
+	public void testStepOverFlow_midPoint() throws Exception
+	{
+		testDebugFlow(DebugOp.STEP_OVER, Arrays.asList(8, 13), null, "debugTest1", Arrays.asList(
+				//setup
+				8, 9,
+				
+				//testcase
+				29, 30, 32,
+				
+				//function2 (because of second debug point)
+				13, 14,
+					
+				//cleanup	
+				47, 48
+			));
+	}
+
 	@Test
 	public void testStepReturnFlow() throws Exception
 	{
