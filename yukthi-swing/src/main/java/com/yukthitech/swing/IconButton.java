@@ -15,6 +15,7 @@
  */
 package com.yukthitech.swing;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 
 public class IconButton extends JButton
@@ -27,5 +28,11 @@ public class IconButton extends JButton
 		super.setContentAreaFilled(false);
 		super.setFocusable(false);
 		super.setBackground(null);
+	}
+
+	public IconButton(Icon icon)
+	{
+		this();
+		super.setIcon(icon);
 	}
 }
