@@ -21,12 +21,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.annotations.PropertyAdder;
+import com.yukthitech.utils.doc.Doc;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -66,6 +68,11 @@ public class BeanProperty
 	private Class<?> keyType;
 	
 	/**
+	 * For key based properties, this represents key name that can be used based on docs.
+	 */
+	private String keyName;
+	
+	/**
 	 * Type of this property.
 	 */
 	private Class<?> type;
@@ -94,7 +101,27 @@ public class BeanProperty
 	 * Field corresponding to the property.
 	 */
 	private Field field;
-
+	
+	/**
+	 * Description of this property.
+	 */
+	private String description;
+	
+	/**
+	 * Flag indicating if this is mandatory property or not.
+	 */
+	private boolean mandatory;
+	
+	/**
+	 * Flag indicating if this property should be ignored as per doc.
+	 */
+	private boolean ignored;
+	
+	/**
+	 * Groups of this property as per doc.
+	 */
+	private Set<String> groups;
+	
 	/**
 	 * Instantiates a new bean property.
 	 *
@@ -110,6 +137,8 @@ public class BeanProperty
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.field = field;
+
+		checkForDocs();
 	}
 	
 	/**
@@ -120,6 +149,43 @@ public class BeanProperty
 	private BeanProperty(String name)
 	{
 		this.name = name;
+	}
+	
+	private void checkForDocs()
+	{
+		Doc docAnnot = getAnnotation(Doc.class);
+		
+		if(docAnnot == null)
+		{
+			return;
+		}
+
+		this.description = docAnnot.value();
+		this.mandatory = docAnnot.required();
+		this.ignored = docAnnot.ignore();
+		
+		this.groups = docAnnot.group().length > 0 ? CommonUtils.toSet(docAnnot.group()) : null;
+	}
+	
+	public Set<String> getGroups()
+	{
+		return groups;
+	}
+	
+	public boolean hasGroup(String name)
+	{
+		return (groups == null) ? false : groups.contains(name);
+	}
+	
+	/**
+	 * Checks if is flag indicating if this property should be ignored as per
+	 * doc.
+	 *
+	 * @return the flag indicating if this property should be ignored as per doc
+	 */
+	public boolean isIgnored()
+	{
+		return ignored;
 	}
 	
 	/**
@@ -139,6 +205,11 @@ public class BeanProperty
 	public boolean isKeyProperty()
 	{
 		return (keyType != null);
+	}
+	
+	public String getKeyName()
+	{
+		return keyName;
 	}
 
 	/**
@@ -210,7 +281,7 @@ public class BeanProperty
 		
 		String adderName = addMethod.getName();
 		adderName = adderName.substring(3);
-		adderName = Character.toUpperCase(adderName.charAt(0)) + adderName.substring(1);
+		adderName = Character.toLowerCase(adderName.charAt(0)) + adderName.substring(1);
 		
 		this.adderName = adderName;
 		return adderName;
@@ -256,6 +327,25 @@ public class BeanProperty
 		return (readMethod == null);
 	}
 	
+	/**
+	 * Flag indicating if this is multi valued property or not.
+	 * @return
+	 */
+	public boolean isMultiValued()
+	{
+		return (addMethod != null);
+	}
+	
+	public String getDescription()
+	{
+		return description;
+	}
+
+	public boolean isMandatory()
+	{
+		return mandatory;
+	}
+
 	/**
 	 * Gets the current annotation property. The annotation will be checked on read and write methods.
 	 * If not found, corresponding field will be checked before returning null.
@@ -392,6 +482,7 @@ public class BeanProperty
 				continue;
 			}
 
+			prop.checkForDocs();
 			resLst.add(prop);
 		}
 		
@@ -406,14 +497,17 @@ public class BeanProperty
 	private static BeanProperty fetchPropertyDetails(Method method, Map<String, BeanProperty> propMap)
 	{
 		boolean setter = true;
+		boolean adder = false;
 		Matcher matcher = SETTER_PATTERN.matcher(method.getName());
 		Class<?> type = null;
 		Class<?> keyType = null;
+		String keyName = null;
 		
 		//if setter is not found check for adder
 		if(!matcher.matches())
 		{
 			matcher = ADDER_PATTERN.matcher(method.getName());
+			adder = matcher.matches();
 		}
 		
 		//if not setter method
@@ -463,6 +557,13 @@ public class BeanProperty
 					return null;
 				}
 				
+				Doc docAnnot = method.getParameters()[0].getAnnotation(Doc.class);
+				
+				if(docAnnot != null)
+				{
+					keyName = docAnnot.name();
+				}
+				
 				type = method.getParameterTypes()[1];
 			}
 			else
@@ -482,6 +583,7 @@ public class BeanProperty
 			beanProperty = new BeanProperty(propName);
 			beanProperty.type = type;
 			beanProperty.keyType = keyType;
+			beanProperty.keyName = keyName;
 			
 			try
 			{
@@ -506,6 +608,11 @@ public class BeanProperty
 		if(setter)
 		{
 			beanProperty.writeMethod = method;
+			
+			if(adder)
+			{
+				beanProperty.addMethod = method;
+			}
 		}
 		else
 		{

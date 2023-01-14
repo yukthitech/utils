@@ -2,6 +2,8 @@ package com.yukthitech.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -195,6 +197,15 @@ public class HtmlPanel extends JPanel
                 		logger.error("An error occurred while opening browser with url: {}", reference, ex);
                 	}
                 }
+			}
+		});
+		
+		textPane.addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusGained(FocusEvent e)
+			{
+				textPane.getCaret().setVisible(true);
 			}
 		});
 	}

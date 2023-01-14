@@ -1,5 +1,6 @@
 package com.yukthitech.swing;
 
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JComponent;
@@ -10,6 +11,11 @@ import javax.swing.KeyStroke;
 public class EscapableDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
+
+	public EscapableDialog(Window window)
+	{
+		super(window);
+	}
 
 	public EscapableDialog()
 	{}

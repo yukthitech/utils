@@ -16,6 +16,7 @@
 package com.yukthitech.utils.doc;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Base class for all documentations.
@@ -41,7 +42,7 @@ public class BaseDoc<T extends BaseDoc<T>>
 	/**
 	 * Group of the element.
 	 */
-	private String group;
+	private Set<String> groups;
 
 	public String getName()
 	{
@@ -79,15 +80,15 @@ public class BaseDoc<T extends BaseDoc<T>>
 		return (T) this;
 	}
 
-	public String getGroup()
+	public Set<String> getGroups()
 	{
-		return group;
+		return groups;
 	}
 
 	@SuppressWarnings("unchecked")
-	public T setGroup(String group)
+	public T setGroups(Set<String> groups)
 	{
-		this.group = group;
+		this.groups = groups;
 		return (T) this;
 	}
 }

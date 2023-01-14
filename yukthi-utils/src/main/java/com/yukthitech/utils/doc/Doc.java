@@ -37,7 +37,7 @@ public @interface Doc
 	 * Field which can be used to group different documentations.
 	 * @return
 	 */
-	public String group() default "";
+	public String[] group() default {};
 	
 	/**
 	 * Name of this element to be used in doc.
@@ -62,4 +62,18 @@ public @interface Doc
 	 * @return
 	 */
 	public String returnDesc() default "";
+	
+	/**
+	 * In case this annotation is used on property, this flag
+	 * can be used to specify if this is mandatory property or not. 
+	 * @return
+	 */
+	public boolean required() default false;
+	
+	/**
+	 * In case this annotation is used on property, this flag
+	 * can be used to specify if this property should be ignored for some processing. 
+	 * @return
+	 */
+	public boolean ignore() default false;
 }

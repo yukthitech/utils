@@ -25,6 +25,8 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.utils.CommonUtils;
+
 /**
  * Helper class to generate doc info using reflections.
  * @author akranthikiran
@@ -77,7 +79,7 @@ public class DocInfoGenerator
 		
 		docInfo.setName(StringUtils.isNotBlank(doc.name()) ? doc.name() : docInfo.getName())
 			.setDescription(doc.value())
-			.setGroup(StringUtils.isNotBlank(doc.group()) ? doc.group() : null)
+			.setGroups(doc.group().length > 0 ? CommonUtils.toSet(doc.group()) : null)
 			.setExamples(doc.examples().length > 0 ? Arrays.asList(doc.examples()) : null);
 	}
 	
