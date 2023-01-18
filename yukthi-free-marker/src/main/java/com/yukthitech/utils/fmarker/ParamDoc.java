@@ -50,8 +50,23 @@ public class ParamDoc implements Comparable<ParamDoc>
 		FmParam fmParam = param.getAnnotation(FmParam.class);
 		
 		this.name = (fmParam != null && StringUtils.isNotBlank(fmParam.name())) ? fmParam.name() : param.getName();
-		this.type = param.getType().getName();
 		this.description = (fmParam != null) ? fmParam.description() : "";
+		
+		Class<?> type = param.getType();
+		
+		if(type.isArray())
+		{
+			this.type = type.getComponentType().getName() + "[]";
+			
+			if(param.isVarArgs())
+			{
+				this.type += " (var-args)";
+			}
+		}
+		else
+		{
+			this.type = param.getType().getName();
+		}
 	}
 
 	/**
