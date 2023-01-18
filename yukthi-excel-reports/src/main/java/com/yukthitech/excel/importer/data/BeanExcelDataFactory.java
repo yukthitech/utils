@@ -17,11 +17,11 @@ package com.yukthitech.excel.importer.data;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -153,12 +153,6 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 		return null;
 	}
 	
-	@Override
-	public Collection<FieldColumn> getColumns()
-	{
-		return columns.values();
-	}
-	
 	public Class<?> getBeanType()
 	{
 		return beanType;
@@ -205,8 +199,20 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 	}
 	
 	@Override
-	public boolean isHeadingRow(List<String> row)
+	public boolean isHeadingRow(int rowNum, List<String> headings)
 	{
-		return this.columns.keySet().containsAll(row);
+		List<String> convertedHeadings = headings.stream()
+				.map(heading -> heading.replaceAll("[\\W\\_]+", "").toLowerCase())
+				.collect(Collectors.toList());
+		
+		boolean res = this.columns.keySet().containsAll(convertedHeadings);
+		
+		if(res)
+		{
+			headings.clear();
+			headings.addAll(convertedHeadings);
+		}
+		
+		return res;
 	}
 }

@@ -15,7 +15,6 @@
  */
 package com.yukthitech.excel.importer;
 
-import static com.yukthitech.excel.importer.IExcelImporterConstants.DEFAULT_DATE_FORMAT;
 import static com.yukthitech.excel.importer.IExcelImporterConstants.DEFAULT_NUMBER_FORMAT;
 
 import java.io.File;
@@ -96,13 +95,10 @@ public class ExcelImporter
 				cell = cellIt.next();
 				
 				heading = cell.getStringCellValue();
-				heading = heading.replaceAll("[\\W\\_]+", "");
-				heading = heading.toLowerCase();
-				
 				headings.add(heading);
 			}
 			
-			if(factory.isHeadingRow(headings))
+			if(factory.isHeadingRow(row.getRowNum(), headings))
 			{
 				return headings;
 			}
@@ -117,7 +113,7 @@ public class ExcelImporter
 		Cell cell = null;
 		String heading = null;
 		Map<String, Object> map = new HashMap<>();
-		String strValue = null;
+		Object cellValue = null;
 		Column column = null;
 		
 		int colCount = columnOrder.size();
@@ -131,20 +127,26 @@ public class ExcelImporter
 			
 			if(column == null)
 			{
-				strValue = getValue(cell, ColumnType.STRING, heading);
-				map.put(heading, strValue);
+				cellValue = getValue(cell, null, heading);
+				map.put(heading, cellValue);
 			}
 			else
 			{
-				strValue = getValue(cell, column.getType(), column.getName());
-				map.put(column.getName(), column.getType().parse(strValue, column.getJavaType(), column.getFormat()));
+				cellValue = getValue(cell, column.getType(), column.getName());
+				
+				if((cellValue instanceof String) && column.getType() != ColumnType.STRING)
+				{
+					cellValue = column.getType().parse((String) cellValue, column.getJavaType(), column.getFormat());
+				}
+				
+				map.put(column.getName(), cellValue);
 			}
 		}
 		
 		return map;
 	}
 
-	public String getValue(Cell cell, ColumnType columnType, String columnName)
+	public Object getValue(Cell cell, ColumnType columnType, String columnName)
 	{
 		if(cell == null)
 		{
@@ -155,26 +157,41 @@ public class ExcelImporter
 		{
 			case BOOLEAN:
 			{
-				if(columnType != ColumnType.BOOLEAN && columnType != ColumnType.STRING)
+				if(columnType == null || columnType == ColumnType.BOOLEAN)
 				{
-					throw new IllegalStateException("Boolean cell encountered for column '" + columnName + "'. Expected type: " + columnType);
+					return cell.getBooleanCellValue();
 				}
 				
-				return "" + cell.getBooleanCellValue();
+				if(columnType == ColumnType.STRING)
+				{
+					return "" + cell.getBooleanCellValue();
+				}
+
+				throw new IllegalStateException("Boolean cell encountered for column '" + columnName + "'. Expected type: " + columnType);
 			}
 			case NUMERIC:
 			{
+				if(columnType == null || columnType == ColumnType.FLOAT)
+				{
+					return cell.getNumericCellValue();
+				}
+
 				if(columnType == ColumnType.DATE)
 				{
-					return DEFAULT_DATE_FORMAT.format(cell.getDateCellValue());
+					return cell.getDateCellValue();
 				}
 				
-				if(columnType != ColumnType.FLOAT && columnType != ColumnType.INTEGER && columnType != ColumnType.STRING)
+				if(columnType == ColumnType.INTEGER)
 				{
-					throw new IllegalStateException("Numeric cell encountered for column '" + columnName + "'. Expected type: " + columnType);
+					return (int) cell.getNumericCellValue();
 				}
-				
-				return DEFAULT_NUMBER_FORMAT.format(cell.getNumericCellValue());
+
+				if(columnType == ColumnType.INTEGER)
+				{
+					return DEFAULT_NUMBER_FORMAT.format(cell.getNumericCellValue());
+				}
+
+				throw new IllegalStateException("Numeric cell encountered for column '" + columnName + "'. Expected type: " + columnType);
 			}
 			default:
 			{

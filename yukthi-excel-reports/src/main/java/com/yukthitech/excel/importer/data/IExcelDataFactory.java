@@ -15,7 +15,6 @@
  */
 package com.yukthitech.excel.importer.data;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -31,12 +30,15 @@ public interface IExcelDataFactory<T>
 	
 	/**
 	 * Checks if specified row is heading row. Till heading row is found
-	 * data rows will not be conisdered.
+	 * data rows will not be considered.
+	 * 
+	 * Headings list can be modified by the implementations as needed. And same will
+	 * be considered for future calls to other methods.
 	 *
-	 * @param row the row
+	 * @param headings the row headings
 	 * @return true, if is heading row
 	 */
-	public default boolean isHeadingRow(List<String> row)
+	public default boolean isHeadingRow(int rowNum, List<String> headings)
 	{
 		return true;
 	}
@@ -52,7 +54,6 @@ public interface IExcelDataFactory<T>
 		return true;
 	}
 
-	public Collection<? extends Column> getColumns();
 	public Column getColumn(String name);
 	public T newDataObject(Map<String, Object> valueMap);
 }
