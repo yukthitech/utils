@@ -115,6 +115,11 @@ public class HtmlPanel extends JPanel
 	private Function<String, String> contentProcessor;
 	
 	private BrowsingHistory browsingHistory = new BrowsingHistory();
+	
+	/**
+	 * If enabled, caret will be displayed in editor on focus.
+	 */
+	private boolean caretEnabled = true;
 
 	public HtmlPanel()
 	{
@@ -205,7 +210,10 @@ public class HtmlPanel extends JPanel
 			@Override
 			public void focusGained(FocusEvent e)
 			{
-				textPane.getCaret().setVisible(true);
+				if(caretEnabled)
+				{
+					textPane.getCaret().setVisible(true);
+				}
 			}
 		});
 	}
@@ -217,6 +225,26 @@ public class HtmlPanel extends JPanel
 	{
 		this();
 		this.setResource(resource);
+	}
+	
+	public JTextPane getTextPane()
+	{
+		return textPane;
+	}
+	
+	public JScrollPane getScrollPane()
+	{
+		return scrollPane;
+	}
+	
+	public void setCaretEnabled(boolean caretEnabled)
+	{
+		this.caretEnabled = caretEnabled;
+	}
+	
+	public boolean isCaretEnabled()
+	{
+		return caretEnabled;
 	}
 	
 	public void setContent(String staticContent)
