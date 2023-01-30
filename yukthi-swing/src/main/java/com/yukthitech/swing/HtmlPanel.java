@@ -240,12 +240,22 @@ public class HtmlPanel extends JPanel
 	
 	private String loadResource(String resource)
 	{
+		File resourceFile = null;
+		
 		try
 		{
-			File resourceFile = new File(HtmlPanel.class.getResource(resource).toURI());
+			resourceFile = new File(HtmlPanel.class.getResource(resource).toURI());
+		}catch(Exception ex)
+		{
+			//if the uri does not represent a file path
+			resourceFile = null;
+		}
+		
+		try
+		{
 			String content = null;
 			
-			if(resourceFile.exists())
+			if(resourceFile != null && resourceFile.exists())
 			{
 				content = FileUtils.readFileToString(resourceFile, Charset.defaultCharset());
 			}
