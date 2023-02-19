@@ -415,7 +415,10 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	@Override
 	public HttpUriRequestBase toHttpRequestBase(String baseUrl) throws UnsupportedEncodingException, URISyntaxException
 	{
-		URIBuilder uriBuilder = new URIBuilder(baseUrl + getResolvedUri());
+		String uri = getResolvedUri();
+		String fullUrl = FULL_URL_PATTERN.matcher(uri).matches() ? uri : (baseUrl + uri);
+		
+		URIBuilder uriBuilder = new URIBuilder(fullUrl);
 		
 		for(String paramName : super.params.keySet())
 		{

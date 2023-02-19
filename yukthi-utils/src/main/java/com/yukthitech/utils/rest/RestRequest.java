@@ -33,6 +33,9 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public abstract class RestRequest<T extends RestRequest<T>>
 {
 	private static final Pattern PATH_VAR_PATTERN = Pattern.compile("\\{(\\w+)\\}");
+	
+	protected static final Pattern FULL_URL_PATTERN = Pattern.compile("^\\w+\\:\\/\\/.*");
+	
 	protected String uri;
 
 	protected Map<String, String> pathVariables = new HashMap<String, String>();
@@ -59,7 +62,7 @@ public abstract class RestRequest<T extends RestRequest<T>>
 	 */
 	public RestRequest(String uri)
 	{
-		if(StringUtils.isNotBlank(uri) && !uri.startsWith("/"))
+		if(StringUtils.isNotBlank(uri) && !uri.startsWith("/") && !FULL_URL_PATTERN.matcher(uri).matches())
 		{
 			uri = "/" + uri;
 		}
