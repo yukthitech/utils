@@ -317,12 +317,31 @@ public class DefaultMethods
 			returnDescription = "ifNull or ifNotNull based on nullCheck.")
 	public static Object ifNull(
 			@FmParam(name = "nullCheck", description = "object to be checked for null") Object nullCheck, 
-			@FmParam(name = "ifNull", description = "object to be returned if null") Object ifNull, 
-			@FmParam(name = "ifNotNull", description = "object to be returned if not null") Object ifNotNull)
+			@FmParam(name = "ifNull", description = "object to be returned if null. Default: true (boolean)") Object ifNull, 
+			@FmParam(name = "ifNotNull", description = "object to be returned if not null. Default: false (boolean)") Object ifNotNull)
 	{
+		ifNull = (ifNull == null) ? true : ifNull;
+		ifNotNull = (ifNotNull == null) ? false : ifNotNull;
+		
 		return (nullCheck == null) ? ifNull : ifNotNull;
 	}
 	
+	@FreeMarkerMethod(
+			value = "ifNotNull", 
+			description = "If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.",
+			returnDescription = "ifNull or ifNotNull based on nullCheck.")
+	public static Object ifNotNull(
+			@FmParam(name = "nullCheck", description = "object to be checked for null") Object nullCheck, 
+			@FmParam(name = "ifNotNull", description = "object to be returned if not null. Default: true (boolean)") Object ifNotNull,
+			@FmParam(name = "ifNull", description = "object to be returned if null. Default: false (boolean)") Object ifNull 
+			)
+	{
+		ifNotNull = (ifNotNull == null) ? true : ifNotNull;
+		ifNull = (ifNull == null) ? false : ifNull;
+		
+		return (nullCheck == null) ? ifNull : ifNotNull;
+	}
+
 	/**
 	 * If 'nullCheck' is null, 'ifNull' will be returned otherwise 'nullCheck' will be returned.
 	 * @param nullCheck
