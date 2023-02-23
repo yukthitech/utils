@@ -393,7 +393,6 @@ public class ZipUtils
 			
 			while( (zipEntry = zis.getNextEntry()) != null)
 			{
-				System.out.println("Unzipping: " + zipEntry.getName());
 				File entryFile = new File(rootFolder, zipEntry.getName().replace("/", File.separator));
 				
 				if(zipEntry.isDirectory())
