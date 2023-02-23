@@ -65,7 +65,7 @@ public class FetchJoinEntityQueryExecutor extends AbstractSearchQuery
 		
 		super.entityDetails = foreignConstraintDetails.getTargetEntityDetails();
 		
-		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
+		conditionQueryBuilder = new ConditionQueryBuilder(super.entityDetails);
 		super.collectionReturnType = getCollectionType(fieldDetails.getField().getType(), methodDesc);
 		super.returnType = super.entityDetails.getEntityType();
 

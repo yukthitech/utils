@@ -1155,9 +1155,6 @@ public class RdbmsDataStore implements IDataStore
 			return records;
 		}catch(Exception ex)
 		{
-			logger.error("An error occurred while finding rows from table '" 
-					+ findQuery.getTableName() + "' using query: " + findQuery, ex);
-			
 			throw new PersistenceException("An error occurred while finding rows from table '" 
 						+ findQuery.getTableName() + "' using query: " + findQuery, ex);
 		}finally

@@ -185,7 +185,7 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 						recordBean = finalConditionQueryBuilder.parseResult(record, returnType, conversionService, persistenceExecutionContext);
 					}catch(Exception ex)
 					{
-						throw new InvalidStateException("An error occurred while converting record object into result bean of type: ", returnType.getName(), ex);
+						throw new InvalidStateException("An error occurred while converting record object into result bean of type: {}", returnType.getName(), ex);
 					}
 					
 					if(dataFilter != null)
