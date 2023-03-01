@@ -42,6 +42,11 @@ public class ParamDoc implements Comparable<ParamDoc>
 	 */
 	private String description;
 	
+	/**
+	 * Default value of the param.
+	 */
+	private String defaultValue;
+	
 	public ParamDoc()
 	{}
 
@@ -51,6 +56,7 @@ public class ParamDoc implements Comparable<ParamDoc>
 		
 		this.name = (fmParam != null && StringUtils.isNotBlank(fmParam.name())) ? fmParam.name() : param.getName();
 		this.description = (fmParam != null) ? fmParam.description() : "";
+		this.defaultValue = (fmParam != null) ? fmParam.defaultValue() : "";
 		
 		Class<?> type = param.getType();
 		
@@ -127,6 +133,21 @@ public class ParamDoc implements Comparable<ParamDoc>
 	public void setDescription(String description)
 	{
 		this.description = description;
+	}
+	
+	public String getDefaultValue()
+	{
+		return defaultValue;
+	}
+	
+	/**
+	 * Sets the default value of the param.
+	 *
+	 * @param defaultValue the new default value of the param
+	 */
+	public void setDefaultValue(String defaultValue)
+	{
+		this.defaultValue = defaultValue;
 	}
 
 	@Override
