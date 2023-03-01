@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -185,16 +186,22 @@ public class DefaultMethods
 			})
 	public static String collectionToString(
 			@FmParam(name = "lst", description = "Collection to be converted") Collection<Object> lst, 
-			@FmParam(name = "prefix", description = "Prefix to be used at start of coverted string") String prefix, 
-			@FmParam(name = "delimiter", description = "Delimiter to be used between the collection elements") String delimiter, 
-			@FmParam(name = "suffix", description = "Suffix to be used at end of converted string") String suffix, 
-			@FmParam(name = "emptyString", description = "String to be used when input list is null or empty") String emptyString)
+			@FmParam(name = "prefix", description = "Prefix to be used at start of coverted string.", defaultValue = "empty string") String prefix, 
+			@FmParam(name = "delimiter", description = "Delimiter to be used between the collection elements.", defaultValue = "comma (,)") String delimiter, 
+			@FmParam(name = "suffix", description = "Suffix to be used at end of converted string.", defaultValue = "empty string") String suffix, 
+			@FmParam(name = "emptyString", description = "String to be used when input list is null or empty.", defaultValue = "empty string") String emptyString)
 	{
+		emptyString = (emptyString == null) ? "" : emptyString;
+		
 		if(lst == null || lst.isEmpty())
 		{
 			return emptyString;
 		}
 		
+		prefix = (prefix == null) ? "" : prefix;
+		delimiter = (delimiter == null) ? "," : delimiter;
+		suffix = (suffix == null) ? "" : suffix;
+
 		StringBuilder builder = new StringBuilder(prefix);
 		boolean first = true;
 		
@@ -233,17 +240,24 @@ public class DefaultMethods
 	public static String mapToString(
 			@FmParam(name = "map", description = "Prefix to be used at start of coverted string") Map<Object, Object> map, 
 			@FmParam(name = "template", description = "Template representing how key and value should be converted "
-					+ "into string (the string can have #key and #value which will act as place holders)") String template, 
-			@FmParam(name = "prefix", description = "Prefix to be used at start of coverted string") String prefix, 
-			@FmParam(name = "delimiter", description = "Delimiter to be used between elements.") String delimiter, 
-			@FmParam(name = "suffix", description = "Suffix to be used at end of string.") String suffix, 
-			@FmParam(name = "emptyString", description = "String that will be returned if input map is null or empty.") String emptyString)
+					+ "into string (the string can have #key and #value which will act as place holders).", defaultValue = "#key=#value") String template, 
+			@FmParam(name = "prefix", description = "Prefix to be used at start of coverted string.", defaultValue = "empty string") String prefix, 
+			@FmParam(name = "delimiter", description = "Delimiter to be used between elements.", defaultValue = "comma (,)") String delimiter, 
+			@FmParam(name = "suffix", description = "Suffix to be used at end of string.", defaultValue = "empty string") String suffix, 
+			@FmParam(name = "emptyString", description = "String that will be returned if input map is null or empty.", defaultValue = "empty string") String emptyString)
 	{
+		emptyString = (emptyString == null) ? "" : emptyString;
+
 		if(map == null || map.isEmpty())
 		{
 			return emptyString;
 		}
 		
+		template = (template == null) ? "#key=#value" : template;
+		prefix = (prefix == null) ? "" : prefix;
+		delimiter = (delimiter == null) ? "," : delimiter;
+		suffix = (suffix == null) ? "" : suffix;
+
 		StringBuilder builder = new StringBuilder(prefix);
 		boolean first = true;
 		
@@ -317,8 +331,8 @@ public class DefaultMethods
 			returnDescription = "ifNull or ifNotNull based on nullCheck.")
 	public static Object ifNull(
 			@FmParam(name = "nullCheck", description = "object to be checked for null") Object nullCheck, 
-			@FmParam(name = "ifNull", description = "object to be returned if null. Default: true (boolean)") Object ifNull, 
-			@FmParam(name = "ifNotNull", description = "object to be returned if not null. Default: false (boolean)") Object ifNotNull)
+			@FmParam(name = "ifNull", description = "object to be returned if null.", defaultValue = "true (boolean)") Object ifNull, 
+			@FmParam(name = "ifNotNull", description = "object to be returned if not null", defaultValue = "false (boolean)") Object ifNotNull)
 	{
 		ifNull = (ifNull == null) ? true : ifNull;
 		ifNotNull = (ifNotNull == null) ? false : ifNotNull;
@@ -332,8 +346,8 @@ public class DefaultMethods
 			returnDescription = "ifNull or ifNotNull based on nullCheck.")
 	public static Object ifNotNull(
 			@FmParam(name = "nullCheck", description = "object to be checked for null") Object nullCheck, 
-			@FmParam(name = "ifNotNull", description = "object to be returned if not null. Default: true (boolean)") Object ifNotNull,
-			@FmParam(name = "ifNull", description = "object to be returned if null. Default: false (boolean)") Object ifNull 
+			@FmParam(name = "ifNotNull", description = "object to be returned if not null.", defaultValue = "true (boolean)") Object ifNotNull,
+			@FmParam(name = "ifNull", description = "object to be returned if null.", defaultValue = "false (boolean)") Object ifNull 
 			)
 	{
 		ifNotNull = (ifNotNull == null) ? true : ifNotNull;
