@@ -179,4 +179,24 @@ public class ConsolidatedJobManager
 			return true;
 		}
 	}
+	
+	public static void scheduleJob(Runnable runnable, long fixedDelay)
+	{
+		Runnable wrapper = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					runnable.run();
+				}catch(Exception ex)
+				{
+					logger.error("Unhandled error occurred in scheduled background job", ex);
+				}
+			}
+		};
+		
+		threadPool.scheduleWithFixedDelay(wrapper, fixedDelay, fixedDelay, TimeUnit.MILLISECONDS);
+	}
 }
