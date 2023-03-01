@@ -68,13 +68,15 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		private Object value;
 		private String contentType;
 		private PartType partType;
+		private String charset;
 		
-		public RequestPart(String name, Object value, String contentType, PartType partType)
+		public RequestPart(String name, Object value, String contentType, PartType partType, String charset)
 		{
 			this.name = name;
 			this.value = value;
 			this.contentType = contentType;
 			this.partType = partType;
+			this.charset = charset;
 		}
 		
 		/* (non-Javadoc)
@@ -87,6 +89,9 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			builder.append("[");
 
 			builder.append("Name: ").append(name);
+			builder.append(",").append("Content Type: ").append(contentType);
+			builder.append(",").append("Charset: ").append(charset);
+			builder.append(",").append("Type: ").append(partType);
 			builder.append(",").append("Value: ").append(value);
 
 			builder.append("]");
@@ -340,7 +345,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		
 		name = StringUtils.isBlank(name) ? file.getName() : name;
 
-		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null, PartType.FILE));
+		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null, PartType.FILE, null));
 	}
 
 	public void addBinaryPart(String field, String name, File file, String contentType)
@@ -352,7 +357,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		
 		name = StringUtils.isBlank(name) ? file.getName() : name;
 
-		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), contentType, PartType.BINARY));
+		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), contentType, PartType.BINARY, null));
 	}
 
 	/**
@@ -361,8 +366,20 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 * @param object Object to be added
 	 * @return current request instance
 	 */
-	@SuppressWarnings("unchecked")
 	public T addJsonPart(String partName, Object object)
+	{
+		return addJsonPart(partName, object, null);
+	}
+	
+	/**
+	 * Adds the specified object as json part to this multipart request
+	 * @param partName Name of the request part
+	 * @param object Object to be added
+	 * @param charset Charset to be used.
+	 * @return current request instance
+	 */
+	@SuppressWarnings("unchecked")
+	public T addJsonPart(String partName, Object object, String charset)
 	{
 		if(!multipartRequest)
 		{
@@ -372,7 +389,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		try
 		{
 			String jsonObject = objectMapper.writeValueAsString(object);
-			this.multiparts.add(new RequestPart(partName, jsonObject, JSON_CONTENT_TYPE, PartType.BINARY));
+			this.multiparts.add(new RequestPart(partName, jsonObject, JSON_CONTENT_TYPE, PartType.TEXT, charset));
 		} catch(JsonProcessingException ex)
 		{
 			throw new IllegalArgumentException("Failed to format specified object as json - " + object, ex);
@@ -384,30 +401,43 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	/**
 	 * Adds the specified object as string part to this multipart request
 	 * @param partName Name of the request part
-	 * @param object string to be added
+	 * @param text string to be added
 	 * @return current request instance
 	 */
-	public T addTextPart(String partName, String object)
+	public T addTextPart(String partName, String text)
 	{
-		return addTextPart(partName, object, TEXT_CONTENT_TYPE);
+		return addTextPart(partName, text, TEXT_CONTENT_TYPE, null);
 	}
 
 	/**
 	 * Adds the specified object as string part to this multipart request
 	 * @param partName Name of the request part
-	 * @param object string to be added
+	 * @param text string to be added
 	 * @param contentType Content type of the part
 	 * @return current request instance
 	 */
+	public T addTextPart(String partName, String text, String contentType)
+	{
+		return addTextPart(partName, text, contentType, null);
+	}
+	
+	/**
+	 * Adds the specified object as string part to this multipart request
+	 * @param partName Name of the request part
+	 * @param text string to be added
+	 * @param contentType Content type of the part
+	 * @param charset charset to be used
+	 * @return current request instance
+	 */
 	@SuppressWarnings("unchecked")
-	public T addTextPart(String partName, String object, String contentType)
+	public T addTextPart(String partName, String text, String contentType, String charset)
 	{
 		if(!multipartRequest)
 		{
 			throw new IllegalStateException("Parts can be added only to multi part request");
 		}
 		
-		this.multiparts.add(new RequestPart(partName, object, contentType, PartType.TEXT));
+		this.multiparts.add(new RequestPart(partName, text, contentType, PartType.TEXT, charset));
 		
 		return (T)this;
 	}
@@ -454,7 +484,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 				}
 				else if(part.partType == PartType.TEXT)
 				{
-					builder.addTextBody(part.name, (String) part.value, ContentType.create(part.contentType));
+					builder.addTextBody(part.name, (String) part.value, ContentType.create(part.contentType, part.charset));
 				}
 				else
 				{
