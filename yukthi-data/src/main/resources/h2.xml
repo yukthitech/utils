@@ -284,7 +284,9 @@
 			ORDER BY <#list query.orderByFields as orderField>${orderField.code} ${orderField.orderByType}<#if orderField_has_next>, </#if></#list>
 		</#if>
 		<#if query.resultsOffset??>
-			LIMIT ${query.resultsOffsetString}, ${query.resultsLimitString}
+			LIMIT ${query.resultsOffset?c}, ${query.resultsLimit?c}
+		<#elseif query.resultsLimitString??>
+			LIMIT ${query.resultsLimit?c}
 		</#if> 
 	]]></template>	
 

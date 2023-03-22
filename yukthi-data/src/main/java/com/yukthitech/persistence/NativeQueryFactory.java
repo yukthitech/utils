@@ -84,7 +84,7 @@ public class NativeQueryFactory
 			is.close();
 		}catch(Exception ex)
 		{
-			throw new InvalidArgumentException(ex, "An error occurred while loading resource file - {}", resource);
+			throw new InvalidArgumentException(ex, "An error occurred while loading resource file - {}\nError: {}", resource, ex);
 		}
 	}
 	

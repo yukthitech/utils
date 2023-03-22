@@ -15,6 +15,7 @@
  */
 package com.yukthitech.persistence.conversion;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import com.yukthitech.persistence.FieldDetails;
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.DataTypeMapping;
 import com.yukthitech.utils.ConvertUtils;
+import com.yukthitech.utils.ObjectWrapper;
 
 /**
  * Service to convert object of one type into other.
@@ -63,25 +65,26 @@ public class ConversionService
 		this.converters.add(converter);
 	}
 	
-	/**
-	 * Fetches the converter for specified field, if it is explcitly defined on 
-	 * target java field
-	 * @param fieldDetails
-	 * @return
-	 */
-	private IPersistenceConverter getConverter(FieldDetails fieldDetails)
+	private IPersistenceConverter getConverter(Field field, DataType dbDataType, Class<?> valueType, ObjectWrapper<DataType> finalDbDataType)
 	{
-		//TODO: Check why field details needs to be null. Is there any substitute.
-		if(fieldDetails == null || fieldDetails.getField() == null)
-		{
-			return null;
-		}
-		
-		DataTypeMapping typeMapping = fieldDetails.getField().getAnnotation(DataTypeMapping.class);
+		DataTypeMapping typeMapping = field.getAnnotation(DataTypeMapping.class);
 		
 		if(typeMapping == null)
 		{
-			return implicitCoverterProvider.getImplicitConverter(fieldDetails.getDbDataType());
+			if(valueType != null)
+			{
+				dbDataType = (dbDataType == null) ? DataType.getDataType(valueType) : dbDataType;
+				finalDbDataType.setValue(dbDataType);
+			}
+			
+			return implicitCoverterProvider.getImplicitConverter(dbDataType);
+		}
+		
+		if(valueType != null)
+		{
+			dbDataType = (dbDataType == null) ? typeMapping.type() : dbDataType;
+			dbDataType = (dbDataType == DataType.UNKNOWN) ? DataType.getDataType(valueType) : dbDataType;
+			finalDbDataType.setValue(dbDataType);
 		}
 		
 		Class<?> converterType = typeMapping.converterType();
@@ -90,7 +93,7 @@ public class ConversionService
 		if(IPersistenceConverter.class.equals(converterType))
 		{
 			// use implicit converter, if any
-			return implicitCoverterProvider.getImplicitConverter(fieldDetails.getDbDataType());
+			return implicitCoverterProvider.getImplicitConverter(dbDataType);
 		}
 		
 		IPersistenceConverter converter = typeToConverter.get(converterType);
@@ -110,6 +113,23 @@ public class ConversionService
 		
 		typeToConverter.put(converterType, converter);
 		return converter;
+	}
+
+	/**
+	 * Fetches the converter for specified field, if it is explcitly defined on 
+	 * target java field
+	 * @param fieldDetails
+	 * @return
+	 */
+	private IPersistenceConverter getConverter(FieldDetails fieldDetails)
+	{
+		//TODO: Check why field details needs to be null. Is there any substitute.
+		if(fieldDetails == null || fieldDetails.getField() == null)
+		{
+			return null;
+		}
+		
+		return getConverter(fieldDetails.getField(), fieldDetails.getDbDataType(), null, null);
 	}
 	
 	/**
@@ -139,6 +159,28 @@ public class ConversionService
 		return convert(dbObject, fieldDetails.getDbDataType(), fieldDetails.getField().getType());
 	}
 	
+	public Object convertToJavaType(Object dbObject, Field field)
+	{
+		//when db object is null, return null
+		if(dbObject == null)
+		{
+			return null;
+		}
+		
+		//fetch field specific converter
+		ObjectWrapper<DataType> dbDataType = new ObjectWrapper<>();
+		IPersistenceConverter converter = getConverter(field, null, dbObject.getClass(), dbDataType);
+		
+		//if field specific converter is present
+		if(converter != null)
+		{
+			return converter.convertToJavaType(dbObject, dbDataType.getValue(), field.getType());
+		}
+		
+		//try to convert using default converters and in generic way
+		return convert(dbObject, dbDataType.getValue(), field.getType());
+	}
+
 	/**
 	 * Converts specified java object into target db type
 	 * @param javaObj

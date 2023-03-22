@@ -38,6 +38,7 @@ import com.yukthitech.persistence.repository.annotations.Conditions;
 import com.yukthitech.persistence.repository.annotations.DefaultCondition;
 import com.yukthitech.persistence.repository.annotations.ExtendedFieldNames;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
+import com.yukthitech.persistence.repository.annotations.LimitRows;
 import com.yukthitech.persistence.repository.annotations.MethodConditions;
 import com.yukthitech.persistence.repository.annotations.NullCheck;
 import com.yukthitech.persistence.repository.annotations.Operator;
@@ -180,13 +181,21 @@ public abstract class QueryExecutor
 		ConditionBean conditionBean = null;
 		Condition condition = null;
 		Conditions conditions = null;
+		LimitRows limitRows = null;
 		boolean found = false;
 		
 		//fetch conditions for each argument
 		for(int i = 0; i < parameters.length; i++)
 		{
-			condition = parameters[i].getAnnotation(Condition.class); 
+			condition = parameters[i].getAnnotation(Condition.class);
 			conditions = parameters[i].getAnnotation(Conditions.class);
+			limitRows = parameters[i].getAnnotation(LimitRows.class);
+			
+			if(limitRows != null)
+			{
+				conditionQueryBuilder.setLimitRowParameterIndex(methodDesc, i);
+				continue;
+			}
 			
 			//if condition is not found on attr
 			if(condition == null && conditions == null)

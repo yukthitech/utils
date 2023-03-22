@@ -42,6 +42,7 @@ import com.yukthitech.persistence.InvalidMappingException;
 import com.yukthitech.persistence.JoinTableDetails;
 import com.yukthitech.persistence.Record;
 import com.yukthitech.persistence.conversion.ConversionService;
+import com.yukthitech.persistence.query.FinderQuery;
 import com.yukthitech.persistence.query.IConditionalQuery;
 import com.yukthitech.persistence.query.IOrderedQuery;
 import com.yukthitech.persistence.query.QueryCondition;
@@ -62,6 +63,7 @@ import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
+import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -424,6 +426,12 @@ public class ConditionQueryBuilder implements Cloneable
 
 	private String defTableCode;
 	private String defTableIdCol;
+	
+	/**
+	 * Index of parameter specifying limit on number of rows
+	 * to be fetched.
+	 */
+	private Integer limitRowParameterIndex;
 
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
@@ -438,6 +446,17 @@ public class ConditionQueryBuilder implements Cloneable
 		this.entityDetails = entityDetails;
 		this.nextTableId = nextTableId;
 		codeToTable.put(defTableCode, new TableInfo(defTableCode, entityDetails.getTableName(), entityDetails, null, null, null, false));
+	}
+	
+	public void setLimitRowParameterIndex(String methodDesc, Integer limitRowParameterIndex)
+	{
+		if(this.limitRowParameterIndex != null)
+		{
+			throw new InvalidConfigurationException("In method {} multiple parameters are marked as limit-row param. [Indexes: {}, {}]", 
+					methodDesc, this.limitRowParameterIndex, limitRowParameterIndex);
+		}
+		
+		this.limitRowParameterIndex = limitRowParameterIndex;
 	}
 
 	/**
@@ -1088,6 +1107,11 @@ public class ConditionQueryBuilder implements Cloneable
 		
 		ParameterContext context = new ParameterContext(params, queryExecutionContext);
 		loadConditionalQuery(context, query, params);
+		
+		if(limitRowParameterIndex != null && (query instanceof FinderQuery))
+		{
+			((FinderQuery) query).setResultsLimit((Integer) params[limitRowParameterIndex]);
+		}
 	}
 	
 	private void loadConditionalQuery(ParameterContext context, IConditionalQuery query, Object params[])

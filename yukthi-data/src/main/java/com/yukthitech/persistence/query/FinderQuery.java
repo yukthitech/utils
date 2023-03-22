@@ -103,6 +103,11 @@ public class FinderQuery extends AbstractConditionalQuery implements IOrderedQue
 	 */
 	public String getResultsLimitString()
 	{
+		if(resultsLimit == null)
+		{
+			return null;
+		}
+		
 		return "" + resultsLimit;
 	}
 

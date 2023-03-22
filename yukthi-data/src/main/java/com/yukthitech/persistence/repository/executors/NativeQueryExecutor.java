@@ -369,8 +369,8 @@ public class NativeQueryExecutor extends QueryExecutor
 			else if(field != null)
 			{
 				//set the value from record on field (after required conversion, if any)
-				ReflectionUtils.setFieldValue(result, field, 
-						ConvertUtils.convert(record.getObject(column), field.getType())
+				ReflectionUtils.setFieldValue(result, field,
+						conversionService.convertToJavaType(record.getObject(column), field)
 				);
 			}
 			else
