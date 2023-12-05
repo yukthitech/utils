@@ -43,8 +43,15 @@ public class SimpleListCellRenderer<E> extends DefaultListCellRenderer
 	{
 		JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 	
-		label.setIcon(iconProvider.apply((E) value));
-		label.setText(labelProvider.apply((E) value));
+		if(iconProvider != null)
+		{
+			label.setIcon(iconProvider.apply((E) value));
+		}
+		
+		if(labelProvider != null)
+		{
+			label.setText(labelProvider.apply((E) value));
+		}
 		
 		return label;
 	}
