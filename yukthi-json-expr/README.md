@@ -152,7 +152,7 @@ When elements has to be repeated dynamically based on data from context, then lo
 > In above example, a loop variable "cont" is used and within current object it can be accessed as a context variable. And it loops through the context value returned by "containers".
 
 > **Map Entries Example**
-> ```json:
+> ```json
 > {
 > 	"fullContainers": {
 > 		"@fmarker: cont": {
@@ -191,5 +191,59 @@ When elements has to be repeated dynamically based on data from context, then lo
 > ```
 > Within the loop the object inclusion and exclusion can be done using ${\color{blue}@for-each-condition}$ which will be evaluated for each iteration.
 
+## Transformation
+Following special conversions are supported when standard json representation is not enough ${\color{blue}@transform}$ can be used to transform the data into other format using any replacement expressions. In general this is used in conjunction with ${\color{blue}@value}$ and ${\color{blue}@falseValue}$ (in conditions).
 
-  
+In these expressions current-value being transformed can be accessed as ${\color{blue}@thisValue}$.
+
+> **Example to convert result object into json string**
+> ```json
+> {
+> 	"result": {
+> 		"@transform": "@expr: toJson(thisValue)",
+> 		"@value": {
+> 			"someVal": 1,
+> 			"containers": "@fmarker: containers"
+> 		}
+> 	}
+> }
+> ```
+> The result will be something like below:
+> ```json
+> {
+> 	"result": "{\"someVal\":1,\"containers\":[\"bank\",\"card\",\"insurance\"]}"
+> }
+> ```
+
+## Resource Loading
+When complex content, like multi-line or double-quotes etc, needs to be added in json, the content can be placed in an external resource file and can be loaded	using ${\color{blue}@resource}$.
+
+${\color{blue}@transform}$ can be applied to transform loaded content into other format.
+
+> **Loading and transformation example**
+> ```json
+> {
+> 	"DOC_TYPE": "TAX",
+> 	"CONTAINER_SUPRT_EN":  {
+> 		"@resource": "/doc-tax.xml",
+> 		"@transform": "@fmarker: normalizeXml(thisValue)"
+> 	}
+> }
+> ```
+
+## Variables
+In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression may needs to be divided, a dynamic variable will come handy.
+
+Using ${\color{blue}@set}$ new variables can be declared which in turn can be accessed directly as standard context attributes.
+
+> **Set Example**
+> ```json
+> {
+> 	"@set(prodMap)": {
+> 		"productNames": "@xpathMulti: /products//name"
+> 	},
+> 	"key2": "@fmarker: prodMap.productNames[0]"
+> }
+> ```
+> In the above example, a variable “prodMap” is created with value as a map (defined on right side). And then this variable is used in next line as a normal context attribute.
+ 
