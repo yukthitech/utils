@@ -15,21 +15,21 @@ Using one the prefixes mentioned below, the full key/value can be replaced with 
 * ${\color{blue}@xpathMulti}$ - Used to fetch multiple values from the current context using xpath.
 
 > **Map Examples** - Shows how replacement-expressions can be used in map values
->  * { "key2": " ${\color{blue}@fmarker}$: prodMap.productNames[0]" }
->  * { "docCount": " ${\color{blue}@xpath}$: /products[name='aggr']/docSize" }
->  * { "productNames": " ${\color{blue}@xpathMulti}$: /products//name" }
+>  * { "key2": " ${\color{blue}@fmarker}$: empMap.employeeNames[0]" }
+>  * { "bookCost": " ${\color{blue}@xpath}$: /books[name='Sphere']/cost" }
+>  * { "bookNames": " ${\color{blue}@xpathMulti}$: /books//name" }
 
 > **List Examples** - Shows how replacement-expressions can be used in list values
->  * { "listWithNoCond": [" ${\color{blue}@fmarker}$: devStackEnabled", 20] }
+>  * { "listWithNoCond": [" ${\color{blue}@fmarker}$: book.cost", 20] }
 
 ## Freemarker Expressions
 String values (both in keys and values) when dynamic-value-replacer prefixes are not used, they will be considered as free-marker templates. And freemarker expressions within the strings can be used in standard way.
 
 > **Example in Key**
-> { "devStack-${devStackEnabled}": {  "desc": "This is a dev stack" } }
+> { "book-${book.name}": {  "desc": "This is a science fiction." } }
 
 > **Example in value**
-> { "name": "${cont}" }
+> { "name": "${name}" }
 
 ## Conditions
 Different parts of a json can be declared to be included conditionally. That is, the target section will be included only when specified condition is true. This can be done using ${\color{blue}@condition}$. But usage of ${\color{blue}@condition}$ different from the element to element.
@@ -37,22 +37,21 @@ Different parts of a json can be declared to be included conditionally. That is,
 > **Maps Example** - To include or exclude Map objects, Map objects should have an entry with key as ${\color{blue}@condition}$
 > ```json
 > {
-> 	"devStack": {
-> 		"@condition": "devStackEnabled == 1",
-> 		"desc": "This is a dev stack"
+> 	"book": {
+> 		"@condition": "book.availableCount >= 1",
+> 		"title": "${book.title}"
 > 	}
 > }
 > ```
-> In above example, "devStack" (whose value is map) will be included in the output json, only if the condition specified by key ${\color{blue}@condition}$ in this map results in true.
+> In above example, "book" (whose value is map) will be included in the output json, only if the condition specified by key ${\color{blue}@condition}$ in this map results in true.
 
 > **Lists Example** - To include or exclude List objects, the first element of list should be string and should be prefix " ${\color{blue}@condition:}$ " followed by condition. With this the current list will be included in output json only when this condition evaluates to true.
 >```json
 >{
->	"listWithPositiveCond": ["@condition: devStackEnabled == 1", 1000, {"a": "b"}],
-> 	"listWithNegativeCond": ["@condition: prodStackEnabled == 1", 1000, {"a": "b"}]
+>	"books": ["@condition: library.enabled", 1000, {"a": "b"}],
 >}
 >```
->In above example, listWithPositiveCond / listWithNegativeCond will be included in final json only if corresponding conditions are true.
+>In above example, "books" will be included in final json only if corresponding conditions are true.
 
 ### Simple Values
 Cases when simple values has to be included/excluded based on conditions, Instead of simple value a map will be included with 2 or 3 keys as described below.
@@ -66,7 +65,7 @@ Cases when simple values has to be included/excluded based on conditions, Instea
 > ```json
 > {
 > 	"enabled": {
-> 		"@condition": "devStackEnabled == 1",
+> 		"@condition": "book.available == 1",
 > 		"@value": "Enabled"
 > 	},
 > 	"otherKey": "otherValue"
@@ -89,7 +88,7 @@ Cases when simple values has to be included/excluded based on conditions, Instea
 > ```json
 > {
 > 	"enabled": {
-> 		"@condition</span>": "devStackEnabled == 1",
+> 		"@condition</span>": "boook.available == 1",
 > 		"@value": "Enabled",
 > 		"@falseValue": "Disabled",
 > 		"extraKey": "some value"
@@ -117,13 +116,13 @@ Cases when simple values has to be included/excluded based on conditions, Instea
 > ```json
 > [
 > 	{
-> 		"@condition": "devStackEnabled == 1",
-> 		"@value": "@fmarker: devStackValue"
+> 		"@condition": "book.available == 1",
+> 		"@value": "@fmarker: book.price"
 > 	},
 > 	100
 > ]
 > ```
-> In above example, if condition evaluates to true, assuming "devStackValue" value is 1000 the result would be:
+> In above example, if condition evaluates to true, assuming "book.price" value is 1000 the result would be:
 > ```json
 > [1000,100]
 > ```
@@ -140,51 +139,51 @@ When elements has to be repeated dynamically based on data from context, then lo
 > **List Example**
 > ```json
 > {
-> 	"containers": [
+> 	"books": [
 > 		{
-> 			"@for-each(cont)": "containers",
-> 			"name": "${cont}",
-> 			"desc": "This is container ${cont}"
+> 			"@for-each(book)": "books",
+> 			"title": "${book.title}",
+> 			"desc": "This is book with summary - ${book.summary}"
 > 		}
 > 	]
 > }
 > ```
-> In above example, a loop variable "cont" is used and within current object it can be accessed as a context variable. And it loops through the context value returned by "containers".
+> In above example, a loop variable "book" is used and within current object it can be accessed as a context variable. And it loops through the context value returned by "books".
 
 > **Map Entries Example**
 > ```json
 > {
-> 	"fullContainers": {
-> 		"@fmarker: cont": {
-> 			"@for-each(cont)": "containers",
-> 			"days": "100"
+> 	"bookMap": {
+> 		"@fmarker: book.id": {
+> 			"@for-each(book)": "books",
+> 			"available": 1
 > 		}
 > 	}
 > }
 > ```
-> In above example, the element will generate key-value pair for every element returned by "cotainers" expression. And the key of generated entry, uses container name itself. So if "containers" returns 3 elements, then in final json "fullContainers" will have 3 entries with container name as key and "days=100" as the map entry.
+> In above example, the element will generate key-value pair for every element returned by "books" expression. And the key of generated entry, uses container name itself. So if "books" returns 3 elements, then in final json "bookMap" will have 3 entries with book-id as key and "available=1" as the map entry.
 
 > **Using static list for loop**
 > ```json
 > {
-> 	"containers": {
-> 		"@fmarker: cont": {
-> 			"@for-each(cont)": [ "bank", "investment", "card" ],
-> 			"days": "100"
+> 	"books": {
+> 		"@fmarker: title": {
+> 			"@for-each(title)": [ "Davinci Code", "Sphere", "Prey" ],
+> 			"available": 1
 > 		}
 > 	}
 > }
 > ```
-> In this case a simple json list can be specified as shown below for looping.
+> In this case a simple json list can be specified as shown above for looping.
 
 > **Inclusion/exclusion within loop**
 > ```json
 > {
-> 	"containers": {
-> 		"@fmarker: cont": {
-> 			"@for-each(cont)": [ "bank", "investment", "card" ],
-> 			"@for-each-condition": "isEnabled(cont)",
-> 			"days": "100"
+> 	"books": {
+> 		"@fmarker: title": {
+> 			"@for-each(title)": [ "Davinci Code", "Sphere", "Prey" ],
+> 			"@for-each-condition": "isEnabled(title)",
+> 			"available": 1
 > 		}
 > 	}
 > }
@@ -203,7 +202,7 @@ In these expressions current-value being transformed can be accessed as ${\color
 > 		"@transform": "@expr: toJson(thisValue)",
 > 		"@value": {
 > 			"someVal": 1,
-> 			"containers": "@fmarker: containers"
+> 			"books": "@fmarker: books"
 > 		}
 > 	}
 > }
@@ -211,7 +210,7 @@ In these expressions current-value being transformed can be accessed as ${\color
 > The result will be something like below:
 > ```json
 > {
-> 	"result": "{\"someVal\":1,\"containers\":[\"bank\",\"card\",\"insurance\"]}"
+> 	"result": "{\"someVal\":1,\"books\":[\"Davinci Code\",\"Sphere\",\"Prey\"]}"
 > }
 > ```
 
@@ -223,9 +222,9 @@ ${\color{blue}@transform}$ can be applied to transform loaded content into other
 > **Loading and transformation example**
 > ```json
 > {
-> 	"DOC_TYPE": "TAX",
-> 	"CONTAINER_SUPRT_EN":  {
-> 		"@resource": "/doc-tax.xml",
+> 	"type": "Fiction",
+> 	"metaInfo":  {
+> 		"@resource": "/fiction-meta.xml",
 > 		"@transform": "@fmarker: normalizeXml(thisValue)"
 > 	}
 > }
@@ -239,10 +238,10 @@ Using ${\color{blue}@set}$ new variables can be declared which in turn can be ac
 > **Set Example**
 > ```json
 > {
-> 	"@set(prodMap)": {
-> 		"productNames": "@xpathMulti: /products//name"
+> 	"@set(bookMap)": {
+> 		"titles": "@xpathMulti: /books//title"
 > 	},
-> 	"key2": "@fmarker: prodMap.productNames[0]"
+> 	"key2": "@fmarker: bookMap.titles[0]"
 > }
 > ```
 > In the above example, a variable “prodMap” is created with value as a map (defined on right side). And then this variable is used in next line as a normal context attribute.
