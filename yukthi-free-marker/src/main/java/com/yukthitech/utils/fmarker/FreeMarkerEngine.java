@@ -51,6 +51,8 @@ public class FreeMarkerEngine
 {
 	private static Logger logger = LogManager.getLogger(FreeMarkerEngine.class);
 	
+	private static ThreadLocal<FreeMarkerEngine> currentInstance = new ThreadLocal<>();
+	
 	/**
 	 * Singleton configuration.
 	 */
@@ -71,6 +73,11 @@ public class FreeMarkerEngine
 		reset();
 	}
 	
+	public static FreeMarkerEngine getCurrentInstance()
+	{
+		return currentInstance.get();
+	}
+	
 	/**
 	 * Resets this free marker engine with defaults.
 	 */
@@ -86,6 +93,7 @@ public class FreeMarkerEngine
 		registerDirective("initcap", new InitCapDirective());
 		
 		loadClass(DefaultMethods.class);
+		loadClass(DefaultCollectionMethods.class);
 	}
 
 	/**
@@ -183,6 +191,11 @@ public class FreeMarkerEngine
 			return null;
 		}
 		
+		// Prev value tracking is done, to support internal expr evaluation
+		//  multiple times in single expression.
+		FreeMarkerEngine prevVal = currentInstance.get();
+		currentInstance.set(this);
+		
 		try
 		{
 			Template template = new Template(name, templateString, getConfiguration());
@@ -196,6 +209,9 @@ public class FreeMarkerEngine
 		{
 			templateString = (templateString != null && templateString.length() > 1000) ? (templateString.substring(0, 1000) + "...") : templateString;
 			throw new InvalidStateException("An exception occurred while processing template: {}\nTemplate String: {}", name, templateString, ex);
+		} finally
+		{
+			currentInstance.set(prevVal);
 		}
 	}
 

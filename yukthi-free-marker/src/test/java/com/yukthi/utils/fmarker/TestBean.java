@@ -28,6 +28,40 @@ public class TestBean
 		this.name = name;
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(obj == this)
+		{
+			return true;
+		}
+
+		if(!(obj instanceof TestBean))
+		{
+			return false;
+		}
+
+		TestBean other = (TestBean) obj;
+		return name.equals(other.name);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashcode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		return name.hashCode();
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
