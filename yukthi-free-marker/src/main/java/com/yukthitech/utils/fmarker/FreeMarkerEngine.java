@@ -276,7 +276,7 @@ public class FreeMarkerEngine
 			return res;
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException("Template processing resulted in error.\n\tName: %s\n\tError: %s\n\tTemplate: %s", 
+			throw new InvalidStateException("Template processing resulted in error.\n\tName: {}\n\tError: {}\n\tTemplate: {}", 
 					name, CommonUtils.getRootCauseMessages(ex), valueExpression, ex);
 		}
 	}
