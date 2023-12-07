@@ -123,7 +123,7 @@ public class JsonExprEngine
 	 * @param context context to be used
 	 * @return processed json
 	 */
-	public String processJson(String json, Map<String, Object> context)
+	public String processJson(String json, Object context)
 	{
 		Object jsonObj = null;
 		
@@ -135,7 +135,7 @@ public class JsonExprEngine
 			throw new InvalidStateException("An error occurred while parsing json template.", ex);
 		}
 		
-		Object res = processObject(jsonObj, context, "");
+		Object res = processObject(jsonObj, toJsonExprContext(context), "");
 		
 		return ExecutionUtils.executeWithReturn(() -> 
 		{
@@ -150,7 +150,7 @@ public class JsonExprEngine
 	 * @param context context to be used
 	 * @return processed json
 	 */
-	public Object processJsonAsObject(String json, Map<String, Object> context)
+	public Object processJsonAsObject(String json, Object context)
 	{
 		Object jsonObj = null;
 		
@@ -162,16 +162,16 @@ public class JsonExprEngine
 			throw new InvalidStateException("An error occurred while parsing json template.", ex);
 		}
 		
-		return processObject(jsonObj, context, "");
+		return processObject(jsonObj, toJsonExprContext(context), "");
 	}
-
+	
 	/**
 	 * Process the specified object with specified context and returns the result.
 	 * @param object object to process
 	 * @param context context to be used
 	 * @return processed object
 	 */
-	public Object processObject(Object object, Map<String, Object> context)
+	public Object processObject(Object object, Object context)
 	{
 		//Convert object into json object
 		String json = ExecutionUtils.executeWithReturn(() -> 
@@ -186,12 +186,24 @@ public class JsonExprEngine
 			jsonObj = OBJECT_MAPPER.readValue(json, Object.class);
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException("An error occurred while parsing json template.", ex);
+			throw new InvalidStateException("An error occurred while parsing json.", ex);
 		}
 
 		//process and return the object
-		return processObject(jsonObj, context, "");
+		return processObject(jsonObj, toJsonExprContext(context), "");
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private IJsonExprContext toJsonExprContext(Object context)
+	{
+		if(context instanceof Map)
+		{
+			return new MapJsonExprContext((Map) context);
+		}
+
+		return new PojoJsonExprContext(context);
+	}
+
 	
 	/**
 	 * Based on the input object type approp process method will be called.
@@ -201,7 +213,7 @@ public class JsonExprEngine
 	 * @return processed object.
 	 */
 	@SuppressWarnings("unchecked")
-	private Object processObject(Object object, Map<String, Object> context, String path)
+	private Object processObject(Object object, IJsonExprContext context, String path)
 	{
 		try
 		{
@@ -237,7 +249,7 @@ public class JsonExprEngine
 	 * @return processed list.
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Object> processList(List<Object> lst, Map<String, Object> context, String path)
+	private List<Object> processList(List<Object> lst, IJsonExprContext context, String path)
 	{
 		if(!processCondition(lst, context, path))
 		{
@@ -296,7 +308,7 @@ public class JsonExprEngine
 	 * @return processed list of values
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Object> procesRepeatedElement(Map<String, Object> mapTemplate, Map<String, Object> context, String path)
+	private List<Object> procesRepeatedElement(Map<String, Object> mapTemplate, IJsonExprContext context, String path)
 	{
 		// if condition is present and evaluated to false, then return empty list 
 		// which in turn would remove current object (map template) on final list
@@ -355,7 +367,7 @@ public class JsonExprEngine
 		// and process them
 		for(Object iterVal : valueLst)
 		{
-			context.put(attrName, iterVal);
+			context.setValue(attrName, iterVal);
 			
 			//if for each condition is specified
 			if(StringUtils.isNotBlank(forEachCond))
@@ -388,7 +400,7 @@ public class JsonExprEngine
 	 * @return processed map.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Object processMap(Map<String, Object> map, Map<String, Object> context, String path)
+	private Object processMap(Map<String, Object> map, IJsonExprContext context, String path)
 	{
 		//if condition is present and evaluated to false, then return null
 		ObjectWrapper<Object> resWrapper = new ObjectWrapper<Object>();
@@ -454,20 +466,25 @@ public class JsonExprEngine
 			
 			//for each entry, process the value and replace current value with processed value
 			Object val = processObject(entry.getValue(), context, path + ">" + entry.getKey());
-			
-			//if value resulted in null, ignore current entry
-			if(val == null)
-			{
-				continue;
-			}
-			
 			Matcher setMatcher = SET_PATTERN.matcher(entry.getKey());
 			
 			//if current key is a set key
 			if(setMatcher.matches())
 			{
+				//irrespective of value being null, if key is @set key, flag has to be set
 				setKeyPresent = true;
-				context.put(setMatcher.group(1), val);
+				
+				if(val != null)
+				{
+					context.setValue(setMatcher.group(1), val);
+				}
+				
+				continue;
+			}
+
+			//if value resulted in null, ignore current entry
+			if(val == null)
+			{
 				continue;
 			}
 			
@@ -515,7 +532,7 @@ public class JsonExprEngine
 	 * @param keyName Key name to be used to fetch the value expression
 	 * @return true if value expression is present
 	 */
-	private boolean processMapValue(Map<String, Object> map, Map<String, Object> context, String path, ObjectWrapper<Object> value, String keyName)
+	private boolean processMapValue(Map<String, Object> map, IJsonExprContext context, String path, ObjectWrapper<Object> value, String keyName)
 	{
 		Object valueExpr = map.get(keyName);
 		
@@ -546,7 +563,7 @@ public class JsonExprEngine
 	 * @param path path where current map is found
 	 * @return true if condition is not present or evaluate to true
 	 */
-	private boolean processCondition(Map<String, Object> map, Map<String, Object> context, String path)
+	private boolean processCondition(Map<String, Object> map, IJsonExprContext context, String path)
 	{
 		String condition = null;
 		
@@ -578,7 +595,7 @@ public class JsonExprEngine
 	 * @param path path where current map is found
 	 * @return true if condition is not present or evaluate to true
 	 */
-	private boolean processCondition(List<Object> lst, Map<String, Object> context, String path)
+	private boolean processCondition(List<Object> lst, IJsonExprContext context, String path)
 	{
 		//if empty list is found, evaluate condition as true
 		if(CollectionUtils.isEmpty(lst))

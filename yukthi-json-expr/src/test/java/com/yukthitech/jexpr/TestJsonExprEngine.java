@@ -76,6 +76,12 @@ public class TestJsonExprEngine
 		return loadXmlFile("/json-expr-negative-test-data.xml");
 	}
 
+	@DataProvider(name = "pojoJsonElDataProvider")
+	public Object[][] getPojoTestData() throws Exception
+	{
+		return loadXmlFile("/pojo-json-expr-test-data.xml");
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(dataProvider =  "jsonElDataProvider")
 	public void testJel(JelTestBean bean) throws Exception
@@ -86,6 +92,20 @@ public class TestJsonExprEngine
 		
 		//execute the jel
 		String res = jsonExprEngine.processJson(bean.getTemplate(), context);
+		Object actualResult = objectMapper.readValue(res, Object.class);
+		
+		//as deep comparison is done, re-covert data to json (removing identations) and compare
+		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
+	}
+
+	@Test(dataProvider =  "pojoJsonElDataProvider")
+	public void testPojoJel(JelTestBean bean) throws Exception
+	{
+		//parse json contents from test bean
+		Object expectedResult = objectMapper.readValue(bean.getExpectedResult(), Object.class);
+		
+		//execute the jel
+		String res = jsonExprEngine.processJson(bean.getTemplate(), bean.getPojoContext());
 		Object actualResult = objectMapper.readValue(res, Object.class);
 		
 		//as deep comparison is done, re-covert data to json (removing identations) and compare

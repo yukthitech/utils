@@ -94,7 +94,7 @@ public class Conversions
 	 *            the value
 	 * @return true, if successful
 	 */
-	public boolean processMapRes(Map<String, Object> map, Map<String, Object> context, String path, ObjectWrapper<Object> value)
+	public boolean processMapRes(Map<String, Object> map, IJsonExprContext context, String path, ObjectWrapper<Object> value)
 	{
 		Object valueExpr = map.get(RES);
 		
@@ -123,7 +123,7 @@ public class Conversions
 		{
 			if(resParams != null)
 			{
-				context.put("resParams", resParams);
+				context.setValue("resParams", resParams);
 			}
 			
 			content = freeMarkerEngine.processTemplate("res-content", content, context);
@@ -142,7 +142,7 @@ public class Conversions
 	 * @param path path where this string is found
 	 * @return processed value
 	 */
-	public Object processString(String str, Map<String, Object> context, String path)
+	public Object processString(String str, IJsonExprContext context, String path)
 	{
 		Matcher matcher = EXPR_PATTERN.matcher(str);
 		
@@ -176,7 +176,7 @@ public class Conversions
 		throw new JsonExpressionException(path, "Invalid expression type specified '%s' in expression: %s", exprType, str);
 	}
 
-	public Object checkForTransform(Map<String, Object> map, Object curValue, Map<String, Object> context, String path)
+	public Object checkForTransform(Map<String, Object> map, Object curValue, IJsonExprContext context, String path)
 	{
 		Object transformExpr = map.get(TRANSFORM);
 		
@@ -187,7 +187,7 @@ public class Conversions
 				
 		try
 		{
-			context.put("thisValue", curValue);
+			context.setValue("thisValue", curValue);
 			
 			return processString((String) transformExpr, context, path);
 		}catch(Exception ex)

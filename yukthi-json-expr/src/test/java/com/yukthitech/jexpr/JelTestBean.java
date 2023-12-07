@@ -32,6 +32,11 @@ public class JelTestBean
 	private String context;
 	
 	/**
+	 * Pojo context to be used.
+	 */
+	private LibraryContext pojoContext;
+	
+	/**
 	 * Template to be used.
 	 */
 	private String template;
@@ -64,6 +69,16 @@ public class JelTestBean
 	public void setContext(String context)
 	{
 		this.context = context;
+	}
+	
+	public LibraryContext getPojoContext()
+	{
+		return pojoContext;
+	}
+
+	public void setPojoContext(LibraryContext pojoContext)
+	{
+		this.pojoContext = pojoContext;
 	}
 
 	/**
