@@ -17,6 +17,8 @@ package com.yukthitech.utils.rest;
 
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,8 +45,6 @@ import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.message.BasicHeaderElementIterator;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.TimeValue;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * @author akiran
@@ -52,7 +52,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class HttpClientFactory
 {
-	private static Logger logger = LogManager.getLogger(HttpClientFactory.class);
+	private static Logger logger = Logger.getLogger(HttpClientFactory.class.getName());
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 500;
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 5;
@@ -144,7 +144,7 @@ public class HttpClientFactory
 		if(StringUtils.isNotBlank(proxy))
 		{
 			proxyHost = parseProxyHost(proxy);
-			logger.debug("Using default http proxy {}:{}", proxyHost.getHostName(), proxyHost.getPort());
+			logger.log(Level.INFO, String.format("Using default http proxy %s:%s", proxyHost.getHostName(), proxyHost.getPort()));
 		}
 	}
 	

@@ -24,9 +24,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.yukthitech.utils.CommonUtils;
 
@@ -37,7 +36,7 @@ import com.yukthitech.utils.CommonUtils;
  */
 public class EventListenerManager<L>
 {
-	private static Logger logger = LogManager.getLogger(EventListenerManager.class);
+	private static Logger logger = Logger.getLogger(EventListenerManager.class.getName());
 	
 	/**
 	 * Data that can be used to filter listeners before invocation.
@@ -287,7 +286,7 @@ public class EventListenerManager<L>
 			}
 		}catch(Exception ex)
 		{
-			logger.error("An error occurred while while invoking listener or result processing - {}", listener, ex);
+			logger.log(Level.SEVERE, "An error occurred while while invoking listener or result processing - " + listener, ex);
 		}
 	}
 	

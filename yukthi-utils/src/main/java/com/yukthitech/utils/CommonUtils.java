@@ -27,13 +27,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -43,7 +42,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class CommonUtils
 {
-	private static Logger logger = LogManager.getLogger(CommonUtils.class);
+	private static Logger logger = Logger.getLogger(CommonUtils.class.getName());
 
 	private static Map<Class<?>, Class<?>> wrapperToPrimitive = new HashMap<Class<?>, Class<?>>();
 	private static Map<Class<?>, Class<?>> primitiveToWrapper = new HashMap<Class<?>, Class<?>>();
@@ -253,7 +252,7 @@ public class CommonUtils
 			} catch(Exception ex)
 			{
 				// in case of error log a warning and ignore
-				logger.warn("An error occurred while parsing expression: " + key, ex);
+				logger.log(Level.INFO, "An error occurred while parsing expression: " + key, ex);
 				value = null;
 			}
 

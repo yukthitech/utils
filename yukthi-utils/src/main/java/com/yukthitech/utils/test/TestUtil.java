@@ -25,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,12 +33,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.utils.CommonUtils;
 
@@ -47,8 +48,8 @@ import com.yukthitech.utils.CommonUtils;
  */
 public class TestUtil
 {
-	private static Logger logger = LogManager.getLogger(TestUtil.class);
-	
+	private static Logger logger = Logger.getLogger(TestUtil.class.getName());
+		
 	private static Random random = new Random();
 
 	/**
@@ -92,14 +93,15 @@ public class TestUtil
 		fos.close();
 		is.close();
 	
-		logger.debug("Copied resource '{}' as file '{}'", resource, file.getPath());
+		logger.log(Level.INFO, String.format("Copied resource '%s' as file '%s'", resource, file.getPath()));
 		
 		return file.getAbsolutePath();
 	}
 	
 
 	/**
-	 * Calls values() and valueOf() on specified enum type. And also calls read method of all properties. This will add code coverage for target enum
+	 * Calls values() and valueOf() on specified enum type. And also calls read method of all properties. 
+	 * This will add code coverage for target enum
 	 * @param enumTypes
 	 * @throws NoSuchMethodException 
 	 * @throws SecurityException 
@@ -302,7 +304,7 @@ public class TestUtil
 		Object value = null;
 		Map<String, Object> valueMap = new HashMap<String, Object>();
 		
-		logger.debug("Testing bean: " + bean.toString());
+		logger.log(Level.INFO, "Testing bean: " + bean.toString());
 		
 		//loop through properties
 		for(PropertyDescriptor prop : propMap.values())
@@ -313,7 +315,7 @@ public class TestUtil
 				continue;
 			}
 			
-			logger.debug("Testing property - " + prop.getName());
+			logger.log(Level.INFO, "Testing property - " + prop.getName());
 			
 			//if it writeable property create random value
 			if(prop.getWriteMethod() != null)
@@ -384,7 +386,7 @@ public class TestUtil
 		
 		if(constructors.length == 0)
 		{
-			logger.debug("No constructors are found for testing type - {}", type.getName());
+			logger.log(Level.INFO, "No constructors are found for testing type - " + type.getName());
 			return;
 		}
 		
@@ -472,7 +474,7 @@ public class TestUtil
 
 		for(Class<?> type : beanTypes)
 		{
-			logger.debug("Testing type - {}", type.getName());
+			logger.log(Level.INFO, "Testing type - " + type.getName());
 			
 			if(type.isInterface())
 			{
@@ -496,7 +498,7 @@ public class TestUtil
 				throw new IllegalStateException("An error occurred while testing bean-type: " + type.getName(), ex);
 			}
 			
-			logger.debug("Testing completed for type {}", type.getName());
+			logger.log(Level.INFO, "Testing completed for type "  + type.getName());
 		}
 	}
 	
@@ -512,6 +514,6 @@ public class TestUtil
 		
 		content = CommonUtils.replaceExpressions(valueMap, content, null);
 		
-		FileUtils.writeStringToFile(new File(file), content);
+		FileUtils.writeStringToFile(new File(file), content, Charset.defaultCharset());
 	}
 }

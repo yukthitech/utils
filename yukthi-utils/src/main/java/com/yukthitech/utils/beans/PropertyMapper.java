@@ -16,10 +16,10 @@
 package com.yukthitech.utils.beans;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -31,7 +31,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class PropertyMapper
 {
-	private static Logger logger = LogManager.getLogger(PropertyMapper.class);
+	private static Logger logger = Logger.getLogger(PropertyMapper.class.getName());
 	
 	private static BeanInfoFactory beanInfoFactory = new BeanInfoFactory();
 	
@@ -139,10 +139,10 @@ public class PropertyMapper
 			{
 				if(isIgnorableType(sourceProperty.getType()) || isIgnorableType(destProperty.getType()))
 				{
-					logger.info("Ignoring property '{}' as source and destination data types are not matching "
-							+ "[Source type : {}, Source Property Type: {}, Desctination Type: {}, Destination Property Type: {}] ", 
+					logger.log(Level.INFO, String.format("Ignoring property '%s' as source and destination data types are not matching "
+							+ "[Source type : %s, Source Property Type: %s, Desctination Type: %s, Destination Property Type: %s] ", 
 							srcProp, source.getClass().getName(), sourceProperty.getType().getName(), 
-							destination.getClass().getName(), destProperty.getType().getName());
+							destination.getClass().getName(), destProperty.getType().getName()));
 					continue;
 				}
 				
@@ -159,10 +159,11 @@ public class PropertyMapper
 					value = destValue;
 				}catch(Exception ex)
 				{
-					logger.info("Ignoring mismatching property '{}' as source and destination data types are not matching and an error occurred while creating desination property bean "
-							+ "[Source type : {}, Source Property Type: {}, Desctination Type: {}, Destination Property Type: {}]. Error - {}", 
+					logger.log(Level.INFO, String.format("Ignoring mismatching property '%s' as source and destination data types are not "
+							+ "matching and an error occurred while creating desination property bean "
+							+ "[Source type : %s, Source Property Type: %s, Desctination Type: %s, Destination Property Type: %s]. Error - %s", 
 							srcProp, source.getClass().getName(), sourceProperty.getType().getName(), 
-							destination.getClass().getName(), destProperty.getType().getName(), ex);
+							destination.getClass().getName(), destProperty.getType().getName(), ex), ex);
 					continue;
 				}
 			}

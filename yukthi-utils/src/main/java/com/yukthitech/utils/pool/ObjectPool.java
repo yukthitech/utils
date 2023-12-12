@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Maintains the pool of objects
@@ -32,7 +31,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ObjectPool<T>
 {
-	private static Logger logger = LogManager.getLogger(ObjectPool.class);
+	private static Logger logger = Logger.getLogger(ObjectPool.class.getName());
 	
 	private List<T> freeObjects = new LinkedList<T>();
 	private Set<T> usedObjects = new HashSet<T>();
@@ -176,7 +175,7 @@ public class ObjectPool<T>
 					//if wait is enabled
 					if(wait)
 					{
-						logger.debug("Wait for availability of free object");
+						logger.log(Level.FINEST, "Wait for availability of free object");
 						
 						//wait till object is available
 						while(freeObjects.isEmpty())

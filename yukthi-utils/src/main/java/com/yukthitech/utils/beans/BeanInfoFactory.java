@@ -18,9 +18,8 @@ package com.yukthitech.utils.beans;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.annotations.IgnorePropertyDestination;
@@ -31,7 +30,7 @@ import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 
 public class BeanInfoFactory
 {
-	private static Logger logger = LogManager.getLogger(BeanInfoFactory.class);
+	private static Logger logger = Logger.getLogger(BeanInfoFactory.class.getName());
 
 	private RecursiveAnnotationFactory recursiveAnnotationFactory = new RecursiveAnnotationFactory();
 	
@@ -142,7 +141,8 @@ public class BeanInfoFactory
 					nestedProp = NestedProperty.getNestedProperty(beanType, field.getName());
 				}catch(Exception ex)
 				{
-					logger.info("Ignoring {}.{} property, as property fetch resulted in error - {}", beanType.getName(), field.getName(), ex);
+					logger.log(Level.INFO, 
+							String.format("Ignoring %s.%%s property, as property fetch resulted in error - %s", beanType.getName(), field.getName()), ex);
 					continue;
 				}
 				

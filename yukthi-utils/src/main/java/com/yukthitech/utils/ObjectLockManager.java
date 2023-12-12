@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A Utility class which helps in locking objects till they are released. This class will
@@ -38,7 +37,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ObjectLockManager
 {
-	private static Logger logger = LogManager.getLogger(ObjectLockManager.class);
+	private static Logger logger = Logger.getLogger(ObjectLockManager.class.getName());
 	
 	private class ObjectLock extends ReentrantLock
 	{
@@ -183,7 +182,7 @@ public class ObjectLockManager
 		//if locked wait for lock to be released
 		if(objLock != null)
 		{
-			logger.debug("Waiting for lock on object using same lock - {}", object);
+			logger.log(Level.FINE, "Waiting for lock on object using same lock - {}", object);
 			
 			objLock.lockObject(object);
 			return;

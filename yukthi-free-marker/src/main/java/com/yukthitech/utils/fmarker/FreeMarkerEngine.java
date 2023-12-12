@@ -23,10 +23,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -49,7 +49,7 @@ import freemarker.template.utility.DeepUnwrap;
  */
 public class FreeMarkerEngine
 {
-	private static Logger logger = LogManager.getLogger(FreeMarkerEngine.class);
+	private static Logger logger = Logger.getLogger(FreeMarkerEngine.class.getName());
 	
 	private static ThreadLocal<FreeMarkerEngine> currentInstance = new ThreadLocal<>();
 	
@@ -123,7 +123,7 @@ public class FreeMarkerEngine
 			throw new InvalidStateException("A void method {}.{}() is registered as freemarker-method", method.getDeclaringClass().getName(), method.getName());
 		}
 		
-		logger.debug("Registering method {}.{} with name - {}", method.getDeclaringClass().getName(), method.getName(), name);
+		logger.log(Level.FINE, String.format("Registering method %s.%s with name - %s", method.getDeclaringClass().getName(), method.getName(), name));
 		
 		if(StringUtils.isBlank(name))
 		{
@@ -141,7 +141,7 @@ public class FreeMarkerEngine
 			//	this can happen when same class is loaded multiple times
 			if(method1.equals(method2))
 			{
-				logger.debug("Ignoring duplicate registration of method: {}()", method1);
+				logger.log(Level.FINE, String.format("Ignoring duplicate registration of method: %s()", method1));
 				return;
 			}
 			

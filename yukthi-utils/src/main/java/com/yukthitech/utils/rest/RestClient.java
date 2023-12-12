@@ -17,6 +17,8 @@ package com.yukthitech.utils.rest;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.ClientProtocolException;
@@ -27,8 +29,6 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  */
 public class RestClient
 {
-	private static Logger logger = LogManager.getLogger(RestClient.class);
+	private static Logger logger = Logger.getLogger(RestClient.class.getName());
 	
 	private static final int MAX_STR_LENGTH = 1000;
 	
@@ -51,7 +51,7 @@ public class RestClient
 			int status = response.getCode();
 			String value = null;
 			
-			logger.trace("Got response-status as {}", status);
+			logger.log(Level.FINER, "Got response-status as " + status);
 			
 			HttpEntity entity = response.getEntity();
 			
@@ -60,11 +60,11 @@ public class RestClient
 				value = entity != null? EntityUtils.toString(entity): null;
 			}catch(Exception ex)
 			{
-				logger.warn("An error occurred while fetching response content", ex);
+				logger.log(Level.SEVERE, "An error occurred while fetching response content", ex);
 				value = null;
 			}
 			
-			logger.trace("Got response status as {} and body as: {}", status, truncate(value));
+			logger.log(Level.FINER, String.format("Got response status as %s and body as: %s", status, truncate(value)));
 			
 			if(StringUtils.isBlank(value))
 			{
@@ -259,12 +259,16 @@ public class RestClient
 		{
 			try
 			{
-				logger.debug("Got response as {}", truncate(stringResult.getValue()) );
+				if(logger.isLoggable(Level.INFO))
+				{
+					logger.log(Level.INFO, String.format("Got response as %s", truncate(stringResult.getValue())));
+				}
+				
 				//convert the response json into required object
 				resultValue = objectMapper.readValue(stringResult.getValue(), expectedResponseType);
 			}catch(Exception ex)
 			{
-				logger.error("An error occurred while parsing json response", ex);
+				logger.log(Level.SEVERE, "An error occurred while parsing json response", ex);
 				//throw new RestInvocationException("An error occurred while parsing json response", ex);
 				resultValue = null;
 				parseError = "" + ex;
@@ -278,7 +282,7 @@ public class RestClient
 		
 		if(restClientListener != null)
 		{
-			logger.debug("Calling rest client listener before sending JSON result to caller");
+			logger.log(Level.FINER, "Calling rest client listener before sending JSON result to caller");
 			restClientListener.postrequest(request, result);
 		}
 			
@@ -296,7 +300,7 @@ public class RestClient
 		
 		if(restClientListener != null)
 		{
-			logger.debug("Calling rest client listener before sending result to caller");
+			logger.log(Level.FINER, "Calling rest client listener before sending result to caller");
 			restClientListener.postrequest(request, result);
 		}
 		
@@ -315,7 +319,7 @@ public class RestClient
 		
 		if(restClientListener != null)
 		{
-			logger.debug("Calling rest client listener before sending result to caller");
+			logger.log(Level.FINER, "Calling rest client listener before sending result to caller");
 			restClientListener.postrequest(request, result);
 		}
 		
@@ -328,18 +332,18 @@ public class RestClient
 		{
 			if(restClientListener != null)
 			{
-				logger.debug("Calling rest client listener before sending request to server");
+				logger.log(Level.FINER, "Calling rest client listener before sending request to server");
 				restClientListener.prerequest(request);
 			}
 			
 			//dont print request details of secured request
 			if(request.isSecured())
 			{
-				logger.trace("Invoking request [Base Url - {}]", baseUrl);
+				logger.log(Level.FINER, "Invoking request [Base Url - {}]", baseUrl);
 			}
 			else
 			{
-				logger.trace("Invoking request [Base Url - {}]: {}", baseUrl, request);
+				logger.log(Level.FINER, String.format("Invoking request [Base Url - %s]: %s", baseUrl, request));
 			}
 			
 			//build http client request

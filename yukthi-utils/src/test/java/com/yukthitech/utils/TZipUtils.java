@@ -16,6 +16,7 @@
 package com.yukthitech.utils;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,13 +30,13 @@ public class TZipUtils
 	public void testCreateZipFile() throws Exception
 	{
 		File file1 = File.createTempFile("test", ".txt");
-		FileUtils.write(file1, "Text for file1");
+		FileUtils.write(file1, "Text for file1", Charset.defaultCharset());
 		
 		File file2 = File.createTempFile("test", ".txt");
-		FileUtils.write(file2, "Text for file2");
+		FileUtils.write(file2, "Text for file2", Charset.defaultCharset());
 		
 		File file3 = File.createTempFile("test", ".txt");
-		FileUtils.write(file3, "Text for file3");
+		FileUtils.write(file3, "Text for file3", Charset.defaultCharset());
 		
 		Map<String, File> entries = new HashMap<String, File>();
 		entries.put("dir1/file1.txt", file1);

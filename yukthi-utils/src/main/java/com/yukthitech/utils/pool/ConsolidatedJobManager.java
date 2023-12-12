@@ -20,9 +20,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Consolidated job manager which helps in scheduling and resheduling jobs based on name.
@@ -30,7 +29,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ConsolidatedJobManager
 {
-	private static Logger logger = LogManager.getLogger(ConsolidatedJobManager.class);
+	private static Logger logger = Logger.getLogger(ConsolidatedJobManager.class.getName());
 	
 	/**
 	 * Job whose multiple invocation has to be consolidated and executed only once.
@@ -101,7 +100,7 @@ public class ConsolidatedJobManager
 				runnable.run();
 			} catch(Exception ex)
 			{
-				logger.error("An error occurred while executing consolidated task: {}", name, ex);
+				logger.log(Level.SEVERE, "An error occurred while executing consolidated task: " + name, ex);
 			} finally
 			{
 				Thread.currentThread().setName(threadName);
@@ -192,7 +191,7 @@ public class ConsolidatedJobManager
 					runnable.run();
 				}catch(Exception ex)
 				{
-					logger.error("Unhandled error occurred in scheduled background job", ex);
+					logger.log(Level.SEVERE, "Unhandled error occurred in scheduled background job", ex);
 				}
 			}
 		};

@@ -18,10 +18,10 @@ package com.yukthitech.utils.fmarker;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
@@ -35,7 +35,7 @@ import freemarker.template.TemplateDirectiveModel;
  */
 class MethodLoader
 {
-	private static Logger logger = LogManager.getLogger(MethodLoader.class);
+	private static Logger logger = Logger.getLogger(MethodLoader.class.getName());
 	
 	/**
 	 * Expected attributes of directive method types.
@@ -101,7 +101,7 @@ class MethodLoader
 			//ignore non-static methods
 			if(!Modifier.isStatic(method.getModifiers()))
 			{
-				logger.debug("Non-static method {}.{}() is marked as free-marker method/directive", cls.getName(), method.getName());
+				logger.log(Level.FINE, String.format("Non-static method %s.%s() is marked as free-marker method/directive", cls.getName(), method.getName()));
 				continue;
 			}
 			

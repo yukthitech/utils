@@ -27,11 +27,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -43,7 +42,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class RecursiveAnnotationFactory
 {
-	private static Logger logger = LogManager.getLogger(RecursiveAnnotationFactory.class);
+	private static Logger logger = Logger.getLogger(RecursiveAnnotationFactory.class.getName());
 	
 	private static Pattern ARR_IDX_PATTERN = Pattern.compile("\\[(.+)\\]");
 	
@@ -415,7 +414,7 @@ public class RecursiveAnnotationFactory
 		//if direct annotation is found, return the same
 		if(targetAnnotation != null)
 		{
-			logger.trace("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
+			logger.log(Level.FINEST, String.format("Direct annotation of type '%s' found on '%s'", targetAnnotationType.getName(), annotatedElement));
 			return targetAnnotation;
 		}
 		
@@ -495,7 +494,7 @@ public class RecursiveAnnotationFactory
 		//if direct annotation is found, return the same
 		if(targetAnnotation != null)
 		{
-			logger.trace("Direct annotation of type '{}' found on '{}'", targetAnnotationType.getName(), annotatedElement);
+			logger.log(Level.FINEST, String.format("Direct annotation of type '%s' found on '%s'", targetAnnotationType.getName(), annotatedElement));
 			matchingAnnot.add(targetAnnotation);
 		}
 

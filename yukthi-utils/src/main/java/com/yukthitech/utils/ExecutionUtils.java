@@ -15,8 +15,8 @@
  */
 package com.yukthitech.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -27,11 +27,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ExecutionUtils
 {
-	
-	/**
-	 * The logger.
-	 */
-	private static Logger logger = LogManager.getLogger(ExecutionUtils.class);
+	private static Logger logger = Logger.getLogger(ExecutionUtils.class.getName());
 	
 	/**
 	 * Interface to represent tasks that can be submitted.
@@ -71,7 +67,7 @@ public class ExecutionUtils
 			executable.execute();
 		} catch(Exception ex)
 		{
-			logger.warn(String.format(message, params), ex);
+			logger.log(Level.WARNING, String.format(message, params), ex);
 		}
 	}
 	
@@ -90,7 +86,7 @@ public class ExecutionUtils
 			return executable.execute();
 		} catch(Exception ex)
 		{
-			logger.warn(String.format(message, params), ex);
+			logger.log(Level.WARNING, String.format(message, params), ex);
 			return null;
 		}
 	}
@@ -111,7 +107,7 @@ public class ExecutionUtils
 			return executable.execute();
 		} catch(Exception ex)
 		{
-			logger.warn(String.format(message, params), ex);
+			logger.log(Level.WARNING, String.format(message, params), ex);
 			return defaultValue;
 		}
 	}
@@ -206,7 +202,8 @@ public class ExecutionUtils
 			} catch(Exception ex)
 			{
 				error = ex;
-				logger.warn("Failed to execute operation '{}'. Will retry after {} millis. [Retry {} of {}]", opMssg, delayInMillis, (i + 1), maxRetries, ex);
+				logger.log(Level.WARNING, 
+						String.format("Failed to execute operation '%s'. Will retry after %s millis. [Retry %s of %s]", opMssg, delayInMillis, (i + 1), maxRetries), ex);
 			}
 
 			try
@@ -218,7 +215,7 @@ public class ExecutionUtils
 				}
 			} catch(InterruptedException ex)
 			{
-				logger.warn("Ignoring interrupted exception and continuing with next retry");
+				logger.log(Level.WARNING, "Ignoring interrupted exception and continuing with next retry");
 			}
 		}
 		

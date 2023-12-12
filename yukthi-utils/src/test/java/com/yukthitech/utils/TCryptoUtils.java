@@ -15,8 +15,6 @@
  */
 package com.yukthitech.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -26,8 +24,6 @@ import org.testng.annotations.Test;
  */
 public class TCryptoUtils
 {
-	private static Logger logger = LogManager.getLogger(TCryptoUtils.class);
-	
 	@Test
 	public void testEnryption()
 	{
@@ -36,7 +32,7 @@ public class TCryptoUtils
 		String input = "2323:pop:123,334,434";
 		
 		String encryptedStr = CryptoUtils.encrypt(secretKey, input);
-		logger.debug("{} got encrypted as {}", input, encryptedStr);
+		System.out.println(String.format("%s got encrypted as %s", input, encryptedStr));
 		
 		Assert.assertNotEquals(encryptedStr, input);
 		
