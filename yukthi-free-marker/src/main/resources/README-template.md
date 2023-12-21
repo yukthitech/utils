@@ -39,7 +39,8 @@ ${\color{blue}@FreeMarkerDirective}$ annotation can be used to mark a static met
 > 			examples = {
 > 				@ExampleDoc(usage = "<@trim>   some content  </@trim>", result = "some content")
 > 			})
-> 	public static void trim(Environment env, Map<String, String> params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws Exception
+> 	public static void trim(Environment env, Map<String, String> params, 
+		TemplateModel[] loopVars, TemplateDirectiveBody body) throws Exception
 > 	{
 > 		StringWriter writer = new StringWriter();
 > 		body.render(writer);
