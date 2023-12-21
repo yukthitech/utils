@@ -24,6 +24,11 @@ import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
 public class FreeMarkerMethodExampleDoc
 {
 	/**
+	 * Title for this example.
+	 */
+	private String title;
+	
+	/**
 	 * Usage example.
 	 */
 	private String usage;
@@ -46,8 +51,14 @@ public class FreeMarkerMethodExampleDoc
 	 */
 	public FreeMarkerMethodExampleDoc(ExampleDoc doc)
 	{
+		this.title = doc.title();
 		this.usage = doc.usage();
 		this.result = doc.result();
+	}
+	
+	public String getTitle()
+	{
+		return title;
 	}
 
 	/**

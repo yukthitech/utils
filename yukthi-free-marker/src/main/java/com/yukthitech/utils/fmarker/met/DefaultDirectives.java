@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.utils.fmarker;
+package com.yukthitech.utils.fmarker.met;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
+import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
 
 import freemarker.core.Environment;
@@ -29,7 +31,11 @@ import freemarker.template.TemplateModel;
 
 public class DefaultDirectives
 {
-	@FreeMarkerDirective(value = "trim")
+	@FreeMarkerDirective(value = "trim", 
+			description = "Trims the content enclosed within this directive.",
+			examples = {
+				@ExampleDoc(usage = "<@trim>   some content  </@trim>", result = "some content")
+			})
 	public static void trim(Environment env, Map<String, String> params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException
 	{
 		StringWriter writer = new StringWriter();
@@ -38,7 +44,20 @@ public class DefaultDirectives
 		env.getOut().append(writer.toString().trim());
 	}
 
-	@FreeMarkerDirective
+	@FreeMarkerDirective( 
+			description = "Helps in indenting the enclosed content. Accepts optional prefix attribute, defaults to empty string. Every line will be trimmed and converted into single line and "
+					+ "prefix will be added at the start. And from the output content '\\t' and '\\n' will be replaced with tab and new-line characters respectively.",
+			params = {
+				@FmParam(name = "prefix", description = "If specified, this value will be added in start of every line", defaultValue = "<empty string>"),
+				@FmParam(name = "retainLineBreaks", description = "[boolean] if true, lines will be maintained as separate lines.", defaultValue = "false")
+			},
+			examples = {
+				@ExampleDoc(title="Without parameters", usage = "<@indent>   first line\n\n   second line  </@indent>", result = "first linesecond line"),
+				@ExampleDoc(title="With Prefix", usage = "<@indent prefix='--'>   first line\n\n   second line    </@indent>", result = "--first line--second line"),
+				@ExampleDoc(title="With Prefix and retainLineBreaks", 
+					usage = "<@indent prefix='--' retainLineBreaks=true>   first line\n\n   second line    </@indent>", 
+					result = "--first line\n--second line")
+			})
 	public static void indent(Environment env, Map<String, Object> params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException
 	{
 		StringWriter writer = new StringWriter();
@@ -48,7 +67,7 @@ public class DefaultDirectives
 		Object prefix = params.get("prefix");
 		prefix = (prefix != null) ? prefix.toString() : "";
 		
-		boolean retainLineBreaks = "true".equals(MethodProxy.convertArgument(params.get("retainLineBreaks"), String.class));
+		boolean retainLineBreaks = "true".equals(MethodUtils.convertArgument(params.get("retainLineBreaks"), String.class));
 
 		StringTokenizer st = new StringTokenizer(actualOutput, "\n");
 		StringBuilder builder = new StringBuilder();

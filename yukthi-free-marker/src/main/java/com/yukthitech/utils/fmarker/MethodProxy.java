@@ -17,23 +17,17 @@ package com.yukthitech.utils.fmarker;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.yukthitech.utils.CommonUtils;
-import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.met.MethodUtils;
 
 import freemarker.template.TemplateMethodModelEx;
-import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.utility.DeepUnwrap;
 
 /**
  * Model wrapper for free marker dynamic method registration.
@@ -61,49 +55,6 @@ class MethodProxy implements TemplateMethodModelEx
 	{
 		this.freeMarkerMethod = freeMarkerMethod;
 		this.methodName = methodName;
-	}
-	
-	/**
-	 * Converts the specified argument into required type.
-	 * @param argument Argument value to be converted
-	 * @param requiredType Expected type
-	 * @return converted object value
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Object convertArgument(Object argument, Class<?> requiredType) throws TemplateModelException
-	{
-		if(argument == null)
-		{
-			return null;
-		}
-		
-		if(argument instanceof TemplateModel)
-		{
-			argument = DeepUnwrap.unwrap((TemplateModel)argument);
-		}
-		
-		if(requiredType.isAssignableFrom(argument.getClass()))
-		{
-			return argument;
-		}
-		
-		if(argument instanceof Collection)
-		{
-			if(List.class.isAssignableFrom(requiredType))
-			{
-				return new ArrayList( (Collection) argument );
-			}
-			else if(Set.class.isAssignableFrom(requiredType))
-			{
-				return new HashSet( (Collection) argument );
-			}
-			else if(Collection.class.isAssignableFrom(requiredType))
-			{
-				return (Collection) argument ;
-			}
-		}
-		
-		return ConvertUtils.convert(argument, requiredType);
 	}
 	
 	/**
@@ -159,7 +110,7 @@ class MethodProxy implements TemplateMethodModelEx
 			for(int i = 0; i < stdArgCount; i++)
 			{
 				Object argVal = argsSize <= i ? CommonUtils.getDefaultValue(argTypes[i]) : arguments.get(i);
-				methodArgs[i] = convertArgument(argVal, argTypes[i]);
+				methodArgs[i] = MethodUtils.convertArgument(argVal, argTypes[i]);
 			}
 			
 			if(isVarArgs && argsSize >= argTypes.length)
@@ -169,7 +120,7 @@ class MethodProxy implements TemplateMethodModelEx
 				
 				for(int i = stdArgCount, j = 0; i < argsSize; i++, j++)
 				{
-					Array.set( varArgs, j, convertArgument(arguments.get(i), varArgType) );
+					Array.set( varArgs, j, MethodUtils.convertArgument(arguments.get(i), varArgType) );
 				}
 				
 				methodArgs[stdArgCount] = varArgs;

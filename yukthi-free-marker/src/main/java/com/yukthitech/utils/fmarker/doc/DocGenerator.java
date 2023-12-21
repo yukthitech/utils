@@ -15,10 +15,14 @@
  */
 package com.yukthitech.utils.fmarker.doc;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.fmarker.FreeMarkerDirectiveDoc;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
@@ -28,16 +32,42 @@ public class DocGenerator
 	
 	public static void main(String args[]) throws Exception
 	{
-		Collection<FreeMarkerMethodDoc> methodDocLst = freeMarkerEngine.getRegisterMethodDocuments();
-		String methodTemplate = load("/method-doc.ftl");
+		Collection<FreeMarkerMethodDoc> methodDocCol = freeMarkerEngine.getRegisterMethodDocuments();
+		List<FreeMarkerMethodDoc> methodDocLst = methodDocCol
+				.stream()
+				.filter(doc -> !doc.getName().startsWith("_"))
+				.collect(Collectors.toList());
 		
-		String methodDoc = freeMarkerEngine.processTemplate("Method Tempalte", methodTemplate, CommonUtils.toMap("methods", methodDocLst));
-		System.out.println(methodDoc);
+		String methodDoc = freeMarkerEngine.processTemplate("/method-doc.ftl", load("/method-doc.ftl"), CommonUtils.toMap("methods", methodDocLst));
+		//System.out.println(methodDoc);
+		
+		Collection<FreeMarkerDirectiveDoc> directiveDocCol = freeMarkerEngine.getRegisterDirectiveDocuments();
+		List<FreeMarkerDirectiveDoc> directiveDocLst = directiveDocCol
+				.stream()
+				.filter(doc -> !doc.getName().startsWith("_"))
+				.collect(Collectors.toList());
+		String directiveDoc = freeMarkerEngine.processTemplate("/directive-doc.ftl", load("/directive-doc.ftl"), CommonUtils.toMap("directives", directiveDocLst));
+		//System.out.println(directiveDoc);
+		
+		String readMeDoc = load("/README-template.md");
+		readMeDoc = readMeDoc.replace("[[defaultMethodContent]]", methodDoc);
+		readMeDoc = readMeDoc.replace("[[defaultDirectiveContent]]", directiveDoc);
+		
+		FileOutputStream fos = new FileOutputStream("README.md");
+		fos.write(readMeDoc.getBytes());
+		fos.flush();
+		fos.close();
+		
+		System.out.println("Successfully generated documentation..");
 	}
 	
 	private static String load(String resource) throws Exception
 	{
-		InputStream is = DocGenerator.class.getResourceAsStream("/method-doc.ftl");
+		return load(DocGenerator.class.getResourceAsStream(resource));
+	}
+	
+	private static String load(InputStream is) throws Exception
+	{
 		StringBuilder builder = new StringBuilder();
 		byte buff[]= new byte[2048];
 		int read = 0;

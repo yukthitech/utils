@@ -32,6 +32,7 @@ import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.met.CollectionMethods;
 import com.yukthitech.utils.fmarker.met.DateMethods;
+import com.yukthitech.utils.fmarker.met.DefaultDirectives;
 import com.yukthitech.utils.fmarker.met.DefaultMethods;
 
 import freemarker.template.Configuration;
@@ -266,6 +267,11 @@ public class FreeMarkerEngine
 	public Collection<FreeMarkerMethodDoc> getRegisterMethodDocuments()
 	{
 		return Collections.unmodifiableCollection( freeMarkerMethodDocRegistry.values() );
+	}
+
+	public Collection<FreeMarkerDirectiveDoc> getRegisterDirectiveDocuments()
+	{
+		return Collections.unmodifiableCollection( freeMarkerDirectiveDocRegistry.values() );
 	}
 
 	/**

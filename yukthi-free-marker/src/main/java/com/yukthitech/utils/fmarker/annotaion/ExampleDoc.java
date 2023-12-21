@@ -29,6 +29,12 @@ import java.lang.annotation.Target;
 public @interface ExampleDoc
 {
 	/**
+	 * Provides the title for this example.
+	 * @return
+	 */
+	public String title() default "";
+	
+	/**
 	 * Example usage.
 	 * @return usage
 	 */

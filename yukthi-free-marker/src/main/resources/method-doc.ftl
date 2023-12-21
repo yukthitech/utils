@@ -1,11 +1,10 @@
 <#list methods as method>
-#### ${method.name}()
-**Description**: ${method.description}
+### ${'$'}{\color{blue}${method.name}()}$
+**Description**: ${method.description}<br>
 **Returns**: **[${method.returnType}]** ${method.returnDescription}
 
 <#if isNotEmpty(method.parameters)>
-|Parameters|
-|----------|
+**Parameters**
 |Name|Type|Default Value|Description|
 |:---|:---|:-----------|:-----------|
 <#list method.parameters as param>
@@ -15,8 +14,9 @@
 
 <#if isNotEmpty(method.examples)>
 <#list method.examples as example>
-> **Example:** ${example.usage}
-> **Result:** ${example.result}
+> **Example:** ```${example.usage}```<br>
+> **Result:** ```${example.result}```
+
 </#list>
 </#if>
 
