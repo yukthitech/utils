@@ -41,23 +41,38 @@ Following additional directives by default are supported by this library:
 |retainLineBreaks|false|[boolean] if true, lines will be maintained as separate lines.|
 
 > **Example:** Without parameters<br>
-> **Usage:** ```<@indent>   first line
-
-   second line  </@indent>```<br>
-> **Result:** ```first linesecond line```
+> **Usage:** 
+> ```
+> <@indent>   first line
+> second line  </@indent>
+> ```
+> **Result:** 
+> ```
+> first linesecond line
+> ```
 
 > **Example:** With Prefix<br>
-> **Usage:** ```<@indent prefix='--'>   first line
-
-   second line    </@indent>```<br>
-> **Result:** ```--first line--second line```
+> **Usage:** 
+> ```
+> <@indent prefix='--'>   first line
+> second line    </@indent>
+> ```
+> **Result:** 
+> ```
+> --first line--second line
+> ```
 
 > **Example:** With Prefix and retainLineBreaks<br>
-> **Usage:** ```<@indent prefix='--' retainLineBreaks=true>   first line
-
-   second line    </@indent>```<br>
-> **Result:** ```--first line
---second line```
+> **Usage:** 
+> ```
+> <@indent prefix='--' retainLineBreaks=true>   first line
+> second line    </@indent>
+> ```
+> **Result:** 
+> ```
+> --first line
+> --second line
+> ```
 
 
 ### ${\color{blue}@trim}$
@@ -65,8 +80,14 @@ Following additional directives by default are supported by this library:
 
 
 > **Example:** <br>
-> **Usage:** ```<@trim>   some content  </@trim>```<br>
-> **Result:** ```some content```
+> **Usage:** 
+> ```
+> <@trim>   some content  </@trim>
+> ```
+> **Result:** 
+> ```
+> some content
+> ```
 
 
 

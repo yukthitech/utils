@@ -14,8 +14,14 @@
 <#if isNotEmpty(directive.examples)>
 <#list directive.examples as example>
 > **Example:** ${example.title}<br>
-> **Usage:** ```${example.usage}```<br>
-> **Result:** ```${example.result}```
+> **Usage:** 
+> ```
+<@indent prefix="> " retainLineBreaks=true>${example.usage}</@indent>
+> ```
+> **Result:** 
+> ```
+<@indent prefix="> " retainLineBreaks=true>${example.result}</@indent>
+> ```
 
 </#list>
 </#if>
