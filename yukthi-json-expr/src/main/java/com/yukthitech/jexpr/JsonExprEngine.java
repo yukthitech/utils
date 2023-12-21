@@ -15,6 +15,8 @@
  */
 package com.yukthitech.jexpr;
 
+import static com.yukthitech.jexpr.JelFmarkerMethods.OBJECT_MAPPER;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +29,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.utils.ExecutionUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -39,11 +40,6 @@ import com.yukthitech.utils.fmarker.FreeMarkerEngine;
  */
 public class JsonExprEngine
 {
-	/**
-	 * Object mapper for parsing and formatting json.
-	 */
-	private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
 	/**
 	 * Key used to specify condition for an object/map inclusion.
 	 */
@@ -98,6 +94,8 @@ public class JsonExprEngine
 	{
 		this.freeMarkerEngine = freeMarkerEngine;
 		this.conversions = new Conversions(freeMarkerEngine);
+		
+		this.freeMarkerEngine.loadClass(JelFmarkerMethods.class);
 	}
 
 	/**

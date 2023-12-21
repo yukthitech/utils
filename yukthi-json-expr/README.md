@@ -25,6 +25,8 @@ Using one the prefixes mentioned below, the full key/value can be replaced with 
 ## Freemarker Expressions
 String values (both in keys and values) when dynamic-value-replacer prefixes are not used, they will be considered as free-marker templates. And freemarker expressions within the strings can be used in standard way.
 
+Available Free marker methods can be found @ [Yukthi Free Marker](https://github.com/yukthitech/utils/tree/master/yukthi-free-marker)
+
 > **Example in Key**
 > { "book-${book.name}": {  "desc": "This is a science fiction." } }
 
