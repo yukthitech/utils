@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.utils.fmarker;
+package com.yukthitech.utils.fmarker.met;
 
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yukthitech.utils.exceptions.InvalidStateException;
-import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -36,11 +29,6 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  */
 public class DefaultMethods
 {
-	/**
-	 * Object mapper to convert object into json.
-	 */
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-	
 	/**
 	 * Used to store value collected in expressions.
 	 */
@@ -60,7 +48,7 @@ public class DefaultMethods
 	 * Fetches the latest value collected. And removes it from memory.
 	 * @return latest value
 	 */
-	static Object getCollectedValue()
+	public static Object getCollectedValue()
 	{
 		Object value = collectorValue.get();
 		collectorValue.remove();
@@ -68,103 +56,101 @@ public class DefaultMethods
 		return value;
 	}
 
-	/**
-	 * Converts specified date to string with specified format.
-	 * @param date Date to be converted
-	 * @param format format to use
-	 * @return converted string
-	 */
+	@SuppressWarnings("unchecked")
 	@FreeMarkerMethod(
-			description = "Converts specified date into string in specified format.",
-			returnDescription = "Fromated date string.",
-			examples = {
-				@ExampleDoc(usage = "dateToStr(date, 'MM/dd/yyy')", result = "20/20/2018")
-			})
-	public static String dateToStr(
-			@FmParam(name = "date", description = "Date to be converted") Date date, 
-			@FmParam(name = "format", description = "Date format to which date should be converted") String format)
+			description = "Used to check if specified value is empty. "
+					+ "For collection, map and string, along with null this will check for empty value.",
+			returnDescription = "True if value is empty."
+			)
+	public static boolean isEmpty(
+			@FmParam(name = "value", description = "Value to be checked for empty") Object value)
 	{
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+		if(value == null)
+		{
+			return true;
+		}
 		
-		return simpleDateFormat.format(date);
-	}
-	
-	/**
-	 * Adds specified number of days to specified date and returns the same.
-	 * @param date date to which days needs to be added
-	 * @param days days to add
-	 * @return result date
-	 */
-	@FreeMarkerMethod(
-			description = "Adds specified number of days to specified date",
-			returnDescription = "Resultant date after addition of specified days")
-	public static Date addDays(
-			@FmParam(name = "date", description = "Date to which days should be added") Date date, 
-			@FmParam(name = "days", description = "Days to be added.") int days)
-	{
-		return DateUtils.addDays(date, days);
-	}
-	
-	/**
-	 * Adds specified number of years to specified date and returns the same.
-	 * @param date date to which years needs to be added
-	 * @param years years to add
-	 * @return result date
-	 */
-	@FreeMarkerMethod(
-			description = "Adds specified number of days to specified date",
-			returnDescription = "Resultant date after addition of specified years")
-	public static Date addYears(
-			@FmParam(name = "date", description = "Date to which days should be added") Date date, 
-			@FmParam(name = "years", description = "Years to be added.") int years)
-	{
-		return DateUtils.addYears(date, years);
-	}
-	
-	@FreeMarkerMethod(
-			description = "Adds specified number of hours to specified date",
-			returnDescription = "Resultant date after addition of specified hours")
-	public static Date addHours(
-			@FmParam(name = "date", description = "Date to which hours should be added") Date date, 
-			@FmParam(name = "hours", description = "Hours to be added.") int hours)
-	{
-		return DateUtils.addHours(date, hours);
+		if(value instanceof String)
+		{
+			String str = (String) value;
+			return (str.trim().length() == 0);
+		}
+		
+		if(value instanceof Collection)
+		{
+			Collection<Object> col = (Collection<Object>) value;
+			return col.isEmpty();
+		}
+
+		if(value instanceof Map)
+		{
+			Map<Object, Object> map = (Map<Object, Object>) value;
+			return map.isEmpty();
+		}
+		
+		return false;
 	}
 
 	@FreeMarkerMethod(
-			description = "Adds specified number of minutes to specified date",
-			returnDescription = "Resultant date after addition of specified minutes")
-	public static Date addMinutes(
-			@FmParam(name = "date", description = "Date to which minutes should be added") Date date, 
-			@FmParam(name = "minutes", description = "Minutes to be added.") int minutes)
+			description = "Used to check if specified value is not empty. "
+					+ "For collection, map and string, along with non-null this will check for non-empty value.",
+			returnDescription = "True if value is empty."
+			)
+	public static boolean isNotEmpty(
+			@FmParam(name = "value", description = "Value to be checked for empty") Object value)
 	{
-		return DateUtils.addMinutes(date, minutes);
+		return !isEmpty(value);
 	}
 
 	@FreeMarkerMethod(
-			description = "Adds specified number of seconds to specified date",
-			returnDescription = "Resultant date after addition of specified seconds")
-	public static Date addSeconds(
-			@FmParam(name = "date", description = "Date to which seconds should be added") Date date, 
-			@FmParam(name = "seconds", description = "Seconds to be added.") int seconds)
+			description = "Used to check if specified value is null and return approp value when null and when non-null.",
+			returnDescription = "Specified null-condition-value or non-null-condition-value."
+			)
+	public static Object nvl(
+			@FmParam(name = "value", description = "Value to be checked for empty") Object value,
+			@FmParam(name = "nullValue", description = "Value to be returned when value is null") Object nullValue,
+			@FmParam(name = "nonNullValue", description = "Value to be returned when value is non-null") Object nonNullValue
+			)
 	{
-		return DateUtils.addSeconds(date, seconds);
+		return (value == null) ? nullValue : nonNullValue;
 	}
 
 	@FreeMarkerMethod(
-			description = "Returns the current date object",
-			returnDescription = "Current date")
-	public static Date today()
+			description = "Used to check if specified value is true and return approp value"
+					+ " Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.",
+			returnDescription = "Specified true-condition-value or false-condition-value."
+			)
+	public static Object ifTrue(
+			@FmParam(name = "value", description = "Value to be checked for true.") Object value,
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true.", defaultValue = "true") Object trueValue,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null.", defaultValue = "false") Object falseValue
+			)
 	{
-		return new Date();
+		trueValue = (trueValue == null) ? true : trueValue;
+		falseValue = (falseValue == null) ? false : falseValue;
+		
+		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
+		
+		return bvalue ? trueValue : falseValue;
 	}
 
 	@FreeMarkerMethod(
-			description = "Returns the current date object",
-			returnDescription = "Current date and time")
-	public static Date now()
+			description = "Used to check if specified value is false and return approp value"
+					+ " Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false. "
+					+ "If null, the condition will be considered as false (hence returing falseValue)",
+			returnDescription = "Specified true-condition-value or false-condition-value."
+			)
+	public static Object ifFalse(
+			@FmParam(name = "value", description = "Value to be checked for false. Can be boolean true or string 'true'") Object value,
+			@FmParam(name = "falseValue", description = "Value to be returned when value is false or null.", defaultValue = "true") Object falseValue,
+			@FmParam(name = "trueValue", description = "Value to be returned when value is true.", defaultValue = "false") Object trueValue
+			)
 	{
-		return new Date();
+		trueValue = (trueValue == null) ? false : trueValue;
+		falseValue = (falseValue == null) ? true : falseValue;
+
+		boolean bvalue = "true".equalsIgnoreCase("" + value) ? true : false;
+		return bvalue ? trueValue : falseValue;
 	}
 
 	/**
@@ -187,27 +173,6 @@ public class DefaultMethods
 		return value.toString();
 	}
 	
-	/**
-	 * Converts specified object into json.
-	 * @param value value to be converted.
-	 * @return converted json
-	 */
-	@FreeMarkerMethod(
-			value = "toJson", 
-			description = "Used to convert specified object into json string.",
-			returnDescription = "Converted json string.")
-	public static String toJson(
-			@FmParam(name = "value", description = "Value to be converted into json string.") Object value)
-	{
-		try
-		{
-			return OBJECT_MAPPER.writeValueAsString(value);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while converting value to json", ex);
-		}
-	}
-
 	/**
 	 * Checks if "nullCheck" is null, then this method return first object, if not second object will be 
 	 * returned.

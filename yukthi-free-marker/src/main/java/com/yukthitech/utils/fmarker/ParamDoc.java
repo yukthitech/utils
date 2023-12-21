@@ -52,13 +52,16 @@ public class ParamDoc implements Comparable<ParamDoc>
 
 	public ParamDoc(Parameter param)
 	{
-		FmParam fmParam = param.getAnnotation(FmParam.class);
+		this(param.getAnnotation(FmParam.class), param);
+	}		
 		
+	public ParamDoc(FmParam fmParam, Parameter param)
+	{
 		this.name = (fmParam != null && StringUtils.isNotBlank(fmParam.name())) ? fmParam.name() : param.getName();
 		this.description = (fmParam != null) ? fmParam.description() : "";
 		this.defaultValue = (fmParam != null) ? fmParam.defaultValue() : "";
 		
-		Class<?> type = param.getType();
+		Class<?> type = param != null ? param.getType() : Object.class;
 		
 		if(type.isArray())
 		{
@@ -71,7 +74,7 @@ public class ParamDoc implements Comparable<ParamDoc>
 		}
 		else
 		{
-			this.type = param.getType().getName();
+			this.type = type.getName();
 		}
 	}
 

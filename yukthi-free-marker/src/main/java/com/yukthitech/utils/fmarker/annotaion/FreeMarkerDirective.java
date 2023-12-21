@@ -34,4 +34,23 @@ public @interface FreeMarkerDirective
 	 * @return
 	 */
 	public String value() default "";
+	
+	/**
+	 * Description of this directive.
+	 * @return description.
+	 */
+	public String description() default "";
+	
+	/**
+	 * Parameters accepted by this directive.
+	 * @return example doc
+	 */
+	public FmParam[] params() default {};
+
+	/**
+	 * Used to document example for the method.
+	 * @return example doc
+	 */
+	public ExampleDoc[] examples() default {};
+	
 }

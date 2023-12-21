@@ -30,13 +30,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
-import com.yukthitech.utils.fmarker.directives.IndentDirective;
-import com.yukthitech.utils.fmarker.directives.InitCapDirective;
-import com.yukthitech.utils.fmarker.directives.TrimDirective;
+import com.yukthitech.utils.fmarker.met.CollectionMethods;
+import com.yukthitech.utils.fmarker.met.DateMethods;
+import com.yukthitech.utils.fmarker.met.DefaultMethods;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.DeepUnwrap;
 
@@ -68,6 +67,11 @@ public class FreeMarkerEngine
 	 */
 	private Map<String, FreeMarkerMethodDoc> freeMarkerMethodDocRegistry = new TreeMap<String, FreeMarkerMethodDoc>();
 	
+	/**
+	 * Registry of free marker directive documentations.
+	 */
+	private Map<String, FreeMarkerDirectiveDoc> freeMarkerDirectiveDocRegistry = new TreeMap<>();
+	
 	public FreeMarkerEngine()
 	{
 		reset();
@@ -88,12 +92,11 @@ public class FreeMarkerEngine
 		
 		freeMarkerMethodRegistry = new HashMap<String, Method>();
 		
-		registerDirective("trim", new TrimDirective());
-		registerDirective("indent", new IndentDirective());
-		registerDirective("initcap", new InitCapDirective());
-		
 		loadClass(DefaultMethods.class);
-		loadClass(DefaultCollectionMethods.class);
+		loadClass(DateMethods.class);
+		loadClass(CollectionMethods.class);
+		
+		loadClass(DefaultDirectives.class);
 	}
 
 	/**
@@ -101,9 +104,39 @@ public class FreeMarkerEngine
 	 * @param name name of the directive
 	 * @param directive directive executor
 	 */
-	public void registerDirective(String name, TemplateDirectiveModel directive)
+	public void registerDirective(String name, Method method)
 	{
-		configuration.setSharedVariable(name, directive);
+		if(freeMarkerMethodRegistry.containsKey(name))
+		{
+			Method regMethod = freeMarkerMethodRegistry.get(name);
+			String methodName = regMethod.getDeclaringClass().getName() + "." + regMethod.getName();
+			String dirMethodName = method.getDeclaringClass().getName() + "." + method.getName();
+
+			throw new InvalidStateException("A directive and method are found with same name - [Directive: {}(), Method: {}()]", 
+					dirMethodName, methodName);
+		}
+		
+		if(freeMarkerDirectiveDocRegistry.containsKey(name))
+		{
+			Method duplicateMethod = freeMarkerDirectiveDocRegistry.get(name).getMethod();
+			
+			String method1 = duplicateMethod.getDeclaringClass().getName() + "." + duplicateMethod.getName();
+			String method2 = method.getDeclaringClass().getName() + "." + method.getName();
+			
+			//if duplicate method and current methods are same, ignore
+			//	this can happen when same class is loaded multiple times
+			if(method1.equals(method2))
+			{
+				logger.log(Level.FINE, String.format("Ignoring duplicate registration of directive: %s()", method1));
+				return;
+			}
+			
+			throw new InvalidStateException("Multiple free marker directives are found with same name - [{}(), {}()]", 
+					method1, method2);
+		}
+
+		configuration.setSharedVariable(name, new DirectiveProxy(method));
+		freeMarkerDirectiveDocRegistry.put(name, new FreeMarkerDirectiveDoc(method));
 	}
 	
 	/**
@@ -130,6 +163,16 @@ public class FreeMarkerEngine
 			name = method.getName();
 		}
 		
+		if(freeMarkerDirectiveDocRegistry.containsKey(name))
+		{
+			Method dirMethod = freeMarkerDirectiveDocRegistry.get(name).getMethod();
+			String dirMethodName = dirMethod.getDeclaringClass().getName() + "." + dirMethod.getName();
+			String methodName = method.getDeclaringClass().getName() + "." + method.getName();
+
+			throw new InvalidStateException("A directive and method are found with same name - [Directive: {}(), Method: {}()]", 
+					dirMethodName, methodName);
+		}
+		
 		if(freeMarkerMethodRegistry.containsKey(name))
 		{
 			Method duplicateMethod = freeMarkerMethodRegistry.get(name);
@@ -149,7 +192,7 @@ public class FreeMarkerEngine
 					method1, method2);
 		}
 		
-		configuration.setSharedVariable(name, new FreeMarkerMethodModel(method, name));
+		configuration.setSharedVariable(name, new MethodProxy(method, name));
 		freeMarkerMethodRegistry.put(name, method);
 		freeMarkerMethodDocRegistry.put(name, new FreeMarkerMethodDoc(method));
 	}

@@ -115,7 +115,7 @@ class MethodLoader
 				name = freeMarkerDirective.value();
 				name = StringUtils.isBlank(name) ? method.getName() : name;
 				
-				freeMarkerEngine.registerDirective(name, new DirectiveProxy(method));
+				freeMarkerEngine.registerDirective(name, method);
 				continue;
 			}
 			

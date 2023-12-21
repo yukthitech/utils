@@ -39,7 +39,7 @@ import freemarker.template.utility.DeepUnwrap;
  * Model wrapper for free marker dynamic method registration.
  * @author akiran
  */
-class FreeMarkerMethodModel implements TemplateMethodModelEx
+class MethodProxy implements TemplateMethodModelEx
 {
 	/**
 	 * Method being registered.
@@ -57,7 +57,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 	 * @param freeMarkerMethod the free marker method
 	 * @param methodName the method name
 	 */
-	public FreeMarkerMethodModel(Method freeMarkerMethod, String methodName)
+	public MethodProxy(Method freeMarkerMethod, String methodName)
 	{
 		this.freeMarkerMethod = freeMarkerMethod;
 		this.methodName = methodName;
@@ -70,7 +70,7 @@ class FreeMarkerMethodModel implements TemplateMethodModelEx
 	 * @return converted object value
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Object convertArgument(Object argument, Class<?> requiredType) throws TemplateModelException
+	public static Object convertArgument(Object argument, Class<?> requiredType) throws TemplateModelException
 	{
 		if(argument == null)
 		{

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.utils.fmarker;
+package com.yukthitech.utils.fmarker.met;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -34,7 +35,7 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Default collection methods.
  * @author Kranthi
  */
-public class DefaultCollectionMethods
+public class CollectionMethods
 {
 	/**
 	 * Represents encapsulation of grouping based on key.
@@ -114,12 +115,12 @@ public class DefaultCollectionMethods
 				return true;
 			}
 
-			if(!(obj instanceof DefaultCollectionMethods.Group))
+			if(!(obj instanceof CollectionMethods.Group))
 			{
 				return false;
 			}
 
-			DefaultCollectionMethods.Group other = (DefaultCollectionMethods.Group) obj;
+			CollectionMethods.Group other = (CollectionMethods.Group) obj;
 			return Objects.equals(key, other.key) && Objects.equals(elements, other.elements);
 		}
 

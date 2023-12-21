@@ -24,8 +24,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.yukthitech.utils.CommonUtils;
-import com.yukthitech.utils.fmarker.DefaultCollectionMethods.Group;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.met.CollectionMethods.Group;
 
 public class TDefaultCollectionMethods
 {
