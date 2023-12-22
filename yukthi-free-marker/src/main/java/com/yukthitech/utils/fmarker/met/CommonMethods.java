@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -27,7 +28,8 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Default free marker methods.
  * @author akiran
  */
-public class DefaultMethods
+@Named("Common Methods")
+public class CommonMethods
 {
 	/**
 	 * Used to store value collected in expressions.

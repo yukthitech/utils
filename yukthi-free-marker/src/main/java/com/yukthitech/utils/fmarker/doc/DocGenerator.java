@@ -17,14 +17,15 @@ package com.yukthitech.utils.fmarker.doc;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.yukthitech.utils.CommonUtils;
-import com.yukthitech.utils.fmarker.FreeMarkerDirectiveDoc;
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
-import com.yukthitech.utils.fmarker.FreeMarkerMethodDoc;
 
 public class DocGenerator
 {
@@ -33,19 +34,19 @@ public class DocGenerator
 	public static void main(String args[]) throws Exception
 	{
 		Collection<FreeMarkerMethodDoc> methodDocCol = freeMarkerEngine.getRegisterMethodDocuments();
-		List<FreeMarkerMethodDoc> methodDocLst = methodDocCol
+		Map<String, List<FreeMarkerMethodDoc>> methodDocLst = methodDocCol
 				.stream()
 				.filter(doc -> !doc.getName().startsWith("_"))
-				.collect(Collectors.toList());
+				.collect(Collectors.groupingBy(doc -> getGroupName(doc.getMethod())));
 		
 		String methodDoc = freeMarkerEngine.processTemplate("/method-doc.ftl", load("/method-doc.ftl"), CommonUtils.toMap("methods", methodDocLst));
 		//System.out.println(methodDoc);
 		
 		Collection<FreeMarkerDirectiveDoc> directiveDocCol = freeMarkerEngine.getRegisterDirectiveDocuments();
-		List<FreeMarkerDirectiveDoc> directiveDocLst = directiveDocCol
+		Map<String, List<FreeMarkerDirectiveDoc>> directiveDocLst = directiveDocCol
 				.stream()
 				.filter(doc -> !doc.getName().startsWith("_"))
-				.collect(Collectors.toList());
+				.collect(Collectors.groupingBy(doc -> getGroupName(doc.getMethod())));
 		String directiveDoc = freeMarkerEngine.processTemplate("/directive-doc.ftl", load("/directive-doc.ftl"), CommonUtils.toMap("directives", directiveDocLst));
 		//System.out.println(directiveDoc);
 		
@@ -59,6 +60,14 @@ public class DocGenerator
 		fos.close();
 		
 		System.out.println("Successfully generated documentation..");
+	}
+	
+	private static String getGroupName(Method method)
+	{
+		Class<?> cls = method.getDeclaringClass();
+		Named named = cls.getAnnotation(Named.class);
+		
+		return (named == null) ? cls.getName() : named.value();
 	}
 	
 	private static String load(String resource) throws Exception

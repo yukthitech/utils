@@ -1,5 +1,7 @@
-<#list methods as method>
-### ${'$'}{\color{blue}${method.name}()}$
+<#list methods?keys as grpName>
+### ${grpName}
+<#list methods[grpName] as method>
+#### ${'$'}{\color{blue}${method.name}()}$
 **Description**: ${method.description}<br>
 **Returns**: **[${method.returnType}]** ${method.returnDescription}
 
@@ -19,5 +21,7 @@
 
 </#list>
 </#if>
+
+</#list>
 
 </#list>

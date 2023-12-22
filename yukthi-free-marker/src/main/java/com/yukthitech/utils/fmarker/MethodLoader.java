@@ -17,17 +17,13 @@ package com.yukthitech.utils.fmarker;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerDirective;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
-
-import freemarker.template.TemplateDirectiveModel;
 
 /**
  * Used by free marker to load methods of target class.
@@ -36,44 +32,6 @@ import freemarker.template.TemplateDirectiveModel;
 class MethodLoader
 {
 	private static Logger logger = Logger.getLogger(MethodLoader.class.getName());
-	
-	/**
-	 * Expected attributes of directive method types.
-	 */
-	private static Class<?> DIR_ATTR_TYPES[];
-	
-	/**
-	 * Expected attributes of directive method types string.
-	 */
-	private static StringBuilder DIR_ATTR_TYPES_STR = new StringBuilder();
-	
-	static
-	{
-		Method methods[] = TemplateDirectiveModel.class.getMethods();
-		
-		for(Method met : methods)
-		{
-			if("execute".equals(met.getName()))
-			{
-				DIR_ATTR_TYPES = met.getParameterTypes();
-				DIR_ATTR_TYPES_STR.append("[");
-				
-				for(Class<?> type: DIR_ATTR_TYPES)
-				{
-					if(DIR_ATTR_TYPES_STR.length() > 1)
-					{
-						DIR_ATTR_TYPES_STR.append(", ");
-					}
-					
-					DIR_ATTR_TYPES_STR.append(type.getName());
-				}
-				
-				DIR_ATTR_TYPES_STR.append("]");
-				
-				break;
-			}
-		}
-	}
 	
 	/**
 	 * Loads the free marker methods from specified class
@@ -107,11 +65,6 @@ class MethodLoader
 			
 			if(freeMarkerDirective != null)
 			{
-				if(!Arrays.equals(DIR_ATTR_TYPES, method.getParameterTypes()))
-				{
-					throw new InvalidStateException("For directive method {}.{} argument types are not as expected. Expected argument types: {}", cls.getName(), method.getName(), DIR_ATTR_TYPES_STR);
-				}
-				
 				name = freeMarkerDirective.value();
 				name = StringUtils.isBlank(name) ? method.getName() : name;
 				

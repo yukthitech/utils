@@ -45,4 +45,18 @@ public @interface FmParam
 	 * @return default value
 	 */
 	public String defaultValue() default "";
+	
+	/**
+	 * Used for directives. Indicates this parameter should be used to pass body
+	 * content into this parameter.
+	 * @return
+	 */
+	public boolean body() default false;
+	
+	/**
+	 * Used for directives and can be used only on Map params. Indicates this parameter should be used to pass all parameter map.
+	 * This is useful when directive works with dynamic parameters.
+	 * @return
+	 */
+	public boolean allParams() default false;
 }

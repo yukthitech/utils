@@ -36,7 +36,7 @@ public class MethodUtils
 	 * @return converted object value
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Object convertArgument(Object argument, Class<?> requiredType) throws TemplateModelException
+	public static <T> T convertArgument(Object argument, Class<T> requiredType) throws TemplateModelException
 	{
 		if(argument == null)
 		{
@@ -50,26 +50,26 @@ public class MethodUtils
 		
 		if(requiredType.isAssignableFrom(argument.getClass()))
 		{
-			return argument;
+			return (T) argument;
 		}
 		
 		if(argument instanceof Collection)
 		{
 			if(List.class.isAssignableFrom(requiredType))
 			{
-				return new ArrayList( (Collection) argument );
+				return (T) new ArrayList( (Collection) argument );
 			}
 			else if(Set.class.isAssignableFrom(requiredType))
 			{
-				return new HashSet( (Collection) argument );
+				return (T) new HashSet( (Collection) argument );
 			}
 			else if(Collection.class.isAssignableFrom(requiredType))
 			{
-				return (Collection) argument ;
+				return (T)  argument ;
 			}
 		}
 		
-		return ConvertUtils.convert(argument, requiredType);
+		return (T) ConvertUtils.convert(argument, requiredType);
 	}
 
 }

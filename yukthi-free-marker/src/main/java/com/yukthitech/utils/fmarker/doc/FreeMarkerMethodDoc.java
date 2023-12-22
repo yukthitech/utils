@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.utils.fmarker;
+package com.yukthitech.utils.fmarker.doc;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

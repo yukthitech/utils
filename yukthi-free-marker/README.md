@@ -52,12 +52,14 @@ ${\color{blue}@FreeMarkerDirective}$ annotation can be used to mark a static met
 ## Default Directives
 Following additional directives by default are supported by this library:
 
-### ${\color{blue}@indent}$
+### Common Directives
+#### ${\color{blue}@indent}$
 **Description**: Helps in indenting the enclosed content. Accepts optional prefix attribute, defaults to empty string. Every line will be trimmed and converted into single line and prefix will be added at the start. And from the output content '\t' and '\n' will be replaced with tab and new-line characters respectively.<br>
 
 **Parameters**
 |Name|Default Value|Description|
 |:---|:-----------|:-----------|
+|body||Enclosing body content|
 |prefix|<empty string>|If specified, this value will be added in start of every line|
 |retainLineBreaks|false|[boolean] if true, lines will be maintained as separate lines.|
 
@@ -96,9 +98,13 @@ Following additional directives by default are supported by this library:
 > ```
 
 
-### ${\color{blue}@trim}$
+#### ${\color{blue}@trim}$
 **Description**: Trims the content enclosed within this directive.<br>
 
+**Parameters**
+|Name|Default Value|Description|
+|:---|:-----------|:-----------|
+|body||Enclosing body content|
 
 > **Example:** <br>
 > **Usage:** 
@@ -113,10 +119,12 @@ Following additional directives by default are supported by this library:
 
 
 
+
 ## Custom Free Marker Methods
 Following additional freemarker methods by default are supported by this library:
 
-### ${\color{blue}addDays()}$
+### Date Methods
+#### ${\color{blue}addDays()}$
 **Description**: Adds specified number of days to specified date<br>
 **Returns**: **[java.util.Date]** Resultant date after addition of specified days
 
@@ -127,7 +135,7 @@ Following additional freemarker methods by default are supported by this library
 |days|int||Days to be added.|
 
 
-### ${\color{blue}addHours()}$
+#### ${\color{blue}addHours()}$
 **Description**: Adds specified number of hours to specified date<br>
 **Returns**: **[java.util.Date]** Resultant date after addition of specified hours
 
@@ -138,7 +146,7 @@ Following additional freemarker methods by default are supported by this library
 |hours|int||Hours to be added.|
 
 
-### ${\color{blue}addMinutes()}$
+#### ${\color{blue}addMinutes()}$
 **Description**: Adds specified number of minutes to specified date<br>
 **Returns**: **[java.util.Date]** Resultant date after addition of specified minutes
 
@@ -149,7 +157,7 @@ Following additional freemarker methods by default are supported by this library
 |minutes|int||Minutes to be added.|
 
 
-### ${\color{blue}addSeconds()}$
+#### ${\color{blue}addSeconds()}$
 **Description**: Adds specified number of seconds to specified date<br>
 **Returns**: **[java.util.Date]** Resultant date after addition of specified seconds
 
@@ -160,7 +168,7 @@ Following additional freemarker methods by default are supported by this library
 |seconds|int||Seconds to be added.|
 
 
-### ${\color{blue}addYears()}$
+#### ${\color{blue}addYears()}$
 **Description**: Adds specified number of days to specified date<br>
 **Returns**: **[java.util.Date]** Resultant date after addition of specified years
 
@@ -171,7 +179,45 @@ Following additional freemarker methods by default are supported by this library
 |years|int||Years to be added.|
 
 
-### ${\color{blue}collectionToString()}$
+#### ${\color{blue}dateToStr()}$
+**Description**: Converts specified date into string in specified format.<br>
+**Returns**: **[java.lang.String]** Fromated date string.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to be converted|
+|format|java.lang.String||Date format to which date should be converted|
+
+> **Example:** ```dateToStr(date, 'MM/dd/yyy')```<br>
+> **Result:** ```20/20/2018```
+
+
+#### ${\color{blue}now()}$
+**Description**: Returns the current date object<br>
+**Returns**: **[java.util.Date]** Current date and time
+
+
+
+#### ${\color{blue}toMillis()}$
+**Description**: Converts specified date into millis.<br>
+**Returns**: **[java.lang.Long]** Millis value
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to be converted|
+
+
+#### ${\color{blue}today()}$
+**Description**: Returns the current date object<br>
+**Returns**: **[java.util.Date]** Current date
+
+
+
+
+### Collection Methods
+#### ${\color{blue}collectionToString()}$
 **Description**: Converts collection of objects into string.<br>
 **Returns**: **[java.lang.String]** Converted string
 
@@ -191,21 +237,7 @@ Following additional freemarker methods by default are supported by this library
 > **Result:** ```<empty>```
 
 
-### ${\color{blue}dateToStr()}$
-**Description**: Converts specified date into string in specified format.<br>
-**Returns**: **[java.lang.String]** Fromated date string.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|date|java.util.Date||Date to be converted|
-|format|java.lang.String||Date format to which date should be converted|
-
-> **Example:** ```dateToStr(date, 'MM/dd/yyy')```<br>
-> **Result:** ```20/20/2018```
-
-
-### ${\color{blue}groupBy()}$
+#### ${\color{blue}groupBy()}$
 **Description**: Groups elements of specified collection based on specified keyExpression<br>
 **Returns**: **[java.util.List]** List of groups. Each group has key (value of key based on which current group is created) and elements having same key.
 
@@ -216,85 +248,7 @@ Following additional freemarker methods by default are supported by this library
 |keyExpression|java.lang.String||Freemarker key expression which will be executed on each of collection element. And obtained key will be used for grouping.|
 
 
-### ${\color{blue}ifFalse()}$
-**Description**: Used to check if specified value is false and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false. If null, the condition will be considered as false (hence returing falseValue)<br>
-**Returns**: **[java.lang.Object]** Specified true-condition-value or false-condition-value.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|value|java.lang.Object||Value to be checked for false. Can be boolean true or string 'true'|
-|falseValue|java.lang.Object|true|Value to be returned when value is false or null.|
-|trueValue|java.lang.Object|false|Value to be returned when value is true.|
-
-
-### ${\color{blue}ifNotNull()}$
-**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.<br>
-**Returns**: **[java.lang.Object]** ifNull or ifNotNull based on nullCheck.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|nullCheck|java.lang.Object||object to be checked for null|
-|ifNotNull|java.lang.Object|true (boolean)|object to be returned if not null.|
-|ifNull|java.lang.Object|false (boolean)|object to be returned if null.|
-
-
-### ${\color{blue}ifNull()}$
-**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.<br>
-**Returns**: **[java.lang.Object]** ifNull or ifNotNull based on nullCheck.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|nullCheck|java.lang.Object||object to be checked for null|
-|ifNull|java.lang.Object|true (boolean)|object to be returned if null.|
-|ifNotNull|java.lang.Object|false (boolean)|object to be returned if not null|
-
-
-### ${\color{blue}ifTrue()}$
-**Description**: Used to check if specified value is true and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.<br>
-**Returns**: **[java.lang.Object]** Specified true-condition-value or false-condition-value.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|value|java.lang.Object||Value to be checked for true.|
-|trueValue|java.lang.Object|true|Value to be returned when value is true.|
-|falseValue|java.lang.Object|false|Value to be returned when value is false or null.|
-
-
-### ${\color{blue}initcap()}$
-**Description**: Makes first letter of every word into capital letter.<br>
-**Returns**: **[java.lang.String]** 
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|str|java.lang.String||String to convert|
-
-
-### ${\color{blue}isEmpty()}$
-**Description**: Used to check if specified value is empty. For collection, map and string, along with null this will check for empty value.<br>
-**Returns**: **[boolean]** True if value is empty.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|value|java.lang.Object||Value to be checked for empty|
-
-
-### ${\color{blue}isNotEmpty()}$
-**Description**: Used to check if specified value is not empty. For collection, map and string, along with non-null this will check for non-empty value.<br>
-**Returns**: **[boolean]** True if value is empty.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|value|java.lang.Object||Value to be checked for empty|
-
-
-### ${\color{blue}mapKeys()}$
+#### ${\color{blue}mapKeys()}$
 **Description**: Extracts and returns the keys collection as list of specified map.<br>
 **Returns**: **[java.util.Collection]** the values collection of specified map.
 
@@ -304,7 +258,7 @@ Following additional freemarker methods by default are supported by this library
 |map|java.util.Map||Map whose keys has to be extracted|
 
 
-### ${\color{blue}mapToString()}$
+#### ${\color{blue}mapToString()}$
 **Description**: Converts map of objects into string.<br>
 **Returns**: **[java.lang.String]** Converted string
 
@@ -325,7 +279,7 @@ Following additional freemarker methods by default are supported by this library
 > **Result:** ```<empty>```
 
 
-### ${\color{blue}mapValues()}$
+#### ${\color{blue}mapValues()}$
 **Description**: Extracts and returns the values collection as list of specified map.<br>
 **Returns**: **[java.util.Collection]** the values collection of specified map.
 
@@ -335,13 +289,98 @@ Following additional freemarker methods by default are supported by this library
 |map|java.util.Map||Map whose values has to be extracted|
 
 
-### ${\color{blue}now()}$
-**Description**: Returns the current date object<br>
-**Returns**: **[java.util.Date]** Current date and time
+#### ${\color{blue}sortBy()}$
+**Description**: Sorted elements of specified collection based on specified keyExpression. Duplicate elements (with same key) will be kept together (though internal order is not guaranteed).<br>
+**Returns**: **[java.util.List]** List of ordered elements based on specified key expression.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|collection|java.util.Collection||Collection of objects which needs sorting|
+|keyExpression|java.lang.String||Freemarker key expression which will be executed on each of collection element. And obtained key will be used for sorting.|
 
 
 
-### ${\color{blue}nullVal()}$
+### Common Methods
+#### ${\color{blue}ifFalse()}$
+**Description**: Used to check if specified value is false and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false. If null, the condition will be considered as false (hence returing falseValue)<br>
+**Returns**: **[java.lang.Object]** Specified true-condition-value or false-condition-value.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for false. Can be boolean true or string 'true'|
+|falseValue|java.lang.Object|true|Value to be returned when value is false or null.|
+|trueValue|java.lang.Object|false|Value to be returned when value is true.|
+
+
+#### ${\color{blue}ifNotNull()}$
+**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.<br>
+**Returns**: **[java.lang.Object]** ifNull or ifNotNull based on nullCheck.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|nullCheck|java.lang.Object||object to be checked for null|
+|ifNotNull|java.lang.Object|true (boolean)|object to be returned if not null.|
+|ifNull|java.lang.Object|false (boolean)|object to be returned if null.|
+
+
+#### ${\color{blue}ifNull()}$
+**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.<br>
+**Returns**: **[java.lang.Object]** ifNull or ifNotNull based on nullCheck.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|nullCheck|java.lang.Object||object to be checked for null|
+|ifNull|java.lang.Object|true (boolean)|object to be returned if null.|
+|ifNotNull|java.lang.Object|false (boolean)|object to be returned if not null|
+
+
+#### ${\color{blue}ifTrue()}$
+**Description**: Used to check if specified value is true and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.<br>
+**Returns**: **[java.lang.Object]** Specified true-condition-value or false-condition-value.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for true.|
+|trueValue|java.lang.Object|true|Value to be returned when value is true.|
+|falseValue|java.lang.Object|false|Value to be returned when value is false or null.|
+
+
+#### ${\color{blue}initcap()}$
+**Description**: Makes first letter of every word into capital letter.<br>
+**Returns**: **[java.lang.String]** 
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|str|java.lang.String||String to convert|
+
+
+#### ${\color{blue}isEmpty()}$
+**Description**: Used to check if specified value is empty. For collection, map and string, along with null this will check for empty value.<br>
+**Returns**: **[boolean]** True if value is empty.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for empty|
+
+
+#### ${\color{blue}isNotEmpty()}$
+**Description**: Used to check if specified value is not empty. For collection, map and string, along with non-null this will check for non-empty value.<br>
+**Returns**: **[boolean]** True if value is empty.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for empty|
+
+
+#### ${\color{blue}nullVal()}$
 **Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'nullCheck' will be returned.<br>
 **Returns**: **[java.lang.Object]** ifNull or nullCheck based on nullCheck is null or not.
 
@@ -352,7 +391,7 @@ Following additional freemarker methods by default are supported by this library
 |ifNull|java.lang.Object||object to be returned if null|
 
 
-### ${\color{blue}nvl()}$
+#### ${\color{blue}nvl()}$
 **Description**: Used to check if specified value is null and return approp value when null and when non-null.<br>
 **Returns**: **[java.lang.Object]** Specified null-condition-value or non-null-condition-value.
 
@@ -364,7 +403,7 @@ Following additional freemarker methods by default are supported by this library
 |nonNullValue|java.lang.Object||Value to be returned when value is non-null|
 
 
-### ${\color{blue}replace()}$
+#### ${\color{blue}replace()}$
 **Description**: Replaces specified substring with replacement in main string.<br>
 **Returns**: **[java.lang.String]** 
 
@@ -376,7 +415,7 @@ Following additional freemarker methods by default are supported by this library
 |replacement|java.lang.String||Replacement string|
 
 
-### ${\color{blue}sizeOf()}$
+#### ${\color{blue}sizeOf()}$
 **Description**: Used to fetch size of specified value. If string length of string is returned, if collection size of collection is returned, if null zero will be returned. Otherwise 1 will be returned.<br>
 **Returns**: **[int]** Size of specified object.
 
@@ -386,18 +425,7 @@ Following additional freemarker methods by default are supported by this library
 |value|java.lang.Object||Value whose size to be determined|
 
 
-### ${\color{blue}sortBy()}$
-**Description**: Sorted elements of specified collection based on specified keyExpression. Duplicate elements (with same key) will be kept together (though internal order is not guaranteed).<br>
-**Returns**: **[java.util.List]** List of ordered elements based on specified key expression.
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|collection|java.util.Collection||Collection of objects which needs sorting|
-|keyExpression|java.lang.String||Freemarker key expression which will be executed on each of collection element. And obtained key will be used for sorting.|
-
-
-### ${\color{blue}strContains()}$
+#### ${\color{blue}strContains()}$
 **Description**: Checks if specified substring can be found in main string<br>
 **Returns**: **[boolean]** true, if substring can be found.
 
@@ -409,17 +437,7 @@ Following additional freemarker methods by default are supported by this library
 |ignoreCase|boolean|false|Flag to indicate if case has to be ignored during search|
 
 
-### ${\color{blue}toMillis()}$
-**Description**: Converts specified date into millis.<br>
-**Returns**: **[java.lang.Long]** Millis value
-
-**Parameters**
-|Name|Type|Default Value|Description|
-|:---|:---|:-----------|:-----------|
-|date|java.util.Date||Date to be converted|
-
-
-### ${\color{blue}toText()}$
+#### ${\color{blue}toText()}$
 **Description**: Used to convert specified object into string. toString() will be invoked on input object to convert<br>
 **Returns**: **[java.lang.String]** Converted string. If null, 'null' will be returned.
 
@@ -427,11 +445,6 @@ Following additional freemarker methods by default are supported by this library
 |Name|Type|Default Value|Description|
 |:---|:---|:-----------|:-----------|
 |value|java.lang.Object||Value to be converted into string.|
-
-
-### ${\color{blue}today()}$
-**Description**: Returns the current date object<br>
-**Returns**: **[java.util.Date]** Current date
 
 
 

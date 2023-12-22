@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.utils.fmarker;
+package com.yukthitech.utils.fmarker.doc;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -75,12 +74,14 @@ public class FreeMarkerDirectiveDoc implements Comparable<FreeMarkerDirectiveDoc
 		this.description = freeMarkerMethod.description();
 		this.method = method;
 		
-		if(freeMarkerMethod.params().length > 0)
+		Parameter params[] = method.getParameters();
+		
+		if(params.length > 0)
 		{
-			this.parameters = Arrays.asList(freeMarkerMethod.params())
-					.stream()
-					.map(annot -> new ParamDoc(annot, null))
-					.collect(Collectors.toList());
+			for(Parameter param : params)
+			{
+				addParameter(new ParamDoc(param));
+			}
 		}
 		
 		if(freeMarkerMethod.examples().length > 0)
@@ -94,6 +95,20 @@ public class FreeMarkerDirectiveDoc implements Comparable<FreeMarkerDirectiveDoc
 		}
 	}
 	
+	/**
+	 * Adds the parameter details to this method doc.
+	 * @param param
+	 */
+	private void addParameter(ParamDoc param)
+	{
+		if(this.parameters == null)
+		{
+			this.parameters = new ArrayList<ParamDoc>();
+		}
+		
+		this.parameters.add(param);
+	}
+
 	public List<ParamDoc> getParameters()
 	{
 		return parameters;

@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
@@ -35,6 +36,7 @@ import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
  * Default collection methods.
  * @author Kranthi
  */
+@Named("Collection Methods")
 public class CollectionMethods
 {
 	/**

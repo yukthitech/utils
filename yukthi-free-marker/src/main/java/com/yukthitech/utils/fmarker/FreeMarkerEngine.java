@@ -30,10 +30,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.doc.FreeMarkerDirectiveDoc;
+import com.yukthitech.utils.fmarker.doc.FreeMarkerMethodDoc;
 import com.yukthitech.utils.fmarker.met.CollectionMethods;
 import com.yukthitech.utils.fmarker.met.DateMethods;
-import com.yukthitech.utils.fmarker.met.DefaultDirectives;
-import com.yukthitech.utils.fmarker.met.DefaultMethods;
+import com.yukthitech.utils.fmarker.met.CommonDirectives;
+import com.yukthitech.utils.fmarker.met.CommonMethods;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -93,11 +95,11 @@ public class FreeMarkerEngine
 		
 		freeMarkerMethodRegistry = new HashMap<String, Method>();
 		
-		loadClass(DefaultMethods.class);
+		loadClass(CommonMethods.class);
 		loadClass(DateMethods.class);
 		loadClass(CollectionMethods.class);
 		
-		loadClass(DefaultDirectives.class);
+		loadClass(CommonDirectives.class);
 	}
 
 	/**
@@ -136,8 +138,9 @@ public class FreeMarkerEngine
 					method1, method2);
 		}
 
-		configuration.setSharedVariable(name, new DirectiveProxy(method));
-		freeMarkerDirectiveDocRegistry.put(name, new FreeMarkerDirectiveDoc(method));
+		FreeMarkerDirectiveDoc dirDoc = new FreeMarkerDirectiveDoc(method);
+		configuration.setSharedVariable(name, new DirectiveProxy(method, dirDoc));
+		freeMarkerDirectiveDocRegistry.put(name, dirDoc);
 	}
 	
 	/**
@@ -314,7 +317,7 @@ public class FreeMarkerEngine
 			processTemplate(name, collectorExpr, context);
 			
 			
-			Object res = DefaultMethods.getCollectedValue();
+			Object res = CommonMethods.getCollectedValue();
 			
 			if(res instanceof TemplateModel)
 			{

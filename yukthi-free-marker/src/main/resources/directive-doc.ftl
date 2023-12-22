@@ -1,5 +1,7 @@
-<#list directives as directive>
-### ${'$'}{\color{blue}@${directive.name}}$
+<#list directives?keys as grpName>
+### ${grpName}
+<#list directives[grpName] as directive>
+#### ${'$'}{\color{blue}@${directive.name}}$
 **Description**: ${directive.description}<br>
 
 <#if isNotEmpty(directive.parameters)>
@@ -25,5 +27,7 @@
 
 </#list>
 </#if>
+
+</#list>
 
 </#list>

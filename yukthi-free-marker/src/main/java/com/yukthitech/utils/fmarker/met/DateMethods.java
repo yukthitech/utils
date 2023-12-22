@@ -20,10 +20,12 @@ import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
+@Named("Date Methods")
 public class DateMethods
 {
 	@FreeMarkerMethod(

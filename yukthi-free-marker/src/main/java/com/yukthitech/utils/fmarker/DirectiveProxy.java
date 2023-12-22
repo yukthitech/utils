@@ -16,11 +16,20 @@
 package com.yukthitech.utils.fmarker;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.doc.FreeMarkerDirectiveDoc;
+import com.yukthitech.utils.fmarker.doc.ParamDoc;
+import com.yukthitech.utils.fmarker.met.MethodUtils;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -40,22 +49,80 @@ class DirectiveProxy implements TemplateDirectiveModel
 	private Method method;
 	
 	/**
+	 * Parameters accepted by this directive.
+	 */
+	private List<ParamDoc> parameters;
+	
+	/**
 	 * Instantiates a new directive proxy.
 	 *
 	 * @param method the method
 	 */
-	public DirectiveProxy(Method method)
+	public DirectiveProxy(Method method, FreeMarkerDirectiveDoc dirDoc)
 	{
 		this.method = method;
+		this.parameters = dirDoc.getParameters();
+		this.parameters = (this.parameters == null) ? Collections.emptyList() : this.parameters;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException
+	public void execute(Environment env, Map paramMap, TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException
 	{
+		Object params[] = new Object[parameters.size()];
+		int idx = -1;
+		
+		for(ParamDoc paramDoc : parameters)
+		{
+			idx++;
+			
+			if(paramDoc.isBody())
+			{
+				StringWriter writer = new StringWriter();
+				body.render(writer);
+
+				params[idx] = writer.toString();
+			}
+			else if(paramDoc.isAllParams())
+			{
+				Map<Object, Object> actMap = paramMap;
+				Map<String, Object> allParamMap = new LinkedHashMap<>();
+				Class<?> valType = Object.class;
+				
+				if(paramDoc.getParameter().getParameterizedType() instanceof ParameterizedType)
+				{
+					ParameterizedType parameterizedType = (ParameterizedType) paramDoc.getParameter().getParameterizedType();
+					valType = (Class<?>) parameterizedType.getActualTypeArguments()[1];
+				}
+				
+				for(Map.Entry<Object, Object> entry : actMap.entrySet())
+				{
+					String key = MethodUtils.convertArgument(entry.getKey(), String.class);
+					Object val = MethodUtils.convertArgument(entry.getValue(), valType);
+					
+					allParamMap.put(key, val);
+				}
+
+				params[idx] = allParamMap;
+				continue;
+			}
+			else
+			{
+				params[idx] = paramMap.get(paramDoc.getName());
+			}
+			
+			Class<?> paramType = paramDoc.getParameter().getType();
+			params[idx] = (params[idx] == null) ? CommonUtils.getDefaultValue(paramType) : MethodUtils.convertArgument(params[idx], paramType);
+		}
+		
 		try
 		{
-			method.invoke(null, env, params, loopVars, body);
+			Object result = method.invoke(null, params);
+			
+			if(result != null)
+			{
+				env.getOut().append(result.toString());
+			}
 		} catch(InvocationTargetException e)
 		{
 			Throwable ex = e.getCause();
@@ -70,10 +137,10 @@ class DirectiveProxy implements TemplateDirectiveModel
 				throw (IOException) ex;
 			}
 			
-			throw new InvalidStateException("An error occurred while executing directiv method: {}.{}", method.getDeclaringClass().getName(), method.getName(), e);
+			throw new InvalidStateException("An error occurred while executing directive method: {}.{}", method.getDeclaringClass().getName(), method.getName(), e);
 		} catch(Exception e)
 		{
-			throw new InvalidStateException("An error occurred while executing directiv method: {}.{}", method.getDeclaringClass().getName(), method.getName(), e);
+			throw new InvalidStateException("An error occurred while executing directive method: {}.{}", method.getDeclaringClass().getName(), method.getName(), e);
 		}
 	}
 

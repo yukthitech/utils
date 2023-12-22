@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.utils.fmarker;
+package com.yukthitech.utils.fmarker.doc;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,6 +48,18 @@ public class ParamDoc implements Comparable<ParamDoc>
 	 */
 	private String defaultValue;
 	
+	/**
+	 * Flag indicating if this is body param.
+	 */
+	private boolean body;
+	
+	/**
+	 * Flag indicating if this param accepts all param map.
+	 */
+	private boolean allParams;
+	
+	private Parameter parameter;
+	
 	public ParamDoc()
 	{}
 
@@ -57,11 +70,15 @@ public class ParamDoc implements Comparable<ParamDoc>
 		
 	public ParamDoc(FmParam fmParam, Parameter param)
 	{
+		this.parameter = param;
 		this.name = (fmParam != null && StringUtils.isNotBlank(fmParam.name())) ? fmParam.name() : param.getName();
 		this.description = (fmParam != null) ? fmParam.description() : "";
 		this.defaultValue = (fmParam != null) ? fmParam.defaultValue() : "";
+		this.body = (fmParam != null) ? fmParam.body() : false;
 		
 		Class<?> type = param != null ? param.getType() : Object.class;
+		
+		this.allParams = fmParam != null && fmParam.allParams() && Map.class.equals(type);
 		
 		if(type.isArray())
 		{
@@ -76,6 +93,26 @@ public class ParamDoc implements Comparable<ParamDoc>
 		{
 			this.type = type.getName();
 		}
+	}
+	
+	public Parameter getParameter()
+	{
+		return parameter;
+	}
+	
+	public boolean isAllParams()
+	{
+		return allParams;
+	}
+	
+	/**
+	 * Checks if is flag indicating if this is body param.
+	 *
+	 * @return the flag indicating if this is body param
+	 */
+	public boolean isBody()
+	{
+		return body;
 	}
 
 	/**
