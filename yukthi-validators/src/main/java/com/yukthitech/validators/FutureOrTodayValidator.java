@@ -18,12 +18,12 @@ package com.yukthitech.validators;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.apache.commons.lang3.time.DateUtils;
 
 import com.yukthitech.validation.annotations.FutureOrToday;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator - to validate the target date either future date or today

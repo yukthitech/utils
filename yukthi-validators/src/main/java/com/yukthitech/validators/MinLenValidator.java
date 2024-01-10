@@ -15,10 +15,10 @@
  */
 package com.yukthitech.validators;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import com.yukthitech.validation.annotations.MinLen;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator of min-length {@link MinLen} validation.

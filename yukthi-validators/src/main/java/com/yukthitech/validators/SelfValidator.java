@@ -15,12 +15,12 @@
  */
 package com.yukthitech.validators;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ValidationException;
-
 import com.yukthitech.validation.ISelfValidation;
 import com.yukthitech.validation.annotations.EnableSelfValidation;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ValidationException;
 
 public class SelfValidator implements ConstraintValidator<EnableSelfValidation, Object>
 {

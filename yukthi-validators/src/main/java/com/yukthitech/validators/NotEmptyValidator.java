@@ -17,10 +17,10 @@ package com.yukthitech.validators;
 
 import java.util.Collection;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import com.yukthitech.validation.annotations.NotEmpty;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator for {@link NotEmpty} constraint

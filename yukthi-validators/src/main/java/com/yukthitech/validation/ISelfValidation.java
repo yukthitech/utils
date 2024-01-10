@@ -15,7 +15,7 @@
  */
 package com.yukthitech.validation;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 /**
  * Base interface for self validation.

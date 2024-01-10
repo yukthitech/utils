@@ -20,10 +20,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
-
 import com.yukthitech.validators.RequiredValidator;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 /**
  * Ensures some or other value is provided for target field. For String field ensures non-zero length is provided.

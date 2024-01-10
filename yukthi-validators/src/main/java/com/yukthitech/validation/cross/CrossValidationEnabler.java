@@ -17,10 +17,10 @@ package com.yukthitech.validation.cross;
 
 import java.lang.reflect.Field;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.MessageInterpolator;
-import javax.validation.Validation;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Validation;
 
 /**
  * Javax Validator which in turn enables cross validation on the bean

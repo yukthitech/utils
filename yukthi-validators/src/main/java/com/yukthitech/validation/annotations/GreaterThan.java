@@ -21,10 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Payload;
-
 import com.yukthitech.validation.cross.CrossConstraint;
 import com.yukthitech.validators.GreaterThanValidator;
+
+import jakarta.validation.Payload;
 
 /**
  * Compares target field with the field specified by {@link #field()}. This validation annotation should be used on fields

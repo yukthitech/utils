@@ -21,10 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
-
 import com.yukthitech.validators.MispatternValidator;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 /**
  * Constraint ensuring target field will not match specified pattern(s)

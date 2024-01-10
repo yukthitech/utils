@@ -21,10 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
-
 import com.yukthitech.validators.NotEmptyValidator;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 /**
  * Ensures target field value is not empty. Can be used on string/collection fields

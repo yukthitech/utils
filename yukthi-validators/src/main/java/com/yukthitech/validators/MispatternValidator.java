@@ -17,10 +17,10 @@ package com.yukthitech.validators;
 
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import com.yukthitech.validation.annotations.Mispattern;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validator for {@link Mispattern} constraint

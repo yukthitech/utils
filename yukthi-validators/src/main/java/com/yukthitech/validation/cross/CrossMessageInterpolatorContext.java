@@ -23,11 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.validation.ConstraintTarget;
-import javax.validation.ConstraintValidator;
-import javax.validation.MessageInterpolator;
-import javax.validation.Payload;
-import javax.validation.metadata.ConstraintDescriptor;
+import jakarta.validation.ConstraintTarget;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Payload;
+import jakarta.validation.metadata.ConstraintDescriptor;
+import jakarta.validation.metadata.ValidateUnwrappedValue;
 
 /**
  * @author akiran
@@ -65,6 +66,14 @@ public class CrossMessageInterpolatorContext implements MessageInterpolator.Cont
 			}
 		}
 	}
+	
+	@Override
+	public ValidateUnwrappedValue getValueUnwrapping()
+	{
+		return null;
+	}
+
+
 
 	/* (non-Javadoc)
 	 * @see javax.validation.MessageInterpolator.Context#getConstraintDescriptor()
