@@ -27,7 +27,7 @@
 			</dataSource>
 		</dataStore>
 	</repositoryFactory>
-	
+
 	<!--  
 	<repositoryFactory createTables="true" name="ORACLE">
 		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="oracle">

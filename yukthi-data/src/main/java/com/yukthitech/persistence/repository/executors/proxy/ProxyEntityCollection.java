@@ -25,9 +25,6 @@ import com.yukthitech.persistence.repository.search.SearchCondition;
 import com.yukthitech.persistence.repository.search.SearchQuery;
 import com.yukthitech.persistence.utils.OrmUtils;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.InvocationHandler;
-
 /**
  * Represents proxy for entity class used for lazy loading
  * @author akiran
@@ -86,19 +83,7 @@ public class ProxyEntityCollection
 		this.actualCollection = OrmUtils.createCollection(collectionType);
 		
 		//create ccg lib handler which will handle method calls on proxy
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(collectionType);
-		
-		enhancer.setCallback(new InvocationHandler()
-		{
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-			{
-				return ProxyEntityCollection.this.invoke(proxy, method, args);
-			}
-		});
-		
-		this.proxyCollection = enhancer.create();
+		this.proxyCollection = ProxyBuilder.buildProxy(collectionType, null, this::invoke);
 	}
 	
 	/**

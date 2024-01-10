@@ -23,9 +23,6 @@ import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IInternalRepository;
 import com.yukthitech.persistence.repository.executors.FetchJoinEntityQueryExecutor;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.InvocationHandler;
-
 /**
  * Proxy used to fetch sub entities which are joined by join table.
  * @author akiran
@@ -86,10 +83,6 @@ public class ProxyJoinEntityCollection
 		
 		Class<?> collectionType = fetchJoinEntityQueryExecutor.getCollectionReturnType();
 		
-		//create ccg lib handler which will handle method calls on proxy
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(collectionType);
-		
 		try
 		{
 			this.actualCollection = (Collection) collectionType.newInstance();
@@ -98,16 +91,8 @@ public class ProxyJoinEntityCollection
 			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);
 		}
 		
-		enhancer.setCallback(new InvocationHandler()
-		{
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-			{
-				return ProxyJoinEntityCollection.this.invoke(proxy, method, args);
-			}
-		});
-		
-		this.proxyCollection = enhancer.create();
+		//create ccg lib handler which will handle method calls on proxy
+		this.proxyCollection = ProxyBuilder.buildProxy(collectionType, IProxyEntity.class, this::invoke);
 	}
 	
 	/**

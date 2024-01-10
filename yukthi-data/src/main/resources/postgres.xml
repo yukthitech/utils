@@ -266,7 +266,7 @@
 			ORDER BY <#list query.orderByFields as orderField>"${orderField.code}" ${orderField.orderByType}<#if orderField_has_next>, </#if></#list>
 		</#if>
 		<#if query.resultsOffset??>
-			LIMIT ${query.resultsLimitString} OFFSET ${query.resultsLimit?c}
+			LIMIT ${query.resultsLimitString} OFFSET ${query.resultsOffset?c}
 		<#elseif query.resultsLimit??>
 			LIMIT ${query.resultsLimit?c}
 		</#if> 

@@ -36,9 +36,6 @@ import com.yukthitech.persistence.repository.search.SearchQuery;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.InvocationHandler;
-
 /**
  * Represents proxy for entity class used for lazy loading
  * @author akiran
@@ -137,20 +134,6 @@ public class ProxyEntityCreator
 		
 		Class<?> entityType = entityDetails.getEntityType();
 		
-		//create ccg lib handler which will handle method calls on proxy
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(entityType);
-		enhancer.setInterfaces(new Class[] { IProxyEntity.class } );
-		
-		enhancer.setCallback(new InvocationHandler()
-		{
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-			{
-				return ProxyEntityCreator.this.invoke(proxy, method, args);
-			}
-		});
-		
 		if(entityId != null)
 		{
 			//fetch the id getter method
@@ -172,7 +155,8 @@ public class ProxyEntityCreator
 			}
 		}
 		
-		this.proxyEntity = enhancer.create();
+		//create ccg lib handler which will handle method calls on proxy
+		this.proxyEntity = ProxyBuilder.buildProxy(entityType, IProxyEntity.class, this::invoke);
 	}
 	
 	/**
