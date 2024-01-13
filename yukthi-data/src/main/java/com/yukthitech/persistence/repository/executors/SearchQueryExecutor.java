@@ -286,7 +286,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 				
 				try
 				{
-					return (Collection)collectionReturnType.newInstance();
+					return (Collection)collectionReturnType.getConstructor().newInstance();
 				}catch(Exception ex)
 				{
 					throw new IllegalStateException("An error occurred while creating return collection: " + collectionReturnType.getName(), ex);
@@ -311,7 +311,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 			
 			try
 			{
-				lst = (Collection)collectionReturnType.newInstance();
+				lst = (Collection)collectionReturnType.getConstructor().newInstance();
 			}catch(Exception ex)
 			{
 				throw new IllegalStateException("An error occurred while creating return collection: " + collectionReturnType.getName(), ex);

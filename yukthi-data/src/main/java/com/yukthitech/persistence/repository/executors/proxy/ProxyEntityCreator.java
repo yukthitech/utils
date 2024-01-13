@@ -140,7 +140,7 @@ public class ProxyEntityCreator
 			try
 			{
 				String idFieldName = entityDetails.getIdField().getName();
-				PropertyDescriptor propertyDesc = PropertyUtils.getPropertyDescriptor(entityType.newInstance(), idFieldName);
+				PropertyDescriptor propertyDesc = PropertyUtils.getPropertyDescriptor(entityType.getConstructor().newInstance(), idFieldName);
 				
 				this.idGetter = propertyDesc != null ? propertyDesc.getReadMethod() : null;
 			}catch(Exception ex)

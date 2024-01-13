@@ -44,7 +44,7 @@ public class ProxyBuilder
 		
 		try
 		{
-			return cls.newInstance();
+			return cls.getConstructor().newInstance();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while creating instance of dynamic type", ex);

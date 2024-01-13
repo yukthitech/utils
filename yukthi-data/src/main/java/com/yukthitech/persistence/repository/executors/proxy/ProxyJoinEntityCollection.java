@@ -85,7 +85,7 @@ public class ProxyJoinEntityCollection
 		
 		try
 		{
-			this.actualCollection = (Collection) collectionType.newInstance();
+			this.actualCollection = (Collection) collectionType.getConstructor().newInstance();;
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);

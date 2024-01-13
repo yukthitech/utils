@@ -179,7 +179,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 
 		try
 		{
-			returnType.newInstance();
+			returnType.getConstructor().newInstance();
 			return returnType;
 		}catch(Exception ex)
 		{
@@ -263,7 +263,7 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 				try
 				{
 					PropertyDescriptor propertyDescriptor = null;
-					Object returnSampleBean = this.returnType.newInstance();
+					Object returnSampleBean = this.returnType.getConstructor().newInstance();
 					
 					for(ResultMapping mapping : mappings)
 					{

@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.Table;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -54,6 +53,8 @@ import com.yukthitech.utils.ReflectionUtils;
 import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Query executor for native queries
@@ -142,7 +143,7 @@ public class NativeQueryExecutor extends QueryExecutor
 				{
 					try
 					{
-						returnType.newInstance();
+						returnType.getConstructor().newInstance();
 						this.returnCollectionType = returnType;
 					}catch(Exception ex)
 					{
@@ -309,7 +310,7 @@ public class NativeQueryExecutor extends QueryExecutor
 		//create result object instance
 		try
 		{
-			result = returnType.newInstance();
+			result = returnType.getConstructor().newInstance();
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException(ex, "An error occurred while creating result object of type - {}", returnType.getName());
@@ -489,7 +490,7 @@ public class NativeQueryExecutor extends QueryExecutor
 				
 				try
 				{
-					resCollection = (Collection)returnCollectionType.newInstance();
+					resCollection = (Collection)returnCollectionType.getConstructor().newInstance();
 				}catch(Exception ex)
 				{
 					throw new InvalidStateException(ex, "An error occurred while creating collection instance - {}", returnCollectionType.getName());

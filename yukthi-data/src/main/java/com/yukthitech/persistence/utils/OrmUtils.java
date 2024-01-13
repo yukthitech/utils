@@ -38,7 +38,7 @@ public class OrmUtils
 		//check if instance of collection can be created directly from collection type
 		try
 		{
-			return (Collection) collectionType.newInstance();
+			return (Collection) collectionType.getConstructor().newInstance();
 		}catch(Exception ex)
 		{
 		}
@@ -55,7 +55,7 @@ public class OrmUtils
 
 		try
 		{
-			return (Collection) collectionType.newInstance();
+			return (Collection) collectionType.getConstructor().newInstance();
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);

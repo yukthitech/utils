@@ -1323,7 +1323,7 @@ public class ConditionQueryBuilder implements Cloneable
 			return (T) ConvertUtils.convert(res, resField.fieldType);
 		}
 
-		T result = resultType.newInstance();
+		T result = resultType.getConstructor().newInstance();
 		Object value = null;
 		ForeignConstraintDetails foreignConstraint = null;
 		EntityDetails foreignEntityDetails = null;

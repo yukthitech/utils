@@ -94,7 +94,7 @@ public class ExecutorFactory
 				return execuctor;
 			}catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex)
 			{
-				throw new IllegalStateException("An error occurred while creating instance of Query-executor", ex);
+				throw new IllegalStateException("An error occurred while creating instance of Query-executor of type: " + constructor.getDeclaringClass().getName(), ex);
 			}
 		}
 		

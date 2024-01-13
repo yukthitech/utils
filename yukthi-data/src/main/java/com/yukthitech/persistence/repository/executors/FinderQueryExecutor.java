@@ -232,7 +232,7 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 
 				try
 				{
-					return collectionReturnType.newInstance();
+					return collectionReturnType.getConstructor().newInstance();
 				}catch(Exception ex)
 				{
 					throw new IllegalStateException("An error occurred while creating return collection: " + collectionReturnType.getName(), ex);
@@ -255,7 +255,7 @@ public class FinderQueryExecutor extends AbstractSearchQuery
 			
 			try
 			{
-				lst = (Collection)collectionReturnType.newInstance();
+				lst = (Collection)collectionReturnType.getConstructor().newInstance();
 				lst.addAll(resLst);
 			}catch(Exception ex)
 			{

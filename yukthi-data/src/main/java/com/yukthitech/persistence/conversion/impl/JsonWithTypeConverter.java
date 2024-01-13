@@ -17,6 +17,7 @@ package com.yukthitech.persistence.conversion.impl;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
 
@@ -43,13 +44,13 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class JsonWithTypeConverter implements IPersistenceConverter
 {
 	/**
-	 * Object mapper to be used for json to/from object coversaion.
+	 * Object mapper to be used for json to/from object conversation.
 	 */
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	static
 	{
-		objectMapper.enableDefaultTyping(DefaultTyping.NON_FINAL, As.PROPERTY);
+		objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), DefaultTyping.NON_FINAL, As.PROPERTY);
 		objectMapper.setSerializationInclusion(Include.NON_NULL);
 	}
 
@@ -116,7 +117,7 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 			try
 			{
 				InputStream is = blob.getBinaryStream();
-				String res = IOUtils.toString(is);
+				String res = IOUtils.toString(is, Charset.defaultCharset());
 				
 				is.close();
 				return res;

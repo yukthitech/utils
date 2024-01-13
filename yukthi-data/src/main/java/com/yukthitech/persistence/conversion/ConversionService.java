@@ -105,7 +105,7 @@ public class ConversionService
 		
 		try
 		{
-			converter = (IPersistenceConverter)converterType.newInstance();
+			converter = (IPersistenceConverter)converterType.getConstructor().newInstance();
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("Failed to create converter of type: " + converterType.getName(), ex);

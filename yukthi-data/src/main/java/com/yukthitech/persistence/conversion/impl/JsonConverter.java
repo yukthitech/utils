@@ -17,6 +17,7 @@ package com.yukthitech.persistence.conversion.impl;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
 
@@ -103,7 +104,7 @@ public class JsonConverter implements IPersistenceConverter
 			try
 			{
 				InputStream is = blob.getBinaryStream();
-				String res = IOUtils.toString(is);
+				String res = IOUtils.toString(is, Charset.defaultCharset());
 				
 				is.close();
 				return res;
