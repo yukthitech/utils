@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 
@@ -52,6 +53,7 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 	{
 		objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(), DefaultTyping.NON_FINAL, As.PROPERTY);
 		objectMapper.setSerializationInclusion(Include.NON_NULL);
+		objectMapper.setTimeZone(TimeZone.getDefault());
 	}
 
 	/* (non-Javadoc)
