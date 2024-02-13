@@ -75,11 +75,23 @@ public class FreeMarkerEngine
 	 */
 	private Map<String, FreeMarkerDirectiveDoc> freeMarkerDirectiveDocRegistry = new TreeMap<>();
 	
+	private boolean excludeDefaultDirectives;
+	
+	private boolean excludeDefaultMethods;
+	
 	public FreeMarkerEngine()
 	{
 		reset();
 	}
 	
+	public FreeMarkerEngine(boolean excludeDefaultMethods, boolean excludeDefaultDirectives)
+	{
+		this.excludeDefaultMethods = excludeDefaultMethods;
+		this.excludeDefaultDirectives = excludeDefaultDirectives;
+		
+		reset();
+	}
+
 	public static FreeMarkerEngine getCurrentInstance()
 	{
 		return currentInstance.get();
@@ -95,11 +107,17 @@ public class FreeMarkerEngine
 		
 		freeMarkerMethodRegistry = new HashMap<String, Method>();
 		
-		loadClass(CommonMethods.class);
-		loadClass(DateMethods.class);
-		loadClass(CollectionMethods.class);
+		if(!excludeDefaultMethods)
+		{
+			loadClass(CommonMethods.class);
+			loadClass(DateMethods.class);
+			loadClass(CollectionMethods.class);
+		}
 		
-		loadClass(CommonDirectives.class);
+		if(!excludeDefaultDirectives)
+		{
+			loadClass(CommonDirectives.class);
+		}
 	}
 
 	/**
