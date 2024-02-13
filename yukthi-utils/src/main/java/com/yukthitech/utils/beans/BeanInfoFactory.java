@@ -16,6 +16,7 @@
 package com.yukthitech.utils.beans;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -136,6 +137,16 @@ public class BeanInfoFactory
 			//loop through property descriptors and add to bean property map
 			for(Field field : fields)
 			{
+				if(field.isSynthetic())
+				{
+					continue;
+				}
+				
+				if(Modifier.isStatic(field.getModifiers()))
+				{
+					continue;
+				}
+				
 				try
 				{
 					nestedProp = NestedProperty.getNestedProperty(beanType, field.getName());
