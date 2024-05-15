@@ -49,7 +49,7 @@
 				}
 			]
 		</template>
-		<expectedError>An error occurred while processing expression: @fmarker: nonExistingField.name Path: [0]>name</expectedError>
+		<expectedError>Invalid expression 'nonExistingField.name' (Name: jel-expr) specified at path: [0]>name</expectedError>
 	</jel-test-bean>
 
 	<jel-test-bean name="invalidExpressionType">

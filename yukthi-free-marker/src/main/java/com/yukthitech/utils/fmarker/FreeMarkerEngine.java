@@ -345,6 +345,9 @@ public class FreeMarkerEngine
 
 			//return collected value
 			return res;
+		} catch(TemplateProcessingException ex)
+		{
+			throw ex;
 		} catch(Exception ex)
 		{
 			throw new TemplateProcessingException("Template processing resulted in error.\n\tName: {}\n\tError: {}\n\tTemplate: {}", 

@@ -126,6 +126,8 @@ public class TestJsonExprEngine
 			Assert.fail("No error is thrown");
 		}catch(Exception ex)
 		{
+			ex.printStackTrace();
+			
 			String expMssg = bean.getExpectedError();
 			String actMssg = ex.getMessage().replaceAll("\\s+", " ");
 			

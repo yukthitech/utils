@@ -126,7 +126,7 @@ public class Conversions
 				context.setValue("resParams", resParams);
 			}
 			
-			content = freeMarkerEngine.processTemplate("res-content", content, context);
+			content = ExpressionUtil.processTemplate(freeMarkerEngine, path, "res-content", content, context);
 		}
 		
 		Object finalRes = checkForTransform(map, content, context, path);
@@ -148,7 +148,7 @@ public class Conversions
 		
 		if(!matcher.matches())
 		{
-			return freeMarkerEngine.processTemplate("jel-template", str, context);
+			return ExpressionUtil.processTemplate(freeMarkerEngine, path, "jel-template", str, context);
 		}
 		
 		String exprType = matcher.group(1);
@@ -158,7 +158,7 @@ public class Conversions
 		{
 			if(EXPR_TYPE_FMARKER.matches(exprType))
 			{
-				return freeMarkerEngine.fetchValue("jel-expr", expr, context);
+				return ExpressionUtil.processValueExpression(freeMarkerEngine, path, "jel-expr", expr, context);
 			}
 			else if(EXPR_TYPE_XPATH.matches(exprType))
 			{
@@ -168,6 +168,9 @@ public class Conversions
 			{
 				return JXPathContext.newContext(context).selectNodes(expr);
 			}
+		} catch(JsonExpressionException ex)
+		{
+			throw ex;
 		} catch(Exception ex)
 		{
 			throw new JsonExpressionException(path, "An error occurred while processing expression: %s", str, ex);
@@ -190,7 +193,10 @@ public class Conversions
 			context.setValue("thisValue", curValue);
 			
 			return processString((String) transformExpr, context, path);
-		}catch(Exception ex)
+		} catch(JsonExpressionException ex)
+		{
+			throw ex;
+		} catch(Exception ex)
 		{
 			throw new JsonExpressionException(path, "An error occurred while transforming result value", ex);	
 		}
