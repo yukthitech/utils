@@ -15,6 +15,8 @@
  */
 package com.yukthitech.mail.tracker;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -109,6 +111,10 @@ public class EmailServerSettings
 	 * Folder from which mails needs to be accessed.
 	 */
 	private String folderName = "INBOX";
+	
+	private Map<String, String> imapProperties = new HashMap<>();
+	
+	private Map<String, String> smtpProperties = new HashMap<>();
 	
 	/**
 	 * Gets the smtp host.
@@ -349,6 +355,26 @@ public class EmailServerSettings
 	{
 		this.enableSsl = enableSsl;
 	}
+	
+	public Map<String, String> getImapProperties()
+	{
+		return imapProperties;
+	}
+
+	public void setImapProperties(Map<String, String> imapProperties)
+	{
+		this.imapProperties = imapProperties;
+	}
+
+	public Map<String, String> getSmtpProperties()
+	{
+		return smtpProperties;
+	}
+
+	public void setSmtpProperties(Map<String, String> smtpProperties)
+	{
+		this.smtpProperties = smtpProperties;
+	}
 
 	/**
 	* Validates required configuration params are provided.
@@ -402,6 +428,16 @@ public class EmailServerSettings
 			props.put(PROP_SMTP_PORT, "" + smtpPort);
 		}
 		
+		if(protocol == MailReadProtocol.IMAPS && imapProperties != null)
+		{
+			props.putAll(imapProperties);
+		}
+		
+		if(protocol == null && smtpProperties != null)
+		{
+			props.putAll(smtpProperties);
+		}
+
 		return props;
 	}
 }

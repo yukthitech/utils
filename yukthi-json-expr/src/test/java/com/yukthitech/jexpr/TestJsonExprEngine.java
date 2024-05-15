@@ -127,8 +127,10 @@ public class TestJsonExprEngine
 		}catch(Exception ex)
 		{
 			String expMssg = bean.getExpectedError();
+			String actMssg = ex.getMessage().replaceAll("\\s+", " ");
 			
-			Assert.assertEquals(ex.getMessage().replaceAll("\\s+", " "), expMssg);
+			Assert.assertTrue(actMssg.startsWith(expMssg),
+					String.format("\nActual Message: %s\nDoes not start with: %s", actMssg, expMssg));
 		}
 	}
 }

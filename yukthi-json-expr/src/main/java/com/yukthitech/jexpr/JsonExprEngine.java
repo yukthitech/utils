@@ -33,6 +33,7 @@ import com.yukthitech.utils.ExecutionUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.TemplateProcessingException;
 
 /**
  * Json expression engine to process Json Expression Language (JEL).
@@ -337,7 +338,7 @@ public class JsonExprEngine
 		
 		if(valueLstExpr instanceof String)
 		{
-			valueLst = (List<Object>) freeMarkerEngine.fetchValue("jel-valueLst-expr", (String) valueLstExpr, context);
+			valueLst = (List<Object>) processValueExpression(path, "jel-valueLst-expr", (String) valueLstExpr, context);
 		}
 		else if(valueLstExpr instanceof List)
 		{
@@ -372,7 +373,7 @@ public class JsonExprEngine
 			{
 				//evaluate the condition. And if condition results in false
 				//  ignore current iteration object
-				if(!freeMarkerEngine.evaluateCondition("for-each-condition", forEachCond, context))
+				if(!evaluateCondition(path, "for-each-condition", forEachCond, context))
 				{
 					continue;
 				}
@@ -390,6 +391,46 @@ public class JsonExprEngine
 		return resLst;
 	}
 	
+	private Object processValueExpression(String path, String name, String expression, Object context)
+	{
+		try
+		{
+			return freeMarkerEngine.fetchValue(name, (String) expression, context);
+		} catch(Exception ex)
+		{
+			String prcessingError = null;
+			
+			if(ex instanceof TemplateProcessingException)
+			{
+				prcessingError = ex.getCause().getMessage();
+				ex = null;
+			}
+			
+			throw new JsonExpressionException(path, "Invalid expression '%s' (Name: %s) specified at path: %s\nProcessing Error: %s", 
+					expression, name, path, prcessingError, ex);	
+		}
+	}
+	
+	private boolean evaluateCondition(String path, String name, String condition, Object context)
+	{
+		try
+		{
+			return freeMarkerEngine.evaluateCondition(name, condition, context);
+		} catch(Exception ex)
+		{
+			String prcessingError = null;
+			
+			if(ex instanceof TemplateProcessingException)
+			{
+				prcessingError = ex.getCause().getMessage();
+				ex = null;
+			}
+			
+			throw new JsonExpressionException(path, "Invalid condition '%s' (Name: %s) specified at path: %s\nProcessing Error: %s", 
+					condition, name, path, prcessingError, ex);	
+		}
+	}
+
 	/**
 	 * Process the map recursively and returns the processed map.
 	 * @param map Map to be processed
@@ -563,27 +604,19 @@ public class JsonExprEngine
 	 */
 	private boolean processCondition(Map<String, Object> map, IJsonExprContext context, String path)
 	{
-		String condition = null;
-		
-		try
-		{
-			condition = (String) map.get(KEY_CONDITION);
+		String condition = (String) map.get(KEY_CONDITION);
 			
-			//if condition is not present, remove it
-			if(StringUtils.isBlank(condition))
-			{
-				map.remove(KEY_CONDITION);
-				return true;
-			}
-
+		//if condition is not present, remove it
+		if(StringUtils.isBlank(condition))
+		{
 			map.remove(KEY_CONDITION);
-			
-			//evaluate the condition and return the result
-			return freeMarkerEngine.evaluateCondition("Json-condition", condition, context);
-		} catch(Exception ex)
-		{
-			throw new JsonExpressionException(path, "Invalid condition '%s' specified at path: %s", condition, path, ex);	
+			return true;
 		}
+
+		map.remove(KEY_CONDITION);
+		
+		//evaluate the condition and return the result
+		return evaluateCondition(path, "Json-condition", condition, context);
 	}
 
 	/**
@@ -631,13 +664,7 @@ public class JsonExprEngine
 		//extract the condition part
 		String condition = matcher.group(2);
 		
-		try
-		{
-			//evaluate the condition and return the result
-			return freeMarkerEngine.evaluateCondition("Json-condition", condition, context);
-		} catch(Exception ex)
-		{
-			throw new JsonExpressionException(path, "Invalid condition '%s' specified at path: %s", condition, path, ex);	
-		}
+		//evaluate the condition and return the result
+		return evaluateCondition(path, "Json-condition", condition, context);
 	}
 }

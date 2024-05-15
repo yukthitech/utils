@@ -104,6 +104,7 @@ public class FreeMarkerEngine
 	{
 		configuration = new Configuration(Configuration.getVersion());
 		configuration.setNumberFormat("#");
+		configuration.setLogTemplateExceptions(false);
 		
 		freeMarkerMethodRegistry = new HashMap<String, Method>();
 		
@@ -273,7 +274,7 @@ public class FreeMarkerEngine
 		} catch(Exception ex)
 		{
 			templateString = (templateString != null && templateString.length() > 1000) ? (templateString.substring(0, 1000) + "...") : templateString;
-			throw new InvalidStateException("An exception occurred while processing template: {}\nTemplate String: {}", name, templateString, ex);
+			throw new TemplateProcessingException("An exception occurred while processing template: {}\nTemplate String: {}", name, templateString, ex);
 		} finally
 		{
 			currentInstance.set(prevVal);
@@ -346,7 +347,7 @@ public class FreeMarkerEngine
 			return res;
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException("Template processing resulted in error.\n\tName: {}\n\tError: {}\n\tTemplate: {}", 
+			throw new TemplateProcessingException("Template processing resulted in error.\n\tName: {}\n\tError: {}\n\tTemplate: {}", 
 					name, CommonUtils.getRootCauseMessages(ex), valueExpression, ex);
 		}
 	}

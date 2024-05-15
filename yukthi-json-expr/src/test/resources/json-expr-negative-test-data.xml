@@ -32,7 +32,7 @@
 				}
 			]
 		</template>
-		<expectedError>Invalid condition 'notExistingField == 1' specified at path: [0] Path: [0]</expectedError>
+		<expectedError>Invalid condition 'notExistingField == 1' (Name: Json-condition) specified at path: [0]</expectedError>
 	</jel-test-bean>
 
 	<jel-test-bean name="invalidExpression">
@@ -81,6 +81,6 @@
 				"listWithPositiveCond": ["@condition:devStackEnabledx == 1", 1000, {"a": "b"}]
 			}
 		</template>
-		<expectedError>Invalid condition 'devStackEnabledx == 1' specified at path: >listWithPositiveCond Path: >listWithPositiveCond</expectedError>
+		<expectedError>Invalid condition 'devStackEnabledx == 1' (Name: Json-condition) specified at path: >listWithPositiveCond</expectedError>
 	</jel-test-bean>
 </test-data>
