@@ -16,6 +16,7 @@
 package com.yukthitech.utils.fmarker;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -132,6 +133,13 @@ class MethodProxy implements TemplateMethodModelEx
 			return freeMarkerMethod.invoke(null, methodArgs);
 		}catch(Exception ex)
 		{
+			Throwable err = ex;
+			
+			if(ex instanceof InvocationTargetException)
+			{
+				err = (Exception) ex.getCause();
+			}
+			
 			String argTypesStr = Arrays.asList(freeMarkerMethod.getParameterTypes())
 					.stream()
 					.map(typ -> typ.getName())
@@ -143,7 +151,7 @@ class MethodProxy implements TemplateMethodModelEx
 					+ "\nUsed arguments type: {}",
 					methodName, 
 					freeMarkerMethod.getDeclaringClass().getName(), freeMarkerMethod.getName(), argTypesStr,
-					Arrays.toString( methodArgs ), Arrays.toString( getTypes(methodArgs) ), ex);
+					Arrays.toString( methodArgs ), Arrays.toString( getTypes(methodArgs) ), err);
 		}
 	}
 }
