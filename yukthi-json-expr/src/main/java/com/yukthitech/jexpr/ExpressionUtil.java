@@ -52,7 +52,7 @@ public class ExpressionUtil
 			if(ex instanceof TemplateProcessingException)
 			{
 				prcessingError = ex.getCause().getMessage();
-				ex = null;
+				ex = (Exception) ex.getCause();
 			}
 			
 			throw new JsonExpressionException(path, "Invalid expression '%s' (Name: %s) specified at path: %s\nProcessing Error: %s", 

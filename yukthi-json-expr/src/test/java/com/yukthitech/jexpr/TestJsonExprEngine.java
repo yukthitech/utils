@@ -18,11 +18,14 @@ package com.yukthitech.jexpr;
 import java.util.Map;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 /**
  * Test cases for json expression engine.
@@ -34,19 +37,14 @@ public class TestJsonExprEngine
 	
 	private JsonExprEngine jsonExprEngine = new JsonExprEngine();
 	
-	/*
-	private FreeMarkerService freeMarkerService = new FreeMarkerService();
-	
 	@BeforeClass
 	public void setup() throws Exception
 	{
-		ClassScannerService classScannerService = new ClassScannerService();
-		freeMarkerService.setClassScannerService(classScannerService);
+		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+		freeMarkerEngine.loadClass(TestMethods.class);
 		
-		ReflectionUtils.setFieldValue(jsonExprEngine, "freeMarkerService", freeMarkerService);
-		ReflectionUtils.invokeMethod(freeMarkerService, FreeMarkerService.class.getDeclaredMethod("initValueCollector"));
+		jsonExprEngine.setFreeMarkerEngine(freeMarkerEngine);
 	}
-	*/
 	
 	private Object[][] loadXmlFile(String file)
 	{
@@ -80,6 +78,23 @@ public class TestJsonExprEngine
 	public Object[][] getPojoTestData() throws Exception
 	{
 		return loadXmlFile("/pojo-json-expr-test-data.xml");
+	}
+
+	@Test
+	public void testException() throws Exception
+	{
+		//parse json contents from test bean
+		Map<String, Object> context = CommonUtils.toMap("test", "Value");
+
+		try
+		{
+			//execute the jel
+			jsonExprEngine.processJson("{\"key\": \"@fmarker: errorMethod(test)\"}", context);
+			Assert.fail("No exception is thrown.");
+		}catch(Exception ex)
+		{
+			Assert.assertNotNull(ex.getCause());
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

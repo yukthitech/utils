@@ -92,12 +92,9 @@ public class JsonExprEngine
 
 	public JsonExprEngine(FreeMarkerEngine freeMarkerEngine)
 	{
-		this.freeMarkerEngine = freeMarkerEngine;
-		this.conversions = new Conversions(freeMarkerEngine);
-		
-		this.freeMarkerEngine.loadClass(JelFmarkerMethods.class);
+		this.setFreeMarkerEngine(freeMarkerEngine);
 	}
-
+	
 	/**
 	 * Sets the free marker engine for expression processing.
 	 *
@@ -113,6 +110,8 @@ public class JsonExprEngine
 		
 		this.freeMarkerEngine = freeMarkerEngine;
 		this.conversions = new Conversions(freeMarkerEngine);
+		
+		this.freeMarkerEngine.loadClass(JelFmarkerMethods.class);
 	}
 	
 	/**
