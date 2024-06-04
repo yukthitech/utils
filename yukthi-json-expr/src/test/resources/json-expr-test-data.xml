@@ -503,9 +503,34 @@
 			{
 				"key1": "cval1",
 				"extra": {
-					"key1": "cval1",
+					"skey1": "cval1",
 					"arr": [1, 2, 3, 4]
 				},
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeResourceWithReplace">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"@replace": {"@includeResource": "/include-res.json"},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"skey1": "cval1",
+				"arr": [1, 2, 3, 4],
 				"key2": "cval2"
 			}
 		</expectedResult>
@@ -523,7 +548,7 @@
 			["1", {"@includeResource": "/include-res.json"}, {"k1": "v1"}]
 		</template>
 		<expectedResult>
-			["1", {"key1": "cval1", "arr": [1, 2, 3, 4]}, {"k1": "v1"}]
+			["1", {"skey1": "cval1", "arr": [1, 2, 3, 4]}, {"k1": "v1"}]
 		</expectedResult>
 	</jel-test-bean>
 

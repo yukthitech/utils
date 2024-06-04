@@ -267,6 +267,41 @@ The same context is shared between parent template and included resource/file. C
 > 	"key2": "@fmarker: ckey2"
 > }
 > ```
+> ```
+> The result will be something like below:
+> ```json
+> {
+> 	"key1": "cval1",
+> 	"extra": {
+> 		"skey1": "cval1",
+> 		"arr": [1, 2, 3, 4]
+> 	},
+> 	"key2": "cval2"
+> }
+> ```
+
+In cases where instead of including direct result object, the entries of result object has to be included, ${\color{blue}@replace}$ can be used as shown below.
+
+> **Usage of @includeResource with @replace**
+> ```json
+> {
+> 	"key1": "@fmarker: ckey1",
+> 	"@replace": {"@includeResource": "/include-res.json"},
+> 	"key2": "@fmarker: ckey2"
+> }
+> ```
+> ```
+> The result will be something like below:
+> ```json
+> {
+> 	"key1": "cval1",
+>	"skey1": "cval1",
+>	"arr": [1, 2, 3, 4],
+> 	"key2": "cval2"
+> }
+> ```
+
+Below is an example to include file instead of resource:
 
 > **Usage of @includeFile**
 > ```json
@@ -276,6 +311,8 @@ The same context is shared between parent template and included resource/file. C
 > 	"key2": "@fmarker: ckey2"
 > }
 > ```
+
+
 
 ## Variables
 In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression may needs to be divided, a dynamic variable will come handy.

@@ -76,6 +76,12 @@ public class JsonExprEngine
 	private static final Pattern SET_PATTERN = Pattern.compile("^\\@set\\((\\w+)\\)$");
 	
 	/**
+	 * Used to replace current map entry, with entries with entries of value map (of current entry). Mainly
+	 * expected to be used with @includeResource or @includeFile.
+	 */
+	private static final String KEY_REPLACE = "@replace";
+
+	/**
 	 * Free marker engine for expression processing.
 	 */
 	private FreeMarkerEngine freeMarkerEngine;
@@ -495,13 +501,26 @@ public class JsonExprEngine
 				
 				continue;
 			}
-
+			
 			//if value resulted in null, ignore current entry
 			if(val == null)
 			{
 				continue;
 			}
 			
+			if(KEY_REPLACE.equals(entry.getKey()))
+			{
+				//if result value is not map
+				if(!(val instanceof Map))
+				{
+					throw new JsonExpressionException(path, "Value of @replace key must be a map but found: {}", val.getClass().getName());
+				}
+				
+				Map<String, Object> valMap = (Map<String, Object>) val;
+				resMap.putAll(valMap);
+				continue;
+			}
+
 			//for normal key-value entry, process the key also for expressions
 			String key = String.valueOf(conversions.processString(entry.getKey(), context, path + "#key"));
 			resMap.put(key, val);
