@@ -303,6 +303,42 @@
 			}
 		</expectedResult>
 	</jel-test-bean>
+	
+	<jel-test-bean name="nullAndEmptyListRefInLoop">
+		<context>
+			{
+				"nullList": null,
+				"emptyList": [],
+				"someList": [1, 2, 3]
+			}
+		</context>
+		
+		<template>
+			{
+				"list1": [{
+					"@for-each(elem)": "nullList",
+					"val": "${elem}"
+				}],
+				"list2": [{
+					"@for-each(elem)": "emptyList",
+					"val": "${elem}"
+				}],
+				"list3": [{
+					"@for-each(elem)": "someList",
+					"val": "${elem}"
+				}]
+			}
+		</template>
+		<expectedResult>
+			{
+				"list1": [],
+				"list2": [],
+				"list3": [
+					{"val": "1"}, {"val": "2"}, {"val": "3"}
+				]
+			}
+		</expectedResult>
+	</jel-test-bean>
 
 	<jel-test-bean name="setExpressions">
 		<context>
@@ -444,6 +480,73 @@
 		<expectedResult>
 			{
 				"result": "This is simple content with param-value=${resParams.key1} and context-value=${ckey1}"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeResourceInMap">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"extra": {"@includeResource": "/include-res.json"},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"extra": {
+					"key1": "cval1",
+					"arr": [1, 2, 3, 4]
+				},
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeResourceInArray">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			["1", {"@includeResource": "/include-res.json"}, {"k1": "v1"}]
+		</template>
+		<expectedResult>
+			["1", {"key1": "cval1", "arr": [1, 2, 3, 4]}, {"k1": "v1"}]
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeFile">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"extra": {"@includeFile": "./src/test/resources/include-file.json"},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"extra": ["cval1", [1, 2, 3, 4]],
+				"key2": "cval2"
 			}
 		</expectedResult>
 	</jel-test-bean>

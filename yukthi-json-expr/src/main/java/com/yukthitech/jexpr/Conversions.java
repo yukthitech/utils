@@ -15,11 +15,13 @@
  */
 package com.yukthitech.jexpr;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 
@@ -59,6 +61,16 @@ public class Conversions
 	 * Use to load resource value.
 	 */
 	private static final String RES = "@resource";
+
+	/**
+	 * Use to include resource template.
+	 */
+	private static final String INCLUDE_RES = "@includeResource";
+
+	/**
+	 * Use to include file template.
+	 */
+	private static final String INCLUDE_FILE = "@includeFile";
 
 	/**
 	 * Use to specify that expressions in resource being loaded should be processed or not.
@@ -113,7 +125,7 @@ public class Conversions
 			content = IOUtils.resourceToString(resPath.toString(), Charset.defaultCharset());
 		}catch(Exception ex)
 		{
-			throw new JsonExpressionException(path, "Failed to fail resource: {}", resPath.toString(), ex);			
+			throw new JsonExpressionException(path, "Failed to load resource: {}", resPath.toString(), ex);			
 		}
 		
 		boolean disableExpressions = "false".equalsIgnoreCase("" + map.get(RES_PARAM_EXPR));
@@ -134,6 +146,62 @@ public class Conversions
 		return true;
 	}
 	
+
+	/**
+	 * If include tag(s) is specified in the map, this will process the specified file/resource and use the result 
+	 * as current map replacement.
+	 *
+	 * @param map
+	 *            the map
+	 * @param context
+	 *            the context
+	 * @param path
+	 *            the path
+	 * @param value
+	 *            the value
+	 * @return true, if successful
+	 */
+	public boolean processInclude(Map<String, Object> map, IJsonExprContext context, String path, ObjectWrapper<Object> value, JsonExprEngine curEngine)
+	{
+		Object includeResPath = map.remove(INCLUDE_RES);
+		Object includeFilePath = map.remove(INCLUDE_FILE);
+		
+		//if value is not present, remove it
+		if(includeResPath == null && includeFilePath == null)
+		{
+			return false;
+		}
+
+		String content = null;
+		
+		try
+		{
+			if(includeResPath != null)
+			{
+				content = IOUtils.resourceToString((String) includeResPath, Charset.defaultCharset());
+			}
+			else
+			{
+				content = FileUtils.readFileToString(new File((String)includeFilePath), Charset.defaultCharset());
+			}
+			
+			Object res = curEngine.processJsonAsObject(content, context);
+			value.setValue(res);
+		}catch(Exception ex)
+		{
+			if(includeResPath != null)
+			{
+				throw new JsonExpressionException(path, "Failed to include resource: {}", includeResPath, ex);
+			}
+			else
+			{
+				throw new JsonExpressionException(path, "Failed to include file: {}", includeFilePath, ex);
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * If input string contains expression syntax the same will be processed and result will be returned. If not string will
 	 * be evaluated as simple free marker template.

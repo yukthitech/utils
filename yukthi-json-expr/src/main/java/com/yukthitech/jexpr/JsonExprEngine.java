@@ -274,7 +274,7 @@ public class JsonExprEngine
 						continue;
 					}
 					
-					newLst.add(nelem);	
+					newLst.add(nelem);
 				}
 				
 			}
@@ -337,6 +337,11 @@ public class JsonExprEngine
 		if(valueLstExpr instanceof String)
 		{
 			valueLst = (List<Object>) ExpressionUtil.processValueExpression(freeMarkerEngine, path, "jel-valueLst-expr", (String) valueLstExpr, context);
+			
+			if(valueLst == null || valueLst.isEmpty())
+			{
+				return Collections.emptyList();
+			}
 		}
 		else if(valueLstExpr instanceof List)
 		{
@@ -344,6 +349,12 @@ public class JsonExprEngine
 		}
 		else
 		{
+			
+			if(valueLstExpr == null)
+			{
+				return Collections.emptyList();
+			}
+
 			valueLst = Arrays.asList(valueLstExpr);
 		}
 		
@@ -426,6 +437,12 @@ public class JsonExprEngine
 			return resWrapper.getValue();
 		}
 		
+		//check if current map is meant for including other resource or file
+		if(conversions.processInclude(map, context, path, resWrapper, this))
+		{
+			return resWrapper.getValue();
+		}
+
 		Map<String, Object> resMap = new LinkedHashMap<String, Object>();
 		boolean setKeyPresent = false;
 		

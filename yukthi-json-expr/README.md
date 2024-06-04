@@ -232,6 +232,51 @@ ${\color{blue}@transform}$ can be applied to transform loaded content into other
 > }
 > ```
 
+While loading resources, following attributes can be used for further customization:
+
+* ${\color{blue}@expressions}$ - Defaults to true. If false, then will not process the expressions in the content loaded from resource.
+
+* ${\color{blue}@resParams}$ - Should be map and can be used to specify more resource-specific-contextual information that can be used in expressions of resource content using "resParams" as the key.
+
+> **Usage of @resParams**
+> ```json
+> {
+> 	"result": {
+> 	"@resource": "/res-file.txt",
+> 	"@resParams": {
+> 		"key1": "val1"
+> 	}
+> }
+> ```
+
+> **Usage of resParams in resource content**
+> This is simple content with param-value=${resParams.key1} and context-value=${ckey1}
+
+## Including Other Resources/Files
+For better organization of complex transformation templates, the template can be split into multiple files and can be included in the parent template file using:
+* ${\color{blue}@includeResource}$ - For including resource template (from classpath).
+* ${\color{blue}@includeFile}$ - For including file template.
+
+The same context is shared between parent template and included resource/file. Current object with ${\color{blue}@includeResource}$ or ${\color{blue}@includeFile}$ will be replaced with the resultant object child resource/file.
+ 
+> **Usage of @includeResource**
+> ```json
+> {
+> 	"key1": "@fmarker: ckey1",
+> 	"extra": {"@includeResource": "/include-res.json"},
+> 	"key2": "@fmarker: ckey2"
+> }
+> ```
+
+> **Usage of @includeFile**
+> ```json
+> {
+> 	"key1": "@fmarker: ckey1",
+> 	"extra": {"@includeFile": "./src/test/resources/include-file.json"},
+> 	"key2": "@fmarker: ckey2"
+> }
+> ```
+
 ## Variables
 In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression may needs to be divided, a dynamic variable will come handy.
 
