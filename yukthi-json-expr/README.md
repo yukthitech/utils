@@ -280,13 +280,13 @@ The same context is shared between parent template and included resource/file. C
 > }
 > ```
 
-In cases where instead of including direct result object, the entries of result object has to be included, ${\color{blue}@replace}$ can be used as shown below.
+In cases where instead of including direct result object, the entries of result object has to be included, ${\color{blue}@replace}$ can be used as shown below. Note: Though param string is supported in ${\color{blue}@replace}$, the param itself will not be used. It is added as key differentiators, so that multiple ${\color{blue}@replace}$ can be used in single map.
 
 > **Usage of @includeResource with @replace**
 > ```json
 > {
 > 	"key1": "@fmarker: ckey1",
-> 	"@replace": {"@includeResource": "/include-res.json"},
+> 	"@replace(extra)": {"@includeResource": "/include-res.json"},
 > 	"key2": "@fmarker: ckey2"
 > }
 > ```
@@ -312,7 +312,7 @@ Below is an example to include file instead of resource:
 > }
 > ```
 
-
+**Note: In all cases above, the include map can specify condition using ${\color{blue}@condition}$ which would be evaluated first before inclusion of resource/file.**
 
 ## Variables
 In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression may needs to be divided, a dynamic variable will come handy.

@@ -511,7 +511,7 @@
 		</expectedResult>
 	</jel-test-bean>
 
-	<jel-test-bean name="includeResourceWithReplace">
+	<jel-test-bean name="includeWithReplace">
 		<context>
 			{
 				"ckey1": "cval1",
@@ -522,7 +522,7 @@
 		<template>
 			{
 				"key1": "@fmarker: ckey1",
-				"@replace": {"@includeResource": "/include-res.json"},
+				"@replace(extra)": {"@includeResource": "/include-res.json"},
 				"key2": "@fmarker: ckey2"
 			}
 		</template>
@@ -531,6 +531,38 @@
 				"key1": "cval1",
 				"skey1": "cval1",
 				"arr": [1, 2, 3, 4],
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeWithReplaceAndCond">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"@replace(wrongCond)": {
+					"@condition": "ckey1 == 'diffValue'",
+					"@includeResource": "/include-res.json"
+				},
+				"@replace(rightCond)": {
+					"@condition": "ckey1 == 'cval1'",
+					"@includeResource": "/include-res2.json"
+				},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"skey2": "fromRes2",
+				"arr2": [1, 2, 3, 4],
 				"key2": "cval2"
 			}
 		</expectedResult>

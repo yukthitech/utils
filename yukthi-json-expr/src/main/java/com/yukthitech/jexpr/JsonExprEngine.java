@@ -77,9 +77,12 @@ public class JsonExprEngine
 	
 	/**
 	 * Used to replace current map entry, with entries with entries of value map (of current entry). Mainly
-	 * expected to be used with @includeResource or @includeFile.
+	 * expected to be used with @includeResource or @includeFile. 
+	 * 
+	 * Note: Though param string is supported, the param itself is not in use. It is added to support multiple replacements
+	 * in single map (in simple terms as key differentiators).
 	 */
-	private static final String KEY_REPLACE = "@replace";
+	private static final Pattern REPLACE_PATTERN = Pattern.compile("^\\@replace\\((\\w+)\\)$");
 
 	/**
 	 * Free marker engine for expression processing.
@@ -508,7 +511,9 @@ public class JsonExprEngine
 				continue;
 			}
 			
-			if(KEY_REPLACE.equals(entry.getKey()))
+			Matcher replaceMatcher = REPLACE_PATTERN.matcher(entry.getKey());
+			
+			if(replaceMatcher.matches())
 			{
 				//if result value is not map
 				if(!(val instanceof Map))
