@@ -1,4 +1,5 @@
 {
 	"skey2": "fromRes2",
-	"arr2": [1, 2, 3, 4]
+	"arr2": [1, 2, 3, 4],
+	"pkey": "@fmarker: params.paramKey1"
 }

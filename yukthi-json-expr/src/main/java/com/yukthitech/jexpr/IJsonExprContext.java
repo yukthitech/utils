@@ -15,6 +15,9 @@
  */
 package com.yukthitech.jexpr;
 
+import java.util.Set;
+import java.util.Map.Entry;
+
 /**
  * Abstraction of context object which can allow setting the value along with other property
  * read access.
@@ -23,6 +26,10 @@ package com.yukthitech.jexpr;
  */
 public interface IJsonExprContext
 {
+	public Set<Entry<String, Object>> entrySet();
+	
+	public Object get(Object key);
+	
 	/**
 	 * Sets the value of with specified key on the context.
 	 * @param key key to use

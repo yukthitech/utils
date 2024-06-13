@@ -553,7 +553,10 @@
 				},
 				"@replace(rightCond)": {
 					"@condition": "ckey1 == 'cval1'",
-					"@includeResource": "/include-res2.json"
+					"@includeResource": "/include-res2.json",
+					"@params": {
+						"paramKey1": "paramValue"
+					}
 				},
 				"key2": "@fmarker: ckey2"
 			}
@@ -563,6 +566,7 @@
 				"key1": "cval1",
 				"skey2": "fromRes2",
 				"arr2": [1, 2, 3, 4],
+				"pkey": "paramValue",
 				"key2": "cval2"
 			}
 		</expectedResult>

@@ -71,6 +71,11 @@ public class Conversions
 	 * Use to include file template.
 	 */
 	private static final String INCLUDE_FILE = "@includeFile";
+	
+	/**
+	 * Params that can be passed during inclusion. These params can be accessed in expressions using "params" as key.
+	 */
+	private static final String PARAMS = "@params";
 
 	/**
 	 * Use to specify that expressions in resource being loaded should be processed or not.
@@ -161,6 +166,7 @@ public class Conversions
 	 *            the value
 	 * @return true, if successful
 	 */
+	@SuppressWarnings("unchecked")
 	public boolean processInclude(Map<String, Object> map, IJsonExprContext context, String path, ObjectWrapper<Object> value, JsonExprEngine curEngine)
 	{
 		Object includeResPath = map.remove(INCLUDE_RES);
@@ -170,6 +176,13 @@ public class Conversions
 		if(includeResPath == null && includeFilePath == null)
 		{
 			return false;
+		}
+		
+		Object params = map.get(PARAMS);
+		
+		if(params != null && !(params instanceof Map))
+		{
+			throw new JsonExpressionException(path, "Invalid params specified for include tag. params should be of type Map");
 		}
 
 		String content = null;
@@ -185,7 +198,7 @@ public class Conversions
 				content = FileUtils.readFileToString(new File((String)includeFilePath), Charset.defaultCharset());
 			}
 			
-			Object res = curEngine.processJsonAsObject(content, context);
+			Object res = curEngine.processJsonAsObject(content, new ParamJsonExprContext(context, (Map<String, Object>) params));
 			value.setValue(res);
 		}catch(Exception ex)
 		{

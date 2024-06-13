@@ -314,6 +314,16 @@ Below is an example to include file instead of resource:
 
 **Note: In all cases above, the include map can specify condition using ${\color{blue}@condition}$ which would be evaluated first before inclusion of resource/file.**
 
+### Parameters
+While including another resource or file, parameters can be specified using ${\color{blue}@params}$. Parameters should be a map, if not error will be thrown. In child template, parameters can be accessed using **params** key.
+
+During deep inclusion, only current level params will be accsible.
+
+Below is an example of params usage:
+
+
+
+
 ## Variables
 In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression may needs to be divided, a dynamic variable will come handy.
 
