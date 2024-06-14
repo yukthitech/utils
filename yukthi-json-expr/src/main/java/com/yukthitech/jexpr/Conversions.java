@@ -17,6 +17,7 @@ package com.yukthitech.jexpr;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -184,7 +185,29 @@ public class Conversions
 		{
 			throw new JsonExpressionException(path, "Invalid params specified for include tag. params should be of type Map");
 		}
-
+		
+		Map<String, Object> paramsMap = (Map<String, Object>) params;
+		
+		//process expression in params map
+		if(paramsMap != null)
+		{
+			Map<String, Object> newMap = new HashMap<>();
+			
+			for(Map.Entry<String, Object> entry : paramsMap.entrySet())
+			{
+				if(entry.getValue() instanceof String)
+				{
+					newMap.put(entry.getKey(), processString((String) entry.getValue(), context, path + "/" + entry.getKey()));
+				}
+				else
+				{
+					newMap.put(entry.getKey(), entry.getValue());
+				}
+			}
+			
+			paramsMap = newMap;
+		}
+		
 		String content = null;
 		
 		try
@@ -198,7 +221,7 @@ public class Conversions
 				content = FileUtils.readFileToString(new File((String)includeFilePath), Charset.defaultCharset());
 			}
 			
-			Object res = curEngine.processJsonAsObject(content, new ParamJsonExprContext(context, (Map<String, Object>) params));
+			Object res = curEngine.processJsonAsObject(content, new MapJsonExprContext(context, "params", paramsMap));
 			value.setValue(res);
 		}catch(Exception ex)
 		{

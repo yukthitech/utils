@@ -611,4 +611,34 @@
 			}
 		</expectedResult>
 	</jel-test-bean>
+
+	<jel-test-bean name="includeRecursively">
+		<context>
+			{
+				"ckey1": "cval1"
+			}
+		</context>
+
+		<template>
+			{
+				"mainMap": {
+					"@includeResource": "/include-recursive.json",
+					"@params": {"value": "@fmarker: 3"}
+				},
+				"ckey1": "@fmarker: ckey1"
+			}
+		</template>
+		<expectedResult>
+			{
+				"mainMap": {
+					"smap": {
+						"smap": {"finalValue": 2},
+						"finalValue": 4
+					},
+					"finalValue": 6
+				},
+				"ckey1": "cval1"
+			}
+		</expectedResult>
+	</jel-test-bean>
 </test-data>

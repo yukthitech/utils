@@ -16,6 +16,7 @@
 package com.yukthitech.jexpr;
 
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +31,18 @@ public class MapJsonExprContext extends AbstractMap<String, Object> implements I
 	public MapJsonExprContext(Map<String, Object> mainMap)
 	{
 		this.mainMap = mainMap;
+	}
+	
+	public MapJsonExprContext(IJsonExprContext parentContext, String paramKey, Object paramVal)
+	{
+		mainMap = new HashMap<>();
+		
+		for(Map.Entry<String, Object> entry : parentContext.entrySet())
+		{
+			mainMap.put(entry.getKey(), entry.getValue());
+		}
+		
+		mainMap.put(paramKey, paramVal);
 	}
 
 	@Override

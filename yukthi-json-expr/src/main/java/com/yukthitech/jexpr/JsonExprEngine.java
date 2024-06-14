@@ -202,6 +202,11 @@ public class JsonExprEngine
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private IJsonExprContext toJsonExprContext(Object context)
 	{
+		if(context instanceof IJsonExprContext)
+		{
+			return (IJsonExprContext) context;
+		}
+		
 		if(context instanceof Map)
 		{
 			return new MapJsonExprContext((Map) context);
@@ -496,12 +501,8 @@ public class JsonExprEngine
 			{
 				//irrespective of value being null, if key is @set key, flag has to be set
 				setKeyPresent = true;
-				
-				if(val != null)
-				{
-					context.setValue(setMatcher.group(1), val);
-				}
-				
+				// if val is null, previous value will be removed (replaced by null)
+				context.setValue(setMatcher.group(1), val);
 				continue;
 			}
 			

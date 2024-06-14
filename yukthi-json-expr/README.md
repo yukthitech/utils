@@ -257,7 +257,7 @@ For better organization of complex transformation templates, the template can be
 * ${\color{blue}@includeResource}$ - For including resource template (from classpath).
 * ${\color{blue}@includeFile}$ - For including file template.
 
-The same context is shared between parent template and included resource/file. Current object with ${\color{blue}@includeResource}$ or ${\color{blue}@includeFile}$ will be replaced with the resultant object child resource/file.
+The copy of context from parent template parent template is used as context for included resource/file. Current object with ${\color{blue}@includeResource}$ or ${\color{blue}@includeFile}$ will be replaced with the resultant object child resource/file.
  
 > **Usage of @includeResource**
 > ```json
@@ -315,13 +315,22 @@ Below is an example to include file instead of resource:
 **Note: In all cases above, the include map can specify condition using ${\color{blue}@condition}$ which would be evaluated first before inclusion of resource/file.**
 
 ### Parameters
-While including another resource or file, parameters can be specified using ${\color{blue}@params}$. Parameters should be a map, if not error will be thrown. In child template, parameters can be accessed using **params** key.
+While including another resource or file, parameters can be specified using ${\color{blue}@params}$. Parameters should be a map, if not error will be thrown. Parameters-map is a static map (JEL expressions are not supported in this map), only string-based expressions are supported in values of ${\color{blue}@params}$ map.
 
-During deep inclusion, only current level params will be accsible.
+In child template, parameters can be accessed using **params** key. 
 
 Below is an example of params usage:
 
-
+> **Usage of @params with include**
+> ```json
+> {
+> 	"mainMap": {
+> 		"@includeResource": "/include-recursive.json",
+> 		"@params": {"value": "@fmarker: 3"}
+> 	},
+> 	"ckey1": "@fmarker: ckey1"
+> }
+> ```
 
 
 ## Variables
