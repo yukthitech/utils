@@ -258,6 +258,8 @@ For better organization of complex transformation templates, the template can be
 * ${\color{blue}@includeFile}$ - For including file template.
 
 The copy of context from parent template parent template is used as context for included resource/file. Current object with ${\color{blue}@includeResource}$ or ${\color{blue}@includeFile}$ will be replaced with the resultant object child resource/file.
+
+**Note**: Loading of content of resources/files can be customized by setting custom content-loader on json-expression-engine.
  
 > **Usage of @includeResource**
 > ```json

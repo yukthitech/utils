@@ -19,10 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.StringUtils;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Settings or information required for sending and reading the mails.

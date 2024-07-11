@@ -78,7 +78,6 @@
 	<modules>
 		<module>../yukthi-data-mapping</module>
 		<module>../yukthi-data</module>
-		<module>../yukthi-indexer</module>
 		<module>../yukthi-utils</module>
 		<module>../yukthi-validators</module>
 		<module>../yukthi-excel-reports</module>
