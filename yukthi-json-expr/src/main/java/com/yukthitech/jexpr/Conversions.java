@@ -15,15 +15,11 @@
  */
 package com.yukthitech.jexpr;
 
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.jxpath.JXPathContext;
 
 import com.yukthitech.utils.ObjectWrapper;
@@ -112,7 +108,7 @@ public class Conversions
 	 *            the value
 	 * @return true, if successful
 	 */
-	public boolean processMapRes(Map<String, Object> map, IJsonExprContext context, String path, ObjectWrapper<Object> value)
+	public boolean processMapRes(Map<String, Object> map, IJsonExprContext context, String path, ObjectWrapper<Object> value, JsonExprEngine curEngine)
 	{
 		Object valueExpr = map.get(RES);
 		
@@ -128,7 +124,7 @@ public class Conversions
 		
 		try
 		{
-			content = IOUtils.resourceToString(resPath.toString(), Charset.defaultCharset());
+			content = curEngine.getContentLoader().loadResource((String) resPath.toString());
 		}catch(Exception ex)
 		{
 			throw new JsonExpressionException(path, "Failed to load resource: {}", resPath.toString(), ex);			
@@ -214,11 +210,11 @@ public class Conversions
 		{
 			if(includeResPath != null)
 			{
-				content = IOUtils.resourceToString((String) includeResPath, Charset.defaultCharset());
+				content = curEngine.getContentLoader().loadResource((String) includeResPath);
 			}
 			else
 			{
-				content = FileUtils.readFileToString(new File((String)includeFilePath), Charset.defaultCharset());
+				content = curEngine.getContentLoader().loadFile((String) includeFilePath);
 			}
 			
 			Object res = curEngine.processJsonAsObject(content, new MapJsonExprContext(context, "params", paramsMap));

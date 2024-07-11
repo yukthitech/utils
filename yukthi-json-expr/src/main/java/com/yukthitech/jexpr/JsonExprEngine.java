@@ -75,6 +75,8 @@ public class JsonExprEngine
 	 */
 	private static final Pattern SET_PATTERN = Pattern.compile("^\\@set\\((\\w+)\\)$");
 	
+	private static final IContentLoader DEFAULT_CONTENT_LOADER = new IContentLoader() {};
+	
 	/**
 	 * Used to replace current map entry, with entries with entries of value map (of current entry). Mainly
 	 * expected to be used with @includeResource or @includeFile. 
@@ -94,6 +96,8 @@ public class JsonExprEngine
 	 */
 	private Conversions conversions;
 	
+	private IContentLoader contentLoader = DEFAULT_CONTENT_LOADER;
+	
 	public JsonExprEngine()
 	{
 		this(new FreeMarkerEngine());
@@ -102,6 +106,21 @@ public class JsonExprEngine
 	public JsonExprEngine(FreeMarkerEngine freeMarkerEngine)
 	{
 		this.setFreeMarkerEngine(freeMarkerEngine);
+	}
+	
+	public void setContentLoader(IContentLoader contentLoader)
+	{
+		if(contentLoader == null)
+		{
+			contentLoader = DEFAULT_CONTENT_LOADER;
+		}
+		
+		this.contentLoader = contentLoader;
+	}
+	
+	public IContentLoader getContentLoader()
+	{
+		return contentLoader;
 	}
 	
 	/**
@@ -446,7 +465,7 @@ public class JsonExprEngine
 		}
 		
 		//check if current map is meant for resource loading.
-		if(conversions.processMapRes(map, context, path, resWrapper))
+		if(conversions.processMapRes(map, context, path, resWrapper, this))
 		{
 			return resWrapper.getValue();
 		}

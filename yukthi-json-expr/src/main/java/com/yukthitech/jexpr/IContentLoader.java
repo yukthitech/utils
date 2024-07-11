@@ -15,29 +15,25 @@
  */
 package com.yukthitech.jexpr;
 
-import com.yukthitech.utils.fmarker.annotaion.FmParam;
-import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
-public class TestMethods
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
+/**
+ * Helps in customizing resource/file loading for JEL engine.
+ */
+public interface IContentLoader
 {
-	@FreeMarkerMethod(
-			description = "Method to check if value is null",
-			returnDescription = "True if not null."
-			)
-	public static boolean isNullTest(
-			@FmParam(name = "value", description = "Value to be checked") Object value)
+	public default String loadResource(String resource) throws IOException
 	{
-		return (value != null);
+		return IOUtils.resourceToString((String) resource, Charset.defaultCharset());
 	}
 
-	@FreeMarkerMethod(
-			description = "Method to throw error",
-			returnDescription = ""
-			)
-	public static boolean errorMethod(
-			@FmParam(name = "value", description = "Value to be checked") Object value)
+	public default String loadFile(String file) throws IOException
 	{
-		throw new IllegalStateException("Test error");
+		return FileUtils.readFileToString(new File((String)file), Charset.defaultCharset());
 	}
-
 }
