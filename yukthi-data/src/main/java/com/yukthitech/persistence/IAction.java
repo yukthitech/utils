@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.yukthitech.test.persitence.entity;
+package com.yukthitech.persistence;
 
-import com.yukthitech.persistence.ICrudRepository;
-import com.yukthitech.persistence.repository.annotations.Field;
-
-public interface IEmployee1Repository extends ICrudRepository<Employee1>
+/**
+ * Action interface to be executed in a transaction, which can throw exception.
+ */
+public interface IAction
 {
-	@Field("address")
-	public Address fetchAddressById(long id);
-
-	public void deleteAll();
-
+	public void execute() throws Exception;
 }

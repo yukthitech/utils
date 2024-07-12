@@ -28,8 +28,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.ForeignConstraintDetails;
+import com.yukthitech.persistence.IAction;
 import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IDataStore;
+import com.yukthitech.persistence.ITransaction;
 import com.yukthitech.persistence.JoinTableDetails;
 import com.yukthitech.persistence.TransactionException;
 import com.yukthitech.persistence.query.DropTableQuery;
@@ -37,6 +39,7 @@ import com.yukthitech.persistence.repository.annotations.NotExecutableMethod;
 import com.yukthitech.persistence.repository.executors.QueryExecutionContext;
 import com.yukthitech.persistence.repository.executors.QueryExecutor;
 import com.yukthitech.utils.annotations.RecursiveAnnotationFactory;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.exceptions.UnsupportedOperationException;
 
 class RepositoryProxy implements InvocationHandler
@@ -63,12 +66,16 @@ class RepositoryProxy implements InvocationHandler
 	
 	private ExecutorFactory executorFactory;
 	
-	public RepositoryProxy(IDataStore dataStore, Class<? extends ICrudRepository<?>> repositoryType, EntityDetails entityDetails, ExecutorFactory executorFactory, RepositoryFactory repositoryFactory)
+	public RepositoryProxy(IDataStore dataStore, Class<? extends ICrudRepository<?>> repositoryType, EntityDetails entityDetails, 
+			ExecutorFactory executorFactory, RepositoryFactory repositoryFactory)
 	{
 		defaultedMethods.put("getEntityDetails", this::getEntityDetails);
+
 		defaultedMethods.put("newTransaction", this::newTransaction);
 		defaultedMethods.put("currentTransaction", this::currentTransaction);
 		defaultedMethods.put("newOrExistingTransaction", this::newOrExistingTransaction);
+		defaultedMethods.put("executeInTransaction", this::executeInTransaction);
+		
 		defaultedMethods.put("dropEntityTable", this::dropEntityTable);
 		defaultedMethods.put("getRepositoryType", this::getRepositoryType);
 		defaultedMethods.put("setExecutionContext", this::setExecutionContext);
@@ -173,6 +180,40 @@ class RepositoryProxy implements InvocationHandler
 		{
 			throw new IllegalStateException(e);
 		}
+	}
+	
+	private Object executeInTransaction(Object args[])
+	{
+		Boolean onlyNewTransaction = (Boolean)args[0];
+		IAction action = (IAction) args[1];
+		
+		if(action == null)
+		{
+			return null;
+		}
+
+		ITransaction transaction = Boolean.TRUE.equals(onlyNewTransaction) ? 
+				(ITransaction) newTransaction(null) : 
+				(ITransaction) newOrExistingTransaction(args);
+		
+		try
+		{
+			action.execute();
+			transaction.commit();
+		}catch(Exception ex)
+		{
+			try
+			{
+				transaction.rollback();
+			}catch(Exception tex)
+			{
+				throw new InvalidStateException("Action resulted in error and rollback too failed.", tex);
+			}
+			
+			throw new InvalidStateException("Action resulted in error.", ex);
+		}
+
+		return null;
 	}
 	
 	private Object currentTransaction(Object args[])

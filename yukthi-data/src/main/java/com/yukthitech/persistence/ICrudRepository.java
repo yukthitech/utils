@@ -65,6 +65,14 @@ public interface ICrudRepository<E>
 	public ITransaction newOrExistingTransaction();
 	
 	/**
+	 * Executes specified action in transaction. In case of error, all changes will be rolled back. At 
+	 * end of successful execution, all changes will be committed.
+	 * @param onlyNewTransaction If true, only new transaction will be created, if false, new/existing transaction will be used
+	 * @param action action to be execute in transaction
+	 */
+	public void executeInTransaction(boolean onlyNewTransaction, IAction action);
+	
+	/**
 	 * Saves the entity to underlying store
 	 * @param entity
 	 */
