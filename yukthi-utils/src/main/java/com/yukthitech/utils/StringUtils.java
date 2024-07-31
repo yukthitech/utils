@@ -15,12 +15,33 @@
  */
 package com.yukthitech.utils;
 
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * String based util methods.
  * @author akiran
  */
 public class StringUtils
 {
+	private static char[] ALPHA_NUMERIC_CHARS = new char[62];
+	
+	static
+	{
+		AtomicInteger index = new AtomicInteger(0);
+		addChars('0', '9', index);
+		addChars('a', 'z', index);
+		addChars('A', 'Z', index);
+	}
+	
+	private static void addChars(char min, char max, AtomicInteger index)
+	{
+		for(char ch = min; ch <= max; ch++)
+		{
+			ALPHA_NUMERIC_CHARS[index.getAndIncrement()] = ch;
+		}
+	}
+	
 	/**
 	 * Converts the first character in input string to lower case and returns the same.
 	 * @param str String to convert
@@ -64,6 +85,32 @@ public class StringUtils
 			}
 			
 			builder.append(chArr[i]);
+		}
+		
+		return builder.toString();
+	}
+	
+	public static String randomAlphaNumericString(int length, char... extraChars)
+	{
+		StringBuilder builder = new StringBuilder();
+		Random random = new Random(System.currentTimeMillis());
+		
+		int charCount = ALPHA_NUMERIC_CHARS.length + extraChars.length;
+		int randIdx = 0;
+		
+		for(int i = 0; i < length; i++)
+		{
+			randIdx = random.nextInt(charCount);
+			
+			if(randIdx > ALPHA_NUMERIC_CHARS.length)
+			{
+				randIdx -= ALPHA_NUMERIC_CHARS.length;
+				builder.append(extraChars[randIdx]);
+			}
+			else
+			{
+				builder.append(ALPHA_NUMERIC_CHARS[randIdx]);
+			}
 		}
 		
 		return builder.toString();

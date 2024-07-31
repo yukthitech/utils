@@ -33,4 +33,13 @@ public class TStringUtils
 		Assert.assertEquals(StringUtils.toStartLower("StringUtils"), "stringUtils");
 		Assert.assertEquals(StringUtils.toStartLower("_StringUtils"), "_StringUtils");
 	}
+	
+	@Test
+	public void testRandomAlphaNumericString()
+	{
+		String randString = StringUtils.randomAlphaNumericString(10, '$', '@', '%');
+		System.out.println(randString);
+		
+		Assert.assertEquals(randString.length(), 10);
+	}
 }
