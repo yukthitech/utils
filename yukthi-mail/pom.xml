@@ -6,11 +6,15 @@
 	<artifactId>yukthi-mail</artifactId>
 	<packaging>jar</packaging>
 
+	<groupId>com.yukthitech</groupId>
+	<version>1.1-SNAPSHOT</version>
 	<name>yukthi-mail</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -53,11 +57,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<parent>
-		<groupId>com.yukthitech</groupId>
-		<artifactId>yukthi-commons-parent</artifactId>
-		<version>1.1-SNAPSHOT</version>
-		<relativePath>../yukthi-commons-parent</relativePath>
-	</parent>
 </project>
