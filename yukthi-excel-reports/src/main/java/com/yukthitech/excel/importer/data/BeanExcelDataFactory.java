@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -185,6 +186,8 @@ public class BeanExcelDataFactory<T> implements IExcelDataFactory<T>
 				accessible = column.field.isAccessible();
 				
 				column.field.setAccessible(true);
+				
+				value = ConvertUtils.convert(value, column.field.getType());
 				column.field.set(bean, value);
 				
 				column.field.setAccessible(accessible);
