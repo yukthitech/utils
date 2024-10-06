@@ -15,6 +15,8 @@
  */
 package com.yukthitech.persistence.conversion;
 
+import java.lang.reflect.Field;
+
 import com.yukthitech.persistence.annotations.DataType;
 
 /**
@@ -30,9 +32,10 @@ public interface IPersistenceConverter
 	 * @param dbObject DB Object to be converted
 	 * @param dbType Target field db type
 	 * @param javaType Target field java type
+	 * @param field Field for which this conversion is happening (helpful in generic field details)
 	 * @return Java type converted object
 	 */
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType);
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field);
 	
 	/**
 	 * Converts specified java object into target dbType object

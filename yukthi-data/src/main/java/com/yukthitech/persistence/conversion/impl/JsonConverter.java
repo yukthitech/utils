@@ -17,15 +17,22 @@ package com.yukthitech.persistence.conversion.impl;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.util.Collection;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.DataTypeMapping;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
@@ -54,11 +61,37 @@ public class JsonConverter implements IPersistenceConverter
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToJavaType(java.lang.Object, com.fw.persistence.annotations.DataType, java.lang.Class)
 	 */
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaTypeCls, Field field)
 	{
 		if(!(dbObject instanceof String))
 		{
 			dbObject = toStr(dbObject);
+		}
+		
+		JavaType javaType = TypeFactory.defaultInstance().constructType(javaTypeCls);
+		
+		if(Collection.class.isAssignableFrom(javaTypeCls))
+		{
+			ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+			Type argTypes[] = parameterizedType.getActualTypeArguments();
+			
+			if(argTypes.length == 1 && (argTypes[0] instanceof Class))
+			{
+				Class<?> elementType = (Class<?>) argTypes[0];
+				javaType = TypeFactory.defaultInstance().constructCollectionLikeType(javaTypeCls, elementType);
+			}
+		}
+		else if(Map.class.isAssignableFrom(javaTypeCls))
+		{
+			ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+			Type argTypes[] = parameterizedType.getActualTypeArguments();
+			
+			if(argTypes.length == 2 && (argTypes[0] instanceof Class) && (argTypes[1] instanceof Class))
+			{
+				Class<?> keyType = (Class<?>) argTypes[0];
+				Class<?> valType = (Class<?>) argTypes[1];
+				javaType = TypeFactory.defaultInstance().constructMapLikeType(javaTypeCls, keyType, valType);
+			}
 		}
 		
 		try

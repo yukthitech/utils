@@ -15,6 +15,8 @@
  */
 package com.yukthitech.persistence.conversion.impl;
 
+import java.lang.reflect.Field;
+
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
 import com.yukthitech.persistence.utils.PasswordEncryptor;
@@ -22,7 +24,7 @@ import com.yukthitech.persistence.utils.PasswordEncryptor;
 public class PasswordEncryptionConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		//Retain encrypted value from db. As encryption is one way encryption
 		return dbObject;

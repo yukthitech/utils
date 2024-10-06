@@ -15,6 +15,7 @@
  */
 package com.yukthitech.persistence.rdbms.converters;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -28,7 +29,7 @@ import oracle.sql.TIMESTAMP;
 public class OracleDateConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if(dbObject instanceof TIMESTAMP)
 		{

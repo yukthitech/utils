@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.sql.Clob;
 
 import org.apache.commons.io.IOUtils;
@@ -41,7 +42,7 @@ public class ClobConverter implements IPersistenceConverter
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToJavaType(java.lang.Object, com.fw.persistence.annotations.DataType, java.lang.Class)
 	 */
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		//if db type is not clob, don't try conversion
 		if(dbType != DataType.CLOB)

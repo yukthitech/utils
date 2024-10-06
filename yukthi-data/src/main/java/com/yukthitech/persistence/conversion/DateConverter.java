@@ -15,6 +15,7 @@
  */
 package com.yukthitech.persistence.conversion;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +32,7 @@ import com.yukthitech.persistence.annotations.DataType;
 public class DateConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if(!(Date.class.equals(javaType)))
 		{

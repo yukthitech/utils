@@ -15,6 +15,7 @@
  */
 package com.yukthitech.persistence.rdbms.converters;
 
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -24,7 +25,7 @@ import com.yukthitech.persistence.conversion.IPersistenceConverter;
 public class DateConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if((dbObject instanceof Date) && Date.class.equals(javaType))
 		{

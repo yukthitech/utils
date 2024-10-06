@@ -15,6 +15,7 @@
  */
 package com.yukthitech.persistence.conversion;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 
 import com.yukthitech.persistence.annotations.DataType;
@@ -27,7 +28,7 @@ import com.yukthitech.persistence.utils.OrmUtils;
 public class StringDbConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType)
+	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		//return null, so that default behaviour is retained
 		return null;

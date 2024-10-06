@@ -152,11 +152,13 @@ public class ConversionService
 		//if field specific converter is present
 		if(converter != null)
 		{
-			return converter.convertToJavaType(dbObject, fieldDetails.getDbDataType(), fieldDetails.getField().getType());
+			return converter.convertToJavaType(dbObject, fieldDetails.getDbDataType(), 
+					fieldDetails.getField().getType(), fieldDetails.getField());
 		}
 		
 		//try to convert using default converters and in generic way
-		return convert(dbObject, fieldDetails.getDbDataType(), fieldDetails.getField().getType());
+		return convert(dbObject, fieldDetails.getDbDataType(), 
+				fieldDetails.getField().getType(), fieldDetails.getField());
 	}
 	
 	public Object convertToJavaType(Object dbObject, Field field)
@@ -174,11 +176,12 @@ public class ConversionService
 		//if field specific converter is present
 		if(converter != null)
 		{
-			return converter.convertToJavaType(dbObject, dbDataType.getValue(), field.getType());
+			return converter.convertToJavaType(dbObject, dbDataType.getValue(), 
+					field.getType(), field);
 		}
 		
 		//try to convert using default converters and in generic way
-		return convert(dbObject, dbDataType.getValue(), field.getType());
+		return convert(dbObject, dbDataType.getValue(), field.getType(), field);
 	}
 
 	/**
@@ -235,7 +238,7 @@ public class ConversionService
 	 * @param targetType
 	 * @return
 	 */
-	private Object convert(Object dbObject, DataType dbDataType, Class<?> targetType)
+	private Object convert(Object dbObject, DataType dbDataType, Class<?> targetType, Field field)
 	{
 		//if from value is null
 		if(dbObject == null)
@@ -260,7 +263,8 @@ public class ConversionService
 		//check if any of the default converters can convert current db object
 		for(IPersistenceConverter converter: converters)
 		{
-			result = converter.convertToJavaType(dbObject, dbDataType, targetType);
+			result = converter.convertToJavaType(dbObject, dbDataType, 
+					targetType, field);
 			
 			//if conversion was success
 			if(result != null)
