@@ -20,8 +20,11 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,9 +51,11 @@ import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.annotations.OrderBy;
 import com.yukthitech.persistence.repository.annotations.OrderByField;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
+import com.yukthitech.persistence.repository.annotations.QueryBean;
 import com.yukthitech.persistence.repository.annotations.UpdateFunction;
 import com.yukthitech.persistence.repository.annotations.UpdateOperator;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
+import com.yukthitech.persistence.utils.OrmUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 @QueryExecutorPattern(prefixes = {"update"}, annotatedWith = UpdateFunction.class)
@@ -175,6 +180,47 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		FieldDetails fieldDetails = entityDetails.getFieldDetailsByField(field);
 		this.orderByFields.add(new QueryResultField(null, fieldDetails.getDbColumnName(), null, orderByType));
 	}
+	
+	private boolean fetchColumnsFromBean(Method method, int paramIndex, Class<?> paramType)
+	{
+		AtomicBoolean found = new AtomicBoolean(false);
+		
+		OrmUtils.processFields(paramType, beanField -> 
+		{
+			Field field = null;
+			FieldDetails fieldDetails = null;
+			
+			field = beanField.getAnnotation(Field.class);
+			
+			if(field == null)
+			{
+				return;
+			}
+			
+			String fieldName = field.value();
+			fieldName = StringUtils.isBlank(fieldName) ? beanField.getName() : fieldName;
+			
+			fieldDetails = this.entityDetails.getFieldDetailsByField(fieldName);
+			
+			if(fieldDetails == null)
+			{
+				throw new InvalidRepositoryException("@Field with invalid name '{}' is specified [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]",
+						fieldName, repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
+			}
+			
+			//if version field is specified explicitly for update
+			if(fieldDetails.isVersionField())
+			{
+				throw new InvalidRepositoryException("Version field '{}' is configured for explicit update [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]", 
+						field.value(), repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
+			}
+			
+			updateQuery.addColumn(new UpdateColumnParam(fieldDetails.getDbColumnName(), null, paramIndex, beanField.getName(), field.updateOp()));
+			found.set(true);
+		});
+		
+		return found.get();
+	}
 
 	private boolean fetchColumnsByAnnotations(Method method)
 	{
@@ -183,6 +229,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		Parameter paramters[] = method.getParameters();
 		
 		Field field = null;
+		QueryBean queryBean = null;
 		boolean found = false;
 		FieldDetails fieldDetails = null;
 		
@@ -190,6 +237,17 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		for(int i = 0; i < paramters.length; i++)
 		{
 			field = paramters[i].getAnnotation(Field.class);
+			queryBean = paramters[i].getAnnotation(QueryBean.class);
+			
+			if(queryBean != null)
+			{
+				if(fetchColumnsFromBean(method, i, paramters[i].getType()))
+				{
+					found = true;
+				}
+				
+				continue;
+			}
 			
 			if(field == null)
 			{
@@ -432,6 +490,18 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				}
 				
 				value = params[column.getIndex()];
+				
+				if(StringUtils.isNotBlank(column.getFieldName()))
+				{
+					try
+					{
+						value = BeanUtils.getProperty(value, column.getFieldName());
+					}catch(Exception ex)
+					{
+						throw new InvalidStateException("An error occurred while fetching param-query-bean field name: {}", 
+								column.getFieldName(), ex);
+					}
+				}
 				
 				//if current field is relation field
 				if(field.isRelationField())

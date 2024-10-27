@@ -15,11 +15,13 @@
  */
 package com.yukthitech.persistence.utils;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Orm common utils.
@@ -59,6 +61,29 @@ public class OrmUtils
 		}catch(Exception ex)
 		{
 			throw new IllegalStateException("An error occurred while creating collection of type: " + collectionType.getName(), ex);
+		}
+	}
+	
+	/**
+	 * For each field declared in type (and for fields declared in its super class) consumer
+	 * will be invoked.
+	 * @param type
+	 * @param consumer
+	 */
+	public static void processFields(Class<?> type, Consumer<Field> consumer)
+	{
+		Field fields[] = null;
+		
+		while(!Object.class.equals(type))
+		{
+			fields = type.getDeclaredFields();
+			
+			for(Field field : fields)
+			{
+				consumer.accept(field);
+			}
+			
+			type = type.getSuperclass();
 		}
 	}
 }

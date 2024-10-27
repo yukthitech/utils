@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +43,9 @@ import com.yukthitech.persistence.repository.annotations.LimitRows;
 import com.yukthitech.persistence.repository.annotations.MethodConditions;
 import com.yukthitech.persistence.repository.annotations.NullCheck;
 import com.yukthitech.persistence.repository.annotations.Operator;
+import com.yukthitech.persistence.repository.annotations.QueryBean;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
+import com.yukthitech.persistence.utils.OrmUtils;
 import com.yukthitech.utils.StringUtils;
 import com.yukthitech.utils.annotations.RecursiveAnnotationFactory;
 
@@ -126,16 +129,12 @@ public abstract class QueryExecutor
 	private boolean fetchConditionsFromObject(String methodName, Class<?> queryobjType,  
 			int index, ConditionQueryBuilder conditionQueryBuilder, String methodDesc, boolean allowNested)
 	{
-		Field fields[] = queryobjType.getDeclaredFields();
-		Condition condition = null;
-		Conditions conditions = null;
-		boolean found = false;
+		AtomicBoolean found = new AtomicBoolean(false);
 		
-		//loop through query object type fields 
-		for(Field field : fields)
+		OrmUtils.processFields(queryobjType, field -> 
 		{
-			condition = field.getAnnotation(Condition.class);
-			conditions = field.getAnnotation(Conditions.class);
+			Condition condition = field.getAnnotation(Condition.class);
+			Conditions conditions = field.getAnnotation(Conditions.class);
 			
 			if(condition != null)
 			{
@@ -162,13 +161,13 @@ public abstract class QueryExecutor
 			//if field is not marked as condition
 			else
 			{
-				continue;
+				return;
 			}
 			
-			found = true;
-		}
+			found.set(true);
+		});
 		
-		return found;
+		return found.get();
 	}
 	
 	protected boolean fetchConditonsByAnnotations(Method method, 
@@ -179,6 +178,7 @@ public abstract class QueryExecutor
 		Parameter parameters[] = method.getParameters();
 		
 		ConditionBean conditionBean = null;
+		QueryBean queryBean = null;
 		Condition condition = null;
 		Conditions conditions = null;
 		LimitRows limitRows = null;
@@ -201,10 +201,11 @@ public abstract class QueryExecutor
 			if(condition == null && conditions == null)
 			{
 				//check for query object annotation
-				conditionBean = parameters[i].getAnnotation(ConditionBean.class); 
+				conditionBean = parameters[i].getAnnotation(ConditionBean.class);
+				queryBean = parameters[i].getAnnotation(QueryBean.class);
 				
 				//if query object is found find nested conditions
-				if(conditionBean != null)
+				if(conditionBean != null || queryBean != null)
 				{
 					if( fetchConditionsFromObject(method.getName(), parameters[i].getType(), i, conditionQueryBuilder, methodDesc, allowNested) )
 					{

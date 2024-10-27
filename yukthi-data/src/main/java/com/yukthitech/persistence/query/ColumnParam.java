@@ -22,6 +22,8 @@ public class ColumnParam
 	private int index;
 	private String sequence;
 	
+	private String fieldName;
+	
 	public ColumnParam(String name, Object value, int index, String sequence)
 	{
 		this.name = name;
@@ -70,6 +72,16 @@ public class ColumnParam
 		return sequence;
 	}
 	
+	public String getFieldName()
+	{
+		return fieldName;
+	}
+
+	public void setFieldName(String fieldName)
+	{
+		this.fieldName = fieldName;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

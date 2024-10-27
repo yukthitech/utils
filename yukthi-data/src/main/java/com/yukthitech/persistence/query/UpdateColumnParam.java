@@ -34,27 +34,19 @@ public class UpdateColumnParam extends ColumnParam
 	 * @param name the name
 	 * @param value the value
 	 * @param index the index
-	 * @param sequence the sequence
-	 * @param updateOp the update op
-	 */
-	public UpdateColumnParam(String name, Object value, int index, String sequence, UpdateOperator updateOp)
-	{
-		super(name, value, index, sequence);
-		this.updateOperator = updateOp;
-	}
-
-	/**
-	 * Instantiates a new update column param.
-	 *
-	 * @param name the name
-	 * @param value the value
-	 * @param index the index
 	 * @param updateOp the update op
 	 */
 	public UpdateColumnParam(String name, Object value, int index, UpdateOperator updateOp)
 	{
 		super(name, value, index);
 		this.updateOperator = updateOp;
+	}
+
+	public UpdateColumnParam(String name, Object value, int index, String fieldName, UpdateOperator updateOp)
+	{
+		super(name, value, index);
+		this.updateOperator = updateOp;
+		super.setFieldName(fieldName);
 	}
 
 	/**
