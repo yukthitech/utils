@@ -33,6 +33,7 @@ import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IDataStore;
 import com.yukthitech.persistence.ITransaction;
 import com.yukthitech.persistence.JoinTableDetails;
+import com.yukthitech.persistence.PersistenceException;
 import com.yukthitech.persistence.TransactionException;
 import com.yukthitech.persistence.query.DropTableQuery;
 import com.yukthitech.persistence.repository.annotations.NotExecutableMethod;
@@ -208,6 +209,11 @@ class RepositoryProxy implements InvocationHandler
 			}catch(Exception tex)
 			{
 				throw new InvalidStateException("Action resulted in error and rollback too failed.", tex);
+			}
+			
+			if(ex instanceof PersistenceException)
+			{
+				throw (PersistenceException) ex;
 			}
 			
 			throw new InvalidStateException("Action resulted in error.", ex);
