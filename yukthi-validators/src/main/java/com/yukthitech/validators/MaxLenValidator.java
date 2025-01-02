@@ -24,7 +24,7 @@ import jakarta.validation.ConstraintValidatorContext;
  * Validator of max-length {@link MaxLen} validation.
  * @author akiran
  */
-public class MaxLenValidator implements ConstraintValidator<MaxLen, String>
+public class MaxLenValidator implements ConstraintValidator<MaxLen, Object>
 {
 	private int maxLength;
 	
@@ -41,16 +41,18 @@ public class MaxLenValidator implements ConstraintValidator<MaxLen, String>
 	 * @see javax.validation.ConstraintValidator#isValid(java.lang.Object, javax.validation.ConstraintValidatorContext)
 	 */
 	@Override
-	public boolean isValid(String value, ConstraintValidatorContext context)
+	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
 		//if no value is specified, ignore validation
 		if(value == null)
 		{
 			return true;
 		}
+
+		String strValue = ValidatorUtils.getValue(MaxLen.class, value);
 		
 		//ensure value length is lesser or equal to specified length value
-		return (value.length() <= maxLength);
+		return (strValue.length() <= maxLength);
 	}
 
 }

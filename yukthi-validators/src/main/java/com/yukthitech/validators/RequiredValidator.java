@@ -15,6 +15,7 @@
  */
 package com.yukthitech.validators;
 
+import com.yukthitech.validation.IStringConvertible;
 import com.yukthitech.validation.annotations.Required;
 
 import jakarta.validation.ConstraintValidator;
@@ -42,6 +43,18 @@ public class RequiredValidator implements ConstraintValidator<Required, Object>
 		if((value instanceof String) && ((String)value).trim().length() <= 0)
 		{
 			return false;
+		}
+		
+		if(value instanceof IStringConvertible)
+		{
+			String strValue = ((IStringConvertible)value).toStringValue();
+			
+			if(strValue == null || strValue.trim().length() <= 0)
+			{
+				return false;
+			}
+			
+			return (strValue.trim().length() > 0 );
 		}
 		
 		if((value instanceof Number) && ((Number)value).longValue() == 0)

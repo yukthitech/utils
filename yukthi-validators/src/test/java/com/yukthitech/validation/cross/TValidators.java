@@ -22,10 +22,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -49,6 +45,10 @@ import com.yukthitech.validation.beans.RequiredBean;
 import com.yukthitech.validation.beans.SimpleBean;
 import com.yukthitech.validators.GreaterThanEqualsValidator;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+
 /**
  * Test cases for validators
  * @author akiran
@@ -62,6 +62,7 @@ public class TValidators
 	@BeforeClass
 	public void setup()
 	{
+		System.out.println("Classpath: " + System.getProperty("java.class.path"));
 		validator = Validation.buildDefaultValidatorFactory().getValidator();
 	}
 	

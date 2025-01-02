@@ -17,6 +17,7 @@ package com.yukthitech.validators;
 
 import java.util.Collection;
 
+import com.yukthitech.validation.IStringConvertible;
 import com.yukthitech.validation.annotations.NotEmpty;
 
 import jakarta.validation.ConstraintValidator;
@@ -45,6 +46,18 @@ public class NotEmptyValidator implements ConstraintValidator<NotEmpty, Object>
 		if(value instanceof String)
 		{
 			return ( ((String)value).trim().length() > 0 );
+		}
+		
+		if(value instanceof IStringConvertible)
+		{
+			String strValue = ((IStringConvertible)value).toStringValue();
+			
+			if(strValue == null)
+			{
+				return false;
+			}
+			
+			return (strValue.trim().length() > 0 );
 		}
 		
 		if(value instanceof Collection)

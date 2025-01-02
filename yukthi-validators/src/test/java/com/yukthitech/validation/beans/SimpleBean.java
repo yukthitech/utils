@@ -37,7 +37,9 @@ public class SimpleBean
 	@MinLen(3)
 	private String minLenField;
 
-	@Mispattern(regexp = { "[a-z]+\\d+", "\\d+[a-z]+", "\\d+" })
+	@Mispattern(regexp = "[a-z]+\\d+")
+	@Mispattern(regexp = "\\d+[a-z]+")
+	@Mispattern(regexp = "\\d+")
 	private String misspatternField;
 
 	@NotEmpty

@@ -22,7 +22,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.ValidationException;
 
-public class SelfValidator implements ConstraintValidator<EnableSelfValidation, Object>
+public class SelfValidator implements ConstraintValidator<EnableSelfValidation, ISelfValidation>
 {
 	@Override
 	public void initialize(EnableSelfValidation constraintAnnotation)
@@ -30,13 +30,8 @@ public class SelfValidator implements ConstraintValidator<EnableSelfValidation, 
 	}
 
 	@Override
-	public boolean isValid(Object value, ConstraintValidatorContext context)
+	public boolean isValid(ISelfValidation value, ConstraintValidatorContext context)
 	{
-		if(!(value instanceof ISelfValidation))
-		{
-			return true;
-		}
-		
 		try
 		{
 			((ISelfValidation) value).validate();

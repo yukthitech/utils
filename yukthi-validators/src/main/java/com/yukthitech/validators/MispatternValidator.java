@@ -26,29 +26,24 @@ import jakarta.validation.ConstraintValidatorContext;
  * Validator for {@link Mispattern} constraint
  * @author akiran
  */
-public class MispatternValidator implements ConstraintValidator<Mispattern, String> 
+public class MispatternValidator implements ConstraintValidator<Mispattern, Object> 
 {
 	/**
 	 * Patterns to be compared
 	 */
-	private Pattern patterns[];
+	private Pattern pattern;
 	
 	@Override
 	public void initialize(Mispattern constraintAnnotation)
 	{
-		String regexp[] = constraintAnnotation.regexp();
+		String regexp = constraintAnnotation.regexp();
 		
 		//compile provided expression
-		patterns = new Pattern[regexp.length];
-		
-		for(int i = 0; i < regexp.length; i++)
-		{
-			patterns[i] = Pattern.compile(regexp[i]);
-		}
+		pattern = Pattern.compile(regexp);
 	}
 
 	@Override
-	public boolean isValid(String value, ConstraintValidatorContext context)
+	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
 		//if value is null
 		if(value == null)
@@ -56,13 +51,12 @@ public class MispatternValidator implements ConstraintValidator<Mispattern, Stri
 			return true;
 		}
 		
+		String strValue = ValidatorUtils.getValue(Mispattern.class, value);
+		
 		//if any of the specified pattern matches fail validation
-		for(Pattern pattern : this.patterns)
+		if(pattern.matcher(strValue).matches())
 		{
-			if(pattern.matcher(value).matches())
-			{
-				return false;
-			}
+			return false;
 		}
 		
 		return true;

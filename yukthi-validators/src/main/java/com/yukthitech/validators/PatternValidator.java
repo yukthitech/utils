@@ -17,62 +17,49 @@ package com.yukthitech.validators;
 
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
-
-import com.yukthitech.validation.annotations.PropertyPattern;
+import com.yukthitech.validation.annotations.Mispattern;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 /**
- * Validator of {@link PropertyPattern} validation.
+ * Validator for {@link Mispattern} constraint
  * @author akiran
  */
-public class PropertyPatternValidator implements ConstraintValidator<PropertyPattern, Object>
+public class PatternValidator implements ConstraintValidator<com.yukthitech.validation.annotations.Pattern, Object> 
 {
-	private String property;
-	
-	private String regexp;
-
-	/* (non-Javadoc)
-	 * @see javax.validation.ConstraintValidator#initialize(java.lang.annotation.Annotation)
+	/**
+	 * Patterns to be compared
 	 */
+	private Pattern pattern;
+	
 	@Override
-	public void initialize(PropertyPattern propPattern)
+	public void initialize(com.yukthitech.validation.annotations.Pattern constraintAnnotation)
 	{
-		this.property = propPattern.property();
-		this.regexp = propPattern.regexp();
+		String regexp = constraintAnnotation.regexp();
+		
+		//compile provided expression
+		pattern = Pattern.compile(regexp);
 	}
-	
-	/* (non-Javadoc)
-	 * @see javax.validation.ConstraintValidator#isValid(java.lang.Object, javax.validation.ConstraintValidatorContext)
-	 */
+
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
-		//if no value is specified, ignore validation
+		//if value is null
 		if(value == null)
 		{
 			return true;
 		}
 		
-		// Fetch property value, ignore if not able to fetch prop value
-		Object propValue = null;
+		String strValue = ValidatorUtils.getValue(com.yukthitech.validation.annotations.Pattern.class, value);
 		
-		try
-		{
-			propValue = PropertyUtils.getProperty(value, property);
-		}catch(Exception ex)
+		//if any of the specified pattern matches fail validation
+		if(pattern.matcher(strValue).matches())
 		{
 			return true;
 		}
 		
-		if(!(propValue instanceof String))
-		{
-			return true;
-		}
-		
-		return Pattern.matches(regexp, (String) propValue);
+		return false;
 	}
 
 }

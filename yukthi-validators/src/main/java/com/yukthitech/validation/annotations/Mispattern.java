@@ -15,8 +15,13 @@
  */
 package com.yukthitech.validation.annotations;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -34,13 +39,14 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = MispatternValidator.class)
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
+@Repeatable(Mispattern.List.class)
 public @interface Mispattern
 {
 	/**
 	 * Regular expression with which current value should not match
 	 * @return
 	 */
-	public String[] regexp();
+	public String regexp();
 	
 	public String message() default "{com.yukthitech.validation.annotations.Mispattern}";
 
@@ -48,4 +54,16 @@ public @interface Mispattern
 
 	public Class<? extends Payload>[] payload() default {};
 
+	/**
+	 * Defines several {@link Mispattern} annotations on the same element.
+	 *
+	 * @see Pattern
+	 */
+	@Target({ METHOD, FIELD})
+	@Retention(RUNTIME)
+	@Documented
+	@interface List 
+	{
+		Mispattern[] value();
+	}
 }

@@ -15,40 +15,55 @@
  */
 package com.yukthitech.validation.annotations;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.yukthitech.validators.PropertyPatternValidator;
+import com.yukthitech.validators.PatternValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 /**
- * Can be used to specify pattern on sub field.
+ * Constraint ensuring target field will not match specified pattern(s)
  * @author akiran
  */
-@Constraint(validatedBy = PropertyPatternValidator.class)
+@Documented
+@Constraint(validatedBy = PatternValidator.class)
 @Target( { ElementType.METHOD, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PropertyPattern
+@Repeatable(Pattern.List.class)
+public @interface Pattern
 {
-	public String message() default "{com.yukthitech.validation.annotations.PropertyPattern}";
+	/**
+	 * Regular expression with which current value should not match
+	 * @return
+	 */
+	public String regexp();
+	
+	public String message() default "{com.yukthitech.validation.annotations.Pattern}";
 
 	public Class<?>[] groups() default {};
 
 	public Class<? extends Payload>[] payload() default {};
 
 	/**
-	 * Property on which pattern has to be implemented.
-	 * @return
+	 * Defines several {@link Pattern} annotations on the same element.
+	 *
+	 * @see Pattern
 	 */
-	public String property();
-
-	/**
-	 * Regular expression to match.
-	 * @return
-	 */
-	public String regexp();
+	@Target({ METHOD, FIELD})
+	@Retention(RUNTIME)
+	@Documented
+	@interface List 
+	{
+		Pattern[] value();
+	}
 }

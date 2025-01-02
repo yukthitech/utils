@@ -15,6 +15,7 @@
  */
 package com.yukthitech.validators;
 
+import com.yukthitech.validation.annotations.MaxLen;
 import com.yukthitech.validation.annotations.MinLen;
 
 import jakarta.validation.ConstraintValidator;
@@ -24,7 +25,7 @@ import jakarta.validation.ConstraintValidatorContext;
  * Validator of min-length {@link MinLen} validation.
  * @author akiran
  */
-public class MinLenValidator implements ConstraintValidator<MinLen, String>
+public class MinLenValidator implements ConstraintValidator<MinLen, Object>
 {
 	private int minLength;
 	
@@ -41,7 +42,7 @@ public class MinLenValidator implements ConstraintValidator<MinLen, String>
 	 * @see javax.validation.ConstraintValidator#isValid(java.lang.Object, javax.validation.ConstraintValidatorContext)
 	 */
 	@Override
-	public boolean isValid(String value, ConstraintValidatorContext context)
+	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
 		//if no value is specified, ignore validation
 		if(value == null)
@@ -49,8 +50,10 @@ public class MinLenValidator implements ConstraintValidator<MinLen, String>
 			return true;
 		}
 		
+		String strValue = ValidatorUtils.getValue(MaxLen.class, value);
+
 		//ensure value length is greater or equal to specified length value
-		return (value.length() >= minLength);
+		return (strValue.length() >= minLength);
 	}
 
 }
