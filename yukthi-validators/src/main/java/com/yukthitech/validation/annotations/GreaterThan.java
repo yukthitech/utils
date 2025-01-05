@@ -33,7 +33,7 @@ import jakarta.validation.Payload;
  */
 @Documented
 @CrossConstraint(validatedBy = GreaterThanValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target( { ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GreaterThan
 {

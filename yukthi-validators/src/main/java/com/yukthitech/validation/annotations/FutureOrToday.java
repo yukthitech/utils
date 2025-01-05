@@ -31,7 +31,7 @@ import jakarta.validation.Payload;
  * @author akiran
  */
 @Constraint(validatedBy = FutureOrTodayValidator.class)
-@Target( { ElementType.FIELD })
+@Target( { ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface FutureOrToday

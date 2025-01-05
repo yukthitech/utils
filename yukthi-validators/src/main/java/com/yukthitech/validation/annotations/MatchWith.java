@@ -30,7 +30,7 @@ import com.yukthitech.validators.MatchWithValidator;
  */
 @Documented
 @CrossConstraint(validatedBy = MatchWithValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MatchWith
 {

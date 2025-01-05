@@ -15,8 +15,6 @@
  */
 package com.yukthitech.validation.annotations;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
@@ -37,7 +35,7 @@ import jakarta.validation.Payload;
  */
 @Documented
 @Constraint(validatedBy = PatternValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target( { ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Pattern.List.class)
 public @interface Pattern
@@ -59,7 +57,7 @@ public @interface Pattern
 	 *
 	 * @see Pattern
 	 */
-	@Target({ METHOD, FIELD})
+	@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE})
 	@Retention(RUNTIME)
 	@Documented
 	@interface List 

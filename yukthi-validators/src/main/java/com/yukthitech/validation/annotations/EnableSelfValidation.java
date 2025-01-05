@@ -30,7 +30,7 @@ import jakarta.validation.Payload;
  * @author akiran
  */
 @Constraint(validatedBy = SelfValidator.class)
-@Target( { ElementType.TYPE })
+@Target( { ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EnableSelfValidation
 {

@@ -30,7 +30,7 @@ import jakarta.validation.Payload;
  * @author akiran
  */
 @Constraint(validatedBy = MaxLenValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target( { ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MaxLen
 {
