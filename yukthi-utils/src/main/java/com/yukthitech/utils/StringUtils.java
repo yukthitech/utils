@@ -15,8 +15,14 @@
  */
 package com.yukthitech.utils;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * String based util methods.
@@ -25,6 +31,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StringUtils
 {
 	private static char[] ALPHA_NUMERIC_CHARS = new char[62];
+	
+	/**
+	 * Used to fetch white spaces present in the starting.
+	 */
+	private static Pattern START_WHITE_SPACES = Pattern.compile("^\\s+");
 	
 	static
 	{
@@ -115,4 +126,65 @@ public class StringUtils
 		
 		return builder.toString();
 	}
+	
+	public static String trimLines(String str)
+	{
+		StringBuilder builder = new StringBuilder();
+		String[] lines = str.split("\\n");
+		
+		Matcher matcher = START_WHITE_SPACES.matcher(str);
+		String firstLineIndent = matcher.find() ? matcher.group() : "";
+		
+		String indent = null;
+		
+		for(String line : lines)
+		{
+			matcher = START_WHITE_SPACES.matcher(line);
+			indent = matcher.find() ? matcher.group() : "";
+			
+			indent = indent.length() > firstLineIndent.length() && indent.startsWith(firstLineIndent) ? indent.substring(firstLineIndent.length()) : "";
+			
+			if(builder.length() > 0)
+			{
+				builder.append("\n");
+			}
+			
+			builder.append(indent).append(line.trim());
+		}
+		
+		return builder.toString();
+	}
+	
+	public static String evaluateChecksum(String content)
+	{
+		try
+		{
+			// Replace multiple white spaces with single space
+			content = content.replaceAll("\\s+", " ");
+			
+			// Static getInstance method is called with hashing MD5
+			MessageDigest md = MessageDigest.getInstance("MD5");
+
+			// digest() method is called to calculate message digest
+			// of an input digest() return array of byte
+			byte[] messageDigest = md.digest(content.getBytes());
+
+			// Convert byte array into signum representation
+			BigInteger no = new BigInteger(1, messageDigest);
+
+			// Convert message digest into hex value
+			String hashtext = no.toString(16);
+
+			while(hashtext.length() < 32)
+			{
+				hashtext = "0" + hashtext;
+			}
+
+			return hashtext;
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while evaluating MD5 checking of content: {}", content, ex);
+		}
+	}
+
 }

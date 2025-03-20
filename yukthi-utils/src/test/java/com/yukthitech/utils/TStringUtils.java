@@ -42,4 +42,16 @@ public class TStringUtils
 		
 		Assert.assertEquals(randString.length(), 10);
 	}
+	
+	@Test
+	public void testTrimLines()
+	{
+		Assert.assertEquals(
+				StringUtils.trimLines("  Line 1  \n   Line 2 \nLine 3\n  Line 4\n Line 5"), 
+				"Line 1\n Line 2\nLine 3\nLine 4\nLine 5");
+
+		Assert.assertEquals(
+				StringUtils.trimLines("  Line 1  \n\n   Line 2\n"), 
+				"Line 1\n\n Line 2");
+	}
 }

@@ -31,80 +31,85 @@ import org.apache.hc.core5.http.ProtocolVersion;
  */
 public class HttpResponse
 {
-	private ClassicHttpResponse httResponse;
+	private ClassicHttpResponse httpResponse;
 	
 	public HttpResponse(ClassicHttpResponse httResponse)
 	{
-		this.httResponse = httResponse;
+		this.httpResponse = httResponse;
 	}
 
 	public HttpEntity getEntity()
 	{
-		return httResponse.getEntity();
+		return httpResponse.getEntity();
 	}
 
 	public boolean containsHeader(String name)
 	{
-		return httResponse.containsHeader(name);
+		return httpResponse.containsHeader(name);
 	}
 
 	public int getCode()
 	{
-		return httResponse.getCode();
+		return httpResponse.getCode();
+	}
+	
+	public String getStatusMessage()
+	{
+		return httpResponse.getReasonPhrase();
 	}
 
 	public int countHeaders(String name)
 	{
-		return httResponse.countHeaders(name);
+		return httpResponse.countHeaders(name);
 	}
 
 	public String getReasonPhrase()
 	{
-		return httResponse.getReasonPhrase();
+		return httpResponse.getReasonPhrase();
 	}
 
 	public ProtocolVersion getVersion()
 	{
-		return httResponse.getVersion();
+		return httpResponse.getVersion();
 	}
 
 	public Header getFirstHeader(String name)
 	{
-		return httResponse.getFirstHeader(name);
+		return httpResponse.getFirstHeader(name);
 	}
 
 	public Locale getLocale()
 	{
-		return httResponse.getLocale();
+		return httpResponse.getLocale();
 	}
 
 	public Header getHeader(String name) throws ProtocolException
 	{
-		return httResponse.getHeader(name);
+		return httpResponse.getHeader(name);
 	}
 
 	public Header[] getHeaders()
 	{
-		return httResponse.getHeaders();
+		return httpResponse.getHeaders();
 	}
 
 	public Header[] getHeaders(String name)
 	{
-		return httResponse.getHeaders(name);
+		return httpResponse.getHeaders(name);
 	}
 
 	public Header getLastHeader(String name)
 	{
-		return httResponse.getLastHeader(name);
+		return httpResponse.getLastHeader(name);
 	}
 
 	public Iterator<Header> headerIterator()
 	{
-		return httResponse.headerIterator();
+		return httpResponse.headerIterator();
 	}
 
 	public Iterator<Header> headerIterator(String name)
 	{
-		return httResponse.headerIterator(name);
+		return httpResponse.headerIterator(name);
 	}
 }

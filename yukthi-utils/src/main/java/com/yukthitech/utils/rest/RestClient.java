@@ -64,7 +64,7 @@ public class RestClient
 				value = null;
 			}
 			
-			logger.log(Level.FINER, String.format("Got response status as %s and body as: %s", status, truncate(value)));
+			logger.log(Level.FINE, String.format("Got response status as %s and body as: %s", status, truncate(value)));
 			
 			if(StringUtils.isBlank(value))
 			{
@@ -339,11 +339,11 @@ public class RestClient
 			//dont print request details of secured request
 			if(request.isSecured())
 			{
-				logger.log(Level.FINER, "Invoking request [Base Url - {}]", baseUrl);
+				logger.log(Level.FINE, "Invoking request [Base Url - {}]", baseUrl);
 			}
 			else
 			{
-				logger.log(Level.FINER, String.format("Invoking request [Base Url - %s]: %s", baseUrl, request));
+				logger.log(Level.FINE, String.format("Invoking request [Base Url - %s]: %s", baseUrl, request));
 			}
 			
 			//build http client request

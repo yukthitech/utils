@@ -90,6 +90,16 @@ public class RestResult<T> implements Serializable
 		return statusCode;
 	}
 	
+	public String getStatusMessage()
+	{
+		if(httpResponse == null)
+		{
+			return null;
+		}
+		
+		return httpResponse.getReasonPhrase();
+	}
+	
 	/**
 	 * Gets the actual http response.
 	 *
