@@ -167,6 +167,11 @@ public class RdbmsDataStore implements IDataStore
 		transactionManager.setDataSource(dataSource);
 	}
 	
+	public DataSource getDataSource()
+	{
+		return transactionManager.getDataSource();
+	}
+	
 	@Override
 	public ITransactionManager<? extends ITransaction> getTransactionManager()
 	{
@@ -205,15 +210,11 @@ public class RdbmsDataStore implements IDataStore
 			Connection connection = transaction.getTransaction().getConnection();
 			
 			ResultSet rs = connection.getMetaData().getTables(connection.getCatalog(), connection.getSchema(), tableName, null);
-			
-			if(rs.next())
-			{
-				return true;
-			}
+			boolean res = rs.next();
 			
 			rs.close();
 			transaction.commit();
-			return false;
+			return res;
 		}catch(Exception ex)
 		{
 			logger.info("An error occurred while checking existence of table: " + tableName, ex);
