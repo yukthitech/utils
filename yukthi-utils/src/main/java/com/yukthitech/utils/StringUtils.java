@@ -133,7 +133,7 @@ public class StringUtils
 		String[] lines = str.split("\\n");
 		
 		Matcher matcher = START_WHITE_SPACES.matcher(str);
-		String firstLineIndent = matcher.find() ? matcher.group() : "";
+		String firstLineIndent = null;
 		
 		String indent = null;
 		
@@ -142,7 +142,20 @@ public class StringUtils
 			matcher = START_WHITE_SPACES.matcher(line);
 			indent = matcher.find() ? matcher.group() : "";
 			
-			indent = indent.length() > firstLineIndent.length() && indent.startsWith(firstLineIndent) ? indent.substring(firstLineIndent.length()) : "";
+			if(firstLineIndent == null)
+			{
+				if(line.trim().length() == 0)
+				{
+					continue;
+				}
+				
+				firstLineIndent = indent;
+				indent = "";
+			}
+			else
+			{
+				indent = indent.length() > firstLineIndent.length() && indent.startsWith(firstLineIndent) ? indent.substring(firstLineIndent.length()) : "";
+			}
 			
 			if(builder.length() > 0)
 			{
