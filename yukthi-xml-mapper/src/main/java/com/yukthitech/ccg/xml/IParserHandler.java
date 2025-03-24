@@ -301,4 +301,6 @@ public interface IParserHandler extends XMLConstants
 		
 		return XMLConstants.CCG_WRAP_URI.equals(uri) || XMLConstants.NEW_CCG_WRAP_URI.equals(uri) ;
 	}
+	
+	public boolean isRetainWhiteSpacesEnabled();
 }

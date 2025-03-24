@@ -203,6 +203,11 @@ public class DefaultParserHandler implements IParserHandler
 	 * Sax locator of the parser.
 	 */
 	protected Locator saxLocator;
+	
+	/**
+	 * Flag to control if white-spaces should be retained while getting text content of node.
+	 */
+	private boolean retainWhiteSpacesEnabled = false;
 
 	/**
 	 * If the root is null, then reserve attribute beanType is mandatory in root
@@ -228,6 +233,16 @@ public class DefaultParserHandler implements IParserHandler
 	{
 		this();
 		this.classLoader = classLoader;
+	}
+	
+	public void setRetainWhiteSpacesEnabled(boolean retainWhiteSpacesEnabled)
+	{
+		this.retainWhiteSpacesEnabled = retainWhiteSpacesEnabled;
+	}
+	
+	public boolean isRetainWhiteSpacesEnabled()
+	{
+		return retainWhiteSpacesEnabled;
 	}
 	
 	/* (non-Javadoc)

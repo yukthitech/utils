@@ -54,6 +54,8 @@ public class BeanNode implements Cloneable
 	 * Generic type of this node.
 	 */
 	private Type genericType;
+	
+	private boolean retainWhiteSpacesEnabled;
 
 	public BeanNode(String nameSpace, String name, IParserHandler parserHandler)
 	{
@@ -67,15 +69,17 @@ public class BeanNode implements Cloneable
 		this.name = name;
 		this.bean = bean;
 		this.parentNode = parent;
+		this.retainWhiteSpacesEnabled = parserHandler.isRetainWhiteSpacesEnabled();
 	}
 
-	private BeanNode(String nameSpace, String name, Object bean, BeanNode parent, boolean reserved)
+	private BeanNode(String nameSpace, String name, Object bean, BeanNode parent, boolean reserved, boolean retainWhiteSpacesEnabled)
 	{
 		this.nameSpace = (nameSpace == null || nameSpace.trim().length() == 0) ? null : nameSpace.trim();
 		this.reserved = reserved;
 		this.name = name;
 		this.bean = bean;
 		this.parentNode = parent;
+		this.retainWhiteSpacesEnabled = retainWhiteSpacesEnabled;
 	}
 
 	void setBean(Object bean)
@@ -248,6 +252,11 @@ public class BeanNode implements Cloneable
 		 * while(st.hasMoreTokens()) { line=st.nextToken().trim();
 		 * if(line.length()==0) continue; res.append(line); res.append("\n"); }
 		 */
+		if(retainWhiteSpacesEnabled)
+		{
+			return buff.toString();
+		}
+		
 		return buff.toString().trim();
 	}
 
@@ -292,7 +301,7 @@ public class BeanNode implements Cloneable
 
 	public Object clone()
 	{
-		BeanNode newObj = new BeanNode(nameSpace, name, bean, parentNode, reserved);
+		BeanNode newObj = new BeanNode(nameSpace, name, bean, parentNode, reserved, retainWhiteSpacesEnabled);
 		newObj.setDescription(description);
 		newObj.setAttributeMap(attributeMap);
 		newObj.setType(type);

@@ -105,7 +105,7 @@ public class XMLUtil
 
 		if(type.isEnum())
 		{
-			return Enum.valueOf((Class) type, textValue);
+			return Enum.valueOf((Class) type, textValue.trim());
 		}
 
 		if(!isSupportedAttributeClass(type))
@@ -149,8 +149,6 @@ public class XMLUtil
 		if(value == null)
 			throw new NullPointerException("Value can not be null.");
 
-		value = value.trim();
-
 		if(type.equals(String.class))
 			return value;
 
@@ -160,11 +158,13 @@ public class XMLUtil
 		if(StringBuilder.class.equals(type))
 			return new StringBuffer(value);
 
+		value = value.trim();
+
 		if(Class.class.equals(type))
 		{
 			try
 			{
-				Class<?> cls = Class.forName(value.trim());
+				Class<?> cls = Class.forName(value);
 				return cls;
 			} catch(Exception ex)
 			{
