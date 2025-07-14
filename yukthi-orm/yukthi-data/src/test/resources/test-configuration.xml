@@ -1,0 +1,56 @@
+<configuration xmlns:ccg="/fw/ccg/XMLBeanParser">
+	<repositoryFactory createTables="true" name="DERBY">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="derby">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>org.apache.derby.jdbc.EmbeddedDriver</driverClassName>
+				<url>jdbc:derby:.\db\testDB;create=true</url>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
+
+	<repositoryFactory createTables="true" name="MYSQL">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="mysql">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>com.mysql.jdbc.Driver</driverClassName>
+				<url>jdbc:mysql://localhost:3306/test</url>
+				<username>kranthi</username>
+				<password>kranthi</password>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
+	
+	<repositoryFactory createTables="true" name="H2">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="h2">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>org.h2.Driver</driverClassName>
+				<url>jdbc:h2:./db-h2/test</url>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
+
+	<!--  
+	<repositoryFactory createTables="true" name="ORACLE">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="oracle">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>oracle.jdbc.driver.OracleDriver</driverClassName>
+				<url>jdbc:oracle:thin:@localhost:1521/xe</url>
+				<username>sdp_owner</username>
+				<password>sdp_owner</password>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
+	-->
+	
+	<repositoryFactory createTables="true" name="POSTGRES">
+		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="postgres">
+			<dataSource ccg:beanType="org.apache.commons.dbcp2.BasicDataSource">
+				<driverClassName>org.postgresql.Driver</driverClassName>
+				<url>jdbc:postgresql://localhost:5432/test?currentSchema=test</url>
+				<username>test</username>
+				<password>test</password>
+			</dataSource>
+		</dataStore>
+	</repositoryFactory>
+</configuration>
+
+	
