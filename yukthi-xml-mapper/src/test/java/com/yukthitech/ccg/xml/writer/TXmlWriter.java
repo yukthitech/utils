@@ -104,16 +104,21 @@ public class TXmlWriter
 
 		ActionPlanStep step1 = new ActionPlanStep("Step1", new TestDataBean(20));
 		ActionPlanStep step2 = new ActionPlanStep("Step2", TestEnum.ONE);
-		
+
 		mainValue.setSteps(Arrays.asList(step1, step2));
 		
-		 String xml = XmlBeanWriter.writeToString("test", mainValue);
-		 System.out.println(xml);
-		 
-		 ActionPlan readValue = new ActionPlan();
-		 XMLBeanParser.parse(new ByteArrayInputStream(xml.getBytes()), readValue);
-		 
-		 Assert.assertEquals(readValue, mainValue);
+		XmlWriterConfig config = new XmlWriterConfig()
+				.setExcludeXmlDeclaration(true)
+				.setIndentXml(true)
+				.setReadCompatible(true);
+
+		String xml = XmlBeanWriter.writeToString("test", mainValue, config);
+		System.out.println(xml);
+
+		ActionPlan readValue = new ActionPlan();
+		XMLBeanParser.parse(new ByteArrayInputStream(xml.getBytes()), readValue);
+
+		Assert.assertEquals(readValue, mainValue);
 		
 	}
 }
