@@ -221,7 +221,7 @@ public class RestClient
 	 * @param expectedResponseType Expected return collection element type
 	 * @return Rest response
 	 */
-	public <T, C extends Collection<?>> RestResult<C> invokeJsonRequestForList(RestRequest<?> request, Class<C> collectionType, Class<T> expectedResponseType)
+	public <T, C extends Collection<T>> RestResult<C> invokeJsonRequestForList(RestRequest<?> request, Class<C> collectionType, Class<T> expectedResponseType)
 	{
 		JavaType collectionJavaType = TypeFactory.defaultInstance().constructCollectionType(collectionType, expectedResponseType);
 		return invokeJsonRequest(request, collectionJavaType);

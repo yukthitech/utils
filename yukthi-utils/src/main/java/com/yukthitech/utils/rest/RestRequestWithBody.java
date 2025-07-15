@@ -123,7 +123,7 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	/**
 	 * indicates if this is multipart request
 	 */
-	private boolean multipartRequest;
+	private Boolean multipartRequest;
 	
 	/**
 	 * Form fields.
@@ -180,6 +180,12 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		return multipartRequest;
 	}
 	
+	/**
+	 * Adds a form field with specified name and value.
+	 * @param name
+	 * @param value
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public T addFormField(String name, String value)
 	{
@@ -188,15 +194,22 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			throw new IllegalStateException("Both form-fields and body can not be set on a single request. Request body was already set");
 		}
 		
-		if(multipartRequest)
+		if(Boolean.TRUE.equals(multipartRequest))
 		{
 			throw new IllegalStateException("Form-fields can not be added for multi part request");
 		}
 
+		multipartRequest = false;
 		this.formFields.put(name, value);
 		return (T) this;
 	}
 
+	/**
+	 * Adds a form field with specified name and value. Value will be converted to json string before adding.
+	 * @param name
+	 * @param value
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public T addJsonFormField(String name, Object value)
 	{
@@ -221,21 +234,6 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	}
 
 	/**
-	 * Sets the indicates if this is multipart request.
-	 *
-	 * @param multipartRequest the new indicates if this is multipart request
-	 */
-	public void setMultipartRequest(boolean multipartRequest)
-	{
-		if(requestBody != null || !formFields.isEmpty())
-		{
-			throw new IllegalStateException("Body/formFields is already set on this request");
-		}
-		
-		this.multipartRequest = multipartRequest;
-	}
-
-	/**
 	 * Sets the request body. Note: params and request body can not be used on
 	 * same request
 	 * 
@@ -250,11 +248,12 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			throw new IllegalStateException("Both formFields and body can not be set on a single request. Param(s) were already set");
 		}
 		
-		if(multipartRequest)
+		if(Boolean.TRUE.equals(multipartRequest))
 		{
 			throw new IllegalStateException("Body can not be set on multi part request");
 		}
 
+		multipartRequest = false;
 		this.requestBody = body;
 		return (T) this;
 	}
@@ -338,26 +337,39 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	 */
 	public void addAttachment(String field, String name, File file, String contentType)
 	{
-		if(!multipartRequest)
+		if(Boolean.FALSE.equals(multipartRequest))
 		{
 			throw new IllegalStateException("Attachments can be added only to multi part request");
 		}
 		
 		name = StringUtils.isBlank(name) ? file.getName() : name;
 
+		multipartRequest = true;
 		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null, PartType.FILE, null));
 	}
 
 	public void addBinaryPart(String field, String name, File file, String contentType)
 	{
-		if(!multipartRequest)
+		if(Boolean.FALSE.equals(multipartRequest))
 		{
 			throw new IllegalStateException("Attachments can be added only to multi part request");
 		}
 		
 		name = StringUtils.isBlank(name) ? file.getName() : name;
 
+		multipartRequest = true;
 		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), contentType, PartType.BINARY, null));
+	}
+
+	public void addBinaryPart(String field, String name, byte[] binaryContent, String contentType)
+	{
+		if(Boolean.FALSE.equals(multipartRequest))
+		{
+			throw new IllegalStateException("Attachments can be added only to multi part request");
+		}
+		
+		multipartRequest = true;
+		this.multiparts.add(new RequestPart(field, binaryContent, contentType, PartType.BINARY, name));
 	}
 
 	/**
@@ -381,13 +393,14 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	@SuppressWarnings("unchecked")
 	public T addJsonPart(String partName, Object object, String charset)
 	{
-		if(!multipartRequest)
+		if(Boolean.FALSE.equals(multipartRequest))
 		{
 			throw new IllegalStateException("Parts can be added only to multi part request");
 		}
 		
 		try
 		{
+			multipartRequest = true;
 			String jsonObject = objectMapper.writeValueAsString(object);
 			this.multiparts.add(new RequestPart(partName, jsonObject, JSON_CONTENT_TYPE, PartType.TEXT, charset));
 		} catch(JsonProcessingException ex)
@@ -432,11 +445,12 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	@SuppressWarnings("unchecked")
 	public T addTextPart(String partName, String text, String contentType, String charset)
 	{
-		if(!multipartRequest)
+		if(Boolean.FALSE.equals(multipartRequest))
 		{
 			throw new IllegalStateException("Parts can be added only to multi part request");
 		}
 		
+		multipartRequest = true;
 		this.multiparts.add(new RequestPart(partName, text, contentType, PartType.TEXT, charset));
 		
 		return (T)this;
@@ -492,6 +506,10 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 					{
 						fileInfo = (FileInfo) part.value;
 						builder.addBinaryBody(part.name, fileInfo.getFile(), ContentType.create(part.contentType), fileInfo.getName());
+					}
+					else if(part.value instanceof byte[])
+					{
+						builder.addBinaryBody(part.name, (byte[]) part.value, ContentType.create(part.contentType), part.name);
 					}
 					else
 					{

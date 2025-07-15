@@ -69,6 +69,15 @@ public class RestResult<T> implements Serializable
 		this.statusCode = statusCode;
 		this.httpResponse = response;
 	}
+	
+	/**
+	 * Returns true if the status code is 2xx.
+	 * @return
+	 */
+	public boolean isSuccess()
+	{
+		return (statusCode >= 200 && statusCode <= 299);
+	}
 
 	/**
 	 * Gets value of value
