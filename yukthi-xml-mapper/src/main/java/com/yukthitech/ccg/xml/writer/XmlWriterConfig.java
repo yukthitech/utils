@@ -62,9 +62,10 @@ public class XmlWriterConfig
 	 *
 	 * @param indentXml the new indicates whether output xml should be indented or not
 	 */
-	public void setIndentXml(boolean indentXml)
+	public XmlWriterConfig setIndentXml(boolean indentXml)
 	{
 		this.indentXml = indentXml;
+		return this;
 	}
 
 	/**
@@ -82,9 +83,10 @@ public class XmlWriterConfig
 	 *
 	 * @param escapeExpressions the new indicates whether expressions should be disabled
 	 */
-	public void setEscapeExpressions(boolean escapeExpressions)
+	public XmlWriterConfig setEscapeExpressions(boolean escapeExpressions)
 	{
 		this.escapeExpressions = escapeExpressions;
+		return this;
 	}
 
 	/**
@@ -102,9 +104,10 @@ public class XmlWriterConfig
 	 *
 	 * @param readCompatible the new if set to true, the output xml will be read compatible
 	 */
-	public void setReadCompatible(boolean readCompatible)
+	public XmlWriterConfig setReadCompatible(boolean readCompatible)
 	{
 		this.readCompatible = readCompatible;
+		return this;
 	}
 
 	/**
@@ -122,9 +125,10 @@ public class XmlWriterConfig
 	 *
 	 * @param excludeNameSpace the new if set to true, ccg namespace settings will be excluded in output xml
 	 */
-	public void setExcludeNameSpace(boolean excludeNameSpace)
+	public XmlWriterConfig setExcludeNameSpace(boolean excludeNameSpace)
 	{
 		this.excludeNameSpace = excludeNameSpace;
+		return this;
 	}
 
 	/**
@@ -143,9 +147,10 @@ public class XmlWriterConfig
 	 * @param excludeXmlDeclaration
 	 *            the new flag indicating if xml declaration has to be excluded
 	 */
-	public void setExcludeXmlDeclaration(boolean excludeXmlDeclaration)
+	public XmlWriterConfig setExcludeXmlDeclaration(boolean excludeXmlDeclaration)
 	{
 		this.excludeXmlDeclaration = excludeXmlDeclaration;
+		return this;
 	}
 	
 	/**

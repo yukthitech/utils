@@ -1,3 +1,4 @@
+package com.yukthitech.ccg.xml.writer;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -7,8 +8,6 @@ import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.ccg.xml.DynamicBean;
-import com.yukthitech.ccg.xml.writer.XmlBeanWriter;
-import com.yukthitech.ccg.xml.writer.XmlWriterConfig;
 import com.yukthitech.utils.CommonUtils;
 
 public class JsonToXmlConverter
