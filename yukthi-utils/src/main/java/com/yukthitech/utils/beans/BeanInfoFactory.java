@@ -66,9 +66,9 @@ public class BeanInfoFactory
 			localProperty = NestedProperty.getNestedProperty(field.getDeclaringClass(), localPropertyName);
 		}catch(Exception ex)
 		{
-			throw new InvalidConfigurationException(ex, "Invalid property mapping specified on field - {}.{}. "
+			throw new InvalidConfigurationException("Invalid property mapping specified on field - {}.{}. "
 					+ "An error occurred while processing mapping properties.", 
-					field.getDeclaringClass().getName(), field.getName());
+					field.getDeclaringClass().getName(), field.getName(), ex);
 		}
 		
 		//ensure target and source are of same types

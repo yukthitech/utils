@@ -27,9 +27,4 @@ public class NullValueException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	public NullValueException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }

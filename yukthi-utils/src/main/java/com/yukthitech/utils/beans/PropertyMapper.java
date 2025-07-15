@@ -81,7 +81,7 @@ public class PropertyMapper
 			return Class.forName(className.substring(0, idx));
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while fetching actual class name from proxy class name - {}", bean.getClass().getName());
+			throw new InvalidStateException("An error occurred while fetching actual class name from proxy class name - {}", bean.getClass().getName(), ex);
 		}
 	}
 	

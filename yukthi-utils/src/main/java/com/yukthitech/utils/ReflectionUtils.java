@@ -228,7 +228,7 @@ public class ReflectionUtils
 				prevCls = field.getType();
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while fetching nested field type - {}", fieldName);
+				throw new InvalidStateException("An error occurred while fetching nested field type - {}", fieldName, ex);
 			}
 		}
 
@@ -280,7 +280,7 @@ public class ReflectionUtils
 				prevObject = field.get(prevObject);
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while fetching nested field value - {} on type - {}", fieldName, bean.getClass().getName());
+				throw new InvalidStateException("An error occurred while fetching nested field value - {} on type - {}", fieldName, bean.getClass().getName(), ex);
 			}
 		}
 
@@ -348,7 +348,7 @@ public class ReflectionUtils
 				prevObject = newObject;
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while fetching nested field value - {} on type - {}", fieldName, bean.getClass().getName());
+				throw new InvalidStateException("An error occurred while fetching nested field value - {} on type - {}", fieldName, bean.getClass().getName(), ex);
 			}
 		}
 	}

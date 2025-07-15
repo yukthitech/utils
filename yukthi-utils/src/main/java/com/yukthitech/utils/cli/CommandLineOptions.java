@@ -231,7 +231,7 @@ public class CommandLineOptions
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while loading bean of from command line arguments");
+			throw new InvalidStateException("An error occurred while loading bean of from command line arguments", ex);
 		}
 	}
 	

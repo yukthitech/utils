@@ -517,7 +517,7 @@ public class CommonUtils
 			return Class.forName(clsType);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "Error in loading class with name: " + clsType);
+			throw new InvalidStateException("Error in loading class with name: {}", clsType, ex);
 		}
 	}
 	

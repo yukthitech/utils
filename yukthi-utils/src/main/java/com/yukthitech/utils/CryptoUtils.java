@@ -90,7 +90,7 @@ public class CryptoUtils
 			return new String(decryptedBytes);
 		}catch(Exception ex)
 		{
-			throw new InvalidArgumentException(ex, "An error occurred while decrypting string - {}", input);
+			throw new InvalidArgumentException("An error occurred while decrypting string - {}", input, ex);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class CryptoUtils
 			return cipher.doFinal(input);
 		} catch(Exception ex)
 		{
-			throw new InvalidArgumentException(ex, "Error encrypting/decrypting input bytes");
+			throw new InvalidArgumentException("Error encrypting/decrypting input bytes", ex);
 		}
 	}
 }

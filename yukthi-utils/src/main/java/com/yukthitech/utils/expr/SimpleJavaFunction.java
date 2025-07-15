@@ -218,7 +218,7 @@ public class SimpleJavaFunction implements IFunction
 			return method.invoke(null, (Object[]) methodArgs.toArray());
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while invoking function - " + name);
+			throw new InvalidStateException("An error occurred while invoking function: {}", name, ex);
 		}
 	}
 }

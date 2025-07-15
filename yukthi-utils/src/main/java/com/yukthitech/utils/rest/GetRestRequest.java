@@ -58,7 +58,7 @@ public class GetRestRequest extends RestRequestWithBody<GetRestRequest>
 			properties = PropertyUtils.describe(bean);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while extracting bean properties - {}", bean);
+			throw new InvalidStateException("An error occurred while extracting bean properties - {}", bean, ex);
 		}
 		
 		//add extracted properties as request params

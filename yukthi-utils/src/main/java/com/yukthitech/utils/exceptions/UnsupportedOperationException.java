@@ -27,9 +27,4 @@ public class UnsupportedOperationException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	public UnsupportedOperationException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }

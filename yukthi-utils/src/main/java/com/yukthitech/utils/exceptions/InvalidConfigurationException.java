@@ -27,9 +27,4 @@ public class InvalidConfigurationException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	public InvalidConfigurationException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }

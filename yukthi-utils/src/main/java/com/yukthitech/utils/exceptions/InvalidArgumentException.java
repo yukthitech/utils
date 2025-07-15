@@ -27,11 +27,4 @@ public class InvalidArgumentException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	public InvalidArgumentException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
-
-	
 }

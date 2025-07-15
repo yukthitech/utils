@@ -156,7 +156,7 @@ public class RecursiveAnnotationFactory
 				method = annotation.annotationType().getMethod(methodName);
 			}catch(Exception ex)
 			{
-				throw new InvalidArgumentException(ex, "Invalid override expression specified on method - '{}'. Method - {}", methodStr, expression);
+				throw new InvalidArgumentException("Invalid override expression specified on method - '{}'. Method - {}", methodStr, expression, ex);
 			}
 			
 			Object methodVal = null;
@@ -166,7 +166,7 @@ public class RecursiveAnnotationFactory
 				methodVal = method.invoke(annotation);
 			}catch(Exception ex)
 			{
-				throw new InvalidArgumentException(ex, "An error occurred while invoking method - {}.{}()", annotation.annotationType().getName(), method.getName());
+				throw new InvalidArgumentException("An error occurred while invoking method - {}.{}()", annotation.annotationType().getName(), method.getName(), ex);
 			}
 			
 			//if the value is overridden then use overridden value
@@ -339,7 +339,7 @@ public class RecursiveAnnotationFactory
 				value =  method.invoke(parentAnnotation);
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while fetching '{}' value from annotation - {}", method.getName(), parentAnnotation.annotationType().getName());
+				throw new InvalidStateException("An error occurred while fetching '{}' value from annotation - {}", method.getName(), parentAnnotation.annotationType().getName(), ex);
 			}
 		
 			//if no proxy was defined earlier

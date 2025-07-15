@@ -207,14 +207,14 @@ public class NestedProperty
 						setters.get(i).invoke(prevObject, newObject);
 					}catch(Exception ex)
 					{
-						throw new InvalidStateException(ex, "Failed to created instance of type - {}", getters.get(i).getReturnType().getName());
+						throw new InvalidStateException("Failed to created instance of type - {}", getters.get(i).getReturnType().getName(), ex);
 					}
 				}
 				
 				prevObject = newObject;
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while setting nested field value - {} on type - {}", name, rootBean.getClass().getName());
+				throw new InvalidStateException("An error occurred while setting nested field value - {} on type - {}", name, rootBean.getClass().getName(), ex);
 			}
 		}
 	}
@@ -251,7 +251,7 @@ public class NestedProperty
 				prevObject = newObject;
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while getting nested field value - {} on type - {}", name, rootBean.getClass().getName());
+				throw new InvalidStateException("An error occurred while getting nested field value - {} on type - {}", name, rootBean.getClass().getName(), ex);
 			}
 		}
 		

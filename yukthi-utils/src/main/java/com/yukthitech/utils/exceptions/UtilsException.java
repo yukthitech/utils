@@ -28,18 +28,6 @@ public class UtilsException extends RuntimeException
 	/**
 	 * Instantiates a new utils exception.
 	 *
-	 * @param cause the cause
-	 * @param message the message
-	 * @param args the args
-	 */
-	public UtilsException(Throwable cause, String message, Object... args)
-	{
-		super(buildMessage(message, args), cause);
-	}
-
-	/**
-	 * Instantiates a new utils exception.
-	 *
 	 * @param message the message
 	 * @param args the args
 	 */

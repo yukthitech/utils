@@ -35,16 +35,4 @@ public class ParseException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	/**
-	 * Instantiates a new parses the exception.
-	 *
-	 * @param cause the cause
-	 * @param message the message
-	 * @param args the args
-	 */
-	public ParseException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }

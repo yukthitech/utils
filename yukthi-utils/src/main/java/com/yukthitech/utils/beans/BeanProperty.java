@@ -411,7 +411,7 @@ public class BeanProperty
 			return readMethod.invoke(bean);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while fetching bean property '{}' on bean - {}", name, bean);
+			throw new InvalidStateException("An error occurred while fetching bean property '{}' on bean - {}", name, bean, ex);
 		}
 	}
 	
@@ -432,7 +432,7 @@ public class BeanProperty
 			writeMethod.invoke(bean, value);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while setting bean property '{}' on bean '{}' with value - {}", name, bean, value);
+			throw new InvalidStateException("An error occurred while setting bean property '{}' on bean '{}' with value - {}", name, bean, value, ex);
 		}
 	}
 	
