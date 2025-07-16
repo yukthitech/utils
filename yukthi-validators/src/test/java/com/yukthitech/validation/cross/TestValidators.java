@@ -53,9 +53,9 @@ import jakarta.validation.Validator;
  * Test cases for validators
  * @author akiran
  */
-public class TValidators
+public class TestValidators
 {
-	private static Logger logger = LogManager.getLogger(TValidators.class);
+	private static Logger logger = LogManager.getLogger(TestValidators.class);
 	
 	private Validator validator;
 	
