@@ -16,6 +16,7 @@
 package com.yukthitech.persistence.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.yukthitech.persistence.EntityDetails;
@@ -69,7 +70,7 @@ public class UpdateQuery extends AbstractConditionalQuery implements IOrderedQue
 	 */
 	public List<UpdateColumnParam> getColumns()
 	{
-		return columns;
+		return columns == null ? Collections.emptyList() : columns;
 	}
 
 	/**

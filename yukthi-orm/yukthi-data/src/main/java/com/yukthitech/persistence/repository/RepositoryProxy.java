@@ -91,7 +91,7 @@ class RepositoryProxy implements InvocationHandler
 		this.repositoryType = repositoryType;
 		this.repositoryFactory = repositoryFactory;
 		
-		this.queryExecutionContext = new QueryExecutionContext(dataStore.getConversionService());
+		this.queryExecutionContext = new QueryExecutionContext(dataStore.getConversionService(), repositoryFactory);
 		
 		Method methods[] = repositoryType.getMethods();
 		String methodName = null;

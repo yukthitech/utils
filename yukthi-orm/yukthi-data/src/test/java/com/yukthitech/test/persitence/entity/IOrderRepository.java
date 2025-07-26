@@ -22,9 +22,12 @@ import com.yukthitech.persistence.repository.annotations.AggregateFunction;
 import com.yukthitech.persistence.repository.annotations.AggregateFunctionType;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.Field;
+import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
 
 public interface IOrderRepository extends ICrudRepository<Order>
 {
+	public Order findOrderByTitle(@Condition("title") String title);
+
 	public List<Order> findOrdersWithItem(@Condition("items.itemName") String itemName);
 	
 	public List<Order> findOrdersOfCusomer(@Condition("customer.name") String customerName);
@@ -47,4 +50,8 @@ public interface IOrderRepository extends ICrudRepository<Order>
 
 	@AggregateFunction(type = AggregateFunctionType.MIN, field = "cost")
 	public float getMinCost(@Condition("customer.name") String customerName);
+	
+	public int updateItems(@Condition("title") String title,  
+			@Field("orderNo") int orderNo,
+			@Field(value = "items", relationUpdate = RelationUpdateType.CASCADE) List<OrderItem> items);
 }

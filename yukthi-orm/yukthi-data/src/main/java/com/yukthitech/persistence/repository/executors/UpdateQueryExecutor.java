@@ -17,7 +17,10 @@ package com.yukthitech.persistence.repository.executors;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,6 +47,7 @@ import com.yukthitech.persistence.query.QueryCondition;
 import com.yukthitech.persistence.query.QueryResultField;
 import com.yukthitech.persistence.query.UpdateColumnParam;
 import com.yukthitech.persistence.query.UpdateQuery;
+import com.yukthitech.persistence.query.FinderQuery;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
 import com.yukthitech.persistence.repository.annotations.Field;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
@@ -57,11 +61,26 @@ import com.yukthitech.persistence.repository.annotations.UpdateOperator;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthitech.persistence.utils.OrmUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
 
 @QueryExecutorPattern(prefixes = {"update"}, annotatedWith = UpdateFunction.class)
 public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 {
 	private static Logger logger = LogManager.getLogger(UpdateQueryExecutor.class);
+
+	private static class RelationUpdateParam 
+	{
+		int paramIndex;
+		RelationUpdateType updateType;
+		FieldDetails fieldDetails;
+
+		RelationUpdateParam(int paramIndex, RelationUpdateType updateType, FieldDetails fieldDetails) 
+		{
+			this.paramIndex = paramIndex;
+			this.updateType = updateType;
+			this.fieldDetails = fieldDetails;
+		}
+	}
 
 	private Class<?> returnType;
 	private ReentrantLock queryLock = new ReentrantLock();
@@ -72,6 +91,10 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 	private UpdateQuery updateQuery;
 	
 	private List<QueryResultField> orderByFields = null;
+	
+	private List<RelationUpdateParam> relationUpdateParams = new ArrayList<>();
+	
+	private RelationUpdateHandler relationUpdateHandler = new RelationUpdateHandler();
 	
 	public UpdateQueryExecutor(Class<?> repositoryType, Method method, EntityDetails entityDetails)
 	{
@@ -215,12 +238,21 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 						field.value(), repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
 			}
 			
+			// Collect relation update info if specified for bean fields
+			if(field.relationUpdate() != RelationUpdateType.NONE) 
+			{
+				addRelationParam(method, field, fieldDetails, paramIndex, beanField.getGenericType());
+				found.set(true);
+				return;
+			}
+
 			updateQuery.addColumn(new UpdateColumnParam(fieldDetails.getDbColumnName(), null, paramIndex, beanField.getName(), field.updateOp()));
 			found.set(true);
 		});
 		
 		return found.get();
 	}
+
 
 	private boolean fetchColumnsByAnnotations(Method method)
 	{
@@ -269,6 +301,14 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 						field.value(), repositoryType.getName(), method.getName());
 			}
 			
+			// Collect relation update info if specified
+			if(field.relationUpdate() != RelationUpdateType.NONE) 
+			{
+				addRelationParam(method, field, fieldDetails, i, paramters[i].getParameterizedType());
+				found = true;
+				continue;
+			}
+			
 			updateQuery.addColumn(new UpdateColumnParam(fieldDetails.getDbColumnName(), null, i, field.updateOp()));
 			found = true;
 		}
@@ -280,6 +320,32 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		}
 
 		return found;
+	}
+
+	private void addRelationParam(Method method, Field field, FieldDetails fieldDetails, int paramIdx, Type paramType)
+	{
+		if(!fieldDetails.isRelationField()) 
+		{
+			throw new InvalidRepositoryException("@Field with relationUpdate specified must represent a relation field. Field: '{}', Method: {}.{}()", 
+					field.value(), repositoryType.getName(), method.getName());
+		}
+
+		if(!Collection.class.isAssignableFrom(TypeUtils.getRawType(paramType, null)))
+		{
+			throw new InvalidRepositoryException("@Field with relationUpdate specified must represent a collection. Field: '{}', Method: {}.{}()", 
+					field.value(), repositoryType.getName(), method.getName());
+		}
+
+		ParameterizedType parameterizedType = (ParameterizedType) paramType;
+		Class<?> collectionType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+
+		if(!fieldDetails.getForeignConstraintDetails().getTargetEntityDetails().getEntityType().isAssignableFrom(collectionType))
+		{
+			throw new InvalidRepositoryException("@Field with relationUpdate specified must represent a collection of same entities. Field: '{}', Method: {}.{}()", 
+					field.value(), repositoryType.getName(), method.getName());
+		}
+		
+		relationUpdateParams.add(new RelationUpdateParam(paramIdx, field.relationUpdate(), fieldDetails));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -444,6 +510,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 	/* (non-Javadoc)
 	 * @see com.yukthitech.persistence.repository.executors.QueryExecutor#execute(com.yukthitech.persistence.repository.executors.QueryExecutionContext, com.yukthitech.persistence.IDataStore, com.yukthitech.persistence.conversion.ConversionService, java.lang.Object[])
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object execute(QueryExecutionContext context, IDataStore dataStore, ConversionService conversionService, Object... params)
 	{
@@ -474,7 +541,6 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 
 			//TODO: When unique fields are getting updated, make sure unique constraints are not violated
 				//during unique field update might be we have to mandate id is provided as condition
-			
 			
 			//TODO: Extension field update using annotations
 			FieldDetails field = null;
@@ -527,7 +593,35 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			
 			try(ITransaction transaction = dataStore.getTransactionManager().newOrExistingTransaction())
 			{
-				int res = dataStore.update(updateQuery, entityDetails);
+				int res = 0;
+				
+				if(updateQuery.getColumns().size() > 0)
+				{
+					res = dataStore.update(updateQuery, entityDetails);
+				}
+
+				// Integrate relation update handler after main update
+				if(!relationUpdateParams.isEmpty())
+				{
+					// Create a FinderQuery from the UpdateQuery's conditions
+					FinderQuery finderQuery = new FinderQuery(entityDetails);
+					finderQuery.setDefaultTableCode(updateQuery.getDefaultTableCode());
+					
+					finderQuery.addResultField(new QueryResultField(finderQuery.getDefaultTableCode(), entityDetails.getIdField().getDbColumnName(), "id"));
+
+					for(var cond : updateQuery.getConditions())
+					{
+						finderQuery.addCondition(cond);
+					}
+
+					for(RelationUpdateParam relParam : relationUpdateParams)
+					{
+						Object relValue = params[relParam.paramIndex];
+
+						res += relationUpdateHandler.handleRelationUpdate(context.getRepositoryFactory(),
+								finderQuery, entityDetails, relParam.fieldDetails, relParam.updateType, (Collection<Object>) relValue);
+					}
+				}
 
 				transaction.commit();
 				

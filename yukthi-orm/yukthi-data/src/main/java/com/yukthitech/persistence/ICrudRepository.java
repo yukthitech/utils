@@ -99,6 +99,9 @@ public interface ICrudRepository<E>
 	@AggregateFunction
 	public long getCount();
 	
+	@AggregateFunction
+	public boolean checkExistsById(Object key);
+	
 	/**
 	 * Common search method to support dynamic search functionality by default
 	 * @param searchQuery

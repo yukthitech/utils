@@ -46,6 +46,13 @@ public class CustomerGroup
 		this.name = name;
 		this.customers = customers;
 	}
+	
+	public CustomerGroup(long id, String name, List<Customer> customers)
+	{
+		this.id = id;
+		this.name = name;
+		this.customers = customers;
+	}
 
 	/**
 	 * @return the {@link #id id}

@@ -16,6 +16,7 @@
 package com.yukthitech.persistence.repository.executors;
 
 import com.yukthitech.persistence.conversion.ConversionService;
+import com.yukthitech.persistence.repository.RepositoryFactory;
 
 /**
  * Encapsulation of parameters and other context sent during query executor execution.
@@ -27,20 +28,28 @@ public class QueryExecutionContext
 	 * Conversion service to be used by query executors.
 	 */
 	private ConversionService conversionService;
+
+	private RepositoryFactory repositoryFactory;
 	
 	/**
 	 * Repository execution context.
 	 */
 	private Object repositoryExecutionContext;
 	
-	public QueryExecutionContext(ConversionService conversionService)
+	public QueryExecutionContext(ConversionService conversionService, RepositoryFactory repositoryFactory)
 	{
 		this.conversionService = conversionService;
+		this.repositoryFactory = repositoryFactory;
 	}
 	
 	public ConversionService getConversionService()
 	{
 		return conversionService;
+	}
+	
+	public RepositoryFactory getRepositoryFactory()
+	{
+		return repositoryFactory;
 	}
 	
 	public void setRepositoryExecutionContext(Object repositoryExecutionContext)

@@ -167,6 +167,11 @@ public class JoinTableDetails
 	{
 		this.inverseJoinColumnType = inverseJoinColumnType;
 	}
+	
+	public EntityDetails getOwnerEntityDetails()
+	{
+		return ownerEntityDetails;
+	}
 
 	/**
 	 * Converts this join table details to entity details

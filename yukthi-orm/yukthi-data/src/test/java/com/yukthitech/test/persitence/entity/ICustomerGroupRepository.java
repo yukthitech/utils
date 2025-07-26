@@ -20,6 +20,7 @@ import java.util.List;
 import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.Field;
+import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
 
 public interface ICustomerGroupRepository extends ICrudRepository<CustomerGroup>
 {
@@ -29,4 +30,14 @@ public interface ICustomerGroupRepository extends ICrudRepository<CustomerGroup>
 	public List<String> findOrderTitles(@Condition("name") String groupName);
 
 	public CustomerGroup findByName(String name);
+
+	public int updateCustomers(
+			@Condition("name") String name, 
+			@Field(value = "customers", relationUpdate = RelationUpdateType.SYNC_RELATION)
+			List<Customer> customers);
+
+	public int updateFullCustomers(
+			@Condition("name") String name, 
+			@Field(value = "customers", relationUpdate = RelationUpdateType.CASCADE)
+			List<Customer> customers);
 }

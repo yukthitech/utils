@@ -15,6 +15,8 @@
  */
 package com.yukthitech.test.persitence.entity;
 
+import java.util.List;
+
 import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.Field;
@@ -31,4 +33,6 @@ public interface IOrderItemRepository extends ICrudRepository<OrderItem>
 	public int deleteByCustomerName(@Condition("quantity") int quantity, @Condition("order.customer.name") String customerName);
 	
 	public int updateByCustomerName(@Field(value = "quantity", updateOp = UpdateOperator.ADD) int quantity, @Condition("order.customer.name") String customerName);
+	
+	public List<OrderItem> fetchItems(@Condition("order.id") Long orderId);
 }

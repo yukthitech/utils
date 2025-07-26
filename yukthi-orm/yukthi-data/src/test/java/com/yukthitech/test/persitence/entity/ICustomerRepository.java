@@ -15,9 +15,24 @@
  */
 package com.yukthitech.test.persitence.entity;
 
+import java.util.List;
+
 import com.yukthitech.persistence.ICrudRepository;
+import com.yukthitech.persistence.repository.annotations.Condition;
+import com.yukthitech.persistence.repository.annotations.Field;
+import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
 
 public interface ICustomerRepository extends ICrudRepository<Customer>
 {
 	public Customer findByName(String name);
+
+	public int updateCustomerGroups(
+		@Condition("name") String name, 
+		@Field(value = "customerGroups", relationUpdate = RelationUpdateType.SYNC_RELATION)
+		List<CustomerGroup> customerGroups);
+
+	public int updateOrders(
+			@Condition("name") String name, 
+			@Field(value = "orders", relationUpdate = RelationUpdateType.SYNC_RELATION)
+			List<Order> orders);
 }

@@ -231,7 +231,8 @@ public class TRelationFetch extends TestSuiteBase
 		//Ensure multi valued field is fetched properly
 		Assert.assertEquals(customer.getCustomerGroups().size(), 2);
 		
-		CustomerGroup group1 = customer.getCustomerGroups().get(0).getName().equals("Group1") ? customer.getCustomerGroups().get(0) : customer.getCustomerGroups().get(1); 
+		CustomerGroup group1 = customer.getCustomerGroups().get(0).getName().equals("Group1") ? 
+				customer.getCustomerGroups().get(0) : customer.getCustomerGroups().get(1); 
 		
 		Set<String> groupNames = group1.getCustomers().stream()
 				.map(cust -> cust.getName())
