@@ -3,7 +3,8 @@ package com.yukthitech.persistence.repository.annotations;
 /**
  * Specifies the type of update operation to be performed on a relation field during update operations.
  */
-public enum RelationUpdateType {
+public enum RelationUpdateType 
+{
     /**
      * No relation update operation will be performed. (Default)
      */

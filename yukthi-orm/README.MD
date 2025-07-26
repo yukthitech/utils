@@ -217,6 +217,27 @@ public interface IEmployeeRepository extends ICrudRepository<Employee> {
 }
 ```
 
+### Relation Updates
+
+Yukthi Data ORM provides powerful options for managing relation updates through the `relationUpdate` attribute in the `@Field` annotation. This attribute accepts a `RelationUpdateType` enum, which can be one of the following:
+
+-   `SYNC_RELATION`: This option synchronizes the relationship between entities. It adds new relations, ignores existing ones, and severs missing ones. Importantly, this option does not cascade updates to the child entities themselves; it only modifies the relation links.
+
+-   `CASCADE`: This option provides a full cascade update. It not only synchronizes the relations but also updates the child entities. New child entities are added, existing ones are updated, and those not present in the input list are unlinked.
+
+#### Example
+
+```java
+public interface IOrderRepository extends ICrudRepository<Order> {
+    @UpdateFunction
+    boolean updateItems(
+        @Condition("title") String title,
+        @Field("orderNo") int orderNo,
+        @Field(value = "items", relationUpdate = RelationUpdateType.CASCADE) List<OrderItem> items
+    );
+}
+```
+
 ## Delete Methods
 
 Define delete methods in your repository interface:
