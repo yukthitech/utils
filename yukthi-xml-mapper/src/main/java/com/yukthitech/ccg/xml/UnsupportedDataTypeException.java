@@ -40,19 +40,4 @@ public class UnsupportedDataTypeException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	/**
-	 * Instantiates a new unsupported data type exception.
-	 *
-	 * @param cause
-	 *            the cause
-	 * @param message
-	 *            the message
-	 * @param args
-	 *            the args
-	 */
-	public UnsupportedDataTypeException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }

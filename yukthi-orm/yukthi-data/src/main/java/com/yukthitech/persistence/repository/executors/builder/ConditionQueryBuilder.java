@@ -1394,7 +1394,7 @@ public class ConditionQueryBuilder implements Cloneable
 				}
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while converting field {} value - {}", resultField.fieldDetails.getName(), value);
+				throw new InvalidStateException("An error occurred while converting field {} value - {}", resultField.fieldDetails.getName(), value, ex);
 			}
 
 			// if value is null after conversion, ignore value

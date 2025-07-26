@@ -29,9 +29,4 @@ public class XmlWriteException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	public XmlWriteException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }

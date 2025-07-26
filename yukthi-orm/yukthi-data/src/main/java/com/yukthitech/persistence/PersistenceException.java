@@ -35,7 +35,7 @@ public class PersistenceException extends UtilsException
 	 */
 	public PersistenceException(String message, Throwable cause)
 	{
-		super(cause, message);
+		super(message, cause);
 	}
 
 	/**
@@ -57,17 +57,5 @@ public class PersistenceException extends UtilsException
 	public PersistenceException(String message, Object... args)
 	{
 		super(message, args);
-	}
-
-	/**
-	 * Instantiates a new persistence exception.
-	 *
-	 * @param cause the cause
-	 * @param message the message
-	 * @param args the args
-	 */
-	public PersistenceException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
 	}
 }

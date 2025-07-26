@@ -281,7 +281,7 @@ public class MultiRelationQueryExecutor extends AbstractPersistQueryExecutor
 			extendedValues = (Map)extDataHolder.get(entity);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while fetching extended values");
+			throw new InvalidStateException("An error occurred while fetching extended values", ex);
 		}
 		
 		if(extendedValues == null || extendedValues.isEmpty())

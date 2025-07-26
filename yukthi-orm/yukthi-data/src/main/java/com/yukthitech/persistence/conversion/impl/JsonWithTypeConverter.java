@@ -73,7 +73,7 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 			return objectMapper.readValue((String)dbObject, Object.class);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while converting string into java object. Json string: " + dbObject);
+			throw new InvalidStateException("An error occurred while converting string into java object. Json string: " + dbObject, ex);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class JsonWithTypeConverter implements IPersistenceConverter
 			return objectMapper.writeValueAsString(javaObject);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while converting java object into string. Object: " + javaObject);
+			throw new InvalidStateException("An error occurred while converting java object into string. Object: " + javaObject, ex);
 		}
 	}
 

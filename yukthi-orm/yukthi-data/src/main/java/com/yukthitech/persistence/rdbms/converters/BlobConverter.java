@@ -88,7 +88,7 @@ public class BlobConverter implements IPersistenceConverter
 			return tempFile;
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while create temp file from blob");
+			throw new InvalidStateException("An error occurred while create temp file from blob", ex);
 		}
 	}
 	

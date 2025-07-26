@@ -854,7 +854,7 @@ public class DefaultParserHandler implements IParserHandler
 				clsToFactInst.put(factCls, fact);
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "Error in initiating bean factory: " + factCls.getName());
+				throw new InvalidStateException("Error in initiating bean factory: " + factCls.getName(), ex);
 			}
 		}
 
@@ -963,7 +963,7 @@ public class DefaultParserHandler implements IParserHandler
 				throw ex;
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "Invalid parameter type specified: " + types[i]);
+				throw new InvalidStateException("Invalid parameter type specified: " + types[i], ex);
 			}
 
 			try
@@ -996,7 +996,7 @@ public class DefaultParserHandler implements IParserHandler
 				return cons.newInstance(actValues);
 			} catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "Error in creating bean of type: " + type.getName() + "\nRootCause: " + ex);
+				throw new InvalidStateException("Error in creating bean of type: " + type.getName() + "\nRootCause: " + ex, ex);
 			}
 		}
 		
@@ -1030,7 +1030,7 @@ public class DefaultParserHandler implements IParserHandler
 			return type.newInstance();
 		} catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "Error in creating bean of type: " + type.getName() + "\nRootCause: " + ex);
+			throw new InvalidStateException("Error in creating bean of type: " + type.getName() + "\nRootCause: " + ex, ex);
 		}
 	}
 

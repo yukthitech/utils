@@ -44,7 +44,7 @@ public class ConfigurationErrorException extends PersistenceException
 			properties.load(ConfigurationErrorException.class.getResourceAsStream("/configuration-exception-messages.properties"));
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occirred while loading resource file: /configuration-exception-messages.properties");
+			throw new InvalidStateException("An error occirred while loading resource file: /configuration-exception-messages.properties", ex);
 		}
 	}
 	
@@ -80,18 +80,6 @@ public class ConfigurationErrorException extends PersistenceException
 	{
 		super(getMessage(code), args);
 		this.code = code;
-	}
-
-	/**
-	 * Instantiates a new configuration error exception.
-	 *
-	 * @param cause the cause
-	 * @param code the code
-	 * @param args the args
-	 */
-	public ConfigurationErrorException(Throwable cause, String code, Object... args)
-	{
-		super(cause, getMessage(code), args);
 	}
 	
 	/**

@@ -84,7 +84,7 @@ public class NativeQueryFactory
 			is.close();
 		}catch(Exception ex)
 		{
-			throw new InvalidArgumentException(ex, "An error occurred while loading resource file - {}\nError: {}", resource, ex);
+			throw new InvalidArgumentException("An error occurred while loading resource file - {}\nError: {}", resource, ex);
 		}
 	}
 	
@@ -114,7 +114,7 @@ public class NativeQueryFactory
 			is.close();
 		}catch(Exception ex)
 		{
-			throw new InvalidArgumentException(ex, "An error occurred while loading file - {}", file);
+			throw new InvalidArgumentException("An error occurred while loading file - {}", file, ex);
 		}
 	}
 	
@@ -189,7 +189,7 @@ public class NativeQueryFactory
 			return finalQuery.toString();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An exception occurred while building query: " + name);
+			throw new InvalidStateException("An exception occurred while building query: " + name, ex);
 		}
 	}
 }

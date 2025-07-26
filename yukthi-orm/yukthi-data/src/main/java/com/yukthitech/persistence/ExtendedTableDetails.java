@@ -218,7 +218,7 @@ public class ExtendedTableDetails
 			entityIdFld = ExtendedTableEntity.class.getDeclaredField(ExtendedTableEntity.FIELD_ENTITY_ID);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while fetching ExtendedTableEntity fields");
+			throw new InvalidStateException("An error occurred while fetching ExtendedTableEntity fields", ex);
 		}
 
 		//add entity id field

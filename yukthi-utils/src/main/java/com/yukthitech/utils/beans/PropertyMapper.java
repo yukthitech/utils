@@ -137,6 +137,7 @@ public class PropertyMapper
 			//if source and destination types are not matching throw error
 			if(!CommonUtils.isAssignable(sourceProperty.getType(), destProperty.getType()))
 			{
+				/*
 				if(isIgnorableType(sourceProperty.getType()) || isIgnorableType(destProperty.getType()))
 				{
 					logger.log(Level.INFO, String.format("Ignoring property '%s' as source and destination data types are not matching "
@@ -145,6 +146,7 @@ public class PropertyMapper
 							destination.getClass().getName(), destProperty.getType().getName()));
 					continue;
 				}
+				*/
 				
 				try
 				{

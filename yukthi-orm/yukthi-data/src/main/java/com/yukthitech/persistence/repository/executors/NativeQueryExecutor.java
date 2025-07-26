@@ -313,7 +313,7 @@ public class NativeQueryExecutor extends QueryExecutor
 			result = returnType.getConstructor().newInstance();
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while creating result object of type - {}", returnType.getName());
+			throw new InvalidStateException("An error occurred while creating result object of type - {}", returnType.getName(), ex);
 		}
 		
 		//copy values from record to result object fields
@@ -387,7 +387,7 @@ public class NativeQueryExecutor extends QueryExecutor
 				postConstructMethod.invoke(result);
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while invoking post construct method - {}.{}", returnType.getName(), postConstructMethod.getName());
+				throw new InvalidStateException("An error occurred while invoking post construct method - {}.{}", returnType.getName(), postConstructMethod.getName(), ex);
 			}
 		}
 		
@@ -493,7 +493,7 @@ public class NativeQueryExecutor extends QueryExecutor
 					resCollection = (Collection)returnCollectionType.getConstructor().newInstance();
 				}catch(Exception ex)
 				{
-					throw new InvalidStateException(ex, "An error occurred while creating collection instance - {}", returnCollectionType.getName());
+					throw new InvalidStateException("An error occurred while creating collection instance - {}", returnCollectionType.getName(), ex);
 				}
 				
 				resCollection.addAll(resLst);

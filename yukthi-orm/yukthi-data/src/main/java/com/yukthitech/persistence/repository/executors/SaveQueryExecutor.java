@@ -397,7 +397,7 @@ public class SaveQueryExecutor extends AbstractPersistQueryExecutor
 			extendedFields = (Map) extFieldsHolder.get(entity);
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while fetching extension field values");
+			throw new InvalidStateException("An error occurred while fetching extension field values", ex);
 		}
 		
 		if(extendedFields == null || extendedFields.isEmpty())

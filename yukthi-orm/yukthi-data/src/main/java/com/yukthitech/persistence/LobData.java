@@ -74,7 +74,7 @@ public class LobData implements Closeable
 			return reader;
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while opening file - {}", file.getPath());
+			throw new InvalidStateException("An error occurred while opening file - {}", file.getPath(), ex);
 		}
 	}
 	
@@ -91,7 +91,7 @@ public class LobData implements Closeable
 			return fis;
 		}catch(Exception ex)
 		{
-			throw new InvalidStateException(ex, "An error occurred while opening file - {}", file.getPath());
+			throw new InvalidStateException("An error occurred while opening file - {}", file.getPath(), ex);
 		}
 	}
 	
@@ -106,7 +106,7 @@ public class LobData implements Closeable
 				fis = null;
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while closing file stream - {}", file.getPath());
+				throw new InvalidStateException("An error occurred while closing file stream - {}", file.getPath(), ex);
 			}
 		}
 		
@@ -118,7 +118,7 @@ public class LobData implements Closeable
 				reader = null;
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException(ex, "An error occurred while closing file reader - {}", file.getPath());
+				throw new InvalidStateException("An error occurred while closing file reader - {}", file.getPath(), ex);
 			}
 		}
 		
