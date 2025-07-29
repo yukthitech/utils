@@ -26,7 +26,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 /**
- * String Min length constraint annotation. Ensure target field value length &gt;= specified length
+ * String/collection/map Min length constraint annotation. Ensure target field value length/size &gt;= specified length
  * @author akiran
  */
 @Constraint(validatedBy = MinLenValidator.class)

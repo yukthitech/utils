@@ -51,7 +51,7 @@ public class MispatternValidator implements ConstraintValidator<Mispattern, Obje
 			return true;
 		}
 		
-		String strValue = ValidatorUtils.getValue(Mispattern.class, value);
+		String strValue = ValidatorUtils.getStrValue(Mispattern.class, value);
 		
 		//if any of the specified pattern matches fail validation
 		if(pattern.matcher(strValue).matches())

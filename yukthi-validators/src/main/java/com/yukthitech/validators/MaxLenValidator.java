@@ -48,11 +48,11 @@ public class MaxLenValidator implements ConstraintValidator<MaxLen, Object>
 		{
 			return true;
 		}
-
-		String strValue = ValidatorUtils.getValue(MaxLen.class, value);
+		
+		int len = ValidatorUtils.getSize(MaxLen.class, value, false);
 		
 		//ensure value length is lesser or equal to specified length value
-		return (strValue.length() <= maxLength);
+		return (len <= maxLength);
 	}
 
 }

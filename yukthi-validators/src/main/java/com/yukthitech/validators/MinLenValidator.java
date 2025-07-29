@@ -15,7 +15,6 @@
  */
 package com.yukthitech.validators;
 
-import com.yukthitech.validation.annotations.MaxLen;
 import com.yukthitech.validation.annotations.MinLen;
 
 import jakarta.validation.ConstraintValidator;
@@ -50,10 +49,10 @@ public class MinLenValidator implements ConstraintValidator<MinLen, Object>
 			return true;
 		}
 		
-		String strValue = ValidatorUtils.getValue(MaxLen.class, value);
+		int len = ValidatorUtils.getSize(MinLen.class, value, false);
 
 		//ensure value length is greater or equal to specified length value
-		return (strValue.length() >= minLength);
+		return (len >= minLength);
 	}
 
 }

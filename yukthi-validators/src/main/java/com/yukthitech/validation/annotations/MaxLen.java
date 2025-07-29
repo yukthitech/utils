@@ -26,7 +26,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 /**
- * String Max length constraint annotation. Ensure target field value length &lt;= specified length
+ * String/collection/map Max length constraint annotation. Ensure target field value length/size &lt;= specified length
  * @author akiran
  */
 @Constraint(validatedBy = MaxLenValidator.class)

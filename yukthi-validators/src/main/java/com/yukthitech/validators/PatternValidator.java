@@ -51,7 +51,7 @@ public class PatternValidator implements ConstraintValidator<com.yukthitech.vali
 			return true;
 		}
 		
-		String strValue = ValidatorUtils.getValue(com.yukthitech.validation.annotations.Pattern.class, value);
+		String strValue = ValidatorUtils.getStrValue(com.yukthitech.validation.annotations.Pattern.class, value);
 		
 		//if any of the specified pattern matches fail validation
 		if(pattern.matcher(strValue).matches())
