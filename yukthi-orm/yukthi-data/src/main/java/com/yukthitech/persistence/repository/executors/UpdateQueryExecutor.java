@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,14 +39,15 @@ import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.IDataStore;
 import com.yukthitech.persistence.ITransaction;
 import com.yukthitech.persistence.InvalidMappingException;
+import com.yukthitech.persistence.annotations.NotUpdateable;
 import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.listeners.EntityEventType;
 import com.yukthitech.persistence.query.ColumnParam;
+import com.yukthitech.persistence.query.FinderQuery;
 import com.yukthitech.persistence.query.QueryCondition;
 import com.yukthitech.persistence.query.QueryResultField;
 import com.yukthitech.persistence.query.UpdateColumnParam;
 import com.yukthitech.persistence.query.UpdateQuery;
-import com.yukthitech.persistence.query.FinderQuery;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
 import com.yukthitech.persistence.repository.annotations.Field;
 import com.yukthitech.persistence.repository.annotations.JoinOperator;
@@ -56,12 +56,13 @@ import com.yukthitech.persistence.repository.annotations.OrderBy;
 import com.yukthitech.persistence.repository.annotations.OrderByField;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
 import com.yukthitech.persistence.repository.annotations.QueryBean;
+import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
 import com.yukthitech.persistence.repository.annotations.UpdateFunction;
 import com.yukthitech.persistence.repository.annotations.UpdateOperator;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthitech.persistence.utils.OrmUtils;
+import com.yukthitech.utils.ReflectionUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
-import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
 
 @QueryExecutorPattern(prefixes = {"update"}, annotatedWith = UpdateFunction.class)
 public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
@@ -73,12 +74,14 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		int paramIndex;
 		RelationUpdateType updateType;
 		FieldDetails fieldDetails;
+		String fieldName;
 
-		RelationUpdateParam(int paramIndex, RelationUpdateType updateType, FieldDetails fieldDetails) 
+		RelationUpdateParam(int paramIndex, RelationUpdateType updateType, FieldDetails fieldDetails, String fieldName) 
 		{
 			this.paramIndex = paramIndex;
 			this.updateType = updateType;
 			this.fieldDetails = fieldDetails;
+			this.fieldName = fieldName;
 		}
 	}
 
@@ -220,6 +223,12 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				return;
 			}
 			
+			// ignore not updateable fields.
+			if(beanField.getAnnotation(NotUpdateable.class) != null)
+			{
+				return;
+			}
+			
 			String fieldName = field.value();
 			fieldName = StringUtils.isBlank(fieldName) ? beanField.getName() : fieldName;
 			
@@ -227,21 +236,30 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			
 			if(fieldDetails == null)
 			{
-				throw new InvalidRepositoryException("@Field with invalid name '{}' is specified [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]",
+				throw new InvalidRepositoryException("On query bean field {}.{} @Field has invalid field-name '{}' is specified [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]",
+						paramType.getName(), beanField.getName(),
 						fieldName, repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
 			}
 			
 			//if version field is specified explicitly for update
 			if(fieldDetails.isVersionField())
 			{
-				throw new InvalidRepositoryException("Version field '{}' is configured for explicit update [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]", 
-						field.value(), repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
+				throw new InvalidRepositoryException("Version field {}.{} (entity field: {}) is configured for explicit update [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]", 
+						paramType.getName(), beanField.getName(),
+						fieldName, repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
+			}
+			
+			if(fieldDetails.isMultiValuedRelation() && field.relationUpdate() == RelationUpdateType.NONE)
+			{
+				throw new InvalidRepositoryException("Mulit-valued relation-field {}.{} (entity field: {}) is not configured with relationUpdate operator in @Field annotation [Repository update method: {}.{}(), Parameter Index: {}, Param Field: {}]", 
+						paramType.getName(), beanField.getName(),
+						fieldName, repositoryType.getName(), method.getName(), paramIndex, beanField.getName());
 			}
 			
 			// Collect relation update info if specified for bean fields
 			if(field.relationUpdate() != RelationUpdateType.NONE) 
 			{
-				addRelationParam(method, field, fieldDetails, paramIndex, beanField.getGenericType());
+				addRelationParam(method, field, fieldDetails, paramIndex, beanField.getGenericType(), beanField.getName());
 				found.set(true);
 				return;
 			}
@@ -301,10 +319,16 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 						field.value(), repositoryType.getName(), method.getName());
 			}
 			
+			if(fieldDetails.isMultiValuedRelation() && field.relationUpdate() == RelationUpdateType.NONE)
+			{
+				throw new InvalidRepositoryException("Mulit-valued relation-field '{}' is not configured with relationUpdate operator in @Field annotation [Repository update method: {}.{}(), Parameter Index: {}]", 
+						field.value(), repositoryType.getName(), method.getName(), i);
+			}
+
 			// Collect relation update info if specified
 			if(field.relationUpdate() != RelationUpdateType.NONE) 
 			{
-				addRelationParam(method, field, fieldDetails, i, paramters[i].getParameterizedType());
+				addRelationParam(method, field, fieldDetails, i, paramters[i].getParameterizedType(), null);
 				found = true;
 				continue;
 			}
@@ -322,7 +346,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		return found;
 	}
 
-	private void addRelationParam(Method method, Field field, FieldDetails fieldDetails, int paramIdx, Type paramType)
+	private void addRelationParam(Method method, Field field, FieldDetails fieldDetails, int paramIdx, Type paramType, String fieldName)
 	{
 		if(!fieldDetails.isRelationField()) 
 		{
@@ -345,7 +369,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 					field.value(), repositoryType.getName(), method.getName());
 		}
 		
-		relationUpdateParams.add(new RelationUpdateParam(paramIdx, field.relationUpdate(), fieldDetails));
+		relationUpdateParams.add(new RelationUpdateParam(paramIdx, field.relationUpdate(), fieldDetails, fieldName));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -505,6 +529,31 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 			throw new IllegalStateException(ex);
 		}
 	}
+	
+	private Object computeParamValue(Object value, String fieldName, FieldDetails field, ConversionService conversionService)
+	{
+		if(StringUtils.isNotBlank(fieldName))
+		{
+			try
+			{
+				value = ReflectionUtils.getFieldValue(value, fieldName);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while fetching param-query-bean field name: {}", 
+						fieldName, ex);
+			}
+		}
+		
+		//if current field is relation field
+		if(field.isRelationField() && field.isTableOwned() && value != null)
+		{
+			//if current table owns the relation in same table, replace the entity value with foreign entity id value
+			value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
+		}
+
+		value = conversionService.convertToDBType(value, field);
+		return value;
+	}
 
 	
 	/* (non-Javadoc)
@@ -556,38 +605,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 				}
 				
 				value = params[column.getIndex()];
-				
-				if(StringUtils.isNotBlank(column.getFieldName()))
-				{
-					try
-					{
-						value = BeanUtils.getProperty(value, column.getFieldName());
-					}catch(Exception ex)
-					{
-						throw new InvalidStateException("An error occurred while fetching param-query-bean field name: {}", 
-								column.getFieldName(), ex);
-					}
-				}
-				
-				//if current field is relation field
-				if(field.isRelationField())
-				{
-					//if current table does not own relation, ignore current field
-					if(!field.isTableOwned())
-					{
-						//TODO: Take care of cases where join table is involved
-						continue;
-					}
-					
-					if(value != null)
-					{
-						//if current table owns the relation in same table, replace the entity value with foreign entity id value
-						value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
-					}
-				}
-
-				value = conversionService.convertToDBType(value, field);
-
+				value = computeParamValue(value, column.getFieldName(), field, conversionService);
 				column.setValue(value);
 			}
 			
@@ -617,6 +635,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 					for(RelationUpdateParam relParam : relationUpdateParams)
 					{
 						Object relValue = params[relParam.paramIndex];
+						relValue = computeParamValue(relValue, relParam.fieldName, relParam.fieldDetails, conversionService);
 
 						res += relationUpdateHandler.handleRelationUpdate(context.getRepositoryFactory(),
 								finderQuery, entityDetails, relParam.fieldDetails, relParam.updateType, (Collection<Object>) relValue);

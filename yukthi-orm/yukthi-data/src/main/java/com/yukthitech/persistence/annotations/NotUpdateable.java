@@ -21,8 +21,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks field as not updateable, which means target field will be skipped
+ * Marks entity field as not updateable, which means target field will be skipped
  * during update.
+ * 
+ * Also can be used in update query beans. Fields with this annotation will not be considered
+ * for update (so that same bean can be used for read operation and this field gets populated).
  * @author akiran
  */
 @Retention(RetentionPolicy.RUNTIME)

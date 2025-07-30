@@ -45,14 +45,14 @@ public class MispatternValidator implements ConstraintValidator<Mispattern, Obje
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
+		String strValue = ValidatorUtils.getStrValue(Mispattern.class, value);
+		
 		//if value is null
-		if(value == null)
+		if(strValue == null)
 		{
 			return true;
 		}
-		
-		String strValue = ValidatorUtils.getStrValue(Mispattern.class, value);
-		
+
 		//if any of the specified pattern matches fail validation
 		if(pattern.matcher(strValue).matches())
 		{

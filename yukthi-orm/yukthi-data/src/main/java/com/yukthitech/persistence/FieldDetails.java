@@ -16,6 +16,7 @@
 package com.yukthitech.persistence;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -416,6 +417,16 @@ public class FieldDetails
 	public boolean isRelationField()
 	{
 		return (foreignConstraintDetails != null);
+	}
+	
+	/**
+	 * Checks if multi valued relation (either with join table or the reverse table
+	 * owns the relation).
+	 * @return
+	 */
+	public boolean isMultiValuedRelation()
+	{
+		return (foreignConstraintDetails != null && Collection.class.isAssignableFrom(field.getType()));
 	}
 	
 	/**

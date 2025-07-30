@@ -45,14 +45,14 @@ public class PatternValidator implements ConstraintValidator<com.yukthitech.vali
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
+		String strValue = ValidatorUtils.getStrValue(com.yukthitech.validation.annotations.Pattern.class, value);
+		
 		//if value is null
-		if(value == null)
+		if(strValue == null)
 		{
 			return true;
 		}
-		
-		String strValue = ValidatorUtils.getStrValue(com.yukthitech.validation.annotations.Pattern.class, value);
-		
+
 		//if any of the specified pattern matches fail validation
 		if(pattern.matcher(strValue).matches())
 		{
