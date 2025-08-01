@@ -23,6 +23,8 @@ import com.yukthitech.persistence.repository.annotations.AggregateFunctionType;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.Field;
 import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
+import com.yukthitech.persistence.repository.annotations.SearchResult;
+import com.yukthitech.test.persitence.queries.OrderSearchResult;
 
 public interface IOrderRepository extends ICrudRepository<Order>
 {
@@ -38,6 +40,9 @@ public interface IOrderRepository extends ICrudRepository<Order>
 	public String findCustomerName(@Condition("orderNo") int orderNo);
 	
 	public Order findOrderByOrderNo(int orderNo);
+	
+	@SearchResult
+	public OrderSearchResult fetchOrder(@Condition("orderNo") int orderNo);
 	
 	@AggregateFunction(type = AggregateFunctionType.COUNT)
 	public int getOrderCount(@Condition("customer.name") String customerName);

@@ -46,7 +46,7 @@ public class TNativeQueries extends TestSuiteBase
 		IDataStore dataStore = factory.getDataStore();
 		dataStore.setNativeQueryFactory(nativeQueryFactory);
 		
-		cleanFactoryAfterClass(factory);
+		cleanFactory(factory);
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
 		repo.save(new Employee("1230", "user0@test.com", "user1", "1234560", 20));
 		repo.save(new Employee("1231", "user1@test.com", "user2", "1234561", 25));
@@ -57,7 +57,7 @@ public class TNativeQueries extends TestSuiteBase
 	}
 	
 	@Override
-	protected void cleanFactoryAfterClass(RepositoryFactory factory)
+	protected void cleanFactory(RepositoryFactory factory)
 	{
 		//cleanup the emp table
 		factory.dropRepository(Employee.class);

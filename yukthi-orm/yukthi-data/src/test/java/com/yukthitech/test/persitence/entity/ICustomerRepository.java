@@ -21,10 +21,15 @@ import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.Field;
 import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
+import com.yukthitech.persistence.repository.annotations.SearchResult;
+import com.yukthitech.test.persitence.queries.CustomerSearchResult;
 
 public interface ICustomerRepository extends ICrudRepository<Customer>
 {
 	public Customer findByName(String name);
+	
+	@SearchResult
+	public CustomerSearchResult fetchCustomer(@Condition("name") String name);
 
 	public int updateCustomerGroups(
 		@Condition("name") String name, 

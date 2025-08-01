@@ -60,7 +60,7 @@ public class SearchQueryExecutor extends AbstractSearchQuery
 		super.entityDetails = entityDetails;
 
 		conditionQueryBuilder = new ConditionQueryBuilder(entityDetails);
-		methodDesc = String.format("search method '%s' of repository - '%s'", method.getName(), repositoryType.getName());
+		methodDesc = String.format("%s.%s()", repositoryType.getName(), method.getName());
 
 		Class<?> paramTypes[] = method.getParameterTypes();
 

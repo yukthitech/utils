@@ -29,7 +29,7 @@ import com.yukthitech.persistence.repository.RepositoryFactory;
 public class TVersion extends TestSuiteBase
 {
 	@Override
-	protected void cleanFactoryAfterClass(RepositoryFactory factory)
+	protected void cleanFactory(RepositoryFactory factory)
 	{
 		//cleanup the emp table
 		factory.dropRepository(EntityWithVersion.class);

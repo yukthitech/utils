@@ -54,10 +54,13 @@ public class TestSuiteBase
 		for(RepositoryFactory factory : TestConfiguration.getTestConfiguration().getRepositoryFactories())
 		{
 			factories.add(new Object[] {factory});
+			
+			this.cleanFactory(factory);
 			initFactoryBeforeClass(factory);
 		}
 	}
 	
+	/*
 	@AfterClass
 	public void cleanupFactories()
 	{
@@ -77,10 +80,11 @@ public class TestSuiteBase
 		}
 
 	}
+	*/
 	
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
 	{}
 	
-	protected void cleanFactoryAfterClass(RepositoryFactory factory)
+	protected void cleanFactory(RepositoryFactory factory)
 	{}
 }

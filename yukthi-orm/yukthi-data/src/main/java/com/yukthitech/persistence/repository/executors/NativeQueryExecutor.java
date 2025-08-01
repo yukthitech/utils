@@ -46,7 +46,7 @@ import com.yukthitech.persistence.conversion.ConversionService;
 import com.yukthitech.persistence.repository.InvalidRepositoryException;
 import com.yukthitech.persistence.repository.annotations.NativeQuery;
 import com.yukthitech.persistence.repository.annotations.NativeQueryType;
-import com.yukthitech.persistence.repository.executors.proxy.ProxyEntityCreator;
+import com.yukthitech.persistence.repository.executors.proxy.ProxyEntity;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ReflectionUtils;
@@ -397,7 +397,7 @@ public class NativeQueryExecutor extends QueryExecutor
 		if(isEntityResultType)
 		{
 			ICrudRepository<?> resultRepo = super.getCrudRepository(returnType); 
-			result = ProxyEntityCreator.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, flatColumnMap);
+			result = ProxyEntity.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, flatColumnMap);
 		}
 		
 		return result;

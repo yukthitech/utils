@@ -21,6 +21,8 @@ import com.yukthitech.persistence.ICrudRepository;
 import com.yukthitech.persistence.repository.annotations.Condition;
 import com.yukthitech.persistence.repository.annotations.Field;
 import com.yukthitech.persistence.repository.annotations.RelationUpdateType;
+import com.yukthitech.persistence.repository.annotations.SearchResult;
+import com.yukthitech.test.persitence.queries.CustomerGroupSearchResult;
 
 public interface ICustomerGroupRepository extends ICrudRepository<CustomerGroup>
 {
@@ -30,6 +32,9 @@ public interface ICustomerGroupRepository extends ICrudRepository<CustomerGroup>
 	public List<String> findOrderTitles(@Condition("name") String groupName);
 
 	public CustomerGroup findByName(String name);
+	
+	@SearchResult
+	public CustomerGroupSearchResult fetchGroup(@Condition("name") String name);
 
 	public int updateCustomers(
 			@Condition("name") String name, 

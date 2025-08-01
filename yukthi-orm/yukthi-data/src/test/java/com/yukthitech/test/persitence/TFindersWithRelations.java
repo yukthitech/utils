@@ -66,7 +66,7 @@ public class TFindersWithRelations extends TestSuiteBase
 	}
 
 	@Override
-	protected void cleanFactoryAfterClass(RepositoryFactory factory)
+	protected void cleanFactory(RepositoryFactory factory)
 	{
 		//cleanup the tables
 		factory.dropRepository(OrderItem.class);

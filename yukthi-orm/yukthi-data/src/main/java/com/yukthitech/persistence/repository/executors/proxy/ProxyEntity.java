@@ -40,7 +40,7 @@ import com.yukthitech.utils.exceptions.InvalidArgumentException;
  * Represents proxy for entity class used for lazy loading
  * @author akiran
  */
-public class ProxyEntityCreator
+public class ProxyEntity
 {
 	/**
 	 * The actual entity which would be loaded lazily on need basis 
@@ -89,7 +89,7 @@ public class ProxyEntityCreator
 			throw new NullPointerException("Entity id can not be null");
 		}
 		
-		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, entityId, null);
+		ProxyEntity creator = new ProxyEntity(entityDetails, repository, entityId, null);
 		return creator.proxyEntity;
 	}
 
@@ -100,7 +100,7 @@ public class ProxyEntityCreator
 			throw new NullPointerException("Condition can not be null");
 		}
 		
-		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, null, condition);
+		ProxyEntity creator = new ProxyEntity(entityDetails, repository, null, condition);
 		return creator.proxyEntity;
 	}
 
@@ -111,7 +111,7 @@ public class ProxyEntityCreator
 			throw new InvalidArgumentException("Specified entity type '{}' is not matching with specified entity: {}", entityDetails.getEntityType().getName(), entity);
 		}
 		
-		ProxyEntityCreator creator = new ProxyEntityCreator(entityDetails, repository, null, null);
+		ProxyEntity creator = new ProxyEntity(entityDetails, repository, null, null);
 		creator.actualEntity = entity;
 		creator.populateRelationFields(dataMap);
 		creator.actualEntityLoaded = true;
@@ -125,7 +125,7 @@ public class ProxyEntityCreator
 	 * @param repository
 	 * @param entityType
 	 */
-	private ProxyEntityCreator(EntityDetails entityDetails, ICrudRepository<?> repository, Object entityId, SearchCondition condition)
+	private ProxyEntity(EntityDetails entityDetails, ICrudRepository<?> repository, Object entityId, SearchCondition condition)
 	{
 		this.repository = repository;
 		this.entityId = entityId;
@@ -239,7 +239,7 @@ public class ProxyEntityCreator
 						}
 					}
 					
-					Object relatedEntity = ProxyEntityCreator.newProxyById(targetEntityDetails, relatedRepo, relationId);
+					Object relatedEntity = ProxyEntity.newProxyById(targetEntityDetails, relatedRepo, relationId);
 					
 					fieldDetails.setValue(actualEntity, relatedEntity);
 					continue;
@@ -255,7 +255,7 @@ public class ProxyEntityCreator
 				}
 				
 				SearchCondition relationCondition = new SearchCondition(foreignConstraintDetails.getMappedBy(), Operator.EQ, entityId);
-				Object relatedEntity = ProxyEntityCreator.newProxyByCondition(targetEntityDetails, relatedRepo, relationCondition);
+				Object relatedEntity = ProxyEntity.newProxyByCondition(targetEntityDetails, relatedRepo, relationCondition);
 				fieldDetails.setValue(actualEntity, relatedEntity);
 			}
 		}

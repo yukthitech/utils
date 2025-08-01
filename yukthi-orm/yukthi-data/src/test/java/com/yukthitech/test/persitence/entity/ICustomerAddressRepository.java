@@ -16,8 +16,14 @@
 package com.yukthitech.test.persitence.entity;
 
 import com.yukthitech.persistence.ICrudRepository;
+import com.yukthitech.persistence.repository.annotations.Condition;
+import com.yukthitech.persistence.repository.annotations.SearchResult;
+import com.yukthitech.test.persitence.queries.CustomerAddressSearchResult;
 
 public interface ICustomerAddressRepository extends ICrudRepository<CustomerAddress>
 {
 	public CustomerAddress findByPropertyId(String propId);
+	
+	@SearchResult
+	public CustomerAddressSearchResult fetchAddress(@Condition("propertyId") String propId);
 }

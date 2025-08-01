@@ -55,7 +55,8 @@ import com.yukthitech.persistence.repository.annotations.JoinOperator;
 import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.annotations.OrderByType;
 import com.yukthitech.persistence.repository.executors.QueryExecutionContext;
-import com.yukthitech.persistence.repository.executors.proxy.ProxyEntityCreator;
+import com.yukthitech.persistence.repository.executors.proxy.ProxyEntity;
+import com.yukthitech.persistence.repository.executors.proxy.ProxyResultObject;
 import com.yukthitech.persistence.repository.search.DynamicResultField;
 import com.yukthitech.persistence.repository.search.IDynamicSearchResult;
 import com.yukthitech.persistence.repository.search.SearchQuery;
@@ -74,6 +75,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class ConditionQueryBuilder implements Cloneable
 {
+	private static final String ID_FIELD_CODE = "RID_0";
+	
 	/**
 	 * Table information required by the query
 	 * 
@@ -432,6 +435,11 @@ public class ConditionQueryBuilder implements Cloneable
 	 * to be fetched.
 	 */
 	private Integer limitRowParameterIndex;
+	
+	/**
+	 * Flag indicating if the expected output results have any relation fields or not.
+	 */
+	private boolean containsRelationResults = false;
 
 	public ConditionQueryBuilder(EntityDetails entityDetails)
 	{
@@ -974,9 +982,8 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param resultProperty
 	 * @param entityFieldExpression
 	 * @param methodDesc
-	 * @return Field code representing the newly added field.
 	 */
-	public String addResultField(String resultProperty, Class<?> resultPropertyType, Type resultGenericPropertyType, String entityFieldExpression, String methodDesc)
+	public void addResultField(String resultProperty, Class<?> resultPropertyType, Type resultGenericPropertyType, String entityFieldExpression, String methodDesc)
 	{
 		// if a field is already added as direct return value
 		if(isSingleFieldReturn)
@@ -1015,6 +1022,24 @@ public class ConditionQueryBuilder implements Cloneable
 			{
 				throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in result parameter '%s' of '%s'", entityFieldExpression, entityFieldExpression, methodDesc));
 			}
+			
+			if(resultField.fieldDetails.isRelationField())
+			{
+				if(!this.containsRelationResults)
+				{
+					ResultField idResultField = new ResultField(null, ID_FIELD_CODE, entityDetails.getIdField().getField().getType());
+					idResultField.fieldDetails = entityDetails.getIdField();
+					idResultField.table = codeToTable.get(defTableCode);
+					resultFields.add(idResultField);
+					
+					this.containsRelationResults = true;
+				}
+				
+				if(!resultField.fieldDetails.isTableOwned())
+				{
+					return;
+				}
+			}
 
 			resultField.table = codeToTable.get(defTableCode);
 			resultFields.add(resultField);
@@ -1024,8 +1049,8 @@ public class ConditionQueryBuilder implements Cloneable
 			{
 				isSingleFieldReturn = true;
 			}
-
-			return resultField.code;
+			
+			return;
 		}
 
 		// if the mapping is for nested entity field (with foreign key
@@ -1035,6 +1060,15 @@ public class ConditionQueryBuilder implements Cloneable
 		resultField.table = tableInfo;
 		resultField.fieldDetails = fieldDetailsHolder.getValue();
 
+		if(resultField.fieldDetails.isRelationField())
+		{
+			if(!resultField.fieldDetails.isTableOwned())
+			{
+				throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in result parameter '%s' of '%s' (non-entity owned subfields are not supported)", 
+						entityFieldExpression, entityFieldExpression, methodDesc));
+			}
+		}
+		
 		// TODO: If end field represents a collection, check if it can be
 		// supported, if not throw exception
 		// Note - Reverse mapping property has to be created for such properties
@@ -1047,8 +1081,6 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			isSingleFieldReturn = true;
 		}
-		
-		return resultField.code;
 	}
 
 	/**
@@ -1331,6 +1363,7 @@ public class ConditionQueryBuilder implements Cloneable
 		RepositoryFactory repositoryFactory = persistenceExecutionContext.getRepositoryFactory();
 		
 		boolean isEntityResultType = (resultType.getAnnotation(Table.class) != null);
+		Object idVal = null;
 
 		for(ResultField resultField : this.resultFields)
 		{
@@ -1339,6 +1372,13 @@ public class ConditionQueryBuilder implements Cloneable
 			// ignore null values
 			if(value == null)
 			{
+				continue;
+			}
+			
+			if(ID_FIELD_CODE.equals(resultField.code))
+			{
+				idVal = conversionService.convertToJavaType(value, resultField.fieldDetails);
+				idVal = ConvertUtils.convert(idVal, resultField.fieldType);
 				continue;
 			}
 
@@ -1352,7 +1392,7 @@ public class ConditionQueryBuilder implements Cloneable
 					foreignConstraint = resultField.fieldDetails.getForeignConstraintDetails();
 					foreignEntityDetails = foreignConstraint.getTargetEntityDetails();
 
-					value = ProxyEntityCreator.newProxyById(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
+					value = ProxyEntity.newProxyById(foreignEntityDetails, repositoryFactory.getRepositoryForEntity((Class) foreignEntityDetails.getEntityType()), value);
 				}
 				//if this is extension field
 				else if(resultField.property.startsWith("@"))
@@ -1410,8 +1450,18 @@ public class ConditionQueryBuilder implements Cloneable
 		if(isEntityResultType)
 		{
 			ICrudRepository<?> resultRepo = repositoryFactory.getRepositoryForEntity(resultType);
+			result = (T) ProxyEntity.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, Collections.emptyMap());
+		}
+		else if(containsRelationResults)
+		{
+			// Id should not be null, when relations are involved
+			if(idVal == null)
+			{
+				throw new InvalidStateException("No id-value found for result object with relations");
+			}
 			
-			result = (T) ProxyEntityCreator.newProxyByEntity(resultRepo.getEntityDetails(), resultRepo, result, Collections.emptyMap());
+			ICrudRepository<?> resultRepo = repositoryFactory.getRepositoryForEntity(entityDetails.getEntityType());
+			result = (T) ProxyResultObject.newProxy(resultRepo.getEntityDetails(), resultRepo, result, idVal);
 		}
 		
 		return result;

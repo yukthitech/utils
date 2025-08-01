@@ -33,14 +33,14 @@ public class TMultiLevelRepo extends TestSuiteBase
 	@Override
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
 	{
-		cleanFactoryAfterClass(factory);
+		cleanFactory(factory);
 		IEmpRepository repo = factory.getRepository(IEmpRepository.class);
 		repo.save(new Employee("1230", "user0@test.com", "user1", "1234560", 20));
 		repo.save(new Employee("1231", "user1@test.com", "user2", "1234561", 25));
 	}
 
 	@Override
-	protected void cleanFactoryAfterClass(RepositoryFactory factory)
+	protected void cleanFactory(RepositoryFactory factory)
 	{
 		//cleanup the emp table
 		factory.dropRepository(Employee.class);

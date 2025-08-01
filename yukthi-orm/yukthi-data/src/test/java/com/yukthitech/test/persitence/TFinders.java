@@ -45,7 +45,9 @@ public class TFinders extends TestSuiteBase
 	@Override
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
 	{
-		cleanFactoryAfterClass(factory);
+		//cleanup the emp table
+		factory.dropRepository(Employee.class);
+
 		IEmployeeRepository repo = factory.getRepository(IEmployeeRepository.class);
 		repo.deleteAll();
 		
@@ -57,13 +59,6 @@ public class TFinders extends TestSuiteBase
 		repo.save(new Employee("1235", "user5@test.com", "user5", "12345644", 45));
 		
 		repo.save(new Employee("1236", "user6@test.com", null, "12345646", 46));
-	}
-
-	@Override
-	protected void cleanFactoryAfterClass(RepositoryFactory factory)
-	{
-		//cleanup the emp table
-		factory.dropRepository(Employee.class);
 	}
 	
 	@Test(dataProvider = "repositoryFactories")

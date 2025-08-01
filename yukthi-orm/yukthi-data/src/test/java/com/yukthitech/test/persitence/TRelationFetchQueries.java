@@ -34,13 +34,17 @@ import com.yukthitech.test.persitence.entity.ICustomerRepository;
 import com.yukthitech.test.persitence.entity.IOrderRepository;
 import com.yukthitech.test.persitence.entity.Order;
 import com.yukthitech.test.persitence.entity.OrderItem;
+import com.yukthitech.test.persitence.queries.CustomerAddressSearchResult;
+import com.yukthitech.test.persitence.queries.CustomerGroupSearchResult;
+import com.yukthitech.test.persitence.queries.CustomerSearchResult;
+import com.yukthitech.test.persitence.queries.OrderSearchResult;
 import com.yukthitech.utils.CommonUtils;
 
 /**
  * Ensures the subrelation entities are fetched properly.
  * @author akiran
  */
-public class TRelationFetch extends TestSuiteBase
+public class TRelationFetchQueries extends TestSuiteBase
 {
 	@Override
 	protected void initFactoryBeforeClass(RepositoryFactory factory)
@@ -52,7 +56,6 @@ public class TRelationFetch extends TestSuiteBase
 		factory.dropRepository(CustomerAddress.class);
 		factory.dropRepository(CustomerGroup.class);
 
-		
 		GenericRepository genericRepository = new GenericRepository(factory);
 		
 		CustomerGroup group1 = new CustomerGroup("Group1", null);
@@ -89,12 +92,18 @@ public class TRelationFetch extends TestSuiteBase
 	 * 		Customer from Order
 	 */
 	@Test(dataProvider = "repositoryFactories")
-	public void testOwnedRelationFetch(RepositoryFactory factory)
+	public void testOwnedRelationFetchByQuery(RepositoryFactory factory)
 	{
 		IOrderRepository repo = factory.getRepository(IOrderRepository.class);
 		
-		Order order = repo.findOrderByOrderNo(10);
+		OrderSearchResult order = repo.fetchOrder(10);
+		
+		// Ensure relation is fetched properly
 		Assert.assertEquals(order.getCustomer().getName(), "Customer1");
+		
+		// Ensure other fields are also working
+		Assert.assertEquals(order.getTitle(), "order1");
+		Assert.assertEquals(order.getOrderNo(), 10);
 	}
 
 	/**
@@ -106,8 +115,13 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		ICustomerAddressRepository repo = factory.getRepository(ICustomerAddressRepository.class);
 		
-		CustomerAddress address = repo.findByPropertyId("add1");
+		CustomerAddressSearchResult address = repo.fetchAddress("add1");
+		
+		// Ensure mapped relation is fetched
 		Assert.assertEquals(address.getCustomer().getName(), "Customer1");
+		
+		// Check other fields
+		Assert.assertEquals(address.getCity(), "city");
 	}
 
 	/**
@@ -119,7 +133,7 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		IOrderRepository repo = factory.getRepository(IOrderRepository.class);
 		
-		Order order = repo.findOrderByOrderNo(10);
+		OrderSearchResult order = repo.fetchOrder(10);
 		
 		//Ensure multi valued field is fetched properly
 		Assert.assertEquals(order.getItems().size(), 2);
@@ -140,7 +154,7 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		ICustomerRepository repo = factory.getRepository(ICustomerRepository.class);
 
-		Customer customer = repo.findByName("Customer1");
+		CustomerSearchResult customer = repo.fetchCustomer("Customer1");
 		
 		//Ensure multi valued field is fetched properly
 		Assert.assertEquals(customer.getCustomerGroups().size(), 2);
@@ -161,7 +175,7 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		ICustomerGroupRepository repo = factory.getRepository(ICustomerGroupRepository.class);
 
-		CustomerGroup customerGroup = repo.findByName("Group1");
+		CustomerGroupSearchResult customerGroup = repo.fetchGroup("Group1");
 		
 		//Ensure multi valued field is fetched properly
 		Assert.assertEquals(customerGroup.getCustomers().size(), 2);
@@ -183,7 +197,7 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		ICustomerAddressRepository repo = factory.getRepository(ICustomerAddressRepository.class);
 		
-		CustomerAddress address = repo.findByPropertyId("add1");
+		CustomerAddressSearchResult address = repo.fetchAddress("add1");
 		Assert.assertEquals(address.getCustomer().getName(), "Customer1");
 		
 		List<Order> orders = address.getCustomer().getOrders();
@@ -206,7 +220,7 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		IOrderRepository repo = factory.getRepository(IOrderRepository.class);
 		
-		Order order = repo.findOrderByOrderNo(10);
+		OrderSearchResult order = repo.fetchOrder(10);
 		
 		//Ensure multi valued field is fetched properly
 		Assert.assertEquals(order.getItems().size(), 2);
@@ -223,7 +237,7 @@ public class TRelationFetch extends TestSuiteBase
 	{
 		ICustomerRepository repo = factory.getRepository(ICustomerRepository.class);
 
-		Customer customer = repo.findByName("Customer1");
+		CustomerSearchResult customer = repo.fetchCustomer("Customer1");
 		
 		//Ensure multi valued field is fetched properly
 		Assert.assertEquals(customer.getCustomerGroups().size(), 2);
