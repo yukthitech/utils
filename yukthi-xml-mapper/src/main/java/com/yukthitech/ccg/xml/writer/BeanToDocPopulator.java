@@ -34,7 +34,7 @@ import com.yukthitech.ccg.xml.annotations.CollectionElement;
 import com.yukthitech.ccg.xml.annotations.XmlAttribute;
 import com.yukthitech.ccg.xml.annotations.XmlElement;
 import com.yukthitech.ccg.xml.annotations.XmlIgnore;
-import com.yukthitech.utils.beans.BeanProperty;
+import com.yukthitech.utils.PropertyAccessor.Property;
 
 /**
  * Populates data from bean to document.
@@ -65,7 +65,7 @@ public class BeanToDocPopulator
 	 * @param value
 	 * @param prop
 	 */
-	private static void addAttributableProperty(Document document, Element element, Object value, BeanProperty prop)
+	private static void addAttributableProperty(Document document, Element element, Object value, Property prop)
 	{
 		XmlAttribute attr = prop.getAnnotation(XmlAttribute.class);
 		String valueStr = toAttributeString(value);
@@ -174,7 +174,7 @@ public class BeanToDocPopulator
 	 * @param value
 	 * @param prop
 	 */
-	private static void createSubnode(Document document, Element parentElem, Object value, BeanProperty prop, XmlWriterConfig writerConfig)
+	private static void createSubnode(Document document, Element parentElem, Object value, Property prop, XmlWriterConfig writerConfig)
 	{
 		XmlElement elem = prop.getAnnotation(XmlElement.class);
 		String name = ( elem == null || StringUtils.isBlank(elem.name()) ) ? prop.getName() : elem.name();
@@ -185,7 +185,7 @@ public class BeanToDocPopulator
 			
 			if(colElem != null)
 			{
-				populateCollectionNode(document, parentElem, value, prop.getReadMethod().getGenericReturnType(), writerConfig, colElem.value());
+				populateCollectionNode(document, parentElem, value, prop.getGetter().getGenericReturnType(), writerConfig, colElem.value());
 				return;
 			}
 		}
@@ -193,7 +193,7 @@ public class BeanToDocPopulator
 		Element newElem = document.createElement(name);
 		parentElem.appendChild(newElem);
 		
-		populateElement(document, newElem, value, prop.getReadMethod().getGenericReturnType(), writerConfig);
+		populateElement(document, newElem, value, prop.getGetter().getGenericReturnType(), writerConfig);
 	}
 	
 	/**
@@ -247,10 +247,10 @@ public class BeanToDocPopulator
 			return;
 		}
 
-		List<BeanProperty> properties = XmlBeanWriter.getReadProperties(bean.getClass(), writerConfig);
+		List<Property> properties = XmlBeanWriter.getReadProperties(bean.getClass(), writerConfig);
 		Object value = null;
 		
-		for(BeanProperty prop : properties)
+		for(Property prop : properties)
 		{
 			//skip property which is marked with @XmlIgnore
 			if(prop.getAnnotation(XmlIgnore.class) != null)

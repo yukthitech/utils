@@ -15,10 +15,14 @@
  */
 package com.yukthitech.utils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -200,6 +204,110 @@ public class PropertyAccessor
 		public Field getField()
 		{
 			return field;
+		}
+		
+		public <A extends Annotation> A getAnnotation(Class<A> type)
+		{
+			List<AnnotatedElement> lst = Arrays.asList(field, getter, setter, adder);
+			
+			for(AnnotatedElement elem : lst)
+			{
+				if(elem == null)
+				{
+					continue;
+				}
+				
+				A res = elem.getAnnotation(type);
+				
+				if(res != null)
+				{
+					return res;
+				}
+			}
+
+			return null;
+		}
+		
+		public Object getValue(Object bean)
+		{
+			if(getter == null)
+			{
+				throw new InvalidStateException("No property get-method found with name '{}' in bean type: {}", name, bean.getClass().getName());
+			}
+
+			try
+			{
+				return getter.invoke(bean);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while fetching value of property '{}' from bean of type: {}", name, bean.getClass().getName(), ex);
+			}
+		}
+		
+		public void setValue(Object bean, Object value)
+		{
+			if(setter == null)
+			{
+				throw new InvalidStateException("No property set-method found with name '{}' in bean type: {}", name, bean.getClass().getName());
+			}
+
+			try
+			{
+				setter.invoke(bean, value);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while setting value of property '{}' on bean of type: {}", name, bean.getClass().getName(), ex);
+			}
+		}
+		
+		public Class<?> getType()
+		{
+			if(field != null)
+			{
+				return field.getType();
+			}
+			
+			if(getter != null)
+			{
+				return getter.getReturnType();
+			}
+			
+			if(setter != null)
+			{
+				return setter.getParameterTypes()[0];
+			}
+			
+			if(adder != null)
+			{
+				return adder.getParameterTypes()[0];
+			}
+			
+			return null;
+		}
+		
+		public Type getGenericType()
+		{
+			if(field != null)
+			{
+				return field.getGenericType();
+			}
+			
+			if(getter != null)
+			{
+				return getter.getGenericReturnType();
+			}
+			
+			if(setter != null)
+			{
+				return setter.getGenericParameterTypes()[0];
+			}
+			
+			if(adder != null)
+			{
+				return adder.getGenericParameterTypes()[0];
+			}
+			
+			return null;
 		}
 		
 		/* (non-Javadoc)
@@ -593,18 +701,7 @@ public class PropertyAccessor
 			throw new InvalidStateException("No property found with name '{}' in bean type: {}", prop, bean.getClass().getName());
 		}
 		
-		if(property.getter == null)
-		{
-			throw new InvalidStateException("No property get-method found with name '{}' in bean type: {}", prop, bean.getClass().getName());
-		}
-
-		try
-		{
-			return property.getter.invoke(bean);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while fetching value of property '{}' from bean of type: {}", prop, bean.getClass().getName(), ex);
-		}
+		return property.getValue(bean);
 	}
 	
 	/**
@@ -633,14 +730,8 @@ public class PropertyAccessor
 		{
 			throw new InvalidStateException("No property set-method found with name '{}' in bean type: {}", prop, bean.getClass().getName());
 		}
-
-		try
-		{
-			property.setter.invoke(bean, value);
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while setting value of property '{}' on bean of type: {}", prop, bean.getClass().getName(), ex);
-		}
+		
+		property.setValue(bean, value);
 	}
 
 	/**

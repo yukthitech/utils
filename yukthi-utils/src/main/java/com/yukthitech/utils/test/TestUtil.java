@@ -41,6 +41,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.PropertyAccessor;
+import com.yukthitech.utils.PropertyAccessor.Property;
 
 /**
  * 
@@ -113,24 +115,24 @@ public class TestUtil
 	{
 		Method valueOfMet = null;
 		Enum<?> vals[] = null;
-		PropertyDescriptor props[] = null;
+		Collection<Property> props = null;
 		
 		for(Class<? extends Enum<?>> enumType : enumTypes)
 		{
 			valueOfMet = enumType.getDeclaredMethod("valueOf", String.class);
 			vals = (Enum[])enumType.getEnumConstants();
-			props = PropertyUtils.getPropertyDescriptors(enumType);
+			props = PropertyAccessor.getProperties(enumType).values();
 			
 			for(Enum<?> e : vals)
 			{
 				valueOfMet.invoke(null, e.name());
 				
 				//invoke read properties if any
-				for(PropertyDescriptor prop : props)
+				for(Property prop : props)
 				{
-					if(prop.getReadMethod() != null)
+					if(prop.getGetter() != null)
 					{
-						prop.getReadMethod().invoke(e);
+						prop.getGetter().invoke(e);
 					}
 				}
 			}
@@ -149,16 +151,16 @@ public class TestUtil
 	public static <T> T populateRandomValues(T bean) throws IllegalAccessException, InvocationTargetException, InstantiationException
 	{
 		Object value = null;
-		PropertyDescriptor properties[] = PropertyUtils.getPropertyDescriptors(bean.getClass());
+		Collection<Property> properties = PropertyAccessor.getProperties(bean.getClass()).values();
 		
 		//loop through properties
-		for(PropertyDescriptor prop : properties)
+		for(Property prop : properties)
 		{
 			//if it writeable property create random value
-			if(prop.getWriteMethod() != null)
+			if(prop.getSetter() != null)
 			{
-				value = getValueOfType(prop.getPropertyType());
-				prop.getWriteMethod().invoke(bean, value);
+				value = getValueOfType(prop.getGetter().getReturnType());
+				prop.getSetter().invoke(bean, value);
 			}
 		}
 		

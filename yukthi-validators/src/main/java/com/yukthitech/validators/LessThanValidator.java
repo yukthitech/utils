@@ -15,13 +15,12 @@
  */
 package com.yukthitech.validators;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.LessThan;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
@@ -55,8 +54,8 @@ public class LessThanValidator extends AbstractCrossConstraintValidator<LessThan
 		
 		try
 		{
-			otherValue = PropertyUtils.getSimpleProperty(bean, lessThanField);
-		}catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException ex)
+			otherValue = PropertyAccessor.getProperty(bean, lessThanField);
+		}catch(Exception ex)
 		{
 			throw new IllegalStateException("Invalid/inaccessible property \"" + lessThanField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
 		}

@@ -15,10 +15,7 @@
  */
 package com.yukthitech.validators;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.apache.commons.beanutils.PropertyUtils;
-
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.MandatoryOption;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
@@ -63,14 +60,14 @@ public class MandatoryOptionValidator extends AbstractCrossConstraintValidator<M
 			for(String otherField: fields)
 			{
 				field = otherField;
-				otherValue = PropertyUtils.getSimpleProperty(bean, otherField);
+				otherValue = PropertyAccessor.getProperty(bean, otherField);
 				
 				if(otherValue != null)
 				{
 					return true;
 				}
 			}
-		}catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException ex)
+		}catch(Exception ex)
 		{
 			throw new IllegalStateException("Invalid/inaccessible property \"" + field +"\" specified with MandatoryOption validator on field: " + bean.getClass().getName() + "." + super.field.getName());
 		}

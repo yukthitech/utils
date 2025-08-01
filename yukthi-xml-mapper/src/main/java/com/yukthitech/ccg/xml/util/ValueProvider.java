@@ -17,7 +17,7 @@ package com.yukthitech.ccg.xml.util;
 
 import java.util.Map;
 
-import org.apache.commons.beanutils.PropertyUtils;
+import com.yukthitech.utils.PropertyAccessor;
 
 public interface ValueProvider
 {
@@ -53,7 +53,7 @@ public interface ValueProvider
 		{
 			try
 			{
-				return PropertyUtils.getProperty(rootBean, name);
+				return PropertyAccessor.getProperty(rootBean, name);
 			} catch(Exception ex)
 			{
 				throw new IllegalStateException("An error occurred while invoking property " + name + " on bean " + rootBean.getClass().getName(), ex);

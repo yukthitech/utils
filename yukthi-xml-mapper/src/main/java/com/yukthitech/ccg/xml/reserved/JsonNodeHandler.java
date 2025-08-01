@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,7 @@ import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IParserHandler;
 import com.yukthitech.ccg.xml.XMLAttributeMap;
 import com.yukthitech.ccg.xml.XMLLoadException;
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -133,7 +133,7 @@ public class JsonNodeHandler implements IReserveNodeHandler
 		
 		try
 		{
-			PropertyUtils.setProperty(parent, name, value);
+			PropertyAccessor.setProperty(parent, name, value);
 		}catch(Exception ex)
 		{
 			throw new XMLLoadException("Failed to set bean of type '" + beanType.getName() + "' as property '" + name + "' on bean of type: " + 

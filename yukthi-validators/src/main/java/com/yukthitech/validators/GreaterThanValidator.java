@@ -15,13 +15,12 @@
  */
 package com.yukthitech.validators;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.GreaterThan;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
@@ -56,8 +55,8 @@ public class GreaterThanValidator extends AbstractCrossConstraintValidator<Great
 		
 		try
 		{
-			otherValue = PropertyUtils.getSimpleProperty(bean, greaterThanField);
-		}catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException ex)
+			otherValue = PropertyAccessor.getProperty(bean, greaterThanField);
+		}catch(Exception ex)
 		{
 			throw new IllegalStateException("Invalid/inaccessible property \"" + greaterThanField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
 		}

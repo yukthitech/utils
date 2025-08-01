@@ -31,7 +31,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.xml.sax.Locator;
 
 import com.yukthitech.ccg.xml.reserved.BeanNodeHandler;
@@ -47,6 +46,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
 import com.yukthitech.ccg.xml.util.Validateable;
 import com.yukthitech.ccg.xml.util.ValueProvider;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -1205,7 +1205,7 @@ public class DefaultParserHandler implements IParserHandler
 				{
 					// return CCGUtility.invokeGetProperty(rootBean, name, null,
 					// false);
-					return "" + PropertyUtils.getProperty(rootBean, name);
+					return "" + PropertyAccessor.getProperty(rootBean, name);
 				} catch(Exception ex)
 				{
 					throw new IllegalStateException("An error occurred while invoking property " + name + " on bean " + rootBean.getClass().getName(), ex);

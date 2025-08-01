@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,8 @@ import org.w3c.dom.Element;
 
 import com.yukthitech.ccg.xml.DefaultParserHandler;
 import com.yukthitech.ccg.xml.XMLConstants;
-import com.yukthitech.utils.beans.BeanProperty;
+import com.yukthitech.utils.PropertyAccessor;
+import com.yukthitech.utils.PropertyAccessor.Property;
 
 /**
  * Helps in converting java beans into xml.
@@ -46,7 +48,7 @@ import com.yukthitech.utils.beans.BeanProperty;
  */
 public class XmlBeanWriter
 {
-	private static Map<Class<?>, List<BeanProperty>> typeToProperties = new HashMap<Class<?>, List<BeanProperty>>();
+	private static Map<Class<?>, List<Property>> typeToProperties = new HashMap<>();
 	
 	public static final String DEF_DATE_FORMAT_STR = "dd/MM/yyyy hh:mm:ss:SSS aa";
 	
@@ -64,17 +66,16 @@ public class XmlBeanWriter
 	 * @param type type for which properties needs to be fetched
 	 * @return properties
 	 */
-	synchronized static List<BeanProperty> getReadProperties(Class<?> type, XmlWriterConfig writerConfig)
+	synchronized static List<Property> getReadProperties(Class<?> type, XmlWriterConfig writerConfig)
 	{
-		List<BeanProperty> properties = typeToProperties.get(type);
+		List<Property> properties = typeToProperties.get(type);
 		
 		if(properties != null)
 		{
 			return properties;
 		}
 		
-		boolean readCompatible = writerConfig.isReadCompatible();
-		properties = BeanProperty.loadProperties(type, true, readCompatible, true);
+		properties = new ArrayList<>(PropertyAccessor.getProperties(type).values()); 
 		typeToProperties.put(type, properties);
 		
 		return properties;

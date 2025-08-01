@@ -15,10 +15,7 @@
  */
 package com.yukthitech.validators;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.apache.commons.beanutils.PropertyUtils;
-
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.MatchWith;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
@@ -46,8 +43,8 @@ public class MatchWithValidator extends AbstractCrossConstraintValidator<MatchWi
 		
 		try
 		{
-			otherValue = PropertyUtils.getSimpleProperty(bean, matchWithField);
-		}catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException ex)
+			otherValue = PropertyAccessor.getProperty(bean, matchWithField);
+		}catch(Exception ex)
 		{
 			throw new IllegalStateException("Invalid/inaccessible property \"" + matchWithField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
 		}
