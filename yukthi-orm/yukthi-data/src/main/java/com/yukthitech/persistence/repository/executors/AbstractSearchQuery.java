@@ -15,7 +15,6 @@
  */
 package com.yukthitech.persistence.repository.executors;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -25,7 +24,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.TreeSet;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +42,8 @@ import com.yukthitech.persistence.repository.annotations.ResultMapping;
 import com.yukthitech.persistence.repository.annotations.SearchResult;
 import com.yukthitech.persistence.repository.executors.builder.ConditionQueryBuilder;
 import com.yukthitech.persistence.repository.search.IDynamicSearchResult;
+import com.yukthitech.utils.PropertyAccessor;
+import com.yukthitech.utils.PropertyAccessor.Property;
 import com.yukthitech.utils.annotations.RecursiveAnnotationFactory;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 
@@ -262,13 +262,17 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 			{
 				try
 				{
-					PropertyDescriptor propertyDescriptor = null;
+					Property propertyDescriptor = null;
 					Object returnSampleBean = this.returnType.getConstructor().newInstance();
 					
 					for(ResultMapping mapping : mappings)
 					{
-						propertyDescriptor = PropertyUtils.getPropertyDescriptor(returnSampleBean, mapping.property());
-						conditionQueryBuilder.addResultField(mapping.property(), propertyDescriptor.getPropertyType(), propertyDescriptor.getReadMethod().getGenericReturnType(), mapping.entityField(), methodDesc);
+						propertyDescriptor = PropertyAccessor.getProperty(returnSampleBean.getClass(), mapping.property()); 
+						conditionQueryBuilder.addResultField(mapping.property(), 
+								propertyDescriptor.getGetter().getReturnType(), 
+								propertyDescriptor.getGetter().getGenericReturnType(), 
+								mapping.entityField(), 
+								methodDesc);
 					}
 				}catch(Exception ex)
 				{

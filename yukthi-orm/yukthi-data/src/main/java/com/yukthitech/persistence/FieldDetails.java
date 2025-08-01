@@ -22,12 +22,11 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.GenerationType;
 
-import org.apache.commons.beanutils.PropertyUtils;
-
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.NotUpdateable;
 import com.yukthitech.persistence.repository.executors.proxy.IProxyEntity;
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -323,7 +322,7 @@ public class FieldDetails
 				}
 				else
 				{
-					return PropertyUtils.getProperty(bean, field.getName());
+					return PropertyAccessor.getProperty(bean, field.getName());
 				}
 			}
 			else

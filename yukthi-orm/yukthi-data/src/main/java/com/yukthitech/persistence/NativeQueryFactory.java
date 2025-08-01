@@ -23,11 +23,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
@@ -181,7 +181,7 @@ public class NativeQueryFactory
 				property = matcher.group(1);
 				matcher.appendReplacement(finalQuery, "?");
 				
-				outputParamValues.add(PropertyUtils.getProperty(context, property));
+				outputParamValues.add(PropertyAccessor.getProperty(context, property));
 			}
 			
 			matcher.appendTail(finalQuery);

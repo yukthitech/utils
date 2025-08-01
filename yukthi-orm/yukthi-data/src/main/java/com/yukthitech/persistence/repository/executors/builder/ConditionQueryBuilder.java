@@ -30,8 +30,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.Table;
 
-import org.apache.commons.beanutils.PropertyUtils;
-
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.ExtendedTableDetails;
 import com.yukthitech.persistence.ExtendedTableEntity;
@@ -63,6 +61,7 @@ import com.yukthitech.persistence.repository.search.SearchQuery;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidConfigurationException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -1205,7 +1204,7 @@ public class ConditionQueryBuilder implements Cloneable
 			//for non-method level conditions fetch the value
 			if(condition.index >= 0)
 			{
-				value = PropertyUtils.getProperty(context, condition.getConditionExpression());
+				value = PropertyAccessor.getProperty(context, condition.getConditionExpression());
 				
 				if(condition.fieldDetails != null)
 				{
@@ -1443,7 +1442,7 @@ public class ConditionQueryBuilder implements Cloneable
 				continue;
 			}
 
-			PropertyUtils.setProperty(result, resultField.property, value);
+			PropertyAccessor.setProperty(result, resultField.property, value);
 		}
 
 		//if return type is target entity type, wrap result with proxy to take care of sub relations

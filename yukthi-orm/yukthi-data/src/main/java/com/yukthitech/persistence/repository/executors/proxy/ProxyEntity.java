@@ -15,14 +15,11 @@
  */
 package com.yukthitech.persistence.repository.executors.proxy;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.beanutils.PropertyUtils;
 
 import com.yukthitech.persistence.EntityDetails;
 import com.yukthitech.persistence.FieldDetails;
@@ -34,6 +31,7 @@ import com.yukthitech.persistence.repository.annotations.Operator;
 import com.yukthitech.persistence.repository.search.SearchCondition;
 import com.yukthitech.persistence.repository.search.SearchQuery;
 import com.yukthitech.utils.ObjectWrapper;
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
 
 /**
@@ -140,9 +138,9 @@ public class ProxyEntity
 			try
 			{
 				String idFieldName = entityDetails.getIdField().getName();
-				PropertyDescriptor propertyDesc = PropertyUtils.getPropertyDescriptor(entityType.getConstructor().newInstance(), idFieldName);
+				PropertyAccessor.Property property = PropertyAccessor.getProperties(entityType).get(idFieldName);
 				
-				this.idGetter = propertyDesc != null ? propertyDesc.getReadMethod() : null;
+				this.idGetter = property != null ? property.getGetter() : null;
 			}catch(Exception ex)
 			{
 				throw new IllegalStateException("An error occurred while fetch id getter for entity type - " + entityType.getName(), ex);
