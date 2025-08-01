@@ -15,17 +15,22 @@
  */
 package com.yukthitech.utils;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.utils.exceptions.InvalidArgumentException;
@@ -135,6 +140,198 @@ public class PropertyAccessor
 			
 			return builder.toString();
 		}
+	}
+	
+	/**
+	 * Represents a property of a bean.
+	 */
+	public static class Property
+	{
+		/**
+		 * Name of the property.
+		 */
+		private String name;
+		
+		/**
+		 * Getter of property.
+		 */
+		private Method getter;
+		
+		/**
+		 * Setter of property.
+		 */
+		private Method setter;
+		
+		/**
+		 * Adder of property.
+		 */
+		private Method adder;
+		
+		/**
+		 * Corresponding field of property.
+		 */
+		private Field field;
+
+		public Property(String name)
+		{
+			this.name = name;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public Method getGetter()
+		{
+			return getter;
+		}
+
+		public Method getSetter()
+		{
+			return setter;
+		}
+		
+		public Method getAdder()
+		{
+			return adder;
+		}
+
+		public Field getField()
+		{
+			return field;
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString()
+		{
+			StringBuilder builder = new StringBuilder(super.toString());
+			builder.append("[");
+
+			builder.append("Name: ").append(name);
+			builder.append(",").append("field: ").append(field != null ? field.getName() : "null");
+			builder.append(",").append("getter: ").append(getter != null ? getter.getName() : "null");
+			builder.append(",").append("setter: ").append(setter != null ? setter.getName() : "null");
+			builder.append(",").append("adder: ").append(adder != null ? adder.getName() : "null");
+
+			builder.append("]");
+			return builder.toString();
+		}
+
+	}
+	
+	private static Map<Class<?>, Map<String, Property>> propertyCache = new HashMap<>();
+	
+	public static synchronized Map<String, Property> getProperties(Class<?> beanType)
+	{
+		Map<String, Property> propMap = propertyCache.get(beanType);
+		
+		if(propMap != null)
+		{
+			return propMap;
+		}
+		
+		Map<String, Field> fieldMap = new HashMap<>();
+		Map<String, Method> setterMap = new HashMap<>();
+		Map<String, Method> getterMap = new HashMap<>();
+		Map<String, Method> adderMap = new HashMap<>();
+		
+		Set<String> names = new HashSet<String>();
+		
+		boolean firstTime = true;
+		
+		while(!beanType.getName().startsWith("java"))
+		{
+			Field[] fields = beanType.getDeclaredFields();
+			
+			for(Field field : fields)
+			{
+				fieldMap.put(field.getName(), field);
+				names.add(field.getName());
+			}
+			
+			if(!firstTime)
+			{
+				beanType = beanType.getSuperclass();
+				continue;
+			}
+			
+			// As only public methods are accessed, the method list is obtained on direct type
+			//   for parent classes it is skipped (as parent classes would have been already processed).
+			firstTime = false;
+			Method[] methods = beanType.getMethods();
+			
+			for(Method method : methods)
+			{
+				String name = method.getName();
+				Map<String, Method> map = null;
+				
+				if(name.startsWith("set") && name.length() > 3 && method.getParameterCount() == 1)
+				{
+					map = setterMap;
+					name = name.substring(3);
+				}
+				else if(name.startsWith("add") && name.length() > 3 && method.getParameterCount() == 1)
+				{
+					map = adderMap;
+					name = name.substring(3);
+				}
+				else if(name.startsWith("get") && name.length() > 3 && method.getParameterCount() == 0 && !void.class.equals(method.getReturnType()))
+				{
+					map = getterMap;
+					name = name.substring(3);
+				}
+				else if(name.startsWith("is") && name.length() > 2 && method.getParameterCount() == 0 && boolean.class.equals(method.getReturnType()))
+				{
+					map = getterMap;
+					name = name.substring(2);
+				}
+				else
+				{
+					continue;
+				}
+				
+				// ignore methods which are not starting with capital letter
+				//    after removing prefix
+				if(!Character.isUpperCase(name.charAt(0)))
+				{
+					continue;
+				}
+				
+				name = Character.toLowerCase(name.charAt(0)) + (name.length() == 1 ? "" : name.substring(1));
+				map.put(name, method);
+				names.add(name);
+			}
+			
+			beanType = beanType.getSuperclass();
+		}
+		
+		propMap = new HashMap<>();
+
+		for(String name : names)
+		{
+			Property prop = new Property(name);
+			prop.adder = adderMap.get(name);
+			prop.field = fieldMap.get(name);
+			prop.getter = getterMap.get(name);
+			prop.setter = setterMap.get(name);
+			
+			propMap.put(name, prop);
+		}
+		
+		propMap = Collections.unmodifiableMap(propMap);
+		
+		propertyCache.put(beanType, propMap);
+		return propMap;
+	}
+	
+	public static Property getProperty(Class<?> beanType, String name)
+	{
+		Map<String, Property> propMap = getProperties(beanType);
+		return propMap.get(name);
 	}
 	
 	/**
@@ -375,6 +572,7 @@ public class PropertyAccessor
 	 * @param prop
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	private static Object getBeanProperty(Object bean, String prop)
 	{
 		//handle special property - @this
@@ -383,10 +581,27 @@ public class PropertyAccessor
 			return bean;
 		}
 		
+		if(bean instanceof Map)
+		{
+			return ((Map) bean).get(prop);
+		}
+		
+		Property property = getProperties(bean.getClass()).get(prop);
+		
+		if(property == null)
+		{
+			throw new InvalidStateException("No property found with name '{}' in bean type: {}", prop, bean.getClass().getName());
+		}
+		
+		if(property.getter == null)
+		{
+			throw new InvalidStateException("No property get-method found with name '{}' in bean type: {}", prop, bean.getClass().getName());
+		}
+
 		try
 		{
-			return PropertyUtils.getProperty(bean, prop);
-		}catch(IllegalAccessException | NoSuchMethodException | InvocationTargetException ex)
+			return property.getter.invoke(bean);
+		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while fetching value of property '{}' from bean of type: {}", prop, bean.getClass().getName(), ex);
 		}
@@ -398,11 +613,30 @@ public class PropertyAccessor
 	 * @param prop
 	 * @param value
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void setBeanProperty(Object bean, String prop, Object value)
 	{
+		if(bean instanceof Map)
+		{
+			((Map) bean).put(prop, value);
+			return;
+		}
+		
+		Property property = getProperties(bean.getClass()).get(prop);
+		
+		if(property == null)
+		{
+			throw new InvalidStateException("No property found with name '{}' in bean type: {}", prop, bean.getClass().getName());
+		}
+		
+		if(property.setter == null)
+		{
+			throw new InvalidStateException("No property set-method found with name '{}' in bean type: {}", prop, bean.getClass().getName());
+		}
+
 		try
 		{
-			PropertyUtils.setProperty(bean, prop, value);
+			property.setter.invoke(bean, value);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while setting value of property '{}' on bean of type: {}", prop, bean.getClass().getName(), ex);
@@ -443,6 +677,10 @@ public class PropertyAccessor
 					if(curValue instanceof List)
 					{
 						curValue = ((List<Object>) curValue).get((Integer) elem.key);
+					}
+					else if(curValue.getClass().isArray())
+					{
+						curValue = Array.get(curValue, (Integer) elem.key);
 					}
 					else
 					{
@@ -677,5 +915,21 @@ public class PropertyAccessor
 				}
 			}
 		}
+	}
+	
+	public static Map<String, Object> describe(Object bean)
+	{
+		Map<String, Property> propMap = getProperties(bean.getClass());
+		Map<String, Object> res = new HashMap<>();
+		
+		for(Property prop : propMap.values())
+		{
+			if(prop.getter != null)
+			{
+				res.put(prop.name, getBeanProperty(bean, prop.name));
+			}
+		}
+		
+		return res;
 	}
 }

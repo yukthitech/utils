@@ -18,10 +18,10 @@ package com.yukthitech.utils.rest;
 import java.net.URI;
 import java.util.Map;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
+import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -55,7 +55,7 @@ public class GetRestRequest extends RestRequestWithBody<GetRestRequest>
 		
 		try
 		{
-			properties = PropertyUtils.describe(bean);
+			properties = PropertyAccessor.describe(bean);
 		}catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while extracting bean properties - {}", bean, ex);

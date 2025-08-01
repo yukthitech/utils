@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -248,7 +247,7 @@ public class CommonUtils
 			
 			try
 			{
-				value = PropertyUtils.getProperty(bean, key);
+				value = PropertyAccessor.getProperty(bean, key);
 			} catch(Exception ex)
 			{
 				// in case of error log a warning and ignore
@@ -443,8 +442,8 @@ public class CommonUtils
 			
 			for(Object obj : list)
 			{
-				value = (valueProp != null) ? PropertyUtils.getProperty(obj, valueProp) : obj;
-				map.put((K)PropertyUtils.getProperty(obj, keyProp), (V)value);
+				value = (valueProp != null) ? PropertyAccessor.getProperty(obj, valueProp) : obj;
+				map.put((K)PropertyAccessor.getProperty(obj, keyProp), (V)value);
 			}
 			
 			return map;
