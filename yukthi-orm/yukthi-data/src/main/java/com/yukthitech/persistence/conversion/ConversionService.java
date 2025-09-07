@@ -49,6 +49,7 @@ public class ConversionService
 		this.implicitCoverterProvider = coverterProvider;
 		addConverter(new StringDbConverter());
 		addConverter(new DateConverter());
+		addConverter(new EnumConverter());
 	}
 	
 	/**

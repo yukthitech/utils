@@ -39,7 +39,7 @@ public class ProxyBuilder
 		Class<?> cls = builder
 			.method(ElementMatchers.any()).intercept(InvocationHandlerAdapter.of(handler))
 			.make()
-			.load(ProxyBuilder.class.getClassLoader())
+			.load(baseType.getClassLoader())
 			.getLoaded();
 		
 		try
