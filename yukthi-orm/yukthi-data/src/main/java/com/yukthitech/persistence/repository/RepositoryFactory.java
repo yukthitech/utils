@@ -175,7 +175,7 @@ public class RepositoryFactory
 		EntityDetails entityDetails = fetchEntityDetails(repositoryType);
 		RepositoryProxy proxyImpl = new RepositoryProxy(dataStore, repositoryType, entityDetails, getExecutorFactory(), this);
 		
-		repo = (R)Proxy.newProxyInstance(RepositoryFactory.class.getClassLoader(), new Class<?>[] {repositoryType, IInternalRepository.class}, proxyImpl);
+		repo = (R)Proxy.newProxyInstance(repositoryType.getClassLoader(), new Class<?>[] {repositoryType, IInternalRepository.class}, proxyImpl);
 		typeToRepo.put(repositoryType, repo);
 		entityTypeToRepo.put(entityDetails.getEntityType(), repo);
 		
