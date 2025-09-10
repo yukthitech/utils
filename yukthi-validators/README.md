@@ -7,7 +7,7 @@ This project provides a set of custom validation annotations that extend the fun
 Here is a list of the custom validation annotations provided by this library:
 
 ### @EnableSelfValidation
-- **Purpose:** Enables a POJO class to self-validate.
+- **Purpose:** Enables a POJO class to self-validate. The classes using this annotation is expected to implement interface com.yukthitech.validation.ISelfValidation.
 - **Attributes:**
     - `message`: The error message to be used if the validation fails. Defaults to "Custom Error".
 
