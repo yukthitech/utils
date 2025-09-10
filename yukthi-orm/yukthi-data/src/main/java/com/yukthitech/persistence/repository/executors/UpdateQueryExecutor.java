@@ -545,7 +545,7 @@ public class UpdateQueryExecutor extends AbstractPersistQueryExecutor
 		}
 		
 		//if current field is relation field
-		if(field.isRelationField() && field.isTableOwned() && value != null)
+		if(field.isRelationField() && field.isTableOwned() && value != null && !(value instanceof Long))
 		{
 			//if current table owns the relation in same table, replace the entity value with foreign entity id value
 			value = field.getForeignConstraintDetails().getTargetEntityDetails().getIdField().getValue(value);
