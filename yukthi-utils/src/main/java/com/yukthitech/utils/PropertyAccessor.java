@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,8 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class PropertyAccessor
 {
+	private static Logger logger = Logger.getLogger(PropertyAccessor.class.getName());
+	
 	/**
 	 * Pattern for recognizing conditions within []
 	 */
@@ -1022,5 +1025,55 @@ public class PropertyAccessor
 		}
 		
 		return res;
+	}
+	
+	public static <T> T cloneObject(Object source, Class<T> targetType)
+	{
+		if(source == null)
+		{
+			return null;
+		}
+		
+		T target = null;
+		
+		try
+		{
+			target = targetType.getConstructor().newInstance();
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to created instance of target type: {}", targetType.getName(), ex);
+		}
+		
+		Map<String, Property> destProperties = getProperties(targetType);
+		Map<String, Property> srcProperties = getProperties(source.getClass());
+		
+		for(Map.Entry<String, Property> srcProp : srcProperties.entrySet())
+		{
+			Property targetProp = destProperties.get(srcProp.getKey());
+			
+			if(targetProp == null || targetProp.setter == null)
+			{
+				continue;
+			}
+			
+			Object value = srcProp.getValue().getValue(source);
+			
+			if(value == null)
+			{
+				continue;
+			}
+			
+			value = ConvertUtils.convert(value, targetProp.getType());
+			
+			try
+			{
+				targetProp.setValue(target, value);
+			}catch(Exception ex)
+			{
+				logger.warning(String.format("Failed to set property '{}' on target. Error: {}", srcProp.getKey(), "" + ex));
+			}
+		}
+		
+		return target;
 	}
 }
