@@ -59,7 +59,7 @@ public class FetchJoinEntityQueryExecutor extends AbstractSearchQuery
 			throw new InvalidArgumentException("Invalid field-name or non-joined field specified. [Field: '{}', Entity type: {}]", fieldName, entityDetails.getEntityType().getName());
 		}
 		
-		methodDesc = String.format("join-entity fetched '%s.%s'", entityDetails.getEntityType().getName(), fieldName);
+		methodDesc = String.format("join-entity fetch '%s.%s'", entityDetails.getEntityType().getName(), fieldName);
 
 		ForeignConstraintDetails foreignConstraintDetails = fieldDetails.getForeignConstraintDetails();
 		

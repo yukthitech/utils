@@ -524,7 +524,7 @@ public class ConditionQueryBuilder implements Cloneable
 		return newTableInfo;
 	}
 
-	private TableInfo getTableInfo(EntityDetails entityDetails, String entityFieldPath[], String paramType, String conditionExpr, String methodDesc, ObjectWrapper<FieldDetails> fieldDetailsWrapper)
+	private TableInfo getTableInfo(EntityDetails entityDetails, String entityFieldPath[], String paramType, String fieldExpr, String methodDesc, ObjectWrapper<FieldDetails> fieldDetailsWrapper)
 	{
 		EntityDetails currentEntityDetails = this.entityDetails, targetEntityDetails = null;
 		String currentProp = null;
@@ -555,7 +555,7 @@ public class ConditionQueryBuilder implements Cloneable
 					if(i != (maxIndex - 1))
 					{
 						throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in %s parameter '%s' of %s. "
-							+ "Extension field is used in middle/start of expression.", currentProp, paramType, conditionExpr, methodDesc));
+							+ "Extension field is used in middle/start of expression.", currentProp, paramType, fieldExpr, methodDesc));
 					}
 					
 					EntityDetails extendedEntityDetails = extendedTableDetails.toEntityDetails(currentEntityDetails);
@@ -564,7 +564,7 @@ public class ConditionQueryBuilder implements Cloneable
 					if(extendedEntityDetails.getFieldDetailsByField(entityFieldPath[i + 1]) == null)
 					{
 						throw new InvalidMappingException(String.format("Invalid field mapping '%s.%s' found in %s parameter '%s' of %s. "
-								+ "Invalid extension field name specified - %s.", currentProp, entityFieldPath[i], paramType, conditionExpr, methodDesc, entityFieldPath[i]));
+								+ "Invalid extension field name specified - %s.", currentProp, entityFieldPath[i], paramType, fieldExpr, methodDesc, entityFieldPath[i]));
 					}
 					
 					newTableInfo = propToTable.get(currentProp);
@@ -580,7 +580,8 @@ public class ConditionQueryBuilder implements Cloneable
 				}
 				else
 				{
-					throw new InvalidMappingException(String.format("Invalid field mapping '%s' found in %s parameter '%s' of %s", currentProp, paramType, conditionExpr, methodDesc));
+					throw new InvalidMappingException(String.format("Invalid field mapping '%s' [Full expression: %s] found in %s of %s", 
+							currentProp, fieldExpr, paramType,  methodDesc));
 				}
 			}
 
@@ -590,7 +591,8 @@ public class ConditionQueryBuilder implements Cloneable
 				// if end field is found to be entity instead of simple property
 				if(fieldDetails.isRelationField())
 				{
-					throw new InvalidMappingException(String.format("Non-simple field mapping '%s' found as %s parameter '%s' of %s", currentProp, paramType, conditionExpr, methodDesc));
+					throw new InvalidMappingException(String.format("Non-simple field mapping '%s' found as %s parameter '%s' of %s", 
+							currentProp, paramType, fieldExpr, methodDesc));
 				}
 
 				fieldDetailsWrapper.setValue(fieldDetails);
@@ -610,7 +612,7 @@ public class ConditionQueryBuilder implements Cloneable
 
 			if(!fieldDetails.isRelationField())
 			{
-				throw new InvalidMappingException(String.format("Non-relational field mapping '%s' found in %s parameter '%s' of %s", currentProp, paramType, conditionExpr, methodDesc));
+				throw new InvalidMappingException(String.format("Non-relational field mapping '%s' found in %s parameter '%s' of %s", currentProp, paramType, fieldExpr, methodDesc));
 			}
 
 			foreignConstraint = fieldDetails.getForeignConstraintDetails();
@@ -1055,7 +1057,7 @@ public class ConditionQueryBuilder implements Cloneable
 		// if the mapping is for nested entity field (with foreign key
 		// relationships)
 		ObjectWrapper<FieldDetails> fieldDetailsHolder = new ObjectWrapper<>();
-		TableInfo tableInfo = getTableInfo(entityDetails, entityFieldParts, "condition", entityFieldExpression, methodDesc, fieldDetailsHolder);
+		TableInfo tableInfo = getTableInfo(entityDetails, entityFieldParts, "result", entityFieldExpression, methodDesc, fieldDetailsHolder);
 		resultField.table = tableInfo;
 		resultField.fieldDetails = fieldDetailsHolder.getValue();
 
