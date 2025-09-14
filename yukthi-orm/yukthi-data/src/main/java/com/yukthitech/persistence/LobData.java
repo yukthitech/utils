@@ -15,12 +15,14 @@
  */
 package com.yukthitech.persistence;
 
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -31,16 +33,11 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public class LobData implements Closeable
 {
-	/**
-	 * File indicating the content
-	 */
-	private File file;
-
-	private FileInputStream fis = null;
+	private InputStream is = null;
 	
 	private Reader reader = null;
 	
-	private boolean textStream;
+	private boolean closed;
 	
 	public LobData(File file, boolean textStream)
 	{
@@ -48,65 +45,80 @@ public class LobData implements Closeable
 		{
 			throw new IllegalArgumentException("Specified file does not exist - " + file.getPath());
 		}
-		
-		this.file = file;
-		this.textStream = textStream;
+
+		try
+		{
+			if(textStream)
+			{
+				reader = new FileReader(file);
+			}
+			else
+			{
+				is = new FileInputStream(file);
+			}
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("Failed to open file: {}", file.getPath(), ex);
+		}
 	}
 	
+	public LobData(byte[] data)
+	{
+		this.is = new ByteArrayInputStream(data);
+	}
+	
+	public LobData(char[] data)
+	{
+		this.reader = new StringReader(new String(data));
+	}
+	
+	public LobData(String data)
+	{
+		this.reader = new StringReader(data);
+	}
+
 	/**
 	 * @return the {@link #textStream textStream}
 	 */
 	public boolean isTextStream()
 	{
-		return textStream;
+		return (reader != null);
 	}
 	
 	public Reader openReader()
 	{
-		if(reader != null)
+		if(closed)
 		{
-			return reader;
+			throw new InvalidStateException("Lob data is already closed");
 		}
 		
-		try
-		{
-			reader = new FileReader(file);
-			return reader;
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while opening file - {}", file.getPath(), ex);
-		}
+		return reader;
 	}
 	
 	public InputStream openStream()
 	{
-		if(fis != null)
+		if(closed)
 		{
-			return fis;
+			throw new InvalidStateException("Lob data is already closed");
 		}
 		
-		try
-		{
-			fis = new FileInputStream(file);
-			return fis;
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while opening file - {}", file.getPath(), ex);
-		}
+		return is;
 	}
 	
 	@Override
 	public void close()
 	{
-		if(fis != null)
+		closed = true;
+		
+		if(is != null)
 		{
 			try
 			{
-				fis.close();
-				fis = null;
+				is.close();
+				is = null;
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException("An error occurred while closing file stream - {}", file.getPath(), ex);
+				throw new InvalidStateException("An error occurred while closing stream", ex);
 			}
 		}
 		
@@ -118,25 +130,9 @@ public class LobData implements Closeable
 				reader = null;
 			}catch(Exception ex)
 			{
-				throw new InvalidStateException("An error occurred while closing file reader - {}", file.getPath(), ex);
+				throw new InvalidStateException("An error occurred while closing reader", ex);
 			}
 		}
 		
 	}
-	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString()
-	{
-		StringBuilder builder = new StringBuilder(super.toString());
-		builder.append("[");
-
-		builder.append("File: ").append(file.getPath());
-
-		builder.append("]");
-		return builder.toString();
-	}
-
 }

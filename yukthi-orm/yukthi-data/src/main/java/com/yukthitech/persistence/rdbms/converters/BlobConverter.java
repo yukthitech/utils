@@ -131,6 +131,11 @@ public class BlobConverter implements IPersistenceConverter
 					data = ZipUtils.unzipBytes(data);
 				}
 				
+				if(byte[].class.equals(javaType))
+				{
+					return data;
+				}
+				
 				return readObject(new ByteArrayInputStream(data));
 			}catch(Exception ex)
 			{
@@ -152,6 +157,11 @@ public class BlobConverter implements IPersistenceConverter
 					data = ZipUtils.unzipBytes(data);
 				}
 				
+				if(byte[].class.equals(javaType))
+				{
+					return data;
+				}
+
 				return readObject(blob.getBinaryStream());
 			}catch(Exception ex)
 			{
@@ -186,6 +196,11 @@ public class BlobConverter implements IPersistenceConverter
 			
 			return new LobData(file, false);
 		}
+		
+		if(javaObject instanceof byte[])
+		{
+			return new LobData((byte[]) javaObject);
+		}
 			
 		//convert java object into byte[]
 		byte dataBytes[] = toBytes(javaObject);
@@ -195,7 +210,7 @@ public class BlobConverter implements IPersistenceConverter
 			dataBytes = ZipUtils.zipBytes(dataBytes);
 		}
 		
-		return dataBytes;
+		return new LobData((byte[]) dataBytes);
 	}
 	
 	/**

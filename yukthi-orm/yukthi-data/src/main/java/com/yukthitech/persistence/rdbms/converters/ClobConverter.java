@@ -144,7 +144,7 @@ public class ClobConverter implements IPersistenceConverter
 			throw new UnsupportedOperationException(String.format("Non-string object is encountered for CLOB storage - {}", javaObject));
 		}
 
-		return javaObject;
+		return new LobData((String) javaObject);
 	}
 
 }
