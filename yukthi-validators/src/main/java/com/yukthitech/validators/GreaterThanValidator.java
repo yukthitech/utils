@@ -24,6 +24,8 @@ import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.GreaterThan;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
+import jakarta.validation.ConstraintValidatorContext;
+
 /**
  * Validator - Validator for {@link GreaterThan} constraint
  * @author akiran
@@ -48,7 +50,7 @@ public class GreaterThanValidator extends AbstractCrossConstraintValidator<Great
 	 * @see com.yukthitech.validation.cross.ICrossConstraintValidator#validate(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean isValid(Object bean, Object fieldValue)
+	public boolean isValid(ConstraintValidatorContext context, Object bean, Object fieldValue)
 	{
 		//obtain field value to be compared
 		Object otherValue = null;
@@ -58,7 +60,12 @@ public class GreaterThanValidator extends AbstractCrossConstraintValidator<Great
 			otherValue = PropertyAccessor.getProperty(bean, greaterThanField);
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("Invalid/inaccessible property \"" + greaterThanField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
+			String mssg = String.format("Invalid/inaccessible property '%s' specified with @GreaterThan validator in bean: %s", greaterThanField, bean.getClass().getName());
+			
+			context.buildConstraintViolationWithTemplate(mssg)
+				.addConstraintViolation();
+			
+			return false;
 		}
 		
 		//if other value is null or of different type

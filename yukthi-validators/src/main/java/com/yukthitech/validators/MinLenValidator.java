@@ -15,6 +15,7 @@
  */
 package com.yukthitech.validators;
 
+import com.yukthitech.validation.MisConfigurationException;
 import com.yukthitech.validation.annotations.MinLen;
 
 import jakarta.validation.ConstraintValidator;
@@ -49,10 +50,18 @@ public class MinLenValidator implements ConstraintValidator<MinLen, Object>
 			return true;
 		}
 		
-		int len = ValidatorUtils.getSize(MinLen.class, value, false);
-
-		//ensure value length is greater or equal to specified length value
-		return (len >= minLength);
+		try
+		{
+			int len = ValidatorUtils.getSize(MinLen.class, value, false);
+	
+			//ensure value length is greater or equal to specified length value
+			return (len >= minLength);
+		}catch(MisConfigurationException ex)
+		{
+			context.buildConstraintViolationWithTemplate(ex.getMessage())
+				.addConstraintViolation();
+			return false;
+		}
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.yukthitech.validation.IStringConvertible;
+import com.yukthitech.validation.MisConfigurationException;
 
 public class ValidatorUtils
 {
@@ -25,8 +26,8 @@ public class ValidatorUtils
 			return ((IStringConvertible) value).toStringValue();
 		}
 		
-		throw new IllegalStateException(String.format("Annotation %s is used on Non-string/non-string-convertible field. Value type: %s", 
-				annotation.getName(), value.getClass().getName()));
+		throw new MisConfigurationException("Annotation %s is used on Non-string/non-string-convertible field. Value type: %s", 
+				annotation.getName(), value.getClass().getName());
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -76,7 +77,7 @@ public class ValidatorUtils
 			return ((Map) value).size();
 		}
 
-		throw new IllegalStateException(String.format("Annotation %s is used on Non-string/non-string-convertible/non-collection/non-map field. Value type: %s", 
-				annotation.getName(), value.getClass().getName()));
+		throw new MisConfigurationException("Annotation %s is used on Non-string/non-string-convertible/non-collection/non-map field. Value type: %s", 
+				annotation.getName(), value.getClass().getName());
 	}
 }

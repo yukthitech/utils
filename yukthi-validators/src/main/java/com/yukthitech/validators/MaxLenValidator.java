@@ -15,6 +15,7 @@
  */
 package com.yukthitech.validators;
 
+import com.yukthitech.validation.MisConfigurationException;
 import com.yukthitech.validation.annotations.MaxLen;
 
 import jakarta.validation.ConstraintValidator;
@@ -49,10 +50,18 @@ public class MaxLenValidator implements ConstraintValidator<MaxLen, Object>
 			return true;
 		}
 		
-		int len = ValidatorUtils.getSize(MaxLen.class, value, false);
-		
-		//ensure value length is lesser or equal to specified length value
-		return (len <= maxLength);
+		try
+		{
+			int len = ValidatorUtils.getSize(MaxLen.class, value, false);
+			
+			//ensure value length is lesser or equal to specified length value
+			return (len <= maxLength);
+		}catch(MisConfigurationException ex)
+		{
+			context.buildConstraintViolationWithTemplate(ex.getMessage())
+				.addConstraintViolation();
+			return false;
+		}
 	}
 
 }

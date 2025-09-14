@@ -15,7 +15,7 @@
  */
 package com.yukthitech.validators;
 
-import com.yukthitech.validation.annotations.MinLen;
+import com.yukthitech.validation.MisConfigurationException;
 import com.yukthitech.validation.annotations.NotEmpty;
 
 import jakarta.validation.ConstraintValidator;
@@ -40,8 +40,16 @@ public class NotEmptyValidator implements ConstraintValidator<NotEmpty, Object>
 			return false;
 		}
 		
-		int len = ValidatorUtils.getSize(MinLen.class, value, true);		
-		return len > 0;
+		try
+		{
+			int len = ValidatorUtils.getSize(NotEmpty.class, value, true);		
+			return len > 0;
+		}catch(MisConfigurationException ex)
+		{
+			context.buildConstraintViolationWithTemplate(ex.getMessage())
+				.addConstraintViolation();
+			return false;
+		}
 	}
 
 }

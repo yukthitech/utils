@@ -19,6 +19,8 @@ import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.MatchWith;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
+import jakarta.validation.ConstraintValidatorContext;
+
 public class MatchWithValidator extends AbstractCrossConstraintValidator<MatchWith>
 {
 	private String matchWithField;
@@ -36,7 +38,7 @@ public class MatchWithValidator extends AbstractCrossConstraintValidator<MatchWi
 	 * @see com.yukthitech.validation.cross.ICrossConstraintValidator#validate(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean isValid(Object bean, Object fieldValue)
+	public boolean isValid(ConstraintValidatorContext context, Object bean, Object fieldValue)
 	{
 		//obtain other field value
 		Object otherValue = null;
@@ -46,7 +48,12 @@ public class MatchWithValidator extends AbstractCrossConstraintValidator<MatchWi
 			otherValue = PropertyAccessor.getProperty(bean, matchWithField);
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("Invalid/inaccessible property \"" + matchWithField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
+			String mssg = String.format("Invalid/inaccessible property '%s' specified with @MatchWith validator in bean: %s", matchWithField, bean.getClass().getName());
+			
+			context.buildConstraintViolationWithTemplate(mssg)
+				.addConstraintViolation();
+			
+			return false;
 		}
 		
 		//if current field value is null

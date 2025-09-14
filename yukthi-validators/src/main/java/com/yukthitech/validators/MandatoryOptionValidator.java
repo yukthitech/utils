@@ -19,6 +19,8 @@ import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.MandatoryOption;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
+import jakarta.validation.ConstraintValidatorContext;
+
 /**
  * Validatory for {@link MandatoryOption} constraint
  * @author akiran
@@ -43,7 +45,7 @@ public class MandatoryOptionValidator extends AbstractCrossConstraintValidator<M
 	 * @see com.yukthitech.validation.cross.ICrossConstraintValidator#validate(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean isValid(Object bean, Object fieldValue)
+	public boolean isValid(ConstraintValidatorContext context, Object bean, Object fieldValue)
 	{
 		//if value is provided for current field
 		if(fieldValue != null)
@@ -69,7 +71,12 @@ public class MandatoryOptionValidator extends AbstractCrossConstraintValidator<M
 			}
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("Invalid/inaccessible property \"" + field +"\" specified with MandatoryOption validator on field: " + bean.getClass().getName() + "." + super.field.getName());
+			String mssg = String.format("Invalid/inaccessible property '%s' specified with @MandatoryOption validator in bean: %s", field, bean.getClass().getName());
+			
+			context.buildConstraintViolationWithTemplate(mssg)
+				.addConstraintViolation();
+			
+			return false;
 		}
 		
 		return false;

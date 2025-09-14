@@ -24,6 +24,8 @@ import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.LessThanEquals;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
+import jakarta.validation.ConstraintValidatorContext;
+
 /**
  * Validator for {@link LessThanEquals} constraint
  * @author akiran
@@ -48,7 +50,7 @@ public class LessThanEqualsValidator extends AbstractCrossConstraintValidator<Le
 	 * @see com.yukthitech.validation.cross.ICrossConstraintValidator#validate(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean isValid(Object bean, Object fieldValue)
+	public boolean isValid(ConstraintValidatorContext context, Object bean, Object fieldValue)
 	{
 		//fetch other field value
 		Object otherValue = null;
@@ -58,7 +60,12 @@ public class LessThanEqualsValidator extends AbstractCrossConstraintValidator<Le
 			otherValue = PropertyAccessor.getProperty(bean, lessThanField);
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("Invalid/inaccessible property \"" + lessThanField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
+			String mssg = String.format("Invalid/inaccessible property '%s' specified with @LessThanEquals validator in bean: %s", lessThanField, bean.getClass().getName());
+			
+			context.buildConstraintViolationWithTemplate(mssg)
+				.addConstraintViolation();
+			
+			return false;
 		}
 		
 		//if value is null or of different data type

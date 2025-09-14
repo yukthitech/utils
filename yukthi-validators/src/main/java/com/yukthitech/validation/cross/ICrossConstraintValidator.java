@@ -18,6 +18,8 @@ package com.yukthitech.validation.cross;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
+import jakarta.validation.ConstraintValidatorContext;
+
 /**
  * Cross constraint validator definition that can be used for validation. For each cross-annotation defined
  * on a field, an instance of the cross validator will be created. And {@link #isValid(Object, Object)} method will be invoked
@@ -62,5 +64,5 @@ public interface ICrossConstraintValidator<A extends Annotation>
 	 * @param bean Bean for which field value is being validated
 	 * @param fieldValue Field value to be validated
 	 */
-	public boolean isValid(Object bean, Object fieldValue);
+	public boolean isValid(ConstraintValidatorContext context, Object bean, Object fieldValue);
 }

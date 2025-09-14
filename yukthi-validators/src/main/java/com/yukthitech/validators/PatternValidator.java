@@ -17,6 +17,7 @@ package com.yukthitech.validators;
 
 import java.util.regex.Pattern;
 
+import com.yukthitech.validation.MisConfigurationException;
 import com.yukthitech.validation.annotations.Mispattern;
 
 import jakarta.validation.ConstraintValidator;
@@ -45,21 +46,29 @@ public class PatternValidator implements ConstraintValidator<com.yukthitech.vali
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext context)
 	{
-		String strValue = ValidatorUtils.getStrValue(com.yukthitech.validation.annotations.Pattern.class, value);
-		
-		//if value is null
-		if(strValue == null)
+		try
 		{
-			return true;
-		}
-
-		//if any of the specified pattern matches fail validation
-		if(pattern.matcher(strValue).matches())
+			String strValue = ValidatorUtils.getStrValue(com.yukthitech.validation.annotations.Pattern.class, value);
+			
+			//if value is null
+			if(strValue == null)
+			{
+				return true;
+			}
+	
+			//if any of the specified pattern matches fail validation
+			if(pattern.matcher(strValue).matches())
+			{
+				return true;
+			}
+			
+			return false;
+		}catch(MisConfigurationException ex)
 		{
-			return true;
+			context.buildConstraintViolationWithTemplate(ex.getMessage())
+				.addConstraintViolation();
+			return false;
 		}
-		
-		return false;
 	}
 
 }

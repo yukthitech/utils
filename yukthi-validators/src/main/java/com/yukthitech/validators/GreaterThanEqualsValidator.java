@@ -24,6 +24,8 @@ import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.validation.annotations.GreaterThanEquals;
 import com.yukthitech.validation.cross.AbstractCrossConstraintValidator;
 
+import jakarta.validation.ConstraintValidatorContext;
+
 public class GreaterThanEqualsValidator extends AbstractCrossConstraintValidator<GreaterThanEquals>
 {
 	private String greaterThanField;
@@ -41,7 +43,7 @@ public class GreaterThanEqualsValidator extends AbstractCrossConstraintValidator
 	 * @see com.yukthitech.validation.cross.ICrossConstraintValidator#validate(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public boolean isValid(Object bean, Object fieldValue)
+	public boolean isValid(ConstraintValidatorContext context, Object bean, Object fieldValue)
 	{
 		if(bean == null)
 		{
@@ -56,7 +58,11 @@ public class GreaterThanEqualsValidator extends AbstractCrossConstraintValidator
 			otherValue = PropertyAccessor.getProperty(bean, greaterThanField);
 		}catch(Exception ex)
 		{
-			throw new IllegalStateException("Invalid/inaccessible property \"" + greaterThanField +"\" specified with matchWith validator in bean: " + bean.getClass().getName());
+			String mssg = String.format("Invalid/inaccessible property '%s' specified with @GreaterThanEquals validator in bean: %s", greaterThanField, bean.getClass().getName());
+			
+			context.buildConstraintViolationWithTemplate(mssg)
+				.addConstraintViolation();
+			return false;
 		}
 		
 		//ensure other field value is present and is of same type

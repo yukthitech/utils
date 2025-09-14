@@ -77,7 +77,7 @@ public class CrossValidationEnabler implements ConstraintValidator<EnableCrossVa
 			for(ICrossConstraintValidator<?> validator : beanCrossValidationDetails.getCrossValidators(field))
 			{
 				//if cross validation failed
-				if(!validator.isValid(bean, fieldValue))
+				if(!validator.isValid(context, bean, fieldValue))
 				{
 					//if an error message is getting added, disable default message
 					if(defaultConstraintEnabled)
