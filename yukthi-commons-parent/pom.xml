@@ -8,13 +8,40 @@
 	<packaging>pom</packaging>
 
 	<name>yukthi-commons-parent</name>
-	<url>http://maven.apache.org</url>
+	<description>Utility library for Yukthi projects</description>
+	<url>https://github.com/yukthitech/utils</url>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>kranthi</id>
+			<name>Kranthi Kiran</name>
+			<email>akranthikiran@gmail.com</email>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:https://github.com/yukthitech/utils.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/yukthitech/utils.git</developerConnection>
+		<url>https://github.com/yukthitech/utils</url>
+	</scm>
 
 	<distributionManagement>
+		<!-- Snapshots go here -->
 		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>central</id>
+			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
 		</snapshotRepository>
+
+		<!-- Releases go here -->
+		<repository>
+			<id>central</id>
+			<url>https://central.sonatype.com/service/local/staging/deploy/maven2/</url>
+		</repository>
 	</distributionManagement>
 
 	<properties>
@@ -50,7 +77,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>3.2.5</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -62,22 +89,22 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.8.0</version>
 				<extensions>true</extensions>
 				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					<publishingServerId>central</publishingServerId>
+					<autoPublish>true</autoPublish>
+					<waitUntil>published</waitUntil>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<modules>
-		<module>../yukthi-data-mapping</module>
-		<module>../yukthi-data</module>
+		<module>../yukthi-orm/yukthi-data-mapping</module>
+		<module>../yukthi-orm/yukthi-data</module>
 		<module>../yukthi-utils</module>
 		<module>../yukthi-validators</module>
 		<module>../yukthi-excel-reports</module>

@@ -35,16 +35,4 @@ public class MailProcessingException extends UtilsException
 	{
 		super(message, args);
 	}
-
-	/**
-	 * Instantiates a new mail processing exception.
-	 *
-	 * @param cause the cause
-	 * @param message the message
-	 * @param args the args
-	 */
-	public MailProcessingException(Throwable cause, String message, Object... args)
-	{
-		super(cause, message, args);
-	}
 }
