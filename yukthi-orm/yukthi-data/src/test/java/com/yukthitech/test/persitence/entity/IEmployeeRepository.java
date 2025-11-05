@@ -65,8 +65,8 @@ public interface IEmployeeRepository extends ICrudRepository<Employee>
 	
 	public Employee findByEmailPattern(@Condition(value = "emailId", ignoreCase = true, op = Operator.LIKE) String mail);
 
-	public List<Employee> findEmpByName1(@Condition(value = "name", nullable = true) String name);
-	public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullable = true) String name);
+	public List<Employee> findEmpByName1(@Condition(value = "name", nullCheck = true) String name);
+	public List<Employee> findEmpByName2(@Condition(value = "name", op = Operator.NE, nullCheck = true) String name);
 	
 	public List<Employee> findByAge(@Condition(value = "age", op = Operator.GE) int age, IDataFilter<Employee> filter);
 	

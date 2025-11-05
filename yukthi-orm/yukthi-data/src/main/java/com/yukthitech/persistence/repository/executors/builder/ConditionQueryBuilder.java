@@ -190,20 +190,20 @@ public class ConditionQueryBuilder implements Cloneable
 		 */
 		List<Object> groupedConditions;
 		
-		boolean nullable;
+		boolean nullCheck;
 		
 		String defaultValue;
 		
 		boolean joiningField;
 		
-		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullable, boolean ignoreCase)
+		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullCheck, boolean ignoreCase)
 		{
 			this.operator = operator;
 			this.index = index;
 			this.embeddedProperty = embeddedProperty;
 			this.fieldExpression = fieldExpression;
 			this.joinOperator = joinOperator;
-			this.nullable = nullable;
+			this.nullCheck = nullCheck;
 			this.ignoreCase = ignoreCase;
 		}
 
@@ -750,18 +750,18 @@ public class ConditionQueryBuilder implements Cloneable
 	 * @param embeddedProperty
 	 * @param entityFieldExpression
 	 * @param methodDesc
-	 * @param nullable Indicates whether condition can hold null values
+	 * @param nullCheck Indicates whether condition is for null check
 	 * @return Returns newly added condition which in turn can be used to add
 	 *         group conditions
 	 */
 	public Condition addCondition(ICondition groupHead, Operator operator, int index, String embeddedProperty, 
-			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, 
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullCheck, boolean ignoreCase, 
 			String defaultValue)
 	{
 		// split the entity field expression
 		String entityFieldParts[] = entityFieldExpression.trim().split("\\s*\\.\\s*");
 
-		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullable, ignoreCase);
+		Condition condition = new Condition(operator, index, embeddedProperty, entityFieldExpression, joinOperator, nullCheck, ignoreCase);
 		condition.joiningField = isJoiningField(entityFieldExpression);
 		
 		// if this mapping is for direct property mapping
@@ -837,7 +837,7 @@ public class ConditionQueryBuilder implements Cloneable
 	}
 	
 	public InnerQuery addFieldSubquery(ICondition groupHead, Operator operator, int index, String embeddedProperty, 
-			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullable, boolean ignoreCase, 
+			String entityFieldExpression, JoinOperator joinOperator, String methodDesc, boolean nullCheck, boolean ignoreCase, 
 			String defaultValue)
 	{
 		if(!isSubqueryRequired(entityFieldExpression))
@@ -871,7 +871,7 @@ public class ConditionQueryBuilder implements Cloneable
 		String subentityExpr = entityFieldExpression.substring(propIdx + 1, entityFieldExpression.length());
 		
 		innerQuery.subqueryBuilder.addCondition(null, operator, index, embeddedProperty, subentityExpr, 
-				JoinOperator.AND, methodDesc, nullable, ignoreCase, defaultValue);
+				JoinOperator.AND, methodDesc, nullCheck, ignoreCase, defaultValue);
 		
 		if(groupHead != null)
 		{
@@ -1243,12 +1243,20 @@ public class ConditionQueryBuilder implements Cloneable
 		QueryCondition groupHead = null;
 
 		// if value is not provided, ignore current condition
-		if(value != null || (condition.operator.isNullable() && condition.nullable))
+		if(value != null)
 		{
 			// add tables and conditions to specifies query
 			addTables(query, condition.table.tableCode, includedTables);
 			
-			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getDbColumnName(), condition.operator, value, condition.joinOperator, condition.ignoreCase);
+			Operator op = condition.operator;
+			
+			if(condition.nullCheck)
+			{
+				op = Boolean.TRUE.equals(value) ? Operator.EQ : Operator.NE;
+				value = null;
+			}
+			
+			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getDbColumnName(), op, value, condition.joinOperator, condition.ignoreCase);
 			groupHead.setDataType(condition.fieldDetails.getDbDataType());
 		}
 

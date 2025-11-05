@@ -119,11 +119,11 @@ public abstract class QueryExecutor
 		if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 		{
 			return conditionQueryBuilder.addFieldSubquery(condGroup, conditionAnnot.op(), index, field.getName(), fieldName.trim(), 
-					joinOp, methodDesc, conditionAnnot.nullable(), ignoreCase, null);
+					joinOp, methodDesc, conditionAnnot.nullCheck(), ignoreCase, null);
 		}
 
 		return conditionQueryBuilder.addCondition(condGroup, conditionAnnot.op(), index, field.getName(), fieldName, 
-				joinOp, methodDesc, conditionAnnot.nullable(), ignoreCase, null);
+				joinOp, methodDesc, conditionAnnot.nullCheck(), ignoreCase, null);
 	}
 	
 	private boolean fetchConditionsFromObject(String methodName, Class<?> queryobjType,  
@@ -281,11 +281,11 @@ public abstract class QueryExecutor
 		if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 		{
 			return conditionQueryBuilder.addFieldSubquery(groupHead, condition.op(), paramIdx, null, 
-					fieldName.trim(), condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+					fieldName.trim(), condition.joinWith(), methodDesc, condition.nullCheck(), ignoreCase, null);
 		}
 		
 		return conditionQueryBuilder.addCondition(groupHead, condition.op(), paramIdx, null, fieldName.trim(), 
-				condition.joinWith(), methodDesc, condition.nullable(), ignoreCase, null);
+				condition.joinWith(), methodDesc, condition.nullCheck(), ignoreCase, null);
 	}
 	
 	protected boolean fetchConditionsByName(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc)

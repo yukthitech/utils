@@ -49,10 +49,14 @@ public @interface Condition
 	public JoinOperator joinWith() default JoinOperator.AND;
 	
 	/**
-	 * Indicates this condition can hold null values
-	 * @return Whether this condition can hold null values
+	 * Has to be used only on Boolean/boolean fields/params. 
+	 * 		If set to true, then this field will be used for IS NULL check.
+	 * 		If set to false or non-boolean values, then this field will be used for IS NOT NULL check.
+	 * 		If null, then condition will be ignored just like any other conditions.
+	 *
+	 * @return true, if successful
 	 */
-	public boolean nullable() default false;
+	public boolean nullCheck() default false;
 	
 	/**
 	 * During condition evaluation case will be ignored

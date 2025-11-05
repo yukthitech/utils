@@ -27,6 +27,9 @@ import org.apache.logging.log4j.Logger;
 import com.yukthitech.persistence.FieldDetails;
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.DataTypeMapping;
+import com.yukthitech.persistence.conversion.impl.JsonConverter;
+import com.yukthitech.persistence.conversion.impl.JsonWithTypeConverter;
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.ObjectWrapper;
 
@@ -37,6 +40,11 @@ import com.yukthitech.utils.ObjectWrapper;
 public class ConversionService
 {
 	private static Logger logger = LogManager.getLogger(ConversionService.class);
+	
+	private static Map<DataConverter, Class<? extends IPersistenceConverter>> CONVERTER_MAPPING = CommonUtils.toMap(
+		DataConverter.JSON, JsonConverter.class,
+		DataConverter.JSON_WITH_TYPE, JsonWithTypeConverter.class
+	); 
 	
 	private IImplicitCoverterProvider implicitCoverterProvider;
 	
@@ -93,8 +101,13 @@ public class ConversionService
 		//if no converter is specified in annotation
 		if(IPersistenceConverter.class.equals(converterType))
 		{
-			// use implicit converter, if any
-			return implicitCoverterProvider.getImplicitConverter(dbDataType);
+			converterType = CONVERTER_MAPPING.get(typeMapping.converter());
+			
+			if(converterType == null)
+			{
+				// use implicit converter, if any
+				return implicitCoverterProvider.getImplicitConverter(dbDataType);
+			}
 		}
 		
 		IPersistenceConverter converter = typeToConverter.get(converterType);

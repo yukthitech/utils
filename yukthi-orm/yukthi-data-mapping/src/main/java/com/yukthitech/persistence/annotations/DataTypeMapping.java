@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.yukthitech.persistence.conversion.DataConverter;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
 
 /**
@@ -41,4 +42,10 @@ public @interface DataTypeMapping
 	 * @return
 	 */
 	public Class<? extends IPersistenceConverter> converterType() default IPersistenceConverter.class;
+	
+	/**
+	 * If converterType is not specified, then this will be used to determine inbuilt converters.
+	 * @return
+	 */
+	public DataConverter converter() default DataConverter.NONE;
 }
