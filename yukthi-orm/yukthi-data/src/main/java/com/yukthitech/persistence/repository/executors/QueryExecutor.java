@@ -119,11 +119,13 @@ public abstract class QueryExecutor
 		if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 		{
 			return conditionQueryBuilder.addFieldSubquery(condGroup, conditionAnnot.op(), index, field.getName(), fieldName.trim(), 
-					joinOp, methodDesc, conditionAnnot.nullCheck(), ignoreCase, null);
+					joinOp, methodDesc, conditionAnnot.nullCheck(), ignoreCase, null)
+					.setValueType(field.getType());
 		}
 
 		return conditionQueryBuilder.addCondition(condGroup, conditionAnnot.op(), index, field.getName(), fieldName, 
-				joinOp, methodDesc, conditionAnnot.nullCheck(), ignoreCase, null);
+				joinOp, methodDesc, conditionAnnot.nullCheck(), ignoreCase, null)
+				.setValueType(field.getType());
 	}
 	
 	private boolean fetchConditionsFromObject(String methodName, Class<?> queryobjType,  
@@ -277,15 +279,18 @@ public abstract class QueryExecutor
 		}
 
 		boolean ignoreCase = condition.ignoreCase();
+		Parameter parameter = method.getParameters()[paramIdx];
 		
 		if(!allowNested && fieldName.contains(".") && !conditionQueryBuilder.isJoiningField(fieldName))
 		{
 			return conditionQueryBuilder.addFieldSubquery(groupHead, condition.op(), paramIdx, null, 
-					fieldName.trim(), condition.joinWith(), methodDesc, condition.nullCheck(), ignoreCase, null);
+					fieldName.trim(), condition.joinWith(), methodDesc, condition.nullCheck(), ignoreCase, null)
+					.setValueType(parameter.getType());
 		}
 		
 		return conditionQueryBuilder.addCondition(groupHead, condition.op(), paramIdx, null, fieldName.trim(), 
-				condition.joinWith(), methodDesc, condition.nullCheck(), ignoreCase, null);
+				condition.joinWith(), methodDesc, condition.nullCheck(), ignoreCase, null)
+				.setValueType(parameter.getType());
 	}
 	
 	protected boolean fetchConditionsByName(Method method, ConditionQueryBuilder conditionQueryBuilder, String methodDesc)

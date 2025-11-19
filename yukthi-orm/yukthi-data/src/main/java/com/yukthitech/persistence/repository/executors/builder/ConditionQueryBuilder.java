@@ -196,6 +196,8 @@ public class ConditionQueryBuilder implements Cloneable
 		
 		boolean joiningField;
 		
+		Class<?> valueType;
+		
 		public Condition(Operator operator, int index, String embeddedProperty, String fieldExpression, JoinOperator joinOperator, boolean  nullCheck, boolean ignoreCase)
 		{
 			this.operator = operator;
@@ -246,6 +248,12 @@ public class ConditionQueryBuilder implements Cloneable
 		{
 			return groupedConditions;
 		}
+		
+		public Condition setValueType(Class<?> valueType)
+		{
+			this.valueType = valueType;
+			return this;
+		}
 	}
 
 	/**
@@ -276,6 +284,8 @@ public class ConditionQueryBuilder implements Cloneable
 		 * Conditions grouped with current condition
 		 */
 		List<Object> groupedConditions;
+		
+		Class<?> valueType;
 
 		public InnerQuery(FieldDetails currentTableField, FieldDetails subqueryField, EntityDetails subqueryEntity, JoinOperator joinOperator, ConditionQueryBuilder conditionQueryBuilder)
 		{
@@ -310,6 +320,12 @@ public class ConditionQueryBuilder implements Cloneable
 		public List<Object> getGroupedConditions()
 		{
 			return groupedConditions;
+		}
+
+		public InnerQuery setValueType(Class<?> valueType)
+		{
+			this.valueType = valueType;
+			return this;
 		}
 	}
 	
@@ -1249,15 +1265,24 @@ public class ConditionQueryBuilder implements Cloneable
 			addTables(query, condition.table.tableCode, includedTables);
 			
 			Operator op = condition.operator;
+			boolean addCondition = true;
 			
 			if(condition.nullCheck && (value instanceof Boolean))
 			{
 				op = Boolean.TRUE.equals(value) ? Operator.EQ : Operator.NE;
 				value = null;
 			}
+			// For boolean fields, if value is null, skip null check condition
+			else if(value == null && (boolean.class.equals(condition.valueType) || Boolean.class.equals(condition.valueType))) 
+			{
+				addCondition = false;
+			}
 			
-			groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getDbColumnName(), op, value, condition.joinOperator, condition.ignoreCase);
-			groupHead.setDataType(condition.fieldDetails.getDbDataType());
+			if(addCondition)
+			{
+				groupHead = new QueryCondition(condition.table.tableCode, condition.fieldDetails.getDbColumnName(), op, value, condition.joinOperator, condition.ignoreCase);
+				groupHead.setDataType(condition.fieldDetails.getDbDataType());
+			}
 		}
 
 		//if no group conditions are present on this query
