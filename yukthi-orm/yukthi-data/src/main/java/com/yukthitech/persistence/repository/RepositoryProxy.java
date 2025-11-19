@@ -216,6 +216,11 @@ class RepositoryProxy implements InvocationHandler
 				throw (PersistenceException) ex;
 			}
 			
+			if(ex instanceof RuntimeException)
+			{
+				throw (RuntimeException) ex;
+			}
+			
 			throw new InvalidStateException("Action resulted in error.", ex);
 		}
 

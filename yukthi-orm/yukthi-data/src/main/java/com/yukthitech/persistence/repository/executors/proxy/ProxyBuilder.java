@@ -31,15 +31,18 @@ public class ProxyBuilder
 		DynamicType.Builder<?> builder = new ByteBuddy()
 			.subclass(baseType);
 		
+		ClassLoader classLoader = baseType.getClassLoader();
+		
 		if(interfaceType != null)
 		{
 			builder = builder.implement(interfaceType);
+			classLoader = interfaceType.getClassLoader();
 		}
 	
 		Class<?> cls = builder
 			.method(ElementMatchers.any()).intercept(InvocationHandlerAdapter.of(handler))
 			.make()
-			.load(baseType.getClassLoader())
+			.load(classLoader)
 			.getLoaded();
 		
 		try

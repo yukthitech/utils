@@ -1243,14 +1243,14 @@ public class ConditionQueryBuilder implements Cloneable
 		QueryCondition groupHead = null;
 
 		// if value is not provided, ignore current condition
-		if(value != null)
+		if(value != null || (condition.operator.isNullable() && condition.nullCheck))
 		{
 			// add tables and conditions to specifies query
 			addTables(query, condition.table.tableCode, includedTables);
 			
 			Operator op = condition.operator;
 			
-			if(condition.nullCheck)
+			if(condition.nullCheck && (value instanceof Boolean))
 			{
 				op = Boolean.TRUE.equals(value) ? Operator.EQ : Operator.NE;
 				value = null;
