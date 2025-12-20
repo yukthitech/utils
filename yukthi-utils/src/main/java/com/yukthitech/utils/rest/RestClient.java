@@ -343,7 +343,7 @@ public class RestClient
 			}
 			else
 			{
-				logger.log(Level.FINE, String.format("Invoking request [Base Url - %s]: %s", baseUrl, request));
+				logger.log(Level.FINE, truncate(String.format("Invoking request [Base Url - %s]: %s", baseUrl, request)));
 			}
 			
 			//build http client request
