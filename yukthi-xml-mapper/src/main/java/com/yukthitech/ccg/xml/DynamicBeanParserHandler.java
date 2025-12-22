@@ -39,7 +39,7 @@ public class DynamicBeanParserHandler extends DefaultParserHandler
 	@Override
 	public Object createRootBean(BeanNode node, XMLAttributeMap att)
 	{
-		return new DynamicBean(typeConversationEnabled);
+		return new DynamicBean(node.getName(), typeConversationEnabled);
 	}
 
 	@Override
@@ -50,13 +50,13 @@ public class DynamicBeanParserHandler extends DefaultParserHandler
 			return new DynamicBeanList(typeConversationEnabled);
 		}
 		
-		return new DynamicBean(typeConversationEnabled);
+		return new DynamicBean(node.getName(), typeConversationEnabled);
 	}
 
 	@Override
-	public Object createAttributeBean(BeanNode node, String attName, Class<?> type)
+	public Object parseAttributeValue(BeanNode node, String attName, Class<?> type)
 	{
-		return new DynamicBean(typeConversationEnabled);
+		return new DynamicBean(attName, typeConversationEnabled);
 	}
 	
 }

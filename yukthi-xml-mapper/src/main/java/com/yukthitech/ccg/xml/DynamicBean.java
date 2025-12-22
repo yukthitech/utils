@@ -30,8 +30,13 @@ import com.yukthitech.ccg.xml.writer.XmlWriterContext;
  * 
  * @author akiran
  */
-public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAcceptor, IWriteableBean
+public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAcceptor, IWriteableBean, ITextAcceptor
 {
+	/**
+	 * Name of node creating this bean.
+	 */
+	private String name;
+	
 	/**
 	 * If this flag enabled, based on prefix values will be type converted.
 	 */
@@ -42,15 +47,23 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	 */
 	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
 	
+	private String textContent;
+	
 	public DynamicBean()
 	{
 	}
 
-	public DynamicBean(boolean typeConversationEnabled)
+	public DynamicBean(String name, boolean typeConversationEnabled)
 	{
+		this.name = name;
 		this.typeConversationEnabled = typeConversationEnabled;
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
+
 	/**
 	 * Sets the if this flag enabled, based on prefix values will be type
 	 * converted.
@@ -63,6 +76,16 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	{
 		this.typeConversationEnabled = typeConversationEnabled;
 	}
+	
+	public String getTextContent()
+	{
+		return textContent;
+	}
+
+	public void setTextContent(String textContent)
+	{
+		this.textContent = textContent;
+	}
 
 	@Override
 	public void set(String propName, String value)
@@ -70,6 +93,7 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 		add(propName, value);
 	}
 	
+	@IgnoreXmlMethod
 	public void addList(String name, DynamicBeanList list)
 	{
 		properties.put(name, list);
@@ -193,15 +217,33 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	public Map<String, Object> toSimpleMap()
 	{
 		Map<String, Object> finalMap = (Map<String, Object>) toSimpleObject(properties);
+		
+		if(textContent != null)
+		{
+			finalMap.put("$textContent", textContent);
+		}
+		
 		return finalMap;
 	}
 	
+	public Map<String, Object> toSimpleMapWithRoot()
+	{
+		Map<String, Object> finalMap = toSimpleMap();
+
+		if(name != null)
+		{
+			finalMap = Map.of(name, finalMap);
+		}
+		
+		return finalMap;
+	}
+
 	@SuppressWarnings("unchecked")
-	private Object convertToSimpleMap(Object object)
+	private Object convertToSimpleMap(String name, Object object)
 	{
 		if(object instanceof Map)
 		{
-			DynamicBean newBean = new DynamicBean(typeConversationEnabled);
+			DynamicBean newBean = new DynamicBean(name, typeConversationEnabled);
 			newBean.loadSimpleMap((Map<String, Object>) object);
 			return newBean;
 		}
@@ -212,7 +254,7 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 			
 			for(Object lstElem : objLst)
 			{
-				lstElem = convertToSimpleMap(lstElem);
+				lstElem = convertToSimpleMap(null, lstElem);
 				newLst.add(lstElem);
 			}
 			
@@ -230,7 +272,7 @@ public class DynamicBean implements DynamicDataAcceptor, IDynamicAttributeAccept
 	{
 		for(Map.Entry<String, Object> entry : map.entrySet())
 		{
-			this.properties.put(entry.getKey(), convertToSimpleMap(entry.getValue()));
+			this.properties.put(entry.getKey(), convertToSimpleMap(entry.getKey(), entry.getValue()));
 		}
 	}
 	

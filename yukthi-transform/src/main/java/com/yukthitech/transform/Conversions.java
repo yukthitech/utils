@@ -58,7 +58,7 @@ public class Conversions
 	 *            the value
 	 * @return true, if successful
 	 */
-	public boolean processMapRes(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, TransformEngine curEngine)
+	public boolean processMapRes(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, TransformEngine curEngine, TransformState transformState)
 	{
 		Resource resource = transformObject.getResource();
 
@@ -83,7 +83,7 @@ public class Conversions
 			content = ExpressionUtil.processTemplate(freeMarkerEngine, path, "res-content", content, context);
 		}
 		
-		Object finalRes = checkForTransform(transformObject, content, context);
+		Object finalRes = checkForTransform(transformObject, content, context, transformState);
 		value.setValue(finalRes);
 		return true;
 	}
@@ -104,7 +104,7 @@ public class Conversions
 	 * @return true, if successful
 	 */
 	@SuppressWarnings("unchecked")
-	public boolean processInclude(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, TransformEngine curEngine)
+	public boolean processInclude(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, TransformEngine curEngine, TransformState transformState)
 	{
 		Include include = transformObject.getInclude();
 
@@ -115,12 +115,11 @@ public class Conversions
 
 		TransformObject paramsObj = include.getParams();
 		Map<String, Object> paramsMap = null;
-		String path = transformObject.getPath();
 		
 		//process expression in params map
 		if(paramsObj != null)
 		{
-			paramsMap = (Map<String, Object>) curEngine.processObject(paramsObj, context, path + "#params");
+			paramsMap = (Map<String, Object>) curEngine.processObject(paramsObj, context, transformState.forDynField("params"));
 		}
 		
 		TransformTemplate content = include.getContent();
@@ -139,7 +138,7 @@ public class Conversions
 	 * @param path path where this string is found
 	 * @return processed value
 	 */
-	public Object processExpression(Expression expression, ITransformContext context, String path)
+	public Object processExpression(Expression expression, ITransformContext context, TransformState transformState)
 	{
 		ExpressionType exprType = expression.getType();
 		String expr = expression.getExpression();
@@ -148,7 +147,7 @@ public class Conversions
 		{
 			if(exprType == ExpressionType.FMARKER)
 			{
-				return ExpressionUtil.processValueExpression(freeMarkerEngine, path, "jel-expr", expr, context);
+				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getPath(), "jel-expr", expr, context);
 			}
 			else if(exprType == ExpressionType.XPATH)
 			{
@@ -160,7 +159,7 @@ public class Conversions
 			}
 			else if(exprType == ExpressionType.TEMPLATE)
 			{
-				return ExpressionUtil.processTemplate(freeMarkerEngine, path, "jel-template", expr, context);
+				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getPath(), "jel-template", expr, context);
 			}
 			else if(exprType == ExpressionType.STRING)
 			{
@@ -171,10 +170,10 @@ public class Conversions
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An error occurred while processing expression: %s [Type: %s]", expr, exprType, ex);
+			throw new TransformException(transformState.getPath(), "An error occurred while processing expression: %s [Type: %s]", expr, exprType, ex);
 		}
 		
-		throw new TransformException(path, "Invalid expression type specified '%s' in expression: %s", exprType, expr);
+		throw new TransformException(transformState.getPath(), "Invalid expression type specified '%s' in expression: %s", exprType, expr);
 	}
 	
 	public String processTemplate(String expression, ITransformContext context, String path)
@@ -191,9 +190,8 @@ public class Conversions
 		}
 	}
 
-	public Object checkForTransform(TransformObject transformObject, Object curValue, ITransformContext context)
+	public Object checkForTransform(TransformObject transformObject, Object curValue, ITransformContext context, TransformState transformState)
 	{
-		String path = transformObject.getPath();
 		Expression transformExpr = transformObject.getTransformExpression();
 
 		if(transformExpr == null)
@@ -205,13 +203,13 @@ public class Conversions
 		{
 			context.setValue("thisValue", curValue);
 			
-			return processExpression(transformExpr, context, path);
+			return processExpression(transformExpr, context, transformState);
 		} catch(TransformException ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An error occurred while transforming result value", ex);	
+			throw new TransformException(transformState.getPath(), "An error occurred while transforming result value", ex);	
 		}
 
 	}

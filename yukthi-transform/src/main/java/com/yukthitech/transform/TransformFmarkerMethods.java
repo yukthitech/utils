@@ -15,6 +15,11 @@
  */
 package com.yukthitech.transform;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -41,5 +46,61 @@ public class TransformFmarkerMethods
 			throw new InvalidStateException("An error occurred while converting value to json", ex);
 		}
 	}
+	
+	@FreeMarkerMethod(
+			description = "Convert specified object into boolean value.",
+			returnDescription = "Converted value.")
+	public static Boolean toBoolean(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value instanceof Boolean)
+		{
+			return (Boolean) value;
+		}
+		
+		return "true".equals("" + value);
+	}
 
+	@FreeMarkerMethod(
+			description = "Convert specified object into int value.",
+			returnDescription = "Converted value.")
+	public static Integer toInt(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value instanceof Integer)
+		{
+			return (Integer) value;
+		}
+		
+		return Integer.parseInt("" + value);
+	}
+
+	@FreeMarkerMethod(
+			description = "Convert specified object into long value.",
+			returnDescription = "Converted value.")
+	public static Long toLong(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value instanceof Long)
+		{
+			return (Long) value;
+		}
+		
+		return Long.parseLong("" + value);
+	}
+
+	@SuppressWarnings("unchecked")
+	@FreeMarkerMethod(
+			description = "Wraps specified value with a list, if it is single object",
+			returnDescription = "Converted value.")
+	public static List<Object> toList(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value instanceof Collection)
+		{
+			return new ArrayList<Object>((Collection<Object>) value);
+		}
+		
+		return Arrays.asList(value);
+	}
 }

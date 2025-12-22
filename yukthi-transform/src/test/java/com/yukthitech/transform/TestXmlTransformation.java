@@ -15,6 +15,7 @@
  */
 package com.yukthitech.transform;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,23 +26,26 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.ccg.xml.DynamicBean;
+import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.transform.template.JsonTemplateFactory;
 import com.yukthitech.transform.template.TransformTemplate;
-import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.transform.template.XmlTemplateFactory;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 /**
  * Test cases for json expression engine.
  * @author akiran
  */
-public class TestJsonTransformation
+public class TestXmlTransformation
 {
-	private JsonTemplateFactory templateFactory = new JsonTemplateFactory();
+	private XmlTemplateFactory templateFactory = new XmlTemplateFactory();
 	
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
-	private TransformEngine jsonExprEngine = new TransformEngine();
+	private TransformEngine transformEngine = new TransformEngine();
+	
+	private DynamicBeanParserHandler parserHandler = new DynamicBeanParserHandler();
 	
 	@BeforeClass
 	public void setup() throws Exception
@@ -49,13 +53,13 @@ public class TestJsonTransformation
 		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 		freeMarkerEngine.loadClass(TestMethods.class);
 		
-		jsonExprEngine.setFreeMarkerEngine(freeMarkerEngine);
+		transformEngine.setFreeMarkerEngine(freeMarkerEngine);
 	}
 	
 	private Object[][] loadXmlFile(String file)
 	{
 		TransformTestBeans beans = new TransformTestBeans();
-		XMLBeanParser.parse(TestJsonTransformation.class.getResourceAsStream(file), beans);
+		XMLBeanParser.parse(TestXmlTransformation.class.getResourceAsStream(file), beans);
 		
 		int size = beans.getTestBeans().size();
 		List<Object[]> rows = new ArrayList<>();
@@ -75,10 +79,10 @@ public class TestJsonTransformation
 		return rows.toArray(new Object[1][]);
 	}
 	
-	@DataProvider(name = "jsonElDataProvider")
+	@DataProvider(name = "xmlTransDataProvider")
 	public Object[][] getTestData() throws Exception
 	{
-		return loadXmlFile("/json-trans-test-data.xml");
+		return loadXmlFile("/xml-trans-test-data.xml");
 	}
 	
 	@DataProvider(name = "jsonElNeagtiveDataProvider")
@@ -93,57 +97,32 @@ public class TestJsonTransformation
 		return loadXmlFile("/pojo-json-trans-test-data.xml");
 	}
 	
-	private String processJson(String json, Object context)
+	private String processXml(String xml, Object context)
 	{
-		TransformTemplate tempalte = templateFactory.parseTemplate(json);
+		TransformTemplate tempalte = templateFactory.parseTemplate(xml);
 		
 		//System.out.println("Got Template as: \n" + tempalte);
-		return jsonExprEngine.processAsString(tempalte, context);
+		return transformEngine.processAsString(tempalte, context);
+	}
+	
+	private Map<String, Object> parseXml(String xml)
+	{
+		DynamicBean bean = (DynamicBean) XMLBeanParser.parse(new ByteArrayInputStream(xml.getBytes()), parserHandler);
+		return bean.toSimpleMapWithRoot();
 	}
 
-	@Test
-	public void testException() throws Exception
+	@Test(dataProvider =  "xmlTransDataProvider")
+	public void testXmlTransformation(TransformTestBean bean) throws Exception
 	{
 		//parse json contents from test bean
-		Map<String, Object> context = CommonUtils.toMap("test", "Value");
-
-		try
-		{
-			//execute the jel
-			processJson("{\"key\": \"@fmarker: errorMethod(test)\"}", context);
-			Assert.fail("No exception is thrown.");
-		}catch(Exception ex)
-		{
-			Throwable th = ex;
-			boolean reqErrorFound = false;
-			
-			while(th != null)
-			{
-				if("Test error".equals(th.getMessage()))
-				{
-					reqErrorFound = true;
-					break;
-				}
-				
-				th = th.getCause();
-			}
-			
-			
-			Assert.assertTrue(reqErrorFound);
-		}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test(dataProvider =  "jsonElDataProvider")
-	public void testJel(TransformTestBean bean) throws Exception
-	{
-		//parse json contents from test bean
-		Map<String, Object> context = (Map) objectMapper.readValue(bean.getContext(), Object.class);
-		Object expectedResult = objectMapper.readValue(bean.getExpectedResult(), Object.class);
+		Map<String, Object> context = parseXml(bean.getContext());
+		Object expectedResult = parseXml(bean.getExpectedResult());
 		
 		//execute the jel
-		String res = processJson(bean.getTemplate(), context);
-		Object actualResult = objectMapper.readValue(res, Object.class);
+		String res = processXml(bean.getTemplate(), context);
+		Object actualResult = parseXml(res);
+		
+		System.out.println("Xml Output:\n============= \n" + res);
 		
 		//as deep comparison is done, re-covert data to json (removing identations) and compare
 		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
@@ -156,7 +135,7 @@ public class TestJsonTransformation
 		Object expectedResult = objectMapper.readValue(bean.getExpectedResult(), Object.class);
 		
 		//execute the jel
-		String res = processJson(bean.getTemplate(), bean.getPojoContext());
+		String res = processXml(bean.getTemplate(), bean.getPojoContext());
 		Object actualResult = objectMapper.readValue(res, Object.class);
 		
 		//as deep comparison is done, re-covert data to json (removing identations) and compare
@@ -173,7 +152,7 @@ public class TestJsonTransformation
 		//execute the jel
 		try
 		{
-			processJson(bean.getTemplate(), context);
+			processXml(bean.getTemplate(), context);
 			Assert.fail("No error is thrown");
 		}catch(Exception ex)
 		{

@@ -186,12 +186,21 @@ public class TransformTemplate implements Serializable
 			return ITransformConstants.toPrettyJson(this);
 		}
 	}
+	
+	public static enum FieldType
+	{
+		ATTRIBUTE,
+		
+		NODE,
+		
+		TEXT_CONTENT
+	}
 
 	/**
 	 * Represents a field of an object.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class TransforObjectField implements Serializable
+	public static class TransformObjectField implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 		
@@ -223,8 +232,13 @@ public class TransformTemplate implements Serializable
 		 * object will be included.
 		 */
 		private boolean replaceEntry;
+		
+		/**
+		 * Type of field. Used by xml transformation only.
+		 */
+		private FieldType type;
 
-		public TransforObjectField(String name, Expression nameExpression, String attributeName, Object value, boolean replaceEntry) {
+		public TransformObjectField(String name, Expression nameExpression, String attributeName, Object value, boolean replaceEntry) {
 			this.name = name;
 			this.nameExpression = nameExpression;
 			this.attributeName = attributeName;
@@ -250,6 +264,17 @@ public class TransformTemplate implements Serializable
 
 		public boolean isReplaceEntry() {
 			return replaceEntry;
+		}
+		
+		TransformObjectField setType(FieldType type)
+		{
+			this.type = type;
+			return this;
+		}
+		
+		public FieldType getType()
+		{
+			return type;
 		}
 
 		@Override
@@ -309,6 +334,12 @@ public class TransformTemplate implements Serializable
 		private static final long serialVersionUID = 1L;
 
 		/**
+		 * Name of node responsible for creation of this object.
+		 * Used in xml (not in json).
+		 */
+		private String name;
+		
+		/**
 		 * Path to the object.
 		 */
 		private String path;
@@ -355,10 +386,20 @@ public class TransformTemplate implements Serializable
 		/**
 		 * Fields to be set on the object.
 		 */
-		private List<TransforObjectField> fields = new ArrayList<>();
+		private List<TransformObjectField> fields = new ArrayList<>();
 
 		public TransformObject(String path) {
 			this.path = path;
+		}
+
+		public TransformObject(String name, String path) {
+			this.name = name;
+			this.path = path;
+		}
+		
+		public String getName()
+		{
+			return name;
 		}
 
 		public String getPath() {
@@ -428,11 +469,11 @@ public class TransformTemplate implements Serializable
 			return this;
 		}
 
-		public List<TransforObjectField> getFields() {
+		public List<TransformObjectField> getFields() {
 			return fields;
 		}
 
-		TransformObject addField(TransforObjectField field) {
+		TransformObject addField(TransformObjectField field) {
 			this.fields.add(field);
 			return this;
 		}
@@ -489,17 +530,19 @@ public class TransformTemplate implements Serializable
 		}
 	}
 	
-	@JsonIgnore
-	private ITemplateFactory templateFactory;
-
 	/**
 	 * Root object of the template.
 	 */
 	private Object root;
+	
+	/**
+	 * Composer type to be used to compose final object.
+	 */
+	private Class<? extends IGenerator> generatorType;
 
-	public TransformTemplate(ITemplateFactory templateFactory, Object root) 
+	public TransformTemplate(Class<? extends IGenerator> generatorType, Object root) 
 	{
-		this.templateFactory = templateFactory;
+		this.generatorType = generatorType;
 		this.root = root;
 	}
 	
@@ -511,10 +554,10 @@ public class TransformTemplate implements Serializable
 	public Object getRoot() {
 		return root;
 	}
-	
-	public ITemplateFactory getTemplateFactory()
+
+	public Class<? extends IGenerator> getGeneratorType()
 	{
-		return templateFactory;
+		return generatorType;
 	}
 
 	@Override

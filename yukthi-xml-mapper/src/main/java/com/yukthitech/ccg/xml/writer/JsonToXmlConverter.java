@@ -22,7 +22,7 @@ public class JsonToXmlConverter
 						Charset.defaultCharset()), 
 				Object.class);
 		
-		DynamicBean dynBean = new DynamicBean(true);
+		DynamicBean dynBean = new DynamicBean(null, true);
 		dynBean.loadSimpleMap(jsonMap);
 		
 		File tempFile = new File("cobrand_template.xml");

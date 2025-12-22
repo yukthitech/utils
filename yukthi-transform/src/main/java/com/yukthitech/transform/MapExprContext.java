@@ -30,7 +30,7 @@ public class MapExprContext extends AbstractMap<String, Object> implements ITran
 	
 	public MapExprContext(Map<String, Object> mainMap)
 	{
-		this.mainMap = mainMap;
+		this.mainMap = new HashMap<>(mainMap);
 	}
 	
 	public MapExprContext(ITransformContext parentContext, String paramKey, Object paramVal)

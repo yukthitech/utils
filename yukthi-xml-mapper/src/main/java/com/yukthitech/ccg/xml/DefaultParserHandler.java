@@ -567,7 +567,7 @@ public class DefaultParserHandler implements IParserHandler
 	 * BeanNode, java.lang.String, java.lang.Class)
 	 */
 	@Override
-	public Object createAttributeBean(BeanNode node, String attName, Class<?> type)
+	public Object parseAttributeValue(BeanNode node, String attName, Class<?> type)
 	{
 		if(typeToFactCls.containsKey(type))
 		{

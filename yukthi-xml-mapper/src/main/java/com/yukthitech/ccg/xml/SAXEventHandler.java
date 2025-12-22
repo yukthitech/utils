@@ -151,6 +151,17 @@ class SAXEventHandler extends DefaultHandler
 			activeNode.appendText(text);
 			return;
 		}
+		
+		
+		if(activeNode.getActualBean() instanceof ITextAcceptor)
+		{
+			if(text.trim().length() > 0)
+			{
+				((ITextAcceptor) activeNode.getActualBean()).setTextContent(text.trim());
+			}
+			
+			return;
+		}
 
 		// check if this method is called due to meta-text node
 		if(!activeNode.isTextNode())
@@ -260,9 +271,9 @@ class SAXEventHandler extends DefaultHandler
 		String nodeType = null;
 		beanDesc = parserHandler.getBeanDescription(parentBean);
 
-		if(met == null && (parentBean instanceof DynamicDataAcceptor))
+		if(met == null && (parentBean instanceof IDynamicNodeAcceptor))
 		{
-			DynamicDataAcceptor acceptor = (DynamicDataAcceptor) parentBean;
+			IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;
 			try
 			{
 				Object nodeValue = activeNode.isTextNode() ? processText(activeNode.getText()) : activeNode.getActualBean();
@@ -568,14 +579,14 @@ class SAXEventHandler extends DefaultHandler
 				return;
 			}
 
-			if(parentBean instanceof DynamicDataAcceptor)
+			if(parentBean instanceof IDynamicNodeAcceptor)
 			{
 				if(dynType == null)
 				{
-					dynType = String.class;
+					//dynType = String.class;
 				}
 
-				DynamicDataAcceptor acceptor = (DynamicDataAcceptor) parentBean;
+				IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;
 
 				if(curAttMap.getNormalAttributeCount() == 1 && acceptor.isIdBased(newNode.getName()))
 				{
@@ -602,7 +613,7 @@ class SAXEventHandler extends DefaultHandler
 		// assume the current bean to be text-node.
 		// if any sub-node is encountered under this type of node then exception
 		// will be thrown
-		if(!normalAtt && XMLUtil.isSupportedAttributeClass(dynType))
+		if(!normalAtt && dynType != null && XMLUtil.isSupportedAttributeClass(dynType))
 		{
 			// if true create text based object and keep it in stack
 			// till it gets its text into it.
@@ -699,7 +710,7 @@ class SAXEventHandler extends DefaultHandler
 
 		if(met == null)
 			met = metList.idBased.get(nodeName);
-
+		
 		return met;
 	}
 
@@ -771,7 +782,7 @@ class SAXEventHandler extends DefaultHandler
 			argType = met.getParameterTypes()[0];
 			try
 			{
-				Object value = parserHandler.createAttributeBean(newNode, attName, argType);
+				Object value = parserHandler.parseAttributeValue(newNode, attName, argType);
 
 				if(value == IParserHandler.NOT_SUPPORTED)
 					value = XMLUtil.parseAttributeObject(attValue, argType, parserHandler.getDateFormat());
@@ -870,6 +881,12 @@ class SAXEventHandler extends DefaultHandler
 		{
 			if(!Modifier.isPublic(mets[i].getModifiers()))
 				continue;
+			
+			if(mets[i].getAnnotation(IgnoreXmlMethod.class) != null)
+			{
+				continue;
+			}
+			
 			name = mets[i].getName();
 			params = mets[i].getParameterTypes();
 			// if plugin method

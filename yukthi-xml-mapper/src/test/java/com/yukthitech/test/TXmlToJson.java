@@ -47,7 +47,7 @@ public class TXmlToJson
 						Charset.defaultCharset()), 
 				Object.class);
 		
-		DynamicBean dynBean = new DynamicBean(true);
+		DynamicBean dynBean = new DynamicBean(null, true);
 		dynBean.loadSimpleMap(jsonMap);
 		
 		File tempFile = File.createTempFile("test", ".xml");

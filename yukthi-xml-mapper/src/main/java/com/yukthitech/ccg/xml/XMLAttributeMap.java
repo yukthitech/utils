@@ -17,13 +17,11 @@ package com.yukthitech.ccg.xml;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.xml.sax.Attributes;
-
-import com.yukthitech.ccg.xml.util.StringComparator;
 
 /**
  * Read only map. A read-only Map used to represent attributes of XML nodes.
@@ -35,11 +33,11 @@ import com.yukthitech.ccg.xml.util.StringComparator;
  * 
  * @author A. Kranthi Kiran
  */
-public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
+public class XMLAttributeMap extends LinkedHashMap<String, XMLAttributeMap.Attribute>
 {
 	private static final long serialVersionUID = 1L;
 
-	static class Attribute
+	public static class Attribute
 	{
 		String value;
 		boolean isReserved;
@@ -49,6 +47,16 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 			this.value = value;
 			isReserved = isRes;
 		}
+		
+		public String getValue()
+		{
+			return value;
+		}
+		
+		public boolean isReserved()
+		{
+			return isReserved;
+		}
 	}
 
 	private boolean hasReserveAttributes = false;
@@ -56,7 +64,7 @@ public class XMLAttributeMap extends TreeMap<String, XMLAttributeMap.Attribute>
 
 	private XMLAttributeMap()
 	{
-		super(new StringComparator(true));
+		super();
 	}
 
 	/**

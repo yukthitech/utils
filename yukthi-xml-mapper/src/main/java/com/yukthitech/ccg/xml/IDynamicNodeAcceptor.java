@@ -15,7 +15,7 @@
  */
 package com.yukthitech.ccg.xml;
 
-public interface DynamicDataAcceptor
+public interface IDynamicNodeAcceptor
 {
 	public void add(String propName, Object obj);
 

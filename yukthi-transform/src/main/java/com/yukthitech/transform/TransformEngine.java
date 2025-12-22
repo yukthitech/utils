@@ -18,7 +18,6 @@ package com.yukthitech.transform;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
-import com.yukthitech.transform.template.TransformTemplate.TransforObjectField;
+import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.utils.ObjectWrapper;
@@ -97,15 +96,19 @@ public class TransformEngine
 	 */
 	public Object process(TransformTemplate template, Object context)
 	{
+		TransformState transformState = new TransformState(template);
+		
 		//process and return the object
-		return processObject(template.getRoot(), toJsonExprContext(context), "");
+		return processObject(template.getRoot(), toJsonExprContext(context), transformState);
 	}
 	
 	public String processAsString(TransformTemplate template, Object context)
 	{
+		TransformState transformState = new TransformState(template);
+		
 		//process and return the object
-		Object res = processObject(template.getRoot(), toJsonExprContext(context), "");
-		return template.getTemplateFactory().formatObject(res);
+		Object res = processObject(template.getRoot(), toJsonExprContext(context), transformState);
+		return transformState.formatObject(res);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -132,28 +135,28 @@ public class TransformEngine
 	 * @param path current path where current object is found
 	 * @return processed object.
 	 */
-	Object processObject(Object object, ITransformContext context, String path)
+	Object processObject(Object object, ITransformContext context, TransformState transformState)
 	{
 		try
 		{
 			if(object instanceof TransformList)
 			{
-				object = processList((TransformList) object, context);
+				object = processList((TransformList) object, context, transformState);
 			}
 			else if(object instanceof TransformObject)
 			{
-				object = processMap((TransformObject) object, context);
+				object = processMap((TransformObject) object, context, transformState);
 			}
 			else if(object instanceof Expression)
 			{
-				object = conversions.processExpression((Expression) object, context, path);
+				object = conversions.processExpression((Expression) object, context, transformState);
 			}
 		} catch(TransformException ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An unhandled error occurred", ex);
+			throw new TransformException(transformState.getPath(), "An unhandled error occurred", ex);
 		}
 		
 		return object;
@@ -166,7 +169,7 @@ public class TransformEngine
 	 * @param context context to be used
 	 * @return processed list.
 	 */
-	private List<Object> processList(TransformList lst, ITransformContext context)
+	private List<Object> processList(TransformList lst, ITransformContext context, TransformState transformState)
 	{
 		if(!processCondition(lst, context))
 		{
@@ -175,7 +178,6 @@ public class TransformEngine
 		
 		List<Object> newLst = new ArrayList<Object>();
 		int index = -1;
-		String path = lst.getPath();
 		
 		//loop through input list
 		for(Object elem : lst.getObjects())
@@ -185,7 +187,7 @@ public class TransformEngine
 			//if the list element is map, check and process repetition approp
 			if(elem instanceof TransformObject)
 			{
-				List<Object> newElems = procesRepeatedElement((TransformObject) elem, context, null, path + "[" + index + "]");
+				List<Object> newElems = procesRepeatedElement((TransformObject) elem, context, null, transformState.forIndex(index));
 				
 				//Note: because of repetition single object may result in multiple objects
 				for(Object nelem: newElems)
@@ -202,7 +204,7 @@ public class TransformEngine
 			//if not an object call process object recursively
 			else
 			{
-				Object newElem = processObject(elem, context, lst.getPath() + "[" + index + "]");
+				Object newElem = processObject(elem, context, transformState.forIndex(index));
 				
 				if(newElem == null)
 				{
@@ -225,7 +227,7 @@ public class TransformEngine
 	 * @return processed list of values
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Object> procesRepeatedElement(TransformObject transformObject, ITransformContext context, Expression nameExpression, String path)
+	private List<Object> procesRepeatedElement(TransformObject transformObject, ITransformContext context, Expression nameExpression, TransformState transformState)
 	{
 		// if condition is present and evaluated to false, then return empty list 
 		// which in turn would remove current object (map template) on final list
@@ -240,7 +242,7 @@ public class TransformEngine
 		//if repetition is not present, then return processed map as a single value list
 		if(forEachLoop == null)
 		{
-			return Arrays.asList(processObject(transformObject, context, path));
+			return Arrays.asList(processObject(transformObject, context, transformState));
 		}
 
 		//extract attr name from for-each expression
@@ -296,12 +298,12 @@ public class TransformEngine
 				}
 			}
 			
-			processedMap = processObject(transformObject, context, path + "{clone}");
+			processedMap = processObject(transformObject, context, transformState.forClone());
 			
 			// for maps add name-value entry as a list object
 			if(nameExpression != null)
 			{
-				String name = "" + conversions.processExpression(nameExpression, context, path + "#name");
+				String name = "" + conversions.processExpression(nameExpression, context, transformState.forDynField("name"));
 				resLst.add(new NameValueEntry(name, processedMap));
 			}
 			else
@@ -321,7 +323,7 @@ public class TransformEngine
 	 * @return processed map.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Object processMap(TransformObject transformObject, ITransformContext context)
+	private Object processMap(TransformObject transformObject, ITransformContext context, TransformState transformState)
 	{
 		//if condition is present and evaluated to false, then return null
 		ObjectWrapper<Object> resWrapper = new ObjectWrapper<Object>();
@@ -329,7 +331,7 @@ public class TransformEngine
 		if(!processCondition(transformObject, context))
 		{
 			if(processMapValue(transformObject, KEY_FALSE_VALUE, 
-				transformObject.getFalseValue(), context, resWrapper))
+				transformObject.getFalseValue(), context, transformState, resWrapper))
 			{
 				//if value expression is present, return the result value
 				return resWrapper.getValue();
@@ -340,30 +342,31 @@ public class TransformEngine
 		
 		//check if value expression is present
 		if(processMapValue(transformObject, KEY_VALUE, 
-			transformObject.getValue(), context, resWrapper))
+			transformObject.getValue(), context, transformState, resWrapper))
 		{
 			//if value expression is present, return the result value
 			return resWrapper.getValue();
 		}
 		
 		//check if current map is meant for resource loading.
-		if(conversions.processMapRes(transformObject, context, resWrapper, this))
+		if(conversions.processMapRes(transformObject, context, resWrapper, this, transformState))
 		{
 			return resWrapper.getValue();
 		}
 		
 		//check if current map is meant for including other resource or file
-		if(conversions.processInclude(transformObject, context, resWrapper, this))
+		if(conversions.processInclude(transformObject, context, resWrapper, this, transformState))
 		{
 			return resWrapper.getValue();
 		}
 
-		Map<String, Object> resMap = new LinkedHashMap<String, Object>();
+		Object resObj = transformState.newObject(transformObject);
 		boolean setKeyPresent = false;
 		String path = transformObject.getPath();
+		boolean otherEntriesAdded = false;
 
 		//loop through map entries
-		for(TransforObjectField field : transformObject.getFields())
+		for(TransformObjectField field : transformObject.getFields())
 		{
 			String fieldName = field.getName();
 
@@ -384,13 +387,14 @@ public class TransformEngine
 					}
 					
 					//based on loop expression generate objects which should be added to res map
-					List<NameValueEntry> processedValues = (List) procesRepeatedElement(submapTemplate, context, nameExpression, path + ">" + fieldName); 
+					List<NameValueEntry> processedValues = (List) procesRepeatedElement(submapTemplate, context, nameExpression, transformState.forField(field)); 
 					
 					//loop through res maps
 					for(NameValueEntry nameValEntry : processedValues)
 					{
 						//add processed map on result
-						resMap.put(nameValEntry.getName(), nameValEntry.getValue());
+						transformState.setField(field, resObj, nameValEntry.getName(), nameValEntry.getValue());
+						otherEntriesAdded = true;
 					}
 					
 					//move to next entry
@@ -399,7 +403,7 @@ public class TransformEngine
 			}
 			
 			//for each entry, process the value and replace current value with processed value
-			Object val = processObject(field.getValue(), context, transformObject.getPath() + ">" + field.getName());
+			Object val = processObject(field.getValue(), context, transformState.forField(field));
 			
 			//if current key is a set key
 			if(field.getAttributeName() != null)
@@ -419,14 +423,8 @@ public class TransformEngine
 			
 			if(field.isReplaceEntry())
 			{
-				//if result value is not map
-				if(!(val instanceof Map))
-				{
-					throw new TransformException(path, "Value of @replace key must be a map but found: {}", val.getClass().getName());
-				}
-				
-				Map<String, Object> valMap = (Map<String, Object>) val;
-				resMap.putAll(valMap);
+				transformState.injectReplaceEntry(path, field, resObj, val);
+				otherEntriesAdded = true;
 				continue;
 			}
 
@@ -435,20 +433,21 @@ public class TransformEngine
 
 			if(field.getNameExpression() != null)
 			{
-				key = (String) conversions.processExpression(field.getNameExpression(), context, path + ">" + fieldName + "#key");
+				key = (String) conversions.processExpression(field.getNameExpression(), context, transformState.forField(field, "name"));
 			}
 
-			resMap.put(key, val);
+			transformState.setField(field, resObj, key, val);
+			otherEntriesAdded = true;
 		}
 		
 		//if set key is the only key in input map
-		if(setKeyPresent && resMap.isEmpty())
+		if(setKeyPresent && !otherEntriesAdded)
 		{
 			//return null, so that the current map is ignored
 			return null;
 		}
 		
-		return resMap;
+		return resObj;
 	}
 	
 	/**
@@ -461,7 +460,7 @@ public class TransformEngine
 	 * @param value wrapper to hold the value
 	 * @return true if value expression is present
 	 */
-	private boolean processMapValue(TransformObject transformObject, String keyName, Object valueExpr, ITransformContext context, ObjectWrapper<Object> value)
+	private boolean processMapValue(TransformObject transformObject, String keyName, Object valueExpr, ITransformContext context, TransformState transformState, ObjectWrapper<Object> value)
 	{
 		if(valueExpr == null)
 		{
@@ -469,10 +468,9 @@ public class TransformEngine
 		}
 		
 		//evaluate the condition and return the result
-		String path = transformObject.getPath();
-		Object res = processObject(valueExpr, context, path + ">" + keyName);
+		Object res = processObject(valueExpr, context, transformState.forDynField(keyName));
 		
-		res = conversions.checkForTransform(transformObject, res, context);
+		res = conversions.checkForTransform(transformObject, res, context, transformState);
 				
 		value.setValue(res);
 		return true;

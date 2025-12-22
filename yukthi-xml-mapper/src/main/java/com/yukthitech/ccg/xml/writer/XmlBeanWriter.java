@@ -38,7 +38,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.yukthitech.ccg.xml.DefaultParserHandler;
-import com.yukthitech.ccg.xml.XMLConstants;
+import com.yukthitech.ccg.xml.IXmlConstants;
 import com.yukthitech.utils.PropertyAccessor;
 import com.yukthitech.utils.PropertyAccessor.Property;
 
@@ -186,8 +186,8 @@ public class XmlBeanWriter
 
 			if(!writerConfig.isExcludeNameSpace())
 			{
-				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ccg", XMLConstants.NEW_CCG_URI);
-				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", XMLConstants.NEW_CCG_WRAP_URI);
+				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:ccg", IXmlConstants.NEW_CCG_URI);
+				rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:wrap", IXmlConstants.NEW_CCG_WRAP_URI);
 				
 				rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_DATE_FORMAT, DEF_DATE_FORMAT_STR);
 				rootElement.setAttribute( CCG_PREFIX + DefaultParserHandler.ATTR_BEAN_TYPE, bean.getClass().getName());

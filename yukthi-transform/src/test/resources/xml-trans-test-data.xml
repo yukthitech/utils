@@ -1,0 +1,620 @@
+<test-data xmlns:r="/fw/ccg/XMLBeanParser">
+	<r:exprPattern enabled="false"/>
+	
+	<disableByDefault>true</disableByDefault>
+	
+	<jel-test-bean name="conditionBasedRemovalInMap">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks open="true"/>
+				<Imagine open="false"/>
+			</libraries>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<Justbooks t:condition="toBoolean(libraries.Justbooks.open)">
+					<desc>Library is open</desc>
+				</Justbooks>
+				<Imagine t:condition="toBoolean(libraries.Imagine.open)">
+					<desc>Library is open</desc>
+				</Imagine>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<Justbooks>
+					<desc>Library is open</desc>
+				</Justbooks>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="exprInKey">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks name="Justbooks" open="true"/>
+				<Imagine name="Imagine" open="false"/>
+			</libraries>
+		]]></context>
+
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<Justbooks t:name="Justbooks-${libraries.Justbooks.open}" status="${libraries.Justbooks.open}"/>
+				<Imagine t:name="@fmarker: mapValues(libraries)[1].name">
+					<status>${libraries.Imagine.open}</status>
+				</Imagine>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<Justbooks-true status="true"/>
+				<Imagine>
+					<status>false</status>
+				</Imagine>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks open="true">
+					<books title="Davinci Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+					<books title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+				</Justbooks>
+				<Imagine open="false">
+					<books title="Shiva Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+					<books title="Dark Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+				</Imagine>
+			</libraries>
+		]]></context>
+		
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<emptyList/>
+				
+				<listWithNoString>100</listWithNoString>
+				<listWithNoString>200</listWithNoString>
+				
+				<listWithNoCond>@fmarker: sizeOf(libraries.Justbooks.books)</listWithNoCond>
+				<listWithNoCond>20</listWithNoCond>
+				
+				<listWithPositiveConds t:condition="toBoolean(libraries.Justbooks.open)">
+					<listWithPositiveCond>1000</listWithPositiveCond>
+					<listWithPositiveCond a="b"></listWithPositiveCond>
+				</listWithPositiveConds>
+				
+				<listWithNegativeConds t:condition="toBoolean(libraries.Imagine.open)">
+					<listWithNegativeCond>1000</listWithNegativeCond>
+					<listWithNegativeCond a="b"></listWithNegativeCond>
+				</listWithNegativeConds>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<emptyList/>
+				
+				<listWithNoString>100</listWithNoString>
+				<listWithNoString>200</listWithNoString>
+				
+				<listWithNoCond>2</listWithNoCond>
+				<listWithNoCond>20</listWithNoCond>
+				
+				<listWithPositiveConds>
+					<listWithPositiveCond>1000</listWithPositiveCond>
+					<listWithPositiveCond a="b"></listWithPositiveCond>
+				</listWithPositiveConds>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="valueKey">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks name="Justbooks" open="true"/>
+				<Imagine name="Imagine" open="false"/>
+			</libraries>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<mapWithString t:condition="toBoolean(libraries.Justbooks.open)" t:value="Enabled" extraParam="1"/>
+				<mapWithNonString t:condition="toBoolean(libraries.Justbooks.open)" t:value="100" extraParam="1"/>
+				<list>
+					<value t:condition="toBoolean(libraries.Justbooks.open)" t:value="@fmarker: libraries.Justbooks.name" extraParam="1"/>
+					<value>100</value>
+				</list>
+				<prodStack t:condition="toBoolean(libraries.Imagine.open)" t:value="Enabled"/>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<mapWithString>Enabled</mapWithString>
+				<mapWithNonString>100</mapWithNonString>
+				
+				<list>
+					<value>Justbooks</value>
+					<value>100</value>
+				</list>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks name="Justbooks" open="true"/>
+				<Imagine name="Imagine" open="false"/>
+			</libraries>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<elem t:condition="toBoolean(libraries.Justbooks.open)" desc="Just books is open"/>
+				<elem t:condition="toBoolean(libraries.Imagine.open)" desc="Just books is open"/>
+				<elem desc="This is a extra lib"/>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<elem desc="Just books is open"/>
+				<elem desc="This is a extra lib"/>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="loopAndExpressions">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks name="Justbooks" open="true">
+					<books title="Davinci Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+					<books title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+				</Justbooks>
+				<Imagine name="Imagine" open="false">
+					<books title="Shiva Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+					<books title="Let Us C" author="Yeshwant Kanetkar" type="Technology" copyCount="0"/>
+					<books title="Dark Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+				</Imagine>
+			</libraries>
+		]]></context>
+
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<bookName t:value="@xpathMulti: /libraries/Justbooks/books//title"/>
+				<copyCount t:value="@xpath: /libraries/Justbooks/books[1]/copyCount"/>
+				
+				<allDocCounts t:value="@fmarker: sizeOf(libraries.Justbooks.books)"/>
+				<allDocCounts t:value="@fmarker: sizeOf(libraries.Imagine.books)"/>
+				
+				<Justbooks t:for-each="libraries.Justbooks.books" t:loop-var="book" name="${book.title}">
+					<desc>Type: ${book.type}, author: ${book.author}</desc>
+				</Justbooks>
+				
+				<Imagine t:for-each="libraries.Imagine.books" t:loop-var="book" name="${book.title}">
+					<desc>Type: ${book.type}, author: ${book.author}</desc>
+				</Imagine>
+			</output>
+		]]></template>
+
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<bookName>Davinci Code</bookName>
+				<bookName>Sphere</bookName>
+				
+				<copyCount>3</copyCount>
+				
+				<allDocCounts>2</allDocCounts>
+				<allDocCounts>3</allDocCounts>
+				
+				<Justbooks name="Davinci Code">
+					<desc>Type: Science Fiction, author: Dan Brown</desc>
+				</Justbooks>
+				<Justbooks name="Sphere">
+					<desc>Type: Science Fiction, author: Michel Crihton</desc>
+				</Justbooks>
+
+				<Imagine name="Shiva Triology">
+					<desc>Type: Mythology Fiction, author: Amit Shah</desc>
+				</Imagine>
+				<Imagine name="Let Us C">
+				    <desc>Type: Technology, author: Yeshwant Kanetkar</desc>
+				</Imagine>
+				<Imagine name="Dark Psychology">
+					<desc>Type: Psychology, author: Xyz</desc>
+				</Imagine>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="loopForMaps" enabled="true">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks open="true">
+					<books title="Davinci-Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+					<books title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+				</Justbooks>
+				<Imagine open="false">
+					<books title="Shiva-Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+					<books title="Let-Us-C" author="Yeshwant Kanetkar" type="Technology" copyCount="0"/>
+					<books title="Dark-Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+				</Imagine>
+			</libraries>
+		]]></context>
+		
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<Justbooks>
+					<book t:name="book.title" t:for-each="libraries.Justbooks.books" t:loop-var="book">
+						<copyCount>@fmarker: book.copyCount</copyCount>
+					</book>
+				</Justbooks>
+				
+				<Imagine>
+					<book t:name="book.title" t:for-each="libraries.Imagine.books"  t:loop-var="book" t:for-each-condition="toInt(book.copyCount) gt 0">
+						<copyCount>@fmarker: book.copyCount</copyCount>
+					</book>
+				</Imagine>
+			</output>
+		]]></template>
+
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<Justbooks>
+					<Davinci-Code>
+						<copyCount>3</copyCount>
+					</Davinci-Code>
+					<Sphere>
+						<copyCount>0</copyCount>
+					</Sphere>
+				</Justbooks>
+				
+				<Imagine>
+					<Shiva-Triology>
+						<copyCount>10</copyCount>
+					</Shiva-Triology>
+					<Dark-Psychology>
+						<copyCount>1</copyCount>
+					</Dark-Psychology>
+				</Imagine>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+	
+	<!--  
+	<jel-test-bean name="nullAndEmptyListRefInLoop">
+		<context>
+			{
+				"nullList": null,
+				"emptyList": [],
+				"someList": [1, 2, 3]
+			}
+		</context>
+		
+		<template>
+			{
+				"list1": [{
+					"@for-each(elem)": "nullList",
+					"val": "${elem}"
+				}],
+				"list2": [{
+					"@for-each(elem)": "emptyList",
+					"val": "${elem}"
+				}],
+				"list3": [{
+					"@for-each(elem)": "someList",
+					"val": "${elem}"
+				}]
+			}
+		</template>
+		<expectedResult>
+			{
+				"list1": [],
+				"list2": [],
+				"list3": [
+					{"val": "1"}, {"val": "2"}, {"val": "3"}
+				]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="setExpressions">
+		<context>
+			{
+				"libraries": {
+					"Justbooks": {
+						"name": "Justbooks",
+						"open": true,
+						"books": [
+							{"title": "Davinci Code", "author": "Dan Brown", "type": "Science Fiction", "copyCount": 3},
+							{"title": "Sphere", "author": "Michel Crihton", "type": "Science Fiction", "copyCount": 0}
+						]
+					},
+					"Imagine": {
+						"name": "Imagine",
+						"open": false,
+						"books": [
+							{"title": "Shiva Triology", "author": "Amit Shah", "type": "Mythology Fiction", "copyCount": 10},
+							{"title": "Let Us C", "author": "Yeshwant Kanetkar", "type": "Technology", "copyCount": 0},
+							{"title": "Dark Psychology", "author": "Xyz", "type": "Psychology", "copyCount": 1}
+						]
+					}
+				}
+			}
+		</context>
+
+		<template>
+			{
+				"list": [
+					100,
+					{
+						"@set(secondLib)": "@xpath: /libraries/Imagine/name"
+					}, 
+					200
+				],
+				"map": {
+					"key1": "val1",
+					
+					"@set(libJb)": {
+						"bookNames": "@xpathMulti: /libraries/Justbooks/books//title"
+					},
+					
+					"key2": "@fmarker: libraries.Imagine.books[1].title"
+				},
+				
+				"names": "@fmarker: libJb.bookNames",
+				"library": "@fmarker: secondLib"
+				
+			}
+		</template>
+		<expectedResult>
+			{
+				"list": [100, 200],
+				"map": {
+					"key1": "val1",
+					"key2": "Let Us C"
+				},
+				
+				"names": ["Davinci Code", "Sphere"],
+				"library": "Imagine"
+				
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="jsonExpressions">
+		<context>
+			{
+				"libraries": {
+					"Justbooks": {"name": "Justbooks", "open": true},
+					"Imagine": {"name": "Imagine", "open": false},
+					"testLib": {}
+				}
+			}
+		</context>
+		
+		<template>
+			{
+				"result": {
+					"@value": {
+						"someVal": 1,
+						"libNames": "@xpathMulti: /libraries/Justbooks//name"
+					},
+					
+					"@transform": "@fmarker: toJson(thisValue)"
+					
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "{\"someVal\":1,\"libNames\":[\"Justbooks\"]}"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="resLoadingWithExpr">
+		<context>
+			{
+				"ckey1": "cval"
+			}
+		</context>
+		
+		<template>
+			{
+				"result": {
+					"@resource": "/res-file.txt",
+					"@resParams": {
+						"key1": "val1"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "This is simple content with param-value=val1 and context-value=cval"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="resLoadingNoExpr">
+		<context>
+			{
+				"ckey1": "cval"
+			}
+		</context>
+
+		<template>
+			{
+				"result": {
+					"@resource": "/res-file.txt",
+					"@expressions": false,
+					"@resParams": {
+						"key1": "val1"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "This is simple content with param-value=${resParams.key1} and context-value=${ckey1}"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeResourceInMap">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"extra": {"@includeResource": "/include-res.json"},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"extra": {
+					"skey1": "cval1",
+					"arr": [1, 2, 3, 4]
+				},
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeWithReplace">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"@replace(extra)": {"@includeResource": "/include-res.json"},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"skey1": "cval1",
+				"arr": [1, 2, 3, 4],
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeWithReplaceAndCond">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"@replace(wrongCond)": {
+					"@condition": "ckey1 == 'diffValue'",
+					"@includeResource": "/include-res.json"
+				},
+				"@replace(rightCond)": {
+					"@condition": "ckey1 == 'cval1'",
+					"@includeResource": "/include-res2.json",
+					"@params": {
+						"paramKey1": "paramValue"
+					}
+				},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"skey2": "fromRes2",
+				"arr2": [1, 2, 3, 4],
+				"pkey": "paramValue",
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeResourceInArray">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			["1", {"@includeResource": "/include-res.json"}, {"k1": "v1"}]
+		</template>
+		<expectedResult>
+			["1", {"skey1": "cval1", "arr": [1, 2, 3, 4]}, {"k1": "v1"}]
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeFile">
+		<context>
+			{
+				"ckey1": "cval1",
+				"ckey2": "cval2"
+			}
+		</context>
+
+		<template>
+			{
+				"key1": "@fmarker: ckey1",
+				"extra": {"@includeFile": "./src/test/resources/include-file.json"},
+				"key2": "@fmarker: ckey2"
+			}
+		</template>
+		<expectedResult>
+			{
+				"key1": "cval1",
+				"extra": ["cval1", [1, 2, 3, 4]],
+				"key2": "cval2"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="includeRecursively">
+		<context>
+			{
+				"ckey1": "cval1"
+			}
+		</context>
+
+		<template>
+			{
+				"mainMap": {
+					"@includeResource": "/include-recursive.json",
+					"@params": {"value": "@fmarker: 3"}
+				},
+				"ckey1": "@fmarker: ckey1"
+			}
+		</template>
+		<expectedResult>
+			{
+				"mainMap": {
+					"smap": {
+						"smap": {"finalValue": 2},
+						"finalValue": 4
+					},
+					"finalValue": 6
+				},
+				"ckey1": "cval1"
+			}
+		</expectedResult>
+	</jel-test-bean>
+	-->
+</test-data>

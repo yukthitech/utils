@@ -65,7 +65,7 @@
 		</expectedResult>
 	</jel-test-bean>
 
-	<jel-test-bean name="conditionBasedRemovalInList">
+	<jel-test-bean name="conditionBasedRemovalInList" enabled="true">
 		<context>
 			{
 				"libraries": {

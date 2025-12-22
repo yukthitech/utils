@@ -37,7 +37,7 @@ import com.yukthitech.ccg.xml.util.ValidateException;
  * 
  * @author A. Kranthi Kiran
  */
-public interface IParserHandler extends XMLConstants
+public interface IParserHandler extends IXmlConstants
 {
 	public static Object NOT_SUPPORTED = new Object();
 
@@ -138,7 +138,7 @@ public interface IParserHandler extends XMLConstants
 	 *            the type
 	 * @return the object
 	 */
-	public Object createAttributeBean(BeanNode node, String attName, Class<?> type);
+	public Object parseAttributeValue(BeanNode node, String attName, Class<?> type);
 
 	/**
 	 * Whenever there is a node end, this method will be called. Since, this
@@ -289,7 +289,7 @@ public interface IParserHandler extends XMLConstants
 			return false;
 		}
 		
-		return XMLConstants.CCG_URI.equals(uri) || XMLConstants.NEW_CCG_URI.equals(uri) ;
+		return IXmlConstants.CCG_URI.equals(uri) || IXmlConstants.NEW_CCG_URI.equals(uri) ;
 	}
 
 	public default boolean isWrapUri(String uri)
@@ -299,7 +299,7 @@ public interface IParserHandler extends XMLConstants
 			return false;
 		}
 		
-		return XMLConstants.CCG_WRAP_URI.equals(uri) || XMLConstants.NEW_CCG_WRAP_URI.equals(uri) ;
+		return IXmlConstants.CCG_WRAP_URI.equals(uri) || IXmlConstants.NEW_CCG_WRAP_URI.equals(uri) ;
 	}
 	
 	public boolean isRetainWhiteSpacesEnabled();

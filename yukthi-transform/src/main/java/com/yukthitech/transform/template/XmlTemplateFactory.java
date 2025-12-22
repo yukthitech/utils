@@ -2,6 +2,7 @@ package com.yukthitech.transform.template;
 
 import static com.yukthitech.transform.ITransformConstants.OBJECT_MAPPER;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,106 +13,110 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
+import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
+import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
-import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
-public class JsonTemplateFactory implements ITemplateFactory
+public class XmlTemplateFactory implements ITemplateFactory
 {
 	public static Set<String> SUB_ATTR = Set.of(
-			"@params",
-			"@expressions",
-			"@resParams",
-			"@for-each-condition"
+			"name",
+			"loopVar",
+			"forEachCondition"
 		);
-	
-	/**
+
+	private static final String PATH_SEP = "/";
+
+    private static final String RES_PATH_SEP = "/t:";
+
+    /**
 	 * Key used to specify condition for an object/map inclusion.
 	 */
-	private static final String KEY_CONDITION = "@condition";
+	private static final String KEY_CONDITION = "condition";
 	
+	/**
+	 * Name expression attr name to override name.
+	 */
+	private static final String NAME_EXPRESSION = "name";
+
 	/**
 	 * Key used to specify value for the enclosing map. Useful when condition has to be specified for simple attribute.
 	 */
-	private static final String KEY_VALUE = "@value";
+	private static final String KEY_VALUE = "value";
 	
 	/**
 	 * Key used to specify value for the enclosing map when condition fails. Useful when condition has to be specified for simple attribute.
 	 */
-	private static final String KEY_FALSE_VALUE = "@falseValue";
+	private static final String KEY_FALSE_VALUE = "falseValue";
 
 	/**
-	 * Pattern used by keys to define repetition.
+	 * Attr used to define repetition.
 	 */
-	private static final Pattern FOR_EACH_PATTERN = Pattern.compile("^\\@for\\-each\\((\\w+)\\)$");
-	
+	private static final String FOR_EACH_EXPR = "forEach";
+
+	/**
+	 * Attr used to define loop variable for repetition.
+	 */
+	private static final String FOR_EACH_LOOP_VAR = "loopVar";
+
 	/**
 	 * Loop condition to exclude objects being generated.
 	 */
-	private static final String KEY_FOR_EACH_CONDITION = "@for-each-condition";
+	private static final String KEY_FOR_EACH_CONDITION = "forEachCondition";
 	
 	/**
-	 * Pattern used by keys to set complex object (post processing) on context.
+	 * Set node name.
 	 */
-	private static final Pattern SET_PATTERN = Pattern.compile("^\\@set\\((\\w+)\\)$");
-	
-	
-	/**
-	 * Used to replace current map entry, with entries with entries of value map (of current entry). Mainly
-	 * expected to be used with @includeResource or @includeFile. 
-	 * 
-	 * Note: Though param string is supported, the param itself is not in use. It is added to support multiple replacements
-	 * in single map (in simple terms as key differentiators).
-	 */
-	private static final Pattern REPLACE_PATTERN = Pattern.compile("^\\@replace\\((\\w+)\\)$");
+	public static final String SET = "set";
 
-    
+	/**
+	 * Replace node name.
+	 */
+	public static final String REPLACE = "replace";
+
 	/**
 	 * In a map if this key is specified with expression, along with @value/@falseValue then the result will be result of this expression.
 	 * Current value will be available in this expressions as thisValue.
 	 */
-	private static final String TRANSFORM = "@transform";
+	private static final String TRANSFORM = "transform";
 
 	/**
 	 * Use to load resource value.
 	 */
-	private static final String RES = "@resource";
+	public static final String RES = "resource";
 
 	/**
 	 * Use to specify that expressions in resource being loaded should be processed or not.
 	 * By default this will be true.
 	 */
-	private static final String RES_PARAM_EXPR = "@expressions";
-
-	/**
-	 * If specified, will be added to current context as 'resParams', which can be accessed within expressions of resource.
-	 */
-	private static final String RES_PARAM_PARAMS = "@resParams";
+	private static final String RES_PARAM_EXPR = "expressions";
 
 	/**
 	 * Use to include resource template.
 	 */
-	private static final String INCLUDE_RES = "@includeResource";
+	public static final String INCLUDE_RES = "includeResource";
 
 	/**
 	 * Use to include file template.
 	 */
-	private static final String INCLUDE_FILE = "@includeFile";
+	public static final String INCLUDE_FILE = "includeFile";
 	
 	/**
 	 * Params that can be passed during inclusion. These params can be accessed in expressions using "params" as key.
 	 */
-	private static final String PARAMS = "@params";
+	public static final String PARAMS = "params";
 
 	/**
 	 * Expression used by value string which has to be replaced with resultant value.
@@ -122,6 +127,8 @@ public class JsonTemplateFactory implements ITemplateFactory
 
     private IContentLoader contentLoader = DEFAULT_CONTENT_LOADER;
     
+    private XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler();
+    
     /**
      * A cache of resource/file path to loaded template. This is maintained
      * to make template loading efficient (avoided repeated parsing) also needed
@@ -129,12 +136,14 @@ public class JsonTemplateFactory implements ITemplateFactory
      */
     private Map<String, TransformTemplate> includeCache = new HashMap<>();
 
-    public JsonTemplateFactory()
+    public XmlTemplateFactory()
     {
     	this(DEFAULT_CONTENT_LOADER);
+    	
+    	parserHandler.setExpressionEnabled(false);
     }
     
-    public JsonTemplateFactory(IContentLoader contentLoader)
+    public XmlTemplateFactory(IContentLoader contentLoader)
     {
     	if(contentLoader == null)
     	{
@@ -144,21 +153,15 @@ public class JsonTemplateFactory implements ITemplateFactory
         this.contentLoader = contentLoader;
     }
 
-    public TransformTemplate parseTemplate(String jsonContent) 
+    public TransformTemplate parseTemplate(String xmlContent) 
     {
-        Object jsonObj = null;
-        
-        try
-        {
-            jsonObj = OBJECT_MAPPER.readValue(jsonContent, Object.class);
-        } catch(Exception ex)
-        {
-            throw new InvalidStateException("An error occurred while parsing json template.", ex);
-        }
+    	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
+    			new ByteArrayInputStream(xmlContent.getBytes()), 
+    			parserHandler);
 
-        Object root = parseObject(jsonObj, "");
+        Object root = parseObject(dynBean, "");
 
-        return new TransformTemplate(JsonGenerator.class, root);
+        return new TransformTemplate(XmlGenerator.class, root);
     }
     
     private void parseTemplateTo(String jsonContent, TransformTemplate template)
@@ -173,10 +176,21 @@ public class JsonTemplateFactory implements ITemplateFactory
             throw new InvalidStateException("An error occurred while parsing json template.", ex);
         }
 
-        Object root = parseObject(jsonObj, "");
+        Object root = parseObject(jsonObj, "/");
         template.setRoot(root);
     }
     
+    public String formatObject(Object object)
+    {
+    	try
+    	{
+    		return OBJECT_MAPPER.writeValueAsString(object);
+        } catch(Exception ex)
+        {
+            throw new InvalidStateException("An error occurred while writing json value.", ex);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private Object parseObject(Object object, String path)
     {
@@ -186,9 +200,9 @@ public class JsonTemplateFactory implements ITemplateFactory
 			{
 				object = parseList((List<Object>) object, path);
 			}
-			else if(object instanceof Map)
+			else if(object instanceof XmlDynamicBean)
 			{
-				object = parseMap((Map<String, Object>) object, path);
+				object = parseDynBean((XmlDynamicBean) object, path);
 			}
 			else if(object instanceof String)
 			{
@@ -257,12 +271,12 @@ public class JsonTemplateFactory implements ITemplateFactory
         
         return matcher.group(2);
     }
-
-    private Object parseMap(Map<String, Object> map, String path)
+    
+    private void processReserveAttributes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
     {
-        TransformObject transformObject = new TransformObject(path);
+        Map<String, String> reserveAttr = dynBean.getReserveAttributes();
 
-        for(Map.Entry<String, Object> entry : map.entrySet())
+        for(Map.Entry<String, String> entry : reserveAttr.entrySet())
         {
             if(KEY_CONDITION.equals(entry.getKey()))
             {
@@ -270,13 +284,11 @@ public class JsonTemplateFactory implements ITemplateFactory
                 continue;
             }
 
-            Matcher forEachMatcher = FOR_EACH_PATTERN.matcher(entry.getKey());
-
-            if(forEachMatcher.matches())
+            if(FOR_EACH_EXPR.equals(entry.getKey()))
             {
-                String loopVariable = forEachMatcher.group(1);
+                String loopVariable = reserveAttr.get(FOR_EACH_LOOP_VAR);
                 Object listExpression = entry.getValue();
-                String loopCondition = (String) map.get(KEY_FOR_EACH_CONDITION);
+                String loopCondition = reserveAttr.get(KEY_FOR_EACH_CONDITION);
 
                 transformObject.setForEachLoop(new ForEachLoop(listExpression, loopVariable, loopCondition));
                 continue;
@@ -284,110 +296,137 @@ public class JsonTemplateFactory implements ITemplateFactory
 
             if(KEY_FALSE_VALUE.equals(entry.getKey()))
             {
-            	Object falseValue = parseObject(entry.getValue(), path + ">" + entry.getKey());
+            	Object falseValue = parseObject(entry.getValue(), path + RES_PATH_SEP + entry.getKey());
                 transformObject.setFalseValue(falseValue);
                 continue;
             }
 
             if(KEY_VALUE.equals(entry.getKey()))
             {
-            	Object valueObj = parseObject(entry.getValue(), path + ">" + entry.getKey());
+            	Object valueObj = parseObject(entry.getValue(), path + RES_PATH_SEP + entry.getKey());
                 transformObject.setValue(valueObj);
                 continue;
             }
 
-            if(TRANSFORM.equals(entry.getKey()) && (entry.getValue() instanceof String)
+            if(TRANSFORM.equals(entry.getKey())
                 && StringUtils.isNotBlank((String) entry.getValue()))
             {
-                transformObject.setTransformExpression(parseExpression((String) entry.getValue(), path + ">" + entry.getKey(), false));
+                transformObject.setTransformExpression(parseExpression((String) entry.getValue(), path + RES_PATH_SEP + entry.getKey(), false));
                 continue;
             }
-
-            if(RES.equals(entry.getKey()))
+            
+            // Attributes which are handled in special way, ignore those reserve attr
+            if(SUB_ATTR.contains(entry.getKey()))
             {
-                String resPath = entry.getValue().toString();
-                String content = null;
-
-                try
-                {
-                    content = contentLoader.loadResource(resPath);
-                }catch(Exception ex)
-                {
-                    throw new TransformException(path, "Failed to load resource: {}", entry.getValue(), ex);			
-                }
-
-                boolean disableExpressions = "false".equalsIgnoreCase("" + map.get(RES_PARAM_EXPR));
-                Object resParams = map.get(RES_PARAM_PARAMS);
-
-                String transformExpression = (String) map.get(TRANSFORM);
-
-                transformObject.setResource(new Resource(
-                    resPath, 
-                    content, 
-                    disableExpressions, 
-                    resParams, 
-                    transformExpression));
-                continue;
+            	continue;
             }
 
-            if(INCLUDE_RES.equals(entry.getKey()) || INCLUDE_FILE.equals(entry.getKey()))
+            throw new InvalidStateException("Invalid transform attribute '{}' specified at path: {}", entry.getKey(), path);
+        }
+    }
+
+    private void processReserveNodes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    {
+        for(XmlDynamicBean resBean : dynBean.getReserveNodes())
+        {
+            if(INCLUDE_RES.equals(resBean.getName()) || INCLUDE_FILE.equals(resBean.getName()))
             {
-                transformObject.setInclude(parseInclude(map, entry.getKey(), path + ">" + entry.getKey()));
+                transformObject.setInclude(parseInclude(resBean, path + PATH_SEP + resBean.getName()));
+                continue;
+            }
+    		
+            if(RES.equals(resBean.getName()))
+            {
+                transformObject.setResource(parseResource(resBean, path + PATH_SEP + resBean.getName()));
                 continue;
             }
             
             // Check if the entry represents a set attr entry
-            Matcher setMatcher = SET_PATTERN.matcher(entry.getKey());
-
-            if(setMatcher.matches())
+            if(SET.equals(resBean.getName()))
             {
-            	String attributeName = setMatcher.group(1);
+            	String attributeName = resBean.getAttributes().get("name");
 
                 transformObject.addField(new TransformObjectField(
-                        entry.getKey(), 
+                		resBean.getName(), 
                         null,
                         attributeName, 
-                        parseObject(entry.getValue(), path + ">" + entry.getKey()),
+                        parseObject(resBean, path + ">" + resBean.getName() + "[" + attributeName + "]"),
                         false
                     ));
                 continue;
             }
 
             // check if this is replaced entry
-
-            if(REPLACE_PATTERN.matcher(entry.getKey()).matches())
+            if(REPLACE.equals(resBean.getName()))
             {
                 transformObject.addField(new TransformObjectField(
-                        entry.getKey(), 
+                		resBean.getName(), 
                         null,
                         null, 
-                        parseObject(entry.getValue(), path + ">" + entry.getKey()),
+                        parseObject(resBean, path + ">" + resBean.getName()),
                         true
                     ));
                 continue;
             }
+        }
+    }
 
-            //check if key itself represents an expression
-            Expression keyExpression = parseExpression(entry.getKey(), path + ">" + entry.getKey(), true);
-            
-            // if key starts with @, those are special keys
-            if(entry.getKey().startsWith("@") && keyExpression == null)
-            {
-            	if(SUB_ATTR.contains(entry.getKey()))
-            	{
-            		continue;
-            	}
-            	
-                throw new InvalidStateException("Invalid transform attribute '{}' specified at path: {}", entry.getKey(), path);
-            }
+    private void processAttributes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    {
+        Map<String, String> attrMap = dynBean.getAttributes();
 
+        for(Map.Entry<String, String> entry : attrMap.entrySet())
+        {
             transformObject.addField(new TransformObjectField(
                 entry.getKey(), 
-                keyExpression,
+                null,
                 null, 
-                parseObject(entry.getValue(), path + ">" + entry.getKey()),
+                parseObject(entry.getValue(), path + PATH_SEP + entry.getKey()),
                 false
-            ));
+            ).setType(FieldType.ATTRIBUTE));
+        }
+    }
+
+    private void processNodes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    {
+        for(XmlDynamicBean bean : dynBean.getNodes())
+        {
+    		Expression keyExpression = null;
+    		String keyExpressionStr = bean.getReserveAttributes().get(NAME_EXPRESSION);
+    		
+            if(StringUtils.isNotBlank(keyExpressionStr))
+            {
+                keyExpression = parseExpression(keyExpressionStr, path + RES_PATH_SEP + NAME_EXPRESSION, true);
+            }
+            
+            transformObject.addField(new TransformObjectField(
+            		bean.getName(), 
+                    keyExpression,
+                    null, 
+                    parseObject(bean, path + PATH_SEP + bean.getName()),
+                    false
+                ).setType(FieldType.NODE));
+        }
+    }
+
+    private Object parseDynBean(XmlDynamicBean dynBean, String path)
+    {
+        TransformObject transformObject = new TransformObject(dynBean.getName(), path);
+        
+        processReserveAttributes(dynBean, path, transformObject);
+        processReserveNodes(dynBean, path, transformObject);
+        processAttributes(dynBean, path, transformObject);
+        processNodes(dynBean, path, transformObject);
+        
+        if(StringUtils.isNotBlank(dynBean.getTextContent()))
+        {
+            transformObject.addField(new TransformObjectField(
+                    "@textContent", 
+                    null,
+                    null, 
+                    parseObject(dynBean.getTextContent().trim(), path + PATH_SEP + "@textContent"),
+                    false
+                ).setType(FieldType.TEXT_CONTENT));
         }
         
         return transformObject;
@@ -465,7 +504,7 @@ public class JsonTemplateFactory implements ITemplateFactory
 		
 		// first template is kept on cache (before parsing) to avoid
 		//   never ending recursion in case of recursive templates
-		subTemplate = new TransformTemplate(JsonGenerator.class, null);
+		subTemplate = new TransformTemplate(XmlGenerator.class, null);
 		includeCache.put(key, subTemplate);
 		
 		parseTemplateTo(content, subTemplate);
@@ -473,27 +512,53 @@ public class JsonTemplateFactory implements ITemplateFactory
 		return subTemplate;
     }
 
-    private Include parseInclude(Map<String, Object> map, String key, String path)
+	private Include parseInclude(XmlDynamicBean dynamicBean, String path)
     {
-        String includePath = map.get(key).toString();
+        String includePath = dynamicBean.getAttributes().get("path");
         
-		Object params = map.get(PARAMS);
-		
-		if(params != null && !(params instanceof Map))
-		{
-			throw new TransformException(path, "Invalid params specified for include tag. params should be of type Map");
-		}
-		
+        XmlDynamicBean paramsNode = (XmlDynamicBean) dynamicBean.getReserveNode(PARAMS);
 		TransformObject paramsObj = null;
 
-		if(params != null)
+		if(paramsNode != null)
 		{
-			paramsObj = (TransformObject) parseObject(params, path + ">" + PARAMS);
+			paramsObj = (TransformObject) parseObject(paramsNode, path + PATH_SEP + PARAMS);
 		}
         
-        boolean isResource = INCLUDE_RES.equals(key);
+        boolean isResource = INCLUDE_RES.equals(dynamicBean.getName());
 		
 		TransformTemplate subTemplate = loadAndParse(includePath, isResource);
         return new Include(includePath, subTemplate, paramsObj);
+    }
+
+	private Resource parseResource(XmlDynamicBean dynamicBean, String path)
+    {
+        String resPath = dynamicBean.getAttributes().get("path");
+        String content = null;
+
+        try
+        {
+            content = contentLoader.loadResource(resPath);
+        }catch(Exception ex)
+        {
+            throw new TransformException(path, "Failed to load resource: {}", resPath, ex);			
+        }
+
+        boolean disableExpressions = "false".equalsIgnoreCase("" + dynamicBean.getAttributes().get(RES_PARAM_EXPR));
+        String transformExpression = dynamicBean.getAttributes().get(TRANSFORM);
+
+        XmlDynamicBean paramsNode = (XmlDynamicBean) dynamicBean.getReserveNode(PARAMS);
+		TransformObject paramsObj = null;
+
+		if(paramsNode != null)
+		{
+			paramsObj = (TransformObject) parseObject(paramsNode, path + PATH_SEP + PARAMS);
+		}
+
+        return new Resource(
+                resPath, 
+                content, 
+                disableExpressions, 
+                paramsObj, 
+                transformExpression);
     }
 }

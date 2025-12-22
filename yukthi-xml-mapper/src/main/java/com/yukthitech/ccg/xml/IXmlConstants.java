@@ -15,7 +15,7 @@
  */
 package com.yukthitech.ccg.xml;
 
-public interface XMLConstants
+public interface IXmlConstants
 {
 	public static final String CCG_URI = "/fw/ccg/XMLBeanParser";
 	public static final String NEW_CCG_URI = "http://xmlbeanparser.yukthitech.com/reserved";
