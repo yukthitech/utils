@@ -153,16 +153,6 @@ class SAXEventHandler extends DefaultHandler
 		}
 		
 		
-		if(activeNode.getActualBean() instanceof ITextAcceptor)
-		{
-			if(text.trim().length() > 0)
-			{
-				((ITextAcceptor) activeNode.getActualBean()).setTextContent(text.trim());
-			}
-			
-			return;
-		}
-
 		// check if this method is called due to meta-text node
 		if(!activeNode.isTextNode())
 		{
@@ -206,7 +196,7 @@ class SAXEventHandler extends DefaultHandler
 		{
 			if(activeNode.containsText())
 			{
-				((IHybridTextBean) curBean).addText(processText(activeNode.getActualText()));
+				((IHybridTextBean) curBean).setText(processText(activeNode.getActualText()));
 				activeNode.clearText();
 			}
 		}
@@ -434,7 +424,7 @@ class SAXEventHandler extends DefaultHandler
 		{
 			if(this.activeNode.containsText())
 			{
-				((IHybridTextBean) curBean).addText(this.activeNode.getActualText());
+				((IHybridTextBean) curBean).setText(this.activeNode.getActualText());
 				this.activeNode.clearText();
 			}
 		}

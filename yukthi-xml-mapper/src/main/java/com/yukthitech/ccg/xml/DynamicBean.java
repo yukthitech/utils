@@ -30,7 +30,7 @@ import com.yukthitech.ccg.xml.writer.XmlWriterContext;
  * 
  * @author akiran
  */
-public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAcceptor, IWriteableBean, ITextAcceptor
+public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAcceptor, IWriteableBean, IHybridTextBean
 {
 	/**
 	 * Name of node creating this bean.
@@ -75,6 +75,12 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 	public void setTypeConversationEnabled(boolean typeConversationEnabled)
 	{
 		this.typeConversationEnabled = typeConversationEnabled;
+	}
+	
+	@Override
+	public void setText(String text)
+	{
+		this.textContent = text.trim();
 	}
 	
 	public String getTextContent()

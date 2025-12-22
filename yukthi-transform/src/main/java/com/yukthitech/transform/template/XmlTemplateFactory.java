@@ -34,7 +34,8 @@ public class XmlTemplateFactory implements ITemplateFactory
 	public static Set<String> SUB_ATTR = Set.of(
 			"name",
 			"loopVar",
-			"forEachCondition"
+			"forEachCondition",
+			"value"
 		);
 
 	private static final String PATH_SEP = "/";
@@ -345,7 +346,23 @@ public class XmlTemplateFactory implements ITemplateFactory
             if(SET.equals(resBean.getName()))
             {
             	String attributeName = resBean.getAttributes().get("name");
+            	
+            	// if set is being done with text body
+            	if(resBean.getTextContent() != null)
+            	{
+            		Object expression = parseExpression(resBean.getTextContent(), path + ">" + resBean.getName() + "[" + attributeName + "]", false);
+            		
+                    transformObject.addField(new TransformObjectField(
+                    		resBean.getName(), 
+                            null,
+                            attributeName, 
+                            expression,
+                            false
+                        ).setType(FieldType.TEXT_CONTENT));
+                    continue;
+            	}
 
+            	// if set is being done with sub xml content
                 transformObject.addField(new TransformObjectField(
                 		resBean.getName(), 
                         null,
@@ -462,7 +479,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             return new Expression(ExpressionType.XPATH_MULTI, expr);
         }
 
-        throw new TransformException(path, "Invalid expression type specified '%s' in expression: %s", exprType, expression);
+        throw new TransformException(path, "Invalid expression type specified '{}' in expression: {}", exprType, expression);
     }
     
     private TransformTemplate loadAndParse(String path, boolean isResource)

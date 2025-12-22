@@ -26,7 +26,7 @@ public class FutureValue implements IHybridTextBean
 	private Object finalValue;
 	
 	@Override
-	public void addText(String text)
+	public void setText(String text)
 	{
 		value += text;
 	}

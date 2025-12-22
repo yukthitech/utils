@@ -1,6 +1,9 @@
 package com.yukthitech.transform.template;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -17,6 +20,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import com.yukthitech.transform.TransformException;
+import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
@@ -44,7 +48,7 @@ public class XmlGenerator implements IGenerator
 	@Override
 	public String getRootPath()
 	{
-		return "/";
+		return "";
 	}
 	
 	@Override
@@ -54,14 +58,28 @@ public class XmlGenerator implements IGenerator
 	}
 
 	@Override
-	public Object generateObject(TransformObject transformObj)
+	public Object generateObject(TransformState state, TransformObject transformObj)
 	{
-		Element element = document.createElement(transformObj.getName());
-		return element;
+		if(state.isAttributeMode())
+		{
+			return new LinkedHashMap<String, Object>();
+		}
+		
+		String path = state.getPath();
+		
+		try
+		{
+			Element element = document.createElement(transformObj.getName());
+			return element;
+		}catch(Exception ex)
+		{
+			throw new TransformException(path, "Failed to create new DOM element with name: {}", transformObj.getName(), ex);
+		}
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
-	public void setField(TransformObjectField field, Object object, String name, Object fieldValue)
+	public void setField(TransformState state, TransformObjectField field, Object object, String name, Object fieldValue)
 	{
 		if(fieldValue instanceof List)
 		{
@@ -69,22 +87,69 @@ public class XmlGenerator implements IGenerator
 			
 			for(Object val : lst)
 			{
-				this.setFieldSingleValue(field, object, name, val);
+				if(state.isAttributeMode())
+				{
+					setFieldSingleValueForAttr(state, field, object, name, val);
+					continue;
+				}
+				
+				this.setFieldSingleValue(state, field, object, name, val);
 			}
 			
 			return;
 		}
+		
+		if(state.isAttributeMode())
+		{
+			setFieldSingleValueForAttr(state, field, object, name, fieldValue);
+			return;
+		}
 
-		setFieldSingleValue(field, object, name, fieldValue);
+		setFieldSingleValue(state, field, object, name, fieldValue);
 	}
 	
-	private void setFieldSingleValue(TransformObjectField field, Object object, String name, Object fieldValue)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void setFieldSingleValueForAttr(TransformState state, TransformObjectField field, Object object, String name, Object fieldValue)
+	{
+		// Note: In set mode, text-content will not come as it would be turned into expression
+		//    xml-template-factory. So only attributes and subnodes is being taken care here
+		
+		LinkedHashMap<String, Object> objMap = (LinkedHashMap<String, Object>) object;
+		
+		Object existingValue = objMap.get(name);
+		
+		if(existingValue == null)
+		{
+			objMap.put(name, fieldValue);
+			return;
+		}
+		
+		if(existingValue instanceof List)
+		{
+			((List) existingValue).add(fieldValue);
+			return;
+		}
+		
+		List<Object> valLst = new ArrayList<>(Arrays.asList(existingValue));
+		valLst.add(fieldValue);
+		objMap.put(name, valLst);
+	}
+	
+	private void setFieldSingleValue(TransformState state, TransformObjectField field, Object object, String name, Object fieldValue)
 	{
 		Element element = (Element) object;
+		String path = state.getPath();
 		
 		if(field.getType() == FieldType.ATTRIBUTE)
 		{
-			element.setAttribute(name, fieldValue.toString());
+			try
+			{
+				element.setAttribute(name, fieldValue.toString());
+			}catch(Exception ex)
+			{
+				throw new TransformException(path, "Failed to add attribute: [Name: {}, Value: {}]", name, fieldValue, ex);
+			}
+			
 			return;
 		}
 		
@@ -92,31 +157,53 @@ public class XmlGenerator implements IGenerator
 		{
 			if(!(fieldValue instanceof Element))
 			{
-				Element nameElem = document.createElement(name);
-				Text textVal = document.createTextNode(fieldValue.toString());
+				try
+				{
+					Element nameElem = document.createElement(name);
+					Text textVal = document.createTextNode(fieldValue.toString());
+					
+					nameElem.appendChild(textVal);
+					element.appendChild(nameElem);
+				}catch(Exception ex)
+				{
+					throw new TransformException(path, "Failed to add text-node: [Name: {}, Value: {}]", name, fieldValue, ex);
+				}
 				
-				nameElem.appendChild(textVal);
-				element.appendChild(nameElem);
 				return;
 			}
 			
 			Element subelem = (Element) fieldValue;
 			
-			if(name != null && !name.equals(subelem.getNodeName()))
+			try
 			{
-				document.renameNode(subelem, null, name);
+				if(name != null && !name.equals(subelem.getNodeName()))
+				{
+					document.renameNode(subelem, null, name);
+				}
+				
+				element.appendChild(subelem);
+			}catch(Exception ex)
+			{
+				throw new TransformException(path, "Failed to append chile node: [Name: {}, New Name: {}]", subelem.getTagName(), name, ex);
 			}
-			
-			element.appendChild(subelem);
 			return;
 		}
 		
-		Text textVal = document.createTextNode(fieldValue.toString());
-		element.appendChild(textVal);
+		try
+		{
+			Text textVal = document.createTextNode(fieldValue.toString());
+			element.appendChild(textVal);
+		}catch(Exception ex)
+		{
+			throw new TransformException(path, "Failed to append text value: {}", fieldValue, ex);
+		}
 	}
 	
-	public void injectReplaceEntry(String path, TransformObjectField field, Object object, Object injectedValue)
+	@Override
+	public void injectReplaceEntry(TransformState state, TransformObjectField field, Object object, Object injectedValue)
 	{
+		String path = state.getPath();
+		
 		//if result value is not map
 		if(!(injectedValue instanceof Element))
 		{

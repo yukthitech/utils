@@ -34,6 +34,6 @@ public class TransformException extends UtilsException
 	 */
 	public TransformException(String path, String mssgTemplate, Object... args)
 	{
-		super(String.format(mssgTemplate, args) + "\n Path: " + path, getRootCause(args));
+		super(buildMessage(mssgTemplate, args) + "\n Path: " + path, getRootCause(args));
 	}
 }

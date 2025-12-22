@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.yukthitech.transform.TransformException;
+import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -25,25 +26,27 @@ public class JsonGenerator implements IGenerator
 	}
 
 	@Override
-	public Object generateObject(TransformObject rootTransform)
+	public Object generateObject(TransformState state, TransformObject rootTransform)
 	{
 		return new LinkedHashMap<String, Object>();
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
-	public void setField(TransformObjectField field, Object object, String name, Object fieldValue)
+	public void setField(TransformState state, TransformObjectField field, Object object, String name, Object fieldValue)
 	{
 		LinkedHashMap<String, Object> objMap = (LinkedHashMap<String, Object>) object;
 		objMap.put(name, fieldValue);
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
-	public void injectReplaceEntry(String path, TransformObjectField field, Object object, Object injectedValue)
+	public void injectReplaceEntry(TransformState state, TransformObjectField field, Object object, Object injectedValue)
 	{
 		//if result value is not map
 		if(!(injectedValue instanceof Map))
 		{
-			throw new TransformException(path, "Value of @replace key must be a map but found: {}", injectedValue.getClass().getName());
+			throw new TransformException(state.getPath(), "Value of @replace key must be a map but found: {}", injectedValue.getClass().getName());
 		}
 		
 		LinkedHashMap<String, Object> objMap = (LinkedHashMap<String, Object>) object;

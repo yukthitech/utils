@@ -35,7 +35,7 @@ public class ExpressionUtil
 				ex = null;
 			}
 			
-			throw new TransformException(path, "An error occurred while evaluating template specified at path: %s\nProcessing Error: %s\nTemplate: %s", 
+			throw new TransformException(path, "An error occurred while evaluating template specified at path: {}\nProcessing Error: {}\nTemplate: {}", 
 					name, path, prcessingError, template, ex);	
 		}
 	}
@@ -55,7 +55,7 @@ public class ExpressionUtil
 				ex = (Exception) ex.getCause();
 			}
 			
-			throw new TransformException(path, "Invalid expression '%s' (Name: %s) specified at path: %s\nProcessing Error: %s", 
+			throw new TransformException(path, "Invalid expression '{}' (Name: {}) specified at path: {}\nProcessing Error: {}", 
 					expression, name, path, prcessingError, ex);	
 		}
 	}
@@ -75,7 +75,7 @@ public class ExpressionUtil
 				ex = null;
 			}
 			
-			throw new TransformException(path, "Invalid condition '%s' (Name: %s) specified at path: %s\nProcessing Error: %s", 
+			throw new TransformException(path, "Invalid condition '{}' (Name: {}) specified at path: {}\nProcessing Error: {}", 
 					condition, name, path, prcessingError, ex);	
 		}
 	}

@@ -1,5 +1,7 @@
 package com.yukthitech.transform;
 
+import java.util.function.Consumer;
+
 import com.yukthitech.transform.template.IGenerator;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
@@ -11,6 +13,12 @@ public class TransformState
 	private IGenerator generator;
 	
 	private String path;
+	
+	/**
+	 * Flag indicating that currently the transformation is being
+	 * done for set-attribute sub content.
+	 */
+	private boolean attributeMode;
 	
 	public TransformState(TransformTemplate template)
 	{
@@ -25,30 +33,31 @@ public class TransformState
 		this.path = generator.getRootPath();
 	}
 	
-	private TransformState(IGenerator generator, String path)
+	private TransformState(TransformState parent, String path)
 	{
-		this.generator = generator;
+		this.generator = parent.generator;
+		this.attributeMode = parent.attributeMode;
 		this.path = path;
 	}
 
 	public TransformState forField(TransformObjectField field)
 	{
-		return new TransformState(generator, path + generator.getSubPath(field));
+		return new TransformState(this, path + generator.getSubPath(field));
 	}
 
 	public TransformState forIndex(int index)
 	{
-		return new TransformState(generator, path + "[" + index + "]");
+		return new TransformState(this, path + "[" + index + "]");
 	}
 
 	public TransformState forClone()
 	{
-		return new TransformState(generator, path + "{clone}");
+		return new TransformState(this, path + "{clone}");
 	}
 
 	public TransformState forDynField(String field)
 	{
-		return new TransformState(generator, path + "#" + field);
+		return new TransformState(this, path + "#" + field);
 	}
 	
 	public TransformState forField(TransformObjectField field, String dynField)
@@ -56,22 +65,35 @@ public class TransformState
 		String fieldPath = path + generator.getSubPath(field);
 		String newPath =  fieldPath + "#" + dynField;
 		
-		return new TransformState(generator, newPath);
+		return new TransformState(this, newPath);
+	}
+	
+	public void executeInAttributeMode(TransformObjectField field, Consumer<TransformState> attrStateConsumer)
+	{
+		TransformState newState = new TransformState(this, path + generator.getSubPath(field));
+		newState.attributeMode = true;
+		
+		attrStateConsumer.accept(newState);
+	}
+	
+	public boolean isAttributeMode()
+	{
+		return attributeMode;
 	}
 
 	public Object newObject(TransformObject object)
 	{
-		return generator.generateObject(object);
+		return generator.generateObject(this, object);
 	}
 	
 	public void setField(TransformObjectField field, Object object, String name, Object fieldValue)
 	{
-		generator.setField(field, object, name, fieldValue);
+		generator.setField(this, field, object, name, fieldValue);
 	}
 	
 	public void injectReplaceEntry(String path, TransformObjectField field, Object object, Object injectedValue)
 	{
-		generator.injectReplaceEntry(path, field, object, injectedValue);
+		generator.injectReplaceEntry(this, field, object, injectedValue);
 	}
 	
 	public String formatObject(Object object)

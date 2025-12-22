@@ -18,6 +18,7 @@ package com.yukthitech.transform;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -96,6 +97,11 @@ public class TransformFmarkerMethods
 	public static List<Object> toList(
 			@FmParam(name = "value", description = "Value to be converted.")Object value)
 	{
+		if(value == null)
+		{
+			return Collections.emptyList();
+		}
+		
 		if(value instanceof Collection)
 		{
 			return new ArrayList<Object>((Collection<Object>) value);

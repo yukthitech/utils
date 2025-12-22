@@ -20,16 +20,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
 import com.yukthitech.ccg.xml.IDynamicNodeAcceptor;
-import com.yukthitech.ccg.xml.ITextAcceptor;
+import com.yukthitech.ccg.xml.IHybridTextBean;
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Generic bean that can be used to accept dynamic properties.
  * 
  * @author akiran
  */
-public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAcceptor, ITextAcceptor
+public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAcceptor, IHybridTextBean
 {
 	/**
 	 * Name of the node used to create this bean.
@@ -69,12 +72,22 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	
 	public void addReserve(String propName, Object obj)
 	{
+		if(textContent != null)
+		{
+			throw new InvalidStateException("Both child-nodes and text content is not allowed");
+		}
+		
 		reserveNodes.add((XmlDynamicBean) obj);
 	}
 	
 	@Override
 	public void add(String propName, Object obj)
 	{
+		if(textContent != null)
+		{
+			throw new InvalidStateException("Both child-nodes and text content is not allowed");
+		}
+
 		if(obj instanceof String)
 		{
 			XmlDynamicBean bean = new XmlDynamicBean(propName);
@@ -129,6 +142,21 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	}
 	
 	@Override
+	public void setText(String text)
+	{
+		if(StringUtils.isEmpty(text))
+		{
+			return;
+		}
+		
+		if(!nodes.isEmpty() || !reserveNodes.isEmpty())
+		{
+			throw new InvalidStateException("Both child-nodes and text content is not allowed");
+		}
+		
+		this.textContent = text.trim();
+	}
+	
 	public void setTextContent(String textContent)
 	{
 		this.textContent = textContent;

@@ -170,10 +170,10 @@ public class Conversions
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(transformState.getPath(), "An error occurred while processing expression: %s [Type: %s]", expr, exprType, ex);
+			throw new TransformException(transformState.getPath(), "An error occurred while processing expression: {} [Type: {}]", expr, exprType, ex);
 		}
 		
-		throw new TransformException(transformState.getPath(), "Invalid expression type specified '%s' in expression: %s", exprType, expr);
+		throw new TransformException(transformState.getPath(), "Invalid expression type specified '{}' in expression: {}", exprType, expr);
 	}
 	
 	public String processTemplate(String expression, ITransformContext context, String path)
@@ -186,7 +186,7 @@ public class Conversions
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An error occurred while processing template: %s", expression, ex);
+			throw new TransformException(path, "An error occurred while processing template: {}", expression, ex);
 		}
 	}
 

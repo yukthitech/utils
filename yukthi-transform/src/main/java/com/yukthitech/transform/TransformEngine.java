@@ -17,6 +17,7 @@ package com.yukthitech.transform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -252,28 +253,24 @@ public class TransformEngine
 		Object valueLstExpr = forEachLoop.getListExpression();
 		
 		//fetch the value list, based on which template map has to be cloned and repeated
-		List<Object> valueLst = null;
-		
+		Collection<Object> valueLst = null;
+
+		// in case of string process it as an expression
 		if(valueLstExpr instanceof String)
 		{
-			valueLst = (List<Object>) ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getPath(), "jel-valueLst-expr", (String) valueLstExpr, context);
-			
-			if(valueLst == null || valueLst.isEmpty())
-			{
-				return Collections.emptyList();
-			}
+			valueLstExpr = ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getPath(), "jel-valueLst-expr", (String) valueLstExpr, context);
 		}
-		else if(valueLstExpr instanceof List)
+		
+		if(valueLstExpr == null)
 		{
-			valueLst = (List<Object>) valueLstExpr;
+			valueLst = Collections.emptyList();
+		}
+		else if(valueLstExpr instanceof Collection)
+		{
+			valueLst = (Collection<Object>) valueLstExpr;
 		}
 		else
 		{
-			if(valueLstExpr == null)
-			{
-				return Collections.emptyList();
-			}
-
 			valueLst = Arrays.asList(valueLstExpr);
 		}
 		
@@ -402,18 +399,25 @@ public class TransformEngine
 				}
 			}
 			
-			//for each entry, process the value and replace current value with processed value
-			Object val = processObject(field.getValue(), context, transformState.forField(field));
-			
 			//if current key is a set key
 			if(field.getAttributeName() != null)
 			{
+				transformState.executeInAttributeMode(field, attrState -> 
+				{
+					//execute the child content with attr state
+					Object val = processObject(field.getValue(), context, attrState);
+
+					// if val is null, previous value will be removed (replaced by null)
+					context.setValue(field.getAttributeName(), val);
+				});
+				
 				//irrespective of value being null, if key is @set key, flag has to be set
 				setKeyPresent = true;
-				// if val is null, previous value will be removed (replaced by null)
-				context.setValue(field.getAttributeName(), val);
 				continue;
 			}
+			
+			//for each entry, process the value and replace current value with processed value
+			Object val = processObject(field.getValue(), context, transformState.forField(field));
 			
 			//if value resulted in null, ignore current entry
 			if(val == null)

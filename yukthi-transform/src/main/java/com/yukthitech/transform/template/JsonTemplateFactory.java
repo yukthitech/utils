@@ -423,7 +423,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             return new Expression(ExpressionType.XPATH_MULTI, expr);
         }
 
-        throw new TransformException(path, "Invalid expression type specified '%s' in expression: %s", exprType, expression);
+        throw new TransformException(path, "Invalid expression type specified '{}' in expression: {}", exprType, expression);
     }
     
     private TransformTemplate loadAndParse(String path, boolean isResource)

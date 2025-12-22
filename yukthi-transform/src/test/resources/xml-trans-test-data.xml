@@ -224,7 +224,7 @@
 		]]></expectedResult>
 	</jel-test-bean>
 
-	<jel-test-bean name="loopForMaps" enabled="true">
+	<jel-test-bean name="loopForMaps">
 		<context><![CDATA[
 			<libraries>
 				<Justbooks open="true">
@@ -242,13 +242,13 @@
 		<template><![CDATA[
 			<output xmlns:t="/transform">
 				<Justbooks>
-					<book t:name="book.title" t:for-each="libraries.Justbooks.books" t:loop-var="book">
+					<book t:name="${book.title}" t:for-each="libraries.Justbooks.books" t:loop-var="book">
 						<copyCount>@fmarker: book.copyCount</copyCount>
 					</book>
 				</Justbooks>
 				
 				<Imagine>
-					<book t:name="book.title" t:for-each="libraries.Imagine.books"  t:loop-var="book" t:for-each-condition="toInt(book.copyCount) gt 0">
+					<book t:name="${book.title}" t:for-each="libraries.Imagine.books"  t:loop-var="book" t:for-each-condition="toInt(book.copyCount) gt 0">
 						<copyCount>@fmarker: book.copyCount</copyCount>
 					</book>
 				</Imagine>
@@ -265,7 +265,6 @@
 						<copyCount>0</copyCount>
 					</Sphere>
 				</Justbooks>
-				
 				<Imagine>
 					<Shiva-Triology>
 						<copyCount>10</copyCount>
@@ -278,107 +277,95 @@
 		]]></expectedResult>
 	</jel-test-bean>
 	
-	<!--  
 	<jel-test-bean name="nullAndEmptyListRefInLoop">
-		<context>
-			{
-				"nullList": null,
-				"emptyList": [],
-				"someList": [1, 2, 3]
-			}
-		</context>
+		<context><![CDATA[
+			<data>
+				<single-list>1</single-list>
+				
+				<some-list>1</some-list>
+				<some-list>2</some-list>
+				<some-list>3</some-list>
+			</data>
+		]]></context>
+
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<missing-list>
+					<val t:for-each="data.missingList" t:loop-var="val">${val.$textContent}</val>
+				</missing-list>
+				<single-list>
+					<val t:for-each="data.singleList" t:loop-var="val">${val.$textContent}</val>
+				</single-list>
+				<some-list>
+					<val t:for-each="data.someList" t:loop-var="val">${val.$textContent}</val>
+				</some-list>
+			</output>
+		]]></template>
 		
-		<template>
-			{
-				"list1": [{
-					"@for-each(elem)": "nullList",
-					"val": "${elem}"
-				}],
-				"list2": [{
-					"@for-each(elem)": "emptyList",
-					"val": "${elem}"
-				}],
-				"list3": [{
-					"@for-each(elem)": "someList",
-					"val": "${elem}"
-				}]
-			}
-		</template>
-		<expectedResult>
-			{
-				"list1": [],
-				"list2": [],
-				"list3": [
-					{"val": "1"}, {"val": "2"}, {"val": "3"}
-				]
-			}
-		</expectedResult>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<missing-list>
+				</missing-list>
+				<single-list>
+					<val>1</val>
+				</single-list>
+				<some-list>
+					<val>1</val>
+					<val>2</val>
+					<val>3</val>
+				</some-list>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
-	<jel-test-bean name="setExpressions">
-		<context>
-			{
-				"libraries": {
-					"Justbooks": {
-						"name": "Justbooks",
-						"open": true,
-						"books": [
-							{"title": "Davinci Code", "author": "Dan Brown", "type": "Science Fiction", "copyCount": 3},
-							{"title": "Sphere", "author": "Michel Crihton", "type": "Science Fiction", "copyCount": 0}
-						]
-					},
-					"Imagine": {
-						"name": "Imagine",
-						"open": false,
-						"books": [
-							{"title": "Shiva Triology", "author": "Amit Shah", "type": "Mythology Fiction", "copyCount": 10},
-							{"title": "Let Us C", "author": "Yeshwant Kanetkar", "type": "Technology", "copyCount": 0},
-							{"title": "Dark Psychology", "author": "Xyz", "type": "Psychology", "copyCount": 1}
-						]
-					}
-				}
-			}
-		</context>
+	<jel-test-bean name="setExpressions" enabled="true">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks name="Justbooks" open="true">
+					<books title="Davinci-Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+					<books title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+				</Justbooks>
+				<Imagine name="Imagine" open="false">
+					<books title="Shiva-Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+					<books title="Let-Us-C" author="Yeshwant Kanetkar" type="Technology" copyCount="0"/>
+					<books title="Dark-Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+				</Imagine>
+			</libraries>
+		]]></context>
 
-		<template>
-			{
-				"list": [
-					100,
-					{
-						"@set(secondLib)": "@xpath: /libraries/Imagine/name"
-					}, 
-					200
-				],
-				"map": {
-					"key1": "val1",
-					
-					"@set(libJb)": {
-						"bookNames": "@xpathMulti: /libraries/Justbooks/books//title"
-					},
-					
-					"key2": "@fmarker: libraries.Imagine.books[1].title"
-				},
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<t:set name="secondLib">@xpath: /libraries/Imagine/name</t:set>
 				
-				"names": "@fmarker: libJb.bookNames",
-				"library": "@fmarker: secondLib"
+				<map>
+					<key1>val1</key1>
+					<t:set name="libJb">
+						<bookNames t:value="@xpathMulti: /libraries/Justbooks/books//title"/>
+					</t:set>
+					<key2>@fmarker: libraries.Imagine.books[1].title</key2>
+				</map>
 				
-			}
-		</template>
-		<expectedResult>
-			{
-				"list": [100, 200],
-				"map": {
-					"key1": "val1",
-					"key2": "Let Us C"
-				},
+				<library>@fmarker: secondLib</library>
+				<names t:value="@fmarker: libJb.bookNames" />
+			</output>
+		]]></template>
+
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<map>
+					<key1>val1</key1>
+					<key2>Let-Us-C</key2>
+				</map>
 				
-				"names": ["Davinci Code", "Sphere"],
-				"library": "Imagine"
+				<library>Imagine</library>
 				
-			}
-		</expectedResult>
+				<names>Davinci-Code</names>
+				<names>Sphere</names>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
+	<!-- 
 	<jel-test-bean name="jsonExpressions">
 		<context>
 			{
