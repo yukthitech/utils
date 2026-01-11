@@ -124,8 +124,14 @@ public class Conversions
 		
 		TransformTemplate content = include.getContent();
 		
-		Object res = curEngine.process(content, new MapExprContext(context, "params", paramsMap));
-		value.setValue(res);
+		try
+		{
+			Object res = curEngine.process(content, new MapExprContext(context, "params", paramsMap));
+			value.setValue(res);
+		}catch(Exception ex)
+		{
+			throw new TransformException(transformState.getPath(), "An error occurred while processing include template: {}", include.getPath());
+		}
 
 		return true;
 	}

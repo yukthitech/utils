@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,12 +35,14 @@ import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yukthitech.utils.ZipUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -49,27 +52,79 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  */
 public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> extends RestRequest<T>
 {
+	
+	/**
+	 * The Constant JSON_CONTENT_TYPE.
+	 */
 	private static final String JSON_CONTENT_TYPE = "application/json";
 	
+	/**
+	 * The Constant TEXT_CONTENT_TYPE.
+	 */
 	private static final String TEXT_CONTENT_TYPE = "application/text";
 	
+	/**
+	 * The Enum PartType.
+	 */
 	private static enum PartType
 	{
+		
+		/**
+		 * The text.
+		 */
 		TEXT,
 		
+		/**
+		 * The binary.
+		 */
 		BINARY,
 		
+		/**
+		 * The file.
+		 */
 		FILE
 	}
 	
+	/**
+	 * The Class RequestPart.
+	 */
 	private static final class RequestPart
 	{
+		
+		/**
+		 * The name.
+		 */
 		private String name;
+		
+		/**
+		 * The value.
+		 */
 		private Object value;
+		
+		/**
+		 * The content type.
+		 */
 		private String contentType;
+		
+		/**
+		 * The part type.
+		 */
 		private PartType partType;
+		
+		/**
+		 * The charset.
+		 */
 		private String charset;
 		
+		/**
+		 * Instantiates a new request part.
+		 *
+		 * @param name the name
+		 * @param value the value
+		 * @param contentType the content type
+		 * @param partType the part type
+		 * @param charset the charset
+		 */
 		public RequestPart(String name, Object value, String contentType, PartType partType, String charset)
 		{
 			this.name = name;
@@ -136,6 +191,11 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 	protected String contentCharset;
 	
 	/**
+	 * Flag to indicate the request body has to be zipped.
+	 */
+	private boolean zipBodyEnabled;
+	
+	/**
 	 * @param uri
 	 */
 	public RestRequestWithBody(String uri, String method)
@@ -180,6 +240,27 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		return multipartRequest;
 	}
 	
+	/**
+	 * Checks if is flag to indicate the request body has to be zipped.
+	 *
+	 * @return the flag to indicate the request body has to be zipped
+	 */
+	public boolean isZipBodyEnabled()
+	{
+		return zipBodyEnabled;
+	}
+
+	/**
+	 * Sets the flag to indicate the request body has to be zipped.
+	 *
+	 * @param zipBodyEnabled the new flag to indicate the request body has to be
+	 *        zipped
+	 */
+	public void setZipBodyEnabled(boolean zipBodyEnabled)
+	{
+		this.zipBodyEnabled = zipBodyEnabled;
+	}
+
 	/**
 	 * Adds a form field with specified name and value.
 	 * @param name
@@ -348,6 +429,14 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), null, PartType.FILE, null));
 	}
 
+	/**
+	 * Adds the binary part.
+	 *
+	 * @param field the field
+	 * @param name the name
+	 * @param file the file
+	 * @param contentType the content type
+	 */
 	public void addBinaryPart(String field, String name, File file, String contentType)
 	{
 		if(Boolean.FALSE.equals(multipartRequest))
@@ -361,6 +450,14 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 		this.multiparts.add(new RequestPart(field, new FileInfo(name, file, contentType), contentType, PartType.BINARY, null));
 	}
 
+	/**
+	 * Adds the binary part.
+	 *
+	 * @param field the field
+	 * @param name the name
+	 * @param binaryContent the binary content
+	 * @param contentType the content type
+	 */
 	public void addBinaryPart(String field, String name, byte[] binaryContent, String contentType)
 	{
 		if(Boolean.FALSE.equals(multipartRequest))
@@ -541,8 +638,17 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 			{
 				request.setHeader(HttpHeaders.CONTENT_TYPE, super.getContentType());
 			}
-
-			if(this.contentCharset == null)
+			
+			if(zipBodyEnabled)
+			{
+				request.setHeader(HttpHeaders.CONTENT_ENCODING, "gzip");
+				
+				byte zippedData[] = ZipUtils.zipBytes(requestBody.getBytes(StandardCharsets.UTF_8));
+				
+				ContentType contentType = super.getContentType() != null ? ContentType.create(super.getContentType()) : null;
+				request.setEntity(new ByteArrayEntity(zippedData, contentType));
+			}
+			else if(this.contentCharset == null)
 			{
 				request.setEntity(new StringEntity(requestBody));
 			}

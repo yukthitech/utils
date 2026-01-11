@@ -85,7 +85,26 @@ public class ReflectionUtils
 	{
 		try
 		{
-			Field fieldObj = bean.getClass().getDeclaredField(field);
+			Field fieldObj = null;
+			Class<?> clazz = bean.getClass();
+			
+			while(clazz != null)
+			{
+				try
+				{
+					fieldObj = clazz.getDeclaredField(field);
+					break;
+				}catch(NoSuchFieldException ex)
+				{}
+				
+				clazz = clazz.getSuperclass();
+			}
+			
+			if(fieldObj == null)
+			{
+				throw new NoSuchFieldException("No field found with name: " + field);
+			}
+			
 			fieldObj.setAccessible(true);
 			fieldObj.set(bean, value);
 		} catch(Exception ex)
@@ -437,6 +456,39 @@ public class ReflectionUtils
 		}catch(NoSuchMethodException ex)
 		{
 			return null;
+		}
+	}
+	
+	public static Object invokeMethod(Object object, String name, Class<?>[] paramTypes, Object... params)
+	{
+		Class<?> clazz = object.getClass();
+		Method method = null;
+		
+		while(clazz != null)
+		{
+			try
+			{
+				method = clazz.getDeclaredMethod(name, paramTypes);
+				break;
+			}catch(NoSuchMethodException ex)
+			{}
+			
+			clazz = clazz.getSuperclass();
+		}
+		
+		if(method == null)
+		{
+			throw new InvalidStateException("No method found with name: " + name);
+		}
+		
+		method.setAccessible(true);
+
+		try
+		{
+			return method.invoke(object, params);
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while invoking method: " + name, ex);
 		}
 	}
 }

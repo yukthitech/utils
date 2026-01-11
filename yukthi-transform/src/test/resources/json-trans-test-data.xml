@@ -208,6 +208,12 @@
 							{"title": "Let Us C", "author": "Yeshwant Kanetkar", "type": "Technology", "copyCount": 0},
 							{"title": "Dark Psychology", "author": "Xyz", "type": "Psychology", "copyCount": 1}
 						]
+					},
+					"Other": {
+						"name": "Other", 
+						"open": false,
+						"books": [
+						]
 					}
 				}
 			}
@@ -229,6 +235,13 @@
 					{
 						"@for-each(book)": "libraries.Imagine.books",
 						"@for-each-condition": "book.copyCount gt 0",
+						"name": "${book.title}",
+						"desc": "Type: ${book.type}, author: ${book.author}"
+					}
+				],
+				"Other": [
+					{
+						"@for-each(book)": "libraries.Other.books",
 						"name": "${book.title}",
 						"desc": "Type: ${book.type}, author: ${book.author}"
 					}
@@ -333,8 +346,6 @@
 		</template>
 		<expectedResult>
 			{
-				"list1": [],
-				"list2": [],
 				"list3": [
 					{"val": "1"}, {"val": "2"}, {"val": "3"}
 				]

@@ -143,6 +143,11 @@ public class JsonTemplateFactory implements ITemplateFactory
     	
         this.contentLoader = contentLoader;
     }
+    
+    public void reset()
+    {
+    	includeCache.clear();
+    }
 
     public TransformTemplate parseTemplate(String jsonContent) 
     {

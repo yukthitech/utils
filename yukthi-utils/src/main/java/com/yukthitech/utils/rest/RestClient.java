@@ -63,8 +63,11 @@ public class RestClient
 				logger.log(Level.SEVERE, "An error occurred while fetching response content", ex);
 				value = null;
 			}
-			
-			logger.log(Level.FINE, String.format("Got response status as %s and body as: %s", status, truncate(value)));
+
+			if(logger.isLoggable(Level.FINE))
+			{
+				logger.log(Level.FINE, String.format("Got response status as %s and body as: %s", status, truncate(value)));
+			}
 			
 			if(StringUtils.isBlank(value))
 			{
@@ -259,11 +262,6 @@ public class RestClient
 		{
 			try
 			{
-				if(logger.isLoggable(Level.INFO))
-				{
-					logger.log(Level.INFO, String.format("Got response as %s", truncate(stringResult.getValue())));
-				}
-				
 				//convert the response json into required object
 				resultValue = objectMapper.readValue(stringResult.getValue(), expectedResponseType);
 			}catch(Exception ex)

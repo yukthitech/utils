@@ -180,6 +180,9 @@ public class TransformEngine
 		List<Object> newLst = new ArrayList<Object>();
 		int index = -1;
 		
+		// this will be true, if for-each loop resulted in zero elements
+		boolean encounteredNullCondition = false;
+		
 		//loop through input list
 		for(Object elem : lst.getObjects())
 		{
@@ -189,6 +192,12 @@ public class TransformEngine
 			if(elem instanceof TransformObject)
 			{
 				List<Object> newElems = procesRepeatedElement((TransformObject) elem, context, null, transformState.forIndex(index));
+				
+				if(newElems == null)
+				{
+					encounteredNullCondition = true;
+					continue;
+				}
 				
 				//Note: because of repetition single object may result in multiple objects
 				for(Object nelem: newElems)
@@ -216,6 +225,15 @@ public class TransformEngine
 			}
 		}
 		
+		/*
+		 * If for-loop is present and resulted in zero elements
+		 * return null, so that overall key can be removed
+		 */
+		if(encounteredNullCondition)
+		{
+			return null;
+		}
+		
 		return newLst;
 	}
 	
@@ -230,8 +248,7 @@ public class TransformEngine
 	@SuppressWarnings("unchecked")
 	private List<Object> procesRepeatedElement(TransformObject transformObject, ITransformContext context, Expression nameExpression, TransformState transformState)
 	{
-		// if condition is present and evaluated to false, then return empty list 
-		// which in turn would remove current object (map template) on final list
+		// if condition is present and evaluated to false, then return empty list
 		if(!processCondition(transformObject, context))
 		{
 			return Collections.emptyList();
@@ -307,6 +324,12 @@ public class TransformEngine
 			{
 				resLst.add(processedMap);
 			}
+		}
+		
+		// if for-loop result in zero elements, return null
+		if(resLst.isEmpty())
+		{
+			return null;
 		}
 
 		return resLst;
