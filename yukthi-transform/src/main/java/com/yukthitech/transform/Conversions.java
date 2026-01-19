@@ -130,7 +130,7 @@ public class Conversions
 			value.setValue(res);
 		}catch(Exception ex)
 		{
-			throw new TransformException(transformState.getPath(), "An error occurred while processing include template: {}", include.getPath());
+			throw new TransformException(transformState.getPath(), "An error occurred while processing include template: {}", include.getPath(), ex);
 		}
 
 		return true;
