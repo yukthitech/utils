@@ -105,6 +105,16 @@ public class CommonMethods
 	}
 
 	@FreeMarkerMethod(
+			description = "Used to check if specified value is null.",
+			returnDescription = "True if value is null."
+			)
+	public static boolean isNull(
+			@FmParam(name = "value", description = "Value to be checked for null") Object value)
+	{
+		return (value == null);
+	}
+
+	@FreeMarkerMethod(
 			description = "Used to check if specified value is null and return approp value when null and when non-null.",
 			returnDescription = "Specified null-condition-value or non-null-condition-value."
 			)
