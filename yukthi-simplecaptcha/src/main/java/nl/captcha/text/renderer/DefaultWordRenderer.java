@@ -71,6 +71,11 @@ public class DefaultWordRenderer implements WordRenderer {
 
             GlyphVector gv = itFont.createGlyphVector(frc, itchar);
             double charWitdth = gv.getVisualBounds().getWidth();
+            
+            if(element == ' ')
+            {
+            	charWitdth += 10;
+            }
 
             g.drawChars(itchar, 0, itchar.length, startPosX, (int) (image.getHeight() + gv.getVisualBounds().getHeight())/2);
             startPosX = startPosX + (int) charWitdth + 1;
