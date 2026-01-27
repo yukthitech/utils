@@ -22,10 +22,10 @@ import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -107,7 +107,7 @@ public class Encryptor
 		{
 			Cipher cipher = Cipher.getInstance(RSA_ECB_PKCS5);
 			cipher.init(Cipher.DECRYPT_MODE, transformKey(privateKey, "RSA", new BouncyCastleProvider()));
-			decryptedString = new String(cipher.doFinal(Base64.decodeBase64(cypher.getBytes())));
+			decryptedString = new String(cipher.doFinal(Base64.getDecoder().decode(cypher.getBytes())));
 		}catch(Exception e)
 		{
 			throw new IllegalStateException("Failed to decrypt the encoded string", e);
@@ -128,7 +128,7 @@ public class Encryptor
 
 			cipher.init(Cipher.ENCRYPT_MODE, transformKey(publicKey, "RSA", new BouncyCastleProvider()));
 
-			encryptedString = new String(Base64.encodeBase64(cipher.doFinal(plainText.getBytes())));
+			encryptedString = new String(Base64.getEncoder().encode(cipher.doFinal(plainText.getBytes())));
 		}catch(Exception e)
 		{
 			throw new IllegalStateException("Error occuurred while trying to encrypt.", e);
