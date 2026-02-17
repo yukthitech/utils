@@ -201,7 +201,7 @@ In these expressions current-value being transformed can be accessed as ${\color
 > ```json
 > {
 > 	"result": {
-> 		"@transform": "@expr: toJson(thisValue)",
+> 		"@transform": "@fmarker: toJson(thisValue)",
 > 		"@value": {
 > 			"someVal": 1,
 > 			"books": "@fmarker: books"
