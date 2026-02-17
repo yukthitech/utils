@@ -2,9 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.yukthitech</groupId>
 	<artifactId>yukthi-xml-mapper</artifactId>
-	<version>1.3.15-SNAPSHOT</version>
+	<version>1.3.16-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>yukthi-xml-mapper</name>
@@ -15,18 +14,20 @@
 	</properties>
 
 	<dependencies>
-		<!-- Used by class scanning services which in turn is used to load repositories, 
-			actions, models, etc -->
 		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.10.2</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.yukthitech</groupId>
+			<artifactId>yukthi-utils</artifactId>
+			<version>1.3.12-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.20.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.20.0</version>
 		</dependency>
 
 		<dependency>
@@ -35,13 +36,6 @@
 			<version>6.9.10</version>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>com.yukthitech</groupId>
-			<artifactId>yukthi-utils</artifactId>
-			<version>1.3.11-SNAPSHOT</version>
-		</dependency>
-
 	</dependencies>
 
 	<parent>
