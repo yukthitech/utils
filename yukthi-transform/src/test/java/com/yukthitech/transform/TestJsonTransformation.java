@@ -180,7 +180,7 @@ public class TestJsonTransformation
 			String expMssg = bean.getExpectedError();
 			String actMssg = ex.getMessage().replaceAll("\\s+", " ");
 			
-			System.out.println(String.format("Error evluation for %s:"
+			System.out.println(String.format("Error evaluation for %s:"
 					+ "\n\tActual Message: %s"
 					+ "\n\tExpected Message: %s",
 					bean.getName(), actMssg, expMssg));

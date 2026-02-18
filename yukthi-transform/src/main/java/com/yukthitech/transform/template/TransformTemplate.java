@@ -326,6 +326,72 @@ public class TransformTemplate implements Serializable
 	}
 
 	/**
+	 * Represents a switch statement with multiple cases.
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	public static class Switch implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+		
+		/**
+		 * List of case objects. Each case has an optional condition and a value.
+		 */
+		private List<SwitchCase> cases = new ArrayList<>();
+		
+		public Switch(List<SwitchCase> cases) {
+			this.cases = cases;
+		}
+		
+		public List<SwitchCase> getCases() {
+			return cases;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return ITransformConstants.toPrettyJson(this);
+		}
+	}
+
+	/**
+	 * Represents a single case in a switch statement.
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	public static class SwitchCase implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+		
+		/**
+		 * Condition to be evaluated. If null, this is the default case.
+		 */
+		private String condition;
+		
+		/**
+		 * Value to return if condition is true.
+		 */
+		private Object value;
+
+		public SwitchCase(String condition, Object value) {
+			this.condition = condition;
+			this.value = value;
+		}
+		
+		public String getCondition() {
+			return condition;
+		}
+		
+		public Object getValue() {
+			return value;
+		}
+
+		@Override
+		public String toString()
+		{
+			return ITransformConstants.toPrettyJson(this);
+		}
+	}
+
+	/**
 	 * Represents an object template in the tree.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -382,6 +448,11 @@ public class TransformTemplate implements Serializable
 		 * Include to be included in place of this object.
 		 */
 		private Include include;
+
+		/**
+		 * Switch statement to evaluate multiple conditions and return matching value.
+		 */
+		private Switch switchStatement;
 
 		/**
 		 * Fields to be set on the object.
@@ -466,6 +537,15 @@ public class TransformTemplate implements Serializable
 
 		TransformObject setInclude(Include include) {
 			this.include = include;
+			return this;
+		}
+
+		public Switch getSwitchStatement() {
+			return switchStatement;
+		}
+
+		TransformObject setSwitchStatement(Switch switchStatement) {
+			this.switchStatement = switchStatement;
 			return this;
 		}
 

@@ -24,6 +24,8 @@ import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
+import com.yukthitech.transform.template.TransformTemplate.Switch;
+import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
@@ -35,7 +37,8 @@ public class XmlTemplateFactory implements ITemplateFactory
 			"name",
 			"loopVar",
 			"forEachCondition",
-			"value"
+			"value",
+			"condition"
 		);
 
 	private static final String PATH_SEP = "/";
@@ -86,6 +89,16 @@ public class XmlTemplateFactory implements ITemplateFactory
 	 * Replace node name.
 	 */
 	public static final String REPLACE = "replace";
+	
+	/**
+	 * Switch node name.
+	 */
+	public static final String SWITCH = "switch";
+	
+	/**
+	 * Case node name.
+	 */
+	public static final String CASE = "case";
 
 	/**
 	 * In a map if this key is specified with expression, along with @value/@falseValue then the result will be result of this expression.
@@ -174,7 +187,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             jsonObj = OBJECT_MAPPER.readValue(jsonContent, Object.class);
         } catch(Exception ex)
         {
-            throw new InvalidStateException("An error occurred while parsing json template.", ex);
+            throw new InvalidStateException("An error occurred while parsing xml template.", ex);
         }
 
         Object root = parseObject(jsonObj, "/");
@@ -339,6 +352,79 @@ public class XmlTemplateFactory implements ITemplateFactory
             if(RES.equals(resBean.getName()))
             {
                 transformObject.setResource(parseResource(resBean, path + PATH_SEP + resBean.getName()));
+                continue;
+            }
+            
+            if(SWITCH.equals(resBean.getName()))
+            {
+            	// Switch should have child nodes as cases
+            	List<XmlDynamicBean> caseNodes = resBean.getNodes();
+            	
+            	// Validation: At least one case is mandatory
+            	if(caseNodes.isEmpty())
+            	{
+            		throw new TransformException(path + PATH_SEP + SWITCH, 
+            			"t:switch must have at least one t:case element");
+            	}
+            	
+            	List<SwitchCase> parsedCases = new ArrayList<>();
+            	boolean defaultCaseFound = false;
+            	
+            	for(int i = 0; i < caseNodes.size(); i++)
+            	{
+            		XmlDynamicBean caseNode = caseNodes.get(i);
+            		
+            		// Validation: Case nodes must be named "case"
+            		if(!CASE.equals(caseNode.getName()))
+            		{
+            			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+            				"Switch case element must be named 't:case', but found: {}", caseNode.getName());
+            		}
+            		
+            		Object condition = caseNode.getReserveValue(KEY_CONDITION);
+
+                    // Validation: Default case (no condition) should be at the end only
+            		if(condition == null)
+            		{
+            			if(defaultCaseFound)
+            			{
+            				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+            					"Multiple default cases (cases without t:condition) found in t:switch. Only one default case is allowed and it must be at the end");
+            			}
+            			
+            			// Check if this is not the last case
+            			if(i < caseNodes.size() - 1)
+            			{
+            				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+            					"Default case (case without t:condition) must be the last case in t:switch");
+            			}
+            			
+            			defaultCaseFound = true;
+            		}
+                    else if(!(condition instanceof String))
+                    {
+                        throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+                            "Switch case condition must be a string, but found: {}", condition.getClass().getName());
+                    }
+            		
+            		Object value = null;
+            		
+            		// Check for t:value attribute - t:value is mandatory
+            		if(caseNode.getReserveAttributes().containsKey(KEY_VALUE))
+            		{
+            			value = parseObject(caseNode.getReserveValue(KEY_VALUE), 
+            				path + PATH_SEP + SWITCH + "[" + i + "]" + RES_PATH_SEP + KEY_VALUE);
+            		}
+                    else
+            		{
+            			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+            				"Switch case must have t:value attribute specified");
+            		}
+            		
+            		parsedCases.add(new SwitchCase((String) condition, value));
+            	}
+            	
+            	transformObject.setSwitchStatement(new Switch(parsedCases));
                 continue;
             }
             

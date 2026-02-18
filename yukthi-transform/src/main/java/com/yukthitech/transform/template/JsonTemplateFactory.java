@@ -21,6 +21,8 @@ import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
+import com.yukthitech.transform.template.TransformTemplate.Switch;
+import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
@@ -32,7 +34,8 @@ public class JsonTemplateFactory implements ITemplateFactory
 			"@params",
 			"@expressions",
 			"@resParams",
-			"@for-each-condition"
+			"@for-each-condition",
+			"@case"
 		);
 	
 	/**
@@ -59,6 +62,16 @@ public class JsonTemplateFactory implements ITemplateFactory
 	 * Loop condition to exclude objects being generated.
 	 */
 	private static final String KEY_FOR_EACH_CONDITION = "@for-each-condition";
+	
+	/**
+	 * Key used to specify switch statement with multiple cases.
+	 */
+	private static final String KEY_SWITCH = "@switch";
+	
+	/**
+	 * Key used in switch case to specify condition.
+	 */
+	private static final String KEY_CASE = "@case";
 	
 	/**
 	 * Pattern used by keys to set complex object (post processing) on context.
@@ -284,6 +297,90 @@ public class JsonTemplateFactory implements ITemplateFactory
                 String loopCondition = (String) map.get(KEY_FOR_EACH_CONDITION);
 
                 transformObject.setForEachLoop(new ForEachLoop(listExpression, loopVariable, loopCondition));
+                continue;
+            }
+
+            if(KEY_SWITCH.equals(entry.getKey()))
+            {
+            	Object switchValue = entry.getValue();
+            	
+            	if(!(switchValue instanceof List))
+            	{
+            		throw new TransformException(path + ">" + entry.getKey(), 
+            			"@switch must have a list value, but found: {}", 
+            			(switchValue != null ? switchValue.getClass().getName() : "null"));
+            	}
+            	
+            	@SuppressWarnings("unchecked")
+            	List<Object> switchCases = (List<Object>) switchValue;
+            	
+            	// Validation: At least one case is mandatory
+            	if(switchCases.isEmpty())
+            	{
+            		throw new TransformException(path + ">" + entry.getKey(), 
+            			"@switch must have at least one case");
+            	}
+            	
+            	List<SwitchCase> parsedCases = new ArrayList<>();
+            	boolean defaultCaseFound = false;
+            	
+            	for(int i = 0; i < switchCases.size(); i++)
+            	{
+            		Object caseObj = switchCases.get(i);
+            		
+            		if(!(caseObj instanceof Map))
+            		{
+            			throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
+            				"Switch case must be a map object, but found: {}", 
+            				(caseObj != null ? caseObj.getClass().getName() : "null"));
+            		}
+            		
+            		@SuppressWarnings("unchecked")
+            		Map<String, Object> caseMap = (Map<String, Object>) caseObj;
+            		
+            		String condition = null;
+            		Object value = null;
+            		
+            		// Check for @case
+            		if(caseMap.containsKey(KEY_CASE))
+            		{
+            			condition = caseMap.get(KEY_CASE).toString();
+            		}
+            		
+            		// Validation: Default case (no condition) should be at the end only
+            		if(condition == null)
+            		{
+            			if(defaultCaseFound)
+            			{
+            				throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
+            					"Multiple default cases (cases without @case) found in @switch. Only one default case is allowed and it must be at the end");
+            			}
+            			
+            			// Check if this is not the last case
+            			if(i < switchCases.size() - 1)
+            			{
+            				throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
+            					"Default case (case without @case) must be the last case in @switch");
+            			}
+            			
+            			defaultCaseFound = true;
+            		}
+            		
+            		// Check for @value - @value is mandatory
+            		if(caseMap.containsKey(KEY_VALUE))
+            		{
+            			value = parseObject(caseMap.get(KEY_VALUE), path + ">" + entry.getKey() + "[" + i + "]>@value");
+            		}
+                    else
+            		{
+            			throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
+            				"Switch case must have @value specified");
+            		}
+            		
+            		parsedCases.add(new SwitchCase(condition, value));
+            	}
+            	
+            	transformObject.setSwitchStatement(new Switch(parsedCases));
                 continue;
             }
 

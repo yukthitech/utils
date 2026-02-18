@@ -277,7 +277,7 @@
 		]]></expectedResult>
 	</jel-test-bean>
 	
-	<jel-test-bean name="nullAndEmptyListRefInLoop">
+	<jel-test-bean name="nullAndEmptyListRefInLoop" enabled="true">
 		<context><![CDATA[
 			<data>
 				<single-list>1</single-list>
@@ -318,7 +318,7 @@
 		]]></expectedResult>
 	</jel-test-bean>
 
-	<jel-test-bean name="setExpressions" enabled="true">
+	<jel-test-bean name="setExpressions">
 		<context><![CDATA[
 			<libraries>
 				<Justbooks name="Justbooks" open="true">
@@ -604,4 +604,270 @@
 		</expectedResult>
 	</jel-test-bean>
 	-->
+
+	<jel-test-bean name="switchBasic">
+		<context><![CDATA[
+			<data>
+				<a>50</a>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<number>
+					<t:switch>
+						<t:case>
+							<t:condition>toInt(a) lt 0</t:condition>
+							<t:value>Negative Number</t:value>
+						</t:case>
+						<t:case>
+							<t:condition>toInt(a) gt 100</t:condition>
+							<t:value>Invalid Number</t:value>
+						</t:case>
+						<t:case>
+							<t:value>@fmarker: a * 100</t:value>
+						</t:case>
+					</t:switch>
+				</number>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<number>5000</number>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchNegativeCase">
+		<context><![CDATA[
+			<data>
+				<a>-10</a>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<number>
+					<t:switch>
+						<t:case t:condition="toInt(a) lt 0" t:value="Negative Number"/>
+						<t:case t:condition="toInt(a) gt 100" t:value="Invalid Number"/>
+						<t:case t:value="@fmarker: a * 100"/>
+					</t:switch>
+				</number>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<number>Negative Number</number>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchInvalidCase">
+		<context><![CDATA[
+			<data>
+				<a>150</a>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<number>
+					<t:switch>
+						<t:case t:condition="toInt(a) lt 0" t:value="Negative Number"/>
+						<t:case t:condition="toInt(a) gt 100" t:value="Invalid Number"/>
+						<t:case t:value="@fmarker: a * 100"/>
+					</t:switch>
+				</number>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<number>Invalid Number</number>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithStringValues">
+		<context><![CDATA[
+			<data>
+				<status>active</status>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<message>
+					<t:switch>
+						<t:case>
+							<t:condition>status == 'active'</t:condition>
+							<t:value>User is active</t:value>
+						</t:case>
+						<t:case>
+							<t:condition>status == 'inactive'</t:condition>
+							<t:value>User is inactive</t:value>
+						</t:case>
+						<t:case>
+							<t:value>Unknown status</t:value>
+						</t:case>
+					</t:switch>
+				</message>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<message>User is active</message>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithDefaultCase">
+		<context><![CDATA[
+			<data>
+				<status>pending</status>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<message>
+					<t:switch>
+						<t:case>
+							<t:condition>status == 'active'</t:condition>
+							<t:value>User is active</t:value>
+						</t:case>
+						<t:case>
+							<t:condition>status == 'inactive'</t:condition>
+							<t:value>User is inactive</t:value>
+						</t:case>
+						<t:case>
+							<t:value>Unknown status: ${status}</t:value>
+						</t:case>
+					</t:switch>
+				</message>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<message>Unknown status: pending</message>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithComplexExpressions">
+		<context><![CDATA[
+			<data>
+				<score>85</score>
+				<bonus>10</bonus>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<grade>
+					<t:switch>
+						<t:case t:condition="toInt(score) gte 90" t:value="A"/>
+						<t:case t:condition="toInt(score) gte 80" t:value="B"/>
+						<t:case t:condition="toInt(score) gte 70" t:value="C"/>
+						<t:case t:value="F"/>
+					</t:switch>
+				</grade>
+				<totalScore>
+					<t:switch>
+						<t:case t:condition="toInt(score) + toInt(bonus) gt 100" t:value="@fmarker: score + bonus"/>
+						<t:case t:value="@fmarker: score"/>
+					</t:switch>
+				</totalScore>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<grade>B</grade>
+				<totalScore>85</totalScore>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithNullValue">
+		<context><![CDATA[
+			<data>
+				<flag>true</flag>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<result>
+					<t:switch>
+						<t:case t:condition="toBoolean(flag)" t:value=""/>
+						<t:case t:value="default"/>
+					</t:switch>
+				</result>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithNestedObjects">
+		<context><![CDATA[
+			<data>
+				<user>
+					<age>25</age>
+					<premium>true</premium>
+				</user>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<category>
+					<t:switch>
+						<t:case>
+							<t:condition>toInt(user.age) lt 18</t:condition>
+							<t:value>Minor</t:value>
+						</t:case>
+						<t:case>
+							<t:condition>toInt(user.age) gte 18 &amp;&amp; toBoolean(user.premium)</t:condition>
+							<t:value>Premium Adult</t:value>
+						</t:case>
+						<t:case>
+							<t:condition>toInt(user.age) gte 18</t:condition>
+							<t:value>Adult</t:value>
+						</t:case>
+						<t:case>
+							<t:value>Unknown</t:value>
+						</t:case>
+					</t:switch>
+				</category>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<category>Premium Adult</category>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithMapValue">
+		<context><![CDATA[
+			<data>
+				<type>admin</type>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<permissions>
+					<t:switch>
+						<t:case t:condition="type == 'admin'" t:value="@fmarker: {'read': true, 'write': true, 'delete': true}"/>
+						<t:case t:condition="type == 'user'" t:value="@fmarker: {'read': true, 'write': true, 'delete': false}"/>
+						<t:case t:value="@fmarker: {'read': true, 'write': false, 'delete': false}"/>
+					</t:switch>
+				</permissions>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output xmlns:t="/transform">
+				<permissions>
+					<read>true</read>
+					<write>true</write>
+					<delete>true</delete>
+				</permissions>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
 </test-data>

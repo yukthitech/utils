@@ -112,6 +112,11 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	{
 		return reserveAttributes;
 	}
+
+	public String getReserveAttribute(String name)
+	{
+		return reserveAttributes.get(name);
+	}
 	
 	public Map<String, String> getAttributes()
 	{
@@ -139,6 +144,23 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 		}
 		
 		return null;
+	}
+
+	/**
+	 * Gets the value of the reserve node, if not present, checks the attributes.
+	 * @param name
+	 * @return
+	 */
+	public Object getReserveValue(String name)
+	{
+		Object res = getReserveNode(name);
+
+		if(res != null)
+		{
+			return res;
+		}
+
+		return getReserveAttribute(name);
 	}
 	
 	@Override

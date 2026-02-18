@@ -28,6 +28,8 @@ import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
+import com.yukthitech.transform.template.TransformTemplate.Switch;
+import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
@@ -360,6 +362,12 @@ public class TransformEngine
 			return null;
 		}
 		
+		//check if switch statement is present
+		if(processSwitch(transformObject, context, transformState, resWrapper))
+		{
+			return resWrapper.getValue();
+		}
+		
 		//check if value expression is present
 		if(processMapValue(transformObject, KEY_VALUE, 
 			transformObject.getValue(), context, transformState, resWrapper))
@@ -408,6 +416,7 @@ public class TransformEngine
 					
 					//based on loop expression generate objects which should be added to res map
 					List<NameValueEntry> processedValues = (List) procesRepeatedElement(submapTemplate, context, nameExpression, transformState.forField(field)); 
+					processedValues = (processedValues == null) ? Collections.emptyList() : processedValues;
 					
 					//loop through res maps
 					for(NameValueEntry nameValEntry : processedValues)
@@ -500,6 +509,69 @@ public class TransformEngine
 		res = conversions.checkForTransform(transformObject, res, context, transformState);
 				
 		value.setValue(res);
+		return true;
+	}
+
+	/**
+	 * Processes the switch statement and returns the matching value.
+	 * @param transformObject transform object containing switch statement
+	 * @param context context to be used
+	 * @param transformState transform state
+	 * @param resWrapper wrapper to hold the result
+	 * @return true if switch statement is present and processed
+	 */
+	private boolean processSwitch(TransformObject transformObject, ITransformContext context, 
+		TransformState transformState, ObjectWrapper<Object> resWrapper)
+	{
+		Switch switchStatement = transformObject.getSwitchStatement();
+		
+		if(switchStatement == null)
+		{
+			return false;
+		}
+		
+		List<SwitchCase> cases = switchStatement.getCases();
+		
+		// Evaluate cases in order
+		for(int i = 0; i < cases.size(); i++)
+		{
+			SwitchCase switchCase = cases.get(i);
+			String condition = switchCase.getCondition();
+			
+			// If condition is null, this is the default case
+			boolean conditionMet = true;
+			
+			if(condition != null)
+			{
+				conditionMet = ExpressionUtil.evaluateCondition(
+					freeMarkerEngine,
+					transformObject.getPath() + ">@switch[" + i + "]>@case",
+					"switch-condition",
+					condition,
+					context);
+			}
+			
+			if(conditionMet)
+			{
+				// Found matching case - process the value
+				Object result = null;
+				
+				if(switchCase.getValue() != null) 
+				{
+					result = processObject(switchCase.getValue(), context, 
+						transformState.forDynField("@switch[" + i + "]>@value"));
+					
+					// Apply transform if present
+					result = conversions.checkForTransform(transformObject, result, context, transformState);
+				}
+				
+				resWrapper.setValue(result);
+				return true;
+			}
+		}
+		
+		// No case matched (should not happen if default case is present, but handle gracefully)
+		resWrapper.setValue(null);
 		return true;
 	}
 

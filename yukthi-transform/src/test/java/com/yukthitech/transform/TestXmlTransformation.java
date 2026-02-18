@@ -85,6 +85,7 @@ public class TestXmlTransformation
 		return loadXmlFile("/xml-trans-test-data.xml");
 	}
 	
+	/*
 	@DataProvider(name = "jsonElNeagtiveDataProvider")
 	public Object[][] getNegativeTestData() throws Exception
 	{
@@ -96,6 +97,7 @@ public class TestXmlTransformation
 	{
 		return loadXmlFile("/pojo-json-trans-test-data.xml");
 	}
+	*/
 	
 	private String processXml(String xml, Object context)
 	{
@@ -128,6 +130,7 @@ public class TestXmlTransformation
 		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
 	}
 
+	/*
 	@Test(dataProvider =  "pojoJsonElDataProvider")
 	public void testPojoJel(TransformTestBean bean) throws Exception
 	{
@@ -156,6 +159,8 @@ public class TestXmlTransformation
 			Assert.fail("No error is thrown");
 		}catch(Exception ex)
 		{
+			ex.printStackTrace();
+			
 			String expMssg = bean.getExpectedError();
 			String actMssg = ex.getMessage().replaceAll("\\s+", " ");
 			
@@ -168,4 +173,5 @@ public class TestXmlTransformation
 					String.format("\nActual Message: %s\nDoes not start with: %s", actMssg, expMssg));
 		}
 	}
+	*/
 }

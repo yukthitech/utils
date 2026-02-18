@@ -654,4 +654,326 @@
 			}
 		</expectedResult>
 	</jel-test-bean>
+
+	<jel-test-bean name="switchBasic">
+		<context>
+			{
+				"a": 50
+			}
+		</context>
+		<template>
+			{
+				"number": {
+					"@switch": [
+						{
+							"@case": "a lt 0",
+							"@value": "Negative Number"
+						},
+						{
+							"@case": "a gt 100",
+							"@value": "Invalid Number"
+						},
+						{
+							"@value": "@fmarker: a * 100"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"number": 5000
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchNegativeCase">
+		<context>
+			{
+				"a": -10
+			}
+		</context>
+		<template>
+			{
+				"number": {
+					"@switch": [
+						{
+							"@case": "a lt 0",
+							"@value": "Negative Number"
+						},
+						{
+							"@case": "a gt 100",
+							"@value": "Invalid Number"
+						},
+						{
+							"@value": "@fmarker: a * 100"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"number": "Negative Number"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchInvalidCase">
+		<context>
+			{
+				"a": 150
+			}
+		</context>
+		<template>
+			{
+				"number": {
+					"@switch": [
+						{
+							"@case": "a lt 0",
+							"@value": "Negative Number"
+						},
+						{
+							"@case": "a gt 100",
+							"@value": "Invalid Number"
+						},
+						{
+							"@value": "@fmarker: a * 100"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"number": "Invalid Number"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithStringValues">
+		<context>
+			{
+				"status": "active"
+			}
+		</context>
+		<template>
+			{
+				"message": {
+					"@switch": [
+						{
+							"@case": "status == 'active'",
+							"@value": "User is active"
+						},
+						{
+							"@case": "status == 'inactive'",
+							"@value": "User is inactive"
+						},
+						{
+							"@value": "Unknown status"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"message": "User is active"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithDefaultCase">
+		<context>
+			{
+				"status": "pending"
+			}
+		</context>
+		<template>
+			{
+				"message": {
+					"@switch": [
+						{
+							"@case": "status == 'active'",
+							"@value": "User is active"
+						},
+						{
+							"@case": "status == 'inactive'",
+							"@value": "User is inactive"
+						},
+						{
+							"@value": "Unknown status: ${status}"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"message": "Unknown status: pending"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithComplexExpressions">
+		<context>
+			{
+				"score": 85,
+				"bonus": 10
+			}
+		</context>
+		<template>
+			{
+				"grade": {
+					"@switch": [
+						{
+							"@case": "score gte 90",
+							"@value": "A"
+						},
+						{
+							"@case": "score gte 80",
+							"@value": "B"
+						},
+						{
+							"@case": "score gte 70",
+							"@value": "C"
+						},
+						{
+							"@value": "F"
+						}
+					]
+				},
+				"totalScore": {
+					"@switch": [
+						{
+							"@case": "score + bonus gt 100",
+							"@value": "@fmarker: score + bonus"
+						},
+						{
+							"@value": "@fmarker: score"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"grade": "B",
+				"totalScore": 85
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithNullValue">
+		<context>
+			{
+				"flag": true
+			}
+		</context>
+		<template>
+			{
+				"result": {
+					"@switch": [
+						{
+							"@case": "flag",
+							"@value": null
+						},
+						{
+							"@value": "default"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithNestedObjects">
+		<context>
+			{
+				"user": {
+					"age": 25,
+					"premium": true
+				}
+			}
+		</context>
+		<template>
+			{
+				"category": {
+					"@switch": [
+						{
+							"@case": "user.age lt 18",
+							"@value": "Minor"
+						},
+						{
+							"@case": "user.age gte 18 &amp;&amp; user.premium",
+							"@value": "Premium Adult"
+						},
+						{
+							"@case": "user.age gte 18",
+							"@value": "Adult"
+						},
+						{
+							"@value": "Unknown"
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"category": "Premium Adult"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="switchWithMapValue">
+		<context>
+			{
+				"type": "admin"
+			}
+		</context>
+		<template>
+			{
+				"permissions": {
+					"@switch": [
+						{
+							"@case": "type == 'admin'",
+							"@value": {
+								"read": true,
+								"write": true,
+								"delete": true
+							}
+						},
+						{
+							"@case": "type == 'user'",
+							"@value": {
+								"read": true,
+								"write": true,
+								"delete": false
+							}
+						},
+						{
+							"@value": {
+								"read": true,
+								"write": false,
+								"delete": false
+							}
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"permissions": {
+					"read": true,
+					"write": true,
+					"delete": true
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
 </test-data>
