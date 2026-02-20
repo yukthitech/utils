@@ -91,7 +91,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<emptyList/>
 				
 				<listWithNoString>100</listWithNoString>
@@ -127,7 +127,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<mapWithString>Enabled</mapWithString>
 				<mapWithNonString>100</mapWithNonString>
 				
@@ -154,7 +154,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<elem desc="Just books is open"/>
 				<elem desc="This is a extra lib"/>
 			</output>
@@ -195,7 +195,7 @@
 		]]></template>
 
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<bookName>Davinci Code</bookName>
 				<bookName>Sphere</bookName>
 				
@@ -256,7 +256,7 @@
 		]]></template>
 
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<Justbooks>
 					<Davinci-Code>
 						<copyCount>3</copyCount>
@@ -303,7 +303,7 @@
 		]]></template>
 		
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<missing-list>
 				</missing-list>
 				<single-list>
@@ -351,7 +351,7 @@
 		]]></template>
 
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<map>
 					<key1>val1</key1>
 					<key2>Let-Us-C</key2>
@@ -658,7 +658,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<number>5000</number>
 			</output>
 		]]></expectedResult>
@@ -682,7 +682,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<number>Negative Number</number>
 			</output>
 		]]></expectedResult>
@@ -706,7 +706,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<number>Invalid Number</number>
 			</output>
 		]]></expectedResult>
@@ -738,7 +738,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<message>User is active</message>
 			</output>
 		]]></expectedResult>
@@ -770,7 +770,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<message>Unknown status: pending</message>
 			</output>
 		]]></expectedResult>
@@ -802,7 +802,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<grade>B</grade>
 				<totalScore>85</totalScore>
 			</output>
@@ -826,7 +826,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 			</output>
 		]]></expectedResult>
 	</jel-test-bean>
@@ -864,7 +864,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<category>Premium Adult</category>
 			</output>
 		]]></expectedResult>
@@ -906,7 +906,7 @@
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
-			<output xmlns:t="/transform">
+			<output>
 				<permissions>
 					<read>true</read>
 					<write>true</write>
