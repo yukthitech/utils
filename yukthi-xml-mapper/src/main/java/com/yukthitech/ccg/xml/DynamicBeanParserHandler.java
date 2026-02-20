@@ -45,13 +45,20 @@ public class DynamicBeanParserHandler extends DefaultParserHandler
 	@Override
 	public Object createBean(BeanNode node, XMLAttributeMap att, ClassLoader loader)
 	{
+		try
+		{
+			Object bean = super.createBean(node, att, loader);
+			
+			if(bean != null)
+			{
+				return bean;
+			}
+		}catch(Exception ex)
+		{
+			// if no dynamic types are specified, then fallback to dynamic-bean
+		}
+		
 		return new DynamicBean(node.getName(), typeConversationEnabled);
-	}
-
-	@Override
-	public Object parseAttributeValue(BeanNode node, String attName, Class<?> type)
-	{
-		return new DynamicBean(attName, typeConversationEnabled);
 	}
 	
 }

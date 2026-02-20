@@ -6,7 +6,7 @@
 	"node2": ["node-val2", "node-val3"],
 	
 	"node3": {
-		"intVal": "100"
+		"intVal": 100
 	},
 	
 	"node4": [

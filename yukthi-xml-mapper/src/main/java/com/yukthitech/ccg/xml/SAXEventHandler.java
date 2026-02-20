@@ -573,7 +573,7 @@ class SAXEventHandler extends DefaultHandler
 			{
 				if(dynType == null)
 				{
-					dynType = DynamicBean.class;
+					//dynType = DynamicBean.class;
 				}
 
 				IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;
@@ -616,7 +616,8 @@ class SAXEventHandler extends DefaultHandler
 			nextBean = parserHandler.createBean(newNode, curAttMap);
 		} catch(Exception ex)
 		{
-			throw new XMLLoadException("Error in creating bean of type: " + typ.getName(), ex, newNode, saxLocator);
+			String typeName = (typ == null) ? "null" : typ.getName();
+			throw new XMLLoadException("Error in creating bean of type: " + typeName, ex, newNode, saxLocator);
 		}
 
 		if(nextBean == null)

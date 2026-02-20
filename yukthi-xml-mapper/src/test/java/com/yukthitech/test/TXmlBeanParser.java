@@ -41,7 +41,7 @@ public class TXmlBeanParser
 	public void testDynamicBean() throws Exception
 	{
 		DynamicTestBean bean = new DynamicTestBean();
-		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean.xml"), bean);
+		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean.xml"), bean, new DynamicBeanParserHandler());
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		String beanJson = objectMapper.writeValueAsString(bean.getData().toSimpleMap());
