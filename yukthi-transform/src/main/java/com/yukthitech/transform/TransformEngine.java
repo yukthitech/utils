@@ -37,7 +37,7 @@ import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 /**
- * Json expression engine to process Json Expression Language (JEL).
+ * Transformation engine to process transformation templates (JSON or XML).
  * @author akiran
  */
 public class TransformEngine
@@ -277,7 +277,7 @@ public class TransformEngine
 		// in case of string process it as an expression
 		if(valueLstExpr instanceof String)
 		{
-			valueLstExpr = ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getPath(), "jel-valueLst-expr", (String) valueLstExpr, context);
+			valueLstExpr = ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getPath(), "transform-valueLst-expr", (String) valueLstExpr, context);
 		}
 		
 		if(valueLstExpr == null)
@@ -594,7 +594,7 @@ public class TransformEngine
 		//evaluate the condition and return the result
 		return ExpressionUtil.evaluateCondition(freeMarkerEngine, 
 			transformObject.getPath(), 
-			"Json-condition", 
+			"transform-condition", 
 			condition, 
 			context);
 	}
@@ -617,7 +617,7 @@ public class TransformEngine
 		return ExpressionUtil.evaluateCondition(
 			freeMarkerEngine, 
 			transformList.getPath(), 
-			"Json-condition", 
+			"transform-condition", 
 			transformList.getCondition(), 
 			context);
 	}

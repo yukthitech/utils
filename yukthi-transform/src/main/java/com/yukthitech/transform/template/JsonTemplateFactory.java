@@ -162,13 +162,13 @@ public class JsonTemplateFactory implements ITemplateFactory
     	includeCache.clear();
     }
 
-    public TransformTemplate parseTemplate(String jsonContent) 
+    public TransformTemplate parseTemplate(String templateContent) 
     {
         Object jsonObj = null;
         
         try
         {
-            jsonObj = OBJECT_MAPPER.readValue(jsonContent, Object.class);
+            jsonObj = OBJECT_MAPPER.readValue(templateContent, Object.class);
         } catch(Exception ex)
         {
             throw new InvalidStateException("An error occurred while parsing json template.", ex);
@@ -179,13 +179,13 @@ public class JsonTemplateFactory implements ITemplateFactory
         return new TransformTemplate(JsonGenerator.class, root);
     }
     
-    private void parseTemplateTo(String jsonContent, TransformTemplate template)
+    private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
         Object jsonObj = null;
         
         try
         {
-            jsonObj = OBJECT_MAPPER.readValue(jsonContent, Object.class);
+            jsonObj = OBJECT_MAPPER.readValue(templateContent, Object.class);
         } catch(Exception ex)
         {
             throw new InvalidStateException("An error occurred while parsing json template.", ex);

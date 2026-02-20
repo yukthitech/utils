@@ -27,7 +27,7 @@ import java.util.Set;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
- * Json expr context implementation wrapper over the map.
+ * Transform context implementation wrapper over a POJO object.
  * @author Kranthi
  */
 public class PojoExprContext extends AbstractMap<String, Object> implements ITransformContext

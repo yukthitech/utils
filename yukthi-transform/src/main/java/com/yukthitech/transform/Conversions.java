@@ -155,7 +155,7 @@ public class Conversions
 		{
 			if(exprType == ExpressionType.FMARKER)
 			{
-				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getPath(), "jel-expr", expr, context);
+				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getPath(), "transform-expr", expr, context);
 			}
 			else if(exprType == ExpressionType.XPATH)
 			{
@@ -167,7 +167,7 @@ public class Conversions
 			}
 			else if(exprType == ExpressionType.TEMPLATE)
 			{
-				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getPath(), "jel-template", expr, context);
+				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getPath(), "transform-template", expr, context);
 			}
 			else if(exprType == ExpressionType.STRING)
 			{
@@ -188,7 +188,7 @@ public class Conversions
 	{
 		try
 		{
-			return ExpressionUtil.processTemplate(freeMarkerEngine, path, "jel-template", expression, context);
+			return ExpressionUtil.processTemplate(freeMarkerEngine, path, "transform-template", expression, context);
 		} catch(TransformException ex)
 		{
 			throw ex;

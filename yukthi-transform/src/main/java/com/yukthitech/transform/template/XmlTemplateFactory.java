@@ -165,10 +165,10 @@ public class XmlTemplateFactory implements ITemplateFactory
         this.contentLoader = contentLoader;
     }
 
-    public TransformTemplate parseTemplate(String xmlContent) 
+    public TransformTemplate parseTemplate(String templateContent) 
     {
     	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
-    			new ByteArrayInputStream(xmlContent.getBytes()), 
+    			new ByteArrayInputStream(templateContent.getBytes()), 
     			parserHandler);
 
         Object root = parseObject(dynBean, "");
@@ -176,10 +176,10 @@ public class XmlTemplateFactory implements ITemplateFactory
         return new TransformTemplate(XmlGenerator.class, root);
     }
     
-    private void parseTemplateTo(String xmlContent, TransformTemplate template)
+    private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
     	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
-    			new ByteArrayInputStream(xmlContent.getBytes()), 
+    			new ByteArrayInputStream(templateContent.getBytes()), 
     			parserHandler);
 
         Object root = parseObject(dynBean, "/");

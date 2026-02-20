@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Json expr context implementation wrapper over the map.
+ * Transform context implementation wrapper over a map.
  * @author Kranthi
  */
 public class MapExprContext extends AbstractMap<String, Object> implements ITransformContext

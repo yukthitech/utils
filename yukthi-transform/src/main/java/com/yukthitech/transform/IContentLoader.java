@@ -23,7 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
- * Helps in customizing resource/file loading for JEL engine.
+ * Helps in customizing resource/file loading for transformation engine.
  */
 public interface IContentLoader
 {

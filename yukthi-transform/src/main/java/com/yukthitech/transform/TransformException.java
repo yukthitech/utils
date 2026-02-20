@@ -18,7 +18,7 @@ package com.yukthitech.transform;
 import com.yukthitech.utils.exceptions.UtilsException;
 
 /**
- * Used when an error occurs while parsing json expressions.
+ * Used when an error occurs during transformation processing (template parsing or execution).
  * @author akiran
  */
 public class TransformException extends UtilsException
@@ -26,7 +26,7 @@ public class TransformException extends UtilsException
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Instantiates a new json expression exception.
+	 * Instantiates a new transformation exception.
 	 *
 	 * @param path the path
 	 * @param mssgTemplate the mssg template
