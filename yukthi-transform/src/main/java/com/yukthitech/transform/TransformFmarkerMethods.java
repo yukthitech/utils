@@ -148,4 +148,12 @@ public class TransformFmarkerMethods
 		
 		return Arrays.asList(value);
 	}
+
+	@FreeMarkerMethod(
+			description = "Simply returns null. Helpful in defining null values in xml",
+			returnDescription = "null")
+	public static Object nullValue()
+	{
+		return null;
+	}
 }

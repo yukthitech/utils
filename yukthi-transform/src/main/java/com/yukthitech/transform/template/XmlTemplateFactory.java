@@ -358,7 +358,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             if(SWITCH.equals(resBean.getName()))
             {
             	// Switch should have child nodes as cases
-            	List<XmlDynamicBean> caseNodes = resBean.getNodes();
+            	List<XmlDynamicBean> caseNodes = resBean.getReserveNodes();
             	
             	// Validation: At least one case is mandatory
             	if(caseNodes.isEmpty())
@@ -382,6 +382,17 @@ public class XmlTemplateFactory implements ITemplateFactory
             		}
             		
             		Object condition = caseNode.getReserveValue(KEY_CONDITION);
+            		
+            		if(condition instanceof XmlDynamicBean)
+            		{
+            			condition = ((XmlDynamicBean) condition).getTextContent();
+            			
+            			if(condition == null)
+            			{
+            				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+                					"Encountered non-text condition node.");
+            			}
+            		}
 
                     // Validation: Default case (no condition) should be at the end only
             		if(condition == null)
@@ -407,12 +418,12 @@ public class XmlTemplateFactory implements ITemplateFactory
                             "Switch case condition must be a string, but found: {}", condition.getClass().getName());
                     }
             		
-            		Object value = null;
+            		Object value = caseNode.getReserveValue(KEY_VALUE);
             		
             		// Check for t:value attribute - t:value is mandatory
-            		if(caseNode.getReserveAttributes().containsKey(KEY_VALUE))
+            		if(value != null)
             		{
-            			value = parseObject(caseNode.getReserveValue(KEY_VALUE), 
+            			value = parseObject(value, 
             				path + PATH_SEP + SWITCH + "[" + i + "]" + RES_PATH_SEP + KEY_VALUE);
             		}
                     else

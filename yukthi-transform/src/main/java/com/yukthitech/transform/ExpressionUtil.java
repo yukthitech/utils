@@ -72,7 +72,6 @@ public class ExpressionUtil
 			if(ex instanceof TemplateProcessingException)
 			{
 				prcessingError = ex.getCause().getMessage();
-				ex = null;
 			}
 			
 			throw new TransformException(path, "Invalid condition '{}' (Name: {}) specified at path: {}\nProcessing Error: {}", 

@@ -188,4 +188,9 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	{
 		return textContent;
 	}
+	
+	public boolean isTextNode()
+	{
+		return StringUtils.isNotBlank(textContent);
+	}
 }

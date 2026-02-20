@@ -1,7 +1,7 @@
 <test-data xmlns:r="/fw/ccg/XMLBeanParser">
 	<r:exprPattern enabled="false"/>
 	
-	<disableByDefault>true</disableByDefault>
+	<disableByDefault>false</disableByDefault>
 	
 	<jel-test-bean name="conditionBasedRemovalInMap">
 		<context><![CDATA[
@@ -277,7 +277,7 @@
 		]]></expectedResult>
 	</jel-test-bean>
 	
-	<jel-test-bean name="nullAndEmptyListRefInLoop" enabled="true">
+	<jel-test-bean name="nullAndEmptyListRefInLoop">
 		<context><![CDATA[
 			<data>
 				<single-list>1</single-list>
@@ -291,13 +291,13 @@
 		<template><![CDATA[
 			<output xmlns:t="/transform">
 				<missing-list>
-					<val t:for-each="data.missingList" t:loop-var="val">${val.$textContent}</val>
+					<val t:for-each="data.missingList" t:loop-var="val">${val}</val>
 				</missing-list>
 				<single-list>
-					<val t:for-each="data.singleList" t:loop-var="val">${val.$textContent}</val>
+					<val t:for-each="data.singleList" t:loop-var="val">${val}</val>
 				</single-list>
 				<some-list>
-					<val t:for-each="data.someList" t:loop-var="val">${val.$textContent}</val>
+					<val t:for-each="data.someList" t:loop-var="val">${val}</val>
 				</some-list>
 			</output>
 		]]></template>
@@ -616,15 +616,15 @@
 				<number>
 					<t:switch>
 						<t:case>
-							<t:condition>toInt(a) lt 0</t:condition>
+							<t:condition>toInt(data.a) lt 0</t:condition>
 							<t:value>Negative Number</t:value>
 						</t:case>
 						<t:case>
-							<t:condition>toInt(a) gt 100</t:condition>
+							<t:condition>toInt(data.a) gt 100</t:condition>
 							<t:value>Invalid Number</t:value>
 						</t:case>
 						<t:case>
-							<t:value>@fmarker: a * 100</t:value>
+							<t:value>@fmarker: toInt(data.a) * 100</t:value>
 						</t:case>
 					</t:switch>
 				</number>
@@ -647,9 +647,9 @@
 			<output xmlns:t="/transform">
 				<number>
 					<t:switch>
-						<t:case t:condition="toInt(a) lt 0" t:value="Negative Number"/>
-						<t:case t:condition="toInt(a) gt 100" t:value="Invalid Number"/>
-						<t:case t:value="@fmarker: a * 100"/>
+						<t:case t:condition="toInt(data.a) lt 0" t:value="Negative Number"/>
+						<t:case t:condition="toInt(data.a) gt 100" t:value="Invalid Number"/>
+						<t:case t:value="@fmarker: toInt(data.a) * 100"/>
 					</t:switch>
 				</number>
 			</output>
@@ -671,9 +671,9 @@
 			<output xmlns:t="/transform">
 				<number>
 					<t:switch>
-						<t:case t:condition="toInt(a) lt 0" t:value="Negative Number"/>
-						<t:case t:condition="toInt(a) gt 100" t:value="Invalid Number"/>
-						<t:case t:value="@fmarker: a * 100"/>
+						<t:case t:condition="toInt(data.a) lt 0" t:value="Negative Number"/>
+						<t:case t:condition="toInt(data.a) gt 100" t:value="Invalid Number"/>
+						<t:case t:value="@fmarker: toInt(data.a) * 100"/>
 					</t:switch>
 				</number>
 			</output>
@@ -696,15 +696,15 @@
 				<message>
 					<t:switch>
 						<t:case>
-							<t:condition>status == 'active'</t:condition>
+							<t:condition>data.status == 'active'</t:condition>
 							<t:value>User is active</t:value>
 						</t:case>
 						<t:case>
-							<t:condition>status == 'inactive'</t:condition>
+							<t:condition>data.status == 'inactive'</t:condition>
 							<t:value>User is inactive</t:value>
 						</t:case>
 						<t:case>
-							<t:value>Unknown status</t:value>
+							<t:value>Unknown status: ${data.status}</t:value>
 						</t:case>
 					</t:switch>
 				</message>
@@ -728,15 +728,15 @@
 				<message>
 					<t:switch>
 						<t:case>
-							<t:condition>status == 'active'</t:condition>
+							<t:condition>data.status == 'active'</t:condition>
 							<t:value>User is active</t:value>
 						</t:case>
 						<t:case>
-							<t:condition>status == 'inactive'</t:condition>
+							<t:condition>data.status == 'inactive'</t:condition>
 							<t:value>User is inactive</t:value>
 						</t:case>
 						<t:case>
-							<t:value>Unknown status: ${status}</t:value>
+							<t:value>Unknown status: ${data.status}</t:value>
 						</t:case>
 					</t:switch>
 				</message>
@@ -760,16 +760,16 @@
 			<output xmlns:t="/transform">
 				<grade>
 					<t:switch>
-						<t:case t:condition="toInt(score) gte 90" t:value="A"/>
-						<t:case t:condition="toInt(score) gte 80" t:value="B"/>
-						<t:case t:condition="toInt(score) gte 70" t:value="C"/>
+						<t:case t:condition="toInt(data.score) gte 90" t:value="A"/>
+						<t:case t:condition="toInt(data.score) gte 80" t:value="B"/>
+						<t:case t:condition="toInt(data.score) gte 70" t:value="C"/>
 						<t:case t:value="F"/>
 					</t:switch>
 				</grade>
 				<totalScore>
 					<t:switch>
-						<t:case t:condition="toInt(score) + toInt(bonus) gt 100" t:value="@fmarker: score + bonus"/>
-						<t:case t:value="@fmarker: score"/>
+						<t:case t:condition="toInt(data.score) + toInt(data.bonus) gt 100" t:value="@fmarker: data.score + data.bonus"/>
+						<t:case t:value="@fmarker: data.score"/>
 					</t:switch>
 				</totalScore>
 			</output>
@@ -792,7 +792,7 @@
 			<output xmlns:t="/transform">
 				<result>
 					<t:switch>
-						<t:case t:condition="toBoolean(flag)" t:value=""/>
+						<t:case t:condition="toBoolean(data.flag)" t:value="@fmarker: nullValue()"/>
 						<t:case t:value="default"/>
 					</t:switch>
 				</result>
@@ -818,19 +818,19 @@
 				<category>
 					<t:switch>
 						<t:case>
-							<t:condition>toInt(user.age) lt 18</t:condition>
+							<t:condition>toInt(data.user.age) lt 18</t:condition>
 							<t:value>Minor</t:value>
 						</t:case>
 						<t:case>
-							<t:condition>toInt(user.age) gte 18 &amp;&amp; toBoolean(user.premium)</t:condition>
+							<t:condition>toInt(data.user.age) gte 18 &amp;&amp; toBoolean(data.user.premium)</t:condition>
 							<t:value>Premium Adult</t:value>
 						</t:case>
 						<t:case>
-							<t:condition>toInt(user.age) gte 18</t:condition>
+							<t:condition>toInt(data.user.age) gte 18</t:condition>
 							<t:value>Adult</t:value>
 						</t:case>
 						<t:case>
-							<t:value>Unknown</t:value>
+							<t:value>Unknown: ${data.user.age}</t:value>
 						</t:case>
 					</t:switch>
 				</category>
@@ -853,9 +853,27 @@
 			<output xmlns:t="/transform">
 				<permissions>
 					<t:switch>
-						<t:case t:condition="type == 'admin'" t:value="@fmarker: {'read': true, 'write': true, 'delete': true}"/>
-						<t:case t:condition="type == 'user'" t:value="@fmarker: {'read': true, 'write': true, 'delete': false}"/>
-						<t:case t:value="@fmarker: {'read': true, 'write': false, 'delete': false}"/>
+						<t:case t:condition="data.type == 'admin'">
+							<t:value>
+								<read>true</read>
+								<write>true</write>
+								<delete>true</delete>
+							</t:value>
+						</t:case>
+						<t:case t:condition="data.type == 'user'">
+							<t:value>
+								<read>true</read>
+								<write>true</write>
+								<delete>false</delete>
+							</t:value>
+						</t:case>
+						<t:case>
+							<t:value>
+								<read>true</read>
+								<write>false</write>
+								<delete>false</delete>
+							</t:value>
+						</t:case>
 					</t:switch>
 				</permissions>
 			</output>
