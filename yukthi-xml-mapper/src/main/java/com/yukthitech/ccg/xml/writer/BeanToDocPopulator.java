@@ -258,6 +258,12 @@ public class BeanToDocPopulator
 				continue;
 			}
 			
+			// ignore properties like getClass()
+			if(prop.getGetter().getDeclaringClass().equals(Object.class))
+			{
+				continue;
+			}
+			
 			value = prop.getValue(bean);
 			
 			if(value == null)

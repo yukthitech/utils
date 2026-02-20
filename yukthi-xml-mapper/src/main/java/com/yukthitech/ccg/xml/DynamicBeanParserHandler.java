@@ -45,11 +45,6 @@ public class DynamicBeanParserHandler extends DefaultParserHandler
 	@Override
 	public Object createBean(BeanNode node, XMLAttributeMap att, ClassLoader loader)
 	{
-		if(DynamicBeanList.class.equals(node.getActualType()))
-		{
-			return new DynamicBeanList(typeConversationEnabled);
-		}
-		
 		return new DynamicBean(node.getName(), typeConversationEnabled);
 	}
 

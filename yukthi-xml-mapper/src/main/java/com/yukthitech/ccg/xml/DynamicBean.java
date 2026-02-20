@@ -20,6 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.ccg.xml.util.TypeConversionUtils;
 import com.yukthitech.ccg.xml.writer.BeanToDocPopulator;
 import com.yukthitech.ccg.xml.writer.IWriteableBean;
@@ -97,12 +100,6 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 	public void set(String propName, String value)
 	{
 		add(propName, value);
-	}
-	
-	@IgnoreXmlMethod
-	public void addList(String name, DynamicBeanList list)
-	{
-		properties.put(name, list);
 	}
 	
 	public void addDynamic(String name, DynamicBean value)
@@ -220,8 +217,13 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 	 * @return converted simple map
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> toSimpleMap()
+	public Object toSimpleMap()
 	{
+		if(MapUtils.isEmpty(properties) && StringUtils.isNotBlank(textContent))
+		{
+			return textContent;
+		}
+		
 		Map<String, Object> finalMap = (Map<String, Object>) toSimpleObject(properties);
 		
 		if(textContent != null)
@@ -232,16 +234,17 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 		return finalMap;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> toSimpleMapWithRoot()
 	{
-		Map<String, Object> finalMap = toSimpleMap();
+		Object finalMap = toSimpleMap();
 
 		if(name != null)
 		{
 			finalMap = Map.of(name, finalMap);
 		}
 		
-		return finalMap;
+		return (Map<String, Object>) finalMap;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -302,16 +305,11 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 		{
 			List<Object> lst = (List<Object>) value;
 			
-			//create wrapping list element
-			context.startChildElement("list");
-			context.setAttribute("name", name);
-			
 			for(Object obj : lst)
 			{
-				write("element", obj, context, true);
+				write(name, obj, context, true);
 			}
 			
-			context.endChildElement();
 			return;
 		}
 		

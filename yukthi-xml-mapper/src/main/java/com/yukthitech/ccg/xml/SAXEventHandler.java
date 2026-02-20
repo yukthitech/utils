@@ -573,7 +573,7 @@ class SAXEventHandler extends DefaultHandler
 			{
 				if(dynType == null)
 				{
-					//dynType = String.class;
+					dynType = DynamicBean.class;
 				}
 
 				IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;

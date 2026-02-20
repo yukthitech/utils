@@ -5,8 +5,6 @@ This is multi line content
 This is multi line content</multiLineContent>
     <cdataContent><![CDATA[This is cdata content with <xml a="b">]]></cdataContent>
   </subnode>
-  <list name="objList">
-    <element age="int: 40" name="Kranthi"/>
-    <element age="int: 41" name="Kiran"/>
-  </list>
+  <objList age="int: 40" name="Kranthi"/>
+  <objList age="int: 41" name="Kiran"/>
 </dyn-content>

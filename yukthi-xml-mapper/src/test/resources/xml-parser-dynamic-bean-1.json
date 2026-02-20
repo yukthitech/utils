@@ -1,0 +1,20 @@
+{
+	"attr1": "val1",
+	"attr2": "val2",
+	
+	"node1": "node-val1",
+	"node2": ["node-val2", "node-val3"],
+	
+	"node3": {
+		"intVal": "100"
+	},
+	
+	"node4": [
+		{
+			"intVal": "100"
+		},
+		{
+			"intVal": "200"
+		}
+	]
+}

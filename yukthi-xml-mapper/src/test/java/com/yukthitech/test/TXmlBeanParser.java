@@ -16,12 +16,11 @@
 package com.yukthitech.test;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
@@ -39,15 +38,19 @@ import com.yukthitech.utils.CommonUtils;
 public class TXmlBeanParser
 {
 	@Test
-	public void testDynamicBean()
+	public void testDynamicBean() throws Exception
 	{
 		DynamicTestBean bean = new DynamicTestBean();
 		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean.xml"), bean);
 		
-		Assert.assertEquals(bean.getData().get("attr1"), "val1");
-		Assert.assertEquals(bean.getData().get("attr2"), "val2");
-		Assert.assertEquals(bean.getData().get("node1"), "node-val1");
-		Assert.assertEquals(bean.getData().get("node2"), "node-val2");
+		ObjectMapper objectMapper = new ObjectMapper();
+		String beanJson = objectMapper.writeValueAsString(bean.getData().toSimpleMap());
+		
+		String expectedJson = objectMapper.writeValueAsString(
+				objectMapper.readValue(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean.json"), Object.class)
+			);
+		
+		Assert.assertEquals(beanJson, expectedJson);
 		
 		TestDataBean testDataBean = (TestDataBean)bean.getData().get("node3");
 		Assert.assertEquals(testDataBean.getIntVal(), 100);
@@ -57,40 +60,19 @@ public class TXmlBeanParser
 	 * Ensure xml to dynamic bean converstion is happening properly. And also ensures dynamic bean to map-of-map 
 	 * coversion is also happening properly.
 	 */
-	@SuppressWarnings("rawtypes")
 	@Test
-	public void testWithDynamicHandler()
+	public void testWithDynamicHandler() throws Exception
 	{
 		DynamicBean bean = (DynamicBean) XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean-1.xml"), null, new DynamicBeanParserHandler());
 
-		System.out.println(bean.toSimpleMap());
+		ObjectMapper objectMapper = new ObjectMapper();
+		String beanJson = objectMapper.writeValueAsString(bean.toSimpleMap());
 		
-		Assert.assertEquals(bean.get("attr1"), "val1");
-		Assert.assertEquals(bean.get("attr2"), "val2");
+		String expectedJson = objectMapper.writeValueAsString(
+				objectMapper.readValue(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-bean-1.json"), Object.class)
+			);
 		
-		Assert.assertEquals(bean.get("node1"), "node-val1");
-		Assert.assertEquals(bean.get("node2"), Arrays.asList("node-val2", "node-val3"));
-		
-		Assert.assertTrue(bean.get("node3") instanceof DynamicBean);
-		Assert.assertEquals( ((DynamicBean) bean.get("node3")).get("intVal"), "100");
-		
-		Assert.assertTrue(bean.get("node4") instanceof List);
-		Assert.assertTrue( ((List) bean.get("node4")).get(0) instanceof DynamicBean);
-		
-		//Ensure conversion of dynamic bean to map is working fine
-		Map<String, Object> map = bean.toSimpleMap();
-		
-		Assert.assertEquals(map.get("attr1"), "val1");
-		Assert.assertEquals(map.get("attr2"), "val2");
-		
-		Assert.assertEquals(map.get("node1"), "node-val1");
-		Assert.assertEquals(map.get("node2"), Arrays.asList("node-val2", "node-val3"));
-		
-		Assert.assertTrue(map.get("node3") instanceof Map);
-		Assert.assertEquals( ((Map) map.get("node3")).get("intVal"), "100");
-		
-		Assert.assertTrue(bean.get("node4") instanceof List);
-		Assert.assertTrue( ((List) map.get("node4")).get(0) instanceof Map);
+		Assert.assertEquals(beanJson, expectedJson);
 	}
 
 	/**

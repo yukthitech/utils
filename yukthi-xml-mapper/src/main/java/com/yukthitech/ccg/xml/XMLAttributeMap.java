@@ -916,8 +916,7 @@ public class XMLAttributeMap extends LinkedHashMap<String, XMLAttributeMap.Attri
 		if(!(key instanceof String))
 			return false;
 
-		String skey = ((String) key).toUpperCase();
-		Attribute att = super.get(skey);// this.keySet()
+		Attribute att = super.get(key);// this.keySet()
 		if(att == null)
 			return false;
 		return att.isReserved;
@@ -928,8 +927,7 @@ public class XMLAttributeMap extends LinkedHashMap<String, XMLAttributeMap.Attri
 		if(!(key instanceof String))
 			return false;
 
-		String skey = ((String) key).toUpperCase();
-		Attribute att = (Attribute) get(skey, false);
+		Attribute att = (Attribute) get(key, false);
 		if(att == null)
 			return false;
 		return att.isReserved;
