@@ -208,6 +208,36 @@ Filter loop iterations using `@for-each-condition`:
 }
 ```
 
+### Global Condition on Loop Elements
+
+Loop elements can have a global `@condition` attribute. If the condition evaluates to `false`, the entire element (including the loop) is removed from the output. This is useful when you want to conditionally include entire loop sections.
+
+```json
+{
+  "books": [
+    {
+      "@condition": "libraries.Justbooks.open",
+      "@for-each(book)": "libraries.Justbooks.books",
+      "title": "${book.title}"
+    },
+    {
+      "@condition": "libraries.Imagine.open",
+      "@for-each(book)": "libraries.Imagine.books",
+      "title": "${book.title}"
+    },
+    {
+      "@condition": "libraries.Other.open",
+      "@for-each(book)": "libraries.Other.books",
+      "title": "${book.title}"
+    }
+  ]
+}
+```
+
+In this example, if `libraries.Other.open` is `false`, the entire third loop element will be excluded from the output, and no books from the "Other" library will appear in the result.
+
+**Note:** The global `@condition` is evaluated before the loop executes. If the condition is `false`, the loop element is completely removed, regardless of the loop's content or `@for-each-condition` settings.
+
 ### Complete Example
 
 ```json

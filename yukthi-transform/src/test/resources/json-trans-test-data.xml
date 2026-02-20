@@ -106,6 +106,75 @@
 		</expectedResult>
 	</jel-test-bean>
 
+	<jel-test-bean name="conditionedLoop">
+		<context>
+			{
+				"libraries": {
+					"Justbooks": {
+						"open": true,
+						"books": [
+							{"title": "Davinci Code", "author": "Dan Brown", "type": "Science Fiction", "copyCount": 3},
+							{"title": "Sphere", "author": "Michel Crihton", "type": "Science Fiction", "copyCount": 0}
+						]
+					},
+					"Imagine": {
+						"open": true,
+						"books": [
+							{"title": "Shiva Triology", "author": "Amit Shah", "type": "Mythology Fiction", "copyCount": 10},
+							{"title": "Dark Psychology", "author": "Xyz", "type": "Psychology", "copyCount": 1}
+						]
+					},
+					"Other": {
+						"open": false,
+						"books": [
+							{"title": "Let Us C", "author": "Yeshwant Kanetkar", "type": "Technology", "copyCount": 0},
+							{"title": "Dark Psychology", "author": "Xyz", "type": "Psychology", "copyCount": 1}
+						]
+					}
+				}
+			}
+		</context>
+		<template>
+			{
+				"books": [
+					{
+						"@condition" : "libraries.Justbooks.open",
+						"@for-each(book)" : "libraries.Justbooks.books",
+						"title" : "${book.title}"
+					},
+					{
+						"@condition" : "libraries.Imagine.open",
+						"@for-each(book)" : "libraries.Imagine.books",
+						"title" : "${book.title}"
+					},
+					{
+						"@condition" : "libraries.Other.open",
+						"@for-each(book)" : "libraries.Other.books",
+						"title" : "${book.title}"
+					}
+				]
+			}
+		</template>
+		<expectedResult>
+			{
+				"books": [
+					{
+						"title" : "Davinci Code"
+					},
+					{
+						"title" : "Sphere"
+					},
+					{
+						"title" : "Shiva Triology"
+					},
+					{
+						"title" : "Dark Psychology"
+					}
+				]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
 	<jel-test-bean name="valueKey">
 		<context>
 			{

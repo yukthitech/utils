@@ -167,6 +167,36 @@ Filter iterations using `t:for-each-condition`:
 </output>
 ```
 
+### Global Condition on Loop Elements
+
+Loop elements can have a global `t:condition` attribute. If the condition evaluates to `false`, the entire element (including the loop) is removed from the output. This is useful when you want to conditionally include entire loop sections.
+
+```xml
+<output xmlns:t="/transform">
+  <books>
+    <book t:condition="toBoolean(libraries.Justbooks.open)"
+          t:for-each="libraries.Justbooks.books" 
+          t:loop-var="book">
+      <title>${book.title}</title>
+    </book>
+    <book t:condition="toBoolean(libraries.Imagine.open)"
+          t:for-each="libraries.Imagine.books" 
+          t:loop-var="book">
+      <title>${book.title}</title>
+    </book>
+    <book t:condition="toBoolean(libraries.Other.open)"
+          t:for-each="libraries.Other.books" 
+          t:loop-var="book">
+      <title>${book.title}</title>
+    </book>
+  </books>
+</output>
+```
+
+In this example, if `libraries.Other.open` is `false`, the entire third loop element will be excluded from the output, and no books from the "Other" library will appear in the result.
+
+**Note:** The global `t:condition` is evaluated before the loop executes. If the condition is `false`, the loop element is completely removed, regardless of the loop's content or `t:for-each-condition` settings.
+
 ### Multiple Elements in Loop
 
 When looping, multiple child elements are repeated:
