@@ -96,9 +96,19 @@ public class TransformState
 		generator.injectReplaceEntry(this, field, object, injectedValue);
 	}
 	
+	public Object convertIncluded(Object value)
+	{
+		return generator.convertIncluded(path, value);
+	}
+	
 	public String formatObject(Object object)
 	{
 		return generator.formatObject(object);
+	}
+	
+	public Object toSimpleObject(Object value)
+	{
+		return generator.toSimpleObject(value);
 	}
 	
 	public String getPath()

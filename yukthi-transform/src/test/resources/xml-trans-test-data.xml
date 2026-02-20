@@ -364,246 +364,273 @@
 			</output>
 		]]></expectedResult>
 	</jel-test-bean>
+	
+	<!--   =============================================================  -->
 
-	<!-- 
-	<jel-test-bean name="jsonExpressions">
-		<context>
-			{
-				"libraries": {
-					"Justbooks": {"name": "Justbooks", "open": true},
-					"Imagine": {"name": "Imagine", "open": false},
-					"testLib": {}
-				}
-			}
-		</context>
+	<!--
+	<jel-test-bean name="jsonExpressions" enabled="true">
+		<context><![CDATA[
+			<libraries>
+				<Justbooks name="Justbooks" open="true"/>
+				<Imagine name="Imagine" open="false"/>
+				<testLib/>
+			</libraries>
+		]]></context>
 		
-		<template>
-			{
-				"result": {
-					"@value": {
-						"someVal": 1,
-						"libNames": "@xpathMulti: /libraries/Justbooks//name"
-					},
-					
-					"@transform": "@fmarker: toJson(thisValue)"
-					
-				}
-			}
-		</template>
-		<expectedResult>
-			{
-				"result": "{\"someVal\":1,\"libNames\":[\"Justbooks\"]}"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<result t:transform="@fmarker: toJson(thisValue)">
+					<someVal>1</someVal>
+					<libNames t:value="@xpathMulti: /libraries/Justbooks//name"/>
+				</result>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<result>{"someVal":1,"libNames":["Justbooks"]}</result>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
+	-->
 
 	<jel-test-bean name="resLoadingWithExpr">
-		<context>
-			{
-				"ckey1": "cval"
-			}
-		</context>
+		<context><![CDATA[
+			<ckey1>cval</ckey1>
+		]]></context>
 		
-		<template>
-			{
-				"result": {
-					"@resource": "/res-file.txt",
-					"@resParams": {
-						"key1": "val1"
-					}
-				}
-			}
-		</template>
-		<expectedResult>
-			{
-				"result": "This is simple content with param-value=val1 and context-value=cval"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<result>
+					<t:resource path="/res-file.txt">
+						<t:params>
+							<key1>val1</key1>
+						</t:params>
+					</t:resource>
+				</result>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<result>This is simple content with param-value=val1 and context-value=cval</result>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="resLoadingNoExpr">
-		<context>
-			{
-				"ckey1": "cval"
-			}
-		</context>
+		<context><![CDATA[
+			<ckey1>cval</ckey1>
+		]]></context>
 
-		<template>
-			{
-				"result": {
-					"@resource": "/res-file.txt",
-					"@expressions": false,
-					"@resParams": {
-						"key1": "val1"
-					}
-				}
-			}
-		</template>
-		<expectedResult>
-			{
-				"result": "This is simple content with param-value=${resParams.key1} and context-value=${ckey1}"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<result>
+					<t:resource path="/res-file.txt" expressions="false">
+						<t:params>
+							<key1>val1</key1>
+						</t:params>
+					</t:resource>
+				</result>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<result>This is simple content with param-value=${resParams.key1} and context-value=${ckey1}</result>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="includeResourceInMap">
-		<context>
-			{
-				"ckey1": "cval1",
-				"ckey2": "cval2"
-			}
-		</context>
+		<context><![CDATA[
+			<data>
+				<ckey1>cval1</ckey1>
+				<ckey2>cval2</ckey2>
+			</data>
+		]]></context>
 
-		<template>
-			{
-				"key1": "@fmarker: ckey1",
-				"extra": {"@includeResource": "/include-res.json"},
-				"key2": "@fmarker: ckey2"
-			}
-		</template>
-		<expectedResult>
-			{
-				"key1": "cval1",
-				"extra": {
-					"skey1": "cval1",
-					"arr": [1, 2, 3, 4]
-				},
-				"key2": "cval2"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<key1>@fmarker: data.ckey1</key1>
+				<extra>
+					<t:includeResource path="/include-res.xml"/>
+				</extra>
+				<key2>@fmarker: data.ckey2</key2>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<key1>cval1</key1>
+				<extra skey1="cval1">
+					<arr>1</arr>
+					<arr>2</arr>
+					<arr>3</arr>
+				</extra>
+				<key2>cval2</key2>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="includeWithReplace">
-		<context>
-			{
-				"ckey1": "cval1",
-				"ckey2": "cval2"
-			}
-		</context>
+		<context><![CDATA[
+			<data>
+				<ckey1>cval1</ckey1>
+				<ckey2>cval2</ckey2>
+			</data>
+		]]></context>
 
-		<template>
-			{
-				"key1": "@fmarker: ckey1",
-				"@replace(extra)": {"@includeResource": "/include-res.json"},
-				"key2": "@fmarker: ckey2"
-			}
-		</template>
-		<expectedResult>
-			{
-				"key1": "cval1",
-				"skey1": "cval1",
-				"arr": [1, 2, 3, 4],
-				"key2": "cval2"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<key1>@fmarker: data.ckey1</key1>
+				<t:replace>
+					<t:includeResource path="/include-res.xml"/>
+				</t:replace>
+				<key2>@fmarker: data.ckey2</key2>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output skey1="cval1">
+				<key1>cval1</key1>
+				<arr>1</arr>
+				<arr>2</arr>
+				<arr>3</arr>
+				<key2>cval2</key2>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="includeWithReplaceAndCond">
-		<context>
-			{
-				"ckey1": "cval1",
-				"ckey2": "cval2"
-			}
-		</context>
+		<context><![CDATA[
+			<data>
+				<ckey1>cval1</ckey1>
+				<ckey2>cval2</ckey2>
+			</data>
+		]]></context>
 
-		<template>
-			{
-				"key1": "@fmarker: ckey1",
-				"@replace(wrongCond)": {
-					"@condition": "ckey1 == 'diffValue'",
-					"@includeResource": "/include-res.json"
-				},
-				"@replace(rightCond)": {
-					"@condition": "ckey1 == 'cval1'",
-					"@includeResource": "/include-res2.json",
-					"@params": {
-						"paramKey1": "paramValue"
-					}
-				},
-				"key2": "@fmarker: ckey2"
-			}
-		</template>
-		<expectedResult>
-			{
-				"key1": "cval1",
-				"skey2": "fromRes2",
-				"arr2": [1, 2, 3, 4],
-				"pkey": "paramValue",
-				"key2": "cval2"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<key1>@fmarker: data.ckey1</key1>
+				<t:replace t:condition="data.ckey1 == 'diffValue'">
+					<t:includeResource path="/include-res.xml"/>
+				</t:replace>
+				<t:replace t:condition="data.ckey1 == 'cval1'">
+					<t:includeResource path="/include-res2.xml">
+						<t:params>
+							<paramKey1>paramValue</paramKey1>
+						</t:params>
+					</t:includeResource>
+				</t:replace>
+				<key2>@fmarker: data.ckey2</key2>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<key1>cval1</key1>
+				<skey2>fromRes2</skey2>
+				<arr2>1</arr2>
+				<arr2>2</arr2>
+				<arr2>3</arr2>
+				<pkey>paramValue</pkey>
+				<key2>cval2</key2>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="includeResourceInArray">
-		<context>
-			{
-				"ckey1": "cval1",
-				"ckey2": "cval2"
-			}
-		</context>
+		<context><![CDATA[
+			<data>
+				<ckey1>cval1</ckey1>
+				<ckey2>cval2</ckey2>
+			</data>
+		]]></context>
 
-		<template>
-			["1", {"@includeResource": "/include-res.json"}, {"k1": "v1"}]
-		</template>
-		<expectedResult>
-			["1", {"skey1": "cval1", "arr": [1, 2, 3, 4]}, {"k1": "v1"}]
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<item>1</item>
+				<item>
+					<t:includeResource path="/include-res.xml"/>
+				</item>
+				<item>
+					<k1>v1</k1>
+				</item>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<item>1</item>
+				<item>
+					<skey1>cval1</skey1>
+					<arr>1</arr>
+					<arr>2</arr>
+					<arr>3</arr>
+				</item>
+				<item>
+					<k1>v1</k1>
+				</item>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="includeFile">
-		<context>
-			{
-				"ckey1": "cval1",
-				"ckey2": "cval2"
-			}
-		</context>
+		<context><![CDATA[
+			<data>
+				<ckey1>cval1</ckey1>
+				<ckey2>cval2</ckey2>
+			</data>
+		]]></context>
 
-		<template>
-			{
-				"key1": "@fmarker: ckey1",
-				"extra": {"@includeFile": "./src/test/resources/include-file.json"},
-				"key2": "@fmarker: ckey2"
-			}
-		</template>
-		<expectedResult>
-			{
-				"key1": "cval1",
-				"extra": ["cval1", [1, 2, 3, 4]],
-				"key2": "cval2"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<key1>@fmarker: data.ckey1</key1>
+				<extra>
+					<t:includeFile path="./src/test/resources/include-file.xml"/>
+				</extra>
+				<key2>@fmarker: data.ckey2</key2>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<key1>cval1</key1>
+				<extra>
+					<item>cval1</item>
+					<item>1</item>
+					<item>2</item>
+				</extra>
+				<key2>cval2</key2>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
 
 	<jel-test-bean name="includeRecursively">
-		<context>
-			{
-				"ckey1": "cval1"
-			}
-		</context>
+		<context><![CDATA[
+			<ckey1>cval1</ckey1>
+		]]></context>
 
-		<template>
-			{
-				"mainMap": {
-					"@includeResource": "/include-recursive.json",
-					"@params": {"value": "@fmarker: 3"}
-				},
-				"ckey1": "@fmarker: ckey1"
-			}
-		</template>
-		<expectedResult>
-			{
-				"mainMap": {
-					"smap": {
-						"smap": {"finalValue": 2},
-						"finalValue": 4
-					},
-					"finalValue": 6
-				},
-				"ckey1": "cval1"
-			}
-		</expectedResult>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<mainMap>
+					<t:includeResource path="/include-recursive.xml">
+						<t:params>
+							<value>@fmarker: 3</value>
+						</t:params>
+					</t:includeResource>
+				</mainMap>
+				<ckey1>@fmarker: ckey1</ckey1>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<mainMap>
+					<smap>
+						<smap>
+							<finalValue>2</finalValue>
+						</smap>
+						<finalValue>4</finalValue>
+					</smap>
+					<finalValue>6</finalValue>
+				</mainMap>
+				<ckey1>cval1</ckey1>
+			</output>
+		]]></expectedResult>
 	</jel-test-bean>
-	-->
 
 	<jel-test-bean name="switchBasic">
 		<context><![CDATA[

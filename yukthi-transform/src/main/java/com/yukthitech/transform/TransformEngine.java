@@ -102,7 +102,7 @@ public class TransformEngine
 		TransformState transformState = new TransformState(template);
 		
 		//process and return the object
-		return processObject(template.getRoot(), toJsonExprContext(context), transformState);
+		return processObject(template.getRoot(), toTransformContext(context), transformState);
 	}
 	
 	public String processAsString(TransformTemplate template, Object context)
@@ -110,12 +110,12 @@ public class TransformEngine
 		TransformState transformState = new TransformState(template);
 		
 		//process and return the object
-		Object res = processObject(template.getRoot(), toJsonExprContext(context), transformState);
+		Object res = processObject(template.getRoot(), toTransformContext(context), transformState);
 		return transformState.formatObject(res);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private ITransformContext toJsonExprContext(Object context)
+	private ITransformContext toTransformContext(Object context)
 	{
 		if(context instanceof ITransformContext)
 		{

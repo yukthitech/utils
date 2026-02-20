@@ -54,6 +54,8 @@ public class TestXmlTransformation
 		freeMarkerEngine.loadClass(TestMethods.class);
 		
 		transformEngine.setFreeMarkerEngine(freeMarkerEngine);
+		
+		parserHandler.setExpressionEnabled(false);
 	}
 	
 	private Object[][] loadXmlFile(String file)

@@ -1,0 +1,12 @@
+<data xmlns:t="/transform">
+	<t:set name="finalVal">@fmarker: toInt(params.value) * 2</t:set>
+	<smap t:condition="toInt(params.value) gt 1">
+		<t:includeResource path="/include-recursive.xml">
+			<t:params>
+				<value>@fmarker: toInt(params.value) - 1</value>
+			</t:params>
+		</t:includeResource>
+	</smap>
+	
+	<finalValue>@fmarker: finalVal</finalValue>
+</data>

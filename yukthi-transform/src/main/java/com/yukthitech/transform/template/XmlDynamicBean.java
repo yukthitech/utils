@@ -15,11 +15,14 @@
  */
 package com.yukthitech.transform.template;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
@@ -43,11 +46,11 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	
 	private Map<String, String> reserveAttributes = new LinkedHashMap<String, String>();
 	
-	private List<XmlDynamicBean> reserveNodes = new LinkedList<>();
-
 	private List<XmlDynamicBean> nodes = new LinkedList<>();
 	
 	private String textContent;
+	
+	private boolean reserved;
 
 	public XmlDynamicBean(String name)
 	{
@@ -57,6 +60,11 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	public String getName()
 	{
 		return name;
+	}
+	
+	public boolean isReserved()
+	{
+		return reserved;
 	}
 
 	public void setReserveAttr(String propName, String value)
@@ -77,7 +85,10 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 			throw new InvalidStateException("Both child-nodes and text content is not allowed");
 		}
 		
-		reserveNodes.add((XmlDynamicBean) obj);
+		XmlDynamicBean node = (XmlDynamicBean) obj;
+		node.reserved = true;
+		
+		nodes.add(node);
 	}
 	
 	@Override
@@ -128,15 +139,15 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 		return nodes;
 	}
 	
-	public List<XmlDynamicBean> getReserveNodes()
-	{
-		return reserveNodes;
-	}
-	
 	public XmlDynamicBean getReserveNode(String name)
 	{
-		for(XmlDynamicBean node : reserveNodes)
+		for(XmlDynamicBean node : nodes)
 		{
+			if(!node.reserved)
+			{
+				continue;
+			}
+			
 			if(name.equals(node.getName()))
 			{
 				return node;
@@ -171,7 +182,7 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 			return;
 		}
 		
-		if(!nodes.isEmpty() || !reserveNodes.isEmpty())
+		if(!nodes.isEmpty())
 		{
 			throw new InvalidStateException("Both child-nodes and text content is not allowed");
 		}
@@ -193,4 +204,55 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	{
 		return StringUtils.isNotBlank(textContent);
 	}
+	
+	/**
+	 * Converts dynamic bean into simple map.
+	 * @return converted simple map
+	 */
+	@SuppressWarnings("unchecked")
+	public Object toSimpleMap()
+	{
+		if(MapUtils.isEmpty(attributes) && StringUtils.isNotBlank(textContent))
+		{
+			return textContent;
+		}
+		
+		Map<String, Object> finalMap = new HashMap<String, Object>();
+		
+		if(attributes != null)
+		{
+			finalMap.putAll(attributes);
+		}
+		
+		for(XmlDynamicBean subnode : this.nodes)
+		{
+			if(subnode.isTextNode())
+			{
+				finalMap.put(subnode.getName(), subnode.getTextContent());
+				continue;
+			}
+
+			Object subnodeValue = subnode.toSimpleMap();
+			Object existingValue = finalMap.get(subnode.getName());
+			
+			if(existingValue != null)
+			{
+				if(existingValue instanceof List)
+				{
+					List<Object> existingList = (List<Object>) existingValue;
+					existingList.add(subnodeValue);
+				}
+				else
+				{
+					List<Object> newList = new ArrayList<>();
+					newList.add(existingValue);
+					newList.add(subnodeValue);
+					finalMap.put(subnode.getName(), newList);
+				}
+			}
+		}
+		
+		return finalMap;
+	}
+
 }

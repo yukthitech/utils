@@ -119,7 +119,8 @@ public class Conversions
 		//process expression in params map
 		if(paramsObj != null)
 		{
-			paramsMap = (Map<String, Object>) curEngine.processObject(paramsObj, context, transformState.forDynField("params"));
+			Object processRes = curEngine.processObject(paramsObj, context, transformState.forDynField("params"));
+			paramsMap = (Map<String, Object>) transformState.toSimpleObject(processRes);
 		}
 		
 		TransformTemplate content = include.getContent();
@@ -127,6 +128,7 @@ public class Conversions
 		try
 		{
 			Object res = curEngine.process(content, new MapExprContext(context, "params", paramsMap));
+			res = transformState.convertIncluded(res);
 			value.setValue(res);
 		}catch(Exception ex)
 		{

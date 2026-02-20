@@ -1,7 +1,5 @@
 package com.yukthitech.transform.template;
 
-import static com.yukthitech.transform.ITransformConstants.OBJECT_MAPPER;
-
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +24,9 @@ import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
 import com.yukthitech.transform.template.TransformTemplate.Switch;
 import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
-import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
+import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class XmlTemplateFactory implements ITemplateFactory
@@ -178,33 +176,16 @@ public class XmlTemplateFactory implements ITemplateFactory
         return new TransformTemplate(XmlGenerator.class, root);
     }
     
-    private void parseTemplateTo(String jsonContent, TransformTemplate template)
+    private void parseTemplateTo(String xmlContent, TransformTemplate template)
     {
-        Object jsonObj = null;
-        
-        try
-        {
-            jsonObj = OBJECT_MAPPER.readValue(jsonContent, Object.class);
-        } catch(Exception ex)
-        {
-            throw new InvalidStateException("An error occurred while parsing xml template.", ex);
-        }
+    	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
+    			new ByteArrayInputStream(xmlContent.getBytes()), 
+    			parserHandler);
 
-        Object root = parseObject(jsonObj, "/");
+        Object root = parseObject(dynBean, "/");
         template.setRoot(root);
     }
     
-    public String formatObject(Object object)
-    {
-    	try
-    	{
-    		return OBJECT_MAPPER.writeValueAsString(object);
-        } catch(Exception ex)
-        {
-            throw new InvalidStateException("An error occurred while writing json value.", ex);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private Object parseObject(Object object, String path)
     {
@@ -285,6 +266,44 @@ public class XmlTemplateFactory implements ITemplateFactory
         
         return matcher.group(2);
     }
+
+    private boolean processReserveText(String name, String value, String path, TransformObject transformObject)
+    {
+        if(KEY_CONDITION.equals(name))
+        {
+            transformObject.setCondition(value);
+            return true;
+        }
+
+        if(KEY_FALSE_VALUE.equals(name))
+        {
+            Object falseValue = parseObject(value, path + RES_PATH_SEP + name);
+            transformObject.setFalseValue(falseValue);
+            return true;
+        }
+
+        if(KEY_VALUE.equals(name))
+        {
+            Object valueObj = parseObject(value, path + RES_PATH_SEP + name);
+            transformObject.setValue(valueObj);
+            return true;
+        }
+
+        if(TRANSFORM.equals(name)
+            && StringUtils.isNotBlank(value))
+        {
+            transformObject.setTransformExpression(parseExpression(value, path + RES_PATH_SEP + name, false));
+            return true;
+        }
+        
+        // Attributes which are handled in special way, ignore those reserve attr
+        if(SUB_ATTR.contains(name))
+        {
+            return true;
+        }
+
+        return false;
+    }
     
     private void processReserveAttributes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
     {
@@ -292,196 +311,173 @@ public class XmlTemplateFactory implements ITemplateFactory
 
         for(Map.Entry<String, String> entry : reserveAttr.entrySet())
         {
-            if(KEY_CONDITION.equals(entry.getKey()))
-            {
-                transformObject.setCondition(entry.getValue().toString());
-                continue;
-            }
-
             if(FOR_EACH_EXPR.equals(entry.getKey()))
             {
                 String loopVariable = reserveAttr.get(FOR_EACH_LOOP_VAR);
                 Object listExpression = entry.getValue();
                 String loopCondition = reserveAttr.get(KEY_FOR_EACH_CONDITION);
-
+    
                 transformObject.setForEachLoop(new ForEachLoop(listExpression, loopVariable, loopCondition));
                 continue;
             }
-
-            if(KEY_FALSE_VALUE.equals(entry.getKey()))
+    
+            if(processReserveText(entry.getKey(), entry.getValue(), path, transformObject))
             {
-            	Object falseValue = parseObject(entry.getValue(), path + RES_PATH_SEP + entry.getKey());
-                transformObject.setFalseValue(falseValue);
                 continue;
             }
-
-            if(KEY_VALUE.equals(entry.getKey()))
-            {
-            	Object valueObj = parseObject(entry.getValue(), path + RES_PATH_SEP + entry.getKey());
-                transformObject.setValue(valueObj);
-                continue;
-            }
-
-            if(TRANSFORM.equals(entry.getKey())
-                && StringUtils.isNotBlank((String) entry.getValue()))
-            {
-                transformObject.setTransformExpression(parseExpression((String) entry.getValue(), path + RES_PATH_SEP + entry.getKey(), false));
-                continue;
-            }
-            
-            // Attributes which are handled in special way, ignore those reserve attr
-            if(SUB_ATTR.contains(entry.getKey()))
-            {
-            	continue;
-            }
-
+        
             throw new InvalidStateException("Invalid transform attribute '{}' specified at path: {}", entry.getKey(), path);
         }
     }
 
-    private void processReserveNodes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    private void processReserveNode(XmlDynamicBean parentBean, XmlDynamicBean reservedBean, String path, TransformObject transformObject)
     {
-        for(XmlDynamicBean resBean : dynBean.getReserveNodes())
+        if(reservedBean.isTextNode())
         {
-            if(INCLUDE_RES.equals(resBean.getName()) || INCLUDE_FILE.equals(resBean.getName()))
+            if(processReserveText(reservedBean.getName(), reservedBean.getTextContent(), path, transformObject))
             {
-                transformObject.setInclude(parseInclude(resBean, path + PATH_SEP + resBean.getName()));
-                continue;
+                return;
             }
-    		
-            if(RES.equals(resBean.getName()))
-            {
-                transformObject.setResource(parseResource(resBean, path + PATH_SEP + resBean.getName()));
-                continue;
-            }
-            
-            if(SWITCH.equals(resBean.getName()))
-            {
-            	// Switch should have child nodes as cases
-            	List<XmlDynamicBean> caseNodes = resBean.getReserveNodes();
-            	
-            	// Validation: At least one case is mandatory
-            	if(caseNodes.isEmpty())
-            	{
-            		throw new TransformException(path + PATH_SEP + SWITCH, 
-            			"t:switch must have at least one t:case element");
-            	}
-            	
-            	List<SwitchCase> parsedCases = new ArrayList<>();
-            	boolean defaultCaseFound = false;
-            	
-            	for(int i = 0; i < caseNodes.size(); i++)
-            	{
-            		XmlDynamicBean caseNode = caseNodes.get(i);
-            		
-            		// Validation: Case nodes must be named "case"
-            		if(!CASE.equals(caseNode.getName()))
-            		{
-            			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
-            				"Switch case element must be named 't:case', but found: {}", caseNode.getName());
-            		}
-            		
-            		Object condition = caseNode.getReserveValue(KEY_CONDITION);
-            		
-            		if(condition instanceof XmlDynamicBean)
-            		{
-            			condition = ((XmlDynamicBean) condition).getTextContent();
-            			
-            			if(condition == null)
-            			{
-            				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
-                					"Encountered non-text condition node.");
-            			}
-            		}
+        }
 
-                    // Validation: Default case (no condition) should be at the end only
-            		if(condition == null)
-            		{
-            			if(defaultCaseFound)
-            			{
-            				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
-            					"Multiple default cases (cases without t:condition) found in t:switch. Only one default case is allowed and it must be at the end");
-            			}
-            			
-            			// Check if this is not the last case
-            			if(i < caseNodes.size() - 1)
-            			{
-            				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
-            					"Default case (case without t:condition) must be the last case in t:switch");
-            			}
-            			
-            			defaultCaseFound = true;
-            		}
-                    else if(!(condition instanceof String))
-                    {
-                        throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
-                            "Switch case condition must be a string, but found: {}", condition.getClass().getName());
-                    }
-            		
-            		Object value = caseNode.getReserveValue(KEY_VALUE);
-            		
-            		// Check for t:value attribute - t:value is mandatory
-            		if(value != null)
-            		{
-            			value = parseObject(value, 
-            				path + PATH_SEP + SWITCH + "[" + i + "]" + RES_PATH_SEP + KEY_VALUE);
-            		}
-                    else
-            		{
-            			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
-            				"Switch case must have t:value attribute specified");
-            		}
-            		
-            		parsedCases.add(new SwitchCase((String) condition, value));
-            	}
-            	
-            	transformObject.setSwitchStatement(new Switch(parsedCases));
-                continue;
-            }
-            
-            // Check if the entry represents a set attr entry
-            if(SET.equals(resBean.getName()))
-            {
-            	String attributeName = resBean.getAttributes().get("name");
-            	
-            	// if set is being done with text body
-            	if(resBean.getTextContent() != null)
-            	{
-            		Object expression = parseExpression(resBean.getTextContent(), path + ">" + resBean.getName() + "[" + attributeName + "]", false);
-            		
-                    transformObject.addField(new TransformObjectField(
-                    		resBean.getName(), 
-                            null,
-                            attributeName, 
-                            expression,
-                            false
-                        ).setType(FieldType.TEXT_CONTENT));
-                    continue;
-            	}
+        if(INCLUDE_RES.equals(reservedBean.getName()) || INCLUDE_FILE.equals(reservedBean.getName()))
+        {
+            transformObject.setInclude(parseInclude(reservedBean, path + PATH_SEP + reservedBean.getName()));
+            return;
+        }
+		
+        if(RES.equals(reservedBean.getName()))
+        {
+            transformObject.setResource(parseResource(reservedBean, path + PATH_SEP + reservedBean.getName()));
+            return;
+        }
+        
+        if(SWITCH.equals(reservedBean.getName()))
+        {
+        	// Switch should have child nodes as cases
+        	List<XmlDynamicBean> caseNodes = reservedBean.getNodes();
+        	
+        	// Validation: At least one case is mandatory
+        	if(caseNodes.isEmpty())
+        	{
+        		throw new TransformException(path + PATH_SEP + SWITCH, 
+        			"t:switch must have at least one t:case element");
+        	}
+        	
+        	List<SwitchCase> parsedCases = new ArrayList<>();
+        	boolean defaultCaseFound = false;
+        	
+        	for(int i = 0; i < caseNodes.size(); i++)
+        	{
+        		XmlDynamicBean caseNode = caseNodes.get(i);
+        		
+        		// Validation: Case nodes must be named "case"
+        		if(!CASE.equals(caseNode.getName()))
+        		{
+        			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        				"Switch case element must be named 't:case', but found: {}", caseNode.getName());
+        		}
+        		
+        		Object condition = caseNode.getReserveValue(KEY_CONDITION);
+        		
+        		if(condition instanceof XmlDynamicBean)
+        		{
+        			condition = ((XmlDynamicBean) condition).getTextContent();
+        			
+        			if(condition == null)
+        			{
+        				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+            					"Encountered non-text condition node.");
+        			}
+        		}
 
-            	// if set is being done with sub xml content
+                // Validation: Default case (no condition) should be at the end only
+        		if(condition == null)
+        		{
+        			if(defaultCaseFound)
+        			{
+        				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        					"Multiple default cases (cases without t:condition) found in t:switch. Only one default case is allowed and it must be at the end");
+        			}
+        			
+        			// Check if this is not the last case
+        			if(i < caseNodes.size() - 1)
+        			{
+        				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        					"Default case (case without t:condition) must be the last case in t:switch");
+        			}
+        			
+        			defaultCaseFound = true;
+        		}
+                else if(!(condition instanceof String))
+                {
+                    throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+                        "Switch case condition must be a string, but found: {}", condition.getClass().getName());
+                }
+        		
+        		Object value = caseNode.getReserveValue(KEY_VALUE);
+        		
+        		// Check for t:value attribute - t:value is mandatory
+        		if(value != null)
+        		{
+        			value = parseObject(value, 
+        				path + PATH_SEP + SWITCH + "[" + i + "]" + RES_PATH_SEP + KEY_VALUE);
+        		}
+                else
+        		{
+        			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        				"Switch case must have t:value attribute specified");
+        		}
+        		
+        		parsedCases.add(new SwitchCase((String) condition, value));
+        	}
+        	
+        	transformObject.setSwitchStatement(new Switch(parsedCases));
+        	return;
+        }
+        
+        // Check if the entry represents a set attr entry
+        if(SET.equals(reservedBean.getName()))
+        {
+        	String attributeName = reservedBean.getAttributes().get("name");
+        	
+        	// if set is being done with text body
+        	if(reservedBean.getTextContent() != null)
+        	{
+        		Object expression = parseExpression(reservedBean.getTextContent(), path + ">" + reservedBean.getName() + "[" + attributeName + "]", false);
+        		
                 transformObject.addField(new TransformObjectField(
-                		resBean.getName(), 
+                		reservedBean.getName(), 
                         null,
                         attributeName, 
-                        parseObject(resBean, path + ">" + resBean.getName() + "[" + attributeName + "]"),
+                        expression,
                         false
-                    ));
-                continue;
-            }
+                    ).setType(FieldType.TEXT_CONTENT));
+                return;
+        	}
 
-            // check if this is replaced entry
-            if(REPLACE.equals(resBean.getName()))
-            {
-                transformObject.addField(new TransformObjectField(
-                		resBean.getName(), 
-                        null,
-                        null, 
-                        parseObject(resBean, path + ">" + resBean.getName()),
-                        true
-                    ));
-                continue;
-            }
+        	// if set is being done with sub xml content
+            transformObject.addField(new TransformObjectField(
+            		reservedBean.getName(), 
+                    null,
+                    attributeName, 
+                    parseObject(reservedBean, path + ">" + reservedBean.getName() + "[" + attributeName + "]"),
+                    false
+                ));
+            return;
+        }
+
+        // check if this is replaced entry
+        if(REPLACE.equals(reservedBean.getName()))
+        {
+            transformObject.addField(new TransformObjectField(
+            		reservedBean.getName(), 
+                    null,
+                    null, 
+                    parseObject(reservedBean, path + ">" + reservedBean.getName()),
+                    true
+                ));
+            return;
         }
     }
 
@@ -501,26 +497,23 @@ public class XmlTemplateFactory implements ITemplateFactory
         }
     }
 
-    private void processNodes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    private void processNode(XmlDynamicBean parentBean, XmlDynamicBean child, String path, TransformObject transformObject)
     {
-        for(XmlDynamicBean bean : dynBean.getNodes())
+		Expression keyExpression = null;
+		String keyExpressionStr = child.getReserveAttributes().get(NAME_EXPRESSION);
+		
+        if(StringUtils.isNotBlank(keyExpressionStr))
         {
-    		Expression keyExpression = null;
-    		String keyExpressionStr = bean.getReserveAttributes().get(NAME_EXPRESSION);
-    		
-            if(StringUtils.isNotBlank(keyExpressionStr))
-            {
-                keyExpression = parseExpression(keyExpressionStr, path + RES_PATH_SEP + NAME_EXPRESSION, true);
-            }
-            
-            transformObject.addField(new TransformObjectField(
-            		bean.getName(), 
-                    keyExpression,
-                    null, 
-                    parseObject(bean, path + PATH_SEP + bean.getName()),
-                    false
-                ).setType(FieldType.NODE));
+            keyExpression = parseExpression(keyExpressionStr, path + RES_PATH_SEP + NAME_EXPRESSION, true);
         }
+        
+        transformObject.addField(new TransformObjectField(
+        		child.getName(), 
+                keyExpression,
+                null, 
+                parseObject(child, path + PATH_SEP + child.getName()),
+                false
+            ).setType(FieldType.NODE));
     }
 
     private Object parseDynBean(XmlDynamicBean dynBean, String path)
@@ -528,9 +521,18 @@ public class XmlTemplateFactory implements ITemplateFactory
         TransformObject transformObject = new TransformObject(dynBean.getName(), path);
         
         processReserveAttributes(dynBean, path, transformObject);
-        processReserveNodes(dynBean, path, transformObject);
         processAttributes(dynBean, path, transformObject);
-        processNodes(dynBean, path, transformObject);
+        
+        for(XmlDynamicBean child : dynBean.getNodes())
+        {
+        	if(child.isReserved())
+        	{
+        		processReserveNode(dynBean, child, path, transformObject);
+        		continue;
+        	}
+        	
+        	processNode(dynBean, child, path, transformObject);
+        }
         
         if(StringUtils.isNotBlank(dynBean.getTextContent()))
         {
@@ -616,14 +618,22 @@ public class XmlTemplateFactory implements ITemplateFactory
 			}
 		}
 		
-		// first template is kept on cache (before parsing) to avoid
-		//   never ending recursion in case of recursive templates
-		subTemplate = new TransformTemplate(XmlGenerator.class, null);
-		includeCache.put(key, subTemplate);
-		
-		parseTemplateTo(content, subTemplate);
-		
-		return subTemplate;
+		try
+		{
+			// first template is kept on cache (before parsing) to avoid
+			//   never ending recursion in case of recursive templates
+			subTemplate = new TransformTemplate(XmlGenerator.class, null);
+			includeCache.put(key, subTemplate);
+			
+			parseTemplateTo(content, subTemplate);
+			
+			return subTemplate;
+		}catch(Exception ex)
+		{
+			throw new TransformException(path, "Failed to parse xml {}: {}", 
+					isResource ? "resource" : "file", 
+					path, ex); 
+		}
     }
 
 	private Include parseInclude(XmlDynamicBean dynamicBean, String path)
@@ -661,11 +671,11 @@ public class XmlTemplateFactory implements ITemplateFactory
         String transformExpression = dynamicBean.getAttributes().get(TRANSFORM);
 
         XmlDynamicBean paramsNode = (XmlDynamicBean) dynamicBean.getReserveNode(PARAMS);
-		TransformObject paramsObj = null;
+		Object paramsObj = null;
 
 		if(paramsNode != null)
 		{
-			paramsObj = (TransformObject) parseObject(paramsNode, path + PATH_SEP + PARAMS);
+			paramsObj = paramsNode.toSimpleMap();
 		}
 
         return new Resource(

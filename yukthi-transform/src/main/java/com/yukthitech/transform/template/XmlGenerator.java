@@ -1,21 +1,18 @@
 package com.yukthitech.transform.template;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
@@ -219,37 +216,134 @@ public class XmlGenerator implements IGenerator
 			injectedElem = clonedElem;
 		}
 		
+		NamedNodeMap attrMap = injectedElem.getAttributes();
+		
+		if(attrMap != null)
+		{
+			int count = attrMap.getLength();
+			
+			for(int i = 0; i < count; i++)
+			{
+				element.setAttribute(attrMap.item(i).getNodeName(), 
+						attrMap.item(i).getNodeValue());
+			}			
+		}
+		
 		NodeList nodeList = injectedElem.getChildNodes();
 		int nodeCount = nodeList.getLength();
 		
 		for(int i = 0; i < nodeCount; i++)
 		{
-			element.appendChild(nodeList.item(i));
+			// As and when element from nodeList is added to element
+			//    it is removed from nodeList. So always zero index element index is accessed
+
+			if(nodeList.item(0) == null)
+			{
+				continue;
+			}
+			
+			element.appendChild(nodeList.item(0));
 		}
+	}
+	
+	@Override
+	public Object convertIncluded(String path, Object value)
+	{
+		if(value == null)
+		{
+			return null;
+		}
+		
+		Element element = (Element) value;
+		
+		if(element.getOwnerDocument() != document)
+		{
+			Element clonedElem = (Element) document.importNode(element, true);
+			return clonedElem;
+		}
+		
+		return element;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Object toSimpleObjectInternal(Element element)
+	{
+		if(element == null)
+		{
+			return null;
+		}
+
+		NamedNodeMap attrMap = element.getAttributes();
+		int attrCount = 0;
+		
+		Map<String, Object> res = new LinkedHashMap<String, Object>();
+		
+		if(attrMap != null)
+		{
+			attrCount = attrMap.getLength();
+			
+			for(int i = 0; i < attrCount; i++)
+			{
+				res.put(attrMap.item(i).getNodeName(), 
+						attrMap.item(i).getNodeValue());
+			}			
+		}
+		
+		NodeList nodeList = element.getChildNodes();
+		int nodeCount = nodeList.getLength();
+		
+		for(int i = 0; i < nodeCount; i++)
+		{
+			Node node = nodeList.item(i);
+			
+			// if text is found, assume this is text node and return text as value
+			if(node instanceof Text)
+			{
+				String content = ((Text) node).getTextContent();
+				
+				if(content.trim().length() > 0)
+				{
+					return content;
+				}
+			}
+			
+			Element childElem = (Element) node;
+			Object convertedVal = toSimpleObjectInternal(childElem);
+			Object existingVal = res.get(childElem.getTagName());
+			
+			if(existingVal != null)
+			{
+				if(existingVal instanceof List)
+				{
+					List<Object> existingList = (List<Object>) existingVal;
+					existingList.add(convertedVal);
+				}
+				else
+				{
+					List<Object> newList = new ArrayList<>();
+					newList.add(existingVal);
+					newList.add(convertedVal);
+					res.put(childElem.getTagName(), newList);
+				}
+			}
+			else
+			{
+				res.put(childElem.getTagName(), convertedVal);
+			}
+		}
+		
+		return res;
+	}
+	
+	@Override
+	public Object toSimpleObject(Object value)
+	{
+		return toSimpleObjectInternal((Element) value);
 	}
 
     public String formatObject(Object object)
     {
-		try
-		{
-			Element element = (Element) object;
-
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-			// Prepare the source and result
-			DOMSource source = new DOMSource(element);
-			StringWriter writer = new StringWriter();
-			StreamResult result = new StreamResult(writer);
-
-			// Perform the transformation
-			transformer.transform(source, result);
-
-			return writer.toString();
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while converting to xml string", ex);
-		}
+		Element element = (Element) object;
+		return TransformUtils.toXmlString(element);
 	}
 }

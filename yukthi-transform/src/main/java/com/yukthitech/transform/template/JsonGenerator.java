@@ -53,6 +53,19 @@ public class JsonGenerator implements IGenerator
 		Map<String, Object> injectedValueMap = (Map<String, Object>) injectedValue;
 		objMap.putAll(injectedValueMap);
 	}
+	
+	@Override
+	public Object convertIncluded(String path, Object value)
+	{
+		// no conversion needed on included object
+		return value;
+	}
+	
+	@Override
+	public Object toSimpleObject(Object value)
+	{
+		return value;
+	}
 
     public String formatObject(Object object)
     {
