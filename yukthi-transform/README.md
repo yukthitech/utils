@@ -1,353 +1,456 @@
-# Json Expression Language (JEL)
+# Yukthi-Transform Library
 
-JEL is a transformation/templating engine which can transform object data (from multiple sources) into different form based on template. Templates are also json files with support for basic templating units like - conditions, loops, variable, easy access etc.
+**yukthi-transform** is a Java transformation/templating engine that transforms object data from multiple sources (JSON, XML, POJOs) into different forms based on templates. The library supports both JSON and XML transformation templates.
 
-![Alt text](doc/images/jel.png?raw=true "JEL Engine")
+![Alt text](doc/images/jel.png?raw=true "Transformation Engine")
 
-## Replacement Expressions
-	
-All values in JEL templates can have free-marker expressions in json format and will be processed. But there will be situations where entire value should be replaced with just not string but other data type or complex object. In those places below mentioned replace expressions will come handy.
+## Features
 
-Using one the prefixes mentioned below, the full key/value can be replaced with the resultant value. The result can be any of the JSON supported type - String, boolean, int, date, map or list. For keys, if expression results in non-string, the result will be converted to string and then used as a key.
+- **Dual Format Support**: Transform data using JSON or XML templates
+- **Multiple Data Sources**: Works with Maps, POJOs, and XML context data
+- **Powerful Expressions**: FreeMarker expressions, XPath queries
+- **Advanced Features**: Conditions, loops, variables, resource loading, includes, switch statements
+- **Type Agnostic**: Transform to any JSON-supported type (String, boolean, int, date, map, list)
 
-* ${\color{blue}@fmarker}$ - Used to inject dynamic values using free marker expression.
-* ${\color{blue}@xpath}$ -  Used to fetch value from the current context using xpath. In this case, when xpath matches multiple values, only the first value will be picked.
-* ${\color{blue}@xpathMulti}$ - Used to fetch multiple values from the current context using xpath.
+## Documentation
 
-> **Map Examples** - Shows how replacement-expressions can be used in map values
->  * { "key2": " ${\color{blue}@fmarker}$: empMap.employeeNames[0]" }
->  * { "bookCost": " ${\color{blue}@xpath}$: /books[name='Sphere']/cost" }
->  * { "bookNames": " ${\color{blue}@xpathMulti}$: /books//name" }
+- **[JSON Transformation Guide](doc/json-transformation-guide.md)** - Complete guide for JSON template syntax and usage
+- **[XML Transformation Guide](doc/xml-transformation-guide.md)** - Complete guide for XML template syntax and usage
+- **[Developer Guide](doc/developer-guide.md)** - Architecture, class organization, and extension points
 
-> **List Examples** - Shows how replacement-expressions can be used in list values
->  * { "listWithNoCond": [" ${\color{blue}@fmarker}$: book.cost", 20] }
+## Maven Dependency
 
-## Freemarker Expressions
-String values (both in keys and values) when dynamic-value-replacer prefixes are not used, they will be considered as free-marker templates. And freemarker expressions within the strings can be used in standard way.
+Add the following dependency to your `pom.xml`:
 
-Available Free marker methods can be found @ [Yukthi Free Marker](https://github.com/yukthitech/utils/tree/master/yukthi-free-marker)
+```xml
+<dependency>
+    <groupId>com.yukthitech</groupId>
+    <artifactId>yukthi-transform</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
 
-> **Example in Key**
-> { "book-${book.name}": {  "desc": "This is a science fiction." } }
+### Required Dependencies
 
-> **Example in value**
-> { "name": "${name}" }
+The library requires the following dependencies (automatically included):
 
-## Conditions
-Different parts of a json can be declared to be included conditionally. That is, the target section will be included only when specified condition is true. This can be done using ${\color{blue}@condition}$. But usage of ${\color{blue}@condition}$ different from the element to element.
+- `yukthi-free-marker` - FreeMarker expression engine
+- `yukthi-xml-mapper` - XML parsing and mapping
+- `commons-jxpath` - XPath support
+- `jackson-databind` - JSON processing
 
-> **Maps Example** - To include or exclude Map objects, Map objects should have an entry with key as ${\color{blue}@condition}$
-> ```json
-> {
-> 	"book": {
-> 		"@condition": "book.availableCount >= 1",
-> 		"title": "${book.title}"
-> 	}
-> }
-> ```
-> In above example, "book" (whose value is map) will be included in the output json, only if the condition specified by key ${\color{blue}@condition}$ in this map results in true.
+## Quick Start
 
-> **Lists Example** - To include or exclude List objects, the first element of list should be string and should be prefix " ${\color{blue}@condition:}$ " followed by condition. With this the current list will be included in output json only when this condition evaluates to true.
->```json
->{
->	"books": ["@condition: library.enabled", 1000, {"a": "b"}],
->}
->```
->In above example, "books" will be included in final json only if corresponding conditions are true.
+### JSON Transformation
 
-### Simple Values
-Cases when simple values has to be included/excluded based on conditions, Instead of simple value a map will be included with 2 or 3 keys as described below.
-* ${\color{blue}@condition}$: tells when to include or exclude. Or when to use main ${\color{blue}@value}$ or when to use ${\color{blue}@falseValue}$.
-* ${\color{blue}@value}$: defines the final value (by replacing the current map) when condition evaluates to **true**.
-  * **Note:** When ${\color{blue}@value}$ is defined along with condition, other keys in this map will be ignored.
-* ${\color{blue}@falseValue}$: defines the final value (by replacing the current map) when condition evaluates to **false**.
-  * **Note:** If ${\color{blue}@falseValue}$ is NOT defined and condition evaluates to false, the current map will be completely excluded.
+```java
+import com.yukthitech.transform.TransformEngine;
+import com.yukthitech.transform.template.JsonTemplateFactory;
+import com.yukthitech.transform.template.TransformTemplate;
+import java.util.HashMap;
+import java.util.Map;
 
-> **Example for inclusion/exclusion key-value of a Map**
-> ```json
-> {
-> 	"enabled": {
-> 		"@condition": "book.available == 1",
-> 		"@value": "Enabled"
-> 	},
-> 	"otherKey": "otherValue"
-> }
-> ```
-> In above example, if condition evaluates to true, the result would be:
-> ```json
-> {
-> 	"enabled": "Enabled",
-> 	"otherKey": "otherValue"
-> }
-> ```
-> if condition evaluates to false, "enable" atttribute would be excluded and the result would be:
-> ```json
-> {
-> 	"otherKey": "otherValue"
-> }
+// Create template factory
+JsonTemplateFactory factory = new JsonTemplateFactory();
 
-> **Example for inclusion/exclusion with false-value**
-> ```json
-> {
-> 	"enabled": {
-> 		"@condition</span>": "boook.available == 1",
-> 		"@value": "Enabled",
-> 		"@falseValue": "Disabled",
-> 		"extraKey": "some value"
-> 	},
-> 	"otherKey": "otherValue"
-> }
-> ```
-> In above example, if condition evaluates to true, the result would be:
-> ```json
-> {
-> 	"enabled": "Enabled",
-> 	"otherKey": "otherValue"
-> }
-> ```
-> If condition evaluates to false, the result would be:
-> ```json
-> {
-> 	"enabled": "Disabled",
-> 	"otherKey": "otherValue"
-> }
-> ```
-> **Note in both cases, "extraKey" is completely ignored.**
+// Parse JSON template
+String templateJson = "{\n" +
+    "  \"book\": {\n" +
+    "    \"@condition\": \"book.availableCount >= 1\",\n" +
+    "    \"title\": \"${book.title}\",\n" +
+    "    \"cost\": \"@fmarker: book.cost\"\n" +
+    "  }\n" +
+    "}";
 
-> **Example for inclusion/exclusion of an element of a list**
-> ```json
-> [
-> 	{
-> 		"@condition": "book.available == 1",
-> 		"@value": "@fmarker: book.price"
-> 	},
-> 	100
-> ]
-> ```
-> In above example, if condition evaluates to true, assuming "book.price" value is 1000 the result would be:
-> ```json
-> [1000,100]
-> ```
-> If condition evaluates to false, the result would be:
-> ```json
-> [100]
-> ```
+TransformTemplate template = factory.parseTemplate(templateJson);
 
-## Loops
-When elements has to be repeated dynamically based on data from context, then loops play major role.
-* **List values**: Loops for List elements: A map element of a list can be repeated using ${\color{blue}@for-each}$ attribute in the map. Which defines the loop variable and list of elements to loop through. The value of this key will be treated as free-marker value expression by default.
-* **Map Entries**: Just like list elements, we can use loops in map-entries also. And in general, in such cases, the key of entry which is getting repeated will also be an expression. And will have access to the current loop variable.
+// Create transform engine
+TransformEngine engine = new TransformEngine();
 
-> **List Example**
-> ```json
-> {
-> 	"books": [
-> 		{
-> 			"@for-each(book)": "books",
-> 			"title": "${book.title}",
-> 			"desc": "This is book with summary - ${book.summary}"
-> 		}
-> 	]
-> }
-> ```
-> In above example, a loop variable "book" is used and within current object it can be accessed as a context variable. And it loops through the context value returned by "books".
+// Prepare context data
+Map<String, Object> context = new HashMap<>();
+Map<String, Object> book = new HashMap<>();
+book.put("title", "The Great Gatsby");
+book.put("cost", 15.99);
+book.put("availableCount", 5);
+context.put("book", book);
 
-> **Map Entries Example**
-> ```json
-> {
-> 	"bookMap": {
-> 		"@fmarker: book.id": {
-> 			"@for-each(book)": "books",
-> 			"available": 1
-> 		}
-> 	}
-> }
-> ```
-> In above example, the element will generate key-value pair for every element returned by "books" expression. And the key of generated entry, uses container name itself. So if "books" returns 3 elements, then in final json "bookMap" will have 3 entries with book-id as key and "available=1" as the map entry.
+// Process transformation
+String result = engine.processAsString(template, context);
+System.out.println(result);
+// Output: {"book":{"title":"The Great Gatsby","cost":15.99}}
+```
 
-> **Using static list for loop**
-> ```json
-> {
-> 	"books": {
-> 		"@fmarker: title": {
-> 			"@for-each(title)": [ "Davinci Code", "Sphere", "Prey" ],
-> 			"available": 1
-> 		}
-> 	}
-> }
-> ```
-> In this case a simple json list can be specified as shown above for looping.
+### XML Transformation
 
-> **Inclusion/exclusion within loop**
-> ```json
-> {
-> 	"books": {
-> 		"@fmarker: title": {
-> 			"@for-each(title)": [ "Davinci Code", "Sphere", "Prey" ],
-> 			"@for-each-condition": "isEnabled(title)",
-> 			"available": 1
-> 		}
-> 	}
-> }
-> ```
-> Within the loop the object inclusion and exclusion can be done using ${\color{blue}@for-each-condition}$ which will be evaluated for each iteration.
+```java
+import com.yukthitech.transform.TransformEngine;
+import com.yukthitech.transform.template.XmlTemplateFactory;
+import com.yukthitech.transform.template.TransformTemplate;
+import java.util.HashMap;
+import java.util.Map;
 
-## Transformation
-Following special conversions are supported when standard json representation is not enough ${\color{blue}@transform}$ can be used to transform the data into other format using any replacement expressions. In general this is used in conjunction with ${\color{blue}@value}$ and ${\color{blue}@falseValue}$ (in conditions).
+// Create template factory
+XmlTemplateFactory factory = new XmlTemplateFactory();
 
-In these expressions current-value being transformed can be accessed as ${\color{blue}@thisValue}$.
+// Parse XML template
+String templateXml = "<output xmlns:t=\"/transform\">\n" +
+    "  <book t:condition=\"toBoolean(book.availableCount >= 1)\">\n" +
+    "    <title>${book.title}</title>\n" +
+    "    <cost>@fmarker: book.cost</cost>\n" +
+    "  </book>\n" +
+    "</output>";
 
-> **Example to convert result object into json string**
-> ```json
-> {
-> 	"result": {
-> 		"@transform": "@fmarker: toJson(thisValue)",
-> 		"@value": {
-> 			"someVal": 1,
-> 			"books": "@fmarker: books"
-> 		}
-> 	}
-> }
-> ```
-> The result will be something like below:
-> ```json
-> {
-> 	"result": "{\"someVal\":1,\"books\":[\"Davinci Code\",\"Sphere\",\"Prey\"]}"
-> }
-> ```
+TransformTemplate template = factory.parseTemplate(templateXml);
 
-## Resource Loading
-When complex content, like multi-line or double-quotes etc, needs to be added in json, the content can be placed in an external resource file and can be loaded	using ${\color{blue}@resource}$.
+// Create transform engine
+TransformEngine engine = new TransformEngine();
 
-${\color{blue}@transform}$ can be applied to transform loaded content into other format.
+// Prepare context data (same as JSON example)
+Map<String, Object> context = new HashMap<>();
+Map<String, Object> book = new HashMap<>();
+book.put("title", "The Great Gatsby");
+book.put("cost", 15.99);
+book.put("availableCount", 5);
+context.put("book", book);
 
-> **Loading and transformation example**
-> ```json
-> {
-> 	"type": "Fiction",
-> 	"metaInfo":  {
-> 		"@resource": "/fiction-meta.xml",
-> 		"@transform": "@fmarker: normalizeXml(thisValue)"
-> 	}
-> }
-> ```
+// Process transformation
+String result = engine.processAsString(template, context);
+System.out.println(result);
+```
 
-While loading resources, following attributes can be used for further customization:
+## Usage Examples
 
-* ${\color{blue}@expressions}$ - Defaults to true. If false, then will not process the expressions in the content loaded from resource.
+### Basic Usage with Map Context
 
-* ${\color{blue}@resParams}$ - Should be map and can be used to specify more resource-specific-contextual information that can be used in expressions of resource content using "resParams" as the key.
+```java
+// Create template factory
+JsonTemplateFactory factory = new JsonTemplateFactory();
 
-> **Usage of @resParams**
-> ```json
-> {
-> 	"result": {
-> 	"@resource": "/res-file.txt",
-> 	"@resParams": {
-> 		"key1": "val1"
-> 	}
-> }
-> ```
+// Parse template
+String templateJson = "{ \"name\": \"${user.name}\", \"age\": \"@fmarker: user.age\" }";
+TransformTemplate template = factory.parseTemplate(templateJson);
 
-> **Usage of resParams in resource content**
-> This is simple content with param-value=${resParams.key1} and context-value=${ckey1}
+// Create transform engine
+TransformEngine engine = new TransformEngine();
 
-## Including Other Resources/Files
-For better organization of complex transformation templates, the template can be split into multiple files and can be included in the parent template file using:
-* ${\color{blue}@includeResource}$ - For including resource template (from classpath).
-* ${\color{blue}@includeFile}$ - For including file template.
+// Prepare context
+Map<String, Object> context = new HashMap<>();
+Map<String, Object> user = new HashMap<>();
+user.put("name", "John Doe");
+user.put("age", 30);
+context.put("user", user);
 
-The copy of context from parent template parent template is used as context for included resource/file. Current object with ${\color{blue}@includeResource}$ or ${\color{blue}@includeFile}$ will be replaced with the resultant object child resource/file.
+// Process transformation
+Object result = engine.process(template, context);
+// or get as string
+String resultString = engine.processAsString(template, context);
+```
 
-**Note**: Loading of content of resources/files can be customized by setting custom content-loader on json-expression-engine.
- 
-> **Usage of @includeResource**
-> ```json
-> {
-> 	"key1": "@fmarker: ckey1",
-> 	"extra": {"@includeResource": "/include-res.json"},
-> 	"key2": "@fmarker: ckey2"
-> }
-> ```
-> ```
-> The result will be something like below:
-> ```json
-> {
-> 	"key1": "cval1",
-> 	"extra": {
-> 		"skey1": "cval1",
-> 		"arr": [1, 2, 3, 4]
-> 	},
-> 	"key2": "cval2"
-> }
-> ```
+### Using POJO Context
 
-In cases where instead of including direct result object, the entries of result object has to be included, ${\color{blue}@replace}$ can be used as shown below. Note: Though param string is supported in ${\color{blue}@replace}$, the param itself will not be used. It is added as key differentiators, so that multiple ${\color{blue}@replace}$ can be used in single map.
+```java
+// Create template factory
+JsonTemplateFactory factory = new JsonTemplateFactory();
 
-> **Usage of @includeResource with @replace**
-> ```json
-> {
-> 	"key1": "@fmarker: ckey1",
-> 	"@replace(extra)": {"@includeResource": "/include-res.json"},
-> 	"key2": "@fmarker: ckey2"
-> }
-> ```
-> ```
-> The result will be something like below:
-> ```json
-> {
-> 	"key1": "cval1",
->	"skey1": "cval1",
->	"arr": [1, 2, 3, 4],
-> 	"key2": "cval2"
-> }
-> ```
+// Parse template
+String templateJson = "{ \"name\": \"${user.name}\", \"email\": \"${user.email}\" }";
+TransformTemplate template = factory.parseTemplate(templateJson);
 
-Below is an example to include file instead of resource:
+// Create transform engine
+TransformEngine engine = new TransformEngine();
 
-> **Usage of @includeFile**
-> ```json
-> {
-> 	"key1": "@fmarker: ckey1",
-> 	"extra": {"@includeFile": "./src/test/resources/include-file.json"},
-> 	"key2": "@fmarker: ckey2"
-> }
-> ```
+// Use POJO as context
+User user = new User("John Doe", "john@example.com");
 
-**Note: In all cases above, the include map can specify condition using ${\color{blue}@condition}$ which would be evaluated first before inclusion of resource/file.**
+// Process transformation (POJO is automatically wrapped in PojoExprContext)
+String result = engine.processAsString(template, user);
+```
 
-### Parameters
-While including another resource or file, parameters can be specified using ${\color{blue}@params}$. Parameters should be a map, if not error will be thrown. Parameters-map is a static map (JEL expressions are not supported in this map), only string-based expressions are supported in values of ${\color{blue}@params}$ map.
+### Custom FreeMarker Engine
 
-In child template, parameters can be accessed using **params** key. 
+```java
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
-Below is an example of params usage:
+// Create custom FreeMarker engine
+FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+freeMarkerEngine.loadClass(MyCustomMethods.class); // Load custom methods
 
-> **Usage of @params with include**
-> ```json
-> {
-> 	"mainMap": {
-> 		"@includeResource": "/include-recursive.json",
-> 		"@params": {"value": "@fmarker: 3"}
-> 	},
-> 	"ckey1": "@fmarker: ckey1"
-> }
-> ```
+// Create transform engine with custom FreeMarker engine
+TransformEngine engine = new TransformEngine(freeMarkerEngine);
 
+// Use engine as normal
+```
 
-## Variables
-In cases, where a complex expressions has to be used repeatedly or to minimize complexity of an expression, single expression may needs to be divided, a dynamic variable will come handy.
+### Custom Content Loader
 
-Using ${\color{blue}@set}$ new variables can be declared which in turn can be accessed directly as standard context attributes.
+```java
+import com.yukthitech.transform.IContentLoader;
+import java.io.IOException;
 
-> **Set Example**
-> ```json
-> {
-> 	"@set(bookMap)": {
-> 		"titles": "@xpathMulti: /books//title"
-> 	},
-> 	"key2": "@fmarker: bookMap.titles[0]"
-> }
-> ```
-> In the above example, a variable “prodMap” is created with value as a map (defined on right side). And then this variable is used in next line as a normal context attribute.
- 
+// Create custom content loader
+IContentLoader customLoader = new IContentLoader() {
+    @Override
+    public String loadResource(String resource) throws IOException {
+        // Custom resource loading logic
+        return loadFromCustomLocation(resource);
+    }
+    
+    @Override
+    public String loadFile(String file) throws IOException {
+        // Custom file loading logic
+        return loadFromCustomLocation(file);
+    }
+};
+
+// Create template factory with custom loader
+JsonTemplateFactory factory = new JsonTemplateFactory(customLoader);
+```
+
+### Template Caching
+
+Templates can be cached and reused:
+
+```java
+JsonTemplateFactory factory = new JsonTemplateFactory();
+
+// Parse template once
+String templateJson = "{ ... }";
+TransformTemplate template = factory.parseTemplate(templateJson);
+
+// Reuse template for multiple transformations
+TransformEngine engine = new TransformEngine();
+
+for (Map<String, Object> context : contexts) {
+    String result = engine.processAsString(template, context);
+    // Process result...
+}
+
+// Clear cache if needed
+factory.reset();
+```
+
+## Template Syntax Overview
+
+### JSON Templates
+
+JSON templates use special keys starting with `@` for directives:
+
+- `@condition` - Conditional inclusion
+- `@value` / `@falseValue` - Value replacement
+- `@for-each(varName):` - Loop definition
+- `@for-each-condition` - Loop filter
+- `@set(varName):` - Variable definition
+- `@switch` / `@case` - Switch statements
+- `@resource` - Load external resource
+- `@includeResource` / `@includeFile` - Include other templates
+- `@replace(name)` - Merge included entries
+- `@transform` - Transform value
+- `@fmarker:` - FreeMarker expression
+- `@xpath:` / `@xpathMulti:` - XPath expressions
+
+**See [JSON Transformation Guide](doc/json-transformation-guide.md) for complete syntax documentation.**
+
+### XML Templates
+
+XML templates use the `/transform` namespace (prefix `t:`) for directives:
+
+- `t:condition` - Conditional inclusion
+- `t:value` / `t:falseValue` - Value replacement
+- `t:for-each` / `t:loop-var` - Loop definition
+- `t:for-each-condition` - Loop filter
+- `<t:set>` - Variable definition
+- `<t:switch>` / `<t:case>` - Switch statements
+- `<t:resource>` - Load external resource
+- `<t:includeResource>` / `<t:includeFile>` - Include other templates
+- `<t:replace>` - Merge included entries
+- `t:transform` - Transform value
+- `t:name` - Dynamic element name
+- `@fmarker:`, `@xpath:`, `@xpathMulti:` - Expressions in attributes/content
+
+**See [XML Transformation Guide](doc/xml-transformation-guide.md) for complete syntax documentation.**
+
+## Context Types
+
+The library supports multiple context types:
+
+1. **Map Context** - `Map<String, Object>`
+   ```java
+   Map<String, Object> context = new HashMap<>();
+   context.put("key", value);
+   ```
+
+2. **POJO Context** - Any Java object
+   ```java
+   MyPojo pojo = new MyPojo();
+   // POJO properties are accessible via property names
+   ```
+
+3. **Custom Context** - Implement `ITransformContext`
+   ```java
+   public class CustomContext implements ITransformContext {
+       // Implement interface methods
+   }
+   ```
+
+## Expression Types
+
+### FreeMarker Expressions
+
+Standard FreeMarker syntax in string values:
+- `${variable}` - Variable interpolation
+- `<#if condition>...</#if>` - Conditionals
+- All FreeMarker features supported
+
+**Available FreeMarker methods:** [Yukthi Free Marker](https://github.com/yukthitech/utils/tree/master/yukthi-free-marker)
+
+### XPath Expressions
+
+Access data using XPath:
+- `@xpath: /path/to/element` - Returns first match
+- `@xpathMulti: /path/to/elements` - Returns all matches
+
+### Replacement Expressions
+
+Replace entire values (not just strings):
+- `@fmarker: expression` - FreeMarker expression result
+- `@xpath: /path` - XPath first match
+- `@xpathMulti: /path` - XPath all matches
+
+## Advanced Features
+
+### Loops
+
+Iterate over collections:
+
+**JSON:**
+```json
+{
+  "books": [
+    {
+      "@for-each(book)": "books",
+      "title": "${book.title}",
+      "@for-each-condition": "book.available"
+    }
+  ]
+}
+```
+
+**XML:**
+```xml
+<books t:for-each="books" t:loop-var="book" 
+       t:for-each-condition="book.available">
+  <title>${book.title}</title>
+</books>
+```
+
+### Switch Statements
+
+Multiple conditional branches:
+
+**JSON:**
+```json
+{
+  "grade": {
+    "@switch": [
+      { "@case": "score gte 90", "@value": "A" },
+      { "@case": "score gte 80", "@value": "B" },
+      { "@value": "F" }
+    ]
+  }
+}
+```
+
+**XML:**
+```xml
+<grade>
+  <t:switch>
+    <t:case t:condition="score gte 90" t:value="A"/>
+    <t:case t:condition="score gte 80" t:value="B"/>
+    <t:case t:value="F"/>
+  </t:switch>
+</grade>
+```
+
+### Resource Loading
+
+Load external content:
+
+**JSON:**
+```json
+{
+  "content": {
+    "@resource": "/template.txt",
+    "@resParams": { "key": "value" },
+    "@expressions": true
+  }
+}
+```
+
+**XML:**
+```xml
+<content>
+  <t:resource path="/template.txt" expressions="true">
+    <t:params>
+      <key>value</key>
+    </t:params>
+  </t:resource>
+</content>
+```
+
+### Template Includes
+
+Include other templates:
+
+**JSON:**
+```json
+{
+  "header": { "@includeResource": "/header.json" },
+  "@replace(body)": { "@includeResource": "/body.json" }
+}
+```
+
+**XML:**
+```xml
+<output>
+  <header>
+    <t:includeResource path="/header.xml"/>
+  </header>
+  <t:replace>
+    <t:includeResource path="/body.xml"/>
+  </t:replace>
+</output>
+```
+
+## Error Handling
+
+The library throws `TransformException` for transformation errors:
+
+```java
+try {
+    String result = engine.processAsString(template, context);
+} catch (TransformException e) {
+    System.err.println("Transformation error at: " + e.getMessage());
+    // Error includes path information for debugging
+}
+```
+
+## Best Practices
+
+1. **Cache Templates**: Parse templates once and reuse them
+2. **Use Variables**: Store complex expressions in variables for reuse
+3. **Split Large Templates**: Use includes to organize complex transformations
+4. **Handle Nulls**: Use conditions to handle optional data gracefully
+5. **Type Safety**: Use type conversion functions in XML (`toBoolean()`, `toInt()`, etc.)
+6. **Error Messages**: Check path information in error messages for debugging
+
+## Additional Resources
+
+- **[JSON Transformation Guide](doc/json-transformation-guide.md)** - Detailed JSON template syntax
+- **[XML Transformation Guide](doc/xml-transformation-guide.md)** - Detailed XML template syntax
+- **[Developer Guide](doc/developer-guide.md)** - Architecture and extension points
+- **[Library Summary](LIBRARY_SUMMARY.md)** - Quick reference guide
+
+## License
+
+Licensed under the Apache License, Version 2.0
