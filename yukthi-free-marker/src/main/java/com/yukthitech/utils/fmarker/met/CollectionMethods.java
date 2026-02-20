@@ -359,4 +359,13 @@ public class CollectionMethods
 		return builder.toString();
 	}
 	
+	@FreeMarkerMethod(
+			description = "Checks if the specified collection contains the specified value.",
+			returnDescription = "true if the specified collection contains the specified value, false otherwise.")
+	public static boolean contains(
+			@FmParam(name = "collection", description = "Collection to be checked") Collection<Object> collection, 
+			@FmParam(name = "value", description = "Value to be checked") Object value)
+	{
+		return collection.contains(value);
+	}
 }

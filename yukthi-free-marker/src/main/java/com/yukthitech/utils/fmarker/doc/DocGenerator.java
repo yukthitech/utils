@@ -33,6 +33,18 @@ public class DocGenerator
 	
 	public static void main(String args[]) throws Exception
 	{
+		String template = args[0]; // "/README-template.md"
+		String outFile = args[1]; // "README.md"
+		
+		if(args.length > 2)
+		{
+			for(int i = 2; i < args.length; i++)
+			{
+				Class<?> cls = Class.forName(args[i]);
+				freeMarkerEngine.loadClass(cls);
+			}
+		}
+		
 		Collection<FreeMarkerMethodDoc> methodDocCol = freeMarkerEngine.getRegisterMethodDocuments();
 		Map<String, List<FreeMarkerMethodDoc>> methodDocLst = methodDocCol
 				.stream()
@@ -50,11 +62,11 @@ public class DocGenerator
 		String directiveDoc = freeMarkerEngine.processTemplate("/directive-doc.ftl", load("/directive-doc.ftl"), CommonUtils.toMap("directives", directiveDocLst));
 		//System.out.println(directiveDoc);
 		
-		String readMeDoc = load("/README-template.md");
+		String readMeDoc = load(template);
 		readMeDoc = readMeDoc.replace("[[defaultMethodContent]]", methodDoc);
 		readMeDoc = readMeDoc.replace("[[defaultDirectiveContent]]", directiveDoc);
 		
-		FileOutputStream fos = new FileOutputStream("README.md");
+		FileOutputStream fos = new FileOutputStream(outFile);
 		fos.write(readMeDoc.getBytes());
 		fos.flush();
 		fos.close();

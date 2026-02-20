@@ -15,6 +15,7 @@
  */
 package com.yukthitech.utils.fmarker.met;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -41,6 +42,18 @@ public class DateMethods
 		}
 		
 		return date.getTime();
+	}
+
+	@FreeMarkerMethod(
+			description = "Parses specified date string into date object using specified format.",
+			returnDescription = "Parsed date object.")
+	public static Date parseDate(
+			@FmParam(name = "dateStr", description = "Date string to be parsed") String dateStr,
+			@FmParam(name = "format", description = "Date format to use") String format
+			) throws ParseException
+	{
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+		return simpleDateFormat.parse(dateStr);
 	}
 
 	/**

@@ -115,6 +115,16 @@ public class CommonMethods
 	}
 
 	@FreeMarkerMethod(
+			description = "Used to check if specified value is not null.",
+			returnDescription = "True if value is not null."
+			)
+	public static boolean isNotNull(
+			@FmParam(name = "value", description = "Value to be checked for not null") Object value)
+	{
+		return (value != null);
+	}
+
+	@FreeMarkerMethod(
 			description = "Used to check if specified value is null and return approp value when null and when non-null.",
 			returnDescription = "Specified null-condition-value or non-null-condition-value."
 			)
@@ -345,5 +355,47 @@ public class CommonMethods
 		}
 		
 		return mainStr.contains(substr);
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string to lower case.",
+			returnDescription = "Lower case string.")
+	public static String lower(
+			@FmParam(name = "str", description = "String to be converted to lower case") String str)
+	{
+		return str.toLowerCase();
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string to upper case.",
+			returnDescription = "Upper case string.")
+	public static String upper(
+			@FmParam(name = "str", description = "String to be converted to upper case") String str)
+	{
+		return str.toUpperCase();
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified values are equal post string conversion.",
+			returnDescription = "True if values are equal."
+			)
+	public static boolean isEqualString(
+			@FmParam(name = "value1", description = "First value to be compared") Object value1,
+			@FmParam(name = "value2", description = "Second value to be compared") Object value2)
+	{
+		String str1 = "" + value1;
+		String str2 = "" + value2;
+		return str1.equals(str2);
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified values are equal ignoring case.",
+			returnDescription = "True if values are equal ignoring case."
+			)
+	public static boolean isEqualIgnoreCase(
+			@FmParam(name = "value1", description = "First value to be compared") String value1,
+			@FmParam(name = "value2", description = "Second value to be compared") String value2)
+	{
+		return value1.equalsIgnoreCase(value2);
 	}
 }

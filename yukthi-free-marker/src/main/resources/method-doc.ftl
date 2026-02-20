@@ -1,7 +1,7 @@
 <#list methods?keys as grpName>
 ### ${grpName}
 <#list methods[grpName] as method>
-#### ${'$'}{\color{blue}${method.name}()}$
+#### <span style="color:blue">${method.name}()</span>
 **Description**: ${method.description}<br>
 **Returns**: **[${method.returnType}]** ${method.returnDescription}
 

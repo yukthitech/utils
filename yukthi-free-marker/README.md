@@ -1,4 +1,4 @@
-# Yukthi FreeMarker Wrapper
+# Yukthi FreeMarker
 
 This library provides a simplified wrapper around the FreeMarker template engine. It allows you to register Java static methods as FreeMarker methods and directives using annotations, making them directly accessible within your templates.
 
@@ -143,304 +143,492 @@ public static String trim(
 | `usage`   | An example of how to use the method or directive. |
 | `result`  | The expected result of the example. |
 
-## Default Methods and Directives
+
+# Default Methods and Directives
 
 This library provides a set of default methods and directives for common tasks.
 
-### Methods
+## Default Directives
+Following additional directives by default are supported by this library:
 
-#### Collection Methods
+### Common Directives
+#### ${\color{blue}@indent}$
+**Description**: Helps in indenting the enclosed content. Accepts optional prefix attribute, defaults to empty string. Every line will be trimmed and converted into single line and prefix will be added at the start. And from the output content '\t' and '\n' will be replaced with tab and new-line characters respectively.<br>
 
-##### `groupBy`
-* **Description:** Groups elements of specified collection based on specified keyExpression
-* **Return Type:** `List<Group>`
-* **Return Description:** List of groups. Each group has key (value of key based on which current group is created) and elements having same key.
-* **Parameters:**
-  * `collection` (`Collection<Object>`): Collection of objects which needs grouping
-  * `keyExpression` (`String`): Freemarker key expression which will be executed on each of collection element. And obtained key will be used for grouping.
+**Parameters**
+|Name|Default Value|Description|
+|:---|:-----------|:-----------|
+|body||Enclosing body content|
+|prefix|<empty string>|If specified, this value will be added in start of every line|
+|retainLineBreaks|false|[boolean] if true, lines will be maintained as separate lines.|
 
-##### `sortBy`
-* **Description:** Sorted elements of specified collection based on specified keyExpression. Duplicate elements (with same key) will be kept together (though internal order is not guaranteed).
-* **Return Type:** `List<Object>`
-* **Return Description:** List of ordered elements based on specified key expression.
-* **Parameters:**
-  * `collection` (`Collection<Object>`): Collection of objects which needs sorting
-  * `keyExpression` (`String`): Freemarker key expression which will be executed on each of collection element. And obtained key will be used for sorting.
+> **Example:** Without parameters<br>
+> **Usage:** 
+> ```
+> <@indent>   first line
+> second line  </@indent>
+> ```
+> **Result:** 
+> ```
+> first linesecond line
+> ```
 
-##### `mapValues`
-* **Description:** Extracts and returns the values collection as list of specified map.
-* **Return Type:** `Collection<Object>`
-* **Return Description:** the values collection of specified map.
-* **Parameters:**
-  * `map` (`Map<Object, Object>`): Map whose values has to be extracted
+> **Example:** With Prefix<br>
+> **Usage:** 
+> ```
+> <@indent prefix='--'>   first line
+> second line    </@indent>
+> ```
+> **Result:** 
+> ```
+> --first line--second line
+> ```
 
-##### `mapKeys`
-* **Description:** Extracts and returns the keys collection as list of specified map.
-* **Return Type:** `Collection<Object>`
-* **Return Description:** the values collection of specified map.
-* **Parameters:**
-  * `map` (`Map<Object, Object>`): Map whose keys has to be extracted
+> **Example:** With Prefix and retainLineBreaks<br>
+> **Usage:** 
+> ```
+> <@indent prefix='--' retainLineBreaks=true>   first line
+> second line    </@indent>
+> ```
+> **Result:** 
+> ```
+> --first line
+> --second line
+> ```
 
-##### `collectionToString`
-* **Description:** Converts collection of objects into string.
-* **Return Type:** `String`
-* **Return Description:** Converted string
-* **Parameters:**
-  * `lst` (`Collection<Object>`): Collection to be converted
-  * `prefix` (`String`): Prefix to be used at start of coverted string.
-  * `delimiter` (`String`): Delimiter to be used between the collection elements.
-  * `suffix` (`String`): Suffix to be used at end of converted string.
-  * `emptyString` (`String`): String to be used when input list is null or empty.
-* **Examples:**
-  * `collectionToString(lst, '[', ' | ', ']', '')` => `[a | b | c]`
-  * `collectionToString(null, '[', ' | ', ']', '<empty>')` => `<empty>`
 
-##### `mapToString`
-* **Description:** Converts map of objects into string.
-* **Return Type:** `String`
-* **Return Description:** Converted string
-* **Parameters:**
-  * `map` (`Map<Object, Object>`): Prefix to be used at start of coverted string
-  * `template` (`String`): Template representing how key and value should be converted into string (the string can have #key and #value which will act as place holders).
-  * `prefix` (`String`): Prefix to be used at start of coverted string.
-  * `delimiter` (`String`): Delimiter to be used between elements.
-  * `suffix` (`String`): Suffix to be used at end of string.
-  * `emptyString` (`String`): String that will be returned if input map is null or empty.
-* **Examples:**
-  * `mapToString(map, '#key=#value', '[', ' | ', ']', '')` => `[a=1 | b=2 | c=3]`
-  * `mapToString(null, '#key=#value', '[', ' | ', ']', '<empty>')` => `<empty>`
+#### ${\color{blue}@trim}$
+**Description**: Trims the content enclosed within this directive.<br>
 
-#### Common Methods
+**Parameters**
+|Name|Default Value|Description|
+|:---|:-----------|:-----------|
+|body||Enclosing body content|
 
-##### `isEmpty`
-* **Description:** Used to check if specified value is empty. For collection, map and string, along with null this will check for empty value.
-* **Return Type:** `boolean`
-* **Return Description:** True if value is empty.
-* **Parameters:**
-  * `value` (`Object`): Value to be checked for empty
+> **Example:** <br>
+> **Usage:** 
+> ```
+> <@trim>   some content  </@trim>
+> ```
+> **Result:** 
+> ```
+> some content
+> ```
 
-##### `isNotEmpty`
-* **Description:** Used to check if specified value is not empty. For collection, map and string, along with non-null this will check for non-empty value.
-* **Return Type:** `boolean`
-* **Return Description:** True if value is empty.
-* **Parameters:**
-  * `value` (`Object`): Value to be checked for empty
 
-##### `nvl`
-* **Description:** Used to check if specified value is null and return approp value when null and when non-null.
-* **Return Type:** `Object`
-* **Return Description:** Specified null-condition-value or non-null-condition-value.
-* **Parameters:**
-  * `value` (`Object`): Value to be checked for empty
-  * `nullValue` (`Object`): Value to be returned when value is null
-  * `nonNullValue` (`Object`): Value to be returned when value is non-null
 
-##### `ifTrue`
-* **Description:** Used to check if specified value is true and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.
-* **Return Type:** `Object`
-* **Return Description:** Specified true-condition-value or false-condition-value.
-* **Parameters:**
-  * `value` (`Object`): Value to be checked for true.
-  * `trueValue` (`Object`): Value to be returned when value is true.
-  * `falseValue` (`Object`): Value to be returned when value is false or null.
 
-##### `ifFalse`
-* **Description:** Used to check if specified value is false and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false. If null, the condition will be considered as false (hence returing falseValue)
-* **Return Type:** `Object`
-* **Return Description:** Specified true-condition-value or false-condition-value.
-* **Parameters:**
-  * `value` (`Object`): Value to be checked for false. Can be boolean true or string 'true'
-  * `falseValue` (`Object`): Value to be returned when value is false or null.
-  * `trueValue` (`Object`): Value to be returned when value is true.
 
-##### `toText`
-* **Description:** Used to convert specified object into string. toString() will be invoked on input object to convert
-* **Return Type:** `String`
-* **Return Description:** Converted string. If null, 'null' will be returned.
-* **Parameters:**
-  * `value` (`Object`): Value to be converted into string.
+## Default Methods
+Following additional freemarker methods by default are supported by this library:
 
-##### `ifNull`
-* **Description:** If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.
-* **Return Type:** `Object`
-* **Return Description:** ifNull or ifNotNull based on nullCheck.
-* **Parameters:**
-  * `nullCheck` (`Object`): object to be checked for null
-  * `ifNull` (`Object`): object to be returned if null.
-  * `ifNotNull` (`Object`): object to be returned if not null
+### Date Methods
+#### ${\color{blue}addDays()}$
+**Description**: Adds specified number of days to specified date<br>
+**Returns**: **[java.util.Date]** Resultant date after addition of specified days
 
-##### `ifNotNull`
-* **Description:** If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.
-* **Return Type:** `Object`
-* **Return Description:** ifNull or ifNotNull based on nullCheck.
-* **Parameters:**
-  * `nullCheck` (`Object`): object to be checked for null
-  * `ifNotNull` (`Object`): object to be returned if not null.
-  * `ifNull` (`Object`): object to be returned if null.
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to which days should be added|
+|days|int||Days to be added.|
 
-##### `nullVal`
-* **Description:** If 'nullCheck' is null, 'ifNull' will be returned otherwise 'nullCheck' will be returned.
-* **Return Type:** `Object`
-* **Return Description:** ifNull or nullCheck based on nullCheck is null or not.
-* **Parameters:**
-  * `nullCheck` (`Object`): object to be checked for null
-  * `ifNull` (`Object`): object to be returned if null
 
-##### `sizeOf`
-* **Description:** Used to fetch size of specified value. If string length of string is returned, if collection size of collection is returned, if null zero will be returned. Otherwise 1 will be returned.
-* **Return Type:** `int`
-* **Return Description:** Size of specified object.
-* **Parameters:**
-  * `value` (`Object`): Value whose size to be determined
+#### ${\color{blue}addHours()}$
+**Description**: Adds specified number of hours to specified date<br>
+**Returns**: **[java.util.Date]** Resultant date after addition of specified hours
 
-##### `replace`
-* **Description:** Replaces specified substring with replacement in main string.
-* **Return Type:** `String`
-* **Parameters:**
-  * `mainString` (`String`): String in which replacement should happen
-  * `substring` (`String`): Substring to be replaced
-  * `replacement` (`String`): Replacement string
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to which hours should be added|
+|hours|int||Hours to be added.|
 
-##### `initcap`
-* **Description:** Makes first letter of every word into capital letter.
-* **Return Type:** `String`
-* **Parameters:**
-  * `str` (`String`): String to convert
 
-##### `strContains`
-* **Description:** Checks if specified substring can be found in main string
-* **Return Type:** `boolean`
-* **Return Description:** true, if substring can be found.
-* **Parameters:**
-  * `mainStr` (`String`): Main string in which search has to be performed
-  * `substr` (`String`): Substring to be searched
-  * `ignoreCase` (`boolean`): Flag to indicate if case has to be ignored during search
+#### ${\color{blue}addMinutes()}$
+**Description**: Adds specified number of minutes to specified date<br>
+**Returns**: **[java.util.Date]** Resultant date after addition of specified minutes
 
-#### Date Methods
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to which minutes should be added|
+|minutes|int||Minutes to be added.|
 
-##### `toMillis`
-* **Description:** Converts specified date into millis.
-* **Return Type:** `Long`
-* **Return Description:** Millis value
-* **Parameters:**
-  * `date` (`Date`): Date to be converted
 
-##### `dateToStr`
-* **Description:** Converts specified date into string in specified format.
-* **Return Type:** `String`
-* **Return Description:** Fromated date string.
-* **Parameters:**
-  * `date` (`Date`): Date to be converted
-  * `format` (`String`): Date format to which date should be converted
-* **Examples:**
-  * `dateToStr(date, 'MM/dd/yyy')` => `20/20/2018`
+#### ${\color{blue}addSeconds()}$
+**Description**: Adds specified number of seconds to specified date<br>
+**Returns**: **[java.util.Date]** Resultant date after addition of specified seconds
 
-##### `addDays`
-* **Description:** Adds specified number of days to specified date
-* **Return Type:** `Date`
-* **Return Description:** Resultant date after addition of specified days
-* **Parameters:**
-  * `date` (`Date`): Date to which days should be added
-  * `days` (`int`): Days to be added.
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to which seconds should be added|
+|seconds|int||Seconds to be added.|
 
-##### `addYears`
-* **Description:** Adds specified number of days to specified date
-* **Return Type:** `Date`
-* **Return Description:** Resultant date after addition of specified years
-* **Parameters:**
-  * `date` (`Date`): Date to which days should be added
-  * `years` (`int`): Years to be added.
 
-##### `addHours`
-* **Description:** Adds specified number of hours to specified date
-* **Return Type:** `Date`
-* **Return Description:** Resultant date after addition of specified hours
-* **Parameters:**
-  * `date` (`Date`): Date to which hours should be added
-  * `hours` (`int`): Hours to be added.
+#### ${\color{blue}addYears()}$
+**Description**: Adds specified number of days to specified date<br>
+**Returns**: **[java.util.Date]** Resultant date after addition of specified years
 
-##### `addMinutes`
-* **Description:** Adds specified number of minutes to specified date
-* **Return Type:** `Date`
-* **Return Description:** Resultant date after addition of specified minutes
-* **Parameters:**
-  * `date` (`Date`): Date to which minutes should be added
-  * `minutes` (`int`): Minutes to be added.
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to which days should be added|
+|years|int||Years to be added.|
 
-##### `addSeconds`
-* **Description:** Adds specified number of seconds to specified date
-* **Return Type:** `Date`
-* **Return Description:** Resultant date after addition of specified seconds
-* **Parameters:**
-  * `date` (`Date`): Date to which seconds should be added
-  * `seconds` (`int`): Seconds to be added.
 
-##### `today`
-* **Description:** Returns the current date object
-* **Return Type:** `Date`
-* **Return Description:** Current date
+#### ${\color{blue}dateToStr()}$
+**Description**: Converts specified date into string in specified format.<br>
+**Returns**: **[java.lang.String]** Fromated date string.
 
-##### `now`
-* **Description:** Returns the current date object
-* **Return Type:** `Date`
-* **Return Description:** Current date and time
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to be converted|
+|format|java.lang.String||Date format to which date should be converted|
 
-### Directives
+> **Example:** ```dateToStr(date, 'MM/dd/yyy')```<br>
+> **Result:** ```20/20/2018```
 
-#### Common Directives
 
-##### `<@trim>`
-* **Description:** Trims the content enclosed within this directive.
-* **Parameters:**
-  * `body` (`String`): Enclosing body content
-* **Examples:**
-  * **Usage**
-    ```
-    <@trim>   some content  </@trim>
-    ```
-  * **Output**
-    ```
-    some content
-    ```
+#### ${\color{blue}now()}$
+**Description**: Returns the current date object<br>
+**Returns**: **[java.util.Date]** Current date and time
 
-##### `<@indent>`
-* **Description:** Helps in indenting the enclosed content. Accepts optional prefix attribute, defaults to empty string. Every line will be trimmed and converted into single line and prefix will be added at the start. And from the output content '	' and '
-' will be replaced with tab and new-line characters respectively.
-* **Parameters:**
-  * `body` (`String`): Enclosing body content
-  * `prefix` (`String`): If specified, this value will be added in start of every line
-  * `retainLineBreaks` (`boolean`): [boolean] if true, lines will be maintained as separate lines.
-* **Example 1**
-  * **Usage**
-    ```
-    <@indent>   first line
 
-    second line  </@indent>
-    ```
-  * **Output**
-    ```
-    first linesecond line
-    ```
-* **Example 2**
-  * **Usage**
-    ```
-    <@indent prefix='--'>   first line
 
-    second line  </@indent>
-    ```
-  * **Output**
-    ```
-    --first line--second line
-    ```
-* **Example 3**
-  * **Usage**
-    ```
-    <@indent prefix='--' retainLineBreaks=true>   first line
+#### ${\color{blue}parseDate()}$
+**Description**: Parses specified date string into date object using specified format.<br>
+**Returns**: **[java.util.Date]** Parsed date object.
 
-    second line  </@indent>
-    ```
- * **Output**
-   ```
-   --first line
-   --second line
-   ```
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|dateStr|java.lang.String||Date string to be parsed|
+|format|java.lang.String||Date format to use|
+
+
+#### ${\color{blue}toMillis()}$
+**Description**: Converts specified date into millis.<br>
+**Returns**: **[java.lang.Long]** Millis value
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|date|java.util.Date||Date to be converted|
+
+
+#### ${\color{blue}today()}$
+**Description**: Returns the current date object<br>
+**Returns**: **[java.util.Date]** Current date
+
+
+
+
+### Collection Methods
+#### ${\color{blue}collectionToString()}$
+**Description**: Converts collection of objects into string.<br>
+**Returns**: **[java.lang.String]** Converted string
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|lst|java.util.Collection||Collection to be converted|
+|prefix|java.lang.String|empty string|Prefix to be used at start of coverted string.|
+|delimiter|java.lang.String|comma (,)|Delimiter to be used between the collection elements.|
+|suffix|java.lang.String|empty string|Suffix to be used at end of converted string.|
+|emptyString|java.lang.String|empty string|String to be used when input list is null or empty.|
+
+> **Example:** ```collectionToString(lst, '[', ' | ', ']', '')```<br>
+> **Result:** ```[a | b | c]```
+
+> **Example:** ```collectionToString(null, '[', ' | ', ']', '<empty>')```<br>
+> **Result:** ```<empty>```
+
+
+#### ${\color{blue}contains()}$
+**Description**: Checks if the specified collection contains the specified value.<br>
+**Returns**: **[boolean]** true if the specified collection contains the specified value, false otherwise.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|collection|java.util.Collection||Collection to be checked|
+|value|java.lang.Object||Value to be checked|
+
+
+#### ${\color{blue}groupBy()}$
+**Description**: Groups elements of specified collection based on specified keyExpression<br>
+**Returns**: **[java.util.List]** List of groups. Each group has key (value of key based on which current group is created) and elements having same key.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|collection|java.util.Collection||Collection of objects which needs grouping|
+|keyExpression|java.lang.String||Freemarker key expression which will be executed on each of collection element. And obtained key will be used for grouping.|
+
+
+#### ${\color{blue}mapKeys()}$
+**Description**: Extracts and returns the keys collection as list of specified map.<br>
+**Returns**: **[java.util.Collection]** the values collection of specified map.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|map|java.util.Map||Map whose keys has to be extracted|
+
+
+#### ${\color{blue}mapToString()}$
+**Description**: Converts map of objects into string.<br>
+**Returns**: **[java.lang.String]** Converted string
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|map|java.util.Map||Prefix to be used at start of coverted string|
+|template|java.lang.String|#key=#value|Template representing how key and value should be converted into string (the string can have #key and #value which will act as place holders).|
+|prefix|java.lang.String|empty string|Prefix to be used at start of coverted string.|
+|delimiter|java.lang.String|comma (,)|Delimiter to be used between elements.|
+|suffix|java.lang.String|empty string|Suffix to be used at end of string.|
+|emptyString|java.lang.String|empty string|String that will be returned if input map is null or empty.|
+
+> **Example:** ```mapToString(map, '#key=#value', '[', ' | ', ']', '')```<br>
+> **Result:** ```[a=1 | b=2 | c=3]```
+
+> **Example:** ```mapToString(null, '#key=#value', '[', ' | ', ']', '<empty>')```<br>
+> **Result:** ```<empty>```
+
+
+#### ${\color{blue}mapValues()}$
+**Description**: Extracts and returns the values collection as list of specified map.<br>
+**Returns**: **[java.util.Collection]** the values collection of specified map.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|map|java.util.Map||Map whose values has to be extracted|
+
+
+#### ${\color{blue}sortBy()}$
+**Description**: Sorted elements of specified collection based on specified keyExpression. Duplicate elements (with same key) will be kept together (though internal order is not guaranteed).<br>
+**Returns**: **[java.util.List]** List of ordered elements based on specified key expression.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|collection|java.util.Collection||Collection of objects which needs sorting|
+|keyExpression|java.lang.String||Freemarker key expression which will be executed on each of collection element. And obtained key will be used for sorting.|
+
+
+
+### Common Methods
+#### ${\color{blue}ifFalse()}$
+**Description**: Used to check if specified value is false and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false. If null, the condition will be considered as false (hence returing falseValue)<br>
+**Returns**: **[java.lang.Object]** Specified true-condition-value or false-condition-value.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for false. Can be boolean true or string 'true'|
+|falseValue|java.lang.Object|true|Value to be returned when value is false or null.|
+|trueValue|java.lang.Object|false|Value to be returned when value is true.|
+
+
+#### ${\color{blue}ifNotNull()}$
+**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.<br>
+**Returns**: **[java.lang.Object]** ifNull or ifNotNull based on nullCheck.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|nullCheck|java.lang.Object||object to be checked for null|
+|ifNotNull|java.lang.Object|true (boolean)|object to be returned if not null.|
+|ifNull|java.lang.Object|false (boolean)|object to be returned if null.|
+
+
+#### ${\color{blue}ifNull()}$
+**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'ifNotNull' will be returned.<br>
+**Returns**: **[java.lang.Object]** ifNull or ifNotNull based on nullCheck.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|nullCheck|java.lang.Object||object to be checked for null|
+|ifNull|java.lang.Object|true (boolean)|object to be returned if null.|
+|ifNotNull|java.lang.Object|false (boolean)|object to be returned if not null|
+
+
+#### ${\color{blue}ifTrue()}$
+**Description**: Used to check if specified value is true and return approp value Can be boolean flag or string. If string, 'true' (case insensitive) will be considered as true otherwise false.<br>
+**Returns**: **[java.lang.Object]** Specified true-condition-value or false-condition-value.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for true.|
+|trueValue|java.lang.Object|true|Value to be returned when value is true.|
+|falseValue|java.lang.Object|false|Value to be returned when value is false or null.|
+
+
+#### ${\color{blue}initcap()}$
+**Description**: Makes first letter of every word into capital letter.<br>
+**Returns**: **[java.lang.String]** 
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|str|java.lang.String||String to convert|
+
+
+#### ${\color{blue}isEmpty()}$
+**Description**: Used to check if specified value is empty. For collection, map and string, along with null this will check for empty value.<br>
+**Returns**: **[boolean]** True if value is empty.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for empty|
+
+
+#### ${\color{blue}isEqualIgnoreCase()}$
+**Description**: Checks if specified values are equal ignoring case.<br>
+**Returns**: **[boolean]** True if values are equal ignoring case.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value1|java.lang.String||First value to be compared|
+|value2|java.lang.String||Second value to be compared|
+
+
+#### ${\color{blue}isEqualString()}$
+**Description**: Checks if specified values are equal post string conversion.<br>
+**Returns**: **[boolean]** True if values are equal.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value1|java.lang.Object||First value to be compared|
+|value2|java.lang.Object||Second value to be compared|
+
+
+#### ${\color{blue}isNotEmpty()}$
+**Description**: Used to check if specified value is not empty. For collection, map and string, along with non-null this will check for non-empty value.<br>
+**Returns**: **[boolean]** True if value is empty.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for empty|
+
+
+#### ${\color{blue}isNotNull()}$
+**Description**: Used to check if specified value is not null.<br>
+**Returns**: **[boolean]** True if value is not null.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for not null|
+
+
+#### ${\color{blue}isNull()}$
+**Description**: Used to check if specified value is null.<br>
+**Returns**: **[boolean]** True if value is null.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for null|
+
+
+#### ${\color{blue}lower()}$
+**Description**: Converts specified string to lower case.<br>
+**Returns**: **[java.lang.String]** Lower case string.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|str|java.lang.String||String to be converted to lower case|
+
+
+#### ${\color{blue}nullVal()}$
+**Description**: If 'nullCheck' is null, 'ifNull' will be returned otherwise 'nullCheck' will be returned.<br>
+**Returns**: **[java.lang.Object]** ifNull or nullCheck based on nullCheck is null or not.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|nullCheck|java.lang.Object||object to be checked for null|
+|ifNull|java.lang.Object||object to be returned if null|
+
+
+#### ${\color{blue}nvl()}$
+**Description**: Used to check if specified value is null and return approp value when null and when non-null.<br>
+**Returns**: **[java.lang.Object]** Specified null-condition-value or non-null-condition-value.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be checked for empty|
+|nullValue|java.lang.Object||Value to be returned when value is null|
+|nonNullValue|java.lang.Object||Value to be returned when value is non-null|
+
+
+#### ${\color{blue}replace()}$
+**Description**: Replaces specified substring with replacement in main string.<br>
+**Returns**: **[java.lang.String]** 
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|mainString|java.lang.String||String in which replacement should happen|
+|substring|java.lang.String||Substring to be replaced|
+|replacement|java.lang.String||Replacement string|
+
+
+#### ${\color{blue}sizeOf()}$
+**Description**: Used to fetch size of specified value. If string length of string is returned, if collection size of collection is returned, if null zero will be returned. Otherwise 1 will be returned.<br>
+**Returns**: **[int]** Size of specified object.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value whose size to be determined|
+
+
+#### ${\color{blue}strContains()}$
+**Description**: Checks if specified substring can be found in main string<br>
+**Returns**: **[boolean]** true, if substring can be found.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|mainString|java.lang.String||Main string in which search has to be performed|
+|substr|java.lang.String||Substring to be searched|
+|ignoreCase|boolean|false|Flag to indicate if case has to be ignored during search|
+
+
+#### ${\color{blue}toText()}$
+**Description**: Used to convert specified object into string. toString() will be invoked on input object to convert<br>
+**Returns**: **[java.lang.String]** Converted string. If null, 'null' will be returned.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value|java.lang.Object||Value to be converted into string.|
+
+
+#### ${\color{blue}upper()}$
+**Description**: Converts specified string to upper case.<br>
+**Returns**: **[java.lang.String]** Upper case string.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|str|java.lang.String||String to be converted to upper case|
+
+
+
+

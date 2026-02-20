@@ -1,7 +1,7 @@
 <#list directives?keys as grpName>
 ### ${grpName}
 <#list directives[grpName] as directive>
-#### ${'$'}{\color{blue}@${directive.name}}$
+#### <span style="color:blue">${directive.name}</span>
 **Description**: ${directive.description}<br>
 
 <#if isNotEmpty(directive.parameters)>
