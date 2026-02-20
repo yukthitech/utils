@@ -21,10 +21,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
+@Named("Transform Methods")
 public class TransformFmarkerMethods
 {
 	/**
@@ -155,5 +157,21 @@ public class TransformFmarkerMethods
 	public static Object nullValue()
 	{
 		return null;
+	}
+
+	@FreeMarkerMethod(
+		description = "Evaluates specified expression in safe manner. In case of exception (because of missing path) default value will be returned.",
+		returnDescription = "Result of expression evaluation or default value if expression evaluation fails.")
+	public static Object safeEval(
+			@FmParam(name = "expression", description = "Expression to be evaluated") String expression,
+			@FmParam(name = "defaultValue", description = "Default value to be returned if expression evaluation fails", defaultValue = "null") Object defaultValue)
+	{
+		try
+		{
+			return InternalExpressionContext.getInstance().evaluateExpression(expression);
+		}catch(Exception ex)
+		{
+			return defaultValue;
+		}
 	}
 }

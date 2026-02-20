@@ -1045,4 +1045,35 @@
 			}
 		</expectedResult>
 	</jel-test-bean>
+
+
+	<jel-test-bean name="dynExprEvaluation">
+		<context>
+			{
+				"score": 85,
+				"bonus": 10
+			}
+		</context>
+		<template>
+			{
+				"grade": {
+					"@switch": [
+						{
+							"@case": "isNotNull(safeEval('noScore'))",
+							"@value": 100
+						},
+						{
+							"@value": 200
+						}
+					]
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"grade": 200
+			}
+		</expectedResult>
+	</jel-test-bean>
+
 </test-data>

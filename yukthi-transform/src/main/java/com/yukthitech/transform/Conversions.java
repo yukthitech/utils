@@ -18,14 +18,12 @@ package com.yukthitech.transform;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.jxpath.JXPathContext;
-
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
-import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
+import com.yukthitech.transform.template.TransformUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
@@ -148,40 +146,15 @@ public class Conversions
 	 */
 	public Object processExpression(Expression expression, ITransformContext context, TransformState transformState)
 	{
-		ExpressionType exprType = expression.getType();
-		String expr = expression.getExpression();
-		
+		InternalExpressionContext.push(freeMarkerEngine, context, transformState);
+
 		try
 		{
-			if(exprType == ExpressionType.FMARKER)
-			{
-				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getPath(), "transform-expr", expr, context);
-			}
-			else if(exprType == ExpressionType.XPATH)
-			{
-				return JXPathContext.newContext(context).getValue(expr);
-			}
-			else if(exprType == ExpressionType.XPATH_MULTI)
-			{
-				return JXPathContext.newContext(context).selectNodes(expr);
-			}
-			else if(exprType == ExpressionType.TEMPLATE)
-			{
-				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getPath(), "transform-template", expr, context);
-			}
-			else if(exprType == ExpressionType.STRING)
-			{
-				return expr;
-			}
-		} catch(TransformException ex)
+			return TransformUtils.processExpression(freeMarkerEngine, expression, context, transformState);
+		} finally
 		{
-			throw ex;
-		} catch(Exception ex)
-		{
-			throw new TransformException(transformState.getPath(), "An error occurred while processing expression: {} [Type: {}]", expr, exprType, ex);
+			InternalExpressionContext.pop();
 		}
-		
-		throw new TransformException(transformState.getPath(), "Invalid expression type specified '{}' in expression: {}", exprType, expr);
 	}
 	
 	public String processTemplate(String expression, ITransformContext context, String path)

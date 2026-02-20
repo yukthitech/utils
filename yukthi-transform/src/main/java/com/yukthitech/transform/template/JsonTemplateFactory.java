@@ -14,10 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
-import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
-import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
@@ -126,11 +124,6 @@ public class JsonTemplateFactory implements ITemplateFactory
 	 */
 	private static final String PARAMS = "@params";
 
-	/**
-	 * Expression used by value string which has to be replaced with resultant value.
-	 */
-	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
-	
 	private static final IContentLoader DEFAULT_CONTENT_LOADER = new IContentLoader() {};
 
     private IContentLoader contentLoader = DEFAULT_CONTENT_LOADER;
@@ -210,7 +203,7 @@ public class JsonTemplateFactory implements ITemplateFactory
 			}
 			else if(object instanceof String)
 			{
-                object = parseExpression((String) object, path, false);
+                object = TransformUtils.parseExpression((String) object, path, false);
 			}
 		} catch(TransformException ex)
 		{
@@ -401,7 +394,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             if(TRANSFORM.equals(entry.getKey()) && (entry.getValue() instanceof String)
                 && StringUtils.isNotBlank((String) entry.getValue()))
             {
-                transformObject.setTransformExpression(parseExpression((String) entry.getValue(), path + ">" + entry.getKey(), false));
+                transformObject.setTransformExpression(TransformUtils.parseExpression((String) entry.getValue(), path + ">" + entry.getKey(), false));
                 continue;
             }
 
@@ -470,7 +463,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             }
 
             //check if key itself represents an expression
-            Expression keyExpression = parseExpression(entry.getKey(), path + ">" + entry.getKey(), true);
+            Expression keyExpression = TransformUtils.parseExpression(entry.getKey(), path + ">" + entry.getKey(), true);
             
             // if key starts with @, those are special keys
             if(entry.getKey().startsWith("@") && keyExpression == null)
@@ -495,39 +488,6 @@ public class JsonTemplateFactory implements ITemplateFactory
         return transformObject;
     }
 
-    private Expression parseExpression(String expression, String path, boolean nullByDefault)
-    {
-        Matcher matcher = EXPR_PATTERN.matcher(expression);
-        
-        if(!matcher.matches())
-        {
-        	if(expression.contains("${") || expression.contains("<#"))
-        	{
-        		return new Expression(ExpressionType.TEMPLATE, expression);
-        	}
-        	
-            return nullByDefault ? null : new Expression(ExpressionType.STRING, expression);
-        }
-
-        String exprType = matcher.group(1);
-        String expr = matcher.group(2);
-
-        if(ITransformConstants.EXPR_TYPE_FMARKER.equals(exprType))
-        {
-            return new Expression(ExpressionType.FMARKER, expr);
-        }
-        else if(ITransformConstants.EXPR_TYPE_XPATH.equals(exprType))
-        {
-            return new Expression(ExpressionType.XPATH, expr);
-        }
-        else if(ITransformConstants.EXPR_TYPE_XPATH_MULTI.equals(exprType))
-        {
-            return new Expression(ExpressionType.XPATH_MULTI, expr);
-        }
-
-        throw new TransformException(path, "Invalid expression type specified '{}' in expression: {}", exprType, expression);
-    }
-    
     private TransformTemplate loadAndParse(String path, boolean isResource)
     {
     	String keyPrefix = isResource ? "res:" : "file:";

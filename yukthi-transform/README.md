@@ -16,6 +16,7 @@
 
 - **[JSON Transformation Guide](doc/json-transformation-guide.md)** - Complete guide for JSON template syntax and usage
 - **[XML Transformation Guide](doc/xml-transformation-guide.md)** - Complete guide for XML template syntax and usage
+- **[Transform Free Marker Methods](doc/transform-fmarker-methods.md)** - List of FreeMarker methods available for transformation templates
 - **[Developer Guide](doc/developer-guide.md)** - Architecture, class organization, and extension points
 
 ## Maven Dependency
@@ -448,6 +449,7 @@ try {
 
 - **[JSON Transformation Guide](doc/json-transformation-guide.md)** - Detailed JSON template syntax
 - **[XML Transformation Guide](doc/xml-transformation-guide.md)** - Detailed XML template syntax
+- **[Transform Free Marker Methods](doc/transform-fmarker-methods.md)** - List of FreeMarker methods available for transformation templates
 - **[Developer Guide](doc/developer-guide.md)** - Architecture and extension points
 - **[Library Summary](LIBRARY_SUMMARY.md)** - Quick reference guide
 

@@ -7,17 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
-import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
-import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Include;
@@ -130,11 +127,6 @@ public class XmlTemplateFactory implements ITemplateFactory
 	 */
 	public static final String PARAMS = "params";
 
-	/**
-	 * Expression used by value string which has to be replaced with resultant value.
-	 */
-	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
-	
 	private static final IContentLoader DEFAULT_CONTENT_LOADER = new IContentLoader() {};
 
     private IContentLoader contentLoader = DEFAULT_CONTENT_LOADER;
@@ -201,7 +193,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 			}
 			else if(object instanceof String)
 			{
-                object = parseExpression((String) object, path, false);
+                object = TransformUtils.parseExpression((String) object, path, false);
 			}
 		} catch(TransformException ex)
 		{
@@ -292,7 +284,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         if(TRANSFORM.equals(name)
             && StringUtils.isNotBlank(value))
         {
-            transformObject.setTransformExpression(parseExpression(value, path + RES_PATH_SEP + name, false));
+            transformObject.setTransformExpression(TransformUtils.parseExpression(value, path + RES_PATH_SEP + name, false));
             return true;
         }
         
@@ -444,7 +436,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         	// if set is being done with text body
         	if(reservedBean.getTextContent() != null)
         	{
-        		Object expression = parseExpression(reservedBean.getTextContent(), path + ">" + reservedBean.getName() + "[" + attributeName + "]", false);
+        		Object expression =  TransformUtils.parseExpression(reservedBean.getTextContent(), path + ">" + reservedBean.getName() + "[" + attributeName + "]", false);
         		
                 transformObject.addField(new TransformObjectField(
                 		reservedBean.getName(), 
@@ -504,7 +496,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 		
         if(StringUtils.isNotBlank(keyExpressionStr))
         {
-            keyExpression = parseExpression(keyExpressionStr, path + RES_PATH_SEP + NAME_EXPRESSION, true);
+            keyExpression = TransformUtils.parseExpression(keyExpressionStr, path + RES_PATH_SEP + NAME_EXPRESSION, true);
         }
         
         transformObject.addField(new TransformObjectField(
@@ -548,39 +540,6 @@ public class XmlTemplateFactory implements ITemplateFactory
         return transformObject;
     }
 
-    private Expression parseExpression(String expression, String path, boolean nullByDefault)
-    {
-        Matcher matcher = EXPR_PATTERN.matcher(expression);
-        
-        if(!matcher.matches())
-        {
-        	if(expression.contains("${") || expression.contains("<#"))
-        	{
-        		return new Expression(ExpressionType.TEMPLATE, expression);
-        	}
-        	
-            return nullByDefault ? null : new Expression(ExpressionType.STRING, expression);
-        }
-
-        String exprType = matcher.group(1);
-        String expr = matcher.group(2);
-
-        if(ITransformConstants.EXPR_TYPE_FMARKER.equals(exprType))
-        {
-            return new Expression(ExpressionType.FMARKER, expr);
-        }
-        else if(ITransformConstants.EXPR_TYPE_XPATH.equals(exprType))
-        {
-            return new Expression(ExpressionType.XPATH, expr);
-        }
-        else if(ITransformConstants.EXPR_TYPE_XPATH_MULTI.equals(exprType))
-        {
-            return new Expression(ExpressionType.XPATH_MULTI, expr);
-        }
-
-        throw new TransformException(path, "Invalid expression type specified '{}' in expression: {}", exprType, expression);
-    }
-    
     private TransformTemplate loadAndParse(String path, boolean isResource)
     {
     	String keyPrefix = isResource ? "res:" : "file:";
