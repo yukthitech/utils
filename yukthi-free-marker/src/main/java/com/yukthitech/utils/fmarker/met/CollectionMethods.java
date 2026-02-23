@@ -16,13 +16,16 @@
 package com.yukthitech.utils.fmarker.met;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
@@ -367,5 +370,23 @@ public class CollectionMethods
 			@FmParam(name = "value", description = "Value to be checked") Object value)
 	{
 		return collection.contains(value);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Creates a list of objects from the specified values.",
+			returnDescription = "List of objects.")
+	public static List<Object> listOf(
+		@FmParam(name = "values", description = "Values to be converted into list") Object... values)
+	{
+		return Arrays.asList(values);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Creates a set of objects from the specified values.",
+			returnDescription = "Set of objects.")
+	public static Set<Object> setOf(
+		@FmParam(name = "values", description = "Values to be converted into set") Object... values)
+	{
+		return new HashSet<>(Arrays.asList(values));
 	}
 }

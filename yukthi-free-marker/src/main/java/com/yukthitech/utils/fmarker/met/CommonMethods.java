@@ -17,6 +17,7 @@ package com.yukthitech.utils.fmarker.met;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -397,5 +398,16 @@ public class CommonMethods
 			@FmParam(name = "value2", description = "Second value to be compared") String value2)
 	{
 		return value1.equalsIgnoreCase(value2);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Checks if specified values are equal using Objects.equals() method. Two null values are considered equal.",
+			returnDescription = "True if values are equal."
+			)
+	public static boolean isEqual(
+			@FmParam(name = "value1", description = "First value to be compared") Object value1,
+			@FmParam(name = "value2", description = "Second value to be compared") Object value2)
+	{
+		return Objects.equals(value1, value2);
 	}
 }

@@ -17,6 +17,7 @@ package com.yukthi.utils.fmarker;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -100,6 +101,24 @@ public class TDefaultCollectionMethods
 		System.out.println("Result: " + actRes);
 		
 		Assert.assertEquals(actRes, expectedRes);
+	}
+
+	@Test
+	public void testListOf()
+	{
+		Object actRes = eval("listOf('1', '2', '3')");
+		System.out.println("Result: " + actRes);
+		
+		Assert.assertEquals(actRes, Arrays.asList("1", "2", "3"));
+	}
+
+	@Test
+	public void testSetOf()
+	{
+		Object actRes = eval("contains(setOf('1', '2', '3'), '2')");
+		System.out.println("Result: " + actRes);
+		
+		Assert.assertTrue((Boolean) actRes);
 	}
 
 }
