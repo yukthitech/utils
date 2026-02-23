@@ -310,6 +310,16 @@ Below is the list of free marker directives and methods available by default as 
 |keyExpression|java.lang.String||Freemarker key expression which will be executed on each of collection element. And obtained key will be used for grouping.|
 
 
+#### <span style="color:blue">listOf()</span>
+**Description**: Creates a list of objects from the specified values.<br>
+**Returns**: **[java.util.List]** List of objects.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|values|java.lang.Object[] (var-args)||Values to be converted into list|
+
+
 #### <span style="color:blue">mapKeys()</span>
 **Description**: Extracts and returns the keys collection as list of specified map.<br>
 **Returns**: **[java.util.Collection]** the values collection of specified map.
@@ -349,6 +359,16 @@ Below is the list of free marker directives and methods available by default as 
 |Name|Type|Default Value|Description|
 |:---|:---|:-----------|:-----------|
 |map|java.util.Map||Map whose values has to be extracted|
+
+
+#### <span style="color:blue">setOf()</span>
+**Description**: Creates a set of objects from the specified values.<br>
+**Returns**: **[java.util.Set]** Set of objects.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|values|java.lang.Object[] (var-args)||Values to be converted into set|
 
 
 #### <span style="color:blue">sortBy()</span>
@@ -430,6 +450,17 @@ Below is the list of free marker directives and methods available by default as 
 |Name|Type|Default Value|Description|
 |:---|:---|:-----------|:-----------|
 |value|java.lang.Object||Value to be checked for empty|
+
+
+#### <span style="color:blue">isEqual()</span>
+**Description**: Checks if specified values are equal using Objects.equals() method. Two null values are considered equal.<br>
+**Returns**: **[boolean]** True if values are equal.
+
+**Parameters**
+|Name|Type|Default Value|Description|
+|:---|:---|:-----------|:-----------|
+|value1|java.lang.Object||First value to be compared|
+|value2|java.lang.Object||Second value to be compared|
 
 
 #### <span style="color:blue">isEqualIgnoreCase()</span>
