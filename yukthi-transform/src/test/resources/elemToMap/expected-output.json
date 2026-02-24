@@ -1,0 +1,25 @@
+{
+    "attrRoot": "valRoot",
+    "onlyAttr": {
+        "attr1": "a1",
+        "attr2": "a2"
+    },
+    "onlyChildren": {
+        "child1": "v1",
+        "child2": "v2"
+    },
+    "attrAndChildren": {
+        "attr": "test",
+        "c1": "v3",
+        "c2": "v4",
+		"c3": ["v5", "v6"]
+    },
+    "attrAndText": {
+        "attrX": "atx",
+        "$text": "TextNodeVal"
+    },
+	"listNode": [
+		{"attr1": "10"},
+		{"attr1": "20", "attr2": "30"}
+	]
+}

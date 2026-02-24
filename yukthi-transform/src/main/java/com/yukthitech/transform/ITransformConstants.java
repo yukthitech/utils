@@ -24,6 +24,8 @@ public interface ITransformConstants
 	 */
 	String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
 	
+	String HYBRID_TEXT_PROP = "$text";
+	
 	public static String toPrettyJson(Object value)
 	{
 		try

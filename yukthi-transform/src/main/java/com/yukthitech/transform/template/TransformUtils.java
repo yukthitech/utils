@@ -1,17 +1,9 @@
 package com.yukthitech.transform.template;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import java.io.StringWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.jxpath.JXPathContext;
-import org.w3c.dom.Element;
 
 import com.yukthitech.transform.ExpressionUtil;
 import com.yukthitech.transform.ITransformConstants;
@@ -20,7 +12,6 @@ import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 public class TransformUtils
@@ -29,29 +20,6 @@ public class TransformUtils
 	 * Expression used by value string which has to be replaced with resultant value.
 	 */
 	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
-
-    public static String toXmlString(Element element)
-    {
-		try
-		{
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-			// Prepare the source and result
-			DOMSource source = new DOMSource(element);
-			StringWriter writer = new StringWriter();
-			StreamResult result = new StreamResult(writer);
-
-			// Perform the transformation
-			transformer.transform(source, result);
-
-			return writer.toString();
-		} catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while converting to xml string", ex);
-		}
-	}
 
     public static Expression parseExpression(String expression, String path, boolean nullByDefault)
     {

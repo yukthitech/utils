@@ -175,6 +175,50 @@
 		</expectedResult>
 	</jel-test-bean>
 
+	<jel-test-bean name="mapLoop">
+		<context>
+			{
+				"libraries": {
+					"Justbooks": {
+						"open": true
+					},
+					"Imagine": {
+						"open": true
+					},
+					"Other": {
+						"open": false
+					}
+				}
+			}
+		</context>
+		<template>
+			{
+				"libraries": [
+					{
+						"@for-each(lib)" : "libraries",
+						"@value": "@fmarker: lib.key"
+					}
+				],
+				"libStatus": {
+					"@fmarker: lib.key": {
+						"@for-each(lib)": "libraries",
+						"open": "@fmarker: lib.value.open"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"libraries": ["Justbooks", "Imagine", "Other"],
+				"libStatus": {
+					"Justbooks": {"open": true}, 
+					"Imagine": {"open": true}, 
+					"Other": {"open": false}
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
 	<jel-test-bean name="valueKey">
 		<context>
 			{

@@ -18,6 +18,7 @@ import org.w3c.dom.Text;
 
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
+import com.yukthitech.transform.TransformXmlUtils;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
@@ -344,6 +345,6 @@ public class XmlGenerator implements IGenerator
     public String formatObject(Object object)
     {
 		Element element = (Element) object;
-		return TransformUtils.toXmlString(element);
+		return TransformXmlUtils.toXmlString(element);
 	}
 }

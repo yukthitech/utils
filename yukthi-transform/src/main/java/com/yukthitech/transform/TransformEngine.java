@@ -247,7 +247,7 @@ public class TransformEngine
 	 * @param context context to be used for processing
 	 * @return processed list of values
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private List<Object> procesRepeatedElement(TransformObject transformObject, ITransformContext context, Expression nameExpression, TransformState transformState)
 	{
 		// if condition is present and evaluated to false, then return empty list
@@ -287,6 +287,10 @@ public class TransformEngine
 		else if(valueLstExpr instanceof Collection)
 		{
 			valueLst = (Collection<Object>) valueLstExpr;
+		}
+		else if(valueLstExpr instanceof Map)
+		{
+			valueLst = ((Map) valueLstExpr).entrySet();
 		}
 		else
 		{

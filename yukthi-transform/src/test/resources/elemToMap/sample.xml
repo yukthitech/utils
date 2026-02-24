@@ -1,0 +1,18 @@
+<root attrRoot="valRoot">
+    <onlyAttr attr1="a1" attr2="a2"/>
+    <onlyChildren>
+        <child1>v1</child1>
+        <child2>v2</child2>
+    </onlyChildren>
+    <attrAndChildren attr="test">
+        <c1>v3</c1>
+        <c2>v4</c2>
+        
+        <c3>v5</c3>
+        <c3>v6</c3>
+    </attrAndChildren>
+    <attrAndText attrX="atx">TextNodeVal</attrAndText>
+    
+    <listNode attr1="10"/>
+    <listNode attr1="20" attr2="30"/>
+</root>

@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
 import com.yukthitech.ccg.xml.IDynamicNodeAcceptor;
 import com.yukthitech.ccg.xml.IHybridTextBean;
+import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -224,14 +225,13 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 			finalMap.putAll(attributes);
 		}
 		
+		if(StringUtils.isNotBlank(textContent))
+		{
+			finalMap.put(ITransformConstants.HYBRID_TEXT_PROP, textContent);
+		}
+		
 		for(XmlDynamicBean subnode : this.nodes)
 		{
-			if(subnode.isTextNode())
-			{
-				finalMap.put(subnode.getName(), subnode.getTextContent());
-				continue;
-			}
-
 			Object subnodeValue = subnode.toSimpleMap();
 			Object existingValue = finalMap.get(subnode.getName());
 			
@@ -249,6 +249,10 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 					newList.add(subnodeValue);
 					finalMap.put(subnode.getName(), newList);
 				}
+			}
+			else
+			{
+				finalMap.put(subnode.getName(), subnodeValue);
 			}
 		}
 		

@@ -126,7 +126,7 @@ public class TestXmlTransformation
 		String res = processXml(bean.getTemplate(), context);
 		Object actualResult = parseXml(res);
 		
-		System.out.println("Xml Output:\n============= \n" + res);
+		System.out.println(String.format("(%s) Xml Output:\n============= \n%s", bean.getName(), res));
 		
 		//as deep comparison is done, re-covert data to json (removing identations) and compare
 		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
