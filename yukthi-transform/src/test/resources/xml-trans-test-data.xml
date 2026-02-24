@@ -111,22 +111,23 @@
 	<jel-test-bean name="mapLoop">
 		<context><![CDATA[
 			<libraries>
-				<Justbooks open="true"/>
-				<Imagine open="false"/>
+				<Justbooks open="true" techBookCount="10" litBookCount="4"/>
+				<Imagine open="false" techBookCount="5" litBookCount="2"/>
 			</libraries>
 		]]></context>
 		
 		<template><![CDATA[
 			<output xmlns:t="/transform">
-				<node t:for-each="libraries" t:loop-var="lib" t:name="${lib.key}">
+				<node t:for-each="libraries" t:loop-var="lib" t:name="${lib.key}"
+					bookCount="@fmarker: toInt(lib.value.techBookCount) + toInt(lib.value.litBookCount)">
 					${lib.value.open}
 				</node>
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[
 			<output>
-				<Justbooks>true</Justbooks>
-				<Imagine>false</Imagine>
+				<Justbooks bookCount="14">true</Justbooks>
+				<Imagine bookCount="7">false</Imagine>
 			</output>
 		]]></expectedResult>
 	</jel-test-bean>
