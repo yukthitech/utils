@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.xml.sax.Locator;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -56,13 +57,17 @@ public class BeanNode implements Cloneable
 	private Type genericType;
 	
 	private boolean retainWhiteSpacesEnabled;
+	
+	private int lineNumber;
+	
+	private int columnNumber;
 
-	public BeanNode(String nameSpace, String name, IParserHandler parserHandler)
+	public BeanNode(String nameSpace, String name, IParserHandler parserHandler,  Locator saxLocator)
 	{
-		this(nameSpace, name, null, null, parserHandler);
+		this(nameSpace, name, null, null, parserHandler, saxLocator);
 	}
 
-	public BeanNode(String nameSpace, String name, Object bean, BeanNode parent, IParserHandler parserHandler)
+	private BeanNode(String nameSpace, String name, Object bean, BeanNode parent, IParserHandler parserHandler, Locator saxLocator)
 	{
 		this.nameSpace = (nameSpace == null || nameSpace.trim().length() == 0) ? null : nameSpace.trim();
 		this.reserved = parserHandler.isReserveUri(this.nameSpace);
@@ -70,9 +75,12 @@ public class BeanNode implements Cloneable
 		this.bean = bean;
 		this.parentNode = parent;
 		this.retainWhiteSpacesEnabled = parserHandler.isRetainWhiteSpacesEnabled();
+
+		this.lineNumber = saxLocator.getLineNumber();
+		this.columnNumber = saxLocator.getColumnNumber();
 	}
 
-	private BeanNode(String nameSpace, String name, Object bean, BeanNode parent, boolean reserved, boolean retainWhiteSpacesEnabled)
+	private BeanNode(String nameSpace, String name, Object bean, BeanNode parent, boolean reserved, boolean retainWhiteSpacesEnabled, int lineNumber, int columnNumber)
 	{
 		this.nameSpace = (nameSpace == null || nameSpace.trim().length() == 0) ? null : nameSpace.trim();
 		this.reserved = reserved;
@@ -80,6 +88,9 @@ public class BeanNode implements Cloneable
 		this.bean = bean;
 		this.parentNode = parent;
 		this.retainWhiteSpacesEnabled = retainWhiteSpacesEnabled;
+		
+		this.lineNumber = lineNumber;
+		this.columnNumber = columnNumber;
 	}
 
 	void setBean(Object bean)
@@ -284,6 +295,16 @@ public class BeanNode implements Cloneable
 	{
 		return (id != null);
 	}
+	
+	public int getLineNumber()
+	{
+		return lineNumber;
+	}
+
+	public int getColumnNumber()
+	{
+		return columnNumber;
+	}
 
 	public String getNodePath()
 	{
@@ -301,7 +322,7 @@ public class BeanNode implements Cloneable
 
 	public Object clone()
 	{
-		BeanNode newObj = new BeanNode(nameSpace, name, bean, parentNode, reserved, retainWhiteSpacesEnabled);
+		BeanNode newObj = new BeanNode(nameSpace, name, bean, parentNode, reserved, retainWhiteSpacesEnabled, lineNumber, columnNumber);
 		newObj.setDescription(description);
 		newObj.setAttributeMap(attributeMap);
 		newObj.setType(type);

@@ -269,9 +269,9 @@ class SAXEventHandler extends DefaultHandler
 				Object nodeValue = activeNode.isTextNode() ? processText(activeNode.getText()) : activeNode.getActualBean();
 
 				if(activeNode.isIDBased())
-					acceptor.add(activeNode.getName(), activeNode.getID(), nodeValue);
+					acceptor.add(activeNode, activeNode.getName(), activeNode.getID(), nodeValue);
 				else
-					acceptor.add(activeNode.getName(), nodeValue);
+					acceptor.add(activeNode, activeNode.getName(), nodeValue);
 			} catch(Exception ex)
 			{
 				throw new XMLLoadException("Failed to set dynamic property for bean \"" + beanDesc + "\" for node: " + name, ex, activeNode, saxLocator);
@@ -369,7 +369,7 @@ class SAXEventHandler extends DefaultHandler
 
 	private BeanNode buildNewNode(String uri, String name, Attributes att)
 	{
-		BeanNode newNode = new BeanNode(uri, name, parserHandler);
+		BeanNode newNode = new BeanNode(uri, name, parserHandler, saxLocator);
 		XMLAttributeMap attrMap = new XMLAttributeMap(att, parserHandler);
 		newNode.setAttributeMap(attrMap);
 
@@ -578,7 +578,7 @@ class SAXEventHandler extends DefaultHandler
 
 				IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;
 
-				if(curAttMap.getNormalAttributeCount() == 1 && acceptor.isIdBased(newNode.getName()))
+				if(curAttMap.getNormalAttributeCount() == 1 && acceptor.isIdBased(newNode, newNode.getName()))
 				{
 					loadIDBasedNode(newNode, curAttMap, dynType, dynType);
 					return;
