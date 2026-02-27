@@ -32,7 +32,7 @@
 				}
 			]
 		</template>
-		<expectedError>Invalid condition 'notExistingField == 1' (Name: transform-condition) specified at path: [0]</expectedError>
+		<expectedError>Path: $[0]] Invalid condition 'notExistingField == 1' (Name: transform-condition)</expectedError>
 	</jel-test-bean>
 
 	<jel-test-bean name="invalidExpression">
@@ -49,7 +49,7 @@
 				}
 			]
 		</template>
-		<expectedError>Invalid expression 'nonExistingField.name' (Name: transform-expr) specified at path: [0]>name</expectedError>
+		<expectedError>Path: $[0].name] Invalid expression 'nonExistingField.name' (Name: transform-expr)</expectedError>
 	</jel-test-bean>
 
 	<jel-test-bean name="invalidExpressionType">
@@ -66,7 +66,7 @@
 				}
 			]
 		</template>
-		<expectedError>Invalid expression type specified 'invalid' in expression: @invalid: devStackEnabled Path: [0]>name</expectedError>
+		<expectedError>Path: $[0].name] Invalid expression type specified 'invalid' in expression: @invalid: devStackEnabled</expectedError>
 	</jel-test-bean>
 
 	<jel-test-bean name="conditionBasedRemovalInList">
@@ -81,6 +81,6 @@
 				"listWithPositiveCond": ["@condition:devStackEnabledx == 1", 1000, {"a": "b"}]
 			}
 		</template>
-		<expectedError>Invalid condition 'devStackEnabledx == 1' (Name: transform-condition) specified at path: >listWithPositiveCond</expectedError>
+		<expectedError>Path: $.listWithPositiveCond] Invalid condition 'devStackEnabledx == 1' (Name: transform-condition)</expectedError>
 	</jel-test-bean>
 </test-data>

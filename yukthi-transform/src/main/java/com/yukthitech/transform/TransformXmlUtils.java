@@ -1,5 +1,6 @@
 package com.yukthitech.transform;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,6 +13,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -42,6 +47,21 @@ public class TransformXmlUtils
 		} catch(Exception ex)
 		{
 			throw new InvalidStateException("An error occurred while converting to xml string", ex);
+		}
+	}
+
+	public static Map<String, Object> toMap(String xml)
+	{
+		try
+		{
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document document = builder.parse(new ByteArrayInputStream(xml.getBytes()));
+			Element element = document.getDocumentElement();
+			return toMap(element);
+		} catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while converting xml to map", ex);
 		}
 	}
 

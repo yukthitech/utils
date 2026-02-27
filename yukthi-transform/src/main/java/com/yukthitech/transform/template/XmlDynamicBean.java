@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.ccg.xml.BeanNode;
 import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
 import com.yukthitech.ccg.xml.IDynamicNodeAcceptor;
 import com.yukthitech.ccg.xml.IHybridTextBean;
@@ -52,15 +53,23 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	private String textContent;
 	
 	private boolean reserved;
+	
+	private Location location;
 
-	public XmlDynamicBean(String name)
+	public XmlDynamicBean(String name, Location location)
 	{
 		this.name = name;
+		this.location = location;
 	}
 
 	public String getName()
 	{
 		return name;
+	}
+	
+	public Location getLocation()
+	{
+		return location;
 	}
 	
 	public boolean isReserved()
@@ -93,7 +102,7 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	}
 	
 	@Override
-	public void add(String propName, Object obj)
+	public void add(BeanNode node, String propName, Object obj)
 	{
 		if(textContent != null)
 		{
@@ -102,7 +111,8 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 
 		if(obj instanceof String)
 		{
-			XmlDynamicBean bean = new XmlDynamicBean(propName);
+			XmlDynamicBean bean = new XmlDynamicBean(propName, 
+					new Location(node.getLineNumber(), node.getColumnNumber(), node.getNodePath()));
 			bean.setTextContent(obj.toString());
 			obj = bean;
 		}
@@ -111,11 +121,11 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 	}
 
 	@Override
-	public void add(String propName, String id, Object obj)
+	public void add(BeanNode node, String propName, String id, Object obj)
 	{}
 
 	@Override
-	public boolean isIdBased(String arg0)
+	public boolean isIdBased(BeanNode node, String arg0)
 	{
 		return false;
 	}

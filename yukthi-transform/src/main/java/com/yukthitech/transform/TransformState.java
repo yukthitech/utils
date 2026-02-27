@@ -3,6 +3,7 @@ package com.yukthitech.transform;
 import java.util.function.Consumer;
 
 import com.yukthitech.transform.template.IGenerator;
+import com.yukthitech.transform.template.Location;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
@@ -12,7 +13,7 @@ public class TransformState
 {
 	private IGenerator generator;
 	
-	private String path;
+	private Location location;
 	
 	/**
 	 * Flag indicating that currently the transformation is being
@@ -30,47 +31,53 @@ public class TransformState
 			throw new InvalidStateException("An error occurred while creating generator instance of type: " + template.getGeneratorType(), ex);
 		}
 		
-		this.path = generator.getRootPath();
+		this.location = template.getLocation();
 	}
 	
-	private TransformState(TransformState parent, String path)
+	private TransformState(TransformState parent, Location location)
 	{
 		this.generator = parent.generator;
 		this.attributeMode = parent.attributeMode;
-		this.path = path;
+		this.location = location;
 	}
 
 	public TransformState forField(TransformObjectField field)
 	{
-		return new TransformState(this, path + generator.getSubPath(field));
+		return new TransformState(this, field.getLocation());
 	}
 
 	public TransformState forIndex(int index)
 	{
-		return new TransformState(this, path + "[" + index + "]");
+		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + "[" + index + "]");
+		return new TransformState(this, newLoc);
 	}
 
 	public TransformState forClone()
 	{
-		return new TransformState(this, path + "{clone}");
+		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + "{clone}");
+		return new TransformState(this, newLoc);
 	}
 
 	public TransformState forDynField(String field)
 	{
-		return new TransformState(this, path + "#" + field);
+		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + "#" + field);
+		return new TransformState(this, newLoc);
 	}
 	
 	public TransformState forField(TransformObjectField field, String dynField)
 	{
-		String fieldPath = path + generator.getSubPath(field);
+		String fieldPath = location.getPath() + generator.getSubPath(field);
 		String newPath =  fieldPath + "#" + dynField;
 		
-		return new TransformState(this, newPath);
+		Location newLoc = new Location(location.getLine(), location.getColumn(), newPath);
+		
+		return new TransformState(this, newLoc);
 	}
 	
 	public void executeInAttributeMode(TransformObjectField field, Consumer<TransformState> attrStateConsumer)
 	{
-		TransformState newState = new TransformState(this, path + generator.getSubPath(field));
+		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + generator.getSubPath(field));
+		TransformState newState = new TransformState(this, newLoc);
 		newState.attributeMode = true;
 		
 		attrStateConsumer.accept(newState);
@@ -91,14 +98,14 @@ public class TransformState
 		generator.setField(this, field, object, name, fieldValue);
 	}
 	
-	public void injectReplaceEntry(String path, TransformObjectField field, Object object, Object injectedValue)
+	public void injectReplaceEntry(TransformObjectField field, Object object, Object injectedValue)
 	{
 		generator.injectReplaceEntry(this, field, object, injectedValue);
 	}
 	
 	public Object convertIncluded(Object value)
 	{
-		return generator.convertIncluded(path, value);
+		return generator.convertIncluded(this, value);
 	}
 	
 	public String formatObject(Object object)
@@ -111,8 +118,8 @@ public class TransformState
 		return generator.toSimpleObject(value);
 	}
 	
-	public String getPath()
+	public Location getLocation()
 	{
-		return path;
+		return location;
 	}
 }

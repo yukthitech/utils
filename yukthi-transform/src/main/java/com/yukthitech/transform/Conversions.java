@@ -18,6 +18,7 @@ package com.yukthitech.transform;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.yukthitech.transform.template.Location;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.Include;
@@ -67,7 +68,6 @@ public class Conversions
 		
 		String content = resource.getContent();
 
-		String path = transformObject.getPath();
 		boolean disableExpressions = resource.isExpressionsDisabled();
 		Object resParams = resource.getResParams();
 		
@@ -78,7 +78,7 @@ public class Conversions
 				context.setValue("resParams", resParams);
 			}
 			
-			content = ExpressionUtil.processTemplate(freeMarkerEngine, path, "res-content", content, context);
+			content = ExpressionUtil.processTemplate(freeMarkerEngine, transformObject.getLocation(), "res-content", content, context);
 		}
 		
 		Object finalRes = checkForTransform(transformObject, content, context, transformState);
@@ -130,7 +130,7 @@ public class Conversions
 			value.setValue(res);
 		}catch(Exception ex)
 		{
-			throw new TransformException(transformState.getPath(), "An error occurred while processing include template: {}", include.getPath(), ex);
+			throw new TransformException(transformState.getLocation(), "An error occurred while processing include template: {}", include.getPath(), ex);
 		}
 
 		return true;
@@ -157,17 +157,17 @@ public class Conversions
 		}
 	}
 	
-	public String processTemplate(String expression, ITransformContext context, String path)
+	public String processTemplate(String expression, ITransformContext context, Location location)
 	{
 		try
 		{
-			return ExpressionUtil.processTemplate(freeMarkerEngine, path, "transform-template", expression, context);
+			return ExpressionUtil.processTemplate(freeMarkerEngine, location, "transform-template", expression, context);
 		} catch(TransformException ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An error occurred while processing template: {}", expression, ex);
+			throw new TransformException(location, "An error occurred while processing template: {}", expression, ex);
 		}
 	}
 
@@ -190,7 +190,7 @@ public class Conversions
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(transformState.getPath(), "An error occurred while transforming result value", ex);	
+			throw new TransformException(transformState.getLocation(), "An error occurred while transforming result value", ex);	
 		}
 
 	}

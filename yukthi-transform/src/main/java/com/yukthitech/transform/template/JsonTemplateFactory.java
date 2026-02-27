@@ -1,7 +1,5 @@
 package com.yukthitech.transform.template;
 
-import static com.yukthitech.transform.ITransformConstants.OBJECT_MAPPER;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,17 +8,21 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
+import com.yukthitech.transform.TemplateParseException;
 import com.yukthitech.transform.TransformException;
+import com.yukthitech.transform.template.JsonWithLocationParser.JsonElementWithLocation;
+import com.yukthitech.transform.template.JsonWithLocationParser.ListWithLocation;
+import com.yukthitech.transform.template.JsonWithLocationParser.MapWithLocation;
+import com.yukthitech.transform.template.JsonWithLocationParser.ValueWithLocation;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
 import com.yukthitech.transform.template.TransformTemplate.Switch;
 import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
+import com.yukthitech.transform.template.TransformTemplate.TransformElement;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
@@ -157,76 +159,79 @@ public class JsonTemplateFactory implements ITemplateFactory
 
     public TransformTemplate parseTemplate(String templateContent) 
     {
+		JsonWithLocationParser parser = new JsonWithLocationParser();
         Object jsonObj = null;
         
         try
         {
-            jsonObj = OBJECT_MAPPER.readValue(templateContent, Object.class);
+            jsonObj = parser.parse(templateContent);
         } catch(Exception ex)
         {
             throw new InvalidStateException("An error occurred while parsing json template.", ex);
         }
 
-        Object root = parseObject(jsonObj, "");
+        TransformElement root = (TransformElement) parseObject((JsonElementWithLocation) jsonObj);
 
-        return new TransformTemplate(JsonGenerator.class, root);
+        return new TransformTemplate(JsonGenerator.class, root, root.getLocation());
     }
     
     private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
+        JsonWithLocationParser parser = new JsonWithLocationParser();
         Object jsonObj = null;
         
         try
         {
-            jsonObj = OBJECT_MAPPER.readValue(templateContent, Object.class);
+            jsonObj = parser.parse(templateContent);
         } catch(Exception ex)
         {
             throw new InvalidStateException("An error occurred while parsing json template.", ex);
         }
 
-        Object root = parseObject(jsonObj, "");
+        Object root = parseObject((JsonElementWithLocation) jsonObj);
         template.setRoot(root);
     }
     
-    @SuppressWarnings("unchecked")
-    private Object parseObject(Object object, String path)
+    private Object parseObject(JsonElementWithLocation object)
     {
 		try
 		{
-			if(object instanceof List)
+			if(object instanceof ListWithLocation)
 			{
-				object = parseList((List<Object>) object, path);
+				return parseList((ListWithLocation) object);
 			}
-			else if(object instanceof Map)
+
+			if(object instanceof MapWithLocation)
 			{
-				object = parseMap((Map<String, Object>) object, path);
+				return parseMap((MapWithLocation) object);
 			}
-			else if(object instanceof String)
+
+			ValueWithLocation valueWithLocation = (ValueWithLocation) object;
+
+			if(valueWithLocation.getValue() instanceof String)
 			{
-                object = TransformUtils.parseExpression((String) object, path, false);
+                return TransformUtils.parseExpression((String) valueWithLocation.getValue(), 
+					valueWithLocation.getLocation(), false);
 			}
-		} catch(TransformException ex)
+
+			return valueWithLocation.getValue();
+		} catch(TemplateParseException ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An unhandled error occurred", ex);
+			throw new TemplateParseException(object.getLocation(), "An unhandled error occurred", ex);
 		}
-		
-		return object;
     }
 
-    private Object parseList(List<Object> list, String path)
+    private TransformList parseList(ListWithLocation list)
     {
         boolean firstValue = true;
         String condition = null;
         List<Object> objects = new ArrayList<>();
-        int index = -1;
         
-        for(Object object : list)
+        for(JsonElementWithLocation object : list)
         {
-        	index++;
-        	
             if(firstValue)
             {
                 condition = checkForListCondition(object);
@@ -239,20 +244,20 @@ public class JsonTemplateFactory implements ITemplateFactory
                 }
             }
 
-            objects.add(parseObject(object, path + "[" + index + "]"));
+            objects.add(parseObject(object));
         }
         
-        return new TransformList(path, condition, objects);
+        return new TransformList(list.getLocation(), condition, objects);
     }
 
-    private String checkForListCondition(Object object)
+    private String checkForListCondition(JsonElementWithLocation object)
     {
-        if(!(object instanceof String))
+        if(!(object.getValue() instanceof String))
         {
             return null;
         }
         
-        Matcher matcher = Conversions.EXPR_PATTERN.matcher((String) object);
+        Matcher matcher = Conversions.EXPR_PATTERN.matcher((String) object.getValue());
         
         if(!matcher.matches())
         {
@@ -269,15 +274,15 @@ public class JsonTemplateFactory implements ITemplateFactory
         return matcher.group(2);
     }
 
-    private Object parseMap(Map<String, Object> map, String path)
+    private TransformObject parseMap(MapWithLocation map)
     {
-        TransformObject transformObject = new TransformObject(path);
+        TransformObject transformObject = new TransformObject(map.getLocation());
 
-        for(Map.Entry<String, Object> entry : map.entrySet())
+        for(Map.Entry<String, JsonElementWithLocation> entry : map.entrySet())
         {
             if(KEY_CONDITION.equals(entry.getKey()))
             {
-                transformObject.setCondition(entry.getValue().toString());
+                transformObject.setCondition(map.getString(KEY_CONDITION));
                 continue;
             }
 
@@ -286,50 +291,38 @@ public class JsonTemplateFactory implements ITemplateFactory
             if(forEachMatcher.matches())
             {
                 String loopVariable = forEachMatcher.group(1);
-                Object listExpression = entry.getValue();
-                String loopCondition = (String) map.get(KEY_FOR_EACH_CONDITION);
+                JsonElementWithLocation listExpression = (JsonElementWithLocation) entry.getValue();
+                String loopCondition = map.getString(KEY_FOR_EACH_CONDITION);
 
-                transformObject.setForEachLoop(new ForEachLoop(listExpression, loopVariable, loopCondition));
+                transformObject.setForEachLoop(new ForEachLoop(listExpression.getLocation(), listExpression.getValue(), 
+					loopVariable, loopCondition));
                 continue;
             }
 
             if(KEY_SWITCH.equals(entry.getKey()))
             {
-            	Object switchValue = entry.getValue();
+            	JsonElementWithLocation switchValue = entry.getValue();
             	
-            	if(!(switchValue instanceof List))
+            	if(!(switchValue instanceof ListWithLocation))
             	{
-            		throw new TransformException(path + ">" + entry.getKey(), 
-            			"@switch must have a list value, but found: {}", 
-            			(switchValue != null ? switchValue.getClass().getName() : "null"));
+            		throw new TemplateParseException(
+						switchValue.getLocation(), "For '@switch' value must be a list.");
             	}
-            	
-            	@SuppressWarnings("unchecked")
-            	List<Object> switchCases = (List<Object>) switchValue;
-            	
-            	// Validation: At least one case is mandatory
-            	if(switchCases.isEmpty())
-            	{
-            		throw new TransformException(path + ">" + entry.getKey(), 
-            			"@switch must have at least one case");
-            	}
-            	
+
+            	ListWithLocation switchCases = (ListWithLocation) switchValue.getValue();
             	List<SwitchCase> parsedCases = new ArrayList<>();
             	boolean defaultCaseFound = false;
             	
             	for(int i = 0; i < switchCases.size(); i++)
             	{
-            		Object caseObj = switchCases.get(i);
+            		JsonElementWithLocation caseObj = switchCases.get(i);
             		
-            		if(!(caseObj instanceof Map))
+            		if(!(caseObj instanceof MapWithLocation))
             		{
-            			throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
-            				"Switch case must be a map object, but found: {}", 
-            				(caseObj != null ? caseObj.getClass().getName() : "null"));
+            			throw new TemplateParseException(caseObj.getLocation(), "Switch case must be a map object.");
             		}
             		
-            		@SuppressWarnings("unchecked")
-            		Map<String, Object> caseMap = (Map<String, Object>) caseObj;
+            		MapWithLocation caseMap = (MapWithLocation) caseObj.getValue();
             		
             		String condition = null;
             		Object value = null;
@@ -337,7 +330,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             		// Check for @case
             		if(caseMap.containsKey(KEY_CASE))
             		{
-            			condition = caseMap.get(KEY_CASE).toString();
+            			condition = caseMap.getString(KEY_CASE);
             		}
             		
             		// Validation: Default case (no condition) should be at the end only
@@ -345,14 +338,14 @@ public class JsonTemplateFactory implements ITemplateFactory
             		{
             			if(defaultCaseFound)
             			{
-            				throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
-            					"Multiple default cases (cases without @case) found in @switch. Only one default case is allowed and it must be at the end");
+            				throw new TemplateParseException(caseObj.getLocation(), 
+								"Multiple default cases (cases without @case) found in @switch. Only one default case is allowed and it must be at the end");
             			}
             			
             			// Check if this is not the last case
             			if(i < switchCases.size() - 1)
             			{
-            				throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
+            				throw new TemplateParseException(caseObj.getLocation(), 
             					"Default case (case without @case) must be the last case in @switch");
             			}
             			
@@ -362,45 +355,49 @@ public class JsonTemplateFactory implements ITemplateFactory
             		// Check for @value - @value is mandatory
             		if(caseMap.containsKey(KEY_VALUE))
             		{
-            			value = parseObject(caseMap.get(KEY_VALUE), path + ">" + entry.getKey() + "[" + i + "]>@value");
+            			value = parseObject(caseMap.get(KEY_VALUE));
             		}
                     else
             		{
-            			throw new TransformException(path + ">" + entry.getKey() + "[" + i + "]", 
+            			throw new TemplateParseException(caseObj.getLocation(), 
             				"Switch case must have @value specified");
             		}
             		
-            		parsedCases.add(new SwitchCase(condition, value));
+            		parsedCases.add(new SwitchCase(caseObj.getLocation(), condition, value));
             	}
             	
-            	transformObject.setSwitchStatement(new Switch(parsedCases));
+            	transformObject.setSwitchStatement(new Switch(switchValue.getLocation(), parsedCases));
                 continue;
             }
 
             if(KEY_FALSE_VALUE.equals(entry.getKey()))
             {
-            	Object falseValue = parseObject(entry.getValue(), path + ">" + entry.getKey());
+            	Object falseValue = parseObject(entry.getValue());
                 transformObject.setFalseValue(falseValue);
                 continue;
             }
 
             if(KEY_VALUE.equals(entry.getKey()))
             {
-            	Object valueObj = parseObject(entry.getValue(), path + ">" + entry.getKey());
+            	Object valueObj = parseObject(entry.getValue());
                 transformObject.setValue(valueObj);
                 continue;
             }
 
-            if(TRANSFORM.equals(entry.getKey()) && (entry.getValue() instanceof String)
-                && StringUtils.isNotBlank((String) entry.getValue()))
+            if(TRANSFORM.equals(entry.getKey()))
             {
-                transformObject.setTransformExpression(TransformUtils.parseExpression((String) entry.getValue(), path + ">" + entry.getKey(), false));
+				JsonElementWithLocation transformValue = (JsonElementWithLocation) entry.getValue();
+				
+                transformObject.setTransformExpression(TransformUtils.parseExpression(
+					map.getString(TRANSFORM),
+					transformValue.getLocation(),
+					false));
                 continue;
             }
 
             if(RES.equals(entry.getKey()))
             {
-                String resPath = entry.getValue().toString();
+                String resPath = map.getString(RES);
                 String content = null;
 
                 try
@@ -408,15 +405,17 @@ public class JsonTemplateFactory implements ITemplateFactory
                     content = contentLoader.loadResource(resPath);
                 }catch(Exception ex)
                 {
-                    throw new TransformException(path, "Failed to load resource: {}", entry.getValue(), ex);			
+                    throw new TemplateParseException(entry.getValue().getLocation(), 
+						"Failed to load resource: {}", resPath, ex);			
                 }
 
                 boolean disableExpressions = "false".equalsIgnoreCase("" + map.get(RES_PARAM_EXPR));
-                Object resParams = map.get(RES_PARAM_PARAMS);
+                Object resParams = map.get(RES_PARAM_PARAMS).getValue();
 
-                String transformExpression = (String) map.get(TRANSFORM);
+                String transformExpression = map.getString(TRANSFORM);
 
                 transformObject.setResource(new Resource(
+					entry.getValue().getLocation(),
                     resPath, 
                     content, 
                     disableExpressions, 
@@ -427,7 +426,7 @@ public class JsonTemplateFactory implements ITemplateFactory
 
             if(INCLUDE_RES.equals(entry.getKey()) || INCLUDE_FILE.equals(entry.getKey()))
             {
-                transformObject.setInclude(parseInclude(map, entry.getKey(), path + ">" + entry.getKey()));
+                transformObject.setInclude(parseInclude(map, entry.getKey()));
                 continue;
             }
             
@@ -439,10 +438,11 @@ public class JsonTemplateFactory implements ITemplateFactory
             	String attributeName = setMatcher.group(1);
 
                 transformObject.addField(new TransformObjectField(
+                        entry.getValue().getLocation(),
                         entry.getKey(), 
                         null,
                         attributeName, 
-                        parseObject(entry.getValue(), path + ">" + entry.getKey()),
+                        parseObject(entry.getValue()),
                         false
                     ));
                 continue;
@@ -453,17 +453,18 @@ public class JsonTemplateFactory implements ITemplateFactory
             if(REPLACE_PATTERN.matcher(entry.getKey()).matches())
             {
                 transformObject.addField(new TransformObjectField(
+                        entry.getValue().getLocation(),
                         entry.getKey(), 
                         null,
                         null, 
-                        parseObject(entry.getValue(), path + ">" + entry.getKey()),
+                        parseObject(entry.getValue()),
                         true
                     ));
                 continue;
             }
 
             //check if key itself represents an expression
-            Expression keyExpression = TransformUtils.parseExpression(entry.getKey(), path + ">" + entry.getKey(), true);
+            Expression keyExpression = TransformUtils.parseExpression(entry.getKey(), entry.getValue().getLocation(), true);
             
             // if key starts with @, those are special keys
             if(entry.getKey().startsWith("@") && keyExpression == null)
@@ -473,14 +474,16 @@ public class JsonTemplateFactory implements ITemplateFactory
             		continue;
             	}
             	
-                throw new InvalidStateException("Invalid transform attribute '{}' specified at path: {}", entry.getKey(), path);
+                throw new TemplateParseException(entry.getValue().getLocation(), 
+					"Invalid transform attribute '{}' specified", entry.getKey());
             }
 
             transformObject.addField(new TransformObjectField(
+                entry.getValue().getLocation(),
                 entry.getKey(), 
                 keyExpression,
                 null, 
-                parseObject(entry.getValue(), path + ">" + entry.getKey()),
+                parseObject(entry.getValue()),
                 false
             ));
         }
@@ -488,7 +491,7 @@ public class JsonTemplateFactory implements ITemplateFactory
         return transformObject;
     }
 
-    private TransformTemplate loadAndParse(String path, boolean isResource)
+    private TransformTemplate loadAndParse(Location location, String path, boolean isResource)
     {
     	String keyPrefix = isResource ? "res:" : "file:";
     	String key = keyPrefix + path;
@@ -517,17 +520,17 @@ public class JsonTemplateFactory implements ITemplateFactory
 		{
 			if(isResource)
 			{
-				throw new TransformException(path, "Failed to include resource: {}", path, ex);
+				throw new TransformException(location, "Failed to include resource: {}", path, ex);
 			}
 			else
 			{
-				throw new TransformException(path, "Failed to include file: {}", path, ex);
+				throw new TransformException(location, "Failed to include file: {}", path, ex);
 			}
 		}
 		
 		// first template is kept on cache (before parsing) to avoid
 		//   never ending recursion in case of recursive templates
-		subTemplate = new TransformTemplate(JsonGenerator.class, null);
+		subTemplate = new TransformTemplate(JsonGenerator.class, null, location);
 		includeCache.put(key, subTemplate);
 		
 		parseTemplateTo(content, subTemplate);
@@ -535,27 +538,28 @@ public class JsonTemplateFactory implements ITemplateFactory
 		return subTemplate;
     }
 
-    private Include parseInclude(Map<String, Object> map, String key, String path)
+    private Include parseInclude(MapWithLocation map, String key)
     {
-        String includePath = map.get(key).toString();
+        String includePath = map.getString(key);
         
-		Object params = map.get(PARAMS);
+		JsonElementWithLocation params = map.get(PARAMS);
 		
-		if(params != null && !(params instanceof Map))
+		if(params != null && !(params instanceof MapWithLocation))
 		{
-			throw new TransformException(path, "Invalid params specified for include tag. params should be of type Map");
+			throw new TemplateParseException(map.get(PARAMS).getLocation(), 
+				"Invalid params specified for include tag. params should be of type Map");
 		}
 		
 		TransformObject paramsObj = null;
 
 		if(params != null)
 		{
-			paramsObj = (TransformObject) parseObject(params, path + ">" + PARAMS);
+			paramsObj = (TransformObject) parseObject(params);
 		}
         
         boolean isResource = INCLUDE_RES.equals(key);
 		
-		TransformTemplate subTemplate = loadAndParse(includePath, isResource);
-        return new Include(includePath, subTemplate, paramsObj);
+		TransformTemplate subTemplate = loadAndParse(map.getLocation(), includePath, isResource);
+        return new Include(map.getLocation(), includePath, subTemplate, paramsObj);
     }
 }

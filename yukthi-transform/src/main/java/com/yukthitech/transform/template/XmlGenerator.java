@@ -63,15 +63,13 @@ public class XmlGenerator implements IGenerator
 			return new LinkedHashMap<String, Object>();
 		}
 		
-		String path = state.getPath();
-		
 		try
 		{
 			Element element = document.createElement(transformObj.getName());
 			return element;
 		}catch(Exception ex)
 		{
-			throw new TransformException(path, "Failed to create new DOM element with name: {}", transformObj.getName(), ex);
+			throw new TransformException(state.getLocation(), "Failed to create new DOM element with name: {}", transformObj.getName(), ex);
 		}
 	}
 	
@@ -136,7 +134,6 @@ public class XmlGenerator implements IGenerator
 	private void setFieldSingleValue(TransformState state, TransformObjectField field, Object object, String name, Object fieldValue)
 	{
 		Element element = (Element) object;
-		String path = state.getPath();
 		
 		if(field.getType() == FieldType.ATTRIBUTE)
 		{
@@ -145,7 +142,7 @@ public class XmlGenerator implements IGenerator
 				element.setAttribute(name, fieldValue.toString());
 			}catch(Exception ex)
 			{
-				throw new TransformException(path, "Failed to add attribute: [Name: {}, Value: {}]", name, fieldValue, ex);
+				throw new TransformException(state.getLocation(), "Failed to add attribute: [Name: {}, Value: {}]", name, fieldValue, ex);
 			}
 			
 			return;
@@ -164,7 +161,7 @@ public class XmlGenerator implements IGenerator
 					element.appendChild(nameElem);
 				}catch(Exception ex)
 				{
-					throw new TransformException(path, "Failed to add text-node: [Name: {}, Value: {}]", name, fieldValue, ex);
+					throw new TransformException(state.getLocation(), "Failed to add text-node: [Name: {}, Value: {}]", name, fieldValue, ex);
 				}
 				
 				return;
@@ -182,7 +179,7 @@ public class XmlGenerator implements IGenerator
 				element.appendChild(subelem);
 			}catch(Exception ex)
 			{
-				throw new TransformException(path, "Failed to append chile node: [Name: {}, New Name: {}]", subelem.getTagName(), name, ex);
+				throw new TransformException(state.getLocation(), "Failed to append chile node: [Name: {}, New Name: {}]", subelem.getTagName(), name, ex);
 			}
 			return;
 		}
@@ -193,19 +190,17 @@ public class XmlGenerator implements IGenerator
 			element.appendChild(textVal);
 		}catch(Exception ex)
 		{
-			throw new TransformException(path, "Failed to append text value: {}", fieldValue, ex);
+			throw new TransformException(state.getLocation(), "Failed to append text value: {}", fieldValue, ex);
 		}
 	}
 	
 	@Override
 	public void injectReplaceEntry(TransformState state, TransformObjectField field, Object object, Object injectedValue)
 	{
-		String path = state.getPath();
-		
 		//if result value is not map
 		if(!(injectedValue instanceof Element))
 		{
-			throw new TransformException(path, "Value of @replace key must be a element but found: {}", injectedValue.getClass().getName());
+			throw new TransformException(state.getLocation(), "Value of @replace key must be a element but found: {}", injectedValue.getClass().getName());
 		}
 		
 		Element element = (Element) object;
@@ -248,7 +243,7 @@ public class XmlGenerator implements IGenerator
 	}
 	
 	@Override
-	public Object convertIncluded(String path, Object value)
+	public Object convertIncluded(TransformState state, Object value)
 	{
 		if(value == null)
 		{

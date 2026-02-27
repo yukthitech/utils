@@ -21,7 +21,8 @@ public class XmlTemplateParserHandler extends DefaultParserHandler
 	
 	private XmlDynamicBean mapToBean(BeanNode node, XMLAttributeMap att)
 	{
-		XmlDynamicBean rootBean = new XmlDynamicBean(node.getName());
+		Location location = new Location(node.getLineNumber(), node.getColumnNumber(), node.getNodePath());
+		XmlDynamicBean rootBean = new XmlDynamicBean(node.getName(), location);
 		
 		for(Map.Entry<String, XMLAttributeMap.Attribute> entry : att.entrySet())
 		{

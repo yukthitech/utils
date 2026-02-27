@@ -38,7 +38,7 @@ public class InternalExpressionContext
 	public Object evaluateExpression(String expressionStr)
 	{
 		Expression expression = TransformUtils.parseExpression(expressionStr, 
-			transformState.getPath() + " (eval-expr)", false);
+			transformState.getLocation(), false);
 		return TransformUtils.processExpression(freeMarkerEngine, expression, context, transformState);
 	}
 }

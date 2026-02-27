@@ -145,6 +145,8 @@ public class TestJsonTransformation
 		String res = processJson(bean.getTemplate(), context);
 		Object actualResult = objectMapper.readValue(res, Object.class);
 		
+		System.out.println(String.format("\n\n(testJel - %s) JSON Output:\n============= \n%s", bean.getName(), res));
+		
 		//as deep comparison is done, re-covert data to json (removing identations) and compare
 		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
 	}
@@ -158,6 +160,8 @@ public class TestJsonTransformation
 		//execute the jel
 		String res = processJson(bean.getTemplate(), bean.getPojoContext());
 		Object actualResult = objectMapper.readValue(res, Object.class);
+		
+		System.out.println(String.format("\n\n(pojoJsonElDataProvider - %s) JSON Output:\n============= \n%s", bean.getName(), res));
 		
 		//as deep comparison is done, re-covert data to json (removing identations) and compare
 		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
@@ -179,13 +183,14 @@ public class TestJsonTransformation
 		{
 			String expMssg = bean.getExpectedError();
 			String actMssg = ex.getMessage().replaceAll("\\s+", " ");
-			
+
 			System.out.println(String.format("Error evaluation for %s:"
+					+ "\n\tException Type: %s"
 					+ "\n\tActual Message: %s"
 					+ "\n\tExpected Message: %s",
-					bean.getName(), actMssg, expMssg));
+					bean.getName(), ex.getClass().getName(), actMssg, expMssg));
 			
-			Assert.assertTrue(actMssg.startsWith(expMssg),
+			Assert.assertTrue(actMssg.contains(expMssg),
 					String.format("\nActual Message: %s\nDoes not start with: %s", actMssg, expMssg));
 		}
 	}

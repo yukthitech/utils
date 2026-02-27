@@ -16,7 +16,7 @@ public interface IGenerator
 	
 	public void injectReplaceEntry(TransformState state, TransformObjectField field, Object object, Object injectedValue);
 	
-	public Object convertIncluded(String path, Object value);
+	public Object convertIncluded(TransformState state, Object value);
 	
 	public Object toSimpleObject(Object value);
 	

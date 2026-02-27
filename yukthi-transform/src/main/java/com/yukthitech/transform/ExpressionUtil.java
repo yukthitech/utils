@@ -15,12 +15,13 @@
  */
 package com.yukthitech.transform;
 
+import com.yukthitech.transform.template.Location;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.TemplateProcessingException;
 
 public class ExpressionUtil
 {
-	public static String processTemplate(FreeMarkerEngine freeMarkerEngine, String path, String name, String template, Object context)
+	public static String processTemplate(FreeMarkerEngine freeMarkerEngine, Location location, String name, String template, Object context)
 	{
 		try
 		{
@@ -35,12 +36,12 @@ public class ExpressionUtil
 				ex = null;
 			}
 			
-			throw new TransformException(path, "An error occurred while evaluating template specified at path: {}\nProcessing Error: {}\nTemplate: {}", 
-					name, path, prcessingError, template, ex);	
+			throw new TransformException(location, "An error occurred while evaluating template \nProcessing Error: {}\nTemplate: {}", 
+					prcessingError, template, ex);	
 		}
 	}
 
-	public static Object processValueExpression(FreeMarkerEngine freeMarkerEngine, String path, String name, String expression, Object context)
+	public static Object processValueExpression(FreeMarkerEngine freeMarkerEngine, Location location, String name, String expression, Object context)
 	{
 		try
 		{
@@ -55,12 +56,12 @@ public class ExpressionUtil
 				ex = (Exception) ex.getCause();
 			}
 			
-			throw new TransformException(path, "Invalid expression '{}' (Name: {}) specified at path: {}\nProcessing Error: {}", 
-					expression, name, path, prcessingError, ex);	
+			throw new TransformException(location, "Invalid expression '{}' (Name: {}) \nProcessing Error: {}", 
+					expression, name, prcessingError, ex);	
 		}
 	}
 	
-	public static boolean evaluateCondition(FreeMarkerEngine freeMarkerEngine, String path, String name, String condition, Object context)
+	public static boolean evaluateCondition(FreeMarkerEngine freeMarkerEngine, Location location, String name, String condition, Object context)
 	{
 		try
 		{
@@ -74,8 +75,8 @@ public class ExpressionUtil
 				prcessingError = ex.getCause().getMessage();
 			}
 			
-			throw new TransformException(path, "Invalid condition '{}' (Name: {}) specified at path: {}\nProcessing Error: {}", 
-					condition, name, path, prcessingError, ex);	
+			throw new TransformException(location, "Invalid condition '{}' (Name: {}) \nProcessing Error: {}", 
+					condition, name, prcessingError, ex);	
 		}
 	}
 

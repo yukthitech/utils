@@ -15,6 +15,7 @@
  */
 package com.yukthitech.transform;
 
+import com.yukthitech.transform.template.Location;
 import com.yukthitech.utils.exceptions.UtilsException;
 
 /**
@@ -25,15 +26,23 @@ public class TransformException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;
 
+	private Location location;
+
 	/**
 	 * Instantiates a new transformation exception.
 	 *
-	 * @param path the path
+	 * @param location the location
 	 * @param mssgTemplate the mssg template
 	 * @param args the args
 	 */
-	public TransformException(String path, String mssgTemplate, Object... args)
+	public TransformException(Location location, String mssgTemplate, Object... args)
 	{
-		super(buildMessage(mssgTemplate, args) + "\n Path: " + path, getRootCause(args));
+		super(location + " " + mssgTemplate, args);
+		this.location = location;
+	}
+
+	public Location getLocation()
+	{
+		return location;
 	}
 }

@@ -8,6 +8,7 @@ import org.apache.commons.jxpath.JXPathContext;
 import com.yukthitech.transform.ExpressionUtil;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.ITransformContext;
+import com.yukthitech.transform.TemplateParseException;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
@@ -21,7 +22,7 @@ public class TransformUtils
 	 */
 	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
 
-    public static Expression parseExpression(String expression, String path, boolean nullByDefault)
+    public static Expression parseExpression(String expression, Location location, boolean nullByDefault)
     {
         Matcher matcher = EXPR_PATTERN.matcher(expression);
         
@@ -29,10 +30,10 @@ public class TransformUtils
         {
         	if(expression.contains("${") || expression.contains("<#"))
         	{
-        		return new Expression(ExpressionType.TEMPLATE, expression);
+        		return new Expression(location, ExpressionType.TEMPLATE, expression);
         	}
         	
-            return nullByDefault ? null : new Expression(ExpressionType.STRING, expression);
+            return nullByDefault ? null : new Expression(location, ExpressionType.STRING, expression);
         }
 
         String exprType = matcher.group(1);
@@ -40,18 +41,18 @@ public class TransformUtils
 
         if(ITransformConstants.EXPR_TYPE_FMARKER.equals(exprType))
         {
-            return new Expression(ExpressionType.FMARKER, expr);
+            return new Expression(location, ExpressionType.FMARKER, expr);
         }
         else if(ITransformConstants.EXPR_TYPE_XPATH.equals(exprType))
         {
-            return new Expression(ExpressionType.XPATH, expr);
+            return new Expression(location, ExpressionType.XPATH, expr);
         }
         else if(ITransformConstants.EXPR_TYPE_XPATH_MULTI.equals(exprType))
         {
-            return new Expression(ExpressionType.XPATH_MULTI, expr);
+            return new Expression(location, ExpressionType.XPATH_MULTI, expr);
         }
 
-        throw new TransformException(path, "Invalid expression type specified '{}' in expression: {}", exprType, expression);
+        throw new TemplateParseException(location, "Invalid expression type specified '{}' in expression: {}", exprType, expression);
     }
 
 	/**
@@ -71,7 +72,7 @@ public class TransformUtils
 		{
 			if(exprType == ExpressionType.FMARKER)
 			{
-				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getPath(), "transform-expr", expr, context);
+				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getLocation(), "transform-expr", expr, context);
 			}
 			else if(exprType == ExpressionType.XPATH)
 			{
@@ -83,7 +84,7 @@ public class TransformUtils
 			}
 			else if(exprType == ExpressionType.TEMPLATE)
 			{
-				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getPath(), "transform-template", expr, context);
+				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getLocation(), "transform-template", expr, context);
 			}
 			else if(exprType == ExpressionType.STRING)
 			{
@@ -94,9 +95,9 @@ public class TransformUtils
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(transformState.getPath(), "An error occurred while processing expression: {} [Type: {}]", expr, exprType, ex);
+			throw new TransformException(transformState.getLocation(), "An error occurred while processing expression: {} [Type: {}]", expr, exprType, ex);
 		}
 		
-		throw new TransformException(transformState.getPath(), "Invalid expression type specified '{}' in expression: {}", exprType, expr);
+		throw new TransformException(transformState.getLocation(), "Invalid expression type specified '{}' in expression: {}", exprType, expr);
 	}
 }

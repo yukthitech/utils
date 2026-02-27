@@ -159,7 +159,7 @@ public class TransformEngine
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(transformState.getPath(), "An unhandled error occurred", ex);
+			throw new TransformException(transformState.getLocation(), "An unhandled error occurred", ex);
 		}
 		
 		return object;
@@ -277,7 +277,7 @@ public class TransformEngine
 		// in case of string process it as an expression
 		if(valueLstExpr instanceof String)
 		{
-			valueLstExpr = ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getPath(), "transform-valueLst-expr", (String) valueLstExpr, context);
+			valueLstExpr = ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getLocation(), "transform-valueLst-expr", (String) valueLstExpr, context);
 		}
 		
 		if(valueLstExpr == null)
@@ -312,7 +312,7 @@ public class TransformEngine
 			{
 				//evaluate the condition. And if condition results in false
 				//  ignore current iteration object
-				if(!ExpressionUtil.evaluateCondition(freeMarkerEngine, transformObject.getPath(), "for-each-condition", forEachCond, context))
+				if(!ExpressionUtil.evaluateCondition(freeMarkerEngine, transformObject.getLocation(), "for-each-condition", forEachCond, context))
 				{
 					continue;
 				}
@@ -394,7 +394,6 @@ public class TransformEngine
 
 		Object resObj = transformState.newObject(transformObject);
 		boolean setKeyPresent = false;
-		String path = transformObject.getPath();
 		boolean otherEntriesAdded = false;
 
 		//loop through map entries
@@ -415,7 +414,7 @@ public class TransformEngine
 					
 					if(nameExpression == null)
 					{
-						nameExpression = new Expression(ExpressionType.STRING, fieldName);
+						nameExpression = new Expression(field.getLocation(), ExpressionType.STRING, fieldName);
 					}
 					
 					//based on loop expression generate objects which should be added to res map
@@ -463,7 +462,7 @@ public class TransformEngine
 			
 			if(field.isReplaceEntry())
 			{
-				transformState.injectReplaceEntry(path, field, resObj, val);
+				transformState.injectReplaceEntry(field, resObj, val);
 				otherEntriesAdded = true;
 				continue;
 			}
@@ -549,7 +548,7 @@ public class TransformEngine
 			{
 				conditionMet = ExpressionUtil.evaluateCondition(
 					freeMarkerEngine,
-					transformObject.getPath() + ">@switch[" + i + "]>@case",
+					transformObject.getLocation(),
 					"switch-condition",
 					condition,
 					context);
@@ -597,7 +596,7 @@ public class TransformEngine
 
 		//evaluate the condition and return the result
 		return ExpressionUtil.evaluateCondition(freeMarkerEngine, 
-			transformObject.getPath(), 
+			transformObject.getLocation(), 
 			"transform-condition", 
 			condition, 
 			context);
@@ -620,7 +619,7 @@ public class TransformEngine
 		//evaluate the condition and return the result
 		return ExpressionUtil.evaluateCondition(
 			freeMarkerEngine, 
-			transformList.getPath(), 
+			transformList.getLocation(), 
 			"transform-condition", 
 			transformList.getCondition(), 
 			context);

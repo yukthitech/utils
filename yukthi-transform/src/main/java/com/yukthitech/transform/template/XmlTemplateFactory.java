@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
-import com.yukthitech.transform.TransformException;
+import com.yukthitech.transform.TemplateParseException;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
@@ -21,10 +21,10 @@ import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
 import com.yukthitech.transform.template.TransformTemplate.Switch;
 import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
+import com.yukthitech.transform.template.TransformTemplate.TransformElement;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
-import com.yukthitech.utils.exceptions.InvalidStateException;
 
 public class XmlTemplateFactory implements ITemplateFactory
 {
@@ -35,10 +35,6 @@ public class XmlTemplateFactory implements ITemplateFactory
 			"value",
 			"condition"
 		);
-
-	private static final String PATH_SEP = "/";
-
-    private static final String RES_PATH_SEP = "/t:";
 
     /**
 	 * Key used to specify condition for an object/map inclusion.
@@ -163,9 +159,9 @@ public class XmlTemplateFactory implements ITemplateFactory
     			new ByteArrayInputStream(templateContent.getBytes()), 
     			parserHandler);
 
-        Object root = parseObject(dynBean, "");
+    	TransformElement root = (TransformElement) parseObject(dynBean, dynBean.getLocation());
 
-        return new TransformTemplate(XmlGenerator.class, root);
+        return new TransformTemplate(XmlGenerator.class, root, root.getLocation());
     }
     
     private void parseTemplateTo(String templateContent, TransformTemplate template)
@@ -174,49 +170,46 @@ public class XmlTemplateFactory implements ITemplateFactory
     			new ByteArrayInputStream(templateContent.getBytes()), 
     			parserHandler);
 
-        Object root = parseObject(dynBean, "/");
+        Object root = parseObject(dynBean, dynBean.getLocation());
         template.setRoot(root);
     }
     
     @SuppressWarnings("unchecked")
-    private Object parseObject(Object object, String path)
+    private Object parseObject(Object object, Location location)
     {
 		try
 		{
 			if(object instanceof List)
 			{
-				object = parseList((List<Object>) object, path);
+				object = parseList((List<XmlDynamicBean>) object, location);
 			}
 			else if(object instanceof XmlDynamicBean)
 			{
-				object = parseDynBean((XmlDynamicBean) object, path);
+				object = parseDynBean((XmlDynamicBean) object);
 			}
 			else if(object instanceof String)
 			{
-                object = TransformUtils.parseExpression((String) object, path, false);
+                object = TransformUtils.parseExpression((String) object, location, false);
 			}
-		} catch(TransformException ex)
+		} catch(TemplateParseException ex)
 		{
 			throw ex;
 		} catch(Exception ex)
 		{
-			throw new TransformException(path, "An unhandled error occurred", ex);
+			throw new TemplateParseException(location, "An unhandled error occurred", ex);
 		}
 		
 		return object;
     }
 
-    private Object parseList(List<Object> list, String path)
+    private Object parseList(List<XmlDynamicBean> list, Location location)
     {
         boolean firstValue = true;
         String condition = null;
         List<Object> objects = new ArrayList<>();
-        int index = -1;
         
-        for(Object object : list)
+        for(XmlDynamicBean object : list)
         {
-        	index++;
-        	
             if(firstValue)
             {
                 condition = checkForListCondition(object);
@@ -229,10 +222,10 @@ public class XmlTemplateFactory implements ITemplateFactory
                 }
             }
 
-            objects.add(parseObject(object, path + "[" + index + "]"));
+            objects.add(parseObject(object, object.getLocation()));
         }
         
-        return new TransformList(path, condition, objects);
+        return new TransformList(location, condition, objects);
     }
 
     private String checkForListCondition(Object object)
@@ -259,7 +252,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         return matcher.group(2);
     }
 
-    private boolean processReserveText(String name, String value, String path, TransformObject transformObject)
+    private boolean processReserveText(String name, String value, Location location, TransformObject transformObject)
     {
         if(KEY_CONDITION.equals(name))
         {
@@ -269,14 +262,14 @@ public class XmlTemplateFactory implements ITemplateFactory
 
         if(KEY_FALSE_VALUE.equals(name))
         {
-            Object falseValue = parseObject(value, path + RES_PATH_SEP + name);
+            Object falseValue = parseObject(value, location);
             transformObject.setFalseValue(falseValue);
             return true;
         }
 
         if(KEY_VALUE.equals(name))
         {
-            Object valueObj = parseObject(value, path + RES_PATH_SEP + name);
+            Object valueObj = parseObject(value, location);
             transformObject.setValue(valueObj);
             return true;
         }
@@ -284,7 +277,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         if(TRANSFORM.equals(name)
             && StringUtils.isNotBlank(value))
         {
-            transformObject.setTransformExpression(TransformUtils.parseExpression(value, path + RES_PATH_SEP + name, false));
+            transformObject.setTransformExpression(TransformUtils.parseExpression(value, location, false));
             return true;
         }
         
@@ -297,7 +290,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         return false;
     }
     
-    private void processReserveAttributes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    private void processReserveAttributes(XmlDynamicBean dynBean, TransformObject transformObject)
     {
         Map<String, String> reserveAttr = dynBean.getReserveAttributes();
 
@@ -309,24 +302,24 @@ public class XmlTemplateFactory implements ITemplateFactory
                 Object listExpression = entry.getValue();
                 String loopCondition = reserveAttr.get(KEY_FOR_EACH_CONDITION);
     
-                transformObject.setForEachLoop(new ForEachLoop(listExpression, loopVariable, loopCondition));
+                transformObject.setForEachLoop(new ForEachLoop(dynBean.getLocation(), listExpression, loopVariable, loopCondition));
                 continue;
             }
     
-            if(processReserveText(entry.getKey(), entry.getValue(), path, transformObject))
+            if(processReserveText(entry.getKey(), entry.getValue(), dynBean.getLocation(), transformObject))
             {
                 continue;
             }
         
-            throw new InvalidStateException("Invalid transform attribute '{}' specified at path: {}", entry.getKey(), path);
+            throw new TemplateParseException(dynBean.getLocation(), "Invalid transform attribute '{}' specified", entry.getKey());
         }
     }
 
-    private void processReserveNode(XmlDynamicBean parentBean, XmlDynamicBean reservedBean, String path, TransformObject transformObject)
+    private void processReserveNode(XmlDynamicBean parentBean, XmlDynamicBean reservedBean, TransformObject transformObject)
     {
         if(reservedBean.isTextNode())
         {
-            if(processReserveText(reservedBean.getName(), reservedBean.getTextContent(), path, transformObject))
+            if(processReserveText(reservedBean.getName(), reservedBean.getTextContent(), reservedBean.getLocation(), transformObject))
             {
                 return;
             }
@@ -334,13 +327,13 @@ public class XmlTemplateFactory implements ITemplateFactory
 
         if(INCLUDE_RES.equals(reservedBean.getName()) || INCLUDE_FILE.equals(reservedBean.getName()))
         {
-            transformObject.setInclude(parseInclude(reservedBean, path + PATH_SEP + reservedBean.getName()));
+            transformObject.setInclude(parseInclude(reservedBean));
             return;
         }
 		
         if(RES.equals(reservedBean.getName()))
         {
-            transformObject.setResource(parseResource(reservedBean, path + PATH_SEP + reservedBean.getName()));
+            transformObject.setResource(parseResource(reservedBean));
             return;
         }
         
@@ -352,7 +345,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         	// Validation: At least one case is mandatory
         	if(caseNodes.isEmpty())
         	{
-        		throw new TransformException(path + PATH_SEP + SWITCH, 
+        		throw new TemplateParseException(reservedBean.getLocation(), 
         			"t:switch must have at least one t:case element");
         	}
         	
@@ -366,7 +359,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         		// Validation: Case nodes must be named "case"
         		if(!CASE.equals(caseNode.getName()))
         		{
-        			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        			throw new TemplateParseException(caseNode.getLocation(), 
         				"Switch case element must be named 't:case', but found: {}", caseNode.getName());
         		}
         		
@@ -378,7 +371,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         			
         			if(condition == null)
         			{
-        				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        				throw new TemplateParseException(caseNode.getLocation(), 
             					"Encountered non-text condition node.");
         			}
         		}
@@ -388,14 +381,14 @@ public class XmlTemplateFactory implements ITemplateFactory
         		{
         			if(defaultCaseFound)
         			{
-        				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        				throw new TemplateParseException(caseNode.getLocation(), 
         					"Multiple default cases (cases without t:condition) found in t:switch. Only one default case is allowed and it must be at the end");
         			}
         			
         			// Check if this is not the last case
         			if(i < caseNodes.size() - 1)
         			{
-        				throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        				throw new TemplateParseException(caseNode.getLocation(), 
         					"Default case (case without t:condition) must be the last case in t:switch");
         			}
         			
@@ -403,7 +396,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         		}
                 else if(!(condition instanceof String))
                 {
-                    throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+                    throw new TemplateParseException(caseNode.getLocation(), 
                         "Switch case condition must be a string, but found: {}", condition.getClass().getName());
                 }
         		
@@ -413,18 +406,18 @@ public class XmlTemplateFactory implements ITemplateFactory
         		if(value != null)
         		{
         			value = parseObject(value, 
-        				path + PATH_SEP + SWITCH + "[" + i + "]" + RES_PATH_SEP + KEY_VALUE);
+        				caseNode.getLocation());
         		}
                 else
         		{
-        			throw new TransformException(path + PATH_SEP + SWITCH + "[" + i + "]", 
+        			throw new TemplateParseException(caseNode.getLocation(), 
         				"Switch case must have t:value attribute specified");
         		}
         		
-        		parsedCases.add(new SwitchCase((String) condition, value));
+        		parsedCases.add(new SwitchCase(reservedBean.getLocation(), (String) condition, value));
         	}
         	
-        	transformObject.setSwitchStatement(new Switch(parsedCases));
+        	transformObject.setSwitchStatement(new Switch(reservedBean.getLocation(), parsedCases));
         	return;
         }
         
@@ -436,9 +429,10 @@ public class XmlTemplateFactory implements ITemplateFactory
         	// if set is being done with text body
         	if(reservedBean.getTextContent() != null)
         	{
-        		Object expression =  TransformUtils.parseExpression(reservedBean.getTextContent(), path + ">" + reservedBean.getName() + "[" + attributeName + "]", false);
+        		Object expression =  TransformUtils.parseExpression(reservedBean.getTextContent(), reservedBean.getLocation(), false);
         		
                 transformObject.addField(new TransformObjectField(
+                		reservedBean.getLocation(),
                 		reservedBean.getName(), 
                         null,
                         attributeName, 
@@ -450,10 +444,11 @@ public class XmlTemplateFactory implements ITemplateFactory
 
         	// if set is being done with sub xml content
             transformObject.addField(new TransformObjectField(
+            		reservedBean.getLocation(),
             		reservedBean.getName(), 
                     null,
                     attributeName, 
-                    parseObject(reservedBean, path + ">" + reservedBean.getName() + "[" + attributeName + "]"),
+                    parseObject(reservedBean, reservedBean.getLocation()),
                     false
                 ));
             return;
@@ -463,76 +458,80 @@ public class XmlTemplateFactory implements ITemplateFactory
         if(REPLACE.equals(reservedBean.getName()))
         {
             transformObject.addField(new TransformObjectField(
+            		reservedBean.getLocation(),
             		reservedBean.getName(), 
                     null,
                     null, 
-                    parseObject(reservedBean, path + ">" + reservedBean.getName()),
+                    parseObject(reservedBean, reservedBean.getLocation()),
                     true
                 ));
             return;
         }
     }
 
-    private void processAttributes(XmlDynamicBean dynBean, String path, TransformObject transformObject)
+    private void processAttributes(XmlDynamicBean dynBean, TransformObject transformObject)
     {
         Map<String, String> attrMap = dynBean.getAttributes();
 
         for(Map.Entry<String, String> entry : attrMap.entrySet())
         {
             transformObject.addField(new TransformObjectField(
+            	dynBean.getLocation(),
                 entry.getKey(), 
                 null,
                 null, 
-                parseObject(entry.getValue(), path + PATH_SEP + entry.getKey()),
+                parseObject(entry.getValue(), dynBean.getLocation()),
                 false
             ).setType(FieldType.ATTRIBUTE));
         }
     }
 
-    private void processNode(XmlDynamicBean parentBean, XmlDynamicBean child, String path, TransformObject transformObject)
+    private void processNode(XmlDynamicBean parentBean, XmlDynamicBean child, TransformObject transformObject)
     {
 		Expression keyExpression = null;
 		String keyExpressionStr = child.getReserveAttributes().get(NAME_EXPRESSION);
 		
         if(StringUtils.isNotBlank(keyExpressionStr))
         {
-            keyExpression = TransformUtils.parseExpression(keyExpressionStr, path + RES_PATH_SEP + NAME_EXPRESSION, true);
+            keyExpression = TransformUtils.parseExpression(keyExpressionStr, child.getLocation(), true);
         }
         
         transformObject.addField(new TransformObjectField(
+        		child.getLocation(),
         		child.getName(), 
                 keyExpression,
                 null, 
-                parseObject(child, path + PATH_SEP + child.getName()),
+                parseObject(child, child.getLocation()),
                 false
             ).setType(FieldType.NODE));
     }
 
-    private Object parseDynBean(XmlDynamicBean dynBean, String path)
+    private Object parseDynBean(XmlDynamicBean dynBean)
     {
-        TransformObject transformObject = new TransformObject(dynBean.getName(), path);
+        TransformObject transformObject = new TransformObject(dynBean.getLocation(), dynBean.getName());
         
-        processReserveAttributes(dynBean, path, transformObject);
-        processAttributes(dynBean, path, transformObject);
+        processReserveAttributes(dynBean, transformObject);
+        processAttributes(dynBean, transformObject);
         
         for(XmlDynamicBean child : dynBean.getNodes())
         {
         	if(child.isReserved())
         	{
-        		processReserveNode(dynBean, child, path, transformObject);
+        		processReserveNode(dynBean, child, transformObject);
         		continue;
         	}
         	
-        	processNode(dynBean, child, path, transformObject);
+        	processNode(dynBean, child, transformObject);
         }
         
         if(StringUtils.isNotBlank(dynBean.getTextContent()))
         {
             transformObject.addField(new TransformObjectField(
+            		dynBean.getLocation(),
                     "@textContent", 
                     null,
                     null, 
-                    parseObject(dynBean.getTextContent().trim(), path + PATH_SEP + "@textContent"),
+                    parseObject(dynBean.getTextContent().trim(), dynBean.getLocation()),
                     false
                 ).setType(FieldType.TEXT_CONTENT));
         }
@@ -540,7 +539,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         return transformObject;
     }
 
-    private TransformTemplate loadAndParse(String path, boolean isResource)
+    private TransformTemplate loadAndParse(Location location, String path, boolean isResource)
     {
     	String keyPrefix = isResource ? "res:" : "file:";
     	String key = keyPrefix + path;
@@ -569,11 +568,11 @@ public class XmlTemplateFactory implements ITemplateFactory
 		{
 			if(isResource)
 			{
-				throw new TransformException(path, "Failed to include resource: {}", path, ex);
+				throw new TemplateParseException(location, "Failed to include resource: {}", path, ex);
 			}
 			else
 			{
-				throw new TransformException(path, "Failed to include file: {}", path, ex);
+				throw new TemplateParseException(location, "Failed to include file: {}", path, ex);
 			}
 		}
 		
@@ -581,7 +580,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 		{
 			// first template is kept on cache (before parsing) to avoid
 			//   never ending recursion in case of recursive templates
-			subTemplate = new TransformTemplate(XmlGenerator.class, null);
+			subTemplate = new TransformTemplate(XmlGenerator.class, null, location);
 			includeCache.put(key, subTemplate);
 			
 			parseTemplateTo(content, subTemplate);
@@ -589,13 +588,13 @@ public class XmlTemplateFactory implements ITemplateFactory
 			return subTemplate;
 		}catch(Exception ex)
 		{
-			throw new TransformException(path, "Failed to parse xml {}: {}", 
+			throw new TemplateParseException(location, "Failed to parse xml {}: {}", 
 					isResource ? "resource" : "file", 
 					path, ex); 
 		}
     }
 
-	private Include parseInclude(XmlDynamicBean dynamicBean, String path)
+	private Include parseInclude(XmlDynamicBean dynamicBean)
     {
         String includePath = dynamicBean.getAttributes().get("path");
         
@@ -604,16 +603,16 @@ public class XmlTemplateFactory implements ITemplateFactory
 
 		if(paramsNode != null)
 		{
-			paramsObj = (TransformObject) parseObject(paramsNode, path + PATH_SEP + PARAMS);
+			paramsObj = (TransformObject) parseObject(paramsNode, dynamicBean.getLocation());
 		}
         
         boolean isResource = INCLUDE_RES.equals(dynamicBean.getName());
 		
-		TransformTemplate subTemplate = loadAndParse(includePath, isResource);
-        return new Include(includePath, subTemplate, paramsObj);
+		TransformTemplate subTemplate = loadAndParse(dynamicBean.getLocation(), includePath, isResource);
+        return new Include(dynamicBean.getLocation(), includePath, subTemplate, paramsObj);
     }
 
-	private Resource parseResource(XmlDynamicBean dynamicBean, String path)
+	private Resource parseResource(XmlDynamicBean dynamicBean)
     {
         String resPath = dynamicBean.getAttributes().get("path");
         String content = null;
@@ -623,7 +622,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             content = contentLoader.loadResource(resPath);
         }catch(Exception ex)
         {
-            throw new TransformException(path, "Failed to load resource: {}", resPath, ex);			
+            throw new TemplateParseException(dynamicBean.getLocation(), "Failed to load resource: {}", resPath, ex);			
         }
 
         boolean disableExpressions = "false".equalsIgnoreCase("" + dynamicBean.getAttributes().get(RES_PARAM_EXPR));
@@ -638,6 +637,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 		}
 
         return new Resource(
+                dynamicBean.getLocation(),
                 resPath, 
                 content, 
                 disableExpressions, 

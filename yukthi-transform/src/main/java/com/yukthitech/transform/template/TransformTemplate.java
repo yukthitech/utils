@@ -9,19 +9,44 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.yukthitech.transform.ITransformConstants;
 
 /**
- * Represents a transform template based on which new objects 
- * can be created based on the input context object.
+ * Represents a transform template based on which new objects can be created
+ * based on the input context object.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransformTemplate implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class Resource implements Serializable
+	public static abstract class TransformElement implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
-		
+
+		/**
+		 * Location where this element is defined.
+		 */
+		private Location location;
+
+		public TransformElement(Location location)
+		{
+			this.location = location;
+		}
+
+		public Location getLocation()
+		{
+			return location;
+		}
+
+		public String toString()
+		{
+			return ITransformConstants.toPrettyJson(this);
+		}
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	public static class Resource extends TransformElement
+	{
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Path to the resource to be included.
 		 */
@@ -47,11 +72,9 @@ public class TransformTemplate implements Serializable
 		 */
 		private String transformExpression;
 
-		public Resource(String path, 
-				String content,
-				boolean expressionsDisabled, 
-				Object resParams,
-				String transformExpression) {
+		public Resource(Location location, String path, String content, boolean expressionsDisabled, Object resParams, String transformExpression)
+		{
+			super(location);
 			this.path = path;
 			this.content = content;
 			this.expressionsDisabled = expressionsDisabled;
@@ -59,23 +82,28 @@ public class TransformTemplate implements Serializable
 			this.transformExpression = transformExpression;
 		}
 
-		public String getPath() {
+		public String getPath()
+		{
 			return path;
 		}
 
-		public String getContent() {	
+		public String getContent()
+		{
 			return content;
 		}
 
-		public boolean isExpressionsDisabled() {
+		public boolean isExpressionsDisabled()
+		{
 			return expressionsDisabled;
 		}
 
-		public Object getResParams() {
+		public Object getResParams()
+		{
 			return resParams;
 		}
 
-		public String getTransformExpression() {
+		public String getTransformExpression()
+		{
 			return transformExpression;
 		}
 
@@ -90,10 +118,10 @@ public class TransformTemplate implements Serializable
 	 * Represents a for-each loop in the tree.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class ForEachLoop implements Serializable
+	public static class ForEachLoop extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		/**
 		 * Expression to be evaluated to get the list of values to loop through.
 		 */
@@ -105,25 +133,31 @@ public class TransformTemplate implements Serializable
 		private String loopVariable;
 
 		/**
-		 * Condition to be evaluated to true for the object to be included in the result.
+		 * Condition to be evaluated to true for the object to be included in
+		 * the result.
 		 */
 		private String condition;
 
-		public ForEachLoop(Object listExpression, String loopVariable, String condition) {
+		public ForEachLoop(Location location, Object listExpression, String loopVariable, String condition)
+		{
+			super(location);
 			this.listExpression = listExpression;
 			this.loopVariable = loopVariable;
 			this.condition = condition;
 		}
 
-		public Object getListExpression() {
+		public Object getListExpression()
+		{
 			return listExpression;
 		}
 
-		public String getLoopVariable() {
+		public String getLoopVariable()
+		{
 			return loopVariable;
 		}
 
-		public String getCondition() {
+		public String getCondition()
+		{
 			return condition;
 		}
 
@@ -136,12 +170,10 @@ public class TransformTemplate implements Serializable
 
 	public static enum ExpressionType
 	{
-		FMARKER,
-		XPATH,
-		XPATH_MULTI,
-		
+		FMARKER, XPATH, XPATH_MULTI,
+
 		TEMPLATE,
-		
+
 		/**
 		 * Static string.
 		 */
@@ -149,14 +181,14 @@ public class TransformTemplate implements Serializable
 	}
 
 	/**
-	 * Represents an expression in the tree.
-	 * Expression can be used as a key or a value as well.
+	 * Represents an expression in the tree. Expression can be used as a key or
+	 * a value as well.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class Expression implements Serializable
+	public static class Expression extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		/**
 		 * Type of the expression.
 		 */
@@ -167,16 +199,20 @@ public class TransformTemplate implements Serializable
 		 */
 		private String expression;
 
-		public Expression(ExpressionType type, String expression) {
+		public Expression(Location location, ExpressionType type, String expression)
+		{
+			super(location);
 			this.type = type;
 			this.expression = expression;
 		}
 
-		public ExpressionType getType() {
+		public ExpressionType getType()
+		{
 			return type;
 		}
 
-		public String getExpression() {
+		public String getExpression()
+		{
 			return expression;
 		}
 
@@ -186,13 +222,13 @@ public class TransformTemplate implements Serializable
 			return ITransformConstants.toPrettyJson(this);
 		}
 	}
-	
+
 	public static enum FieldType
 	{
 		ATTRIBUTE,
-		
+
 		NODE,
-		
+
 		TEXT_CONTENT
 	}
 
@@ -200,28 +236,28 @@ public class TransformTemplate implements Serializable
 	 * Represents a field of an object.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class TransformObjectField implements Serializable
+	public static class TransformObjectField extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		/**
-		 * Name of the field.
-		 * Note: This can be an expression which will be evaluated to get the final field name
-		 * in case of loop objects.
+		 * Name of the field. Note: This can be an expression which will be
+		 * evaluated to get the final field name in case of loop objects.
 		 */
 		private String name;
 
 		/**
-		 * Expression to be evaluated to get the final field name
-		 * mainly used in case of loop objects.
+		 * Expression to be evaluated to get the final field name mainly used in
+		 * case of loop objects.
 		 */
 		private Expression nameExpression;
 
 		/**
-		 * If specified, the current entry value will be set on the context with this attribute name.
+		 * If specified, the current entry value will be set on the context with
+		 * this attribute name.
 		 */
 		private String attributeName;
-	
+
 		/**
 		 * Value of the field. This can be a simple value or a complex object.
 		 */
@@ -232,13 +268,15 @@ public class TransformTemplate implements Serializable
 		 * object will be included.
 		 */
 		private boolean replaceEntry;
-		
+
 		/**
 		 * Type of field. Used by xml transformation only.
 		 */
 		private FieldType type;
 
-		public TransformObjectField(String name, Expression nameExpression, String attributeName, Object value, boolean replaceEntry) {
+		public TransformObjectField(Location location, String name, Expression nameExpression, String attributeName, Object value, boolean replaceEntry)
+		{
+			super(location);
 			this.name = name;
 			this.nameExpression = nameExpression;
 			this.attributeName = attributeName;
@@ -246,32 +284,37 @@ public class TransformTemplate implements Serializable
 			this.replaceEntry = replaceEntry;
 		}
 
-		public String getName() {
+		public String getName()
+		{
 			return name;
 		}
 
-		public Expression getNameExpression() {
+		public Expression getNameExpression()
+		{
 			return nameExpression;
 		}
 
-		public String getAttributeName() {
+		public String getAttributeName()
+		{
 			return attributeName;
 		}
 
-		public Object getValue() {
+		public Object getValue()
+		{
 			return value;
 		}
 
-		public boolean isReplaceEntry() {
+		public boolean isReplaceEntry()
+		{
 			return replaceEntry;
 		}
-		
+
 		TransformObjectField setType(FieldType type)
 		{
 			this.type = type;
 			return this;
 		}
-		
+
 		public FieldType getType()
 		{
 			return type;
@@ -285,18 +328,18 @@ public class TransformTemplate implements Serializable
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class Include implements Serializable
+	public static class Include extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		/**
 		 * Path to the resource to be included.
 		 */
 		private String path;
 
 		/**
-		 * Content of the resource.
-		 * Note: Ignored in json to avoid never-ending recursion.
+		 * Content of the resource. Note: Ignored in json to avoid never-ending
+		 * recursion.
 		 */
 		@JsonIgnore
 		private TransformTemplate content;
@@ -306,21 +349,26 @@ public class TransformTemplate implements Serializable
 		 */
 		private TransformObject params;
 
-		public Include(String path, TransformTemplate content, TransformObject params) {
+		public Include(Location location, String path, TransformTemplate content, TransformObject params)
+		{
+			super(location);
 			this.path = path;
 			this.content = content;
 			this.params = params;
 		}
 
-		public String getPath() {
+		public String getPath()
+		{
 			return path;
 		}
-		
-		public TransformTemplate getContent() {
+
+		public TransformTemplate getContent()
+		{
 			return content;
 		}
 
-		public TransformObject getParams() {
+		public TransformObject getParams()
+		{
 			return params;
 		}
 	}
@@ -329,23 +377,27 @@ public class TransformTemplate implements Serializable
 	 * Represents a switch statement with multiple cases.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class Switch implements Serializable
+	public static class Switch extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		/**
-		 * List of case objects. Each case has an optional condition and a value.
+		 * List of case objects. Each case has an optional condition and a
+		 * value.
 		 */
 		private List<SwitchCase> cases = new ArrayList<>();
-		
-		public Switch(List<SwitchCase> cases) {
+
+		public Switch(Location location, List<SwitchCase> cases)
+		{
+			super(location);
 			this.cases = cases;
 		}
-		
-		public List<SwitchCase> getCases() {
+
+		public List<SwitchCase> getCases()
+		{
 			return cases;
 		}
-		
+
 		@Override
 		public String toString()
 		{
@@ -357,30 +409,34 @@ public class TransformTemplate implements Serializable
 	 * Represents a single case in a switch statement.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class SwitchCase implements Serializable
+	public static class SwitchCase extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
-		
+
 		/**
 		 * Condition to be evaluated. If null, this is the default case.
 		 */
 		private String condition;
-		
+
 		/**
 		 * Value to return if condition is true.
 		 */
 		private Object value;
 
-		public SwitchCase(String condition, Object value) {
+		public SwitchCase(Location location, String condition, Object value)
+		{
+			super(location);
 			this.condition = condition;
 			this.value = value;
 		}
-		
-		public String getCondition() {
+
+		public String getCondition()
+		{
 			return condition;
 		}
-		
-		public Object getValue() {
+
+		public Object getValue()
+		{
 			return value;
 		}
 
@@ -395,34 +451,30 @@ public class TransformTemplate implements Serializable
 	 * Represents an object template in the tree.
 	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class TransformObject implements Serializable
+	public static class TransformObject extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
 
 		/**
-		 * Name of node responsible for creation of this object.
-		 * Used in xml (not in json).
+		 * Name of node responsible for creation of this object. Used in xml
+		 * (not in json).
 		 */
 		private String name;
-		
+
 		/**
-		 * Path to the object.
-		 */
-		private String path;
-		
-		/**
-		 * Condition to be evaluated to true for the object to be included in the result.
+		 * Condition to be evaluated to true for the object to be included in
+		 * the result.
 		 */
 		private String condition;
-		
+
 		/**
 		 * Value to be returned if the condition is evaluated to false.
 		 */
 		private Object falseValue;
 
 		/**
-		 * Value to be returned if the condition is evaluated to true (
-		 * instead of returning full object itself, this value will be returned).
+		 * Value to be returned if the condition is evaluated to true ( instead
+		 * of returning full object itself, this value will be returned).
 		 */
 		private Object value;
 
@@ -435,7 +487,8 @@ public class TransformTemplate implements Serializable
 		 * For-each loop to a copy of this transform object will be evaluated
 		 * for each value in the list.
 		 * 
-		 * If present, a copy of this transform object will be evaluated for each value in the list returned by the expression.
+		 * If present, a copy of this transform object will be evaluated for
+		 * each value in the list returned by the expression.
 		 */
 		private ForEachLoop forEachLoop;
 
@@ -450,7 +503,8 @@ public class TransformTemplate implements Serializable
 		private Include include;
 
 		/**
-		 * Switch statement to evaluate multiple conditions and return matching value.
+		 * Switch statement to evaluate multiple conditions and return matching
+		 * value.
 		 */
 		private Switch switchStatement;
 
@@ -459,101 +513,117 @@ public class TransformTemplate implements Serializable
 		 */
 		private List<TransformObjectField> fields = new ArrayList<>();
 
-		public TransformObject(String path) {
-			this.path = path;
+		public TransformObject(Location location)
+		{
+			super(location);
 		}
 
-		public TransformObject(String name, String path) {
+		public TransformObject(Location location, String name)
+		{
+			super(location);
 			this.name = name;
-			this.path = path;
 		}
-		
+
 		public String getName()
 		{
 			return name;
 		}
 
-		public String getPath() {
-			return path;
-		}
-
-		public String getCondition() {
+		public String getCondition()
+		{
 			return condition;
 		}
 
-		TransformObject setCondition(String condition) {
+		TransformObject setCondition(String condition)
+		{
 			this.condition = condition;
 			return this;
 		}
-		
-		public Object getFalseValue() {
+
+		public Object getFalseValue()
+		{
 			return falseValue;
 		}
 
-		TransformObject setFalseValue(Object falseValue) {
+		TransformObject setFalseValue(Object falseValue)
+		{
 			this.falseValue = falseValue;
 			return this;
 		}
-		
-		public Object getValue() {
+
+		public Object getValue()
+		{
 			return value;
 		}
 
-		TransformObject setValue(Object value) {
+		TransformObject setValue(Object value)
+		{
 			this.value = value;
 			return this;
 		}
-		
-		public Resource getResource() {
+
+		public Resource getResource()
+		{
 			return resource;
 		}
 
-		TransformObject setResource(Resource resource) {
+		TransformObject setResource(Resource resource)
+		{
 			this.resource = resource;
 			return this;
 		}
-		
-		public ForEachLoop getForEachLoop() {
+
+		public ForEachLoop getForEachLoop()
+		{
 			return forEachLoop;
 		}
 
-		TransformObject setForEachLoop(ForEachLoop forEachLoop) {
+		TransformObject setForEachLoop(ForEachLoop forEachLoop)
+		{
 			this.forEachLoop = forEachLoop;
 			return this;
 		}
-		
-		public Expression getTransformExpression() {
+
+		public Expression getTransformExpression()
+		{
 			return transformExpression;
 		}
 
-		TransformObject setTransformExpression(Expression transformExpression) {
+		TransformObject setTransformExpression(Expression transformExpression)
+		{
 			this.transformExpression = transformExpression;
 			return this;
 		}
 
-		public Include getInclude() {
+		public Include getInclude()
+		{
 			return include;
 		}
 
-		TransformObject setInclude(Include include) {
+		TransformObject setInclude(Include include)
+		{
 			this.include = include;
 			return this;
 		}
 
-		public Switch getSwitchStatement() {
+		public Switch getSwitchStatement()
+		{
 			return switchStatement;
 		}
 
-		TransformObject setSwitchStatement(Switch switchStatement) {
+		TransformObject setSwitchStatement(Switch switchStatement)
+		{
 			this.switchStatement = switchStatement;
 			return this;
 		}
 
-		public List<TransformObjectField> getFields() {
+		public List<TransformObjectField> getFields()
+		{
 			return fields;
 		}
 
-		TransformObject addField(TransformObjectField field) {
+		TransformObject addField(TransformObjectField field)
+		{
 			this.fields.add(field);
 			return this;
 		}
@@ -566,40 +636,35 @@ public class TransformTemplate implements Serializable
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	public static class TransformList implements Serializable
+	public static class TransformList extends TransformElement
 	{
 		private static final long serialVersionUID = 1L;
 
 		/**
-		 * Path to the list.
-		 */
-		private String path;
-
-		/**
-		 * Condition to be evaluated to true for the list to be included in the result.
+		 * Condition to be evaluated to true for the list to be included in the
+		 * result.
 		 */
 		private String condition;
-		
+
 		/**
 		 * List of objects to be included in the result.
 		 */
 		private List<Object> objects;
 
-		public TransformList(String path, String condition, List<Object> objects) {
-			this.path = path;
+		public TransformList(Location location, String condition, List<Object> objects)
+		{
+			super(location);
 			this.condition = condition;
 			this.objects = objects;
 		}
 
-		public String getPath() {
-			return path;
-		}
-
-		public String getCondition() {
+		public String getCondition()
+		{
 			return condition;
 		}
-		
-		public List<Object> getObjects() {
+
+		public List<Object> getObjects()
+		{
 			return objects;
 		}
 
@@ -609,35 +674,44 @@ public class TransformTemplate implements Serializable
 			return ITransformConstants.toPrettyJson(this);
 		}
 	}
-	
+
 	/**
 	 * Root object of the template.
 	 */
 	private Object root;
-	
+
 	/**
 	 * Composer type to be used to compose final object.
 	 */
 	private Class<? extends IGenerator> generatorType;
+	
+	private Location location;
 
-	public TransformTemplate(Class<? extends IGenerator> generatorType, Object root) 
+	public TransformTemplate(Class<? extends IGenerator> generatorType, Object root, Location location)
 	{
 		this.generatorType = generatorType;
 		this.root = root;
+		this.location = location;
 	}
-	
+
 	void setRoot(Object root)
 	{
 		this.root = root;
 	}
 
-	public Object getRoot() {
+	public Object getRoot()
+	{
 		return root;
 	}
 
 	public Class<? extends IGenerator> getGeneratorType()
 	{
 		return generatorType;
+	}
+	
+	public Location getLocation()
+	{
+		return location;
 	}
 
 	@Override

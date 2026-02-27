@@ -46,7 +46,7 @@ public class JsonGenerator implements IGenerator
 		//if result value is not map
 		if(!(injectedValue instanceof Map))
 		{
-			throw new TransformException(state.getPath(), "Value of @replace key must be a map but found: {}", injectedValue.getClass().getName());
+			throw new TransformException(state.getLocation(), "Value of @replace key must be a map but found: {}", injectedValue.getClass().getName());
 		}
 		
 		LinkedHashMap<String, Object> objMap = (LinkedHashMap<String, Object>) object;
@@ -55,7 +55,7 @@ public class JsonGenerator implements IGenerator
 	}
 	
 	@Override
-	public Object convertIncluded(String path, Object value)
+	public Object convertIncluded(TransformState state, Object value)
 	{
 		// no conversion needed on included object
 		return value;
