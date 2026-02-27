@@ -1264,4 +1264,71 @@ public class DefaultParserHandler implements IParserHandler
 	{
 		return objIdToObj.get(id);
 	}
+	
+	@Override
+	public boolean handleDynamicAttr(BeanNode beanNode, Object parentBean, String propName, String value)
+	{
+		if(!(parentBean instanceof IDynamicAttributeAcceptor))
+		{
+			return false;
+		}
+		
+		IDynamicAttributeAcceptor dynParentBean = (IDynamicAttributeAcceptor) parentBean;
+		dynParentBean.set(propName, value);
+		return true;
+	}
+
+	@Override
+	public boolean handleDynamicNode(BeanNode beanNode, Object parentBean, String propName, Object obj)
+	{
+		if(!(parentBean instanceof IDynamicNodeAcceptor))
+		{
+			return false;
+		}
+		
+		IDynamicNodeAcceptor dynParentBean = (IDynamicNodeAcceptor) parentBean;
+		dynParentBean.add(propName, obj);
+		return true;
+	}
+
+	@Override
+	public boolean handleDynamicNode(BeanNode beanNode, Object parentBean, String propName, String id, Object obj)
+	{
+		if(!(parentBean instanceof IDynamicNodeAcceptor))
+		{
+			return false;
+		}
+		
+		IDynamicNodeAcceptor dynParentBean = (IDynamicNodeAcceptor) parentBean;
+		dynParentBean.add(propName, id, obj);
+		return true;
+	}
+
+	@Override
+	public Boolean isIdBasedDynamicNode(BeanNode beanNode, Object parentBean, String propName)
+	{
+		if(!(parentBean instanceof IDynamicNodeAcceptor))
+		{
+			return null;
+		}
+		
+		return ((IDynamicNodeAcceptor) parentBean).isIdBased(propName);
+	}
+	
+	@Override
+	public boolean isHybridTextSupported(BeanNode beanNode, Object activeBean)
+	{
+		return (activeBean instanceof IHybridTextBean);
+	}
+	
+	@Override
+	public void handleHybridText(BeanNode beanNode, Object activeBean, String text)
+	{
+		if(!(activeBean instanceof IHybridTextBean))
+		{
+			return;
+		}
+		
+		((IHybridTextBean) activeBean).setText(text);
+	}
 }

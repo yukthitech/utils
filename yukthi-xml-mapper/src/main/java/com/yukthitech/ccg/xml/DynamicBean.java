@@ -99,17 +99,17 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 	@Override
 	public void set(String propName, String value)
 	{
-		add((BeanNode) null, propName, value);
+		add(propName, value);
 	}
 	
-	public void addDynamic(BeanNode node, String name, DynamicBean value)
+	public void addDynamic(String name, DynamicBean value)
 	{
-		this.add(node, name, value);
+		this.add(name, value);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void add(BeanNode node, String propName, Object obj)
+	public void add(String propName, Object obj)
 	{
 		if(typeConversationEnabled)
 		{
@@ -141,11 +141,11 @@ public class DynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAccep
 	}
 
 	@Override
-	public void add(BeanNode node, String propName, String id, Object obj)
+	public void add(String propName, String id, Object obj)
 	{}
 
 	@Override
-	public boolean isIdBased(BeanNode node, String arg0)
+	public boolean isIdBased(String arg0)
 	{
 		return false;
 	}

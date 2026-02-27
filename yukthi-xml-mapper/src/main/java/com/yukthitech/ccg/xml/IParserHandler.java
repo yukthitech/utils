@@ -303,4 +303,26 @@ public interface IParserHandler extends IXmlConstants
 	}
 	
 	public boolean isRetainWhiteSpacesEnabled();
+	
+	public boolean handleDynamicAttr(BeanNode beanNode, Object parentBean, String propName, String value);
+	
+	public boolean handleDynamicNode(BeanNode beanNode, Object parentBean, String propName, Object obj);
+
+	public boolean handleDynamicNode(BeanNode beanNode, Object parentBean, String propName, String id, Object obj);
+
+	/**
+	 * Should return null in case dynamic nodes are not supported. True/false of dynamic nodes
+	 * are supported and based on if the node represents id node or not.
+	 * 
+	 * @param beanNode
+	 * @param parentBean
+	 * @param propName
+	 * @return
+	 */
+	public Boolean isIdBasedDynamicNode(BeanNode beanNode, Object parentBean, String propName);
+	
+	public boolean isHybridTextSupported(BeanNode beanNode, Object activeBean);
+	
+	public void handleHybridText(BeanNode beanNode, Object activeBean, String text);
+	
 }

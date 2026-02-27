@@ -17,9 +17,9 @@ package com.yukthitech.ccg.xml;
 
 public interface IDynamicNodeAcceptor
 {
-	public void add(BeanNode beanNode, String propName, Object obj);
+	public void add(String propName, Object obj);
 
-	public void add(BeanNode beanNode, String propName, String id, Object obj);
+	public void add(String propName, String id, Object obj);
 
-	public boolean isIdBased(BeanNode beanNode, String propName);
+	public boolean isIdBased(String propName);
 }

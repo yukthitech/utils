@@ -125,7 +125,7 @@ class SAXEventHandler extends DefaultHandler
 		if(text.length() <= 0)
 			return;
 
-		if(activeNode.getActualBean() instanceof IHybridTextBean)
+		if(parserHandler.isHybridTextSupported(activeNode, activeNode.getActualBean()))
 		{
 			activeNode.appendText(text);
 			return;
@@ -192,11 +192,11 @@ class SAXEventHandler extends DefaultHandler
 		BeanNode parentNode = activeNode.getParentNode();
 		String beanDesc = null;
 
-		if(curBean instanceof IHybridTextBean)
+		if(parserHandler.isHybridTextSupported(activeNode, curBean))
 		{
 			if(activeNode.containsText())
 			{
-				((IHybridTextBean) curBean).setText(processText(activeNode.getActualText()));
+				parserHandler.handleHybridText(activeNode, curBean, activeNode.getActualText());
 				activeNode.clearText();
 			}
 		}
@@ -261,17 +261,26 @@ class SAXEventHandler extends DefaultHandler
 		String nodeType = null;
 		beanDesc = parserHandler.getBeanDescription(parentBean);
 
-		if(met == null && (parentBean instanceof IDynamicNodeAcceptor))
+		if(met == null)
 		{
-			IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;
 			try
 			{
 				Object nodeValue = activeNode.isTextNode() ? processText(activeNode.getText()) : activeNode.getActualBean();
 
 				if(activeNode.isIDBased())
-					acceptor.add(activeNode, activeNode.getName(), activeNode.getID(), nodeValue);
+				{
+					if(parserHandler.handleDynamicNode(activeNode, parentBean, activeNode.getName(), activeNode.getID(), nodeValue))
+					{
+						return;
+					}
+				}
 				else
-					acceptor.add(activeNode, activeNode.getName(), nodeValue);
+				{
+					if(parserHandler.handleDynamicNode(activeNode, parentBean, activeNode.getName(), nodeValue))
+					{
+						return;
+					}
+				}
 			} catch(Exception ex)
 			{
 				throw new XMLLoadException("Failed to set dynamic property for bean \"" + beanDesc + "\" for node: " + name, ex, activeNode, saxLocator);
@@ -420,11 +429,11 @@ class SAXEventHandler extends DefaultHandler
 
 		Object curBean = (this.activeNode != null) ? this.activeNode.getActualBean() : null;
 
-		if(curBean instanceof IHybridTextBean)
+		if(this.activeNode != null && parserHandler.isHybridTextSupported(activeNode, curBean))
 		{
 			if(this.activeNode.containsText())
 			{
-				((IHybridTextBean) curBean).setText(this.activeNode.getActualText());
+				parserHandler.handleHybridText(this.activeNode, curBean, this.activeNode.getActualText());
 				this.activeNode.clearText();
 			}
 		}
@@ -568,17 +577,13 @@ class SAXEventHandler extends DefaultHandler
 				loadIDBasedNode(newNode, curAttMap, valType, dynType);
 				return;
 			}
+			
+			Boolean dynIdBased = parserHandler.isIdBasedDynamicNode(newNode, parentBean, newNode.getName());
 
-			if(parentBean instanceof IDynamicNodeAcceptor)
+			// if dyn nodes are supported
+			if(dynIdBased != null)
 			{
-				if(dynType == null)
-				{
-					//dynType = DynamicBean.class;
-				}
-
-				IDynamicNodeAcceptor acceptor = (IDynamicNodeAcceptor) parentBean;
-
-				if(curAttMap.getNormalAttributeCount() == 1 && acceptor.isIdBased(newNode, newNode.getName()))
+				if(curAttMap.getNormalAttributeCount() == 1 && dynIdBased)
 				{
 					loadIDBasedNode(newNode, curAttMap, dynType, dynType);
 					return;
@@ -761,9 +766,8 @@ class SAXEventHandler extends DefaultHandler
 
 			if(met == null)
 			{
-				if(toBean instanceof IDynamicAttributeAcceptor)
+				if(parserHandler.handleDynamicAttr(newNode, toBean, attName, attValue))
 				{
-					((IDynamicAttributeAcceptor) toBean).set(attName, attValue);
 					continue;
 				}
 
