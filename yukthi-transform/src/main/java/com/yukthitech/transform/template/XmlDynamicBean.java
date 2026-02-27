@@ -25,9 +25,6 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.ccg.xml.BeanNode;
-import com.yukthitech.ccg.xml.IDynamicAttributeAcceptor;
-import com.yukthitech.ccg.xml.IDynamicNodeAcceptor;
 import com.yukthitech.ccg.xml.IHybridTextBean;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.utils.exceptions.InvalidStateException;
@@ -37,7 +34,7 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
  * 
  * @author akiran
  */
-public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAcceptor, IHybridTextBean
+public class XmlDynamicBean
 {
 	/**
 	 * Name of the node used to create this bean.
@@ -82,8 +79,7 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 		reserveAttributes.put(propName, value);
 	}
 
-	@Override
-	public void set(String propName, String value)
+	public void setAttribute(String propName, String value)
 	{
 		attributes.put(propName, value);
 	}
@@ -101,8 +97,7 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 		nodes.add(node);
 	}
 	
-	@Override
-	public void add(BeanNode node, String propName, Object obj)
+	public void addNode(Location location, String propName, Object obj)
 	{
 		if(textContent != null)
 		{
@@ -111,23 +106,12 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 
 		if(obj instanceof String)
 		{
-			XmlDynamicBean bean = new XmlDynamicBean(propName, 
-					new Location(node.getLineNumber(), node.getColumnNumber(), node.getNodePath()));
+			XmlDynamicBean bean = new XmlDynamicBean(propName, location);
 			bean.setTextContent(obj.toString());
 			obj = bean;
 		}
 		
 		nodes.add((XmlDynamicBean) obj);
-	}
-
-	@Override
-	public void add(BeanNode node, String propName, String id, Object obj)
-	{}
-
-	@Override
-	public boolean isIdBased(BeanNode node, String arg0)
-	{
-		return false;
 	}
 
 	public Map<String, String> getReserveAttributes()
@@ -185,7 +169,6 @@ public class XmlDynamicBean implements IDynamicNodeAcceptor, IDynamicAttributeAc
 		return getReserveAttribute(name);
 	}
 	
-	@Override
 	public void setText(String text)
 	{
 		if(StringUtils.isEmpty(text))

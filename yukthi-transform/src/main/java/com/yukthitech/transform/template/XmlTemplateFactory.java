@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
-import com.yukthitech.transform.TemplateParseException;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
@@ -127,8 +126,6 @@ public class XmlTemplateFactory implements ITemplateFactory
 
     private IContentLoader contentLoader = DEFAULT_CONTENT_LOADER;
     
-    private XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler();
-    
     /**
      * A cache of resource/file path to loaded template. This is maintained
      * to make template loading efficient (avoided repeated parsing) also needed
@@ -139,8 +136,6 @@ public class XmlTemplateFactory implements ITemplateFactory
     public XmlTemplateFactory()
     {
     	this(DEFAULT_CONTENT_LOADER);
-    	
-    	parserHandler.setExpressionEnabled(false);
     }
     
     public XmlTemplateFactory(IContentLoader contentLoader)
@@ -153,19 +148,25 @@ public class XmlTemplateFactory implements ITemplateFactory
         this.contentLoader = contentLoader;
     }
 
-    public TransformTemplate parseTemplate(String templateContent) 
+    public TransformTemplate parseTemplate(String name, String templateContent) 
     {
+    	XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler(name);
+    	parserHandler.setExpressionEnabled(false);
+    	
     	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
     			new ByteArrayInputStream(templateContent.getBytes()), 
     			parserHandler);
 
     	TransformElement root = (TransformElement) parseObject(dynBean, dynBean.getLocation());
 
-        return new TransformTemplate(XmlGenerator.class, root, root.getLocation());
+        return new TransformTemplate(name, XmlGenerator.class, root, root.getLocation());
     }
     
     private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
+    	XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler(template.getName());
+    	parserHandler.setExpressionEnabled(false);
+
     	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
     			new ByteArrayInputStream(templateContent.getBytes()), 
     			parserHandler);
@@ -580,7 +581,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 		{
 			// first template is kept on cache (before parsing) to avoid
 			//   never ending recursion in case of recursive templates
-			subTemplate = new TransformTemplate(XmlGenerator.class, null, location);
+			subTemplate = new TransformTemplate(path, XmlGenerator.class, null, location);
 			includeCache.put(key, subTemplate);
 			
 			parseTemplateTo(content, subTemplate);

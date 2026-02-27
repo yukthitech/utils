@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
 
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
-import com.yukthitech.transform.TemplateParseException;
-import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.template.JsonWithLocationParser.JsonElementWithLocation;
 import com.yukthitech.transform.template.JsonWithLocationParser.ListWithLocation;
 import com.yukthitech.transform.template.JsonWithLocationParser.MapWithLocation;
@@ -157,9 +155,9 @@ public class JsonTemplateFactory implements ITemplateFactory
     	includeCache.clear();
     }
 
-    public TransformTemplate parseTemplate(String templateContent) 
+    public TransformTemplate parseTemplate(String name, String templateContent) 
     {
-		JsonWithLocationParser parser = new JsonWithLocationParser();
+		JsonWithLocationParser parser = new JsonWithLocationParser(name);
         Object jsonObj = null;
         
         try
@@ -172,12 +170,12 @@ public class JsonTemplateFactory implements ITemplateFactory
 
         TransformElement root = (TransformElement) parseObject((JsonElementWithLocation) jsonObj);
 
-        return new TransformTemplate(JsonGenerator.class, root, root.getLocation());
+        return new TransformTemplate(name, JsonGenerator.class, root, root.getLocation());
     }
     
     private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
-        JsonWithLocationParser parser = new JsonWithLocationParser();
+        JsonWithLocationParser parser = new JsonWithLocationParser(template.getName());
         Object jsonObj = null;
         
         try
@@ -520,17 +518,17 @@ public class JsonTemplateFactory implements ITemplateFactory
 		{
 			if(isResource)
 			{
-				throw new TransformException(location, "Failed to include resource: {}", path, ex);
+				throw new TemplateParseException(location, "Failed to include resource: {}", path, ex);
 			}
 			else
 			{
-				throw new TransformException(location, "Failed to include file: {}", path, ex);
+				throw new TemplateParseException(location, "Failed to include file: {}", path, ex);
 			}
 		}
 		
 		// first template is kept on cache (before parsing) to avoid
 		//   never ending recursion in case of recursive templates
-		subTemplate = new TransformTemplate(JsonGenerator.class, null, location);
+		subTemplate = new TransformTemplate(path, JsonGenerator.class, null, location);
 		includeCache.put(key, subTemplate);
 		
 		parseTemplateTo(content, subTemplate);

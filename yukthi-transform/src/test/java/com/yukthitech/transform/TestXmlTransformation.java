@@ -103,7 +103,7 @@ public class TestXmlTransformation
 	
 	private String processXml(String xml, Object context)
 	{
-		TransformTemplate tempalte = templateFactory.parseTemplate(xml);
+		TransformTemplate tempalte = templateFactory.parseTemplate("test", xml);
 		
 		//System.out.println("Got Template as: \n" + tempalte);
 		return transformEngine.processAsString(tempalte, context);

@@ -48,35 +48,32 @@ public class TransformState
 
 	public TransformState forIndex(int index)
 	{
-		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + "[" + index + "]");
+		Location newLoc = location.sublocation("[" + index + "]");
 		return new TransformState(this, newLoc);
 	}
 
 	public TransformState forClone()
 	{
-		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + "{clone}");
+		Location newLoc = location.sublocation("{clone}");
 		return new TransformState(this, newLoc);
 	}
 
 	public TransformState forDynField(String field)
 	{
-		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + "#" + field);
+		Location newLoc = location.sublocation("#" + field);
 		return new TransformState(this, newLoc);
 	}
 	
 	public TransformState forField(TransformObjectField field, String dynField)
 	{
-		String fieldPath = location.getPath() + generator.getSubPath(field);
-		String newPath =  fieldPath + "#" + dynField;
-		
-		Location newLoc = new Location(location.getLine(), location.getColumn(), newPath);
-		
+		String fieldPath = generator.getSubPath(field);
+		Location newLoc = location.sublocation(fieldPath + "#" + dynField);
 		return new TransformState(this, newLoc);
 	}
 	
 	public void executeInAttributeMode(TransformObjectField field, Consumer<TransformState> attrStateConsumer)
 	{
-		Location newLoc = new Location(location.getLine(), location.getColumn(), location.getPath() + generator.getSubPath(field));
+		Location newLoc = location.sublocation(generator.getSubPath(field));
 		TransformState newState = new TransformState(this, newLoc);
 		newState.attributeMode = true;
 		

@@ -95,7 +95,7 @@ public class TestJsonTransformation
 	
 	private String processJson(String json, Object context)
 	{
-		TransformTemplate tempalte = templateFactory.parseTemplate(json);
+		TransformTemplate tempalte = templateFactory.parseTemplate("test", json);
 		
 		//System.out.println("Got Template as: \n" + tempalte);
 		return jsonExprEngine.processAsString(tempalte, context);

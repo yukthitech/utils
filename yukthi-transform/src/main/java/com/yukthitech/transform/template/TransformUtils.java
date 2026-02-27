@@ -8,7 +8,6 @@ import org.apache.commons.jxpath.JXPathContext;
 import com.yukthitech.transform.ExpressionUtil;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.ITransformContext;
-import com.yukthitech.transform.TemplateParseException;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.Expression;

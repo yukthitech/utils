@@ -19,7 +19,7 @@ import com.yukthitech.transform.template.Location;
 import com.yukthitech.utils.exceptions.UtilsException;
 
 /**
- * Used when an error occurs during transformation processing (template parsing or execution).
+ * Used when an error occurs during transformation processing (template execution).
  * @author akiran
  */
 public class TransformException extends UtilsException

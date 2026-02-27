@@ -676,6 +676,11 @@ public class TransformTemplate implements Serializable
 	}
 
 	/**
+	 * Name of the template.
+	 */
+	private String name;
+
+	/**
 	 * Root object of the template.
 	 */
 	private Object root;
@@ -687,11 +692,17 @@ public class TransformTemplate implements Serializable
 	
 	private Location location;
 
-	public TransformTemplate(Class<? extends IGenerator> generatorType, Object root, Location location)
+	public TransformTemplate(String name, Class<? extends IGenerator> generatorType, Object root, Location location)
 	{
+		this.name = name;
 		this.generatorType = generatorType;
 		this.root = root;
 		this.location = location;
+	}
+
+	public String getName()
+	{
+		return name;
 	}
 
 	void setRoot(Object root)

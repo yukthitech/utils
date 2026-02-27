@@ -12,7 +12,14 @@ import com.yukthitech.utils.exceptions.InvalidStateException;
 public class XmlTemplateParserHandler extends DefaultParserHandler
 {
 	public static final String TRANSFORM_RESERVE_URI = "/transform";
-	
+
+	private String templateName;
+
+	public XmlTemplateParserHandler(String templateName)
+	{
+		this.templateName = templateName;
+	}
+
 	@Override
 	public boolean isReserveUri(String uri)
 	{
@@ -21,7 +28,7 @@ public class XmlTemplateParserHandler extends DefaultParserHandler
 	
 	private XmlDynamicBean mapToBean(BeanNode node, XMLAttributeMap att)
 	{
-		Location location = new Location(node.getLineNumber(), node.getColumnNumber(), node.getNodePath());
+		Location location = new Location(templateName, node.getLineNumber(), node.getColumnNumber(), node.getNodePath());
 		XmlDynamicBean rootBean = new XmlDynamicBean(node.getName(), location);
 		
 		for(Map.Entry<String, XMLAttributeMap.Attribute> entry : att.entrySet())
@@ -79,5 +86,45 @@ public class XmlTemplateParserHandler extends DefaultParserHandler
 	{
 		XmlDynamicBean parent = (XmlDynamicBean) node.getParent();
 		parent.addReserve(node.getName(), node.getActualBean());
+	}
+
+	@Override
+	public boolean handleDynamicAttr(BeanNode beanNode, Object parentBean, String propName, String value)
+	{
+		((XmlDynamicBean) parentBean).setAttribute(propName, value);
+		return true;
+	}
+	
+	@Override
+	public boolean handleDynamicNode(BeanNode node, Object parentBean, String propName, Object obj)
+	{
+		Location location = new Location(templateName, node.getLineNumber(), node.getColumnNumber(), node.getNodePath());
+		
+		((XmlDynamicBean) parentBean).addNode(location, propName, obj);
+		return true;
+	}
+	
+	@Override
+	public boolean handleDynamicNode(BeanNode beanNode, Object parentBean, String propName, String id, Object obj)
+	{
+		return false;
+	}
+	
+	@Override
+	public Boolean isIdBasedDynamicNode(BeanNode beanNode, Object parentBean, String propName)
+	{
+		return Boolean.FALSE;
+	}
+	
+	@Override
+	public boolean isHybridTextSupported(BeanNode beanNode, Object activeBean)
+	{
+		return true;
+	}
+	
+	@Override
+	public void handleHybridText(BeanNode beanNode, Object activeBean, String text)
+	{
+		((XmlDynamicBean) activeBean).setText(text);
 	}
 }

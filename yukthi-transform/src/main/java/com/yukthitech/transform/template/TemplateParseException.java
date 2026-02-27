@@ -1,8 +1,11 @@
-package com.yukthitech.transform;
+package com.yukthitech.transform.template;
 
-import com.yukthitech.transform.template.Location;
 import com.yukthitech.utils.exceptions.UtilsException;
 
+/**
+ * Exception thrown when a template parse error occurs.
+ * @author akiran
+ */
 public class TemplateParseException extends UtilsException
 {
 	private static final long serialVersionUID = 1L;

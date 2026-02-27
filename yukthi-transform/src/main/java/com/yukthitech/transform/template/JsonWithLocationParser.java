@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.yukthitech.transform.TemplateParseException;
 
 /**
  * Parser for JSON with location information.
@@ -149,6 +148,11 @@ public class JsonWithLocationParser
 	}
 
 	/**
+	 * Name of the template.
+	 */
+	private String templateName;
+
+	/**
 	 * The JSON factory.
 	 */
 	private final JsonFactory factory = new JsonFactory();
@@ -157,6 +161,11 @@ public class JsonWithLocationParser
 	 * The path stack.
 	 */
 	private final Deque<PathElement> pathStack = new ArrayDeque<>();
+
+	public JsonWithLocationParser(String templateName)
+	{
+		this.templateName = templateName;
+	}
 
 	/**
 	 * Parses the JSON string and returns the root node.
@@ -212,7 +221,7 @@ public class JsonWithLocationParser
 		JsonToken token = parser.currentToken();
 
 		JsonLocation location = parser.currentLocation();
-		Location locationObj = new Location(location.getLineNr(), location.getColumnNr(), buildJsonPath());
+		Location locationObj = new Location(templateName, location.getLineNr(), location.getColumnNr(), buildJsonPath());
 
 		switch (token)
 		{
@@ -261,7 +270,7 @@ public class JsonWithLocationParser
 	{
 
 		JsonLocation location = parser.currentLocation();
-		Location locationObj = new Location(location.getLineNr(), location.getColumnNr(), buildJsonPath());
+		Location locationObj = new Location(templateName, location.getLineNr(), location.getColumnNr(), buildJsonPath());
 		MapWithLocation map = new MapWithLocation(locationObj);
 
 		while(parser.nextToken() != JsonToken.END_OBJECT)
@@ -295,7 +304,7 @@ public class JsonWithLocationParser
 	{
 
 		JsonLocation location = parser.currentLocation();
-		Location locationObj = new Location(location.getLineNr(), location.getColumnNr(), buildJsonPath());
+		Location locationObj = new Location(templateName, location.getLineNr(), location.getColumnNr(), buildJsonPath());
 		ListWithLocation list = new ListWithLocation(locationObj);
 		int index = 0;
 

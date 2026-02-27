@@ -10,6 +10,11 @@ public class Location implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Name of the template.
+	 */
+	private String templateName;
+	
+	/**
 	 * The line number of the location.
 	 */
 	private int line;
@@ -24,11 +29,22 @@ public class Location implements Serializable
 	 */
 	private String path;
 
-	public Location(int line, int column, String path)
+	public Location(String templateName, int line, int column, String path)
 	{
+		this.templateName = templateName;
 		this.line = line;
 		this.column = column;
 		this.path = path;
+	}
+	
+	public Location sublocation(String subpath)
+	{
+		return new Location(subpath, line, column, path + subpath);
+	}
+
+	public String getTemplateName()
+	{
+		return templateName;
 	}
 
 	public int getLine()
@@ -49,6 +65,6 @@ public class Location implements Serializable
 	@Override
 	public String toString()
 	{
-		return String.format("[Line: %d, Column: %d, Path: %s]", line, column, path);
+		return String.format("[Template: %s, Line: %d, Column: %d, Path: %s]", templateName, line, column, path);
 	}
 }
