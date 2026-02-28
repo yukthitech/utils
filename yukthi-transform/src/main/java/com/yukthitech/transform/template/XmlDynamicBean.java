@@ -25,7 +25,6 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yukthitech.ccg.xml.IHybridTextBean;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 

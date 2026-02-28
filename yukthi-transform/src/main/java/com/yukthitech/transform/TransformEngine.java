@@ -24,6 +24,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yukthitech.transform.event.ITransformListener;
+import com.yukthitech.transform.event.TransformEvent;
+import com.yukthitech.transform.event.TransformEventType;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
@@ -42,6 +45,12 @@ import com.yukthitech.utils.fmarker.FreeMarkerEngine;
  */
 public class TransformEngine
 {
+	private static final ITransformListener DUMMY_LISTENER = new ITransformListener()
+	{
+		public void onTransform(TransformEvent event)
+		{}
+	};
+
 	/**
 	 * Key used to specify value for the enclosing map. Useful when condition has to be specified for simple attribute.
 	 */
@@ -61,6 +70,11 @@ public class TransformEngine
 	 * Conversion functionality.
 	 */
 	private Conversions conversions;
+
+	/**
+	 * Listener for transform events.
+	 */
+	private ITransformListener listener = DUMMY_LISTENER;
 	
 	public TransformEngine()
 	{
@@ -70,6 +84,11 @@ public class TransformEngine
 	public TransformEngine(FreeMarkerEngine freeMarkerEngine)
 	{
 		this.setFreeMarkerEngine(freeMarkerEngine);
+	}
+
+	public void setListener(ITransformListener listener)
+	{
+		this.listener = listener == null ? DUMMY_LISTENER : listener;
 	}
 	
 	/**
@@ -152,7 +171,7 @@ public class TransformEngine
 			}
 			else if(object instanceof Expression)
 			{
-				object = conversions.processExpression((Expression) object, context, transformState);
+				object = conversions.processExpression((Expression) object, context, transformState, listener);
 			}
 		} catch(TransformException ex)
 		{
@@ -193,7 +212,8 @@ public class TransformEngine
 			//if the list element is map, check and process repetition approp
 			if(elem instanceof TransformObject)
 			{
-				List<Object> newElems = procesRepeatedElement((TransformObject) elem, context, null, transformState.forIndex(index));
+				List<Object> newElems = procesRepeatedElement((TransformObject) elem, context, 
+					null, transformState.forIndex(index));
 				
 				if(newElems == null)
 				{
@@ -248,7 +268,8 @@ public class TransformEngine
 	 * @return processed list of values
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private List<Object> procesRepeatedElement(TransformObject transformObject, ITransformContext context, Expression nameExpression, TransformState transformState)
+	private List<Object> procesRepeatedElement(TransformObject transformObject, 
+		ITransformContext context, Expression nameExpression, TransformState transformState)
 	{
 		// if condition is present and evaluated to false, then return empty list
 		if(!processCondition(transformObject, context))
@@ -296,6 +317,8 @@ public class TransformEngine
 		{
 			valueLst = Arrays.asList(valueLstExpr);
 		}
+
+		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.LIST_EXPRESSION_EVALUATED, valueLst));
 		
 		List<Object> resLst = new ArrayList<>();
 		Object processedMap = null;
@@ -310,9 +333,15 @@ public class TransformEngine
 			//if for each condition is specified
 			if(StringUtils.isNotBlank(forEachCond))
 			{
+				boolean condResult = ExpressionUtil.evaluateCondition(freeMarkerEngine, transformObject.getLocation(), 
+					"for-each-condition", forEachCond, context);
+
+				listener.onTransform(new TransformEvent(transformObject.getLocation(), 
+					TransformEventType.FOR_EACH_CONDITION_EVALUATED, condResult));
+
 				//evaluate the condition. And if condition results in false
 				//  ignore current iteration object
-				if(!ExpressionUtil.evaluateCondition(freeMarkerEngine, transformObject.getLocation(), "for-each-condition", forEachCond, context))
+				if(!condResult)
 				{
 					continue;
 				}
@@ -323,7 +352,10 @@ public class TransformEngine
 			// for maps add name-value entry as a list object
 			if(nameExpression != null)
 			{
-				String name = "" + conversions.processExpression(nameExpression, context, transformState.forDynField("name"));
+				String name = "" + conversions.processExpression(nameExpression, context, transformState.forDynField("name"), listener);
+
+				listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.KEY_EXPRESSION_EVALUATED, name));
+
 				resLst.add(new NameValueEntry(name, processedMap));
 			}
 			else
@@ -331,6 +363,8 @@ public class TransformEngine
 				resLst.add(processedMap);
 			}
 		}
+
+		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.LOOP_EVALUATED, resLst));
 		
 		// if for-loop result in zero elements, return null
 		if(resLst.isEmpty())
@@ -381,14 +415,18 @@ public class TransformEngine
 		}
 		
 		//check if current map is meant for resource loading.
-		if(conversions.processMapRes(transformObject, context, resWrapper, this, transformState))
+		if(conversions.processMapRes(transformObject, context, resWrapper, this, transformState, listener))
 		{
+			listener.onTransform(new TransformEvent(transformObject.getLocation(), 
+				TransformEventType.RESOURCE_LOADED, resWrapper.getValue()));
 			return resWrapper.getValue();
 		}
 		
 		//check if current map is meant for including other resource or file
 		if(conversions.processInclude(transformObject, context, resWrapper, this, transformState))
 		{
+			listener.onTransform(new TransformEvent(transformObject.getLocation(), 
+				TransformEventType.INCLUDE_PROCESSED, resWrapper.getValue()));
 			return resWrapper.getValue();
 		}
 
@@ -418,7 +456,8 @@ public class TransformEngine
 					}
 					
 					//based on loop expression generate objects which should be added to res map
-					List<NameValueEntry> processedValues = (List) procesRepeatedElement(submapTemplate, context, nameExpression, transformState.forField(field)); 
+					List<NameValueEntry> processedValues = (List) procesRepeatedElement(submapTemplate, context, 
+						nameExpression, transformState.forField(field)); 
 					processedValues = (processedValues == null) ? Collections.emptyList() : processedValues;
 					
 					//loop through res maps
@@ -442,6 +481,9 @@ public class TransformEngine
 					//execute the child content with attr state
 					Object val = processObject(field.getValue(), context, attrState);
 
+					listener.onTransform(new TransformEvent(field.getLocation(), 
+						TransformEventType.SET_VARIABLE_EVALUATED, field.getAttributeName(), val));
+
 					// if val is null, previous value will be removed (replaced by null)
 					context.setValue(field.getAttributeName(), val);
 				});
@@ -453,7 +495,10 @@ public class TransformEngine
 			
 			//for each entry, process the value and replace current value with processed value
 			Object val = processObject(field.getValue(), context, transformState.forField(field));
-			
+
+			listener.onTransform(new TransformEvent(field.getLocation(), 
+				TransformEventType.VALUE_EVALUATED, field.getName(), val));
+
 			//if value resulted in null, ignore current entry
 			if(val == null)
 			{
@@ -463,6 +508,9 @@ public class TransformEngine
 			if(field.isReplaceEntry())
 			{
 				transformState.injectReplaceEntry(field, resObj, val);
+
+				listener.onTransform(new TransformEvent(field.getLocation(), 
+					TransformEventType.REPLACE_ENTRY_EVALUATED, val));
 				otherEntriesAdded = true;
 				continue;
 			}
@@ -472,10 +520,15 @@ public class TransformEngine
 
 			if(field.getNameExpression() != null)
 			{
-				key = (String) conversions.processExpression(field.getNameExpression(), context, transformState.forField(field, "name"));
+				key = (String) conversions.processExpression(field.getNameExpression(), context, transformState.forField(field, "name"), listener);
+
+				listener.onTransform(new TransformEvent(field.getLocation(), 
+						TransformEventType.KEY_REPLACED, key));
 			}
 
 			transformState.setField(field, resObj, key, val);
+			listener.onTransform(new TransformEvent(field.getLocation(), 
+				TransformEventType.KEY_VALUE_SET, key, val));
 			otherEntriesAdded = true;
 		}
 		
@@ -499,7 +552,8 @@ public class TransformEngine
 	 * @param value wrapper to hold the value
 	 * @return true if value expression is present
 	 */
-	private boolean processMapValue(TransformObject transformObject, String keyName, Object valueExpr, ITransformContext context, TransformState transformState, ObjectWrapper<Object> value)
+	private boolean processMapValue(TransformObject transformObject, String keyName, 
+		Object valueExpr, ITransformContext context, TransformState transformState, ObjectWrapper<Object> value)
 	{
 		if(valueExpr == null)
 		{
@@ -509,9 +563,10 @@ public class TransformEngine
 		//evaluate the condition and return the result
 		Object res = processObject(valueExpr, context, transformState.forDynField(keyName));
 		
-		res = conversions.checkForTransform(transformObject, res, context, transformState);
-				
+		res = conversions.checkForTransform(transformObject, res, context, transformState, listener);
 		value.setValue(res);
+
+		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.VALUE_EVALUATED, keyName, res));
 		return true;
 	}
 
@@ -552,6 +607,9 @@ public class TransformEngine
 					"switch-condition",
 					condition,
 					context);
+
+				listener.onTransform(new TransformEvent(switchCase.getLocation(), 
+					TransformEventType.SWITCH_CONDITION_EVALUATED, conditionMet));
 			}
 			
 			if(conditionMet)
@@ -565,13 +623,17 @@ public class TransformEngine
 						transformState.forDynField("@switch[" + i + "]>@value"));
 					
 					// Apply transform if present
-					result = conversions.checkForTransform(transformObject, result, context, transformState);
+					result = conversions.checkForTransform(transformObject, result, context, transformState, listener);
 				}
 				
+				listener.onTransform(new TransformEvent(switchCase.getLocation(), 
+					TransformEventType.SWITCH_VALUE_EVALUATED, result));
 				resWrapper.setValue(result);
 				return true;
 			}
 		}
+		
+		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.SWITCH_VALUE_EVALUATED, null));
 		
 		// No case matched (should not happen if default case is present, but handle gracefully)
 		resWrapper.setValue(null);
@@ -595,11 +657,15 @@ public class TransformEngine
 		}
 
 		//evaluate the condition and return the result
-		return ExpressionUtil.evaluateCondition(freeMarkerEngine, 
+		boolean result = ExpressionUtil.evaluateCondition(freeMarkerEngine, 
 			transformObject.getLocation(), 
 			"transform-condition", 
 			condition, 
 			context);
+
+		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.CONDITION_EVALUATED, result));
+
+		return result;
 	}
 
 	/**
@@ -617,11 +683,15 @@ public class TransformEngine
 		}
 		
 		//evaluate the condition and return the result
-		return ExpressionUtil.evaluateCondition(
+		boolean result = ExpressionUtil.evaluateCondition(
 			freeMarkerEngine, 
 			transformList.getLocation(), 
 			"transform-condition", 
 			transformList.getCondition(), 
 			context);
+
+		listener.onTransform(new TransformEvent(transformList.getLocation(), TransformEventType.CONDITION_EVALUATED, result));
+
+		return result;
 	}
 }

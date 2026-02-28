@@ -10,6 +10,9 @@ import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.ITransformContext;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
+import com.yukthitech.transform.event.ITransformListener;
+import com.yukthitech.transform.event.TransformEvent;
+import com.yukthitech.transform.event.TransformEventType;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
@@ -62,7 +65,8 @@ public class TransformUtils
 	 * @param path path where this string is found
 	 * @return processed value
 	 */
-	public static Object processExpression(FreeMarkerEngine freeMarkerEngine, Expression expression, ITransformContext context, TransformState transformState)
+	public static Object processExpression(FreeMarkerEngine freeMarkerEngine, Expression expression, 
+		ITransformContext context, TransformState transformState, ITransformListener listener)
 	{
 		ExpressionType exprType = expression.getType();
 		String expr = expression.getExpression();
@@ -71,22 +75,38 @@ public class TransformUtils
 		{
 			if(exprType == ExpressionType.FMARKER)
 			{
-				return ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getLocation(), "transform-expr", expr, context);
+				Object res = ExpressionUtil.processValueExpression(freeMarkerEngine, transformState.getLocation(), 
+					"transform-expr", expr, context);
+				listener.onTransform(new TransformEvent(transformState.getLocation(), 
+					TransformEventType.FMARKER_EXPRESSION_EVALUATED, res));
+				return res;
 			}
 			else if(exprType == ExpressionType.XPATH)
 			{
-				return JXPathContext.newContext(context).getValue(expr);
+				Object res = JXPathContext.newContext(context).getValue(expr);
+				listener.onTransform(new TransformEvent(transformState.getLocation(), 
+					TransformEventType.XPATH_EXPRESSION_EVALUATED, res));
+				return res;
 			}
 			else if(exprType == ExpressionType.XPATH_MULTI)
 			{
-				return JXPathContext.newContext(context).selectNodes(expr);
+				Object res = JXPathContext.newContext(context).selectNodes(expr);
+				listener.onTransform(new TransformEvent(transformState.getLocation(), 
+					TransformEventType.XPATH_MULTI_EXPRESSION_EVALUATED, res));
+				return res;
 			}
 			else if(exprType == ExpressionType.TEMPLATE)
 			{
-				return ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getLocation(), "transform-template", expr, context);
+				Object res = ExpressionUtil.processTemplate(freeMarkerEngine, transformState.getLocation(), 
+					"transform-template", expr, context);
+				listener.onTransform(new TransformEvent(transformState.getLocation(), 
+					TransformEventType.TEMPLATE_EXPRESSION_EVALUATED, res));
+				return res;
 			}
 			else if(exprType == ExpressionType.STRING)
 			{
+				listener.onTransform(new TransformEvent(transformState.getLocation(), 
+					TransformEventType.STRING_EXPRESSION_EVALUATED, expr));
 				return expr;
 			}
 		} catch(TransformException ex)

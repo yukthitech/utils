@@ -18,6 +18,7 @@ package com.yukthitech.transform;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.yukthitech.transform.event.ITransformListener;
 import com.yukthitech.transform.template.Location;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
@@ -57,7 +58,8 @@ public class Conversions
 	 *            the value
 	 * @return true, if successful
 	 */
-	public boolean processMapRes(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, TransformEngine curEngine, TransformState transformState)
+	public boolean processMapRes(TransformObject transformObject, ITransformContext context, 
+		ObjectWrapper<Object> value, TransformEngine curEngine, TransformState transformState, ITransformListener listener)
 	{
 		Resource resource = transformObject.getResource();
 
@@ -81,7 +83,7 @@ public class Conversions
 			content = ExpressionUtil.processTemplate(freeMarkerEngine, transformObject.getLocation(), "res-content", content, context);
 		}
 		
-		Object finalRes = checkForTransform(transformObject, content, context, transformState);
+		Object finalRes = checkForTransform(transformObject, content, context, transformState, listener);
 		value.setValue(finalRes);
 		return true;
 	}
@@ -102,7 +104,8 @@ public class Conversions
 	 * @return true, if successful
 	 */
 	@SuppressWarnings("unchecked")
-	public boolean processInclude(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, TransformEngine curEngine, TransformState transformState)
+	public boolean processInclude(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, 
+			TransformEngine curEngine, TransformState transformState)
 	{
 		Include include = transformObject.getInclude();
 
@@ -144,13 +147,14 @@ public class Conversions
 	 * @param path path where this string is found
 	 * @return processed value
 	 */
-	public Object processExpression(Expression expression, ITransformContext context, TransformState transformState)
+	public Object processExpression(Expression expression, ITransformContext context, 
+			TransformState transformState, ITransformListener listener)
 	{
-		InternalExpressionContext.push(freeMarkerEngine, context, transformState);
+		InternalExpressionContext.push(freeMarkerEngine, context, transformState, listener);
 
 		try
 		{
-			return TransformUtils.processExpression(freeMarkerEngine, expression, context, transformState);
+			return TransformUtils.processExpression(freeMarkerEngine, expression, context, transformState, listener);
 		} finally
 		{
 			InternalExpressionContext.pop();
@@ -171,7 +175,8 @@ public class Conversions
 		}
 	}
 
-	public Object checkForTransform(TransformObject transformObject, Object curValue, ITransformContext context, TransformState transformState)
+	public Object checkForTransform(TransformObject transformObject, Object curValue, 
+		ITransformContext context, TransformState transformState, ITransformListener listener)
 	{
 		Expression transformExpr = transformObject.getTransformExpression();
 
@@ -184,7 +189,7 @@ public class Conversions
 		{
 			context.setValue("thisValue", curValue);
 			
-			return processExpression(transformExpr, context, transformState);
+			return processExpression(transformExpr, context, transformState, listener);
 		} catch(TransformException ex)
 		{
 			throw ex;
