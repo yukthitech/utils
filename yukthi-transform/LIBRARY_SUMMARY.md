@@ -27,6 +27,28 @@
    - **PojoExprContext** - For POJO-based context
    - **ITransformContext** - Interface for custom contexts
 
+## Processing Order
+
+The transformation engine processes objects in a specific order:
+
+### Map/Element Processing
+1. **Condition** → If false, return `@falseValue` or null
+2. **Switch** → Evaluate switch statement (if present)
+3. **Value** → Return `@value` expression (if present)
+4. **Resource/Include** → Process resource or include (if present)
+5. **Fields** → Process each field (for-each loops, set keys, replace entries, etc.)
+
+### List Processing
+1. **Condition** → If false, return null
+2. **Elements** → Process each element (for-each loops, standard objects)
+
+### For-Each Loop Processing
+1. **Condition** → If false, return empty list
+2. **Iteration** → For each item: set loop variable, evaluate `@for-each-condition`, process template
+3. **Result** → If zero elements, return null
+
+**See [README.md](README.md#processing-logic) for detailed processing logic.**
+
 ## Key Features
 
 ### 1. Replacement Expressions

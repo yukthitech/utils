@@ -194,14 +194,63 @@ TransformEngine.process()
 
 **Processing Steps:**
 
-1. **Condition Evaluation**: Check if object/list should be included
-2. **Switch Processing**: Evaluate switch statements
-3. **Value Processing**: Handle @value/@falseValue
-4. **Resource Loading**: Process @resource directives
-5. **Include Processing**: Process @includeResource/@includeFile
-6. **Loop Processing**: Handle @for-each loops
-7. **Field Processing**: Process each field recursively
-8. **Expression Evaluation**: Evaluate expressions (@fmarker, @xpath, etc.)
+The transformation engine processes objects in a specific order. This order is critical to understand when writing templates.
+
+#### Map/Element Processing Order
+
+A map (in JSON) / element (in XML) object is evaluated in the following order:
+
+1. **Condition Evaluation**: If `@condition`/`t:condition` is specified, it is evaluated first.
+   - If condition evaluates to false:
+     - If `@falseValue`/`t:false-value` is present, that value is returned
+     - Otherwise, null is returned
+   - If condition is not present or evaluates to true, the next steps are executed
+
+2. **Switch Statement**: If `@switch`/`t:switch` is present, the current object will be evaluated as a switch statement. Rest of the map-entries/nodes, if any, will be ignored.
+
+3. **Value Expression**: If `@value`/`t:value` is specified, this expression value will be the effective value of this map. Rest of the entries are ignored.
+
+4. **Resource Loading**: If `@resource`/`t:resource` or `@includeResource`/`t:include-resource` is specified, the current map will be processed as a resource. Rest of the entries are ignored.
+
+5. **Field Processing**: Each field/attribute of the map/element is processed in the following order (in case of XML, attributes are evaluated first):
+   - If sub-element/map has `@for-each`/`t:for-each` loop, the element (along with its dynamic key) will be processed and repeated as per the loop parameters.
+     - In maps, `@for-each` loops can exist only for submaps. Main map should not have loop element directly (as multiple roots cannot be created)
+     - In a loop element, `@condition`/`t:condition` will be evaluated first. If it evaluates to false, the for-loop entry will be completely excluded
+     - For each iteration, if `@for-each-condition`/`t:for-each-condition` is specified, it will be evaluated. If false, that iteration will be skipped
+     - Rest of the entries will be processed as standard map entries
+   - If the current entry key represents a set-key (`@set(varName)`/`t:set`), then the value will be processed as an object and a new context variable will be set
+   - If the key/name represents a replace-entry (`@replace`/`t:replace`), then the result value entries will be added to parent map (instead of being a submap)
+   - In case of XML, if the element has `t:name` attribute, the current entry key will be replaced with the dynamic value represented by `t:name`
+   - Otherwise, the value will be processed as a standard object and added to the result map
+
+#### List Processing Order
+
+A list (in JSON) is evaluated in the following order:
+
+1. **Condition Evaluation**: If condition is specified on the list, it is evaluated first. If it evaluates to false, null is returned
+
+2. **Element Processing**: For each element in the list, the following steps are executed:
+   - If the array element is a map/object and has a `@for-each` loop, the loop is evaluated (just like map loop) and resultant elements will be added to the result list
+   - If the loop results in zero elements, the entire list will be excluded (returns null)
+   - Other elements are processed as standard objects
+   - If any processed element results in null, it is excluded from the result list
+
+#### For-Each Loop Processing
+
+When a for-each loop is encountered:
+
+1. The condition on the loop element (if present) is evaluated first. If false, an empty list is returned
+
+2. The list expression is evaluated to get the collection to iterate over
+
+3. For each item in the collection:
+   - The loop variable is set in the context
+   - If `@for-each-condition` is specified, it is evaluated. If false, the iteration is skipped
+   - The template object is processed with the current iteration value
+   - If a name expression is present (for map entries), the result is added as a NameValueEntry
+   - Otherwise, the processed object is added directly to the result list
+
+4. If the loop results in zero elements, null is returned (so the parent key can be removed)
 
 #### Phase 4: Output Generation
 
