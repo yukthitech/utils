@@ -46,4 +46,10 @@ public class TransformEvent
     {
         return result;
     }
+    
+    @Override
+    public String toString()
+    {
+    	return "Event [Type: %s, Key: %s, Result: %s, Location: %s]".formatted(eventType, keyName, result, location);
+    }
 }
