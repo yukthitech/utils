@@ -26,6 +26,8 @@ public interface ITransformConstants
 	
 	String HYBRID_TEXT_PROP = "$text";
 	
+	String FIELD_TEXT_CONTENT = "@textContent";
+	
 	public static String toPrettyJson(Object value)
 	{
 		try

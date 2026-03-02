@@ -18,6 +18,7 @@
 				<Imagine t:condition="toBoolean(libraries.Imagine.open)">
 					<desc>Library is open</desc>
 				</Imagine>
+				<extra>@fmarker: libraries.Imagine.nonExisting</extra>
 			</output>
 		]]></template>
 		<expectedResult><![CDATA[

@@ -21,4 +21,15 @@ public interface IGenerator
 	public Object toSimpleObject(Object value);
 	
 	public String formatObject(Object object);
+	
+	/**
+	 * This should return true, if the specified object should not be part of output.
+	 * @param object
+	 * @param object
+	 * @return
+	 */
+	public default boolean isIgnorable(TransformObject transformObject, Object object)
+	{
+		return false;
+	}
 }

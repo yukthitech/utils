@@ -119,4 +119,9 @@ public class TransformState
 	{
 		return location;
 	}
+	
+	public boolean isIgnorable(TransformObject transformObject, Object object)
+	{
+		return generator.isIgnorable(transformObject, object);
+	}
 }

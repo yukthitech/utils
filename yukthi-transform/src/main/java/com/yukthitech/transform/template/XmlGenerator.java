@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -16,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.TransformXmlUtils;
@@ -342,4 +344,37 @@ public class XmlGenerator implements IGenerator
 		Element element = (Element) object;
 		return TransformXmlUtils.toXmlString(element);
 	}
+    
+    @Override
+    public boolean isIgnorable(TransformObject transformObject, Object object)
+    {
+    	if(!(object instanceof Element))
+    	{
+    		return false;
+    	}
+    	
+    	Element element = (Element) object;
+    	
+    	// if element has at least one attribute return false
+    	if(element.getAttributes() != null && element.getAttributes().getLength() > 0)
+    	{
+    		return false;
+    	}
+    	
+    	// if element has at least one child element return false
+    	if(element.getChildNodes() != null && element.getChildNodes().getLength() > 0)
+    	{
+    		return false;
+    	}
+    	
+    	// if element is empty, check as per def if its suppose to be text node, 
+    	//      then return true, so that it is not part of response
+    	if(CollectionUtils.isNotEmpty(transformObject.getFields()) 
+    			&& ITransformConstants.FIELD_TEXT_CONTENT.equals(transformObject.getFields().get(0).getName()))
+    	{
+    		return true;
+    	}
+    	
+    	return false;
+    }
 }

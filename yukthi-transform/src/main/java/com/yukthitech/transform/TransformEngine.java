@@ -539,6 +539,11 @@ public class TransformEngine
 			return null;
 		}
 		
+		if(transformState.isIgnorable(transformObject, resObj))
+		{
+			return null;
+		}
+		
 		return resObj;
 	}
 	

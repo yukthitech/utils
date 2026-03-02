@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
+import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
@@ -529,7 +530,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         {
             transformObject.addField(new TransformObjectField(
             		dynBean.getLocation(),
-                    "@textContent", 
+                    ITransformConstants.FIELD_TEXT_CONTENT, 
                     null,
                     null, 
                     parseObject(dynBean.getTextContent().trim(), dynBean.getLocation()),
