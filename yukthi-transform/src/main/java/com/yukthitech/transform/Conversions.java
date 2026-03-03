@@ -16,7 +16,6 @@
 package com.yukthitech.transform;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import com.yukthitech.transform.event.ITransformListener;
 import com.yukthitech.transform.template.Location;
@@ -31,12 +30,6 @@ import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 public class Conversions
 {
-	
-	/**
-	 * Expression used by value string which has to be replaced with resultant value.
-	 */
-	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
-	
 	/**
 	 * Free marker engine for expression processing.
 	 */

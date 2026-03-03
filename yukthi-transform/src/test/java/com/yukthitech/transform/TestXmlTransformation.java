@@ -123,7 +123,11 @@ public class TestXmlTransformation
 		Object expectedResult = parseXml(bean.getExpectedResult());
 		
 		//execute the jel
-		String res = processXml(bean.getTemplate(), context);
+		String template = bean.getTemplate();
+		template = template.replace("[[CDATA]]", "<![CDATA[");
+		template = template.replace("[[/CDATA]]", "]]>");
+		
+		String res = processXml(template, context);
 		Object actualResult = parseXml(res);
 		
 		System.out.println(String.format("(%s) Xml Output:\n============= \n%s", bean.getName(), res));

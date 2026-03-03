@@ -22,7 +22,7 @@ public class TransformUtils
 	/**
 	 * Expression used by value string which has to be replaced with resultant value.
 	 */
-	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$");
+	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$", Pattern.DOTALL);
 
     public static Expression parseExpression(String expression, Location location, boolean nullByDefault)
     {

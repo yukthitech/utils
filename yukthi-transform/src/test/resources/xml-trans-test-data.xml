@@ -361,6 +361,11 @@
 		<template><![CDATA[
 			<output xmlns:t="/transform">
 				<t:set name="secondLib">@xpath: /libraries/Imagine/name</t:set>
+				<t:set name="firstLib">[[CDATA]]
+					@fmarker: ifNull(libraries.Justbooks.name,
+						"Absent", 
+						"Present")
+				[[/CDATA]]</t:set>
 				
 				<map>
 					<key1>val1</key1>
@@ -371,6 +376,7 @@
 				</map>
 				
 				<library>@fmarker: secondLib</library>
+				<library>@fmarker: firstLib</library>
 				<names t:value="@fmarker: libJb.bookNames" />
 			</output>
 		]]></template>
@@ -383,6 +389,7 @@
 				</map>
 				
 				<library>Imagine</library>
+				<library>Present</library>
 				
 				<names>Davinci-Code</names>
 				<names>Sphere</names>
@@ -656,6 +663,8 @@
 			</output>
 		]]></expectedResult>
 	</jel-test-bean>
+	
+	<!-- =========================================================================== -->
 
 	<jel-test-bean name="switchBasic">
 		<context><![CDATA[
@@ -712,6 +721,34 @@
 			</output>
 		]]></expectedResult>
 	</jel-test-bean>
+	
+	<jel-test-bean name="switchAndSet">
+		<context><![CDATA[
+			<data>
+				<a>-10</a>
+			</data>
+		]]></context>
+		<template><![CDATA[
+			<output xmlns:t="/transform">
+				<t:set name="switchVal">
+					<t:switch>
+						<t:case t:condition="toInt(data.a) lt 0" t:value="Negative Number"/>
+						<t:case t:condition="toInt(data.a) gt 100" t:value="Invalid Number"/>
+						<t:case t:value="@fmarker: toInt(data.a) * 100"/>
+					</t:switch>
+				</t:set>
+				<number attr="value">
+					@fmarker: switchVal
+				</number>
+			</output>
+		]]></template>
+		<expectedResult><![CDATA[
+			<output>
+				<number attr="value">Negative Number</number>
+			</output>
+		]]></expectedResult>
+	</jel-test-bean>
+	
 
 	<jel-test-bean name="switchInvalidCase">
 		<context><![CDATA[

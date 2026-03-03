@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
 import com.yukthitech.transform.template.JsonWithLocationParser.JsonElementWithLocation;
 import com.yukthitech.transform.template.JsonWithLocationParser.ListWithLocation;
@@ -255,7 +254,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             return null;
         }
         
-        Matcher matcher = Conversions.EXPR_PATTERN.matcher((String) object.getValue());
+        Matcher matcher = TransformUtils.EXPR_PATTERN.matcher((String) object.getValue());
         
         if(!matcher.matches())
         {

@@ -11,7 +11,6 @@ import java.util.regex.Matcher;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.ccg.xml.XMLBeanParser;
-import com.yukthitech.transform.Conversions;
 import com.yukthitech.transform.IContentLoader;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
@@ -237,7 +236,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             return null;
         }
         
-        Matcher matcher = Conversions.EXPR_PATTERN.matcher((String) object);
+        Matcher matcher = TransformUtils.EXPR_PATTERN.matcher((String) object);
         
         if(!matcher.matches())
         {
