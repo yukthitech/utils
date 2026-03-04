@@ -8,7 +8,7 @@
 
 - **Dual Format Support**: Transform data using JSON or XML templates
 - **Multiple Data Sources**: Works with Maps, POJOs, and XML context data
-- **Powerful Expressions**: FreeMarker expressions, XPath queries
+- **Powerful Expressions**: FreeMarker expressions, XPath queries, JsonPath expressions
 - **Advanced Features**: Conditions, loops, variables, resource loading, includes, switch statements
 - **Type Agnostic**: Transform to any JSON-supported type (String, boolean, int, date, map, list)
 
@@ -208,6 +208,26 @@ IContentLoader customLoader = new IContentLoader() {
 JsonTemplateFactory factory = new JsonTemplateFactory(customLoader);
 ```
 
+### Disabling XPath for Multi-Threading
+
+XPath expressions can cause errors in multi-threading scenarios. To disable XPath and use JsonPath instead:
+
+```java
+import com.yukthitech.transform.template.TemplateFactoryConfiguration;
+
+// Create configuration to disable XPath
+TemplateFactoryConfiguration config = new TemplateFactoryConfiguration();
+config.setXpathDisabled(true);
+
+// Create template factory with configuration
+JsonTemplateFactory factory = new JsonTemplateFactory();
+factory.setTemplateFactoryConfiguration(config);
+
+// Now use JsonPath expressions in templates instead of XPath
+// @jpath: $.path.to.element
+// @jpathMulti: $.path.to.elements[*]
+```
+
 ### Template Caching
 
 Templates can be cached and reused:
@@ -248,7 +268,8 @@ JSON templates use special keys starting with `@` for directives:
 - `@replace(name)` - Merge included entries
 - `@transform` - Transform value
 - `@fmarker:` - FreeMarker expression
-- `@xpath:` / `@xpathMulti:` - XPath expressions
+- `@xpath:` / `@xpathMulti:` - XPath expressions (can be disabled for multi-threading)
+- `@jpath:` / `@jpathMulti:` - JsonPath expressions (recommended alternative to XPath)
 
 **See [JSON Transformation Guide](doc/json-transformation-guide.md) for complete syntax documentation.**
 
@@ -378,12 +399,39 @@ Access data using XPath:
 - `@xpath: /path/to/element` - Returns first match
 - `@xpathMulti: /path/to/elements` - Returns all matches
 
+**Note:** XPath expressions can cause errors in multi-threading scenarios. It's recommended to disable XPath and use JsonPath expressions instead when working in multi-threaded environments.
+
+**Disabling XPath:**
+```java
+TemplateFactoryConfiguration config = new TemplateFactoryConfiguration();
+config.setXpathDisabled(true);
+
+JsonTemplateFactory factory = new JsonTemplateFactory();
+factory.setTemplateFactoryConfiguration(config);
+```
+
+### JsonPath Expressions
+
+Access JSON data using JsonPath (recommended alternative to XPath):
+- `@jpath: $.path.to.element` - Returns first match
+- `@jpathMulti: $.path.to.elements[*]` - Returns all matches
+
+**Example:**
+```json
+{
+  "jsonBookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title",
+  "jsonCopyCount": "@jpath: $.libraries.Justbooks.books[0].copyCount"
+}
+```
+
 ### Replacement Expressions
 
 Replace entire values (not just strings):
 - `@fmarker: expression` - FreeMarker expression result
 - `@xpath: /path` - XPath first match
 - `@xpathMulti: /path` - XPath all matches
+- `@jpath: $.path` - JsonPath first match
+- `@jpathMulti: $.path` - JsonPath all matches
 
 ## Advanced Features
 

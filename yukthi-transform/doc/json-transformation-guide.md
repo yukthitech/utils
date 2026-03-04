@@ -22,8 +22,10 @@ Replacement expressions allow you to replace entire values (not just strings) wi
 ### Syntax
 
 - `@fmarker:` - FreeMarker expression evaluation
-- `@xpath:` - XPath expression (returns first match)
-- `@xpathMulti:` - XPath expression (returns all matches)
+- `@xpath:` - XPath expression (returns first match) - **Note:** Can be disabled for multi-threading scenarios
+- `@xpathMulti:` - XPath expression (returns all matches) - **Note:** Can be disabled for multi-threading scenarios
+- `@jpath:` - JsonPath expression (returns first match) - **Recommended alternative to XPath**
+- `@jpathMulti:` - JsonPath expression (returns all matches) - **Recommended alternative to XPath**
 
 ### Examples
 
@@ -32,7 +34,9 @@ Replacement expressions allow you to replace entire values (not just strings) wi
 {
   "key2": "@fmarker: empMap.employeeNames[0]",
   "bookCost": "@xpath: /books[name='Sphere']/cost",
-  "bookNames": "@xpathMulti: /books//title"
+  "bookNames": "@xpathMulti: /books//title",
+  "jsonBookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title",
+  "jsonCopyCount": "@jpath: $.libraries.Justbooks.books[0].copyCount"
 }
 ```
 
@@ -42,6 +46,35 @@ Replacement expressions allow you to replace entire values (not just strings) wi
   "listWithNoCond": ["@fmarker: book.cost", 20]
 }
 ```
+
+### XPath vs JsonPath
+
+**Important:** XPath expressions (`@xpath:` and `@xpathMulti:`) can cause errors in multi-threading scenarios. For better thread safety and when working with transformation, it's recommended to use JsonPath expressions instead.
+
+**JsonPath Syntax:**
+- `@jpath:` - JsonPath expression (returns first match)
+- `@jpathMulti:` - JsonPath expression (returns all matches)
+
+**JsonPath Examples:**
+```json
+{
+  "jsonBookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title",
+  "jsonCopyCount": "@jpath: $.libraries.Justbooks.books[0].copyCount"
+}
+```
+
+**Disabling XPath:**
+To disable XPath expressions (recommended for multi-threaded environments), configure the template factory:
+
+```java
+TemplateFactoryConfiguration config = new TemplateFactoryConfiguration();
+config.setXpathDisabled(true);
+
+JsonTemplateFactory factory = new JsonTemplateFactory();
+factory.setTemplateFactoryConfiguration(config);
+```
+
+When XPath is disabled, any XPath expressions in templates will throw a `TransformException` at runtime. Use JsonPath expressions as a replacement.
 
 ---
 
@@ -266,7 +299,7 @@ Use `@set(varName):` to define a variable:
 ```json
 {
   "@set(bookMap)": {
-    "titles": "@xpathMulti: /books//title"
+    "titles": "@jpathMulti: $.books[*].title"
   },
   "key2": "@fmarker: bookMap.titles[0]"
 }
@@ -279,14 +312,14 @@ Use `@set(varName):` to define a variable:
   "list": [
     100,
     {
-      "@set(secondLib)": "@xpath: /libraries/Imagine/name"
+      "@set(secondLib)": "@jpath: $.libraries.Imagine.name"
     },
     200
   ],
   "map": {
     "key1": "val1",
     "@set(libJb)": {
-      "bookNames": "@xpathMulti: /libraries/Justbooks/books//title"
+      "bookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title"
     },
     "key2": "@fmarker: libraries.Imagine.books[1].title"
   },
@@ -637,6 +670,8 @@ Here's a comprehensive example combining multiple features:
 {
   "bookNames": "@xpathMulti: /libraries/Justbooks/books//title",
   "copyCount": "@xpath: /libraries/Justbooks/books[1]/copyCount",
+  "jsonBookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title",
+  "jsonCopyCount": "@jpath: $.libraries.Justbooks.books[0].copyCount",
   "allDocCounts": [
     "@fmarker: sizeOf(libraries.Justbooks.books)",
     "@fmarker: sizeOf(libraries.Imagine.books)"
@@ -688,7 +723,8 @@ Here's a comprehensive example combining multiple features:
 
 Common errors and their causes:
 
-- **Invalid expression type**: Check that expression prefix is one of: `@fmarker:`, `@xpath:`, `@xpathMulti:`
+- **Invalid expression type**: Check that expression prefix is one of: `@fmarker:`, `@xpath:`, `@xpathMulti:`, `@jpath:`, `@jpathMulti:`
+- **XPath not supported**: If XPath is disabled via `TemplateFactoryConfiguration.setXpathDisabled(true)`, use JsonPath expressions (`@jpath:`, `@jpathMulti:`) instead
 - **Invalid condition**: Ensure condition expression is valid FreeMarker syntax
 - **Missing @value in switch case**: Every switch case must have `@value` specified
 - **Default case not last**: The default case (without `@case`) must be the last case in a switch statement
