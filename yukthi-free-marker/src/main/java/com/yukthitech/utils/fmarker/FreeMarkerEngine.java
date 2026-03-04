@@ -29,7 +29,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yukthitech.utils.CommonUtils;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.FreeMarkerTemplate.TemplateType;
 import com.yukthitech.utils.fmarker.doc.FreeMarkerDirectiveDoc;
 import com.yukthitech.utils.fmarker.doc.FreeMarkerMethodDoc;
 import com.yukthitech.utils.fmarker.met.CollectionMethods;
@@ -239,6 +241,29 @@ public class FreeMarkerEngine
 		return configuration;
 	}
 
+	private Template buildFmarkerTemplate(String name, String templateString)
+	{
+		try
+		{
+			Template template = new Template(name, templateString, getConfiguration());
+			return template;
+		}catch(Exception ex)
+		{
+			templateString = (templateString != null && templateString.length() > 1000) ? (templateString.substring(0, 1000) + "...") : templateString;
+			throw new TemplateProcessingException("An exception occurred while processing template: {}\nTemplate String: {}", name, templateString, ex);
+		}
+	}
+	
+	public FreeMarkerTemplate buildTemplate(String name, String templateString)
+	{
+		if(StringUtils.isBlank(templateString))
+		{
+			return null;
+		}
+		
+		return new FreeMarkerTemplate(name, TemplateType.TEMPLATE, buildFmarkerTemplate(name, templateString), templateString);
+	}
+
 	/**
 	 * Utility method to process templates.
 	 * 
@@ -280,6 +305,47 @@ public class FreeMarkerEngine
 			currentInstance.set(prevVal);
 		}
 	}
+	
+	/**
+	 * Utility method to process templates.
+	 * 
+	 * @param name
+	 *            Name of the template, used for debugging.
+	 * @param template
+	 *            Template to be processed.
+	 * @param context
+	 *            Context to be used for processing.
+	 * @return Processed string.
+	 */
+	public String processTemplate(FreeMarkerTemplate template, Object context)
+	{
+		if(template == null)
+		{
+			return null;
+		}
+		
+		// Prev value tracking is done, to support internal expr evaluation
+		//  multiple times in single expression.
+		FreeMarkerEngine prevVal = currentInstance.get();
+		currentInstance.set(this);
+		
+		try
+		{
+			StringWriter writer = new StringWriter();
+			template.getTemplate().process(context, writer);
+
+			writer.flush();
+			return writer.toString();
+		} catch(Exception ex)
+		{
+			String templateString = template.getSourceTemplate();
+			templateString = (templateString != null && templateString.length() > 1000) ? (templateString.substring(0, 1000) + "...") : templateString;
+			throw new TemplateProcessingException("An exception occurred while processing template: {}\nTemplate String: {}", template.getName(), templateString, ex);
+		} finally
+		{
+			currentInstance.set(prevVal);
+		}
+	}
 
 	public Collection<Method> getRegisteredMethods()
 	{
@@ -294,6 +360,17 @@ public class FreeMarkerEngine
 	public Collection<FreeMarkerDirectiveDoc> getRegisterDirectiveDocuments()
 	{
 		return Collections.unmodifiableCollection( freeMarkerDirectiveDocRegistry.values() );
+	}
+
+	public FreeMarkerTemplate buildConditionTemplate(String name, String condition)
+	{
+		if(StringUtils.isBlank(condition))
+		{
+			return null;
+		}
+		
+		String ifCondition = String.format("<#if %s>true<#else>false</#if>", condition);
+		return new FreeMarkerTemplate(name, TemplateType.CONDITION, buildFmarkerTemplate(name, ifCondition), condition);
 	}
 
 	/**
@@ -319,6 +396,35 @@ public class FreeMarkerEngine
 		String res = processTemplate(name, ifCondition, context);
 		
 		return "true".equals(res);
+	}
+
+	/**
+	 * Evaluates specified condition in specified context and returns the result.
+	 * @param condition condition to be evaluated.
+	 * @param context context to be used for processing.
+	 * @return result of condition evaluation.
+	 */
+	public boolean evaluateCondition(FreeMarkerTemplate condition, Object context)
+	{
+		if(condition == null || condition.getType() != TemplateType.CONDITION)
+		{
+			throw new InvalidArgumentException("Null/non-condition template object specified");
+		}
+		
+		String res = processTemplate(condition, context);
+		
+		return "true".equals(res);
+	}
+
+	public FreeMarkerTemplate buildValueTemplate(String name, String valueExpression)
+	{
+		if(StringUtils.isBlank(valueExpression))
+		{
+			return null;
+		}
+		
+		String collectorExpr = String.format("${__fmarker_collect(%s)}", valueExpression);
+		return new FreeMarkerTemplate(name, TemplateType.VALUE_EXPRESSION, buildFmarkerTemplate(name, collectorExpr), valueExpression);
 	}
 
 	/**
@@ -352,6 +458,42 @@ public class FreeMarkerEngine
 		{
 			throw new TemplateProcessingException("Template processing resulted in error.\n\tName: {}\n\tError: {}\n\tTemplate: {}", 
 					name, CommonUtils.getRootCauseMessages(ex), valueExpression, ex);
+		}
+	}
+
+	/**
+	 * Evaluates specified condition in specified context and returns the result.
+	 * @param valueExpression Value expression whose value needs to be fetched.
+	 * @param context context to be used for processing.
+	 * @return result fetched value.
+	 */
+	public Object fetchValue(FreeMarkerTemplate valueExpression, Object context)
+	{
+		if(valueExpression == null || valueExpression.getType() != TemplateType.VALUE_EXPRESSION)
+		{
+			throw new InvalidArgumentException("Null/non-value template object specified");
+		}
+
+		try
+		{
+			processTemplate(valueExpression, context);
+			
+			Object res = CommonMethods.getCollectedValue();
+			
+			if(res instanceof TemplateModel)
+			{
+				res = DeepUnwrap.unwrap((TemplateModel)res);
+			}
+
+			//return collected value
+			return res;
+		} catch(TemplateProcessingException ex)
+		{
+			throw ex;
+		} catch(Exception ex)
+		{
+			throw new TemplateProcessingException("Template processing resulted in error.\n\tName: {}\n\tError: {}\n\tTemplate: {}", 
+					valueExpression.getName(), CommonUtils.getRootCauseMessages(ex), valueExpression, ex);
 		}
 	}
 }
