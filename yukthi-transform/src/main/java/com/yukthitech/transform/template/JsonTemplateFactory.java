@@ -150,6 +150,11 @@ public class JsonTemplateFactory implements ITemplateFactory
 	 */
 	private FreeMarkerEngine freeMarkerEngine;
 
+	/**
+	 * Configuration for the template factory.
+	 */
+	private TemplateFactoryConfiguration templateFactoryConfiguration = new TemplateFactoryConfiguration();
+
     public JsonTemplateFactory()
     {
     	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
@@ -176,6 +181,16 @@ public class JsonTemplateFactory implements ITemplateFactory
 		this.setFreeMarkerEngine(freeMarkerEngine);
 	}
 
+	public void setTemplateFactoryConfiguration(TemplateFactoryConfiguration templateFactoryConfiguration)
+	{
+		if(templateFactoryConfiguration == null)
+		{
+			throw new NullPointerException("Template factory configuration cannot be set to null.");
+		}
+
+		this.templateFactoryConfiguration = templateFactoryConfiguration;
+	}
+
 	/**
 	 * Sets the free marker engine for expression processing.
 	 *
@@ -200,37 +215,53 @@ public class JsonTemplateFactory implements ITemplateFactory
 
     public TransformTemplate parseTemplate(String name, String templateContent) 
     {
-		JsonWithLocationParser parser = new JsonWithLocationParser(name);
-        Object jsonObj = null;
-        
-        try
-        {
-            jsonObj = parser.parse(templateContent);
-        } catch(Exception ex)
-        {
-            throw new InvalidStateException("An error occurred while parsing json template.", ex);
-        }
+		templateFactoryConfiguration.pushCurrentInstance();
 
-        TransformElement root = (TransformElement) parseObject((JsonElementWithLocation) jsonObj, null);
+		try
+		{
+			JsonWithLocationParser parser = new JsonWithLocationParser(name);
+			Object jsonObj = null;
+			
+			try
+			{
+				jsonObj = parser.parse(templateContent);
+			} catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while parsing json template.", ex);
+			}
 
-        return new TransformTemplate(name, JsonGenerator.class, root, root.getLocation());
-    }
+			TransformElement root = (TransformElement) parseObject((JsonElementWithLocation) jsonObj, null);
+
+			return new TransformTemplate(name, JsonGenerator.class, root, root.getLocation());
+		} finally
+		{
+			templateFactoryConfiguration.popCurrentInstance();
+		}
+	}
     
     private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
-        JsonWithLocationParser parser = new JsonWithLocationParser(template.getName());
-        Object jsonObj = null;
-        
-        try
-        {
-            jsonObj = parser.parse(templateContent);
-        } catch(Exception ex)
-        {
-            throw new InvalidStateException("An error occurred while parsing json template.", ex);
-        }
+		templateFactoryConfiguration.pushCurrentInstance();
 
-        Object root = parseObject((JsonElementWithLocation) jsonObj, null);
-        template.setRoot(root);
+		try
+		{
+			JsonWithLocationParser parser = new JsonWithLocationParser(template.getName());
+			Object jsonObj = null;
+			
+			try
+			{
+				jsonObj = parser.parse(templateContent);
+			} catch(Exception ex)
+			{
+				throw new InvalidStateException("An error occurred while parsing json template.", ex);
+			}
+
+			Object root = parseObject((JsonElementWithLocation) jsonObj, null);
+			template.setRoot(root);
+		} finally
+		{
+			templateFactoryConfiguration.popCurrentInstance();
+		}
     }
     
     private Object parseObject(JsonElementWithLocation object, String parentKey)

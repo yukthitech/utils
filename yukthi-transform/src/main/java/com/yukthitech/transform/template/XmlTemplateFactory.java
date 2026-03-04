@@ -141,6 +141,11 @@ public class XmlTemplateFactory implements ITemplateFactory
 	 */
 	private FreeMarkerEngine freeMarkerEngine;
 
+	/**
+	 * Configuration for the template factory.
+	 */
+	private TemplateFactoryConfiguration templateFactoryConfiguration = new TemplateFactoryConfiguration();
+
     public XmlTemplateFactory()
     {
     	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
@@ -162,6 +167,14 @@ public class XmlTemplateFactory implements ITemplateFactory
 		this.setFreeMarkerEngine(freeMarkerEngine);
 	}
 
+	public void setTemplateFactoryConfiguration(TemplateFactoryConfiguration templateFactoryConfiguration)
+	{
+		if(templateFactoryConfiguration == null)
+		{
+			throw new NullPointerException("Template factory configuration cannot be set to null.");
+		}
+	}
+
 	/**
 	 * Sets the free marker engine for expression processing.
 	 *
@@ -181,30 +194,46 @@ public class XmlTemplateFactory implements ITemplateFactory
 
     public TransformTemplate parseTemplate(String name, String templateContent) 
     {
-    	XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler(name);
-    	parserHandler.setExpressionEnabled(false);
-    	
-    	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
-    			new ByteArrayInputStream(templateContent.getBytes()), 
-    			parserHandler);
+		templateFactoryConfiguration.pushCurrentInstance();
 
-    	TransformElement root = (TransformElement) parseObject(dynBean, dynBean.getLocation());
+		try
+		{
+			XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler(name);
+			parserHandler.setExpressionEnabled(false);
+			
+			XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
+					new ByteArrayInputStream(templateContent.getBytes()), 
+					parserHandler);
 
-        return new TransformTemplate(name, XmlGenerator.class, root, root.getLocation());
-    }
+			TransformElement root = (TransformElement) parseObject(dynBean, dynBean.getLocation());
+
+			return new TransformTemplate(name, XmlGenerator.class, root, root.getLocation());
+		} finally
+		{
+			templateFactoryConfiguration.popCurrentInstance();
+		}
+	}
     
     private void parseTemplateTo(String templateContent, TransformTemplate template)
     {
-    	XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler(template.getName());
-    	parserHandler.setExpressionEnabled(false);
+		templateFactoryConfiguration.pushCurrentInstance();
 
-    	XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
-    			new ByteArrayInputStream(templateContent.getBytes()), 
-    			parserHandler);
+		try
+		{
+			XmlTemplateParserHandler parserHandler = new XmlTemplateParserHandler(template.getName());
+			parserHandler.setExpressionEnabled(false);
 
-        Object root = parseObject(dynBean, dynBean.getLocation());
-        template.setRoot(root);
-    }
+			XmlDynamicBean dynBean = (XmlDynamicBean) XMLBeanParser.parse(
+					new ByteArrayInputStream(templateContent.getBytes()), 
+					parserHandler);
+
+			Object root = parseObject(dynBean, dynBean.getLocation());
+			template.setRoot(root);
+		} finally
+		{
+			templateFactoryConfiguration.popCurrentInstance();
+		}
+	}
     
     @SuppressWarnings("unchecked")
     private Object parseObject(Object object, Location location)

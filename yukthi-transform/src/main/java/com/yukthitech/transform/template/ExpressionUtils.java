@@ -119,6 +119,8 @@ public class ExpressionUtils
 	{
 		ExpressionType exprType = expression.getType();
 		String expr = expression.getExpression();
+
+		TemplateFactoryConfiguration templateFactoryConfiguration = TemplateFactoryConfiguration.getCurrentInstance();
 		
 		try
 		{
@@ -133,6 +135,11 @@ public class ExpressionUtils
 			}
 			else if(exprType == ExpressionType.XPATH)
 			{
+				if(templateFactoryConfiguration != null && templateFactoryConfiguration.isXpathDisabled())
+				{
+					throw new TransformException(expression.getLocation(), "XPath expression is not supported by the current template factory.");
+				}
+
 				CompiledExpression compiledExpression = (CompiledExpression) expression.getParsedExpression();
 				Object res = compiledExpression.getValue(JXPathContext.newContext(context));
 				
@@ -142,6 +149,11 @@ public class ExpressionUtils
 			}
 			else if(exprType == ExpressionType.XPATH_MULTI)
 			{
+				if(templateFactoryConfiguration != null && templateFactoryConfiguration.isXpathDisabled())
+				{
+					throw new TransformException(expression.getLocation(), "XPath expression is not supported by the current template factory.");
+				}
+	
 				CompiledExpression compiledExpression = (CompiledExpression) expression.getParsedExpression();
 				
 				Iterator<?> it = compiledExpression.iterate(JXPathContext.newContext(context));
