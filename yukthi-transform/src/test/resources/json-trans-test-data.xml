@@ -381,6 +381,10 @@
 			{
 				"bookNames": "@xpathMulti: /libraries/Justbooks/books//title",
 				"copyCount": "@xpath: /libraries/Justbooks/books[1]/copyCount",
+
+				"jsonBookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title",
+				"jsonCopyCount": "@jpath: $.libraries.Justbooks.books[0].copyCount",
+
 				"allDocCounts": ["@fmarker: sizeOf(libraries.Justbooks.books)", "@fmarker: sizeOf(libraries.Imagine.books)"],
 				"Justbooks": [
 					{
@@ -410,6 +414,10 @@
 			{
 				"bookNames": ["Davinci Code", "Sphere"],
 				"copyCount": 3,
+
+				"jsonBookNames": ["Davinci Code", "Sphere"],
+				"jsonCopyCount": 3,
+
 				"allDocCounts": [2, 3],
 				"Justbooks": [
 					{ "name": "Davinci Code", "desc": "Type: Science Fiction, author: Dan Brown" },
@@ -541,7 +549,8 @@
 				"list": [
 					100,
 					{
-						"@set(secondLib)": "@xpath: /libraries/Imagine/name"
+						"@set(secondLib)": "@xpath: /libraries/Imagine/name",
+						"@set(jsonSecondLib)": "@jpath: $.libraries.Imagine.name"
 					}, 
 					200
 				],
@@ -556,7 +565,8 @@
 				},
 				
 				"names": "@fmarker: libJb.bookNames",
-				"library": "@fmarker: secondLib"
+				"library": "@fmarker: secondLib",
+				"jsonLibrary": "@fmarker: jsonSecondLib"
 				
 			}
 		</template>
@@ -569,7 +579,8 @@
 				},
 				
 				"names": ["Davinci Code", "Sphere"],
-				"library": "Imagine"
+				"library": "Imagine",
+				"jsonLibrary": "Imagine"
 				
 			}
 		</expectedResult>

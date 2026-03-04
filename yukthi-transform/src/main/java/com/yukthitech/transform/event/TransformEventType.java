@@ -93,6 +93,16 @@ public enum TransformEventType
     XPATH_MULTI_EXPRESSION_EVALUATED,
 
     /**
+     * JSON path expression evaluated. Result is object.
+     */
+    JSON_PATH_EXPRESSION_EVALUATED,
+
+    /**
+     * JSON path multi expression evaluated. Result is object.
+     */
+    JSON_PATH_MULTI_EXPRESSION_EVALUATED,
+
+    /**
      * Template expression evaluated. Result is object.
      */
     TEMPLATE_EXPRESSION_EVALUATED,

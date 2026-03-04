@@ -19,6 +19,9 @@ public interface ITransformConstants
 	 */
 	String EXPR_TYPE_XPATH = "xpath";
 	
+	/**
+	 * JSON path expression type.
+	 */
 	String EXPR_TYPE_JSON_PATH = "jpath";
 
 	/**
@@ -26,6 +29,9 @@ public interface ITransformConstants
 	 */
 	String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
 	
+	/**
+	 * JSON path expression type with multiple value.
+	 */
 	String EXPR_TYPE_JSON_PATH_MULTI = "jpathMulti";
 	
 	String HYBRID_TEXT_PROP = "$text";

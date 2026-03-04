@@ -1,6 +1,8 @@
 package com.yukthitech.transform.template;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,6 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.jxpath.CompiledExpression;
 import org.apache.commons.jxpath.JXPathContext;
 
+import com.jayway.jsonpath.JsonPath;
 import com.yukthitech.transform.FreemarkerUtil;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.ITransformContext;
@@ -46,6 +49,16 @@ public class ExpressionUtils
         	CompiledExpression compiledExpr = JXPathContext.compile(expr);
             return new Expression(location, ExpressionType.XPATH_MULTI, expr, compiledExpr);
         }
+		else if(ITransformConstants.EXPR_TYPE_JSON_PATH.equals(exprType))
+		{
+			JsonPath compiledExpr = JsonPath.compile(expr);
+			return new Expression(location, ExpressionType.JSON_PATH, expr, compiledExpr);
+		}
+		else if(ITransformConstants.EXPR_TYPE_JSON_PATH_MULTI.equals(exprType))
+		{
+			JsonPath compiledExpr = JsonPath.compile(expr);
+			return new Expression(location, ExpressionType.JSON_PATH_MULTI, expr, compiledExpr);
+		}
 
         throw new TemplateParseException(location, "Invalid expression type specified '{}' in expression: {}", exprType, mainExpression);
     }
@@ -100,6 +113,7 @@ public class ExpressionUtils
 	 * @param path path where this string is found
 	 * @return processed value
 	 */
+	@SuppressWarnings("unchecked")
 	public static Object processExpression(FreeMarkerEngine freeMarkerEngine, Expression expression, 
 		ITransformContext context, ITransformListener listener)
 	{
@@ -141,6 +155,36 @@ public class ExpressionUtils
 				
 				listener.onTransform(new TransformEvent(expression.getLocation(), 
 					TransformEventType.XPATH_MULTI_EXPRESSION_EVALUATED, res));
+				return res;
+			}
+			else if(exprType == ExpressionType.JSON_PATH)
+			{
+				JsonPath compiledExpression = (JsonPath) expression.getParsedExpression();
+				Object res = compiledExpression.read(context);
+				
+				if(res instanceof Collection)
+				{
+					Collection<Object> collection = (Collection<Object>) res;
+					Iterator<Object> it = collection.iterator();
+					res = it.hasNext() ? it.next() : null;
+				}
+				
+				listener.onTransform(new TransformEvent(expression.getLocation(), 
+					TransformEventType.JSON_PATH_EXPRESSION_EVALUATED, res));
+				return res;
+			}
+			else if(exprType == ExpressionType.JSON_PATH_MULTI)
+			{
+				JsonPath compiledExpression = (JsonPath) expression.getParsedExpression();
+				Object res = compiledExpression.read(context);
+				
+				if(res != null && !(res instanceof Collection))
+				{
+					res = Arrays.asList(res);
+				}
+
+				listener.onTransform(new TransformEvent(expression.getLocation(), 
+					TransformEventType.JSON_PATH_MULTI_EXPRESSION_EVALUATED, res));
 				return res;
 			}
 			else if(exprType == ExpressionType.TEMPLATE)

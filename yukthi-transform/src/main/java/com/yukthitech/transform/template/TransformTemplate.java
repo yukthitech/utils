@@ -187,7 +187,7 @@ public class TransformTemplate implements Serializable
 
 	public static enum ExpressionType
 	{
-		FMARKER, XPATH, XPATH_MULTI,
+		FMARKER, XPATH, XPATH_MULTI, JSON_PATH, JSON_PATH_MULTI,
 
 		TEMPLATE,
 
