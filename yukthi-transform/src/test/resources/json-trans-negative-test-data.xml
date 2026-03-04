@@ -81,6 +81,6 @@
 				"listWithPositiveCond": ["@condition:devStackEnabledx == 1", 1000, {"a": "b"}]
 			}
 		</template>
-		<expectedError>Path: $.listWithPositiveCond] Invalid condition 'devStackEnabledx == 1' (Name: transform-condition)</expectedError>
+		<expectedError>Path: $.listWithPositiveCond] Invalid condition 'devStackEnabledx == 1' (Name: transform-list-condition)</expectedError>
 	</jel-test-bean>
 </test-data>

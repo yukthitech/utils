@@ -18,28 +18,17 @@ package com.yukthitech.transform;
 import java.util.Map;
 
 import com.yukthitech.transform.event.ITransformListener;
-import com.yukthitech.transform.template.Location;
+import com.yukthitech.transform.template.ExpressionUtils;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.Include;
 import com.yukthitech.transform.template.TransformTemplate.Resource;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
-import com.yukthitech.transform.template.TransformUtils;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
 public class Conversions
 {
-	/**
-	 * Free marker engine for expression processing.
-	 */
-	private FreeMarkerEngine freeMarkerEngine;
-	
-	public Conversions(FreeMarkerEngine freeMarkerEngine)
-	{
-		this.freeMarkerEngine = freeMarkerEngine;
-	}
-
 	/**
 	 * If resource tag is specified in the map, this will fetch resource content from specified resource.
 	 *
@@ -51,7 +40,7 @@ public class Conversions
 	 *            the value
 	 * @return true, if successful
 	 */
-	public boolean processMapRes(TransformObject transformObject, ITransformContext context, 
+	public static boolean processMapRes(FreeMarkerEngine freeMarkerEngine, TransformObject transformObject, ITransformContext context, 
 		ObjectWrapper<Object> value, TransformEngine curEngine, TransformState transformState, ITransformListener listener)
 	{
 		Resource resource = transformObject.getResource();
@@ -73,10 +62,10 @@ public class Conversions
 				context.setValue("resParams", resParams);
 			}
 			
-			content = ExpressionUtil.processTemplate(freeMarkerEngine, transformObject.getLocation(), "res-content", content, context);
+			content = FreemarkerUtil.processTemplate(freeMarkerEngine, transformObject.getLocation(), "res-content", content, context);
 		}
 		
-		Object finalRes = checkForTransform(transformObject, content, context, transformState, listener);
+		Object finalRes = checkForTransform(freeMarkerEngine, transformObject, content, context, transformState, listener);
 		value.setValue(finalRes);
 		return true;
 	}
@@ -97,7 +86,7 @@ public class Conversions
 	 * @return true, if successful
 	 */
 	@SuppressWarnings("unchecked")
-	public boolean processInclude(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, 
+	public static boolean processInclude(TransformObject transformObject, ITransformContext context, ObjectWrapper<Object> value, 
 			TransformEngine curEngine, TransformState transformState)
 	{
 		Include include = transformObject.getInclude();
@@ -140,35 +129,21 @@ public class Conversions
 	 * @param path path where this string is found
 	 * @return processed value
 	 */
-	public Object processExpression(Expression expression, ITransformContext context, 
+	private static Object processExpression(FreeMarkerEngine freeMarkerEngine, Expression expression, ITransformContext context, 
 			TransformState transformState, ITransformListener listener)
 	{
 		InternalExpressionContext.push(freeMarkerEngine, context, transformState, listener);
 
 		try
 		{
-			return TransformUtils.processExpression(freeMarkerEngine, expression, context, transformState, listener);
+			return ExpressionUtils.processExpression(freeMarkerEngine, expression, context, listener);
 		} finally
 		{
 			InternalExpressionContext.pop();
 		}
 	}
 	
-	public String processTemplate(String expression, ITransformContext context, Location location)
-	{
-		try
-		{
-			return ExpressionUtil.processTemplate(freeMarkerEngine, location, "transform-template", expression, context);
-		} catch(TransformException ex)
-		{
-			throw ex;
-		} catch(Exception ex)
-		{
-			throw new TransformException(location, "An error occurred while processing template: {}", expression, ex);
-		}
-	}
-
-	public Object checkForTransform(TransformObject transformObject, Object curValue, 
+	public static Object checkForTransform(FreeMarkerEngine freeMarkerEngine, TransformObject transformObject, Object curValue, 
 		ITransformContext context, TransformState transformState, ITransformListener listener)
 	{
 		Expression transformExpr = transformObject.getTransformExpression();
@@ -182,7 +157,7 @@ public class Conversions
 		{
 			context.setValue("thisValue", curValue);
 			
-			return processExpression(transformExpr, context, transformState, listener);
+			return processExpression(freeMarkerEngine, transformExpr, context, transformState, listener);
 		} catch(TransformException ex)
 		{
 			throw ex;

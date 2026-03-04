@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.IContentLoader;
 import com.yukthitech.transform.ITransformConstants;
+import com.yukthitech.transform.TransformFmarkerMethods;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.FieldType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
@@ -24,6 +25,8 @@ import com.yukthitech.transform.template.TransformTemplate.TransformElement;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
 
 public class XmlTemplateFactory implements ITemplateFactory
 {
@@ -133,20 +136,48 @@ public class XmlTemplateFactory implements ITemplateFactory
      */
     private Map<String, TransformTemplate> includeCache = new HashMap<>();
 
+	/**
+	 * Free marker engine for expression processing.
+	 */
+	private FreeMarkerEngine freeMarkerEngine;
+
     public XmlTemplateFactory()
     {
-    	this(DEFAULT_CONTENT_LOADER);
+    	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
     }
     
     public XmlTemplateFactory(IContentLoader contentLoader)
     {
+    	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
+    }
+    
+	public XmlTemplateFactory(IContentLoader contentLoader, FreeMarkerEngine freeMarkerEngine)
+	{
     	if(contentLoader == null)
     	{
     		contentLoader = DEFAULT_CONTENT_LOADER;
     	}
     	
         this.contentLoader = contentLoader;
-    }
+		this.setFreeMarkerEngine(freeMarkerEngine);
+	}
+
+	/**
+	 * Sets the free marker engine for expression processing.
+	 *
+	 * @param freeMarkerEngine
+	 *            the new free marker engine for expression processing
+	 */
+	public void setFreeMarkerEngine(FreeMarkerEngine freeMarkerEngine)
+	{
+		if(freeMarkerEngine == null)
+		{
+			throw new NullPointerException("Free marker engine cannot be set to null.");
+		}
+		
+		this.freeMarkerEngine = freeMarkerEngine;
+		this.freeMarkerEngine.loadClass(TransformFmarkerMethods.class);
+	}
 
     public TransformTemplate parseTemplate(String name, String templateContent) 
     {
@@ -190,7 +221,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 			}
 			else if(object instanceof String)
 			{
-                object = TransformUtils.parseExpression((String) object, location, false);
+                object = ExpressionUtils.parseExpression(this.freeMarkerEngine, (String) object, location, false);
 			}
 		} catch(TemplateParseException ex)
 		{
@@ -226,7 +257,8 @@ public class XmlTemplateFactory implements ITemplateFactory
             objects.add(parseObject(object, object.getLocation()));
         }
         
-        return new TransformList(location, condition, objects);
+        FreeMarkerTemplate conditionTemp = (condition == null) ? null : freeMarkerEngine.buildConditionTemplate("transform-list-condition", condition);
+        return new TransformList(location, conditionTemp, objects);
     }
 
     private String checkForListCondition(Object object)
@@ -236,7 +268,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             return null;
         }
         
-        Matcher matcher = TransformUtils.EXPR_PATTERN.matcher((String) object);
+        Matcher matcher = ExpressionUtils.EXPR_PATTERN.matcher((String) object);
         
         if(!matcher.matches())
         {
@@ -257,7 +289,8 @@ public class XmlTemplateFactory implements ITemplateFactory
     {
         if(KEY_CONDITION.equals(name))
         {
-            transformObject.setCondition(value);
+        	FreeMarkerTemplate conditionTemp = freeMarkerEngine.buildConditionTemplate("transform-condition", value);
+            transformObject.setCondition(conditionTemp);
             return true;
         }
 
@@ -278,7 +311,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         if(TRANSFORM.equals(name)
             && StringUtils.isNotBlank(value))
         {
-            transformObject.setTransformExpression(TransformUtils.parseExpression(value, location, false));
+            transformObject.setTransformExpression(ExpressionUtils.parseExpression(this.freeMarkerEngine, value, location, false));
             return true;
         }
         
@@ -302,8 +335,27 @@ public class XmlTemplateFactory implements ITemplateFactory
                 String loopVariable = reserveAttr.get(FOR_EACH_LOOP_VAR);
                 Object listExpression = entry.getValue();
                 String loopCondition = reserveAttr.get(KEY_FOR_EACH_CONDITION);
-    
-                transformObject.setForEachLoop(new ForEachLoop(dynBean.getLocation(), listExpression, loopVariable, loopCondition));
+                
+                String nameExpression = reserveAttr.get(NAME_EXPRESSION);
+                
+                if(listExpression instanceof String)
+                {
+                	Expression expression = ExpressionUtils.parseValueExpression(this.freeMarkerEngine, (String) listExpression, 
+                			dynBean.getLocation());
+                	
+                	listExpression = expression;
+                }
+                
+                FreeMarkerTemplate conditionTemplate = loopCondition  == null ? null : freeMarkerEngine.buildConditionTemplate("for-each-condition", loopCondition);
+                
+                ForEachLoop forEachLoop = new ForEachLoop(dynBean.getLocation(), listExpression, loopVariable, conditionTemplate);
+
+                // Note: unlike in json, same element with same name can be repeated in xml (so name expression in for-loop is not mandatory)
+                Expression nameExpressionObj = (nameExpression == null) ? null : ExpressionUtils.parseExpression(freeMarkerEngine, nameExpression, 
+                		dynBean.getLocation(), false);
+                forEachLoop.setNameExpression(nameExpressionObj);
+
+                transformObject.setForEachLoop(forEachLoop);
                 continue;
             }
     
@@ -415,7 +467,8 @@ public class XmlTemplateFactory implements ITemplateFactory
         				"Switch case must have t:value attribute specified");
         		}
         		
-        		parsedCases.add(new SwitchCase(reservedBean.getLocation(), (String) condition, value));
+        		FreeMarkerTemplate conditionTemp = (condition == null) ? null : freeMarkerEngine.buildConditionTemplate("switch-condition", (String) condition);
+        		parsedCases.add(new SwitchCase(reservedBean.getLocation(), conditionTemp, value));
         	}
         	
         	transformObject.setSwitchStatement(new Switch(reservedBean.getLocation(), parsedCases));
@@ -430,7 +483,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         	// if set is being done with text body
         	if(reservedBean.getTextContent() != null)
         	{
-        		Object expression =  TransformUtils.parseExpression(reservedBean.getTextContent(), reservedBean.getLocation(), false);
+        		Object expression =  ExpressionUtils.parseExpression(this.freeMarkerEngine, reservedBean.getTextContent(), reservedBean.getLocation(), false);
         		
                 transformObject.addField(new TransformObjectField(
                 		reservedBean.getLocation(),
@@ -494,7 +547,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 		
         if(StringUtils.isNotBlank(keyExpressionStr))
         {
-            keyExpression = TransformUtils.parseExpression(keyExpressionStr, child.getLocation(), true);
+            keyExpression = ExpressionUtils.parseExpression(this.freeMarkerEngine, keyExpressionStr, child.getLocation(), true);
         }
         
         transformObject.addField(new TransformObjectField(

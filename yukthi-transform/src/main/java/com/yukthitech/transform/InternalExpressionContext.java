@@ -1,7 +1,7 @@
 package com.yukthitech.transform;
 
 import com.yukthitech.transform.event.ITransformListener;
-import com.yukthitech.transform.template.TransformUtils;
+import com.yukthitech.transform.template.ExpressionUtils;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 
@@ -41,8 +41,8 @@ public class InternalExpressionContext
 
 	public Object evaluateExpression(String expressionStr)
 	{
-		Expression expression = TransformUtils.parseExpression(expressionStr, 
+		Expression expression = ExpressionUtils.parseExpression(freeMarkerEngine, expressionStr, 
 			transformState.getLocation(), false);
-		return TransformUtils.processExpression(freeMarkerEngine, expression, context, transformState, listener);
+		return ExpressionUtils.processExpression(freeMarkerEngine, expression, context, listener);
 	}
 }

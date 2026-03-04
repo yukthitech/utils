@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.yukthitech.transform.ITransformConstants;
+import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
 
 /**
  * Represents a transform template based on which new objects can be created
@@ -136,14 +137,30 @@ public class TransformTemplate implements Serializable
 		 * Condition to be evaluated to true for the object to be included in
 		 * the result.
 		 */
-		private String condition;
+		private FreeMarkerTemplate condition;
+		
+		/**
+		 * Name expression to be used for this for-each. Populated only in
+		 * case map entry loops.
+		 */
+		private Expression nameExpression;
 
-		public ForEachLoop(Location location, Object listExpression, String loopVariable, String condition)
+		public ForEachLoop(Location location, Object listExpression, String loopVariable, FreeMarkerTemplate condition)
 		{
 			super(location);
 			this.listExpression = listExpression;
 			this.loopVariable = loopVariable;
 			this.condition = condition;
+		}
+		
+		public void setNameExpression(Expression nameExpression)
+		{
+			this.nameExpression = nameExpression;
+		}
+		
+		public Expression getNameExpression()
+		{
+			return nameExpression;
 		}
 
 		public Object getListExpression()
@@ -156,7 +173,7 @@ public class TransformTemplate implements Serializable
 			return loopVariable;
 		}
 
-		public String getCondition()
+		public FreeMarkerTemplate getCondition()
 		{
 			return condition;
 		}
@@ -198,12 +215,18 @@ public class TransformTemplate implements Serializable
 		 * Expression to be evaluated.
 		 */
 		private String expression;
+		
+		/**
+		 * Parsed expression object.
+		 */
+		private Object parsedExpression;
 
-		public Expression(Location location, ExpressionType type, String expression)
+		public Expression(Location location, ExpressionType type, String expression, Object parsedExpression)
 		{
 			super(location);
 			this.type = type;
 			this.expression = expression;
+			this.parsedExpression = parsedExpression;
 		}
 
 		public ExpressionType getType()
@@ -214,6 +237,11 @@ public class TransformTemplate implements Serializable
 		public String getExpression()
 		{
 			return expression;
+		}
+		
+		public Object getParsedExpression()
+		{
+			return parsedExpression;
 		}
 
 		@Override
@@ -277,6 +305,7 @@ public class TransformTemplate implements Serializable
 		public TransformObjectField(Location location, String name, Expression nameExpression, String attributeName, Object value, boolean replaceEntry)
 		{
 			super(location);
+			
 			this.name = name;
 			this.nameExpression = nameExpression;
 			this.attributeName = attributeName;
@@ -416,21 +445,21 @@ public class TransformTemplate implements Serializable
 		/**
 		 * Condition to be evaluated. If null, this is the default case.
 		 */
-		private String condition;
+		private FreeMarkerTemplate condition;
 
 		/**
 		 * Value to return if condition is true.
 		 */
 		private Object value;
 
-		public SwitchCase(Location location, String condition, Object value)
+		public SwitchCase(Location location, FreeMarkerTemplate condition, Object value)
 		{
 			super(location);
 			this.condition = condition;
 			this.value = value;
 		}
 
-		public String getCondition()
+		public FreeMarkerTemplate getCondition()
 		{
 			return condition;
 		}
@@ -465,7 +494,7 @@ public class TransformTemplate implements Serializable
 		 * Condition to be evaluated to true for the object to be included in
 		 * the result.
 		 */
-		private String condition;
+		private FreeMarkerTemplate condition;
 
 		/**
 		 * Value to be returned if the condition is evaluated to false.
@@ -529,12 +558,12 @@ public class TransformTemplate implements Serializable
 			return name;
 		}
 
-		public String getCondition()
+		public FreeMarkerTemplate getCondition()
 		{
 			return condition;
 		}
 
-		TransformObject setCondition(String condition)
+		TransformObject setCondition(FreeMarkerTemplate condition)
 		{
 			this.condition = condition;
 			return this;
@@ -644,21 +673,21 @@ public class TransformTemplate implements Serializable
 		 * Condition to be evaluated to true for the list to be included in the
 		 * result.
 		 */
-		private String condition;
+		private FreeMarkerTemplate condition;
 
 		/**
 		 * List of objects to be included in the result.
 		 */
 		private List<Object> objects;
 
-		public TransformList(Location location, String condition, List<Object> objects)
+		public TransformList(Location location, FreeMarkerTemplate condition, List<Object> objects)
 		{
 			super(location);
 			this.condition = condition;
 			this.objects = objects;
 		}
 
-		public String getCondition()
+		public FreeMarkerTemplate getCondition()
 		{
 			return condition;
 		}

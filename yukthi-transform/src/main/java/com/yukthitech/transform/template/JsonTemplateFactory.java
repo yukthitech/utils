@@ -8,7 +8,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yukthitech.transform.IContentLoader;
+import com.yukthitech.transform.TransformFmarkerMethods;
 import com.yukthitech.transform.template.JsonWithLocationParser.JsonElementWithLocation;
 import com.yukthitech.transform.template.JsonWithLocationParser.ListWithLocation;
 import com.yukthitech.transform.template.JsonWithLocationParser.MapWithLocation;
@@ -24,6 +27,8 @@ import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.utils.exceptions.InvalidStateException;
+import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
 
 public class JsonTemplateFactory implements ITemplateFactory
 {
@@ -32,7 +37,8 @@ public class JsonTemplateFactory implements ITemplateFactory
 			"@expressions",
 			"@resParams",
 			"@for-each-condition",
-			"@case"
+			"@case",
+			"@name"
 		);
 	
 	/**
@@ -59,6 +65,11 @@ public class JsonTemplateFactory implements ITemplateFactory
 	 * Loop condition to exclude objects being generated.
 	 */
 	private static final String KEY_FOR_EACH_CONDITION = "@for-each-condition";
+	
+	/**
+	 * Used in cases where parent-key has to be modified based on this expression.
+	 */
+	private static final String KEY_NAME = "@name";
 	
 	/**
 	 * Key used to specify switch statement with multiple cases.
@@ -133,23 +144,56 @@ public class JsonTemplateFactory implements ITemplateFactory
      * for recursive templates.
      */
     private Map<String, TransformTemplate> includeCache = new HashMap<>();
+    
+	/**
+	 * Free marker engine for expression processing.
+	 */
+	private FreeMarkerEngine freeMarkerEngine;
 
     public JsonTemplateFactory()
     {
-    	this(DEFAULT_CONTENT_LOADER);
+    	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
+    }
+    
+    public JsonTemplateFactory(FreeMarkerEngine freeMarkerEngine)
+    {
+    	this(DEFAULT_CONTENT_LOADER, freeMarkerEngine);
     }
     
     public JsonTemplateFactory(IContentLoader contentLoader)
     {
+    	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
+    }
+    
+	public JsonTemplateFactory(IContentLoader contentLoader, FreeMarkerEngine freeMarkerEngine)
+	{
     	if(contentLoader == null)
     	{
     		contentLoader = DEFAULT_CONTENT_LOADER;
     	}
     	
         this.contentLoader = contentLoader;
-    }
-    
-    public void reset()
+		this.setFreeMarkerEngine(freeMarkerEngine);
+	}
+
+	/**
+	 * Sets the free marker engine for expression processing.
+	 *
+	 * @param freeMarkerEngine
+	 *            the new free marker engine for expression processing
+	 */
+	public void setFreeMarkerEngine(FreeMarkerEngine freeMarkerEngine)
+	{
+		if(freeMarkerEngine == null)
+		{
+			throw new NullPointerException("Free marker engine cannot be set to null.");
+		}
+		
+		this.freeMarkerEngine = freeMarkerEngine;
+		this.freeMarkerEngine.loadClass(TransformFmarkerMethods.class);
+	}
+
+	public void reset()
     {
     	includeCache.clear();
     }
@@ -167,7 +211,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             throw new InvalidStateException("An error occurred while parsing json template.", ex);
         }
 
-        TransformElement root = (TransformElement) parseObject((JsonElementWithLocation) jsonObj);
+        TransformElement root = (TransformElement) parseObject((JsonElementWithLocation) jsonObj, null);
 
         return new TransformTemplate(name, JsonGenerator.class, root, root.getLocation());
     }
@@ -185,11 +229,11 @@ public class JsonTemplateFactory implements ITemplateFactory
             throw new InvalidStateException("An error occurred while parsing json template.", ex);
         }
 
-        Object root = parseObject((JsonElementWithLocation) jsonObj);
+        Object root = parseObject((JsonElementWithLocation) jsonObj, null);
         template.setRoot(root);
     }
     
-    private Object parseObject(JsonElementWithLocation object)
+    private Object parseObject(JsonElementWithLocation object, String parentKey)
     {
 		try
 		{
@@ -200,14 +244,14 @@ public class JsonTemplateFactory implements ITemplateFactory
 
 			if(object instanceof MapWithLocation)
 			{
-				return parseMap((MapWithLocation) object);
+				return parseMap((MapWithLocation) object, parentKey);
 			}
 
 			ValueWithLocation valueWithLocation = (ValueWithLocation) object;
 
 			if(valueWithLocation.getValue() instanceof String)
 			{
-                return TransformUtils.parseExpression((String) valueWithLocation.getValue(), 
+                return ExpressionUtils.parseExpression(this.freeMarkerEngine, (String) valueWithLocation.getValue(), 
 					valueWithLocation.getLocation(), false);
 			}
 
@@ -241,10 +285,11 @@ public class JsonTemplateFactory implements ITemplateFactory
                 }
             }
 
-            objects.add(parseObject(object));
+            objects.add(parseObject(object, null));
         }
         
-        return new TransformList(list.getLocation(), condition, objects);
+        FreeMarkerTemplate conditionTemp = (condition == null) ? null : freeMarkerEngine.buildConditionTemplate("transform-list-condition", condition);
+        return new TransformList(list.getLocation(), conditionTemp, objects);
     }
 
     private String checkForListCondition(JsonElementWithLocation object)
@@ -254,7 +299,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             return null;
         }
         
-        Matcher matcher = TransformUtils.EXPR_PATTERN.matcher((String) object.getValue());
+        Matcher matcher = ExpressionUtils.EXPR_PATTERN.matcher((String) object.getValue());
         
         if(!matcher.matches())
         {
@@ -271,7 +316,7 @@ public class JsonTemplateFactory implements ITemplateFactory
         return matcher.group(2);
     }
 
-    private TransformObject parseMap(MapWithLocation map)
+    private TransformObject parseMap(MapWithLocation map, String parentKey)
     {
         TransformObject transformObject = new TransformObject(map.getLocation());
 
@@ -279,7 +324,8 @@ public class JsonTemplateFactory implements ITemplateFactory
         {
             if(KEY_CONDITION.equals(entry.getKey()))
             {
-                transformObject.setCondition(map.getString(KEY_CONDITION));
+            	FreeMarkerTemplate conditionTemp = freeMarkerEngine.buildConditionTemplate("transform-condition", map.getString(KEY_CONDITION));
+                transformObject.setCondition(conditionTemp);
                 continue;
             }
 
@@ -290,9 +336,37 @@ public class JsonTemplateFactory implements ITemplateFactory
                 String loopVariable = forEachMatcher.group(1);
                 JsonElementWithLocation listExpression = (JsonElementWithLocation) entry.getValue();
                 String loopCondition = map.getString(KEY_FOR_EACH_CONDITION);
+                
+                String nameExpression = map.getString(KEY_NAME);
+                Location nameExprLocation = StringUtils.isNotBlank(nameExpression) ? map.get(KEY_NAME).getLocation() : null;
+                
+                // For map based for-loop, if name expression is not defined, use parent key as name-expression
+                if(parentKey != null && StringUtils.isBlank(nameExpression))
+                {
+                	nameExpression = parentKey;
+                	nameExprLocation = map.getLocation();
+                }
+                
+                Object listExpressionValue = listExpression.getValue();
+                
+                if(listExpressionValue instanceof String)
+                {
+                	Expression expression = ExpressionUtils.parseValueExpression(this.freeMarkerEngine, (String) listExpressionValue, 
+                			listExpression.getLocation());
+                	
+                	listExpressionValue = expression;
+                }
+                
+                FreeMarkerTemplate conditionTemplate = StringUtils.isBlank(loopCondition) ? null : freeMarkerEngine.buildConditionTemplate("for-each-condition", loopCondition);
+                
+                ForEachLoop forEachLoop = new ForEachLoop(listExpression.getLocation(), listExpressionValue, 
+    					loopVariable, conditionTemplate);
 
-                transformObject.setForEachLoop(new ForEachLoop(listExpression.getLocation(), listExpression.getValue(), 
-					loopVariable, loopCondition));
+                Expression nameExpressionObj = (nameExpression == null) ? null : ExpressionUtils.parseExpression(freeMarkerEngine, nameExpression, 
+                		nameExprLocation, false);
+                forEachLoop.setNameExpression(nameExpressionObj);
+                
+                transformObject.setForEachLoop(forEachLoop);
                 continue;
             }
 
@@ -352,7 +426,7 @@ public class JsonTemplateFactory implements ITemplateFactory
             		// Check for @value - @value is mandatory
             		if(caseMap.containsKey(KEY_VALUE))
             		{
-            			value = parseObject(caseMap.get(KEY_VALUE));
+            			value = parseObject(caseMap.get(KEY_VALUE), null);
             		}
                     else
             		{
@@ -360,7 +434,8 @@ public class JsonTemplateFactory implements ITemplateFactory
             				"Switch case must have @value specified");
             		}
             		
-            		parsedCases.add(new SwitchCase(caseObj.getLocation(), condition, value));
+            		FreeMarkerTemplate conditionTemp = (condition == null) ? null : freeMarkerEngine.buildConditionTemplate("switch-condition", condition);
+            		parsedCases.add(new SwitchCase(caseObj.getLocation(), conditionTemp, value));
             	}
             	
             	transformObject.setSwitchStatement(new Switch(switchValue.getLocation(), parsedCases));
@@ -369,14 +444,14 @@ public class JsonTemplateFactory implements ITemplateFactory
 
             if(KEY_FALSE_VALUE.equals(entry.getKey()))
             {
-            	Object falseValue = parseObject(entry.getValue());
+            	Object falseValue = parseObject(entry.getValue(), null);
                 transformObject.setFalseValue(falseValue);
                 continue;
             }
 
             if(KEY_VALUE.equals(entry.getKey()))
             {
-            	Object valueObj = parseObject(entry.getValue());
+            	Object valueObj = parseObject(entry.getValue(), null);
                 transformObject.setValue(valueObj);
                 continue;
             }
@@ -385,7 +460,8 @@ public class JsonTemplateFactory implements ITemplateFactory
             {
 				JsonElementWithLocation transformValue = (JsonElementWithLocation) entry.getValue();
 				
-                transformObject.setTransformExpression(TransformUtils.parseExpression(
+                transformObject.setTransformExpression(ExpressionUtils.parseExpression(
+                	this.freeMarkerEngine, 
 					map.getString(TRANSFORM),
 					transformValue.getLocation(),
 					false));
@@ -439,7 +515,7 @@ public class JsonTemplateFactory implements ITemplateFactory
                         entry.getKey(), 
                         null,
                         attributeName, 
-                        parseObject(entry.getValue()),
+                        parseObject(entry.getValue(), null),
                         false
                     ));
                 continue;
@@ -454,14 +530,14 @@ public class JsonTemplateFactory implements ITemplateFactory
                         entry.getKey(), 
                         null,
                         null, 
-                        parseObject(entry.getValue()),
+                        parseObject(entry.getValue(), null),
                         true
                     ));
                 continue;
             }
 
             //check if key itself represents an expression
-            Expression keyExpression = TransformUtils.parseExpression(entry.getKey(), entry.getValue().getLocation(), true);
+            Expression keyExpression = ExpressionUtils.parseExpression(this.freeMarkerEngine, entry.getKey(), entry.getValue().getLocation(), true);
             
             // if key starts with @, those are special keys
             if(entry.getKey().startsWith("@") && keyExpression == null)
@@ -480,7 +556,7 @@ public class JsonTemplateFactory implements ITemplateFactory
                 entry.getKey(), 
                 keyExpression,
                 null, 
-                parseObject(entry.getValue()),
+                parseObject(entry.getValue(), entry.getKey()),
                 false
             ));
         }
@@ -551,7 +627,7 @@ public class JsonTemplateFactory implements ITemplateFactory
 
 		if(params != null)
 		{
-			paramsObj = (TransformObject) parseObject(params);
+			paramsObj = (TransformObject) parseObject(params, null);
 		}
         
         boolean isResource = INCLUDE_RES.equals(key);

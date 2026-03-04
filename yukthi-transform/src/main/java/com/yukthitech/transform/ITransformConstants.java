@@ -18,11 +18,15 @@ public interface ITransformConstants
 	 * Xpath expression type.
 	 */
 	String EXPR_TYPE_XPATH = "xpath";
+	
+	String EXPR_TYPE_JSON_PATH = "jpath";
 
 	/**
 	 * Xpath expression type with multiple value.
 	 */
 	String EXPR_TYPE_XPATH_MULTI = "xpathMulti";
+	
+	String EXPR_TYPE_JSON_PATH_MULTI = "jpathMulti";
 	
 	String HYBRID_TEXT_PROP = "$text";
 	

@@ -22,22 +22,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.yukthitech.transform.event.ITransformListener;
 import com.yukthitech.transform.event.TransformEvent;
 import com.yukthitech.transform.event.TransformEventType;
+import com.yukthitech.transform.template.ExpressionUtils;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
-import com.yukthitech.transform.template.TransformTemplate.ExpressionType;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
 import com.yukthitech.transform.template.TransformTemplate.Switch;
 import com.yukthitech.transform.template.TransformTemplate.SwitchCase;
-import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
+import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.utils.ObjectWrapper;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
 
 /**
  * Transformation engine to process transformation templates (JSON or XML).
@@ -50,7 +49,7 @@ public class TransformEngine
 		public void onTransform(TransformEvent event)
 		{}
 	};
-
+	
 	/**
 	 * Key used to specify value for the enclosing map. Useful when condition has to be specified for simple attribute.
 	 */
@@ -67,11 +66,6 @@ public class TransformEngine
 	private FreeMarkerEngine freeMarkerEngine;
 	
 	/**
-	 * Conversion functionality.
-	 */
-	private Conversions conversions;
-
-	/**
 	 * Listener for transform events.
 	 */
 	private ITransformListener listener = DUMMY_LISTENER;
@@ -86,11 +80,6 @@ public class TransformEngine
 		this.setFreeMarkerEngine(freeMarkerEngine);
 	}
 
-	public void setListener(ITransformListener listener)
-	{
-		this.listener = listener == null ? DUMMY_LISTENER : listener;
-	}
-	
 	/**
 	 * Sets the free marker engine for expression processing.
 	 *
@@ -105,9 +94,12 @@ public class TransformEngine
 		}
 		
 		this.freeMarkerEngine = freeMarkerEngine;
-		this.conversions = new Conversions(freeMarkerEngine);
-		
 		this.freeMarkerEngine.loadClass(TransformFmarkerMethods.class);
+	}
+
+	public void setListener(ITransformListener listener)
+	{
+		this.listener = listener == null ? DUMMY_LISTENER : listener;
 	}
 	
 	/**
@@ -171,7 +163,7 @@ public class TransformEngine
 			}
 			else if(object instanceof Expression)
 			{
-				object = conversions.processExpression((Expression) object, context, transformState, listener);
+				object = ExpressionUtils.processExpression(freeMarkerEngine, (Expression) object, context, listener);
 			}
 		} catch(TransformException ex)
 		{
@@ -213,7 +205,7 @@ public class TransformEngine
 			if(elem instanceof TransformObject)
 			{
 				List<Object> newElems = procesRepeatedElement((TransformObject) elem, context, 
-					null, transformState.forIndex(index));
+					null, transformState.forIndex(index), false);
 				
 				if(newElems == null)
 				{
@@ -269,7 +261,7 @@ public class TransformEngine
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private List<Object> procesRepeatedElement(TransformObject transformObject, 
-		ITransformContext context, Expression nameExpression, TransformState transformState)
+		ITransformContext context, Expression nameExpression, TransformState transformState, boolean forMaps)
 	{
 		// if condition is present and evaluated to false, then return empty list
 		if(!processCondition(transformObject, context))
@@ -296,9 +288,9 @@ public class TransformEngine
 		Collection<Object> valueLst = null;
 
 		// in case of string process it as an expression
-		if(valueLstExpr instanceof String)
+		if(valueLstExpr instanceof Expression)
 		{
-			valueLstExpr = ExpressionUtil.processValueExpression(freeMarkerEngine, transformObject.getLocation(), "transform-valueLst-expr", (String) valueLstExpr, context);
+			valueLstExpr = ExpressionUtils.processExpression(freeMarkerEngine, (Expression) valueLstExpr, context, listener);
 		}
 		
 		if(valueLstExpr == null)
@@ -322,7 +314,7 @@ public class TransformEngine
 		
 		List<Object> resLst = new ArrayList<>();
 		Object processedMap = null;
-		String forEachCond = forEachLoop.getCondition();
+		FreeMarkerTemplate forEachCond = forEachLoop.getCondition();
 
 		//loop through value list and create repetitive object from template
 		// and process them
@@ -331,10 +323,10 @@ public class TransformEngine
 			context.setValue(loopVariable, iterVal);
 			
 			//if for each condition is specified
-			if(StringUtils.isNotBlank(forEachCond))
+			if(forEachCond != null)
 			{
-				boolean condResult = ExpressionUtil.evaluateCondition(freeMarkerEngine, transformObject.getLocation(), 
-					"for-each-condition", forEachCond, context);
+				boolean condResult = FreemarkerUtil.evaluateCondition(freeMarkerEngine, transformObject.getLocation(), 
+					forEachCond, context);
 
 				listener.onTransform(new TransformEvent(transformObject.getLocation(), 
 					TransformEventType.FOR_EACH_CONDITION_EVALUATED, condResult));
@@ -350,9 +342,11 @@ public class TransformEngine
 			processedMap = processObject(transformObject, context, transformState.forClone());
 			
 			// for maps add name-value entry as a list object
-			if(nameExpression != null)
+			if(forMaps)
 			{
-				String name = "" + conversions.processExpression(nameExpression, context, transformState.forDynField("name"), listener);
+				String name = nameExpression != null 
+						? "" + ExpressionUtils.processExpression(freeMarkerEngine, nameExpression, context, listener) 
+						: transformObject.getName();
 
 				listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.KEY_EXPRESSION_EVALUATED, name));
 
@@ -415,7 +409,7 @@ public class TransformEngine
 		}
 		
 		//check if current map is meant for resource loading.
-		if(conversions.processMapRes(transformObject, context, resWrapper, this, transformState, listener))
+		if(Conversions.processMapRes(freeMarkerEngine, transformObject, context, resWrapper, this, transformState, listener))
 		{
 			listener.onTransform(new TransformEvent(transformObject.getLocation(), 
 				TransformEventType.RESOURCE_LOADED, resWrapper.getValue()));
@@ -423,7 +417,7 @@ public class TransformEngine
 		}
 		
 		//check if current map is meant for including other resource or file
-		if(conversions.processInclude(transformObject, context, resWrapper, this, transformState))
+		if(Conversions.processInclude(transformObject, context, resWrapper, this, transformState))
 		{
 			listener.onTransform(new TransformEvent(transformObject.getLocation(), 
 				TransformEventType.INCLUDE_PROCESSED, resWrapper.getValue()));
@@ -437,8 +431,6 @@ public class TransformEngine
 		//loop through map entries
 		for(TransformObjectField field : transformObject.getFields())
 		{
-			String fieldName = field.getName();
-
 			//if value is map
 			if(field.getValue() instanceof TransformObject)
 			{
@@ -448,16 +440,11 @@ public class TransformEngine
 				if(submapTemplate.getForEachLoop() != null)
 				{
 					// build name expression
-					Expression nameExpression = field.getNameExpression();
-					
-					if(nameExpression == null)
-					{
-						nameExpression = new Expression(field.getLocation(), ExpressionType.STRING, fieldName);
-					}
+					Expression nameExpression = submapTemplate.getForEachLoop().getNameExpression();
 					
 					//based on loop expression generate objects which should be added to res map
 					List<NameValueEntry> processedValues = (List) procesRepeatedElement(submapTemplate, context, 
-						nameExpression, transformState.forField(field)); 
+						nameExpression, transformState.forField(field), true); 
 					processedValues = (processedValues == null) ? Collections.emptyList() : processedValues;
 					
 					//loop through res maps
@@ -520,7 +507,7 @@ public class TransformEngine
 
 			if(field.getNameExpression() != null)
 			{
-				key = (String) conversions.processExpression(field.getNameExpression(), context, transformState.forField(field, "name"), listener);
+				key = (String) ExpressionUtils.processExpression(freeMarkerEngine, field.getNameExpression(), context, listener);
 
 				listener.onTransform(new TransformEvent(field.getLocation(), 
 						TransformEventType.KEY_REPLACED, key));
@@ -568,7 +555,7 @@ public class TransformEngine
 		//evaluate the condition and return the result
 		Object res = processObject(valueExpr, context, transformState.forDynField(keyName));
 		
-		res = conversions.checkForTransform(transformObject, res, context, transformState, listener);
+		res = Conversions.checkForTransform(freeMarkerEngine, transformObject, res, context, transformState, listener);
 		value.setValue(res);
 
 		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.VALUE_EVALUATED, keyName, res));
@@ -599,17 +586,16 @@ public class TransformEngine
 		for(int i = 0; i < cases.size(); i++)
 		{
 			SwitchCase switchCase = cases.get(i);
-			String condition = switchCase.getCondition();
+			FreeMarkerTemplate condition = switchCase.getCondition();
 			
 			// If condition is null, this is the default case
 			boolean conditionMet = true;
 			
 			if(condition != null)
 			{
-				conditionMet = ExpressionUtil.evaluateCondition(
+				conditionMet = FreemarkerUtil.evaluateCondition(
 					freeMarkerEngine,
 					transformObject.getLocation(),
-					"switch-condition",
 					condition,
 					context);
 
@@ -628,7 +614,7 @@ public class TransformEngine
 						transformState.forDynField("@switch[" + i + "]>@value"));
 					
 					// Apply transform if present
-					result = conversions.checkForTransform(transformObject, result, context, transformState, listener);
+					result = Conversions.checkForTransform(freeMarkerEngine, transformObject, result, context, transformState, listener);
 				}
 				
 				listener.onTransform(new TransformEvent(switchCase.getLocation(), 
@@ -653,18 +639,17 @@ public class TransformEngine
 	 */
 	private boolean processCondition(TransformObject transformObject, ITransformContext context)
 	{
-		String condition = transformObject.getCondition();
+		FreeMarkerTemplate condition = transformObject.getCondition();
 			
 		//if condition is not present, remove it
-		if(StringUtils.isBlank(condition))
+		if(condition == null)
 		{
 			return true;
 		}
 
 		//evaluate the condition and return the result
-		boolean result = ExpressionUtil.evaluateCondition(freeMarkerEngine, 
+		boolean result = FreemarkerUtil.evaluateCondition(freeMarkerEngine, 
 			transformObject.getLocation(), 
-			"transform-condition", 
 			condition, 
 			context);
 
@@ -688,10 +673,9 @@ public class TransformEngine
 		}
 		
 		//evaluate the condition and return the result
-		boolean result = ExpressionUtil.evaluateCondition(
+		boolean result = FreemarkerUtil.evaluateCondition(
 			freeMarkerEngine, 
 			transformList.getLocation(), 
-			"transform-condition", 
 			transformList.getCondition(), 
 			context);
 

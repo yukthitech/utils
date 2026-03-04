@@ -41,7 +41,7 @@ public class TestJsonTransformation
 	
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
-	private TransformEngine jsonExprEngine = new TransformEngine();
+	private TransformEngine jsonExprEngine;
 	
 	@BeforeClass
 	public void setup() throws Exception
@@ -49,6 +49,9 @@ public class TestJsonTransformation
 		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
 		freeMarkerEngine.loadClass(TestMethods.class);
 		
+		templateFactory = new JsonTemplateFactory(freeMarkerEngine);
+		
+		jsonExprEngine = new TransformEngine(freeMarkerEngine);
 		jsonExprEngine.setFreeMarkerEngine(freeMarkerEngine);
 	}
 	

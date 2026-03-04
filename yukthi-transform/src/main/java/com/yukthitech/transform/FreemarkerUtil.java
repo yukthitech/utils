@@ -17,10 +17,31 @@ package com.yukthitech.transform;
 
 import com.yukthitech.transform.template.Location;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
+import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
 import com.yukthitech.utils.fmarker.TemplateProcessingException;
 
-public class ExpressionUtil
+public class FreemarkerUtil
 {
+	public static String processTemplate(FreeMarkerEngine freeMarkerEngine, Location location, FreeMarkerTemplate template, Object context)
+	{
+		try
+		{
+			return freeMarkerEngine.processTemplate(template, context);
+		} catch(Exception ex)
+		{
+			String prcessingError = null;
+			
+			if(ex instanceof TemplateProcessingException)
+			{
+				prcessingError = ex.getCause().getMessage();
+				ex = null;
+			}
+			
+			throw new TransformException(location, "An error occurred while evaluating template \nProcessing Error: {}\nTemplate: {}", 
+					prcessingError, template.getSourceTemplate(), ex);	
+		}
+	}
+
 	public static String processTemplate(FreeMarkerEngine freeMarkerEngine, Location location, String name, String template, Object context)
 	{
 		try
@@ -41,11 +62,11 @@ public class ExpressionUtil
 		}
 	}
 
-	public static Object processValueExpression(FreeMarkerEngine freeMarkerEngine, Location location, String name, String expression, Object context)
+	public static Object processValueExpression(FreeMarkerEngine freeMarkerEngine, Location location, FreeMarkerTemplate expression, Object context)
 	{
 		try
 		{
-			return freeMarkerEngine.fetchValue(name, expression, context);
+			return freeMarkerEngine.fetchValue(expression, context);
 		} catch(Exception ex)
 		{
 			String prcessingError = null;
@@ -57,15 +78,15 @@ public class ExpressionUtil
 			}
 			
 			throw new TransformException(location, "Invalid expression '{}' (Name: {}) \nProcessing Error: {}", 
-					expression, name, prcessingError, ex);	
+					expression.getSourceTemplate(), expression.getName(), prcessingError, ex);	
 		}
 	}
 	
-	public static boolean evaluateCondition(FreeMarkerEngine freeMarkerEngine, Location location, String name, String condition, Object context)
+	public static boolean evaluateCondition(FreeMarkerEngine freeMarkerEngine, Location location, FreeMarkerTemplate condition, Object context)
 	{
 		try
 		{
-			return freeMarkerEngine.evaluateCondition(name, condition, context);
+			return freeMarkerEngine.evaluateCondition(condition, context);
 		} catch(Exception ex)
 		{
 			String prcessingError = null;
@@ -76,7 +97,7 @@ public class ExpressionUtil
 			}
 			
 			throw new TransformException(location, "Invalid condition '{}' (Name: {}) \nProcessing Error: {}", 
-					condition, name, prcessingError, ex);	
+					condition.getSourceTemplate(), condition.getName(), prcessingError, ex);	
 		}
 	}
 

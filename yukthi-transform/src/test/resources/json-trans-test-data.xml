@@ -219,6 +219,51 @@
 		</expectedResult>
 	</jel-test-bean>
 
+	<jel-test-bean name="mapLoopWithNameExpr">
+		<context>
+			{
+				"libraries": {
+					"Justbooks": {
+						"open": true
+					},
+					"Imagine": {
+						"open": true
+					},
+					"Other": {
+						"open": false
+					}
+				}
+			}
+		</context>
+		<template>
+			{
+				"libraries": [
+					{
+						"@for-each(lib)" : "libraries",
+						"@value": "@fmarker: lib.key"
+					}
+				],
+				"libStatus": {
+					"key": {
+						"@for-each(lib)": "libraries",
+						"@name": "@fmarker: lib.key",
+						"open": "@fmarker: lib.value.open"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"libraries": ["Justbooks", "Imagine", "Other"],
+				"libStatus": {
+					"Justbooks": {"open": true}, 
+					"Imagine": {"open": true}, 
+					"Other": {"open": false}
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
 	<jel-test-bean name="valueKey">
 		<context>
 			{
