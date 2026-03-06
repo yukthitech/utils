@@ -506,6 +506,12 @@ public class TransformTemplate implements Serializable
 		 * of returning full object itself, this value will be returned).
 		 */
 		private Object value;
+		
+		/**
+		 * Default value to be used, in case value results in exception. This is a means
+		 * of evaluating expressions in safe manner with default value. 
+		 */
+		private Object safeValue;
 
 		/**
 		 * Resource to be included in place of this object.
@@ -590,11 +596,21 @@ public class TransformTemplate implements Serializable
 			this.value = value;
 			return this;
 		}
+		
+		public Object getSafeValue()
+		{
+			return safeValue;
+		}
+		
+		TransformObject setSafeValue(Object safeValue)
+		{
+			this.safeValue = safeValue;
+			return this;
+		}
 
 		public Resource getResource()
 		{
-			return resource;
-		}
+			return resource;		}
 
 		TransformObject setResource(Resource resource)
 		{

@@ -38,7 +38,8 @@ public class JsonTemplateFactory implements ITemplateFactory
 			"@resParams",
 			"@for-each-condition",
 			"@case",
-			"@name"
+			"@name",
+			"@safe"
 		);
 	
 	/**
@@ -50,6 +51,12 @@ public class JsonTemplateFactory implements ITemplateFactory
 	 * Key used to specify value for the enclosing map. Useful when condition has to be specified for simple attribute.
 	 */
 	private static final String KEY_VALUE = "@value";
+	
+	/**
+	 * Key used to specify safe value to be used, in case value results in exception. This is a means
+	 * of evaluating expressions in safe manner with default value. 
+	 */
+	private static final String KEY_SAFE_VALUE = "@safe";
 	
 	/**
 	 * Key used to specify value for the enclosing map when condition fails. Useful when condition has to be specified for simple attribute.
@@ -484,6 +491,13 @@ public class JsonTemplateFactory implements ITemplateFactory
             {
             	Object valueObj = parseObject(entry.getValue(), null);
                 transformObject.setValue(valueObj);
+                
+                if(map.containsKey(KEY_SAFE_VALUE))
+                {
+                	Object safeValueObj = parseObject(map.get(KEY_SAFE_VALUE), null);
+                    transformObject.setSafeValue(safeValueObj);
+                }
+                
                 continue;
             }
 

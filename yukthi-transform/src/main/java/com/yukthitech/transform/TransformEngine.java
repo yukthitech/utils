@@ -466,10 +466,36 @@ public class TransformEngine
 				transformState.executeInAttributeMode(field, attrState -> 
 				{
 					//execute the child content with attr state
-					Object val = processObject(field.getValue(), context, attrState);
+					Object val = null;
+					
+					
+					try
+					{
+						val = processObject(field.getValue(), context, attrState);
 
-					listener.onTransform(new TransformEvent(field.getLocation(), 
-						TransformEventType.SET_VARIABLE_EVALUATED, field.getAttributeName(), val));
+						listener.onTransform(new TransformEvent(field.getLocation(), 
+								TransformEventType.SET_VARIABLE_EVALUATED, field.getAttributeName(), val));
+					}catch(RuntimeException ex)
+					{
+						// for xml safe val will be part of parent object (set node)
+						Object safeVal = transformObject.getSafeValue();
+						
+						// for json, safe val will be part of transform object
+						if(safeVal == null && (field.getValue() instanceof TransformObject))
+						{
+							TransformObject fieldVal = (TransformObject) field.getValue();
+							safeVal = fieldVal.getSafeValue();
+						}
+						
+						if(safeVal == null)
+						{
+							throw ex;
+						}
+
+						val = processObject(safeVal, context, attrState);
+						listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.SAFE_VALUE_EVALUATED, field.getAttributeName(), val, ex));
+
+					}
 
 					// if val is null, previous value will be removed (replaced by null)
 					context.setValue(field.getAttributeName(), val);
@@ -557,7 +583,6 @@ public class TransformEngine
 		
 		res = Conversions.checkForTransform(freeMarkerEngine, transformObject, res, context, transformState, listener);
 		value.setValue(res);
-
 		listener.onTransform(new TransformEvent(transformObject.getLocation(), TransformEventType.VALUE_EVALUATED, keyName, res));
 		return true;
 	}

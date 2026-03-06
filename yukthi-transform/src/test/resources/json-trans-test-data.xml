@@ -550,7 +550,11 @@
 					100,
 					{
 						"@set(secondLib)": "@xpath: /libraries/Imagine/name",
-						"@set(jsonSecondLib)": "@jpath: $.libraries.Imagine.name"
+						"@set(jsonSecondLib)": "@jpath: $.libraries.Imagine.name",
+						"@set(safeLib)": {
+							"@value": "@xpath: /libraries/nonExisting/name",
+							"@safe": "safeLibValue"
+						}
 					}, 
 					200
 				],
@@ -566,7 +570,8 @@
 				
 				"names": "@fmarker: libJb.bookNames",
 				"library": "@fmarker: secondLib",
-				"jsonLibrary": "@fmarker: jsonSecondLib"
+				"jsonLibrary": "@fmarker: jsonSecondLib",
+				"safeLibrary": "@fmarker: safeLib"
 				
 			}
 		</template>
@@ -580,7 +585,8 @@
 				
 				"names": ["Davinci Code", "Sphere"],
 				"library": "Imagine",
-				"jsonLibrary": "Imagine"
+				"jsonLibrary": "Imagine",
+				"safeLibrary": "safeLibValue"
 				
 			}
 		</expectedResult>

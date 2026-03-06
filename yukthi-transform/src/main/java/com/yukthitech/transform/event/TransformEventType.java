@@ -48,6 +48,11 @@ public enum TransformEventType
     VALUE_EVALUATED,
 
     /**
+     * Value evaluated. Result is object.
+     */
+    SAFE_VALUE_EVALUATED,
+
+    /**
      * Resource loaded. Result is object.
      */
     RESOURCE_LOADED,

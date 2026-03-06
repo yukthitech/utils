@@ -367,6 +367,8 @@
 						"Present")
 				[[/CDATA]]</t:set>
 				
+				<t:set name="safeLib" t:safe="safeLibValue">@xpath: /libraries/non-existing/name</t:set>
+				
 				<map>
 					<key1>val1</key1>
 					<t:set name="libJb">
@@ -377,6 +379,7 @@
 				
 				<library>@fmarker: secondLib</library>
 				<library>@fmarker: firstLib</library>
+				<library>@fmarker: safeLib</library>
 				<names t:value="@fmarker: libJb.bookNames" />
 			</output>
 		]]></template>
@@ -390,6 +393,7 @@
 				
 				<library>Imagine</library>
 				<library>Present</library>
+				<library>safeLibValue</library>
 				
 				<names>Davinci-Code</names>
 				<names>Sphere</names>

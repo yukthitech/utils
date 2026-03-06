@@ -35,6 +35,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 			"loopVar",
 			"forEachCondition",
 			"value",
+			"safe",
 			"condition"
 		);
 
@@ -53,6 +54,12 @@ public class XmlTemplateFactory implements ITemplateFactory
 	 */
 	private static final String KEY_VALUE = "value";
 	
+	/**
+	 * Key used to specify safe value to be used, in case value results in exception. This is a means
+	 * of evaluating expressions in safe manner with default value. 
+	 */
+	private static final String KEY_SAFE_VALUE = "safe";
+
 	/**
 	 * Key used to specify value for the enclosing map when condition fails. Useful when condition has to be specified for simple attribute.
 	 */
@@ -314,7 +321,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         return matcher.group(2);
     }
 
-    private boolean processReserveText(String name, String value, Location location, TransformObject transformObject)
+    private boolean processReserveText(String name, String value, Location location, TransformObject transformObject, XmlDynamicBean dynBean)
     {
         if(KEY_CONDITION.equals(name))
         {
@@ -334,6 +341,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         {
             Object valueObj = parseObject(value, location);
             transformObject.setValue(valueObj);
+            
             return true;
         }
 
@@ -388,7 +396,7 @@ public class XmlTemplateFactory implements ITemplateFactory
                 continue;
             }
     
-            if(processReserveText(entry.getKey(), entry.getValue(), dynBean.getLocation(), transformObject))
+            if(processReserveText(entry.getKey(), entry.getValue(), dynBean.getLocation(), transformObject, dynBean))
             {
                 continue;
             }
@@ -401,7 +409,7 @@ public class XmlTemplateFactory implements ITemplateFactory
     {
         if(reservedBean.isTextNode())
         {
-            if(processReserveText(reservedBean.getName(), reservedBean.getTextContent(), reservedBean.getLocation(), transformObject))
+            if(processReserveText(reservedBean.getName(), reservedBean.getTextContent(), reservedBean.getLocation(), transformObject, parentBean))
             {
                 return;
             }
@@ -522,6 +530,16 @@ public class XmlTemplateFactory implements ITemplateFactory
                         expression,
                         false
                     ).setType(FieldType.TEXT_CONTENT));
+
+                
+                String safeValue = reservedBean.getReserveAttribute(KEY_SAFE_VALUE);
+
+                if(safeValue != null)
+                {
+                	Object safeValueObj = parseObject(safeValue, reservedBean.getLocation());
+                    transformObject.setSafeValue(safeValueObj);
+                }
+                
                 return;
         	}
 
@@ -534,6 +552,15 @@ public class XmlTemplateFactory implements ITemplateFactory
                     parseObject(reservedBean, reservedBean.getLocation()),
                     false
                 ));
+
+            Object safeValue = reservedBean.getReserveValue(KEY_SAFE_VALUE);
+            
+            if(safeValue != null)
+            {
+            	Object safeValueObj = parseObject(safeValue, reservedBean.getLocation());
+                transformObject.setSafeValue(safeValueObj);
+            }
+            
             return;
         }
 
