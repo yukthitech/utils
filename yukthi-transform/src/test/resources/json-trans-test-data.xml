@@ -549,6 +549,7 @@
 				"list": [
 					100,
 					{
+						"@dummy": "true", 
 						"@set(secondLib)": "@xpath: /libraries/Imagine/name",
 						"@set(jsonSecondLib)": "@jpath: $.libraries.Imagine.name",
 						"@set(safeLib)": {

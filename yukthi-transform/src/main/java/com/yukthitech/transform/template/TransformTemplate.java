@@ -547,6 +547,12 @@ public class TransformTemplate implements Serializable
 		 * Fields to be set on the object.
 		 */
 		private List<TransformObjectField> fields = new ArrayList<>();
+		
+		/**
+		 * Flag indicating if this is dummy object, which needs to be ignored 
+		 * post processing.
+		 */
+		private boolean dummy = false;
 
 		public TransformObject(Location location)
 		{
@@ -671,6 +677,17 @@ public class TransformTemplate implements Serializable
 		{
 			this.fields.add(field);
 			return this;
+		}
+		
+		TransformObject setDummy(boolean dummy)
+		{
+			this.dummy = dummy;
+			return this;
+		}
+		
+		public boolean isDummy()
+		{
+			return dummy;
 		}
 
 		@Override

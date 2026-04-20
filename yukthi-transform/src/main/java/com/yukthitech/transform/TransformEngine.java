@@ -425,8 +425,6 @@ public class TransformEngine
 		}
 
 		Object resObj = transformState.newObject(transformObject);
-		boolean setKeyPresent = false;
-		boolean otherEntriesAdded = false;
 
 		//loop through map entries
 		for(TransformObjectField field : transformObject.getFields())
@@ -452,7 +450,6 @@ public class TransformEngine
 					{
 						//add processed map on result
 						transformState.setField(field, resObj, nameValEntry.getName(), nameValEntry.getValue());
-						otherEntriesAdded = true;
 					}
 					
 					//move to next entry
@@ -501,8 +498,6 @@ public class TransformEngine
 					context.setValue(field.getAttributeName(), val);
 				});
 				
-				//irrespective of value being null, if key is @set key, flag has to be set
-				setKeyPresent = true;
 				continue;
 			}
 			
@@ -524,7 +519,6 @@ public class TransformEngine
 
 				listener.onTransform(new TransformEvent(field.getLocation(), 
 					TransformEventType.REPLACE_ENTRY_EVALUATED, val));
-				otherEntriesAdded = true;
 				continue;
 			}
 
@@ -542,13 +536,11 @@ public class TransformEngine
 			transformState.setField(field, resObj, key, val);
 			listener.onTransform(new TransformEvent(field.getLocation(), 
 				TransformEventType.KEY_VALUE_SET, key, val));
-			otherEntriesAdded = true;
 		}
 		
-		//if set key is the only key in input map
-		if(setKeyPresent && !otherEntriesAdded)
+		// if transform object is dummy, ignore it
+		if(transformObject.isDummy())
 		{
-			//return null, so that the current map is ignored
 			return null;
 		}
 		

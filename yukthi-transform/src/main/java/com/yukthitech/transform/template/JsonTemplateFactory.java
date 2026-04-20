@@ -48,6 +48,12 @@ public class JsonTemplateFactory implements ITemplateFactory
 	private static final String KEY_CONDITION = "@condition";
 	
 	/**
+	 * Used to mark an object as dummy, which indicates the object
+	 * needs to be ignored post processing.
+	 */
+	private static final String KEY_DUMMY = "@dummy";
+	
+	/**
 	 * Key used to specify value for the enclosing map. Useful when condition has to be specified for simple attribute.
 	 */
 	private static final String KEY_VALUE = "@value";
@@ -174,7 +180,7 @@ public class JsonTemplateFactory implements ITemplateFactory
     
     public JsonTemplateFactory(IContentLoader contentLoader)
     {
-    	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
+    	this(contentLoader, new FreeMarkerEngine());
     }
     
 	public JsonTemplateFactory(IContentLoader contentLoader, FreeMarkerEngine freeMarkerEngine)
@@ -364,6 +370,12 @@ public class JsonTemplateFactory implements ITemplateFactory
             {
             	FreeMarkerTemplate conditionTemp = freeMarkerEngine.buildConditionTemplate("transform-condition", map.getString(KEY_CONDITION));
                 transformObject.setCondition(conditionTemp);
+                continue;
+            }
+
+            if(KEY_DUMMY.equals(entry.getKey()))
+            {
+                transformObject.setDummy("true".equalsIgnoreCase(map.getString(KEY_DUMMY)));
                 continue;
             }
 

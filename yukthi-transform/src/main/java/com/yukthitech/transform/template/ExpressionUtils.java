@@ -34,31 +34,37 @@ public class ExpressionUtils
     private static Expression parseExpression(FreeMarkerEngine freeMarkerEngine, String mainExpression, 
     		String exprType, String expr, Location location)
     {
-        if(ITransformConstants.EXPR_TYPE_FMARKER.equals(exprType))
-        {
-        	FreeMarkerTemplate freeMarkerTemplate = freeMarkerEngine.buildValueTemplate("transform-expr", expr);
-            return new Expression(location, ExpressionType.FMARKER, expr, freeMarkerTemplate);
-        }
-        else if(ITransformConstants.EXPR_TYPE_XPATH.equals(exprType))
-        {
-        	CompiledExpression compiledExpr = JXPathContext.compile(expr);
-            return new Expression(location, ExpressionType.XPATH, expr, compiledExpr);
-        }
-        else if(ITransformConstants.EXPR_TYPE_XPATH_MULTI.equals(exprType))
-        {
-        	CompiledExpression compiledExpr = JXPathContext.compile(expr);
-            return new Expression(location, ExpressionType.XPATH_MULTI, expr, compiledExpr);
-        }
-		else if(ITransformConstants.EXPR_TYPE_JSON_PATH.equals(exprType))
-		{
-			JsonPath compiledExpr = JsonPath.compile(expr);
-			return new Expression(location, ExpressionType.JSON_PATH, expr, compiledExpr);
-		}
-		else if(ITransformConstants.EXPR_TYPE_JSON_PATH_MULTI.equals(exprType))
-		{
-			JsonPath compiledExpr = JsonPath.compile(expr);
-			return new Expression(location, ExpressionType.JSON_PATH_MULTI, expr, compiledExpr);
-		}
+    	try
+    	{
+	        if(ITransformConstants.EXPR_TYPE_FMARKER.equals(exprType))
+	        {
+	        	FreeMarkerTemplate freeMarkerTemplate = freeMarkerEngine.buildValueTemplate("transform-expr", expr);
+	            return new Expression(location, ExpressionType.FMARKER, expr, freeMarkerTemplate);
+	        }
+	        else if(ITransformConstants.EXPR_TYPE_XPATH.equals(exprType))
+	        {
+	        	CompiledExpression compiledExpr = JXPathContext.compile(expr);
+	            return new Expression(location, ExpressionType.XPATH, expr, compiledExpr);
+	        }
+	        else if(ITransformConstants.EXPR_TYPE_XPATH_MULTI.equals(exprType))
+	        {
+	        	CompiledExpression compiledExpr = JXPathContext.compile(expr);
+	            return new Expression(location, ExpressionType.XPATH_MULTI, expr, compiledExpr);
+	        }
+			else if(ITransformConstants.EXPR_TYPE_JSON_PATH.equals(exprType))
+			{
+				JsonPath compiledExpr = JsonPath.compile(expr);
+				return new Expression(location, ExpressionType.JSON_PATH, expr, compiledExpr);
+			}
+			else if(ITransformConstants.EXPR_TYPE_JSON_PATH_MULTI.equals(exprType))
+			{
+				JsonPath compiledExpr = JsonPath.compile(expr);
+				return new Expression(location, ExpressionType.JSON_PATH_MULTI, expr, compiledExpr);
+			}
+    	}catch(Exception ex)
+    	{
+    		throw new TemplateParseException(location, "Failed to parse expression: [Type: {}, Expression: {}]", exprType, mainExpression, ex);
+    	}
 
         throw new TemplateParseException(location, "Invalid expression type specified '{}' in expression: {}", exprType, mainExpression);
     }

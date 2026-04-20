@@ -273,6 +273,7 @@
 				"list": [
 					100,
 					{
+						"@dummy": "true",
 						"@set(secondLib)": "@xpath: /libraryList[2]/name"
 					}, 
 					200
