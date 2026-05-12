@@ -1,8 +1,9 @@
 package com.yukthitech.transform.template;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,11 +15,11 @@ import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
  * based on the input context object.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TransformTemplate implements Serializable
+public class TransformTemplate implements ITemplateObject
 {
 	private static final long serialVersionUID = 1L;
 
-	public static abstract class TransformElement implements Serializable
+	public static abstract class TransformElement implements ITemplateObject
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -35,6 +36,12 @@ public class TransformTemplate implements Serializable
 		public Location getLocation()
 		{
 			return location;
+		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			// overridden by nodes that have compiled artifacts or children to compile
 		}
 
 		public String toString()
@@ -126,7 +133,7 @@ public class TransformTemplate implements Serializable
 		/**
 		 * Expression to be evaluated to get the list of values to loop through.
 		 */
-		private Object listExpression;
+		private ITemplateObject listExpression;
 
 		/**
 		 * Variable name to be used to access the current value in the loop.
@@ -134,10 +141,15 @@ public class TransformTemplate implements Serializable
 		private String loopVariable;
 
 		/**
+		 * FreeMarker condition source text for the loop body (not serializable artifact).
+		 */
+		private String conditionExpression;
+
+		/**
 		 * Condition to be evaluated to true for the object to be included in
 		 * the result.
 		 */
-		private FreeMarkerTemplate condition;
+		private transient FreeMarkerTemplate condition;
 		
 		/**
 		 * Name expression to be used for this for-each. Populated only in
@@ -145,12 +157,34 @@ public class TransformTemplate implements Serializable
 		 */
 		private Expression nameExpression;
 
-		public ForEachLoop(Location location, Object listExpression, String loopVariable, FreeMarkerTemplate condition)
+		public ForEachLoop(Location location, ITemplateObject listExpression, String loopVariable, String conditionExpression)
 		{
 			super(location);
 			this.listExpression = listExpression;
 			this.loopVariable = loopVariable;
-			this.condition = condition;
+			this.conditionExpression = conditionExpression;
+		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			if(StringUtils.isNotBlank(conditionExpression))
+			{
+				this.condition = context.getFreeMarkerEngine().buildConditionTemplate("for-each-condition", conditionExpression);
+			}
+			if(listExpression != null)
+			{
+				listExpression.compile(context);
+			}
+			if(nameExpression != null)
+			{
+				nameExpression.compile(context);
+			}
+		}
+
+		public String getConditionExpression()
+		{
+			return conditionExpression;
 		}
 		
 		public void setNameExpression(Expression nameExpression)
@@ -163,7 +197,7 @@ public class TransformTemplate implements Serializable
 			return nameExpression;
 		}
 
-		public Object getListExpression()
+		public ITemplateObject getListExpression()
 		{
 			return listExpression;
 		}
@@ -217,9 +251,9 @@ public class TransformTemplate implements Serializable
 		private String expression;
 		
 		/**
-		 * Parsed expression object.
+		 * Parsed expression object (FreeMarker template, XPath compiled form, JsonPath, etc.).
 		 */
-		private Object parsedExpression;
+		private transient Object parsedExpression;
 
 		public Expression(Location location, ExpressionType type, String expression, Object parsedExpression)
 		{
@@ -227,6 +261,17 @@ public class TransformTemplate implements Serializable
 			this.type = type;
 			this.expression = expression;
 			this.parsedExpression = parsedExpression;
+		}
+
+		void setParsedExpression(Object parsedExpression)
+		{
+			this.parsedExpression = parsedExpression;
+		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			ExpressionUtils.compileParsedExpression(context.getFreeMarkerEngine(), this);
 		}
 
 		public ExpressionType getType()
@@ -289,7 +334,7 @@ public class TransformTemplate implements Serializable
 		/**
 		 * Value of the field. This can be a simple value or a complex object.
 		 */
-		private Object value;
+		private ITemplateObject value;
 
 		/**
 		 * If true, in place of current entry in parent, the entries of this
@@ -302,7 +347,7 @@ public class TransformTemplate implements Serializable
 		 */
 		private FieldType type;
 
-		public TransformObjectField(Location location, String name, Expression nameExpression, String attributeName, Object value, boolean replaceEntry)
+		public TransformObjectField(Location location, String name, Expression nameExpression, String attributeName, ITemplateObject value, boolean replaceEntry)
 		{
 			super(location);
 			
@@ -311,6 +356,19 @@ public class TransformTemplate implements Serializable
 			this.attributeName = attributeName;
 			this.value = value;
 			this.replaceEntry = replaceEntry;
+		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			if(nameExpression != null)
+			{
+				nameExpression.compile(context);
+			}
+			if(value != null)
+			{
+				value.compile(context);
+			}
 		}
 
 		public String getName()
@@ -328,7 +386,7 @@ public class TransformTemplate implements Serializable
 			return attributeName;
 		}
 
-		public Object getValue()
+		public ITemplateObject getValue()
 		{
 			return value;
 		}
@@ -400,6 +458,19 @@ public class TransformTemplate implements Serializable
 		{
 			return params;
 		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			if(params != null)
+			{
+				params.compile(context);
+			}
+			if(content != null)
+			{
+				content.compile(context);
+			}
+		}
 	}
 
 	/**
@@ -428,6 +499,15 @@ public class TransformTemplate implements Serializable
 		}
 
 		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			for(SwitchCase switchCase : cases)
+			{
+				switchCase.compile(context);
+			}
+		}
+
+		@Override
 		public String toString()
 		{
 			return ITransformConstants.toPrettyJson(this);
@@ -443,20 +523,43 @@ public class TransformTemplate implements Serializable
 		private static final long serialVersionUID = 1L;
 
 		/**
+		 * FreeMarker condition source text. Null for the default switch branch.
+		 */
+		private String conditionExpression;
+
+		/**
 		 * Condition to be evaluated. If null, this is the default case.
 		 */
-		private FreeMarkerTemplate condition;
+		private transient FreeMarkerTemplate condition;
 
 		/**
 		 * Value to return if condition is true.
 		 */
-		private Object value;
+		private ITemplateObject value;
 
-		public SwitchCase(Location location, FreeMarkerTemplate condition, Object value)
+		public SwitchCase(Location location, String conditionExpression, ITemplateObject value)
 		{
 			super(location);
-			this.condition = condition;
+			this.conditionExpression = conditionExpression;
 			this.value = value;
+		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			if(StringUtils.isNotBlank(conditionExpression))
+			{
+				this.condition = context.getFreeMarkerEngine().buildConditionTemplate("switch-condition", conditionExpression);
+			}
+			if(value != null)
+			{
+				value.compile(context);
+			}
+		}
+
+		public String getConditionExpression()
+		{
+			return conditionExpression;
 		}
 
 		public FreeMarkerTemplate getCondition()
@@ -464,7 +567,7 @@ public class TransformTemplate implements Serializable
 			return condition;
 		}
 
-		public Object getValue()
+		public ITemplateObject getValue()
 		{
 			return value;
 		}
@@ -491,27 +594,32 @@ public class TransformTemplate implements Serializable
 		private String name;
 
 		/**
+		 * FreeMarker condition source for object inclusion.
+		 */
+		private String conditionExpression;
+
+		/**
 		 * Condition to be evaluated to true for the object to be included in
 		 * the result.
 		 */
-		private FreeMarkerTemplate condition;
+		private transient FreeMarkerTemplate condition;
 
 		/**
 		 * Value to be returned if the condition is evaluated to false.
 		 */
-		private Object falseValue;
+		private ITemplateObject falseValue;
 
 		/**
 		 * Value to be returned if the condition is evaluated to true ( instead
 		 * of returning full object itself, this value will be returned).
 		 */
-		private Object value;
+		private ITemplateObject value;
 		
 		/**
 		 * Default value to be used, in case value results in exception. This is a means
 		 * of evaluating expressions in safe manner with default value. 
 		 */
-		private Object safeValue;
+		private ITemplateObject safeValue;
 
 		/**
 		 * Resource to be included in place of this object.
@@ -570,45 +678,101 @@ public class TransformTemplate implements Serializable
 			return name;
 		}
 
+		public String getConditionExpression()
+		{
+			return conditionExpression;
+		}
+
+		TransformObject setConditionExpression(String conditionExpression)
+		{
+			this.conditionExpression = conditionExpression;
+			return this;
+		}
+
 		public FreeMarkerTemplate getCondition()
 		{
 			return condition;
 		}
 
-		TransformObject setCondition(FreeMarkerTemplate condition)
+		@Override
+		public void compile(TemplateCompileContext context)
 		{
-			this.condition = condition;
-			return this;
+			if(!context.beginTransformObject(this))
+			{
+				return;
+			}
+			try
+			{
+				if(StringUtils.isNotBlank(conditionExpression))
+				{
+					this.condition = context.getFreeMarkerEngine().buildConditionTemplate("transform-condition", conditionExpression);
+				}
+				if(forEachLoop != null)
+				{
+					forEachLoop.compile(context);
+				}
+				if(transformExpression != null)
+				{
+					transformExpression.compile(context);
+				}
+				if(include != null)
+				{
+					include.compile(context);
+				}
+				if(switchStatement != null)
+				{
+					switchStatement.compile(context);
+				}
+				for(TransformObjectField field : fields)
+				{
+					field.compile(context);
+				}
+				if(falseValue != null)
+				{
+					falseValue.compile(context);
+				}
+				if(value != null)
+				{
+					value.compile(context);
+				}
+				if(safeValue != null)
+				{
+					safeValue.compile(context);
+				}
+			} finally
+			{
+				context.endTransformObject(this);
+			}
 		}
 
-		public Object getFalseValue()
+		public ITemplateObject getFalseValue()
 		{
 			return falseValue;
 		}
 
-		TransformObject setFalseValue(Object falseValue)
+		TransformObject setFalseValue(ITemplateObject falseValue)
 		{
 			this.falseValue = falseValue;
 			return this;
 		}
 
-		public Object getValue()
+		public ITemplateObject getValue()
 		{
 			return value;
 		}
 
-		TransformObject setValue(Object value)
+		TransformObject setValue(ITemplateObject value)
 		{
 			this.value = value;
 			return this;
 		}
 		
-		public Object getSafeValue()
+		public ITemplateObject getSafeValue()
 		{
 			return safeValue;
 		}
 		
-		TransformObject setSafeValue(Object safeValue)
+		TransformObject setSafeValue(ITemplateObject safeValue)
 		{
 			this.safeValue = safeValue;
 			return this;
@@ -616,7 +780,8 @@ public class TransformTemplate implements Serializable
 
 		public Resource getResource()
 		{
-			return resource;		}
+			return resource;
+		}
 
 		TransformObject setResource(Resource resource)
 		{
@@ -703,21 +868,47 @@ public class TransformTemplate implements Serializable
 		private static final long serialVersionUID = 1L;
 
 		/**
+		 * FreeMarker condition source for list inclusion (first list element {@code @condition:...}).
+		 */
+		private String conditionExpression;
+
+		/**
 		 * Condition to be evaluated to true for the list to be included in the
 		 * result.
 		 */
-		private FreeMarkerTemplate condition;
+		private transient FreeMarkerTemplate condition;
 
 		/**
 		 * List of objects to be included in the result.
 		 */
-		private List<Object> objects;
+		private List<ITemplateObject> objects;
 
-		public TransformList(Location location, FreeMarkerTemplate condition, List<Object> objects)
+		public TransformList(Location location, String conditionExpression, List<ITemplateObject> objects)
 		{
 			super(location);
-			this.condition = condition;
+			this.conditionExpression = conditionExpression;
 			this.objects = objects;
+		}
+
+		@Override
+		public void compile(TemplateCompileContext context)
+		{
+			if(StringUtils.isNotBlank(conditionExpression))
+			{
+				this.condition = context.getFreeMarkerEngine().buildConditionTemplate("transform-list-condition", conditionExpression);
+			}
+			for(ITemplateObject object : objects)
+			{
+				if(object != null)
+				{
+					object.compile(context);
+				}
+			}
+		}
+
+		public String getConditionExpression()
+		{
+			return conditionExpression;
 		}
 
 		public FreeMarkerTemplate getCondition()
@@ -725,7 +916,7 @@ public class TransformTemplate implements Serializable
 			return condition;
 		}
 
-		public List<Object> getObjects()
+		public List<ITemplateObject> getObjects()
 		{
 			return objects;
 		}
@@ -745,7 +936,7 @@ public class TransformTemplate implements Serializable
 	/**
 	 * Root object of the template.
 	 */
-	private Object root;
+	private ITemplateObject root;
 
 	/**
 	 * Composer type to be used to compose final object.
@@ -754,7 +945,7 @@ public class TransformTemplate implements Serializable
 	
 	private Location location;
 
-	public TransformTemplate(String name, Class<? extends IGenerator> generatorType, Object root, Location location)
+	public TransformTemplate(String name, Class<? extends IGenerator> generatorType, ITemplateObject root, Location location)
 	{
 		this.name = name;
 		this.generatorType = generatorType;
@@ -767,12 +958,12 @@ public class TransformTemplate implements Serializable
 		return name;
 	}
 
-	void setRoot(Object root)
+	void setRoot(ITemplateObject root)
 	{
 		this.root = root;
 	}
 
-	public Object getRoot()
+	public ITemplateObject getRoot()
 	{
 		return root;
 	}
@@ -787,6 +978,26 @@ public class TransformTemplate implements Serializable
 		return location;
 	}
 
+	@Override
+	public void compile(TemplateCompileContext context)
+	{
+		if(root == null)
+		{
+			return;
+		}
+		if(!context.beginTemplate(this))
+		{
+			return;
+		}
+		try
+		{
+			root.compile(context);
+		} finally
+		{
+			context.endTemplate(this);
+		}
+	}
+	
 	@Override
 	public String toString()
 	{

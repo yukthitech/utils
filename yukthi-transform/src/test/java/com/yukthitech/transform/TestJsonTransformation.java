@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -27,6 +28,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.ccg.xml.XMLBeanParser;
 import com.yukthitech.transform.template.JsonTemplateFactory;
+import com.yukthitech.transform.template.TemplateCompileContext;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
@@ -42,11 +44,13 @@ public class TestJsonTransformation
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	private TransformEngine jsonExprEngine;
+
+	private FreeMarkerEngine freeMarkerEngine;
 	
 	@BeforeClass
 	public void setup() throws Exception
 	{
-		FreeMarkerEngine freeMarkerEngine = new FreeMarkerEngine();
+		freeMarkerEngine = new FreeMarkerEngine();
 		freeMarkerEngine.loadClass(TestMethods.class);
 		
 		templateFactory = new JsonTemplateFactory(freeMarkerEngine);
@@ -66,6 +70,7 @@ public class TestJsonTransformation
 		for(int i = 0; i < size; i++)
 		{
 			TransformTestBean testBean = beans.getTestBeans().get(i);
+			testBean.setTestTemplateSerialization(false);
 			
 			if(beans.isDisableByDefault() && !testBean.isEnabled())
 			{
@@ -73,6 +78,11 @@ public class TestJsonTransformation
 			}
 			
 			rows.add(new Object[] {testBean});
+
+			// add one more row with template serialization enabled
+			TransformTestBean clonedBean = testBean.clone();
+			clonedBean.setTestTemplateSerialization(true);
+			rows.add(new Object[] {clonedBean});
 		}
 		
 		return rows.toArray(new Object[1][]);
@@ -96,14 +106,31 @@ public class TestJsonTransformation
 		return loadXmlFile("/pojo-json-trans-test-data.xml");
 	}
 	
-	private String processJson(String json, Object context)
+	private String processJson(String json, Object context, TransformTestBean bean)
 	{
+		if(bean != null && bean.isTestTemplateSerialization())
+		{
+			return processJsonWithTemplateSerialization(json, context);
+		}
+		
 		TransformTemplate tempalte = templateFactory.parseTemplate("test", json);
 		
 		//System.out.println("Got Template as: \n" + tempalte);
 		return jsonExprEngine.processAsString(tempalte, context);
 	}
 
+	private String processJsonWithTemplateSerialization(String json, Object context)
+	{
+		TransformTemplate tempalte = templateFactory.parseTemplateTreeOnly("test", json);
+
+		byte[] serializedTemplate = SerializationUtils.serialize(tempalte);
+		TransformTemplate deserializedTemplate = SerializationUtils.deserialize(serializedTemplate);
+
+		TemplateCompileContext compileContext = new TemplateCompileContext(freeMarkerEngine);
+		deserializedTemplate.compile(compileContext);
+		return jsonExprEngine.processAsString(deserializedTemplate, context);
+	}
+	
 	@Test
 	public void testException() throws Exception
 	{
@@ -113,7 +140,7 @@ public class TestJsonTransformation
 		try
 		{
 			//execute the jel
-			processJson("{\"key\": \"@fmarker: errorMethod(test)\"}", context);
+			processJson("{\"key\": \"@fmarker: errorMethod(test)\"}", context, null);
 			Assert.fail("No exception is thrown.");
 		}catch(Exception ex)
 		{
@@ -145,7 +172,7 @@ public class TestJsonTransformation
 		Object expectedResult = objectMapper.readValue(bean.getExpectedResult(), Object.class);
 		
 		//execute the jel
-		String res = processJson(bean.getTemplate(), context);
+		String res = processJson(bean.getTemplate(), context, bean);
 		Object actualResult = objectMapper.readValue(res, Object.class);
 		
 		System.out.println(String.format("\n\n(testJel - %s) JSON Output:\n============= \n%s", bean.getName(), res));
@@ -161,7 +188,7 @@ public class TestJsonTransformation
 		Object expectedResult = objectMapper.readValue(bean.getExpectedResult(), Object.class);
 		
 		//execute the jel
-		String res = processJson(bean.getTemplate(), bean.getPojoContext());
+		String res = processJson(bean.getTemplate(), bean.getPojoContext(), bean);
 		Object actualResult = objectMapper.readValue(res, Object.class);
 		
 		System.out.println(String.format("\n\n(pojoJsonElDataProvider - %s) JSON Output:\n============= \n%s", bean.getName(), res));
@@ -180,7 +207,7 @@ public class TestJsonTransformation
 		//execute the jel
 		try
 		{
-			processJson(bean.getTemplate(), context);
+			processJson(bean.getTemplate(), context, bean);
 			Assert.fail("No error is thrown");
 		}catch(Exception ex)
 		{

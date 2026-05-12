@@ -26,6 +26,8 @@ import com.yukthitech.transform.event.ITransformListener;
 import com.yukthitech.transform.event.TransformEvent;
 import com.yukthitech.transform.event.TransformEventType;
 import com.yukthitech.transform.template.ExpressionUtils;
+import com.yukthitech.transform.template.ITemplateObject;
+import com.yukthitech.transform.template.TemplateLeaf;
 import com.yukthitech.transform.template.TransformTemplate;
 import com.yukthitech.transform.template.TransformTemplate.Expression;
 import com.yukthitech.transform.template.TransformTemplate.ForEachLoop;
@@ -149,21 +151,31 @@ public class TransformEngine
 	 * @param path current path where current object is found
 	 * @return processed object.
 	 */
-	Object processObject(Object object, ITransformContext context, TransformState transformState)
+	Object processObject(ITemplateObject object, ITransformContext context, TransformState transformState)
 	{
 		try
 		{
+			if(object == null)
+			{
+				return null;
+			}
+
+			if(object instanceof TemplateLeaf)
+			{
+				return ((TemplateLeaf) object).getValue();
+			}
+
 			if(object instanceof TransformList)
 			{
-				object = processList((TransformList) object, context, transformState);
+				return processList((TransformList) object, context, transformState);
 			}
 			else if(object instanceof TransformObject)
 			{
-				object = processMap((TransformObject) object, context, transformState);
+				return processMap((TransformObject) object, context, transformState);
 			}
 			else if(object instanceof Expression)
 			{
-				object = ExpressionUtils.processExpression(freeMarkerEngine, (Expression) object, context, listener);
+				return ExpressionUtils.processExpression(freeMarkerEngine, (Expression) object, context, listener);
 			}
 		} catch(TransformException ex)
 		{
@@ -197,7 +209,7 @@ public class TransformEngine
 		boolean encounteredNullCondition = false;
 		
 		//loop through input list
-		for(Object elem : lst.getObjects())
+		for(ITemplateObject elem : lst.getObjects())
 		{
 			index++;
 			
@@ -282,16 +294,23 @@ public class TransformEngine
 		String loopVariable = forEachLoop.getLoopVariable();
 
 		//remove the pattern key, so that cloned maps will not have it
-		Object valueLstExpr = forEachLoop.getListExpression();
-		
+		ITemplateObject listExprNode = forEachLoop.getListExpression();
+		Object valueLstExpr = null;
+		if(listExprNode instanceof Expression)
+		{
+			valueLstExpr = ExpressionUtils.processExpression(freeMarkerEngine, (Expression) listExprNode, context, listener);
+		}
+		else if(listExprNode instanceof TemplateLeaf)
+		{
+			valueLstExpr = ((TemplateLeaf) listExprNode).getValue();
+		}
+		else if(listExprNode != null)
+		{
+			valueLstExpr = processObject(listExprNode, context, transformState);
+		}
+
 		//fetch the value list, based on which template map has to be cloned and repeated
 		Collection<Object> valueLst = null;
-
-		// in case of string process it as an expression
-		if(valueLstExpr instanceof Expression)
-		{
-			valueLstExpr = ExpressionUtils.processExpression(freeMarkerEngine, (Expression) valueLstExpr, context, listener);
-		}
 		
 		if(valueLstExpr == null)
 		{
@@ -475,7 +494,7 @@ public class TransformEngine
 					}catch(RuntimeException ex)
 					{
 						// for xml safe val will be part of parent object (set node)
-						Object safeVal = transformObject.getSafeValue();
+						ITemplateObject safeVal = transformObject.getSafeValue();
 						
 						// for json, safe val will be part of transform object
 						if(safeVal == null && (field.getValue() instanceof TransformObject))
@@ -563,7 +582,7 @@ public class TransformEngine
 	 * @return true if value expression is present
 	 */
 	private boolean processMapValue(TransformObject transformObject, String keyName, 
-		Object valueExpr, ITransformContext context, TransformState transformState, ObjectWrapper<Object> value)
+		ITemplateObject valueExpr, ITransformContext context, TransformState transformState, ObjectWrapper<Object> value)
 	{
 		if(valueExpr == null)
 		{

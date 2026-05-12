@@ -26,7 +26,6 @@ import com.yukthitech.transform.template.TransformTemplate.TransformList;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
-import com.yukthitech.utils.fmarker.FreeMarkerTemplate;
 
 public class XmlTemplateFactory implements ITemplateFactory
 {
@@ -153,6 +152,12 @@ public class XmlTemplateFactory implements ITemplateFactory
 	 */
 	private TemplateFactoryConfiguration templateFactoryConfiguration = new TemplateFactoryConfiguration();
 
+	/**
+	 * When true, parsed FreeMarker templates and expression artifacts are not built; call
+	 * {@link TransformTemplate#compile(TemplateCompileContext)} before use.
+	 */
+	private boolean treeOnlyParse = false;
+
     public XmlTemplateFactory()
     {
     	this(DEFAULT_CONTENT_LOADER, new FreeMarkerEngine());
@@ -180,6 +185,8 @@ public class XmlTemplateFactory implements ITemplateFactory
 		{
 			throw new NullPointerException("Template factory configuration cannot be set to null.");
 		}
+
+		this.templateFactoryConfiguration = templateFactoryConfiguration;
 	}
 
 	/**
@@ -212,12 +219,35 @@ public class XmlTemplateFactory implements ITemplateFactory
 					new ByteArrayInputStream(templateContent.getBytes()), 
 					parserHandler);
 
-			TransformElement root = (TransformElement) parseObject(dynBean, dynBean.getLocation());
+			ITemplateObject root = parseObject(dynBean, dynBean.getLocation());
+			Location rootLocation = ((TransformElement) root).getLocation();
 
-			return new TransformTemplate(name, XmlGenerator.class, root, root.getLocation());
+			TransformTemplate template = new TransformTemplate(name, XmlGenerator.class, root, rootLocation);
+			if(!treeOnlyParse)
+			{
+				template.compile(new TemplateCompileContext(freeMarkerEngine));
+			}
+			return template;
 		} finally
 		{
 			templateFactoryConfiguration.popCurrentInstance();
+		}
+	}
+
+	/**
+	 * Parses XML template content into a serializable tree without compiling FreeMarker templates or
+	 * XPath/JsonPath artifacts. Call {@link TransformTemplate#compile(TemplateCompileContext)}
+	 * on the consuming side before transformation.
+	 */
+	public TransformTemplate parseTemplateTreeOnly(String name, String templateContent)
+	{
+		treeOnlyParse = true;
+		try
+		{
+			return parseTemplate(name, templateContent);
+		} finally
+		{
+			treeOnlyParse = false;
 		}
 	}
     
@@ -234,7 +264,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 					new ByteArrayInputStream(templateContent.getBytes()), 
 					parserHandler);
 
-			Object root = parseObject(dynBean, dynBean.getLocation());
+			ITemplateObject root = parseObject(dynBean, dynBean.getLocation());
 			template.setRoot(root);
 		} finally
 		{
@@ -243,21 +273,21 @@ public class XmlTemplateFactory implements ITemplateFactory
 	}
     
     @SuppressWarnings("unchecked")
-    private Object parseObject(Object object, Location location)
+    private ITemplateObject parseObject(Object object, Location location)
     {
 		try
 		{
 			if(object instanceof List)
 			{
-				object = parseList((List<XmlDynamicBean>) object, location);
+				return parseList((List<XmlDynamicBean>) object, location);
 			}
 			else if(object instanceof XmlDynamicBean)
 			{
-				object = parseDynBean((XmlDynamicBean) object);
+				return parseDynBean((XmlDynamicBean) object);
 			}
 			else if(object instanceof String)
 			{
-                object = ExpressionUtils.parseExpression(this.freeMarkerEngine, (String) object, location, false);
+                return ExpressionUtils.parseExpression(this.freeMarkerEngine, (String) object, location, false, false);
 			}
 		} catch(TemplateParseException ex)
 		{
@@ -267,14 +297,14 @@ public class XmlTemplateFactory implements ITemplateFactory
 			throw new TemplateParseException(location, "An unhandled error occurred", ex);
 		}
 		
-		return object;
+		return new TemplateLeaf(location, object);
     }
 
-    private Object parseList(List<XmlDynamicBean> list, Location location)
+    private TransformList parseList(List<XmlDynamicBean> list, Location location)
     {
         boolean firstValue = true;
         String condition = null;
-        List<Object> objects = new ArrayList<>();
+        List<ITemplateObject> objects = new ArrayList<>();
         
         for(XmlDynamicBean object : list)
         {
@@ -293,8 +323,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             objects.add(parseObject(object, object.getLocation()));
         }
         
-        FreeMarkerTemplate conditionTemp = (condition == null) ? null : freeMarkerEngine.buildConditionTemplate("transform-list-condition", condition);
-        return new TransformList(location, conditionTemp, objects);
+        return new TransformList(location, condition, objects);
     }
 
     private String checkForListCondition(Object object)
@@ -325,21 +354,20 @@ public class XmlTemplateFactory implements ITemplateFactory
     {
         if(KEY_CONDITION.equals(name))
         {
-        	FreeMarkerTemplate conditionTemp = freeMarkerEngine.buildConditionTemplate("transform-condition", value);
-            transformObject.setCondition(conditionTemp);
+            transformObject.setConditionExpression(value);
             return true;
         }
 
         if(KEY_FALSE_VALUE.equals(name))
         {
-            Object falseValue = parseObject(value, location);
+            ITemplateObject falseValue = parseObject(value, location);
             transformObject.setFalseValue(falseValue);
             return true;
         }
 
         if(KEY_VALUE.equals(name))
         {
-            Object valueObj = parseObject(value, location);
+            ITemplateObject valueObj = parseObject(value, location);
             transformObject.setValue(valueObj);
             
             return true;
@@ -348,7 +376,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         if(TRANSFORM.equals(name)
             && StringUtils.isNotBlank(value))
         {
-            transformObject.setTransformExpression(ExpressionUtils.parseExpression(this.freeMarkerEngine, value, location, false));
+            transformObject.setTransformExpression(ExpressionUtils.parseExpression(this.freeMarkerEngine, value, location, false, false));
             return true;
         }
         
@@ -370,26 +398,25 @@ public class XmlTemplateFactory implements ITemplateFactory
             if(FOR_EACH_EXPR.equals(entry.getKey()))
             {
                 String loopVariable = reserveAttr.get(FOR_EACH_LOOP_VAR);
-                Object listExpression = entry.getValue();
                 String loopCondition = reserveAttr.get(KEY_FOR_EACH_CONDITION);
-                
                 String nameExpression = reserveAttr.get(NAME_EXPRESSION);
-                
-                if(listExpression instanceof String)
+                Object rawListExpr = entry.getValue();
+                ITemplateObject listExprIt;
+                if(rawListExpr instanceof String)
                 {
-                	Expression expression = ExpressionUtils.parseValueExpression(this.freeMarkerEngine, (String) listExpression, 
-                			dynBean.getLocation());
-                	
-                	listExpression = expression;
+                	listExprIt = ExpressionUtils.parseValueExpression(this.freeMarkerEngine, (String) rawListExpr, 
+                			dynBean.getLocation(), false);
+                }
+                else
+                {
+                	listExprIt = new TemplateLeaf(dynBean.getLocation(), rawListExpr);
                 }
                 
-                FreeMarkerTemplate conditionTemplate = loopCondition  == null ? null : freeMarkerEngine.buildConditionTemplate("for-each-condition", loopCondition);
-                
-                ForEachLoop forEachLoop = new ForEachLoop(dynBean.getLocation(), listExpression, loopVariable, conditionTemplate);
+                ForEachLoop forEachLoop = new ForEachLoop(dynBean.getLocation(), listExprIt, loopVariable, loopCondition);
 
                 // Note: unlike in json, same element with same name can be repeated in xml (so name expression in for-loop is not mandatory)
                 Expression nameExpressionObj = (nameExpression == null) ? null : ExpressionUtils.parseExpression(freeMarkerEngine, nameExpression, 
-                		dynBean.getLocation(), false);
+                		dynBean.getLocation(), false, false);
                 forEachLoop.setNameExpression(nameExpressionObj);
 
                 transformObject.setForEachLoop(forEachLoop);
@@ -490,12 +517,13 @@ public class XmlTemplateFactory implements ITemplateFactory
                         "Switch case condition must be a string, but found: {}", condition.getClass().getName());
                 }
         		
-        		Object value = caseNode.getReserveValue(KEY_VALUE);
+        		ITemplateObject value = null;
+        		Object valueRaw = caseNode.getReserveValue(KEY_VALUE);
         		
         		// Check for t:value attribute - t:value is mandatory
-        		if(value != null)
+        		if(valueRaw != null)
         		{
-        			value = parseObject(value, 
+        			value = parseObject(valueRaw, 
         				caseNode.getLocation());
         		}
                 else
@@ -504,8 +532,8 @@ public class XmlTemplateFactory implements ITemplateFactory
         				"Switch case must have t:value attribute specified");
         		}
         		
-        		FreeMarkerTemplate conditionTemp = (condition == null) ? null : freeMarkerEngine.buildConditionTemplate("switch-condition", (String) condition);
-        		parsedCases.add(new SwitchCase(reservedBean.getLocation(), conditionTemp, value));
+        		String conditionStr = condition == null ? null : (String) condition;
+        		parsedCases.add(new SwitchCase(caseNode.getLocation(), conditionStr, value));
         	}
         	
         	transformObject.setSwitchStatement(new Switch(reservedBean.getLocation(), parsedCases));
@@ -520,7 +548,7 @@ public class XmlTemplateFactory implements ITemplateFactory
         	// if set is being done with text body
         	if(reservedBean.getTextContent() != null)
         	{
-        		Object expression =  ExpressionUtils.parseExpression(this.freeMarkerEngine, reservedBean.getTextContent(), reservedBean.getLocation(), false);
+        		Expression expression = ExpressionUtils.parseExpression(this.freeMarkerEngine, reservedBean.getTextContent(), reservedBean.getLocation(), false, false);
         		
                 transformObject.addField(new TransformObjectField(
                 		reservedBean.getLocation(),
@@ -536,7 +564,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 
                 if(safeValue != null)
                 {
-                	Object safeValueObj = parseObject(safeValue, reservedBean.getLocation());
+                	ITemplateObject safeValueObj = parseObject(safeValue, reservedBean.getLocation());
                     transformObject.setSafeValue(safeValueObj);
                 }
                 
@@ -557,7 +585,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             
             if(safeValue != null)
             {
-            	Object safeValueObj = parseObject(safeValue, reservedBean.getLocation());
+            	ITemplateObject safeValueObj = parseObject(safeValue, reservedBean.getLocation());
                 transformObject.setSafeValue(safeValueObj);
             }
             
@@ -603,7 +631,7 @@ public class XmlTemplateFactory implements ITemplateFactory
 		
         if(StringUtils.isNotBlank(keyExpressionStr))
         {
-            keyExpression = ExpressionUtils.parseExpression(this.freeMarkerEngine, keyExpressionStr, child.getLocation(), true);
+            keyExpression = ExpressionUtils.parseExpression(this.freeMarkerEngine, keyExpressionStr, child.getLocation(), true, false);
         }
         
         transformObject.addField(new TransformObjectField(
@@ -616,7 +644,7 @@ public class XmlTemplateFactory implements ITemplateFactory
             ).setType(FieldType.NODE));
     }
 
-    private Object parseDynBean(XmlDynamicBean dynBean)
+    private TransformObject parseDynBean(XmlDynamicBean dynBean)
     {
         TransformObject transformObject = new TransformObject(dynBean.getLocation(), dynBean.getName());
         

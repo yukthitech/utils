@@ -1,6 +1,7 @@
 package com.yukthitech.transform.template;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -40,7 +41,7 @@ public class JsonWithLocationParser
 		}
 	}
 
-	public static interface JsonElementWithLocation
+	public static interface JsonElementWithLocation extends Serializable
 	{
 		Location getLocation();
 
@@ -55,6 +56,8 @@ public class JsonWithLocationParser
 	 */
 	public static class ValueWithLocation implements JsonElementWithLocation
 	{
+		private static final long serialVersionUID = 1L;
+
 		Object value;
 		Location location;
 

@@ -32,33 +32,35 @@ public class ExpressionUtils
 	public static final Pattern EXPR_PATTERN = Pattern.compile("^\\@([\\w\\-]+)\\s*\\:\\s*(.*)$", Pattern.DOTALL);
 
     private static Expression parseExpression(FreeMarkerEngine freeMarkerEngine, String mainExpression, 
-    		String exprType, String expr, Location location)
+    		String exprType, String expr, Location location, boolean compileParsed)
     {
     	try
     	{
 	        if(ITransformConstants.EXPR_TYPE_FMARKER.equals(exprType))
 	        {
-	        	FreeMarkerTemplate freeMarkerTemplate = freeMarkerEngine.buildValueTemplate("transform-expr", expr);
+	        	FreeMarkerTemplate freeMarkerTemplate = compileParsed
+	        			? freeMarkerEngine.buildValueTemplate("transform-expr", expr)
+	        			: null;
 	            return new Expression(location, ExpressionType.FMARKER, expr, freeMarkerTemplate);
 	        }
 	        else if(ITransformConstants.EXPR_TYPE_XPATH.equals(exprType))
 	        {
-	        	CompiledExpression compiledExpr = JXPathContext.compile(expr);
+	        	CompiledExpression compiledExpr = compileParsed ? JXPathContext.compile(expr) : null;
 	            return new Expression(location, ExpressionType.XPATH, expr, compiledExpr);
 	        }
 	        else if(ITransformConstants.EXPR_TYPE_XPATH_MULTI.equals(exprType))
 	        {
-	        	CompiledExpression compiledExpr = JXPathContext.compile(expr);
+	        	CompiledExpression compiledExpr = compileParsed ? JXPathContext.compile(expr) : null;
 	            return new Expression(location, ExpressionType.XPATH_MULTI, expr, compiledExpr);
 	        }
 			else if(ITransformConstants.EXPR_TYPE_JSON_PATH.equals(exprType))
 			{
-				JsonPath compiledExpr = JsonPath.compile(expr);
+				JsonPath compiledExpr = compileParsed ? JsonPath.compile(expr) : null;
 				return new Expression(location, ExpressionType.JSON_PATH, expr, compiledExpr);
 			}
 			else if(ITransformConstants.EXPR_TYPE_JSON_PATH_MULTI.equals(exprType))
 			{
-				JsonPath compiledExpr = JsonPath.compile(expr);
+				JsonPath compiledExpr = compileParsed ? JsonPath.compile(expr) : null;
 				return new Expression(location, ExpressionType.JSON_PATH_MULTI, expr, compiledExpr);
 			}
     	}catch(Exception ex)
@@ -71,13 +73,25 @@ public class ExpressionUtils
 
     public static Expression parseExpression(FreeMarkerEngine freeMarkerEngine, String expression, Location location, boolean nullByDefault)
     {
+    	return parseExpression(freeMarkerEngine, expression, location, nullByDefault, true);
+    }
+
+    /**
+     * Parses an expression into an {@link Expression} node. When {@code compileParsed} is false, the
+     * serializable text and type are set but {@link Expression#getParsedExpression()} remains null until
+     * {@link #compileParsedExpression(FreeMarkerEngine, Expression)} is run (for example after deserialization).
+     */
+    public static Expression parseExpression(FreeMarkerEngine freeMarkerEngine, String expression, Location location, boolean nullByDefault, boolean compileParsed)
+    {
         Matcher matcher = EXPR_PATTERN.matcher(expression);
         
         if(!matcher.matches())
         {
         	if(expression.contains("${") || expression.contains("<#"))
         	{
-        		FreeMarkerTemplate freeMarkerTemplate = freeMarkerEngine.buildTemplate("transform-template", expression);
+        		FreeMarkerTemplate freeMarkerTemplate = compileParsed
+        				? freeMarkerEngine.buildTemplate("transform-template", expression)
+        				: null;
         		return new Expression(location, ExpressionType.TEMPLATE, expression, freeMarkerTemplate);
         	}
         	
@@ -87,10 +101,15 @@ public class ExpressionUtils
         String exprType = matcher.group(1);
         String expr = matcher.group(2);
         
-        return parseExpression(freeMarkerEngine, expression, exprType, expr, location);
+        return parseExpression(freeMarkerEngine, expression, exprType, expr, location, compileParsed);
     }
     
     public static Expression parseValueExpression(FreeMarkerEngine freeMarkerEngine, String expression, Location location)
+    {
+    	return parseValueExpression(freeMarkerEngine, expression, location, true);
+    }
+
+    public static Expression parseValueExpression(FreeMarkerEngine freeMarkerEngine, String expression, Location location, boolean compileParsed)
     {
         Matcher matcher = EXPR_PATTERN.matcher(expression);
         String exprType = null;
@@ -108,7 +127,55 @@ public class ExpressionUtils
         	expr = expression;
         }
         
-        return parseExpression(freeMarkerEngine, expression, exprType, expr, location);
+        return parseExpression(freeMarkerEngine, expression, exprType, expr, location, compileParsed);
+    }
+
+    /**
+     * Compiles the parsed expression artifact (FreeMarker template, XPath, JsonPath) from the stored
+     * type and expression text. No-op if already compiled or if the type has no compiled form.
+     */
+    public static void compileParsedExpression(FreeMarkerEngine freeMarkerEngine, Expression expression)
+    {
+    	if(expression == null)
+    	{
+    		return;
+    	}
+    	if(expression.getParsedExpression() != null)
+    	{
+    		return;
+    	}
+
+    	ExpressionType exprType = expression.getType();
+    	String expr = expression.getExpression();
+    	Location location = expression.getLocation();
+
+    	try
+    	{
+    		switch(exprType)
+    		{
+    			case STRING:
+    				return;
+    			case FMARKER:
+    				expression.setParsedExpression(freeMarkerEngine.buildValueTemplate("transform-expr", expr));
+    				return;
+    			case TEMPLATE:
+    				expression.setParsedExpression(freeMarkerEngine.buildTemplate("transform-template", expr));
+    				return;
+    			case XPATH:
+    			case XPATH_MULTI:
+    				expression.setParsedExpression(JXPathContext.compile(expr));
+    				return;
+    			case JSON_PATH:
+    			case JSON_PATH_MULTI:
+    				expression.setParsedExpression(JsonPath.compile(expr));
+    				return;
+    			default:
+    				throw new TemplateParseException(location, "Unsupported expression type for compilation: {}", exprType);
+    		}
+    	} catch(Exception ex)
+    	{
+    		throw new TemplateParseException(location, "Failed to compile expression: [Type: {}, Expression: {}]", exprType, expr, ex);
+    	}
     }
 
 	/**

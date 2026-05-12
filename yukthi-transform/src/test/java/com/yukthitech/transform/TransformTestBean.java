@@ -19,7 +19,7 @@ package com.yukthitech.transform;
  * Test data for jel testing.
  * @author akiran
  */
-public class TransformTestBean
+public class TransformTestBean implements Cloneable
 {
 	/**
 	 * Name of test case.
@@ -55,6 +55,11 @@ public class TransformTestBean
 	 * In case disabled by default, this flag has to be specified explicitly.
 	 */
 	private boolean enabled;
+
+	/**
+	 * Flag indicating if serialization of the template should be tested.
+	 */
+	private boolean testTemplateSerialization;
 
 	/**
 	 * Gets the context to be used.
@@ -176,6 +181,16 @@ public class TransformTestBean
 		this.enabled = enabled;
 	}
 
+	public boolean isTestTemplateSerialization()
+	{
+		return testTemplateSerialization;
+	}
+
+	public void setTestTemplateSerialization(boolean testTemplateSerialization)
+	{
+		this.testTemplateSerialization = testTemplateSerialization;
+	}
+
 	/**
 	 * To string.
 	 *
@@ -184,6 +199,18 @@ public class TransformTestBean
 	@Override
 	public String toString()
 	{
-		return name;
+		return name + " (test-Serialization: " + testTemplateSerialization + ")";
+	}
+	
+	@Override
+	public TransformTestBean clone()
+	{
+		try
+		{
+			return (TransformTestBean) super.clone();
+		} catch(CloneNotSupportedException ex)
+		{
+			throw new RuntimeException(ex);
+		}
 	}
 }
