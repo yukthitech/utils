@@ -1,0 +1,12 @@
+{
+	"@set(finalVal)": "@fmarker: params.value * 2",
+	"smap" : {
+		"@condition": "params.value gt 1",
+		"@includeResource": "/include-recursive.json",
+		"@params": {
+			"value": "@fmarker: params.value - 1"
+		}
+	},
+	
+	"finalValue": "@fmarker: finalVal"
+}

@@ -1,0 +1,376 @@
+<test-data xmlns:r="/fw/ccg/XMLBeanParser">
+	<r:exprPattern enabled="false"/>
+	
+	<jel-test-bean name="conditionBasedRemovalInMap">
+		<pojo-context>
+			<library name="Justbooks" open="true"/>
+			<library name="Imagine" open="false"/>
+		</pojo-context>
+		<template>
+			{
+				"Justbooks": {
+					"@condition": "libraries.Justbooks.open",
+					"desc": "Library is open"
+				},
+				"Imagine": {
+					"@condition": "libraries.Imagine.open",
+					"desc": "Library is open"
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"Justbooks": {
+					"desc": "Library is open"
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="exprInKey">
+		<pojo-context>
+			<library name="Justbooks" open="true"/>
+			<library name="Imagine" open="false"/>
+		</pojo-context>
+
+		<template>
+			{
+				"Justbooks-${libraries.Justbooks.open?c}": {
+					"status": "${libraries.Justbooks.open?c}"
+				},
+				"@fmarker: libraryList[1].name": {
+					"status": "${libraries.Imagine.open?c}"
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"Justbooks-true": {
+					"status": "true"
+				},
+				"Imagine": {
+					"status": "false"
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<pojo-context>
+			<library name="Justbooks" open="true">
+				<book title="Davinci Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+				<book title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+			</library>
+			<library name="Imagine" open="false">
+				<book title="Shiva Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+				<book title="Dark Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+			</library>
+		</pojo-context>
+		
+		<template>
+			{
+				"emptyList": [],
+				"listWithNoString": [100, 200],
+				"listWithNoCond": ["@fmarker: sizeOf(libraries.Justbooks.books)", 20],
+				"listWithPositiveCond": ["@condition: libraries.Justbooks.open", 1000, {"a": "b"}],
+				"listWithNegativeCond": ["@condition: libraries.Imagine.open", 1000, {"a": "b"}]
+			}
+		</template>
+		<expectedResult>
+			{
+				"emptyList": [],
+				"listWithNoString": [100, 200],
+				"listWithNoCond": [2, 20],
+				"listWithPositiveCond": [1000, {"a": "b"}]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="valueKey">
+		<pojo-context>
+			<library name="Justbooks" open="true"/>
+			<library name="Imagine" open="false"/>
+		</pojo-context>
+
+		<template>
+			{
+				"mapWithString": {
+					"@condition": "libraries.Justbooks.open",
+					"@value": "Enabled",
+					"extraParam": 1
+				},
+				"mapWithNonString": {
+					"@condition": "libraries.Justbooks.open",
+					"@value": 100,
+					"extraParam": 1
+				},
+				"list": [
+					{
+						"@condition": "libraries.Justbooks.open",
+						"@value": "@fmarker: libraries.Justbooks.name",
+						"extraParam": 1
+					},
+					100
+				],
+				"prodStack": {
+					"@condition": "libraries.Imagine.open",
+					"@value": "Enabled"
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"mapWithString": "Enabled",
+				"mapWithNonString": 100,
+				"list": ["Justbooks", 100]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="conditionBasedRemovalInList">
+		<pojo-context>
+			<library name="Justbooks" open="true"/>
+			<library name="Imagine" open="false"/>
+		</pojo-context>
+		
+		<template>
+			[
+				{
+					"@condition": "libraries.Justbooks.open",
+					"desc": "Just books is open"
+				},
+				{
+					"@condition": "libraries.Imagine.open",
+					"desc": "Imagine is open"
+				},
+				{
+					"desc": "This is a extra lib"
+				}
+			]
+		</template>
+		<expectedResult>
+			[
+				{
+					"desc": "Just books is open"
+				},
+				{
+					"desc": "This is a extra lib"
+				}
+			]
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="loopAndExpressions">
+		<pojo-context>
+			<library name="Justbooks" open="true">
+				<book title="Davinci Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+				<book title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+			</library>
+			<library name="Imagine" open="false">
+				<book title="Shiva Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+				<book title="Let Us C" author="Yeshwant Kanetkar" type="Technology" copyCount="0"/>
+				<book title="Dark Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+			</library>
+		</pojo-context>
+		
+		<template>
+			{
+				"libraryNames": "@xpathMulti: /libraryList//name",
+				"copyCount": "@xpath: /libraryList[name='Justbooks']/books[1]/copyCount",
+				"allDocCounts": ["@fmarker: sizeOf(libraries.Justbooks.books)", "@fmarker: sizeOf(libraries.Imagine.books)"],
+				"Justbooks": [
+					{
+						"@for-each(book)": "libraries.Justbooks.books",
+						"name": "${book.title}",
+						"desc": "Type: ${book.type}, author: ${book.author}"
+					}
+				],
+				"Imagine": [
+					{
+						"@for-each(book)": "libraries.Imagine.books",
+						"@for-each-condition": "book.copyCount gt 0",
+						"name": "${book.title}",
+						"desc": "Type: ${book.type}, author: ${book.author}"
+					}
+				]
+			}
+		</template>
+		<expectedResult>
+			{
+				"libraryNames": ["Justbooks", "Imagine"],
+				"copyCount": 3,
+				"allDocCounts": [2, 3],
+				"Justbooks": [
+					{ "name": "Davinci Code", "desc": "Type: Science Fiction, author: Dan Brown" },
+					{ "name": "Sphere", "desc": "Type: Science Fiction, author: Michel Crihton" }
+				],
+				"Imagine": [
+					{ "name": "Shiva Triology", "desc": "Type: Mythology Fiction, author: Amit Shah" },
+					{ "name": "Dark Psychology", "desc": "Type: Psychology, author: Xyz" }
+				]
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="loopForMaps">
+		<pojo-context>
+			<library name="Justbooks" open="true">
+				<book title="Davinci Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+				<book title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+			</library>
+			<library name="Imagine" open="false">
+				<book title="Shiva Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+				<book title="Let Us C" author="Yeshwant Kanetkar" type="Technology" copyCount="0"/>
+				<book title="Dark Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+			</library>
+		</pojo-context>
+		<template>
+			{
+				"Justbooks": {
+					"@fmarker: book.title": {
+						"@for-each(book)": "libraries.Justbooks.books",
+						"copyCount": "@fmarker: book.copyCount"
+					}
+				},
+				"Imagine": {
+					"@fmarker: book.title": {
+						"@for-each(book)": "libraries.Imagine.books",
+						"@for-each-condition": "book.copyCount gt 0",
+						"copyCount": "@fmarker: book.copyCount"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"Justbooks": {
+					"Davinci Code": { "copyCount": 3 },
+					"Sphere": { "copyCount": 0 }
+				},
+				"Imagine": {
+					"Shiva Triology": { "copyCount": 10 },
+					"Dark Psychology": { "copyCount": 1 }
+				}
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="setExpressions">
+		<pojo-context>
+			<library name="Justbooks" open="true">
+				<book title="Davinci Code" author="Dan Brown" type="Science Fiction" copyCount="3"/>
+				<book title="Sphere" author="Michel Crihton" type="Science Fiction" copyCount="0"/>
+			</library>
+			<library name="Imagine" open="false">
+				<book title="Shiva Triology" author="Amit Shah" type="Mythology Fiction" copyCount="10"/>
+				<book title="Let Us C" author="Yeshwant Kanetkar" type="Technology" copyCount="0"/>
+				<book title="Dark Psychology" author="Xyz" type="Psychology" copyCount="1"/>
+			</library>
+		</pojo-context>
+
+		<template>
+			{
+				"list": [
+					100,
+					{
+						"@set(secondLib)": "@xpath: /libraryList[2]/name"
+					}, 
+					200
+				],
+				"map": {
+					"key1": "val1",
+					
+					"@set(libJb)": {
+						"bookNames": "@xpathMulti: /libraryList[name='Justbooks']/books//title"
+					},
+					
+					"key2": "@fmarker: libraries.Imagine.books[1].title"
+				},
+				
+				"names": "@fmarker: libJb.bookNames",
+				"library": "@fmarker: secondLib"
+				
+			}
+		</template>
+		<expectedResult>
+			{
+				"list": [100, 200],
+				"map": {
+					"key1": "val1",
+					"key2": "Let Us C"
+				},
+				
+				"names": ["Davinci Code", "Sphere"],
+				"library": "Imagine"
+				
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="jsonExpressions">
+		<pojo-context>
+			<library name="Justbooks" open="true"/>
+			<library name="Imagine" open="false"/>
+		</pojo-context>
+
+		<template>
+			{
+				"result": {
+					"@value": {
+						"someVal": 1,
+						"libNames": "@xpathMulti: /libraryList//name"
+					},
+					
+					"@transform": "@fmarker: toJson(thisValue)"
+					
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "{\"someVal\":1,\"libNames\":[\"Justbooks\",\"Imagine\"]}"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="resLoadingWithExpr">
+		<pojo-context ckey1="cval"/>
+
+		<template>
+			{
+				"result": {
+					"@resource": "/res-file.txt",
+					"@resParams": {
+						"key1": "val1"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "This is simple content with param-value=val1 and context-value=cval"
+			}
+		</expectedResult>
+	</jel-test-bean>
+
+	<jel-test-bean name="resLoadingNoExpr">
+		<pojo-context ckey1="cval"/>
+
+		<template>
+			{
+				"result": {
+					"@resource": "/res-file.txt",
+					"@expressions": false,
+					"@resParams": {
+						"key1": "val1"
+					}
+				}
+			}
+		</template>
+		<expectedResult>
+			{
+				"result": "This is simple content with param-value=${resParams.key1} and context-value=${ckey1}"
+			}
+		</expectedResult>
+	</jel-test-bean>
+</test-data>
