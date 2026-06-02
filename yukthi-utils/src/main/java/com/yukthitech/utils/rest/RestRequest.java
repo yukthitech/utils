@@ -56,6 +56,11 @@ public abstract class RestRequest<T extends RestRequest<T>>
 	 * Indicates if this request is secured, secured request information will not be printed to log.
 	 */
 	private boolean secured = false;
+	
+	/**
+	 * Timeouts to be used for this request.
+	 */
+	protected RestClientConfig restTimeoutConfig;
 
 	/**
 	 * @param uri
@@ -163,6 +168,16 @@ public abstract class RestRequest<T extends RestRequest<T>>
 	public void setContentType(String contentType)
 	{
 		this.contentType = contentType;
+	}
+	
+	public RestClientConfig getRestTimeoutConfig()
+	{
+		return restTimeoutConfig;
+	}
+
+	public void setRestTimeoutConfig(RestClientConfig restTimeoutConfig)
+	{
+		this.restTimeoutConfig = restTimeoutConfig;
 	}
 
 	public String getResolvedUri()

@@ -363,6 +363,11 @@ public class CommonUtils
 
 		for(int i = 0; i < keyValues.length; i += 2)
 		{
+			if(keyValues[i + 1] == null)
+			{
+				continue;
+			}
+			
 			((Map) res).put(keyValues[i], keyValues[i + 1]);
 		}
 		

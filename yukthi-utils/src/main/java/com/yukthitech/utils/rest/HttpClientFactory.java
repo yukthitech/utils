@@ -190,7 +190,7 @@ public class HttpClientFactory
 	 * @param proxyHostStr proxy host string in host:port format
 	 * @return http client with proxy
 	 */
-	public CloseableHttpClient newHttpClient(String proxyHostStr)
+	public CloseableHttpClient newHttpClient(String proxyHostStr, RestClientConfig config)
 	{
 		HttpClientBuilder clientBuilder = newClientBuilder();
 		clientBuilder.setConnectionManager(connectionManager);
@@ -207,12 +207,22 @@ public class HttpClientFactory
 			clientBuilder.setRoutePlanner(newDefaultProxyRoutePlanner(proxyHost));
 		}
 		
+		if(config != null && config.hasRetryStrategy())
+		{
+			clientBuilder.setRetryStrategy(config.buildRetryStrategy());
+		}
+		
+		if(config != null && config.hasRequestConfig())
+		{
+			clientBuilder.setDefaultRequestConfig(config.buildRequestConfig());
+		}
+		
 		return clientBuilder.build();
 	}
 
 	public CloseableHttpClient newHttpClient()
 	{
-		return newHttpClient(null);
+		return newHttpClient(null, null);
 	}
 
 	public static synchronized void reset()

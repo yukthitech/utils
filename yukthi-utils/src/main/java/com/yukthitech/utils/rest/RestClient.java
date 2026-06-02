@@ -132,12 +132,8 @@ public class RestClient
 	 * Listener that can listen to rest client events
 	 */
 	private IRestClientListener restClientListener;
-
-	/**
-	 * A base url of the API server (eg: http://localhost:8080/test), which will get prepended to each request being invoked
-	 * @param baseUrl
-	 */
-	public RestClient(String baseUrl, String proxyHostPort)
+	
+	public RestClient(String baseUrl, String proxyHostPort, RestClientConfig config)
 	{
 		int len = baseUrl.length();
 
@@ -148,12 +144,22 @@ public class RestClient
 		}
 
 		this.baseUrl = baseUrl;
-		httpclient = HttpClientFactory.getInstance().newHttpClient(proxyHostPort);
+		httpclient = HttpClientFactory.getInstance().newHttpClient(proxyHostPort, config);
+
+	}
+
+	/**
+	 * A base url of the API server (eg: http://localhost:8080/test), which will get prepended to each request being invoked
+	 * @param baseUrl
+	 */
+	public RestClient(String baseUrl, String proxyHostPort)
+	{
+		this(baseUrl, proxyHostPort, null);
 	}
 	
 	public RestClient(String baseUrl)
 	{
-		this(baseUrl, null);
+		this(baseUrl, null, null);
 	}
 
 	/**

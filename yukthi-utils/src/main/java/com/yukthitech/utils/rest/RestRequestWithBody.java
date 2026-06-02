@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.entity.mime.FileBody;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
@@ -39,6 +41,7 @@ import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.util.Timeout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -568,6 +571,17 @@ public abstract class RestRequestWithBody<T extends RestRequestWithBody<T>> exte
 
 		HttpUriRequestBase request = newRequest(uriBuilder.build());
 		super.populateHeaders(request);
+		
+		if(restTimeoutConfig != null)
+		{
+			RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectTimeout(Timeout.of(restTimeoutConfig.getConnectionRequestTimeOutMillis(), TimeUnit.MILLISECONDS))
+				.setResponseTimeout(Timeout.of(restTimeoutConfig.getResponseTimeOutMillis(), TimeUnit.MILLISECONDS))
+				.setConnectionRequestTimeout(Timeout.of(restTimeoutConfig.getConnectionRequestTimeOutMillis(), TimeUnit.MILLISECONDS))
+				.build();
+				
+			request.setConfig(requestConfig);
+		}
 
 		// if file params are attached
 		if(!this.multiparts.isEmpty())
