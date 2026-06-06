@@ -22,6 +22,7 @@ import java.util.Date;
 import org.apache.commons.lang3.time.DateUtils;
 
 import com.yukthitech.utils.annotations.Named;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
@@ -52,8 +53,23 @@ public class DateMethods
 			@FmParam(name = "format", description = "Date format to use") String format
 			) throws ParseException
 	{
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
-		return simpleDateFormat.parse(dateStr);
+		SimpleDateFormat simpleDateFormat = null;
+		
+		try
+		{
+			simpleDateFormat = new SimpleDateFormat(format);
+		}catch(Exception ex)
+		{
+			throw new InvalidArgumentException("Invalid date format specified: {}", format, ex);
+		}
+		
+		try
+		{
+			return simpleDateFormat.parse(dateStr);
+		}catch(Exception ex)
+		{
+			throw new InvalidArgumentException("Specified date {} is not in specified format: {}", dateStr, format, ex);
+		}
 	}
 
 	/**

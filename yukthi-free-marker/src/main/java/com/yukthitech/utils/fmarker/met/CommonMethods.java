@@ -22,6 +22,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.yukthitech.utils.annotations.Named;
+import com.yukthitech.utils.exceptions.InvalidArgumentException;
 import com.yukthitech.utils.fmarker.annotaion.FmParam;
 import com.yukthitech.utils.fmarker.annotaion.FreeMarkerMethod;
 
@@ -335,72 +336,6 @@ public class CommonMethods
 	}
 
 	@FreeMarkerMethod(
-			description = "Checks if specified substring can be found in main string",
-			returnDescription = "true, if substring can be found."
-			)
-	public static boolean strContains(
-			@FmParam(name = "mainString", description = "Main string in which search has to be performed") String mainStr,
-			@FmParam(name = "substr", description = "Substring to be searched") String substr,
-			@FmParam(name = "ignoreCase", description = "Flag to indicate if case has to be ignored during search", defaultValue = "false") boolean ignoreCase
-			)
-	{
-		if(mainStr == null || substr == null)
-		{
-			return false;
-		}
-		
-		if(ignoreCase)
-		{
-			mainStr = mainStr.toLowerCase();
-			substr = mainStr.toLowerCase();
-		}
-		
-		return mainStr.contains(substr);
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string to lower case.",
-			returnDescription = "Lower case string.")
-	public static String lower(
-			@FmParam(name = "str", description = "String to be converted to lower case") String str)
-	{
-		return str.toLowerCase();
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string to upper case.",
-			returnDescription = "Upper case string.")
-	public static String upper(
-			@FmParam(name = "str", description = "String to be converted to upper case") String str)
-	{
-		return str.toUpperCase();
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks if specified values are equal post string conversion.",
-			returnDescription = "True if values are equal."
-			)
-	public static boolean isEqualString(
-			@FmParam(name = "value1", description = "First value to be compared") Object value1,
-			@FmParam(name = "value2", description = "Second value to be compared") Object value2)
-	{
-		String str1 = "" + value1;
-		String str2 = "" + value2;
-		return str1.equals(str2);
-	}
-
-	@FreeMarkerMethod(
-			description = "Checks if specified values are equal ignoring case.",
-			returnDescription = "True if values are equal ignoring case."
-			)
-	public static boolean isEqualIgnoreCase(
-			@FmParam(name = "value1", description = "First value to be compared") String value1,
-			@FmParam(name = "value2", description = "Second value to be compared") String value2)
-	{
-		return value1.equalsIgnoreCase(value2);
-	}
-	
-	@FreeMarkerMethod(
 			description = "Checks if specified values are equal using Objects.equals() method. Two null values are considered equal.",
 			returnDescription = "True if values are equal."
 			)
@@ -408,6 +343,84 @@ public class CommonMethods
 			@FmParam(name = "value1", description = "First value to be compared") Object value1,
 			@FmParam(name = "value2", description = "Second value to be compared") Object value2)
 	{
+		//when two numbers of different data types has to be compared
+		// like long and BigDecimal
+		if(value1 != null && value2 != null && !value1.getClass().equals(value2.getClass()) 
+				&& (value1 instanceof Number) && (value2 instanceof Number))
+		{
+			//compare them with their long value
+			return ((Number) value1).longValue() == ((Number) value2).longValue();
+		}
+		
 		return Objects.equals(value1, value2);
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string value into long value.",
+			returnDescription = "Converted long value."
+			)
+	public static Long toLong(
+			@FmParam(name = "str", description = "String value to be converted") String str)
+	{
+		return Long.parseLong(str);
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string value into int value.",
+			returnDescription = "Converted int value."
+			)
+	public static Integer toInt(
+			@FmParam(name = "str", description = "String value to be converted") String str)
+	{
+		return Integer.parseInt(str);
+	}
+
+	@FreeMarkerMethod(
+			description = "Converts specified string value into boolean value.",
+			returnDescription = "Converted boolean value."
+			)
+	public static Boolean toBoolean(
+			@FmParam(name = "str", description = "String value to be converted") String str)
+	{
+		return "true".equalsIgnoreCase(str);
+	}
+	
+	/**
+	 * Compares the specified values and returns the comparison result as int.
+	 * @param value1
+	 * @param value2
+	 * @return
+	 */
+	@FreeMarkerMethod(
+			description = "Compares the specified values and returns the comparison result as int.",
+			returnDescription = "Comparison result."
+			)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static int compare(
+			@FmParam(name = "value1", description = "Value1 to compare") Object value1,
+			@FmParam(name = "value2", description = "Value2 to compare") Object value2
+			)
+	{
+		if(value1 == null && value2 == null)
+		{
+			return 0;
+		}
+		
+		if(value1 == value2)
+		{
+			return 0;
+		}
+		
+		if(!(value1 instanceof Comparable))
+		{
+			throw new InvalidArgumentException("Non comparable object is specified as value1: {}", value1);
+		}
+
+		if(!(value2 instanceof Comparable))
+		{
+			throw new InvalidArgumentException("Non comparable object is specified as value1: {}", value1);
+		}
+		
+		return ((Comparable)value1).compareTo(value2);
 	}
 }

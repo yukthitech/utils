@@ -19,16 +19,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.annotations.Named;
 import com.yukthitech.utils.fmarker.FreeMarkerEngine;
 import com.yukthitech.utils.fmarker.annotaion.ExampleDoc;
@@ -362,14 +366,56 @@ public class CollectionMethods
 		return builder.toString();
 	}
 	
+	@SuppressWarnings({ "unchecked"})
 	@FreeMarkerMethod(
-			description = "Checks if the specified collection contains the specified value.",
-			returnDescription = "true if the specified collection contains the specified value, false otherwise.")
-	public static boolean contains(
-			@FmParam(name = "collection", description = "Collection to be checked") Collection<Object> collection, 
-			@FmParam(name = "value", description = "Value to be checked") Object value)
+			description = "Checks whether specified value is present in specified collection/map. If map, value will be searched as key. "
+					+ "If collection is null or non-collection and non-map, then nullValue will be returned.",
+			returnDescription = "True if value/key is present in collection/map."
+			)
+	public static Boolean contains(
+			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
+			@FmParam(name = "value", description = "Value/key to be searched") Object value,
+			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type", defaultValue = "false") Boolean nullVal
+			) throws Exception
 	{
-		return collection.contains(value);
+		nullVal = (nullVal == null) ? false : nullVal;
+		
+		if(collection instanceof Collection)
+		{
+			Collection<Object> col = (Collection<Object>) collection;
+			return col.contains(value);
+		}
+		
+		if(collection instanceof Map)
+		{
+			Map<Object, Object> map = (Map<Object, Object>) collection;
+			return map.containsKey(value);
+		}
+		
+		return nullVal;
+	}
+	
+	@FreeMarkerMethod(
+			description = "Checks whether specified value is NOT present in specified collection/map. If map, value will be searched as key. "
+					+ "If collection is null or non-collection and non-map, then nullValue will be returned.",
+			returnDescription = "True if value/key is NOT present in collection/map."
+			)
+	public static Boolean notContains(
+			@FmParam(name = "collection", description = "Collection/map in which value/key has to be searched.") Object collection,
+			@FmParam(name = "value", description = "Value/key to be searched") Object value,
+			@FmParam(name = "nullVal", description = "Flag to be returned when collection is null or non-suppported type", defaultValue = "true") Boolean nullVal
+			) throws Exception
+	{
+		nullVal = (nullVal == null) ? true : nullVal;
+		
+		Boolean res = contains(collection, value, null);
+		
+		if(res == null)
+		{
+			return nullVal;
+		}
+
+		return res;
 	}
 	
 	@FreeMarkerMethod(
@@ -388,5 +434,203 @@ public class CollectionMethods
 		@FmParam(name = "values", description = "Values to be converted into set") Object... values)
 	{
 		return new HashSet<>(Arrays.asList(values));
+	}
+
+	@FreeMarkerMethod(
+			description = "Creates an empty map and returns the same.",
+			returnDescription = "Empty map"
+			)
+	public static Map<Object, Object> emptyMap()
+	{
+		return new HashMap<Object, Object>();
+	}
+	
+	@FreeMarkerMethod(
+			description = "Creates a new list with specified values",
+			returnDescription = "newly created list"
+			)
+	public static List<Object> newList(
+			@FmParam(name = "values", description = "Initial values to be set") Object... values)
+	{
+		List<Object> lst = new ArrayList<>();
+		
+		if(values != null && values.length > 0)
+		{
+			lst.addAll(Arrays.asList(values));
+		}
+		
+		return lst;
+	}
+
+	@FreeMarkerMethod(
+			description = "Creates a new map with specified values",
+			returnDescription = "newly created map"
+			)
+	public static Map<Object, Object> newMap(
+			@FmParam(name = "keyValues", description = "Initial key-value pairs to be set") Object... keyValues)
+	{
+		return CommonUtils.toMap(keyValues);
+	}
+
+	@FreeMarkerMethod(
+			description = "Creates a new sorted map with specified values",
+			returnDescription = "newly created map"
+			)
+	public static Map<Object, Object> newSortedMap(
+			@FmParam(name = "keyValues", description = "Initial key-value pairs to be set") Object... keyValues)
+	{
+		return CommonUtils.toSortedMap(keyValues);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Adds specified values to the specified collection",
+			returnDescription = "Input collection post modification"
+			)
+	public static Collection<Object> addToCol(
+			@FmParam(name = "collection", description = "Collection to be modified") Collection<Object> collection, 
+			@FmParam(name = "values", description = "Values to add") Object... values)
+	{
+		if(values != null)
+		{
+			collection.addAll(Arrays.asList(values));
+		}
+		
+		return collection;
+	}
+
+	@FreeMarkerMethod(
+			description = "Removes specified values from the specified collection",
+			returnDescription = "Input collection post modification"
+			)
+	public static Collection<Object> removeFromCol(
+			@FmParam(name = "collection", description = "Collection to be modified") Collection<Object> collection, 
+			@FmParam(name = "values", description = "Values to remove") Object... values)
+	{
+		if(values != null)
+		{
+			collection.removeAll(Arrays.asList(values));
+		}
+		
+		return collection;
+	}
+
+	@FreeMarkerMethod(
+			description = "Adds specified key-values to the specified map",
+			returnDescription = "Input map post modification"
+			)
+	public static Map<Object, Object> addToMap(
+			@FmParam(name = "map", description = "Map to be modified") Map<Object, Object> map, 
+			@FmParam(name = "keyValues", description = "Key-value pairs to add") Object... keyValues)
+	{
+		if(keyValues != null)
+		{
+			map.putAll(CommonUtils.toMap(keyValues));
+		}
+		
+		return map;
+	}
+
+	@FreeMarkerMethod(
+			description = "Removes specified keys from the specified map",
+			returnDescription = "Input collection post modification"
+			)
+	public static Map<Object, Object> removeFromMap(
+			@FmParam(name = "map", description = "Map to be modified") Map<Object, Object> map, 
+			@FmParam(name = "keys", description = "Keys to remove") Object... keys)
+	{
+		if(keys != null)
+		{
+			Arrays.asList(keys).forEach(key -> map.remove(key));
+		}
+		
+		return map;
+	}
+	
+	@FreeMarkerMethod(
+			description = "Converts specified list into set.",
+			returnDescription = "Converted set."
+			)
+	public static Set<Object> lstToSet(
+			@FmParam(name = "list", description = "List to be converted") List<Object> lst)
+	{
+		if(lst == null)
+		{
+			return null;
+		}
+		
+		return new HashSet<>(lst);
+	}
+	
+	@FreeMarkerMethod(
+			description = "Converts specified string into list by splitting it using specified delimiter.",
+			returnDescription = "Converted list."
+			)
+	public static List<String> strToList(
+			@FmParam(name = "str", description = "String to be converted") String str,
+			@FmParam(name = "delim", description = "Delimiter to be used") String delim
+			)
+	{
+		return new ArrayList<String>( Arrays.asList(str.split(delim)) );
+	}
+
+	@FreeMarkerMethod(
+			description = "Checks if specified submap is submap of supermap",
+			returnDescription = "true if comparison is susccessful."
+			)
+	public static boolean isSubmap(
+			@FmParam(name = "superMap", description = "Super-set map in which submap has to be checked") Map<Object, Object> superMap, 
+			@FmParam(name = "superMap", description = "Sub-set map which needs to be checked") Map<Object, Object> submap)
+	{
+		for(Object key : submap.keySet())
+		{
+			Object superVal = superMap.get(key);
+			Object subVal = submap.get(key);
+			
+			if(!Objects.equals(superVal, subVal))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	@FreeMarkerMethod(
+			description = "Evaluates the intersection size of specified collections.",
+			returnDescription = "intersection size of collections"
+			)
+	@SuppressWarnings("unchecked")
+	public static int intersectionCount(
+			@FmParam(name = "collection1", description = "Collection one to be checked") Collection<Object> collection1, 
+			@FmParam(name = "collection2", description = "Collection two to be checked") Collection<Object> collection2
+			)
+	{
+		Collection<Object> intersection = CollectionUtils.intersection(collection1, collection2);
+		//return the size
+		return intersection.size();
+	}
+
+	@FreeMarkerMethod(
+			description = "Adds to specified value to specified collection",
+			returnDescription = "empty string"
+			)
+	public static String push(
+			@FmParam(name = "collection", description = "Collection to which value should be added") Collection<Object> collection, 
+			@FmParam(name = "value", description = "Value to add") Object val
+			)
+	{
+		collection.add(val);
+		return "";
+	}
+
+	@FreeMarkerMethod(
+			description = "Removes the element from the end. If list is empty null will be returned.",
+			returnDescription = "Returns the element removed"
+			)
+	public static Object pop(
+			@FmParam(name = "list", description = "Collection to which value should be added") List<Object> collection
+			)
+	{
+		return collection.remove(collection.size() - 1);
 	}
 }

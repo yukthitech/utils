@@ -36,6 +36,10 @@ import com.yukthitech.utils.fmarker.doc.FreeMarkerDirectiveDoc;
 import com.yukthitech.utils.fmarker.doc.FreeMarkerMethodDoc;
 import com.yukthitech.utils.fmarker.met.CollectionMethods;
 import com.yukthitech.utils.fmarker.met.DateMethods;
+import com.yukthitech.utils.fmarker.met.FileFreeMarkerMethods;
+import com.yukthitech.utils.fmarker.met.RandomFreeMarkerMethods;
+import com.yukthitech.utils.fmarker.met.RegexFreeMarkerMethods;
+import com.yukthitech.utils.fmarker.met.StringMethods;
 import com.yukthitech.utils.fmarker.met.CommonDirectives;
 import com.yukthitech.utils.fmarker.met.CommonMethods;
 
@@ -115,6 +119,11 @@ public class FreeMarkerEngine
 			loadClass(CommonMethods.class);
 			loadClass(DateMethods.class);
 			loadClass(CollectionMethods.class);
+			
+			loadClass(FileFreeMarkerMethods.class);
+			loadClass(RandomFreeMarkerMethods.class);
+			loadClass(RegexFreeMarkerMethods.class);
+			loadClass(StringMethods.class);
 		}
 		
 		if(!excludeDefaultDirectives)
