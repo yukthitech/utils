@@ -49,87 +49,6 @@ public class TransformFmarkerMethods
 			throw new InvalidStateException("An error occurred while converting value to json", ex);
 		}
 	}
-	
-	@FreeMarkerMethod(
-			description = "Convert specified object into boolean value.",
-			returnDescription = "Converted value.")
-	public static Boolean toBoolean(
-			@FmParam(name = "value", description = "Value to be converted.")Object value)
-	{
-		if(value == null) {return null;}
-		
-		if(value instanceof Boolean)
-		{
-			return (Boolean) value;
-		}
-		
-		return "true".equals("" + value);
-	}
-
-	@FreeMarkerMethod(
-			description = "Convert specified object into int value.",
-			returnDescription = "Converted value.")
-	public static Integer toInt(
-			@FmParam(name = "value", description = "Value to be converted.")Object value)
-	{
-		if(value == null) {return null;}
-
-		if(value instanceof Integer)
-		{
-			return (Integer) value;
-		}
-		
-		return Integer.parseInt("" + value);
-	}
-
-	@FreeMarkerMethod(
-			description = "Convert specified object into long value.",
-			returnDescription = "Converted value.")
-	public static Long toLong(
-			@FmParam(name = "value", description = "Value to be converted.")Object value)
-	{
-		if(value == null) {return null;}
-		
-		if(value instanceof Long)
-		{
-			return (Long) value;
-		}
-		
-		return Long.parseLong("" + value);
-	}
-
-	@FreeMarkerMethod(
-			description = "Convert specified object into float value.",
-			returnDescription = "Converted value.")
-	public static Float toFloat(
-			@FmParam(name = "value", description = "Value to be converted.")Object value)
-	{
-		if(value == null) {return null;}
-		
-		if(value instanceof Float)
-		{
-			return (Float) value;
-		}
-		
-		return Float.parseFloat("" + value);
-	}
-
-
-	@FreeMarkerMethod(
-			description = "Convert specified object into double value.",
-			returnDescription = "Converted value.")
-	public static Double toDouble(
-			@FmParam(name = "value", description = "Value to be converted.")Object value)
-	{
-		if(value == null) {return null;}
-		
-		if(value instanceof Double)
-		{
-			return (Double) value;
-		}
-		
-		return Double.parseDouble("" + value);
-	}
 
 	@SuppressWarnings("unchecked")
 	@FreeMarkerMethod(
@@ -149,14 +68,6 @@ public class TransformFmarkerMethods
 		}
 		
 		return Arrays.asList(value);
-	}
-
-	@FreeMarkerMethod(
-			description = "Simply returns null. Helpful in defining null values in xml",
-			returnDescription = "null")
-	public static Object nullValue()
-	{
-		return null;
 	}
 
 	@FreeMarkerMethod(

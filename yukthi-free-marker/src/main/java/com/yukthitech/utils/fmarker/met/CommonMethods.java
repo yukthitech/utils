@@ -356,35 +356,86 @@ public class CommonMethods
 	}
 
 	@FreeMarkerMethod(
-			description = "Converts specified string value into long value.",
-			returnDescription = "Converted long value."
-			)
-	public static Long toLong(
-			@FmParam(name = "str", description = "String value to be converted") String str)
-	{
-		return Long.parseLong(str);
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string value into int value.",
-			returnDescription = "Converted int value."
-			)
-	public static Integer toInt(
-			@FmParam(name = "str", description = "String value to be converted") String str)
-	{
-		return Integer.parseInt(str);
-	}
-
-	@FreeMarkerMethod(
-			description = "Converts specified string value into boolean value.",
-			returnDescription = "Converted boolean value."
-			)
+			description = "Convert specified object into boolean value.",
+			returnDescription = "Converted value.")
 	public static Boolean toBoolean(
-			@FmParam(name = "str", description = "String value to be converted") String str)
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
 	{
-		return "true".equalsIgnoreCase(str);
+		if(value == null) {return null;}
+		
+		if(value instanceof Boolean)
+		{
+			return (Boolean) value;
+		}
+		
+		return "true".equals("" + value);
 	}
 	
+	@FreeMarkerMethod(
+			description = "Convert specified object into int value.",
+			returnDescription = "Converted value.")
+	public static Integer toInt(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value == null) {return null;}
+
+		if(value instanceof Integer)
+		{
+			return (Integer) value;
+		}
+		
+		return Integer.parseInt("" + value);
+	}
+
+	@FreeMarkerMethod(
+			description = "Convert specified object into long value.",
+			returnDescription = "Converted value.")
+	public static Long toLong(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value == null) {return null;}
+		
+		if(value instanceof Long)
+		{
+			return (Long) value;
+		}
+		
+		return Long.parseLong("" + value);
+	}
+
+	@FreeMarkerMethod(
+			description = "Convert specified object into float value.",
+			returnDescription = "Converted value.")
+	public static Float toFloat(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value == null) {return null;}
+		
+		if(value instanceof Float)
+		{
+			return (Float) value;
+		}
+		
+		return Float.parseFloat("" + value);
+	}
+
+
+	@FreeMarkerMethod(
+			description = "Convert specified object into double value.",
+			returnDescription = "Converted value.")
+	public static Double toDouble(
+			@FmParam(name = "value", description = "Value to be converted.")Object value)
+	{
+		if(value == null) {return null;}
+		
+		if(value instanceof Double)
+		{
+			return (Double) value;
+		}
+		
+		return Double.parseDouble("" + value);
+	}
+
 	/**
 	 * Compares the specified values and returns the comparison result as int.
 	 * @param value1
@@ -423,4 +474,13 @@ public class CommonMethods
 		
 		return ((Comparable)value1).compareTo(value2);
 	}
+
+	@FreeMarkerMethod(
+			description = "Simply returns null. Helpful in defining null values in xml",
+			returnDescription = "null")
+	public static Object nullValue()
+	{
+		return null;
+	}
+
 }
