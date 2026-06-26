@@ -1,5 +1,6 @@
 package com.yukthitech.transform.template;
 
+import com.yukthitech.transform.FormatOptions;
 import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
 import com.yukthitech.transform.template.TransformTemplate.TransformObjectField;
@@ -20,7 +21,7 @@ public interface IGenerator
 	
 	public Object toSimpleObject(Object value);
 	
-	public String formatObject(Object object);
+	public String formatObject(Object object, FormatOptions formatOptions);
 	
 	/**
 	 * This should return true, if the specified object should not be part of output.

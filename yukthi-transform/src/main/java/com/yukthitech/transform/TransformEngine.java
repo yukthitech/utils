@@ -120,7 +120,12 @@ public class TransformEngine
 	
 	public String processAsString(TransformTemplate template, Object context)
 	{
-		TransformState transformState = new TransformState(template);
+		return processAsString(template, context, null);
+	}
+
+	public String processAsString(TransformTemplate template, Object context, FormatOptions formatOptions)
+	{
+		TransformState transformState = new TransformState(template, formatOptions);
 		
 		//process and return the object
 		Object res = processObject(template.getRoot(), toTransformContext(context), transformState);

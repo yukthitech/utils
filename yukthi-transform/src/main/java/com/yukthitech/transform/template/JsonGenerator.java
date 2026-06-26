@@ -5,6 +5,7 @@ import static com.yukthitech.transform.ITransformConstants.OBJECT_MAPPER;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.yukthitech.transform.FormatOptions;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
 import com.yukthitech.transform.template.TransformTemplate.TransformObject;
@@ -67,11 +68,19 @@ public class JsonGenerator implements IGenerator
 		return value;
 	}
 
-    public String formatObject(Object object)
+    @Override
+    public String formatObject(Object object, FormatOptions formatOptions)
     {
+    	boolean minified = formatOptions != null ? formatOptions.isMinified() : true;
+
     	try
     	{
-    		return OBJECT_MAPPER.writeValueAsString(object);
+    		if(minified)
+    		{
+    			return OBJECT_MAPPER.writeValueAsString(object);
+    		}
+
+    		return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(object);
         } catch(Exception ex)
         {
             throw new InvalidStateException("An error occurred while writing json value.", ex);

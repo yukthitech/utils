@@ -29,11 +29,16 @@ public class TransformXmlUtils
 {
     public static String toXmlString(Element element)
     {
+    	return toXmlString(element, false);
+    }
+
+    public static String toXmlString(Element element, boolean minified)
+    {
 		try
 		{
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, minified ? "no" : "yes");
 
 			// Prepare the source and result
 			DOMSource source = new DOMSource(element);

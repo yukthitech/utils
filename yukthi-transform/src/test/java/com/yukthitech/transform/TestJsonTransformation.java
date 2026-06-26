@@ -224,4 +224,28 @@ public class TestJsonTransformation
 					String.format("\nActual Message: %s\nDoes not start with: %s", actMssg, expMssg));
 		}
 	}
+
+	@Test
+	public void testFormatOptions() throws Exception
+	{
+		String template = "{\"name\": \"@fmarker: name\", \"value\": \"@fmarker: value\"}";
+		Map<String, Object> context = CommonUtils.toMap("name", "foo", "value", "bar");
+		TransformTemplate parsedTemplate = templateFactory.parseTemplate("format-test", template);
+
+		String defaultResult = jsonExprEngine.processAsString(parsedTemplate, context);
+		String minifiedResult = jsonExprEngine.processAsString(parsedTemplate, context,
+				new FormatOptions().setMinified(true));
+		String formattedResult = jsonExprEngine.processAsString(parsedTemplate, context,
+				new FormatOptions().setMinified(false));
+		
+		System.out.println("Minified: \n\t" + minifiedResult);
+		
+		System.out.println("Formatted: \n\t" + formattedResult);
+
+
+		Assert.assertFalse(defaultResult.contains("\n"), "Default JSON output should be minified");
+		Assert.assertEquals(defaultResult, minifiedResult);
+		Assert.assertTrue(formattedResult.contains("\n"), "Formatted JSON output should contain line breaks");
+		Assert.assertEquals(objectMapper.readTree(defaultResult), objectMapper.readTree(formattedResult));
+	}
 }

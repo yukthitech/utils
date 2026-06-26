@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import com.yukthitech.transform.FormatOptions;
 import com.yukthitech.transform.ITransformConstants;
 import com.yukthitech.transform.TransformException;
 import com.yukthitech.transform.TransformState;
@@ -339,10 +340,12 @@ public class XmlGenerator implements IGenerator
 		return toSimpleObjectInternal((Element) value);
 	}
 
-    public String formatObject(Object object)
+    @Override
+    public String formatObject(Object object, FormatOptions formatOptions)
     {
 		Element element = (Element) object;
-		return TransformXmlUtils.toXmlString(element);
+		boolean minified = formatOptions != null ? formatOptions.isMinified() : false;
+		return TransformXmlUtils.toXmlString(element, minified);
 	}
     
     @Override

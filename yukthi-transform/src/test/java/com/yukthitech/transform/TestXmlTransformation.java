@@ -136,6 +136,32 @@ public class TestXmlTransformation
 		Assert.assertEquals(objectMapper.writeValueAsString(actualResult), objectMapper.writeValueAsString(expectedResult));
 	}
 
+	@Test
+	public void testFormatOptions() throws Exception
+	{
+		String template = "<root><name>@fmarker: context.name</name><value>@fmarker: context.value</value></root>";
+		Map<String, Object> context = parseXml(
+				"<context><name>foo</name><value>bar</value></context>");
+		TransformTemplate parsedTemplate = templateFactory.parseTemplate("format-test", template);
+
+		String defaultResult = transformEngine.processAsString(parsedTemplate, context);
+		String minifiedResult = transformEngine.processAsString(parsedTemplate, context,
+				new FormatOptions().setMinified(true));
+		String formattedResult = transformEngine.processAsString(parsedTemplate, context,
+				new FormatOptions().setMinified(false));
+		
+		System.out.println("Minified: \n\t" + minifiedResult);
+		
+		System.out.println("Formatted: \n\t" + formattedResult);
+
+		Assert.assertTrue(defaultResult.contains("\n"), "Default XML output should be formatted");
+		Assert.assertEquals(defaultResult, formattedResult);
+		Assert.assertFalse(minifiedResult.replace("\r", "").contains("\n  "),
+				"Minified XML output should not contain indentation");
+		Assert.assertEquals(parseXml(defaultResult), parseXml(minifiedResult));
+		Assert.assertEquals(parseXml(defaultResult), parseXml(formattedResult));
+	}
+
 	/*
 	@Test(dataProvider =  "pojoJsonElDataProvider")
 	public void testPojoJel(TransformTestBean bean) throws Exception

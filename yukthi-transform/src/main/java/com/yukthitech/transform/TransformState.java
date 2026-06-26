@@ -13,6 +13,8 @@ public class TransformState
 {
 	private IGenerator generator;
 	
+	private FormatOptions formatOptions;
+	
 	private Location location;
 	
 	/**
@@ -23,6 +25,11 @@ public class TransformState
 	
 	public TransformState(TransformTemplate template)
 	{
+		this(template, null);
+	}
+
+	public TransformState(TransformTemplate template, FormatOptions formatOptions)
+	{
 		try
 		{
 			generator = template.getGeneratorType().getConstructor().newInstance();
@@ -31,12 +38,14 @@ public class TransformState
 			throw new InvalidStateException("An error occurred while creating generator instance of type: " + template.getGeneratorType(), ex);
 		}
 		
+		this.formatOptions = formatOptions;
 		this.location = template.getLocation();
 	}
 	
 	private TransformState(TransformState parent, Location location)
 	{
 		this.generator = parent.generator;
+		this.formatOptions = parent.formatOptions;
 		this.attributeMode = parent.attributeMode;
 		this.location = location;
 	}
@@ -105,9 +114,14 @@ public class TransformState
 		return generator.convertIncluded(this, value);
 	}
 	
+	public FormatOptions getFormatOptions()
+	{
+		return formatOptions;
+	}
+
 	public String formatObject(Object object)
 	{
-		return generator.formatObject(object);
+		return generator.formatObject(object, formatOptions);
 	}
 	
 	public Object toSimpleObject(Object value)
