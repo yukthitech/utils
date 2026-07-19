@@ -1,0 +1,55 @@
+---
+description: Information about XPath disabling and JsonPath support in yukthi-transform
+globs: **/*.java,**/*.md,**/*.xml
+---
+
+# XPath and JsonPath in Yukthi-Transform
+
+## Important: XPath Threading Issues
+
+XPath expressions (`@xpath:` and `@xpathMulti:`) can cause errors in multi-threading scenarios. For better thread safety, it's recommended to disable XPath and use JsonPath expressions instead.
+
+## Disabling XPath
+
+To disable XPath expressions, configure the template factory:
+
+```java
+TemplateFactoryConfiguration config = new TemplateFactoryConfiguration();
+config.setXpathDisabled(true);
+
+JsonTemplateFactory factory = new JsonTemplateFactory();
+factory.setTemplateFactoryConfiguration(config);
+```
+
+When XPath is disabled via [TemplateFactoryConfiguration.setXpathDisabled()](mdc:yukthi-transform/src/main/java/com/yukthitech/transform/template/TemplateFactoryConfiguration.java), any XPath expressions in templates will throw a `TransformException` at runtime.
+
+The configuration is set via [JsonTemplateFactory.setTemplateFactoryConfiguration()](mdc:yukthi-transform/src/main/java/com/yukthitech/transform/template/JsonTemplateFactory.java).
+
+## JsonPath as Replacement
+
+Use JsonPath expressions as a thread-safe alternative to XPath:
+
+- `@jpath:` - JsonPath expression (returns first match)
+- `@jpathMulti:` - JsonPath expression (returns all matches)
+
+### Examples
+
+See [json-trans-test-data.xml](mdc:yukthi-transform/src/test/resources/json-trans-test-data.xml) for examples:
+
+```json
+{
+  "jsonBookNames": "@jpathMulti: $.libraries.Justbooks.books[*].title",
+  "jsonCopyCount": "@jpath: $.libraries.Justbooks.books[0].copyCount"
+}
+```
+
+## Implementation Details
+
+The XPath disabling check is implemented in [ExpressionUtils.processExpression()](mdc:yukthi-transform/src/main/java/com/yukthitech/transform/template/ExpressionUtils.java), which checks `TemplateFactoryConfiguration.isXpathDisabled()` before processing XPath expressions.
+
+JsonPath expressions are processed using the `JsonPath` class from `com.jayway.jsonpath` library and are always available regardless of XPath configuration.
+
+## Best Practices
+
+1. **For multi-threaded environments**: Always disable XPath and use JsonPath
+2. **Migration**: Replace `@xpath:` with `@jpath:` and `@xpathMulti:` with `@jpathMulti:` when migrating templates

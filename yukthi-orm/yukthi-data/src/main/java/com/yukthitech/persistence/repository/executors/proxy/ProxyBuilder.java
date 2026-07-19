@@ -15,18 +15,104 @@
  */
 package com.yukthitech.persistence.repository.executors.proxy;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
 public class ProxyBuilder
 {
+	/**
+	 * Synthetic field on generated proxy classes that holds the per-instance handler.
+	 */
+	private static final String HANDLER_FIELD = "$__handler";
+	
+	/**
+	 * Cache of generated proxy types keyed by base + optional interface type.
+	 */
+	private static final ConcurrentHashMap<ProxyKey, ProxyType> PROXY_CACHE = new ConcurrentHashMap<>();
+	
+	private static final class ProxyKey
+	{
+		private final Class<?> baseType;
+		private final Class<?> interfaceType;
+		
+		private ProxyKey(Class<?> baseType, Class<?> interfaceType)
+		{
+			this.baseType = baseType;
+			this.interfaceType = interfaceType;
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if(this == obj)
+			{
+				return true;
+			}
+			
+			if(!(obj instanceof ProxyKey))
+			{
+				return false;
+			}
+			
+			ProxyKey other = (ProxyKey) obj;
+			return Objects.equals(baseType, other.baseType)
+					&& Objects.equals(interfaceType, other.interfaceType);
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return Objects.hash(baseType, interfaceType);
+		}
+	}
+	
+	private static final class ProxyType
+	{
+		private final Class<?> proxyClass;
+		private final Field handlerField;
+		
+		private ProxyType(Class<?> proxyClass)
+		{
+			try
+			{
+				this.proxyClass = proxyClass;
+				this.handlerField = proxyClass.getDeclaredField(HANDLER_FIELD);
+				this.handlerField.setAccessible(true);
+			}catch(Exception ex)
+			{
+				throw new InvalidStateException("Failed to prepare proxy type: {}", proxyClass.getName(), ex);
+			}
+		}
+	}
+	
 	public static Object buildProxy(Class<?> baseType, Class<?> interfaceType, InvocationHandler handler)
+	{
+		ProxyType proxyType = PROXY_CACHE.computeIfAbsent(
+				new ProxyKey(baseType, interfaceType),
+				key -> new ProxyType(createProxyClass(baseType, interfaceType)));
+		
+		try
+		{
+			Object proxy = proxyType.proxyClass.getConstructor().newInstance();
+			proxyType.handlerField.set(proxy, handler);
+			return proxy;
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while creating instance of dynamic type", ex);
+		}
+	}
+	
+	private static Class<?> createProxyClass(Class<?> baseType, Class<?> interfaceType)
 	{
 		DynamicType.Builder<?> builder = new ByteBuddy()
 			.subclass(baseType);
@@ -38,19 +124,12 @@ public class ProxyBuilder
 			builder = builder.implement(interfaceType);
 			classLoader = interfaceType.getClassLoader();
 		}
-	
-		Class<?> cls = builder
-			.method(ElementMatchers.any()).intercept(InvocationHandlerAdapter.of(handler))
+		
+		return builder
+			.defineField(HANDLER_FIELD, InvocationHandler.class, Visibility.PRIVATE)
+			.method(ElementMatchers.any()).intercept(InvocationHandlerAdapter.toField(HANDLER_FIELD))
 			.make()
 			.load(classLoader)
 			.getLoaded();
-		
-		try
-		{
-			return cls.getConstructor().newInstance();
-		}catch(Exception ex)
-		{
-			throw new InvalidStateException("An error occurred while creating instance of dynamic type", ex);
-		}
 	}
 }

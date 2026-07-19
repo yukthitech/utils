@@ -39,7 +39,6 @@
 			</dataSource>
 		</dataStore>
 	</repositoryFactory>
-	-->
 	
 	<repositoryFactory createTables="true" name="POSTGRES">
 		<dataStore ccg:beanType="com.yukthitech.persistence.rdbms.RdbmsDataStore" ccg:paramTypes="String" ccg:params="postgres">
@@ -51,6 +50,7 @@
 			</dataSource>
 		</dataStore>
 	</repositoryFactory>
+	-->
 </configuration>
 
 	

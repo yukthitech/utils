@@ -65,29 +65,27 @@ public class SqlExceptionHandler
 		Object constraint = null;
 		String constraintName = null;
 		
-		if(CollectionUtils.isEmpty(constraintErrorPatterns))
+		//fetch the constraint name from the message
+		Matcher matcher = WORD_PATTERN.matcher(message);
+		String word = null;
+		
+		while(matcher.find())
 		{
-			//fetch the constraint name from the message
-			Matcher matcher = WORD_PATTERN.matcher(message);
-			String word = null;
+			word = matcher.group(1);
+			constraint = entityDetailsFactory.getConstraint(word);
 			
-			while(matcher.find())
+			if(constraint != null)
 			{
-				word = matcher.group(1);
-				constraint = entityDetailsFactory.getConstraint(word);
-				
-				if(constraint != null)
-				{
-					constraintName = word;
-					break;
-				}
+				constraintName = word;
+				break;
 			}
 		}
-		else
+		
+		if(constraint == null && CollectionUtils.isNotEmpty(constraintErrorPatterns))
 		{
 			for(Pattern constraintErrorPattern : constraintErrorPatterns)
 			{
-				Matcher matcher = constraintErrorPattern.matcher(message);
+				matcher = constraintErrorPattern.matcher(message);
 				
 				if(matcher.find())
 				{
