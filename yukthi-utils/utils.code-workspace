@@ -2,7 +2,21 @@
 	"folders": [
 		{
 			"path": ".."
+		},
+		{
+			"path": "../../autox"
+		},
+		{
+			"path": "../../yukthi-mongojs"
+		},
+		{
+			"path": "../../papilio"
+		},
+		{
+			"path": "../yukthi-orm"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
 }

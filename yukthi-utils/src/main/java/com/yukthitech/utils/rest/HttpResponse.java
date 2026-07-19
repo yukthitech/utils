@@ -15,14 +15,18 @@
  */
 package com.yukthitech.utils.rest;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Locale;
 
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.ProtocolVersion;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+
+import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
  * Wrapper over http response object. Used to isolate the users of this library from
@@ -37,10 +41,47 @@ public class HttpResponse
 	{
 		this.httpResponse = httResponse;
 	}
-
-	public HttpEntity getEntity()
+	
+	public long getContentLength()
 	{
-		return httpResponse.getEntity();
+		return httpResponse.getEntity().getContentLength();
+	}
+
+	public String getContentType()
+	{
+		return httpResponse.getEntity().getContentType();
+	}
+
+	public String getContentEncoding()
+	{
+		return httpResponse.getEntity().getContentEncoding();
+	}
+
+	public InputStream getBodyStream() throws IOException
+	{
+		return httpResponse.getEntity().getContent();
+	}
+
+	public String getBodyAsString()
+	{
+		try
+		{
+			return EntityUtils.toString(httpResponse.getEntity());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while reading body", ex);
+		}
+	}
+
+	public byte[] getBodyAsByteArray()
+	{
+		try
+		{
+			return EntityUtils.toByteArray(httpResponse.getEntity());
+		}catch(Exception ex)
+		{
+			throw new InvalidStateException("An error occurred while reading body", ex);
+		}
 	}
 
 	public boolean containsHeader(String name)

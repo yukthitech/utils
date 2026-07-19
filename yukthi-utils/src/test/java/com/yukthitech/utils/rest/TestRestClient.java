@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -317,11 +315,9 @@ public class TestRestClient
 			
 			if(statusCode >= 200 && statusCode <= 299)
 			{
-				HttpEntity entity = response.getEntity();
-				
 				try
 				{
-					data = entity != null? EntityUtils.toByteArray(entity): null;
+					data = response.getBodyAsByteArray();
 				}catch(Exception ex)
 				{
 					data = null;
