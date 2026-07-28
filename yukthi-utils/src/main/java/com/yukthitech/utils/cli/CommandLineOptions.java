@@ -201,7 +201,7 @@ public class CommandLineOptions
 				
 				if( boolean.class.equals(optionDetails.field.getType()) || Boolean.class.equals(optionDetails.field.getType()) )
 				{
-					value = "" + commandLine.hasOption(name);
+					value = "true".equalsIgnoreCase(commandLine.getOptionValue(name)) ? "true" : "false";
 				}
 				else
 				{

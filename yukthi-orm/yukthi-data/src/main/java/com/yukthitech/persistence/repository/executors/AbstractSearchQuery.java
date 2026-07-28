@@ -288,6 +288,8 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 	
 	/**
 	 * Fetches order by fields for the specified method.
+	 * Order-by fields must already be present in the result fields (including nested
+	 * expressions); the matching result field alias is reused for ordering.
 	 * @param method Method from which order by details needs to be fetched.
 	 */
 	protected void fetchOrderDetails(Method method)
@@ -303,11 +305,6 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		{
 			for(OrderByField field : orderBy.fields())
 			{
-				if(!entityDetails.hasField(field.name()))
-				{
-					throw new InvalidMappingException("Invalid field '" + field.name() + "' specified in @OrderBy annotation of finder method - " + methodDesc);
-				}
-				
 				conditionQueryBuilder.addOrderByField(field.name(), field.type(), methodDesc);
 			}
 		}
@@ -315,11 +312,6 @@ public abstract class AbstractSearchQuery extends QueryExecutor
 		{
 			for(String field : orderBy.value())
 			{
-				if(!entityDetails.hasField(field))
-				{
-					throw new InvalidMappingException("Invalid field '" + field + "' specified in @OrderBy annotation of finder method - " + methodDesc);
-				}
-				
 				conditionQueryBuilder.addOrderByField(field, OrderByType.ASC, methodDesc);
 			}
 		}

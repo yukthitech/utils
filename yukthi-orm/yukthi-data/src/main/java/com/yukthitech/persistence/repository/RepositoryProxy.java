@@ -154,10 +154,10 @@ class RepositoryProxy implements InvocationHandler
 			return defaultedMethods.get(methodName).apply(args);
 		}
 		
-		//logger.debug("Executing method '" + method.getName() + "' with arguments: " + Arrays.toString(args));
-		
 		try
 		{
+			logger.debug("Executing repository method {}.{}()", repositoryType.getName(), methodName);
+			
 			QueryExecutor queryExecutor = methodToExecutor.get(method.getName());
 			return queryExecutor.execute(queryExecutionContext, dataStore, dataStore.getConversionService(), args);
 		}catch(RuntimeException ex)
