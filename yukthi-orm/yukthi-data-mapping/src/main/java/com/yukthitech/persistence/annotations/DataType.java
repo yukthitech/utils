@@ -15,6 +15,7 @@
  */
 package com.yukthitech.persistence.annotations;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ public enum DataType
 	LONG(long.class, Long.class), 
 	FLOAT(float.class, Float.class), 
 	DOUBLE(double.class, Double.class),
+	DECIMAL(BigDecimal.class),
 	BOOLEAN(boolean.class, Boolean.class),
 	DATE,
 	BLOB,

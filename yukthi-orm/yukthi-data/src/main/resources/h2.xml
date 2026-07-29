@@ -118,6 +118,8 @@
 					<#assign dataType="REAL">
 				<#elseif columnType == "DOUBLE">
 					<#assign dataType="DOUBLE">
+				<#elseif columnType == "DECIMAL">
+					<#assign dataType="DECIMAL(19, 4)">
 				<#elseif columnType == "DATE">
 					<#assign dataType="DATE">
 				<#elseif columnType == "DATE_TIME">

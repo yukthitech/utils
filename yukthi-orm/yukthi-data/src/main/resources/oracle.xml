@@ -117,6 +117,8 @@
 							<#assign dataType="NUMBER(19, 4)">
 						<#elseif columnType == "DOUBLE">
 							<#assign dataType="NUMBER(19, 4)">
+						<#elseif columnType == "DECIMAL">
+							<#assign dataType="NUMBER(19, 4)">
 						<#elseif columnType == "DATE_TIME">
 							<#assign dataType="TIMESTAMP">
 						<#elseif columnType == "DATE">

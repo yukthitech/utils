@@ -128,9 +128,31 @@ public class Employee {
 | `@Version` (JPA) | Optimistic locking |
 | `@OneToMany` / `@ManyToOne` / `@OneToOne` / `@ManyToMany` | Relations (+ cascade) |
 
-`DataType` enum: `STRING`, `INT`, `LONG`, `FLOAT`, `DOUBLE`, `BOOLEAN`, `DATE`, `BLOB`, `ZIP_BLOB`, `CLOB`, `DATE_TIME`, `UNKNOWN`.
+`DataType` enum: `STRING`, `INT`, `LONG`, `FLOAT`, `DOUBLE`, `DECIMAL`, `BOOLEAN`, `DATE`, `BLOB`, `ZIP_BLOB`, `CLOB`, `DATE_TIME`, `UNKNOWN`.
 
-Built-in converters: `JsonConverter`, `JsonWithTypeConverter`, `XmlConverter`, `SerializationConverter`, `PasswordEncryptionConverter`, plus Blob/Clob/Date converters.
+Implicit Java → `DataType` mapping (when `@DataTypeMapping` is omitted):
+
+| Java type | `DataType` | Typical SQL column |
+|-----------|------------|--------------------|
+| `String` | `STRING` | `VARCHAR(length)` |
+| `byte`/`Byte`, `short`/`Short`, `int`/`Integer` | `INT` | `INT` / `INTEGER` |
+| `long`/`Long` | `LONG` | `BIGINT` |
+| `float`/`Float` | `FLOAT` | `FLOAT` / `REAL` / `FLOAT4` |
+| `double`/`Double` | `DOUBLE` | `DOUBLE` / `FLOAT8` |
+| `java.math.BigDecimal` | `DECIMAL` | `DECIMAL(19,4)` / `NUMBER(19,4)` / `NUMERIC(19,4)` |
+| `boolean`/`Boolean` | `BOOLEAN` | `BOOLEAN` (or `Number(1)` on Oracle) |
+| `java.util.Date` | `DATE_TIME` | `TIMESTAMP` / `DATETIME` |
+
+Use `@DataTypeMapping(type = DataType.DATE)` when a `Date` field should map to a date-only column.
+
+Example `BigDecimal` entity field (no extra annotation required):
+
+```java
+@Column(name = "AMOUNT")
+private BigDecimal amount;
+```
+
+Built-in converters: `JsonConverter`, `JsonWithTypeConverter`, `XmlConverter`, `SerializationConverter`, `PasswordEncryptionConverter`, plus Blob/Clob/Date/`DecimalConverter` converters.
 
 ---
 
@@ -205,6 +227,39 @@ List<Employee> findTop(@Condition("age") int age, @LimitRows int limit);
 **Operators (`Operator`):** `EQ`, `LT`, `LE`, `GT`, `GE`, `NE`, `LIKE`, `IN`, `NOT_IN`.
 
 Join-path conditions: `@Condition("customer.name")`, aggregates on related fields similarly.
+
+### Flat projections (`@SearchResult` + `@Field`) — prefer over loading relations
+
+Returning full entities and then calling `entity.getRelation().getX()` in a loop causes **N+1 queries** (one query per row to load the association).
+
+Instead, project only the needed columns (including joined paths) into a small POJO in a **single** SQL query:
+
+```java
+// Projection POJO — @Field paths are entity property paths (supports relations)
+@Data
+@NoArgsConstructor
+public class ModelLovQueryResult {
+    @Field("id")
+    private Long id;
+
+    @Field("name")
+    private String name;
+
+    @Field("llmService.name")   // joined column — no separate entity load
+    private String serviceName;
+}
+
+// Repository
+@SearchResult
+@OrderBy("name")
+List<ModelLovQueryResult> findForOwner(
+    @Condition("global") boolean global,
+    @Condition(value = "owner.id", joinWith = JoinOperator.OR) long ownerId);
+```
+
+**DO:** use `@SearchResult` + `@Field("relation.property")` when you only need a few fields from associations (LOVs, summaries, list rows).
+
+**DON'T:** `findAll()` / entity list then `entity.getParent().getName()` inside a loop unless you intentionally need the full graph.
 
 ### Condition beans
 

@@ -121,6 +121,8 @@
 					<#assign dataType="FLOAT4">
 				<#elseif columnType == "DOUBLE">
 					<#assign dataType="FLOAT8">
+				<#elseif columnType == "DECIMAL">
+					<#assign dataType="NUMERIC(19, 4)">
 				<#elseif columnType == "DATE_TIME">
 					<#assign dataType="TIMESTAMP">
 				<#elseif columnType == "CLOB">
