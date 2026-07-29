@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -32,6 +31,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.UnrecognizedOptionException;
 
+import com.yukthitech.utils.ConvertUtils;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
 /**
@@ -194,7 +194,7 @@ public class CommandLineOptions
 				
 				if(instance == null)
 				{
-					instance = optionDetails.type.newInstance();
+					instance = optionDetails.type.getConstructor().newInstance();
 					beans.put(optionDetails.type, instance);
 				}
 				
@@ -221,8 +221,9 @@ public class CommandLineOptions
 								optionDetails.option.getOpt());
 					}
 				}
-					
-				BeanUtils.setProperty(instance, optionDetails.field.getName(), value);
+				
+				optionDetails.field.setAccessible(true);
+				optionDetails.field.set(instance, ConvertUtils.convert(value, optionDetails.field.getType()));
 			}
 			
 			return beans;
