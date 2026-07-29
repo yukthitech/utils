@@ -2,7 +2,7 @@
 
 **yukthi-transform** is a Java transformation/templating engine that transforms object data from multiple sources (JSON, XML, POJOs) into different forms based on templates. The library supports both JSON and XML transformation templates.
 
-![Alt text](doc/images/jel.png?raw=true "Transformation Engine")
+![Alt text](../docs/yukthi-transform/images/jel.png?raw=true "Transformation Engine")
 
 ## Features
 
@@ -14,10 +14,11 @@
 
 ## Documentation
 
-- **[JSON Transformation Guide](doc/json-transformation-guide.md)** - Complete guide for JSON template syntax and usage
-- **[XML Transformation Guide](doc/xml-transformation-guide.md)** - Complete guide for XML template syntax and usage
-- **[Transform Free Marker Methods](doc/transform-fmarker-methods.md)** - List of FreeMarker methods available for transformation templates
-- **[Developer Guide](doc/developer-guide.md)** - Architecture, class organization, and extension points
+- **[JSON Transformation Guide](../docs/yukthi-transform/json-transformation-guide.md)** - Complete guide for JSON template syntax and usage
+- **[XML Transformation Guide](../docs/yukthi-transform/xml-transformation-guide.md)** - Complete guide for XML template syntax and usage
+- **[Transform Free Marker Methods](../docs/yukthi-transform/transform-fmarker-methods.md)** - List of FreeMarker methods available for transformation templates
+- **[Developer Guide](../docs/yukthi-transform/developer-guide.md)** - Architecture, class organization, and extension points
+- **[AI Template Generation Guide](../docs/yukthi-transform/ai-template-generation-guide.md)** - Guide for generating templates with AI / Cursor
 
 ## Maven Dependency
 
@@ -271,7 +272,7 @@ JSON templates use special keys starting with `@` for directives:
 - `@xpath:` / `@xpathMulti:` - XPath expressions (can be disabled for multi-threading)
 - `@jpath:` / `@jpathMulti:` - JsonPath expressions (recommended alternative to XPath)
 
-**See [JSON Transformation Guide](doc/json-transformation-guide.md) for complete syntax documentation.**
+**See [JSON Transformation Guide](../docs/yukthi-transform/json-transformation-guide.md) for complete syntax documentation.**
 
 ### XML Templates
 
@@ -290,7 +291,7 @@ XML templates use the `/transform` namespace (prefix `t:`) for directives:
 - `t:name` - Dynamic element name
 - `@fmarker:`, `@xpath:`, `@xpathMulti:` - Expressions in attributes/content
 
-**See [XML Transformation Guide](doc/xml-transformation-guide.md) for complete syntax documentation.**
+**See [XML Transformation Guide](../docs/yukthi-transform/xml-transformation-guide.md) for complete syntax documentation.**
 
 ## Processing Logic
 
@@ -562,10 +563,11 @@ try {
 
 ## Additional Resources
 
-- **[JSON Transformation Guide](doc/json-transformation-guide.md)** - Detailed JSON template syntax
-- **[XML Transformation Guide](doc/xml-transformation-guide.md)** - Detailed XML template syntax
-- **[Transform Free Marker Methods](doc/transform-fmarker-methods.md)** - List of FreeMarker methods available for transformation templates
-- **[Developer Guide](doc/developer-guide.md)** - Architecture and extension points
+- **[JSON Transformation Guide](../docs/yukthi-transform/json-transformation-guide.md)** - Detailed JSON template syntax
+- **[XML Transformation Guide](../docs/yukthi-transform/xml-transformation-guide.md)** - Detailed XML template syntax
+- **[Transform Free Marker Methods](../docs/yukthi-transform/transform-fmarker-methods.md)** - List of FreeMarker methods available for transformation templates
+- **[Developer Guide](../docs/yukthi-transform/developer-guide.md)** - Architecture and extension points
+- **[AI Template Generation Guide](../docs/yukthi-transform/ai-template-generation-guide.md)** - Guide for generating templates with AI / Cursor
 - **[Library Summary](LIBRARY_SUMMARY.md)** - Quick reference guide
 
 ## License

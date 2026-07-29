@@ -1392,7 +1392,7 @@ When generating templates, ensure:
 - **[XML Transformation Guide](xml-transformation-guide.md)** - Detailed XML template syntax
 - **[Transform Free Marker Methods](transform-fmarker-methods.md)** - Complete method reference
 - **[Developer Guide](developer-guide.md)** - Architecture and extension points
-- **[Library Summary](../LIBRARY_SUMMARY.md)** - Quick reference guide
+- **[Library Summary](../../yukthi-transform/LIBRARY_SUMMARY.md)** - Quick reference guide
 
 ---
 
