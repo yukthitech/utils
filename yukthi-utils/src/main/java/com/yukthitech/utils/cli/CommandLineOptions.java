@@ -223,6 +223,12 @@ public class CommandLineOptions
 				}
 				
 				optionDetails.field.setAccessible(true);
+				
+				if(value == null && optionDetails.field.getType().isPrimitive())
+				{
+					continue;
+				}
+				
 				optionDetails.field.set(instance, ConvertUtils.convert(value, optionDetails.field.getType()));
 			}
 			

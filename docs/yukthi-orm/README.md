@@ -280,7 +280,20 @@ List<Employee> find(@ConditionBean EmpSearchQuery query);
 
 ### Updates
 
+Unlike Hibernate dirty checking, **`ICrudRepository.update(entity)` writes every mapped column**. Unloaded / null fields can wipe existing DB values. Prefer **field-specific update methods** for normal cases; use full-entity `update(entity)` only when most/all fields must change together.
+
 ```java
+// Prefer — updates only the listed columns
+void updateStatus(@Condition("id") long id,
+    @Field("status") String status,
+    @Field("startedOn") Date startedOn);
+
+void updateNotes(@Condition("id") long id, @Field("notes") String notes);
+
+// Full-entity update — use sparingly
+repo.update(entity);
+
+// Operator update
 @UpdateFunction
 boolean updateAge(
     @Field(value = "age", updateOp = UpdateOperator.ADD) int ageToAdd,
