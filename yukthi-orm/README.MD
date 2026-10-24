@@ -141,15 +141,18 @@ public class EmployeeService {
 
 | Annotation | Description | Attributes |
 | :--- | :--- | :--- |
-| `@Condition` | Specifies a condition for a finder method. | `value` (String): The name of the entity field. <br> `op` (Operator): The operator to use in the condition. <br> `joinWith` (JoinOperator): The join operator to use. <br> `nullable` (boolean): Whether the condition can hold null values. <br> `ignoreCase` (boolean): Whether to ignore case during condition evaluation. |
-| `@Conditions` | A group of `@Condition` annotations. | `value` (Condition[]): An array of conditions. <br> `joinWith` (JoinOperator): The join operator to use for the group. |
-| `@Field` | Selects a specific field to be returned by a finder method. | `value` (String): The name of the entity field. <br> `updateOp` (UpdateOperator): The update operator to use. |
+| `@Condition` | Specifies a condition for a finder/update/delete method. | `value` (String): The name of the entity field. <br> `op` (Operator): `EQ`, `NE`, `LT`, `LE`, `GT`, `GE`, `LIKE`, `IN`, `NOT_IN`. <br> `joinWith` (JoinOperator): AND/OR join with previous condition. <br> `nullCheck` (boolean): Treat parameter as IS NULL / IS NOT NULL. <br> `ignoreCase` (boolean): Case-insensitive string comparison. |
+| `@Conditions` | A group of `@Condition` annotations on one parameter. | `value` (Condition[]): An array of conditions. <br> `joinWith` (JoinOperator): The join operator for the group. |
+| `@Field` | Selects a field to return (finders) or update (updates). | `value` (String): The name of the entity field. <br> `updateOp` (UpdateOperator): Arithmetic update operator. <br> `relationUpdate` (RelationUpdateType): Relation sync/cascade mode. |
 | `@UpdateFunction` | Marks a method as an update operation. | | 
-| `@AggregateFunction` | Performs an aggregate operation (e.g., COUNT, SUM, AVG). | `type` (AggregateFunctionType): The type of aggregate function. <br> `field` (String): The field to use in the function. |
-| `@NativeQuery` | Executes a native SQL query. | `name` (String): The name of the native query. <br> `type` (NativeQueryType): The type of native query. |
-| `@SearchResult` | Maps the result of a query to a custom search result object. | `mappings` (ResultMapping[]): An array of result mappings. |
-| `@MethodConditions` | Specifies conditions at the method level. | `nullChecks` (NullCheck[]): An array of null checks. <br> `conditions` (DefaultCondition[]): An array of default conditions. |
-| `@OrderBy` | Specifies the ordering for finder method results. | `value` (String[]): An array of fields to order by. <br> `fields` (OrderByField[]): An array of `OrderByField` annotations. |
+| `@AggregateFunction` | Performs an aggregate operation (COUNT, AVG, MIN, MAX). | `type` (AggregateFunctionType): Aggregate type (default `COUNT`). <br> `field` (String): Field to aggregate (defaults to id). |
+| `@NativeQuery` | Executes a native SQL query. | `name` (String): The name of the native query. <br> `type` (NativeQueryType): `READ`, `INSERT`, `UPDATE`, or `DELETE`. |
+| `@SearchResult` | Maps finder results to a custom DTO. | `mappings` (ResultMapping[]): Optional entity-field to property mappings. |
+| `@SearchFunction` | Marks a method as a dynamic search (accepts `SearchQuery`). | | 
+| `@MethodConditions` | Specifies fixed conditions at the method level. | `nullChecks` (NullCheck[]): IS NULL / IS NOT NULL checks. <br> `conditions` (DefaultCondition[]): Fixed default conditions. |
+| `@OrderBy` | Specifies ordering for finder results. | `value` (String[]): Fields to order by (ASC). <br> `fields` (OrderByField[]): Fields with explicit ASC/DESC. |
+| `@LimitRows` | Marks a parameter as the max rows to fetch. | | 
+| `@FirstRowOnly` | Forces a single-row result for non-collection return types. | | 
 
 ### Query Bean Annotations
 
@@ -162,14 +165,17 @@ public class EmployeeService {
 
 ### Basic Finders
 
-Define finder methods in your repository interface by following a naming convention:
+Define finder methods with the `find` or `fetch` prefix. Conditions can come from the method name (`findByFieldName`) or from annotations:
 
 ```java
 public interface IEmployeeRepository extends ICrudRepository<Employee> {
     Employee findByEmployeeNo(String empNo);
     Employee findByEmailId(String emailId);
+    Employee fetchByPhoneNo(String phoneNo);
 }
 ```
+
+Other method prefixes: `update` (or `@UpdateFunction`), `delete`, and `search` (or `@SearchFunction`).
 
 ### Conditional Finders
 
@@ -206,6 +212,184 @@ public interface IEmployeeRepository extends ICrudRepository<Employee> {
 }
 ```
 
+### Field Projection
+
+Use `@Field` on the method to return a single entity field (scalar) instead of the full entity:
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    @Field("id")
+    long findIdByEmail(@Condition("emailId") String mail);
+
+    @Field("emailId")
+    String findEmailByEmployeeNo(String empNo);
+
+    @Field("age")
+    int findAge(@Condition("name") String name, @Condition("phoneNo") String phoneNo);
+}
+```
+
+### OR Conditions and Condition Groups
+
+Use `joinWith = JoinOperator.OR` on individual conditions, or `@Conditions` to apply one parameter value across multiple fields:
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    List<Employee> findByNameOrPhone(
+        @Condition(value = "name", op = Operator.LIKE, joinWith = JoinOperator.OR) String name,
+        @Condition(value = "phoneNo", op = Operator.LIKE, joinWith = JoinOperator.OR) String phone
+    );
+
+    List<Employee> findEmpByMulti(
+        @Conditions({
+            @Condition(value = "emailId", op = Operator.LIKE),
+            @Condition(value = "name", op = Operator.LIKE, joinWith = JoinOperator.OR)
+        })
+        String text
+    );
+}
+```
+
+### Nested Property Conditions
+
+Dot-notation reaches related entities (implemented as joins or subqueries):
+
+```java
+public interface IOrderRepository extends ICrudRepository<Order> {
+    List<Order> findOrdersOfCustomer(@Condition("customer.name") String customerName);
+
+    List<Order> findOrdersWithItem(@Condition("items.itemName") String itemName);
+
+    @Field("customer.name")
+    String findCustomerName(@Condition("orderNo") int orderNo);
+}
+```
+
+### Condition Options
+
+Common `@Condition` options beyond equality:
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    // Case-insensitive match
+    Employee findEmpByEmailIgnoreCase(@Condition(value = "emailId", ignoreCase = true) String mail);
+
+    // IN / NOT_IN with a collection parameter
+    List<Employee> findEmpWithEmails(
+        @Condition(value = "emailId", ignoreCase = true, op = Operator.IN) Set<String> mails
+    );
+
+    // nullCheck keeps EQ/NE conditions when the value is null (IS NULL / IS NOT NULL)
+    List<Employee> findWithNullName(@Condition(value = "name", nullCheck = true) String name);
+}
+```
+
+### Method-Level Conditions
+
+Use `@MethodConditions` for fixed WHERE clauses that do not come from parameters:
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    // Always require name IS NULL
+    @MethodConditions(nullChecks = { @NullCheck(field = "name") })
+    List<Employee> findEmpWithNoName(@Condition("phoneNo") String phoneNo);
+
+    // Always require age >= 40 (expression supported)
+    @MethodConditions(conditions = {
+        @DefaultCondition(field = "age", op = Operator.GE, value = "${oldAge=40}")
+    })
+    List<Employee> findOldEmployees(@Condition("phoneNo") String phoneNo);
+}
+```
+
+### Search Result DTOs
+
+Map selected columns to a custom result bean with `@SearchResult`. Annotate result fields with `@Field`, or use explicit `@ResultMapping`:
+
+```java
+public class EmpSearchResult {
+    @Field("name")
+    private String empName;
+
+    @Field("age")
+    private int age;
+}
+
+public class KeyValueBean {
+    private String key;
+    private Object value;
+}
+
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    @SearchResult
+    List<EmpSearchResult> findResultsByName(@Condition("name") String name);
+
+    @SearchResult(mappings = {
+        @ResultMapping(entityField = "name", property = "key"),
+        @ResultMapping(entityField = "age", property = "value")
+    })
+    List<KeyValueBean> findKeyValues(@Condition(value = "phoneNo", op = Operator.LIKE) String phone);
+}
+```
+
+### Ordering Results
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    @SearchResult
+    @OrderBy("name")
+    List<EmpSearchResult> findResultsByNameWithOrder(@Condition(value = "name", op = Operator.LIKE) String name);
+
+    @OrderBy(fields = {
+        @OrderByField(name = "age", type = OrderByType.DESC),
+        @OrderByField(name = "name", type = OrderByType.ASC)
+    })
+    List<Employee> findByPhoneNo(@Condition(value = "phoneNo", op = Operator.LIKE) String phone);
+}
+```
+
+### Limiting Results
+
+Mark a parameter with `@LimitRows` to cap the number of rows returned:
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    List<Employee> findByAge(@Condition(value = "age", op = Operator.GE) int age, @LimitRows int maxRows);
+}
+```
+
+For non-collection return types, `@FirstRowOnly` can be used to explicitly return only the first matching row.
+
+## Dynamic Search
+
+`ICrudRepository` provides runtime search via `SearchQuery` (conditions, order, paging). Custom search methods can also be declared with `@SearchFunction`:
+
+```java
+// Built-in on every repository
+List<Employee> results = employeeRepository.search(new SearchQuery(
+    new SearchCondition("age", Operator.GE, 30),
+    new SearchCondition("name", Operator.LIKE, "user%")
+));
+
+long count = employeeRepository.searchCount(new SearchQuery(
+    new SearchCondition("age", Operator.GE, 30)
+));
+
+// Order and paging
+SearchQuery query = new SearchQuery(new SearchCondition("name", Operator.LIKE, "%a%"));
+query.setOrderByFields(Arrays.asList(new OrderByField("name", OrderByType.ASC)));
+query.setResultsOffset(0);
+query.setResultsLimit(10);
+List<Employee> page = employeeRepository.search(query);
+
+// Custom search method returning a DTO
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    @SearchFunction
+    @SearchResult
+    List<DynamicEmpSearchResult> searchByName(SearchQuery searchQuery);
+}
+```
+
 ## Update Methods
 
 Use the `@UpdateFunction` annotation to create update methods:
@@ -216,6 +400,38 @@ public interface IEmployeeRepository extends ICrudRepository<Employee> {
     boolean updateAge(@Field(value = "age", updateOp = UpdateOperator.ADD) int ageToAdd, @Condition("id") long id);
 }
 ```
+
+### Update Query Beans
+
+Group update columns and conditions into a single bean with `@QueryBean`. Mark fields to update with `@Field` and WHERE criteria with `@Condition`:
+
+```java
+public class EmpUpdateQuery {
+    @Field("phoneNo")
+    private String phoneNo;
+
+    @Field(value = "age", updateOp = UpdateOperator.ADD)
+    private Integer ageToAdd;
+
+    @Condition("id")
+    private Long id;
+
+    @Condition(value = "name", op = Operator.LIKE)
+    private String namePattern;
+}
+
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    @UpdateFunction
+    boolean updateEmployee(@QueryBean EmpUpdateQuery query);
+}
+```
+
+Notes:
+
+-   `@Field` fields become the SET clause; `@Condition` fields become the WHERE clause.
+-   `updateOp` on `@Field` supports arithmetic updates (`ADD`, `SUBTRACT`, `MULTIPLY`, `DIVIDE`), same as parameter-based update methods.
+-   Use `@NotUpdateable` on a bean field to exclude it from the SET clause (useful when the same bean is also used for reads).
+-   Null condition values are ignored at runtime, so optional criteria can be left unset.
 
 ### Relation Updates
 
@@ -249,9 +465,38 @@ public interface IEmployeeRepository extends ICrudRepository<Employee> {
 }
 ```
 
+### Delete with Condition Beans
+
+Group delete criteria into a condition bean, same pattern as finder methods:
+
+```java
+public class EmpDeleteQuery {
+    @Condition("emailId")
+    private String emailId;
+
+    @Condition(value = "age", op = Operator.LT)
+    private Integer maxAge;
+
+    @Condition(value = "name", op = Operator.LIKE)
+    private String namePattern;
+}
+
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    int deleteEmployees(@ConditionBean EmpDeleteQuery query);
+}
+```
+
+You can also combine a condition bean with additional `@Condition` parameters:
+
+```java
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    int deleteByQueryAndPhone(@ConditionBean EmpDeleteQuery query, @Condition("phoneNo") String phoneNo);
+}
+```
+
 ## Aggregate Methods
 
-Use the `@AggregateFunction` annotation to perform aggregate operations:
+Use the `@AggregateFunction` annotation to perform aggregate operations (`COUNT` is the default type):
 
 ```java
 public interface IOrderRepository extends ICrudRepository<Order> {
@@ -260,14 +505,28 @@ public interface IOrderRepository extends ICrudRepository<Order> {
 
     @AggregateFunction(type = AggregateFunctionType.MAX, field = "cost")
     float getMaxCost(@Condition("customer.name") String customerName);
+
+    @AggregateFunction(type = AggregateFunctionType.MIN, field = "cost")
+    float getMinCost(@Condition("customer.name") String customerName);
+
+    @AggregateFunction(type = AggregateFunctionType.AVG, field = "cost")
+    float getAverageCost(@Condition("customer.name") String customerName);
+}
+
+public interface IEmployeeRepository extends ICrudRepository<Employee> {
+    // COUNT without explicit type
+    @AggregateFunction
+    long getCountByMailId(@Condition("emailId") String mail);
 }
 ```
 
+`ICrudRepository` also exposes `getCount()` and `checkExistsById(...)` as built-in aggregates.
+
 ## Native Queries
 
-For complex scenarios, you can use native SQL queries:
+For complex scenarios, define SQL in an XML file and bind it with `@NativeQuery`. Supported types: `READ`, `INSERT`, `UPDATE`, `DELETE`.
 
-1.  **Define the query in an XML file:**
+1.  **Define the queries in an XML file:**
 
     ```xml
     <native-queries>
@@ -276,17 +535,44 @@ For complex scenarios, you can use native SQL queries:
             FROM EMPLOYEE
             WHERE NAME LIKE '%${query.name}%'
         ]]></query>
+
+        <query name="insertQuery"><![CDATA[
+            INSERT INTO EMPLOYEE(EMP_NO, EMAIL_ID, ENAME, PHONE_NO, AGE)
+            VALUES(?{emp.employeeNo}, ?{emp.emailId}, ?{emp.name}, ?{emp.phoneNo}, ?{emp.age})
+        ]]></query>
+
+        <query name="updateQuery"><![CDATA[
+            UPDATE EMPLOYEE
+            SET EMAIL_ID = ?{query.emailId}
+            WHERE ID = ${query.id}
+        ]]></query>
+
+        <query name="deleteQuery"><![CDATA[
+            DELETE FROM EMPLOYEE
+            WHERE ENAME LIKE '%${query.name}%'
+        ]]></query>
     </native-queries>
     ```
 
-2.  **Create a repository method with the `@NativeQuery` annotation:**
+2.  **Create repository methods with the `@NativeQuery` annotation:**
 
     ```java
     public interface IEmployeeRepository extends ICrudRepository<Employee> {
         @NativeQuery(name = "readQuery", type = NativeQueryType.READ)
         List<Employee> readEmployee(EmpSearchQuery query);
+
+        @NativeQuery(name = "insertQuery", type = NativeQueryType.INSERT)
+        boolean addEmployee(@Named("emp") Employee employee);
+
+        @NativeQuery(name = "updateQuery", type = NativeQueryType.UPDATE)
+        int updateEmployee(Map<String, Object> employeeDet);
+
+        @NativeQuery(name = "deleteQuery", type = NativeQueryType.DELETE)
+        int deleteEmployee(Map<String, Object> employeeDet);
     }
     ```
+
+Use `${...}` for literal substitution and `?{...}` for bound parameters. FreeMarker conditionals (`<#if ...>`) are supported for optional clauses.
 
 ## Advanced Topics
 
@@ -426,6 +712,7 @@ package com.yukthitech.persistence.conversion.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.persistence.annotations.DataType;
+import com.yukthitech.persistence.conversion.ConverterContext;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
 
 import java.lang.reflect.Field;
@@ -434,7 +721,7 @@ public class JsonConverter implements IPersistenceConverter {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
-    public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaTypeCls, Field field) {
+    public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaTypeCls, Field field) {
         if (dbObject == null) {
             return null;
         }
@@ -446,7 +733,7 @@ public class JsonConverter implements IPersistenceConverter {
     }
 
     @Override
-    public Object convertToDBType(Object javaObject, DataType dbType) {
+    public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType) {
         if (javaObject == null) {
             return null;
         }

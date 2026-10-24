@@ -25,6 +25,7 @@ import org.apache.commons.lang3.SerializationUtils;
 
 import com.yukthitech.persistence.annotations.DataType;
 import com.yukthitech.persistence.annotations.DataTypeMapping;
+import com.yukthitech.persistence.conversion.ConverterContext;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -42,7 +43,7 @@ public class SerializationConverter implements IPersistenceConverter
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToJavaType(java.lang.Object, com.fw.persistence.annotations.DataType, java.lang.Class)
 	 */
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
+	public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if(!(dbObject instanceof byte[]))
 		{
@@ -62,7 +63,7 @@ public class SerializationConverter implements IPersistenceConverter
 	 * @see com.fw.persistence.conversion.IPersistenceConverter#convertToDBType(java.lang.Object, com.fw.persistence.annotations.DataType)
 	 */
 	@Override
-	public Object convertToDBType(Object javaObject, DataType dbType)
+	public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType)
 	{
 		try
 		{

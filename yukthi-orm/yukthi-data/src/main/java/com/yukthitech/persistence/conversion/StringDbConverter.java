@@ -28,14 +28,14 @@ import com.yukthitech.persistence.utils.OrmUtils;
 public class StringDbConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
+	public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		//return null, so that default behaviour is retained
 		return null;
 	}
 
 	@Override
-	public Object convertToDBType(Object javaObject, DataType dbType)
+	public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType)
 	{
 		//for non string ignore
 		if(dbType != DataType.STRING)

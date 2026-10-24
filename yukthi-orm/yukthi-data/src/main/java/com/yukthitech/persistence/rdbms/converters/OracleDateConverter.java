@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import com.yukthitech.persistence.annotations.DataType;
+import com.yukthitech.persistence.conversion.ConverterContext;
 import com.yukthitech.persistence.conversion.IPersistenceConverter;
 import com.yukthitech.utils.exceptions.InvalidStateException;
 
@@ -29,7 +30,7 @@ import oracle.sql.TIMESTAMP;
 public class OracleDateConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
+	public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if(dbObject instanceof TIMESTAMP)
 		{
@@ -51,7 +52,7 @@ public class OracleDateConverter implements IPersistenceConverter
 	}
 
 	@Override
-	public Object convertToDBType(Object javaObject, DataType dbType)
+	public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType)
 	{
 		if(dbType == DataType.DATE_TIME && (javaObject instanceof Date))
 		{

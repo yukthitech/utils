@@ -32,7 +32,7 @@ import com.yukthitech.persistence.annotations.DataType;
 public class DateConverter implements IPersistenceConverter
 {
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
+	public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if(!(Date.class.equals(javaType)))
 		{
@@ -77,7 +77,7 @@ public class DateConverter implements IPersistenceConverter
 	}
 
 	@Override
-	public Object convertToDBType(Object javaObject, DataType dbType)
+	public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType)
 	{
 		return null;
 	}

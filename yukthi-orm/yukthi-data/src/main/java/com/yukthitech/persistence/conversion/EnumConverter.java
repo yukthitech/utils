@@ -27,7 +27,7 @@ public class EnumConverter implements IPersistenceConverter
 {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field)
+	public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field)
 	{
 		if(!(Enum.class.isAssignableFrom(javaType)))
 		{
@@ -43,7 +43,7 @@ public class EnumConverter implements IPersistenceConverter
 	}
 
 	@Override
-	public Object convertToDBType(Object javaObject, DataType dbType)
+	public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType)
 	{
 		//for non string ignore
 		if(!(javaObject instanceof Enum))

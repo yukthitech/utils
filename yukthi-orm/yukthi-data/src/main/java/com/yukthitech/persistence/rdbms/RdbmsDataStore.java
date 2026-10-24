@@ -75,6 +75,7 @@ import com.yukthitech.persistence.rdbms.RdbmsConfiguration.QueryStep;
 import com.yukthitech.persistence.rdbms.converters.BlobConverter;
 import com.yukthitech.persistence.rdbms.converters.ClobConverter;
 import com.yukthitech.persistence.repository.IDataSourceCloser;
+import com.yukthitech.utils.Encryptor;
 import com.yukthitech.utils.ObjectWrapper;
 
 public class RdbmsDataStore implements IDataStore
@@ -95,6 +96,8 @@ public class RdbmsDataStore implements IDataStore
 	
 	private NativeQueryFactory nativeQueryFactory;
 	
+	private Encryptor encryptor;
+	
 	public RdbmsDataStore(String templatesName)
 	{
 		rdbmsConfig = new RdbmsConfiguration();
@@ -114,6 +117,12 @@ public class RdbmsDataStore implements IDataStore
 		//add blob and clob converters as default converters
 		conversionService.addConverter(new BlobConverter());
 		conversionService.addConverter(new ClobConverter());
+	}
+
+	public void setEncryptor(Encryptor encryptor)
+	{
+		this.encryptor = encryptor;
+		conversionService.setEncryptor(encryptor);
 	}
 	
 	@Override
@@ -154,6 +163,11 @@ public class RdbmsDataStore implements IDataStore
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
+		
+		if(encryptor != null)
+		{
+			conversionService.setEncryptor(encryptor);
+		}
 	}
 
 	@Override

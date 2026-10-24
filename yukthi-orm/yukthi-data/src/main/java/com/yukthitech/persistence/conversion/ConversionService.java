@@ -31,6 +31,7 @@ import com.yukthitech.persistence.conversion.impl.JsonConverter;
 import com.yukthitech.persistence.conversion.impl.JsonWithTypeConverter;
 import com.yukthitech.utils.CommonUtils;
 import com.yukthitech.utils.ConvertUtils;
+import com.yukthitech.utils.Encryptor;
 import com.yukthitech.utils.ObjectWrapper;
 
 /**
@@ -52,6 +53,8 @@ public class ConversionService
 	
 	private Map<Class<?>, IPersistenceConverter> typeToConverter = new HashMap<>();
 	
+	private ConverterContext converterContext = new ConverterContext();
+	
 	public ConversionService(IImplicitCoverterProvider coverterProvider)
 	{
 		this.implicitCoverterProvider = coverterProvider;
@@ -61,6 +64,15 @@ public class ConversionService
 		addConverter(new EnumConverter());
 	}
 	
+	/**
+	 * Sets the encryptor configured on the data store. Converters receive it through {@link ConverterContext}.
+	 * @param encryptor encryptor to use during conversion
+	 */
+	public void setEncryptor(Encryptor encryptor)
+	{
+		this.converterContext.setEncryptor(encryptor);
+	}
+
 	/**
 	 * Adds a converter that can modify data of one particular type to other
 	 * @param converter
@@ -167,7 +179,7 @@ public class ConversionService
 		//if field specific converter is present
 		if(converter != null)
 		{
-			return converter.convertToJavaType(dbObject, fieldDetails.getDbDataType(), 
+			return converter.convertToJavaType(converterContext, dbObject, fieldDetails.getDbDataType(), 
 					fieldDetails.getField().getType(), fieldDetails.getField());
 		}
 		
@@ -191,7 +203,7 @@ public class ConversionService
 		//if field specific converter is present
 		if(converter != null)
 		{
-			return converter.convertToJavaType(dbObject, dbDataType.getValue(), 
+			return converter.convertToJavaType(converterContext, dbObject, dbDataType.getValue(), 
 					field.getType(), field);
 		}
 		
@@ -225,7 +237,7 @@ public class ConversionService
 		//if field specific converter is present
 		if(fldConverter != null)
 		{
-			return fldConverter.convertToDBType(javaObj, fieldDetails.getDbDataType());
+			return fldConverter.convertToDBType(converterContext, javaObj, fieldDetails.getDbDataType());
 		}
 		
 		Object result = null;
@@ -233,7 +245,7 @@ public class ConversionService
 		//check if any converter can handle conversion
 		for(IPersistenceConverter converter: converters)
 		{
-			result = converter.convertToDBType(javaObj, fieldDetails.getDbDataType());
+			result = converter.convertToDBType(converterContext, javaObj, fieldDetails.getDbDataType());
 
 			//if conversion was successful
 			if(result != null)
@@ -278,7 +290,7 @@ public class ConversionService
 		//check if any of the default converters can convert current db object
 		for(IPersistenceConverter converter: converters)
 		{
-			result = converter.convertToJavaType(dbObject, dbDataType, 
+			result = converter.convertToJavaType(converterContext, dbObject, dbDataType, 
 					targetType, field);
 			
 			//if conversion was success

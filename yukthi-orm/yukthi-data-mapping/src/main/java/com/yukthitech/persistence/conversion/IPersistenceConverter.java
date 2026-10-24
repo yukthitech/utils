@@ -29,19 +29,21 @@ public interface IPersistenceConverter
 	/**
 	 * Converts "dbObject" read from DB (whose data type is specified "dBtype") to specified 
 	 * java-type
+	 * @param context Conversion context, including the data-store encryptor when configured
 	 * @param dbObject DB Object to be converted
 	 * @param dbType Target field db type
 	 * @param javaType Target field java type
 	 * @param field Field for which this conversion is happening (helpful in generic field details)
 	 * @return Java type converted object
 	 */
-	public Object convertToJavaType(Object dbObject, DataType dbType, Class<?> javaType, Field field);
+	public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field);
 	
 	/**
 	 * Converts specified java object into target dbType object
+	 * @param context Conversion context, including the data-store encryptor when configured
 	 * @param javaObject Source java object that needs to be converted
 	 * @param dbType Target DB type
 	 * @return DB type converted object
 	 */
-	public Object convertToDBType(Object javaObject, DataType dbType);
+	public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType);
 }

@@ -152,7 +152,7 @@ Example `BigDecimal` entity field (no extra annotation required):
 private BigDecimal amount;
 ```
 
-Built-in converters: `JsonConverter`, `JsonWithTypeConverter`, `XmlConverter`, `SerializationConverter`, `PasswordEncryptionConverter`, plus Blob/Clob/Date/`DecimalConverter` converters.
+Built-in converters: `JsonConverter`, `JsonWithTypeConverter`, `XmlConverter`, `SerializationConverter`, `PasswordEncryptionConverter`, `EncryptionConverter`, plus Blob/Clob/Date/`DecimalConverter` converters. `EncryptionConverter` needs an `Encryptor` on `RdbmsDataStore` (see [Field encryption](#field-encryption)).
 
 ---
 
@@ -406,7 +406,54 @@ Events: `PRE_SAVE`, `POST_SAVE`, `PRE_UPDATE`, `POST_UPDATE`, `PRE_DELETE`, `POS
 
 ### Custom converters
 
-Implement `IPersistenceConverter` and attach via `@DataTypeMapping(converterType = …)` or built-in `converter` enum values.
+Implement `IPersistenceConverter` and attach via `@DataTypeMapping(converterType = …)` or built-in `converter` enum values (`JSON`, `JSON_WITH_TYPE`).
+
+Both methods receive a `ConverterContext` as the first argument. `ConversionService` fills that context with the `Encryptor` set on `RdbmsDataStore` (when one is configured).
+
+```java
+public Object convertToJavaType(ConverterContext context, Object dbObject, DataType dbType, Class<?> javaType, Field field);
+public Object convertToDBType(ConverterContext context, Object javaObject, DataType dbType);
+```
+
+### Field encryption
+
+`EncryptionConverter` (`com.yukthitech.persistence.conversion.impl`) encrypts a field on write and decrypts it on read, using `com.yukthitech.utils.Encryptor` (RSA keystore). `PasswordEncryptionConverter` is separate: it stores a one-way password hash and returns that hash on read.
+
+1. Create a PKCS12 keystore:
+
+```text
+keytool -genkey -keyalg RSA -validity 3650 -sigalg SHA256withRSA -alias appkey -keystore app.p12 -storepass changeit -keypass changeit
+```
+
+2. Set the encryptor on the data store. `RdbmsDataStore.setEncryptor()` copies it onto `ConversionService`, which puts it on `ConverterContext`:
+
+```xml
+<bean id="encryptor" class="com.yukthitech.utils.Encryptor">
+    <constructor-arg value="${app.keystore.file}"/>
+    <constructor-arg value="${app.keystore.alias}"/>
+    <constructor-arg value="${app.keystore.password}"/>
+</bean>
+
+<bean class="com.yukthitech.persistence.rdbms.RdbmsDataStore">
+    <constructor-arg type="java.lang.String" value="${app.db.type}"/>
+    <property name="dataSource" ref="dataSource"/>
+    <property name="encryptor" ref="encryptor"/>
+</bean>
+```
+
+`Encryptor` also accepts `(InputStream keyStore, String alias, String password)`.
+
+3. Mark the entity field. The column stores the ciphertext string, so give it enough length:
+
+```java
+@Column(name = "SECRET", length = 2000)
+@DataTypeMapping(type = DataType.STRING, converterType = EncryptionConverter.class)
+private String secret;
+```
+
+Reads and writes go through the repository as usual (`save`, `update`, finders). The Java value is plain text; the database value is encrypted.
+
+If a mapped field is converted and no encryptor is configured, `EncryptionConverter` throws `InvalidStateException` ("Encryptor is not configured"). Null field values stay null and are not encrypted.
 
 ---
 
