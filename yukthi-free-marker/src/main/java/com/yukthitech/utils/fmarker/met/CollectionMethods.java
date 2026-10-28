@@ -633,4 +633,48 @@ public class CollectionMethods
 	{
 		return collection.remove(collection.size() - 1);
 	}
+
+	@FreeMarkerMethod(
+			description = "Appends specified values to the specified list",
+			returnDescription = "List with appended values"
+			)
+	public static List<Object> appendToList(
+			@FmParam(name = "list", description = "List to which values should be appended") List<Object> list,
+			@FmParam(name = "values", description = "Values to append") Object... values
+			)
+	{
+		List<Object> result = new ArrayList<>();
+
+		if(list != null)
+		{
+			result.addAll(list);
+		}
+
+		if(values != null)
+		{
+			result.addAll(Arrays.asList(values));
+		}
+		return result;
+	}
+
+	@FreeMarkerMethod(
+			description = "Appends specified values to the specified set",
+			returnDescription = "Set with appended values"
+			)
+	public static Set<Object> appendToSet(
+			@FmParam(name = "set", description = "Set to which values should be appended") Set<Object> set,
+			@FmParam(name = "values", description = "Values to append") Object... values
+			)
+	{
+		Set<Object> result = new HashSet<>();
+		if(set != null)
+		{
+			result.addAll(set);
+		}
+		if(values != null)
+		{
+			result.addAll(Arrays.asList(values));
+		}
+		return result;
+	}
 }
