@@ -1314,6 +1314,17 @@ public class DefaultParserHandler implements IParserHandler
 		
 		return ((IDynamicNodeAcceptor) parentBean).isIdBased(propName);
 	}
+
+	/**
+	 * Defaults untyped dynamic children to {@link String} so they load as text nodes.
+	 * Mandatory for IDynamicNodeAcceptor parents that accept text-valued child elements
+	 * (attribute replaced with child element), e.g. FunctionRef params.
+	 */
+	@Override
+	public Class<?> getDefaultDynamicNodeType(BeanNode beanNode, Object parentBean, String propName)
+	{
+		return String.class;
+	}
 	
 	@Override
 	public boolean isHybridTextSupported(BeanNode beanNode, Object activeBean)

@@ -60,5 +60,15 @@ public class DynamicBeanParserHandler extends DefaultParserHandler
 		
 		return new DynamicBean(node.getName(), typeConversationEnabled);
 	}
+
+	/**
+	 * Leave type unset so SAX calls {@link #createBean}; nested / attributed dynamic
+	 * children become {@link DynamicBean}. Mandatory for XML→DynamicBean structure (transform).
+	 */
+	@Override
+	public Class<?> getDefaultDynamicNodeType(BeanNode beanNode, Object parentBean, String propName)
+	{
+		return null;
+	}
 	
 }

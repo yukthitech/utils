@@ -55,6 +55,17 @@ public class XmlTemplateParserHandler extends DefaultParserHandler
 	{
 		return mapToBean(node, att);
 	}
+
+	/**
+	 * Leave type unset so SAX calls {@link #createBean}; every unknown child becomes
+	 * {@link XmlDynamicBean}. Text vs nested structure is then handled on that bean
+	 * (hybrid text vs child nodes), not by forcing String text-nodes in SAX.
+	 */
+	@Override
+	public Class<?> getDefaultDynamicNodeType(BeanNode beanNode, Object parentBean, String propName)
+	{
+		return null;
+	}
 	
 	@Override
 	public Object processReservedNode(BeanNode node, XMLAttributeMap att)

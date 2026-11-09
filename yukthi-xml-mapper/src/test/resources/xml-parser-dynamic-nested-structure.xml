@@ -1,0 +1,15 @@
+<!--
+  Mandatory: DynamicBeanParserHandler must keep untyped dynamic children as DynamicBean
+  (not String text-nodes) so nested structure and sibling text leaves both work.
+  Forcing String.class in SAX breaks nested trees used by XML transform / DynamicBean flows.
+-->
+<root attr="root-attr">
+	<plainText>leaf-text</plainText>
+	<nested>
+		<childAttr attrOnly="a1"/>
+		<childText>nested-text</childText>
+		<deeper>
+			<item>x</item>
+		</deeper>
+	</nested>
+</root>

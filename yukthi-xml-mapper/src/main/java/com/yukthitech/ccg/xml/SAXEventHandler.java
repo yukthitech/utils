@@ -583,6 +583,13 @@ class SAXEventHandler extends DefaultHandler
 			// if dyn nodes are supported
 			if(dynIdBased != null)
 			{
+				if(dynType == null)
+				{
+					// Handler decides: String → text leaf (DefaultParserHandler);
+					// null → createBean builds nested dynamic beans (DynamicBeanParserHandler).
+					dynType = parserHandler.getDefaultDynamicNodeType(newNode, parentBean, newNode.getName());
+				}
+
 				if(curAttMap.getNormalAttributeCount() == 1 && dynIdBased)
 				{
 					loadIDBasedNode(newNode, curAttMap, dynType, dynType);

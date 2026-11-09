@@ -49,9 +49,10 @@
 
 		<!-- Internal module versions -->
 		<yukthi-utils.version>1.3.12-SNAPSHOT</yukthi-utils.version>
-		<yukthi-xml-mapper.version>1.3.16-SNAPSHOT</yukthi-xml-mapper.version>
+		<yukthi-xml-mapper.version>1.3.17-SNAPSHOT</yukthi-xml-mapper.version>
 		<yukthi-free-marker.version>1.3.16-SNAPSHOT</yukthi-free-marker.version>
-		<yukthi-json-expr.version>1.0.15-SNAPSHOT</yukthi-json-expr.version>
+		<yukthi-json-expr.version>1.0.16-SNAPSHOT</yukthi-json-expr.version>
+		<yukthi-transform.version>1.0.5-SNAPSHOT</yukthi-transform.version>
 		<yukthi-data-mapping.version>1.3.4-SNAPSHOT</yukthi-data-mapping.version>
 
 		<!-- Third-party versions -->
@@ -117,6 +118,11 @@
 				<groupId>com.yukthitech</groupId>
 				<artifactId>yukthi-json-expr</artifactId>
 				<version>${yukthi-json-expr.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.yukthitech</groupId>
+				<artifactId>yukthi-transform</artifactId>
+				<version>${yukthi-transform.version}</version>
 			</dependency>
 
 			<!-- Commons / Apache -->
@@ -396,7 +402,6 @@
 		<module>../yukthi-xml-mapper</module>
 		<module>../yukthi-free-marker</module>
 		<module>../yukthi-transform</module>
-		<module>../yukthi-json-expr</module>
 		<module>../yukthi-simplecaptcha</module>
 		<module>../yukthi-swing</module>
 	</modules>

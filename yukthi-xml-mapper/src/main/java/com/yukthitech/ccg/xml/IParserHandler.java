@@ -320,6 +320,22 @@ public interface IParserHandler extends IXmlConstants
 	 * @return
 	 */
 	public Boolean isIdBasedDynamicNode(BeanNode beanNode, Object parentBean, String propName);
+
+	/**
+	 * Default Java type for an untyped dynamic child node (no setter/adder type and no beanType). This is called
+	 * only for parent beans that accept dynamic nodes.
+	 * <p>
+	 * Return {@link String} so attribute-less children become text nodes (e.g. FunctionRef-style params).
+	 * Return {@code null} so SAX calls {@link #createBean(BeanNode, XMLAttributeMap)} and the handler
+	 * can build nested dynamic beans (DynamicBeanParserHandler / XmlTemplateParserHandler).
+	 * </p>
+	 *
+	 * @param beanNode the child node being created
+	 * @param parentBean parent bean that accepts dynamic nodes
+	 * @param propName child node / property name
+	 * @return default type, or null to defer to createBean
+	 */
+	public Class<?> getDefaultDynamicNodeType(BeanNode beanNode, Object parentBean, String propName);
 	
 	public boolean isHybridTextSupported(BeanNode beanNode, Object activeBean);
 	

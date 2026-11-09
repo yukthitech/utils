@@ -16,6 +16,7 @@
 package com.yukthitech.test;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -24,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yukthitech.ccg.xml.DynamicBean;
 import com.yukthitech.ccg.xml.DynamicBeanParserHandler;
 import com.yukthitech.ccg.xml.XMLBeanParser;
+import com.yukthitech.test.beans.DynamicNodeAcceptorBean;
+import com.yukthitech.test.beans.DynamicNodeAcceptorRoot;
 import com.yukthitech.test.beans.DynamicTestBean;
 import com.yukthitech.test.beans.ListBean;
 import com.yukthitech.test.beans.MapBean;
@@ -73,6 +76,76 @@ public class TXmlBeanParser
 			);
 		
 		Assert.assertEquals(beanJson, expectedJson);
+	}
+
+	/**
+	 * MANDATORY feature: DefaultParserHandler + IDynamicNodeAcceptor must accept text-valued
+	 * child elements that replace dynamic attributes (FunctionRef-style params).
+	 * <p>
+	 * DefaultParserHandler.getDefaultDynamicNodeType() returns String so attribute-less
+	 * dynamic children become text nodes and never hit createBean(null) /
+	 * "Either of type or preferredType is mandatory". Do not remove without an equivalent.
+	 * </p>
+	 */
+	@Test
+	public void testDynamicNodeAcceptorTextChildren_mandatory()
+	{
+		DynamicNodeAcceptorRoot root = new DynamicNodeAcceptorRoot();
+		XMLBeanParser.parse(TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-text-children.xml"), root);
+
+		DynamicNodeAcceptorBean node = root.getNode();
+		Assert.assertNotNull(node);
+		Assert.assertEquals(node.getName(), "demo");
+		Assert.assertEquals(node.getParams().get("paramA"), "value-a");
+		Assert.assertEquals(node.getParams().get("paramB"), "value-b");
+		Assert.assertTrue(node.getParams().get("paramA") instanceof String);
+	}
+
+	/**
+	 * MANDATORY feature: DynamicBeanParserHandler must NOT default untyped dynamic children
+	 * to String. Nested structure (and text leaves under DynamicBean) must be built via
+	 * createBean → DynamicBean, which XML transform / DynamicBean flows rely on.
+	 * <p>
+	 * Forcing String.class in SAX for all handlers breaks nested trees. Keep
+	 * DynamicBeanParserHandler.getDefaultDynamicNodeType() returning null.
+	 * </p>
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testDynamicBeanNestedStructure_mandatory()
+	{
+		DynamicBean bean = (DynamicBean) XMLBeanParser.parse(
+				TXmlBeanParser.class.getResourceAsStream("/xml-parser-dynamic-nested-structure.xml"),
+				null,
+				new DynamicBeanParserHandler());
+
+		Assert.assertEquals(bean.get("attr"), "root-attr");
+
+		// Text leaves are DynamicBeans with text (not SAX String text-nodes)
+		Assert.assertTrue(bean.get("plainText") instanceof DynamicBean, "plainText must be DynamicBean, not String node");
+		Assert.assertEquals(((DynamicBean) bean.get("plainText")).getTextContent(), "leaf-text");
+
+		Object nestedObj = bean.get("nested");
+		Assert.assertTrue(nestedObj instanceof DynamicBean, "nested must remain DynamicBean, not String");
+
+		DynamicBean nested = (DynamicBean) nestedObj;
+		Assert.assertTrue(nested.get("childAttr") instanceof DynamicBean);
+		Assert.assertEquals(((DynamicBean) nested.get("childAttr")).get("attrOnly"), "a1");
+		Assert.assertTrue(nested.get("childText") instanceof DynamicBean);
+		Assert.assertEquals(((DynamicBean) nested.get("childText")).getTextContent(), "nested-text");
+
+		DynamicBean deeper = (DynamicBean) nested.get("deeper");
+		Assert.assertNotNull(deeper);
+		Assert.assertTrue(deeper.get("item") instanceof DynamicBean);
+		Assert.assertEquals(((DynamicBean) deeper.get("item")).getTextContent(), "x");
+
+		// toSimpleMap collapses text-only DynamicBeans to String for JSON-friendly maps
+		Map<String, Object> simple = (Map<String, Object>) bean.toSimpleMap();
+		Assert.assertEquals(simple.get("plainText"), "leaf-text");
+		Assert.assertTrue(simple.get("nested") instanceof Map);
+		Map<String, Object> nestedMap = (Map<String, Object>) simple.get("nested");
+		Assert.assertEquals(nestedMap.get("childText"), "nested-text");
+		Assert.assertTrue(nestedMap.get("deeper") instanceof Map);
 	}
 
 	/**

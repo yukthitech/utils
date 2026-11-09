@@ -1,0 +1,12 @@
+<!--
+  Mandatory: IDynamicNodeAcceptor + DefaultParserHandler must accept text-valued
+  child elements that replace what would otherwise be dynamic attributes
+  (FunctionRef-style params). Without String default dynamic type this fails
+  with "Either of type or preferredType is mandatory".
+-->
+<root>
+	<node name="demo">
+		<paramA>value-a</paramA>
+		<paramB>value-b</paramB>
+	</node>
+</root>
